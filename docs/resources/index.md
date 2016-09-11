@@ -13,9 +13,9 @@ Whether you're an experienced developer or just learning, we can use your help!
 
 ## Understanding the problem
 
-* [Affordable housing program guide](/resources/programs-guide.html)
-* [Database Schema](/resources/database-schema.html)
-* [Roadmap](/resources/roadmap.html)
+* [Affordable housing program guide]({{ site.baseurl }}/resources/programs-guide.html)
+* [Database Schema]({{ site.baseurl }}/resources/database-schema.html)
+* [Roadmap]({{ site.baseurl }}/resources/roadmap.html)
 
 ## Learn about our tools
 

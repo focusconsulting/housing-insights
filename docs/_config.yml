@@ -10,7 +10,7 @@ title: CTDC Project
 email: humphrey.neal@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   This is the placeholder website for the CTDC project.
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: /housing-preservation # the subpath of your site, e.g. /blog
 
 # Build settings
 markdown: kramdown
