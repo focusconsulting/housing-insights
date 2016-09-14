@@ -1,3 +1,4 @@
+
 # Welcome to Jekyll!
 #
 # This config file is meant for settings that affect your whole blog, values
@@ -11,6 +12,8 @@ email: humphrey.neal@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   This is the placeholder website for the CTDC project.
 baseurl: /housing-preservation # the subpath of your site, e.g. /blog
+tagline: Bringing open data to affordable housing decision makers
+partners: [{name: 'CNHED', logo: 'assets/CNHED-logo.jpg',  url: 'https://www.cnhed.org/' },{  name: 'Neighborhood Info DC',  logo: 'assets/NIDC-logo.png',  url: 'http://www.neighborhoodinfodc.org/'  },{  name: 'Living Cities (Civic Tech and Data Collaborative)',  logo: 'assets/LC-logo.jpg',  url: 'https://www.livingcities.org/work/civic-tech-and-data-collaborative'  },{  name: 'DC Department of Housing and Community Development',  logo: 'assets/dhcd-logo.jpg', url: 'http://dhcd.dc.gov/'  }]
 
 # Build settings
 markdown: kramdown
