@@ -34,7 +34,13 @@ a.disabled {
    cursor: default;
 }
 
+footer {
+    margin: 10px 0;
+}
 
+footer .img-responsive {
+    margin:20px auto;
+}
 
 
 
