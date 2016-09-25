@@ -11,6 +11,9 @@ Much of this should be replaced with a bootstrap-theme.css file instead*/
     --second-accent-color:rgba(255,147, 58,1);
 }
 
+.container{
+  min-height: 400px;
+}
 .bg-white {
 	background-color: #ffffff;
 }
@@ -35,7 +38,7 @@ a.disabled {
 }
 
 footer {
-    margin: 10px 0;
+    margin:20px 0;
 }
 
 footer .img-responsive {
