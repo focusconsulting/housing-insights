@@ -1,0 +1,33 @@
+/* TODO - just setting up a couple quick and dirty styles for demo purposes. 
+Much of this should be replaced with a bootstrap-theme.css file instead*/
+
+
+
+/* Variables are NOT supported in Internet Explorer*/
+/* TODO Replace these with static CSS assignments before deployment, when styling choices have been made*/ 
+:root{
+    --main-color:rgba(189, 54, 33,1);
+    --accent-color:rgba(111, 94,100,1);
+    --second-accent-color:rgba(255,147, 58,1);
+}
+
+.container{
+  min-height: 400px;
+}
+.bg-white {
+	background-color: #ffffff;
+}
+
+.navbar{
+    background-color: var(--main-color);
+}
+
+.navbar-default .navbar-nav > li > a, 
+.navbar-default .navbar-brand {
+	color: #ffffff;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+	background-color: #ffffff;
+}
+
