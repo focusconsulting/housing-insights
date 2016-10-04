@@ -1,10 +1,15 @@
-/* TODO - just setting up a couple quick and dirty styles for demo purposes. 
+---
+# This is blank YAML front matter so that sitewide config variables can be used (e.g. baseurl)
+---
+
+
+/* TODO - just setting up a couple quick and dirty styles for demo purposes.
 Much of this should be replaced with a bootstrap-theme.css file instead*/
 
 
 
 /* Variables are NOT supported in Internet Explorer*/
-/* TODO Replace these with static CSS assignments before deployment, when styling choices have been made*/ 
+/* TODO Replace these with static CSS assignments before deployment, when styling choices have been made*/
 :root{
     --main-color:rgba(189, 54, 33,1);
     --accent-color:rgba(111, 94,100,1);
@@ -17,18 +22,44 @@ Much of this should be replaced with a bootstrap-theme.css file instead*/
 .bg-white {
 	background-color: #ffffff;
 }
+.bg-purple {
+  background-color: rgba(111, 94,100,0.2)
+}
+.hero-image {
+  background-image: linear-gradient(
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0.5)
+    ),
+    url("{{ site.baseurl }}/assets/dc.png");
+  background-size: cover;
+  background-position:65% 20%;
+  min-height:350px;
+  margin-top: -20px;
+}
+
+.title-text{
+  padding:10% 0
+}
+
+
+.hero-image h1,
+.hero-image h2 {
+  color: rgba(255, 255, 255,1);
+  /*text-align: center;*/
+}
 
 .navbar{
     background-color: var(--main-color);
 }
 
-.navbar-default .navbar-nav > li > a, 
+.navbar-default .navbar-nav > li > a,
 .navbar-default .navbar-brand {
 	color: #ffffff;
 }
 
 .navbar-default .navbar-toggle .icon-bar {
 	background-color: #ffffff;
+  background-image: none;
 }
 
 
@@ -39,21 +70,56 @@ a.disabled {
 
 footer {
     margin:20px 0;
+    background-color:#eeeeee;
 }
 
 footer .img-responsive {
     margin:20px auto;
 }
 
+h1, .h1, h2, .h2, h3, .h3 {
+  margin-top: 20px;
+}
+p {
+  font-size: 1.2em;
+}
 
-
+.btn-lg {
+  font-size: 1em;
+}
+.white { color: rgba(255, 255, 255,1) }
 
 /* Temporary until we get a color scheme - a few colors to play with */
-.dark-red { color: rgba(189, 54, 33,1) }	
-.medium-red { color: rgba(103, 41, 31,1) }  
-.dc-red { color: rgba(232, 27, 57,1) }  
+.dark-red { color: rgba(189, 54, 33,1) }
+.medium-red { color: rgba(103, 41, 31,1) }
+.dc-red { color: rgba(232, 27, 57,1) }
 .eggplant { color: rgba(111, 94,100,1) }
 .light-yellow { color: rgba(255,147, 58,1) }
 .medium-yellow { color: rgba(255,207,168,1) }
 .yellow { color: rgba(255,175,108,1) }
 
+
+.margin-bottom {
+  margin-bottom: 20px;
+}
+
+/* Homepage specific stuff*/
+.building-path {
+  fill: #93c54b;
+}
+.binary-inspect {
+  fill: #93c54b;
+}
+.bar-graph {
+  fill: #93c54b;
+}
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.get-involved {
+  min-height: 400px;
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<header>
+	{% include header-includes.html %}
+	{{page.css}}
+
+	<title>{{ page.title }}</title>
+
+</header>
+
+
+<!--Optional on-page styles-->
+<style>
+
+</style>
+
+
+
+<!--Main body of the content here-->
+<body>
+	<div class="bg-white">
+	{% include navbar.html %}
+
+	<div class="hero-image">
+		<div class="jumbotron hero-image">
+		<div class="container">
+			<div class="title-text">
+				<h1>Project Name (TBD)</h1>
+				<h2>{{ site.tagline }}</h2>
+				<p>
+					<button type="button" class="btn btn-primary btn-lg get-updates">Get updates</button>
+					<button type="button" class="btn btn-primary btn-lg help-build">Help us build it</button>
+				</p>
+			</div>
+		</div>
+		</div>
+	</div>
+
+	</div>
+
+	<div class="bg-white">
+	<div class="container bg-white">
+	  <div class="row">
+	    <div class="col-xs-12">
+				{{content}}
+			</div>
+		</div>
+	</div>
+	</div>
+
+<!--.sitewide includes-->
+{% include footer-includes.html %}
+{{page.javascript}}
+<!--page specific includes-->
+	<!--none-->
+<!--.page specific includes-->
+
+</body>
+
+</html>

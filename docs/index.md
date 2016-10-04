@@ -1,16 +1,71 @@
 ---
-layout: main
+layout: home
 title: CTDC Home
 ---
-# Project Name (TBD)
-*{{ site.tagline }}*
-
-This will be an awesome website documenting how this project works. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ornare, tellus eu pellentesque vehicula, tortor quam bibendum felis, in dictum dui diam in nisi. 
 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ornare, tellus eu pellentesque vehicula, tortor quam bibendum felis, in dictum dui diam in nisi. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ornare, tellus eu pellentesque vehicula, tortor quam bibendum felis, in dictum dui diam in nisi. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ornare, tellus eu pellentesque vehicula, tortor quam bibendum felis, in dictum dui diam in nisi. 
+<!--main body-->
+<div class="row margin-bottom">
+<div class="col-xs-2 vcenter">
+  {% include svg/apartment-icon.svg %}
+</div><!--this comment fixes inline-block space issue
+--><div class="col-xs-10 vcenter">
+<h1>The Housing Problem</h1>
+<p>Most affordable housing is owned privately, with government programs providing subsidies that allow them to rent to low-income residents at rates they can afford. Since the buildings are owned privately, owners can also stop participating in these programs - reducing the availability of housing for those who need it.</p>
 
-<button type="button" class="btn btn-primary">Get updates</button>
+<p>Affordable housing advocates and the DC government put time and money into <strong>preserving</strong> these buildings - keeping them participating - through refinancing, tenant organizing, and incentives. But they have limited resources, and need to know where their energy is best spent.</p>
+</div>
+</div>
+
 <hr>
-## Latest Updates
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ornare, tellus eu pellentesque vehicula, tortor quam bibendum felis, in dictum dui diam in nisi. 
+
+<div class="row margin-bottom">
+<div class="col-xs-2 vcenter">
+  {% include svg/binary-inspect.svg %}
+</div><!--this comment fixes inline-block space issue
+--><div class="col-xs-10 vcenter">
+<h1>The Data Problem</h1>
+<p>Even getting a single list of all the affordable buildings in DC is a challenge. The <a href="http://www.neighborhoodinfodc.org/dcpreservationcatalog/">DC Preservation Catalog</a> provided a big step forward in solving this problem, collecting multiple data sources into a unified list of affordable buildings in DC. But to be more useful to partners it needs to be easier to access, browse and utilize.</p>
+
+<p>But there's a bigger challenge. Information about the neighborhoods surrounding the buildings is also important - a building that is close to public transit may be more important to preserve for example, or a building in a rapidly gentrifying neighborhood may be much more likely to be sold or converted.</p>
+</div>
+</div>
+
+<hr>
+
+<div class="row margin-bottom">
+<div class="col-xs-2 vcenter">
+  {% include svg/bar-graph-icon.svg %}
+</div><!--this comment fixes inline-block space issue
+--><div class="col-xs-10 vcenter">
+<h1>Our Solution</h1>
+<p>The purpose of this project is to put better information in the hands of the decision makers and advocates for affordable housing. The PROJECT NAME web tool will make it easy to browse a list of all subsidized affordable housing in DC regardless of what subsidy program they are part of. And, it will connect to relevant outside data such as public transit, zoning, and neighborhood characteristics to make it easy to consider all the relevant factors when prioritizing and coordinating work.</p>
+
+<p>Together we can make this process easier, bringing open data sources to affordable housing decision makers.</p>
+</div>
+</div>
+
+<hr>
+
+<h1>Get Involved</h1>
+<div class="row">
+<div class="col-sm-6">
+<div class="well get-involved">
+<h2>Affordable Housing Professionals</h2>
+<p class="lead text-info">Are you someone who works in DC Government, at a non-profit, or with affordable housing developments?</p>
+<p> We want to make this tool useful for you. <a href="{{site.baseurl}}/resources/contact">Contact</a> the project staff if you're interested in being a beta tester or be interviewed about what would make this tool most useful to you. Our monthly newsletter will also document project progress.</p>
+
+<button type="button" class="btn btn-primary get-updates">Get updates</button>
+</div>
+</div>
+
+<div class="col-sm-6">
+<div class="well get-involved">
+<h2>Coders and Developers</h2>
+<p class="lead text-info">Are you a coder, developer, or data enthusiast?</p>
+<p>Beginner or professional, do you want to give back to the community and help us build this tool? <a href="http://codefordc.org/">Code for DC</a> volunteers are doing the work to make this tool awesome. We're building a dynamic Javascript front-end, crunching our data with Python, and we can use your help no matter what your background or experience.</p>
+
+<button type="button" class="btn btn-primary help-build">Help us build it</button>
+</div>
+</div>
+</div>
