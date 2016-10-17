@@ -11,7 +11,7 @@ title: CTDC Project
 email: humphrey.neal@gmail.com
 description: > # this means to ignore newlines until "baseurl:"
   This is the placeholder website for the CTDC project.
-baseurl: / # the subpath of your site, e.g. /blog
+baseurl:  # the subpath of your site, e.g. /blog
 tagline: Bringing open data to affordable housing decision makers
 
 # TODO - figure out how to use the 'baseurl' variable within this file itself, to have better logo url paths.
