@@ -11,25 +11,20 @@ We want to help DC government officials and affordable housing advocates better 
 
 [Read the full project summary]({{site.baseurl}}/resources/summary.html)
 
-## Data sources
-
+[Project phases]({{site.baseurl}}/resources/phases.html)
 
 ## Technical resources
 Whether you're an experienced developer or just learning, we can use your help!
-* [Contributing](https://github.com/codefordc/housing-preservation) a few workflow conventions you should follow to keep our code consistent.
+* [Contributing](https://github.com/codefordc/housing-insights/blob/master/CONTRIBUTING.md) a few workflow conventions you should follow to keep our code consistent.
 * [Setting up your dev environment](https://github.com/codefordc/housing-preservation) (README on our Github repo)
 * [Our issues list](https://github.com/codefordc/housing-preservation/issues) (Github)
 
+## Data sources
+TBD
+
 ## Understanding the problem
-* [Problem Summary]({{site.baseurl}}/resources/summary.html)
 * [Affordable housing program guide]({{ site.baseurl }}/resources/programs-guide.html)
 * [Database Schema]({{ site.baseurl }}/resources/database-schema.html)
 * [Roadmap]({{ site.baseurl }}/resources/roadmap.html)
 
 ## Learn about our tools
-
-* [Python](#)
-* [Git](#)
-* [Plotly](#)
-* [D3](#)
-* etc.
