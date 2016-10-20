@@ -4,7 +4,7 @@
 We use a fork-and-pull request method, which should be familiar to most people who have contributed to an open source project before. When you're starting the project, it's easy:
 
 1. Click 'fork' in the upper right of this page.
-1. Click you will now be on *your* copy of the repo on Github (look for YourUserName/housing-insights in the upper left).
+1. Click you will now be on your copy of the repo on Github (look for YourUserName/housing-insights in the upper left).
 1. Click the green 'Clone' button from **your** copy (not the CodeForDC copy)
 1. Once you've cloned it to your computer, make a new branch for your feature and then start coding!
 1. Push your local changes to your fork regularly
@@ -14,6 +14,7 @@ We use a fork-and-pull request method, which should be familiar to most people w
 But! Don't forget that if changes happen on the Code for DC repo, you need to sync that code
 
 **Easy Way**
+
 1. Make sure you've pushed all local changes to your fork on Github
 1. Go to your repo on Github
 1. Click 'Pull requests' and 'New Pull Request'
@@ -34,6 +35,8 @@ We use a loose [git flow](https://datasift.github.io/gitflow/IntroducingGitFlow.
 * All pull requests should go into `dev`
 * `master` always matches what is on our live website, and is tagged with version numbers.
 
+If you know how to do that sort of thing, squashed and rebased pull requests bring great joy to our repo history! If you don't know what that means, it's not necessary and is best to learn only when you are confident in your Git skills.
+
 ## Coding conventions
 Some miscellaneous coding conventions:
 * Write code that doesn't need code comments - variable names that clearly indicate content and type.
@@ -51,9 +54,9 @@ Some miscellaneous coding conventions:
     entries.select(from=3, to=5)
     ```
 * Use most common language conventions whenever possible
-  * Python: `snake_case` for vars and modules, `CapitalCamelCase` for class names, `ALL_UPPER` for constants.
-  * Javascript: `camelCase` for vars, `CapitalCamelCase` for constructors.
-  * Single-line functions, CSS definitions, etc. are OK when they are short and/or follow a repeatable pattern.
+   * Python: `snake_case` for vars and modules, `CapitalCamelCase` for class names, `ALL_UPPER` for constants.
+   * Javascript: `camelCase` for vars, `CapitalCamelCase` for constructors.
+* Single-line functions, CSS definitions, etc. are OK when they are short and/or follow a repeatable pattern.
 
 ## License
 We're publishing this project under the [MIT license](https://github.com/codefordc/housing-insights/blob/master/LICENSE.txt). By contributing code to this repo you are agreeing to make your work available to the public under the terms of this license.

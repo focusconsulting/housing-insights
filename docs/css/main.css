@@ -106,20 +106,19 @@ p {
 .medium-yellow { color: rgba(255,207,168,1) }
 .yellow { color: rgba(255,175,108,1) }
 
-
 .margin-bottom {
   margin-bottom: 20px;
 }
 
 /* Homepage specific stuff*/
 .building-path {
-  fill: #93c54b;
+  fill: #79a736;
 }
 .binary-inspect {
-  fill: #93c54b;
+  fill: #79a736;
 }
 .bar-graph {
-  fill: #93c54b;
+  fill: #79a736;
 }
 
 .vcenter {

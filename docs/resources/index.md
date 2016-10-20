@@ -3,28 +3,34 @@ layout: main
 title: H.I. Resources
 ---
 
-# Coders and Contributors
-Here's all the background info you'll need to help us get started on the project.
+# Resources for Coders and Contributors
+Yes! We're glad you're interested in helping out on this project.
 
-## Project Purpose and Approach
-We want to help DC government officials and affordable housing advocates better spend the time and money available for affordable housing preservation. We will do this by providing better access to data and analysis for both the current affordable buildings and the neighborhoods they are part of.
+If you're new to the project, read each of the resources below. In about 10 minutes you'll be up and running and ready to start contributing!
 
+## 1) Project Purpose and Approach
 [Read the full project summary]({{site.baseurl}}/resources/summary.html)
 
-[Project phases]({{site.baseurl}}/resources/phases.html)
+Then take a quick look at our planned [project phases]({{site.baseurl}}/resources/phases.html)
 
-## Technical resources
-Whether you're an experienced developer or just learning, we can use your help!
-* [Contributing](https://github.com/codefordc/housing-insights/blob/master/CONTRIBUTING.md) a few workflow conventions you should follow to keep our code consistent.
-* [Setting up your dev environment](https://github.com/codefordc/housing-preservation) (README on our Github repo)
-* [Our issues list](https://github.com/codefordc/housing-preservation/issues) (Github)
+## 2) Coding and workflow conventions
+Our [CONTRIBUTING](https://github.com/codefordc/housing-insights/blob/master/CONTRIBUTING.md) document in our Github repo has important information on code conventions.
+
+## 3) Installation
+We use Python, Javascript, and Jekyll. Follow the instructions for [setting up your dev environment](https://github.com/codefordc/housing-preservation) to make sure you have everything you need installed.
+
+## 4) Pick an issue
+Issues are tagged with the language or technology needed to do them, and their category of issue. If you're a beginner or just have a little bit of time, look for issues marked 'easy.' When you start working on an issue, leave a note in the comments so others know you're going to start tackling it.
+
+[Our issues list](https://github.com/codefordc/housing-preservation/issues) (Github)
+
+# Additional Resources
 
 ## Data sources
 TBD
 
 ## Understanding the problem
+
 * [Affordable housing program guide]({{ site.baseurl }}/resources/programs-guide.html)
 * [Database Schema]({{ site.baseurl }}/resources/database-schema.html)
 * [Roadmap]({{ site.baseurl }}/resources/roadmap.html)
-
-## Learn about our tools
