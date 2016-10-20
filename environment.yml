@@ -1,0 +1,5 @@
+name: housing-insights
+channels: !!python/tuple
+- defaults
+prefix: C:\Users\humph\Anaconda3\envs\housing-insights
+
