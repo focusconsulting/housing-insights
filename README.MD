@@ -9,11 +9,22 @@ If you're already up to speed and are ready to start contributing, read on for i
 `\docs`
 A Jekyll-based static website that is used as a project informational page while developing the project.
 
-`\preservation-site`
+`\insights-site`
 The tool itself. Currently a single-page static website.
+  * `\insights-site\data`: flat files exported from the scripts/analysis section that are used directly by the javascript in the site. Larger files that need to be queryable should instead be uploaded to CKAN to provide an API.
 
 `\scripts`
-Folder for Python scripts used for processing data sources. Small static data is directed to the `\preservation-site\data` folder, but most of our source data will live on the Code for DC CKAN (see below).
+Folder for Python scripts used for processing data sources. Output of the any scripts should be directed to the \insights-site\data folder. In production, this data will be uploaded to CKAN.
+
+`\mockups`
+Store any brainstorming, images, pictures of napkin drawings, or other ideas for implementation here. "Live mockups" during the prototype phase, i.e. code-based mockups, can typically go directly into the insights-site folder instead.
+
+# Basic Workflow Concept
+This is very much a work in progress so any suggestions to clean up or change this approach are welcome! Currently we are planning to use a static website approach to the final product, unless it becomes necessary to have a server back end. There is a fundamental separation between processing scripts (which perform one-time analysis) and the live site (which uses output of this analysis).
+
+1. Any tabular data sources that need to be analyzed should be loaded into our PostgreSQL server on Amazon, so that they are easily accessible to all users without having to re-download or process them.
+2. Python code (or plain SQL if necessary) should perform all data upload and analysis queries, so that ingestion scripts can be re-run any time they are needed.
+3. Final analysis scripts should output flat files (JSON or CSV) that can be used by the Javascript from the insights-site/data folder or uploaded to a CDN or CKAN.
 
 # Setting up your local environment
 The local environment setup you need depends on which part of the project you want to contribute to:
@@ -66,5 +77,5 @@ Then, you'll want to re-create the virtual environment using the environments.ym
 Jekyll is a static website templating engine. This means you can have a simple, static website but still get the benefits of reusing your HTML code on different pages of a website. It also powers Github Pages, where we host our info site.
 * Follow the install instructions for your operating system on the [Jekyll website](https://jekyllrb.com/docs/installation/). Note, we don't currently use CoffeeScript so NodeJS is unnecessary.
 * Open a command line and `> cd \path\to\housing-insights\docs`
-* Run `jekyll serve`
+* Run `> jekyll serve`
 * Open a browser at the path listed (probably `http://localhost:4000`)
