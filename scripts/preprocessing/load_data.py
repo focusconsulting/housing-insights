@@ -26,13 +26,14 @@ logging.getLogger().addHandler(logging.StreamHandler())
 #CONSTANTS
 #############################
 constants = {
-    'snapshots_csv_filename': 'snapshots_to_load_test.csv',
+    'secrets_filename': 'secrets.json',
+    'snapshots_csv_filename': 'load_manifest.csv',
 }
 
-def get_connect_str(path='./secrets.json'):
+def get_connect_str():
     "Loads the secrets json file to retrieve the connection string"
     logging.info("Loading secrets from {}".format(path))
-    with open(path) as fh:
+    with open(constants['secrets_filename']) as fh:
         secrets = json.load(fh)
     return secrets['database']['connect_str']
 
