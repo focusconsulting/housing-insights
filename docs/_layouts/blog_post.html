@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<header>
+	{% include header-includes.html %}
+	{{page.css}}
+
+	<title>{{ page.title }}</title>
+
+</header>
+
+
+<!--Optional on-page styles-->
+<style>
+
+</style>
+
+
+
+<!--Main body of the content here-->
+<body>
+	<div class="bg-white">
+	{% include navbar.html %}
+		<!--main body-->
+		<div class="container">
+			<div class="row">
+                <div class="col-xs-12  col-md-8"><!--id="container-sub-wrapper"-->
+
+                    {{content}}
+
+                </div>           
+                <div class="col-xs-12  col-md-4">
+                    <h3>Recent blog posts</h3>
+                    <ul>
+                        {% for post in site.posts | limit: 10 %}
+                        <li>
+                            <a href="{{ post.url }}">{{ post.title }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <h3>More from {{ page.author }}</h3>
+                    <ul>
+                        {% assign posts = site.posts | where: "author", page.author %}
+                        {% for post in posts | limit: 10 %}
+                        <li>
+                            <a href="{{ post.url }}">{{ post.title }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!--.sitewide includes-->
+{% include footer-includes.html %}
+{{page.javascript}}
+<!--page specific includes-->
+	<!--none-->
+<!--.page specific includes-->
+
+</body>
+
+</html>
