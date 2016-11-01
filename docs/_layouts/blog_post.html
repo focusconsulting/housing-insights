@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<header>
+	{% include header-includes.html %}
+	{{page.css}}
+
+	<title>{{ page.title }}</title>
+
+</header>
+
+
+<!--Optional on-page styles-->
+<style>
+
+</style>
+
+
+
+<!--Main body of the content here-->
+<body>
+	<div class="bg-white">
+	{% include navbar.html %}
+		<!--main body-->
+		<div class="container">
+            <div class="row">
+                <div>
+                    <h1>{{ page.title }}</h1><p>{{ page.author }} | {{ page.date | date: '%B %d, %Y' }}</p>
+                </div>
+            </div>
+			<div class="row">
+                <div class="col-xs-12  col-md-8"><!--id="container-sub-wrapper"-->
+
+                    {{content}}
+
+                </div>           
+                <aside class="col-xs-12  col-md-4">
+                    {% include recent-blogs.html %}
+                    {% assign posts = site.posts | where: "author", page.author %}
+                    {% if posts.size > 1 %} <!-- only show same-author list if there's more than one post by author -->
+                    <h3>More from {{ page.author }}</h3>
+                    <ul>
+                       
+                        {% for post in posts | limit: 10 %}
+                        {% if post.url != page.url %} <!-- only show posts that are not the same as current page -->
+                        <li>
+                            <a href="{{ post.url }}">{{ post.title }}</a>
+                        </li>
+                        {% endif %} <!-- post.url != page.url -->
+                        {% endfor %}
+                    </ul>
+                    {% endif %} <!-- post.size > 1 -->
+                </aside>
+            </div>
+        </div>
+    </div>
+
+<!--.sitewide includes-->
+{% include footer-includes.html %}
+{{page.javascript}}
+<!--page specific includes-->
+	<!--none-->
+<!--.page specific includes-->
+
+</body>
+
+</html>

@@ -10,7 +10,10 @@ docs/css/.DS_Store
 _site/
 
 
-
+###################
+# Configuration
+###################
+secrets.json
 
 
 
