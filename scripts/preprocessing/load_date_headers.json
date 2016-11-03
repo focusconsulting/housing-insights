@@ -18,6 +18,10 @@
       "Subsidy_End_First",
       "Subsidy_End_Last",
 
+      "LAST_SALE_DATE",
+      "DEED_DATE",
+      "LASTMODIFIEDDATE",
+
       "Nonsense_column_name_Example"
     ]
 }
