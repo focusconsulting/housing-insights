@@ -5,12 +5,19 @@ title: CTDC Home
 
 <h1>The Blog</h1>
 
-
-Posts:
-<ul>
-  {% for post in site.posts %}
-    <li>
+<div class="col-xs-12  col-md-8"> <!-- main div lists two most recent posts with teasers -->
+    {% for post in site.posts | limit: 2 %}
+    <h2>
       <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
-    </li>
-  {% endfor %}
-</ul>
+    </h2>
+    <p>
+         {{ post.content | strip_html | truncatewords:50}}
+    </p>
+    <p>
+        <a href="{{ site.baseurl }}{{ post.url }}">Read the blog</a>
+    </p>
+    {% endfor %}
+</div>
+<div class="col-xs-12  col-md-4">
+     {% include recent-blogs.html %}
+</div>
