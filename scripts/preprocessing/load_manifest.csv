@@ -1,11 +1,16 @@
 skip,table_name,date,path,filename,notes
-,parcel,20160401,../small_data/PresCat_Export_20160401/,Parcel.csv,none
-,project,20160401,../small_data/PresCat_Export_20160401/,Project.csv,none
-,reac_score,20160401,../small_data/PresCat_Export_20160401/,Reac_score.csv,none
-,real_property,20160401,../small_data/PresCat_Export_20160401/,Real_property.csv,none
-,subsidy,20160401,../small_data/PresCat_Export_20160401/,Subsidy.csv,none
-,zillow_zrisqft_zip,20161101,../big_data/zillow/,Zip_ZriPerSqft_AllHomes.csv,Excludes multifamily
-,zillow_zri_zip,20161101,../big_data/zillow/,Zip_Zri_AllHomes.csv,Excludes multifamily
-,zillow_zrisqft_neighbor,20161101,../big_data/zillow/,Neighborhood_ZriPerSqft_AllHomes.csv,Excludes multifamily
-,zillow_zri_neighbor,20161101,../big_data/zillow/,Neighborhood_Zri_AllHomes.csv,Excludes multifamily
-,dc_tax,20161101,../big_data/,Integrated_Tax_System_Public_Extract_Facts.csv,Claims it is updated weekly; unclear if that is true.
+skip,parcel,20160401,../small_data/PresCat_Export_20160401/,Parcel.csv,none
+skip,project,20160401,../small_data/PresCat_Export_20160401/,Project.csv,none
+skip,reac_score,20160401,../small_data/PresCat_Export_20160401/,Reac_score.csv,none
+skip,real_property,20160401,../small_data/PresCat_Export_20160401/,Real_property.csv,none
+skip,subsidy,20160401,../small_data/PresCat_Export_20160401/,Subsidy.csv,none
+skip,zillow_zrisqft_zip,20161101,../big_data/zillow/,Zip_ZriPerSqft_AllHomes.csv,Excludes multifamily
+skip,zillow_zri_zip,20161101,../big_data/zillow/,Zip_Zri_AllHomes.csv,Excludes multifamily
+skip,zillow_zrisqft_neighbor,20161101,../big_data/zillow/,Neighborhood_ZriPerSqft_AllHomes.csv,Excludes multifamily
+skip,zillow_zri_neighbor,20161101,../big_data/zillow/,Neighborhood_Zri_AllHomes.csv,Excludes multifamily
+skip,dc_tax,20161101,../big_data/,Integrated_Tax_System_Public_Extract_Facts.csv,Claims it is updated weekly; unclear if that is true.
+,nc_well_being,20161103,../small_data/Neighborhood_Profiles/,nc_well_being.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
+,nc_schools,20161103,../small_data/Neighborhood_Profiles/,nc_schools.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
+,nc_population,20161103,../small_data/Neighborhood_Profiles/,nc_population.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
+,nc_housing,20161103,../small_data/Neighborhood_Profiles/,nc_housing.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
+,nc_foreclosures,20161103,../small_data/Neighborhood_Profiles/,nc_foreclosures.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
