@@ -21,7 +21,7 @@ var tooltip = d3.select("body").append("div").attr("class", "tooltip");
 var tooltipOffset = { x: 5, y: -25 };
    
 //Define function for populating bar chart
-d3.csv("js/MapData.csv", function(data){
+d3.csv("static/MapData.csv", function(data){
 
         var barChart = d3.select('#detailView')
 
@@ -82,7 +82,7 @@ d3.csv("js/MapData.csv", function(data){
 });
 
 //Define function for populating mapView 
-d3.json("../scripts/small_data/Neighborhood_Clusters_shapefile/Neighborhood_Clusters.geojson", function (geodata) {
+d3.json("static/Neighborhood_Clusters.geojson", function (geodata) {
 var map = d3.select("#mapView").append("g").classed("DC", true)
 
 map.selectAll("path")
