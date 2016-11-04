@@ -8,8 +8,6 @@ SELECT * from parcel limit 10;
 
 
 /* Investigating double counting. 
-
-
 --Records in	project	only					362
 --		project left join real_property			1109
 --		project left join parcel			910
@@ -60,40 +58,55 @@ WHERE dc_tax.ssl ILIKE '0205%'
 --Total land value by Neighborhood Cluster
 --Currently this query double counts cases with multiple projects sharing the same SSL
 
---These outer queries just append calculated columns using the renamed fields from the inner SELECT statement.
-SELECT *, ROUND(missing_tax_count::numeric / ssl_count::numeric, 2) AS percent_ssl_missing 
+--This outer query just appends calculated columns using the renamed fields from the inner SELECT statement.
+SELECT *
+	, ROUND(missing_tax_count::numeric / ssl_count::numeric, 2) AS percent_ssl_missing
+	, ROUND(sum_appraised_value_current_land / appraised_value_count) as average_land_appraisal  --this can be used to fill in missing appraisals for the sum
 FROM ( 
 	--This inner query is the main deal.
 	SELECT 
-	project.cluster_tr2000
-	    , count (distinct project.nlihc_id) as project_nlihc_count
-	    , count (distinct parcel."ssl") as ssl_distinct_count
-	    , count (parcel."ssl") as ssl_count
+	unique_ssls.cluster_tr2000
+	    , sum (unique_ssls.project_count) as project_count
+	    , count (distinct unique_ssls.ssl) as ssl_distinct_count
+	    , count (unique_ssls.ssl) as ssl_count
 	    , count (dc_tax."appraised_value_current_land") as appraised_value_count
 	    , sum (
 		CASE WHEN dc_tax.appraised_value_current_land IS NULL then 1
 		ELSE 0 END)
 		AS missing_tax_count
-	    , coalesce(sum(dc_tax."appraised_value_current_land"), 0) as sum_appraised_value_current_land
-	    , round(avg(zillow_zri_zip."2016-09")) as avg_zip_rent --should actually be weighted average, but doing this temporarily    
-	    , project.cluster_tr2000_name
 
-	FROM project
-	LEFT JOIN public.zillow_zri_zip
-		ON project."proj_zip" = zillow_zri_zip."regionname"
-	LEFT JOIN public.parcel
-		ON project."nlihc_id" = parcel."nlihc_id"
+	    , sum(dc_tax."appraised_value_prior_land") as sum_appraised_value_prior_land
+	    , sum(dc_tax."appraised_value_prior_total") as sum_appraised_value_prior_total
+	    , sum(dc_tax."appraised_value_current_land") as sum_appraised_value_current_land
+	    , sum(dc_tax."appraised_value_current_total") as sum_appraised_value_current_total
+
+	    , unique_ssls.cluster_tr2000_name
+
+	--To avoid double counting projects that have the same SSL, we need to make a summary table of projects that contains just unique ssls
+	FROM (
+		SELECT parcel.ssl
+                    , count(project.nlihc_id) as project_count
+		    , cluster_tr2000
+		    , cluster_tr2000_name
+		FROM project
+		LEFT JOIN parcel
+		     ON parcel.nlihc_id = project.nlihc_id
+		GROUP BY parcel.ssl
+		    , cluster_tr2000
+		    , cluster_tr2000_name
+		) as unique_ssls
+
 	LEFT JOIN public.dc_tax
-		ON parcel."ssl" = dc_tax."ssl"
-	GROUP BY project.cluster_tr2000
-		, project.cluster_tr2000_name       
-	ORDER BY project.cluster_tr2000
+		ON unique_ssls.ssl = dc_tax.ssl
+	GROUP BY unique_ssls.cluster_tr2000
+		, unique_ssls.cluster_tr2000_name       
+	ORDER BY unique_ssls.cluster_tr2000
 	) AS summary_table
 ;
 
 
 /*
---Total unit count of the projects by cluster. Doing this in the lower table is inaccurate because the LEFT JOIN duplicates this data. 
+--Total unit count of the projects by cluster, to be appended to the land value table
 SELECT project.cluster_tr2000
 	, SUM(
 		CASE WHEN project.proj_units_assist_max = 'N' THEN 0
