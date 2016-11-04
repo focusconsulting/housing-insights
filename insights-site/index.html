@@ -38,12 +38,17 @@
 
 
 				<!--add content here-->
-				<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+                <!-- to use conventioanl chart type and map need to call highcharts.js first, then the map addon -->
+				<script src="https://code.highcharts.com/highcharts.js"></script>
+                <script src="https://code.highcharts.com/maps/modules/map.js"></script>
+                <script src="https://code.highcharts.com/modules/data.js"></script>    
 				<script src="https://code.highcharts.com/maps/modules/data.js"></script>
 				<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
 
-
-				<div id="container" style="min-width: 310px; max-width: 400px"></div>
+                <div id="highcharts-wrapper">
+                    <div id="container-1" class="hc-container" style="min-width: 310px; max-width: 400px"></div>
+                    <div id="container-2" class="hc-container" style="min-width: 310px; max-width: 400px;height:300px;"></div>    
+                </div>
 
 
 
