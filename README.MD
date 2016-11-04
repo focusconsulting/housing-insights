@@ -32,6 +32,7 @@ The local environment setup you need depends on which part of the project you wa
 * Everyone needs Git
 * Front-end work just needs some sort of local static file server. We recommend the Python `http.server` but any other alternative will work, including Jekyll.
 * Data processing scripts need Python3, preferably via Anaconda.
+* Our data is loaded into an Amazon RDS database, so if you want to do manual SQL or if you want to run scripts that connect to it you'll need the log in credentials.
 * The informational website (`/docs`) requires Jekyll.
 
 ## Git
@@ -72,6 +73,12 @@ Then, you'll want to re-create the virtual environment using the environments.ym
   * Any time you are running the project, activate the environment first
   * Any time you add a new package to the code(`import mypackage`), you'll need to install it in the environment and then re-export the environment.yml file. Use `conda env export > environment.yml`
   * Any time you see that the environment.yml has been updated in git, you'll need to remove and rebuild the environment (or, manually install the new packages). Use `conda remove --name housing-risk --all` and then `conda env create -f environment.yml` to rebuild.
+
+## Amazon RDS Database
+
+* Server: housing-insights-raw.ccmqak7fm8oa.us-east-1.rds.amazonaws.com
+* Port: 5432
+* Ask Neal for login credentials
 
 ## Informational Website (`/docs`)
 Jekyll is a static website templating engine. This means you can have a simple, static website but still get the benefits of reusing your HTML code on different pages of a website. It also powers Github Pages, where we host our info site.
