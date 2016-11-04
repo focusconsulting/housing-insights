@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Quicksand:400,700' rel='stylesheet' type='text/css'>
+    <link href='css/Map.css' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+    <div id="DrizlyData">
+        <div class="head">
+            <div class="title">Housing Insights</div>
+            <div class="subtitle">Select an area</div>
+        </div>
+        <div class="views">
+            <div class="pane1">
+                <svg id="mapView" width="320px" height="100%" shape-rendering="auto"></svg>
+            </div>
+            <div class="pane2">
+                <svg id="detailView" width="320px" height="100%" shape-rendering="auto"></svg>
+            </div>
+        </div>
+        <div class="source">Source: Drizly</div>
+    </div>
+    <script src="js/Map.js"></script>
+</body>
+
+</html>

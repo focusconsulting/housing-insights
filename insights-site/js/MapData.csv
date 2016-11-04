@@ -1,201 +1,40 @@
-location,item,itemCategory,rank
-20001,Tito's Handmade Vodka,Liquor,1
-20001,Smirnoff No. 22,Liquor,2
-20001,Miller Lite,Beer,3
-20001,Stella Artois,Beer,4
-20001,Jameson Irish Whiskey,Liquor,5
-20001,Tanqueray Dry Gin,Liquor,6
-20001,Bud Light,Beer,7
-20001,Coors Light,Beer,8
-20001,Svedka Vodka,Liquor,9
-20001,La Marca Prosecco ,Wine,10
-20002,Grey Goose Vodka,Liquor,1
-20002,Tito's Handmade Vodka,Liquor,2
-20002,Svedka Vodka,Liquor,3
-20002,Smirnoff No. 23,Liquor,4
-20002,Stella Artois,Beer,5
-20002,Black Box Cabernet Sauv.,Wine,6
-20002,Fireball Cinnamon Whisky,Liquor,7
-20002,Alamos Malbec,Wine,8
-20002,Evan Williams Black,Liquor,9
-20002,New Amsterdam Gin,Liquor,10
-20003,Svedka Vodka,Liquor,1
-20003,Tito's Handmade Vodka,Liquor,2
-20003,Black Box Pinot Grigio,Wine,3
-20003,Crown Royal,Liquor,4
-20003,Miller Lite,Beer,5
-20003,Black Box Sauv. Blanc,Wine,6
-20003,Victory Golden Monkey,Beer,7
-20003,Bud Light,Beer,8
-20003,Black Box Chardonnay,Wine,9
-20003,Avalon Cabernet Sauv.,Wine,10
-20004,Avalon Cabernet Sauv.,Wine,1
-20004,Smirnoff No. 24,Liquor,2
-20004,Coors Light,Beer,3
-20004,21st Amendment Black IPA,Beer,4
-20004,Apothic Red Blend,Wine,5
-20004,Bulleit Bourbon,Liquor,6
-20004,Johnnie Walker Black Label,Liquor,7
-20004,Stella Artois,Beer,8
-20004,DC Brau Brau Pils,Beer,9
-20004,Cupcake Sauv. Blanc,Wine,10
-20005,Miller Lite,Beer,1
-20005,Coors Light,Beer,2
-20005,Tanqueray Dry Gin,Liquor,3
-20005,Heineken Lager,Beer,4
-20005,Stella Artois,Beer,5
-20005,Tito's Handmade Vodka,Liquor,6
-20005,Fireball Cinnamon Whisky,Liquor,7
-20005,Bud Light,Beer,8
-20005,Blue Moon Belgian White,Beer,9
-20005,Yuengling Lager,Beer,10
-20006,Tito's Handmade Vodka,Liquor,1
-20006,Corona Extra,Beer,2
-20006,Svedka Vodka,Liquor,3
-20006,Absolut Vodka,Liquor,4
-20006,Angry Orchard Cider,Beer,5
-20006,Blue Moon Belgian White,Beer,6
-20006,Flying Dog Variety Pack,Beer,7
-20006,Stella Artois,Beer,8
-20006,Yuengling Lager,Beer,9
-20006,Dogfish Head 60 Minute IPA,Beer,10
-20007,Tito's Handmade Vodka,Liquor,1
-20007,Natural Light,Beer,2
-20007,Crispin English Cider,Beer,3
-20007,Miller Lite,Beer,4
-20007,Bud Light,Beer,5
-20007,Omission Pale Ale,Beer,6
-20007,Coors Light,Beer,7
-20007,Svedka Vodka,Liquor,8
-20007,Captain Morgan Spiced Rum,Liquor,9
-20007,Stella Artois,Beer,10
-20008,Svedka Vodka,Liquor,1
-20008,Tito's Handmade Vodka,Liquor,2
-20008,Alamos Malbec,Wine,3
-20008,Yuengling Lager,Beer,4
-20008,Smirnoff No. 21,Liquor,5
-20008,Stella Artois,Beer,6
-20008,Victory Golden Monkey,Beer,7
-20008,Yellow Tail Cabernet Sauv.,Wine,8
-20008,Bud Light Platinum,Beer,9
-20008,Black Box Cabernet Sauv.,Wine,10
-20009,Svedka Vodka,Liquor,1
-20009,Tito's Handmade Vodka,Liquor,2
-20009,Bud Light,Beer,3
-20009,Johnnie Walker Red Label,Liquor,4
-20009,Miller Lite,Beer,5
-20009,Jim Beam,Liquor,6
-20009,Alamos Malbec,Wine,7
-20009,Bulleit Bourbon,Liquor,8
-20009,Guinness Draught,Beer,9
-20009,Dogfish Head 60 Minute IPA,Beer,10
-20010,Dewars White Label,Liquor,1
-20010,Tito's Handmade Vodka,Liquor,2
-20010,Racer 5 IPA,Beer,3
-20010,Cupcake Sauv. Blanc,Wine,4
-20010,Absolut Vodka,Liquor,5
-20010,Gruet Rose,Wine,6
-20010,New Amsterdam Gin,Liquor,7
-20010,Svedka Vodka,Liquor,8
-20010,Temptation Bourbon Whiskey,Liquor,9
-20010,Bota Box  Cabernet Sauv. ,Wine,10
-20011,Tito's Handmade Vodka,Liquor,1
-20011,Ballast Point Sculpin IPA,Beer,2
-20011,Ballast Point Big Eye IPA,Beer,3
-20011,Oyster Bay Sauv. Blanc,Wine,4
-20011,Woodbridge Chardonnay,Wine,5
-20011,Bulleit Bourbon,Liquor,6
-20011,Boulevard The Calling IPA,Beer,7
-20011,Founders Cenennial IPA,Beer,8
-20011,Flying Dog The Truth Imperial IPA,Beer,9
-20011,Atlas Rowdy Rye,Beer,10
-20015,Svedka Vodka,Liquor,1
-20015,Coors Light,Beer,2
-20015,Miller Lite,Beer,3
-20015,Cisco Grey Lady,Beer,4
-20015,Cristalino Cava Brut,Wine,5
-20015,Yellow Tail Cabernet Sauv.,Wine,6
-20015,Menage a Trois Red,Wine,7
-20015,Four Vines Naked Chardonnay,Wine,8
-20015,Heineken Lager,Beer,9
-20015,Dog Point Sauv. Blanc,Wine,10
-20016,Coors Light,Beer,1
-20016,Maker's Mark Kentucky Bourbon,Liquor,2
-20016,Tito's Handmade Vodka,Liquor,3
-20016,Bud Light,Beer,4
-20016,Stella Artois,Beer,5
-20016,Miller Lite,Beer,6
-20016,Svedka Mango Pineapple,Liquor,7
-20016,Stella Cidre,Beer,8
-20016,Angry Orchard Cider,Beer,9
-20016,Trapiche Broquel Malbec,Wine,10
-20017,Yellow Tail Pinot Grigio,Wine,1
-20017,Bota Box Pinot Grigio,Wine,2
-20017,Bulleit Bourbon,Liquor,3
-20017,Gordon's Londo Dry Gin,Liquor,4
-20017,Southern Tier IPA,Beer,5
-20017,Ballast Point Sculpin IPA,Beer,6
-20017,Andre Extra Dry Champagne,Wine,7
-20017,Yellow Tail Chardonnay,Wine,8
-20017,Alamos Malbec,Wine,9
-20017,1800 Silver ,Liquor,10
-20018,Rascal Pinot Noir,Wine,1
-20018,Bota Box Pinot Noir,Wine,2
-20018,Not Your Father's Root Beer,Beer,3
-20018,21st Amendment Seasonal,Beer,4
-20018,Bacardi Superior Rum,Liquor,5
-20018,Firesteed Pinot Noir,Wine,6
-20018,Miller Lite,Beer,7
-20018,Crispin Original Cider,Beer,8
-20018,Miller High Life,Beer,9
-20018,Leffe Blonde,Beer,10
-20020,Fireball Cinnamon Whisky,Liquor,1
-20020,Black Box Sauv. Blanc,Wine,2
-20020,Absolut Vodka,Liquor,3
-20020,Bulleit Bourbon,Liquor,4
-20020,Courvoisier Congac VS,Liquor,5
-20020,Ciroc Vodka,Liquor,6
-20020,Jameson Irish Whiskey,Liquor,7
-20020,Apothic Red Blend,Wine,8
-20020,Oyster Bay Sauv. Blanc,Wine,9
-20020,Grey Goose Vodka,Liquor,10
-20024,Tito's Handmade Vodka,Liquor,1
-20024,Bacardi Superior Rum,Liquor,2
-20024,Miller Lite,Beer,3
-20024,Fireball Cinnamon Whisky,Liquor,4
-20024,Bulleit Bourbon,Liquor,5
-20024,Bud Light,Beer,6
-20024,Absolut Vodka,Liquor,7
-20024,Veuve Clicquot Brut,Wine,8
-20024,Maker's Mark Kentucky Bourbon,Liquor,9
-20024,Bulleit Rye,Liquor,10
-20036,Cristalino Cava Brut,Wine,1
-20036,Svedka Vodka,Liquor,2
-20036,Bud Light,Beer,3
-20036,Chateau Montaud Rose,Wine,4
-20036,Oyster Bay Sauv. Blanc,Wine,5
-20036,Stella Artois,Beer,6
-20036,Miller Lite,Beer,7
-20036,Bota Box Chardonnay,Wine,8
-20036,Meiomi Pinot Noir,Wine,9
-20036,Cristalino Cava Brut Rose,Wine,10
-20037,Stella Artois,Beer,1
-20037,Tito's Handmade Vodka,Liquor,2
-20037,Corona Extra,Beer,3
-20037,Bud Light,Beer,4
-20037,Barefoot Chardonnay,Wine,5
-20037,Svedka Vodka,Liquor,6
-20037,Jameson Irish Whiskey,Liquor,7
-20037,Grey Goose Vodka,Liquor,8
-20037,Coors Light,Beer,9
-20037,Bell's Two Hearted Ale,Beer,10
-"Washington, DC",Tito's Handmade Vodka,Liquor,1
-"Washington, DC",Miller Lite,Beer,2
-"Washington, DC",Svedka Vodka,Liquor,3
-"Washington, DC",Bud Light,Beer,4
-"Washington, DC",Stella Artois,Beer,5
-"Washington, DC",Coors Light,Beer,6
-"Washington, DC",La Marca Prosecco,Wine,7
-"Washington, DC",Natural Light,Beer,8
-"Washington, DC",Oyster Bay Sauv. Blanc,Wine,9
-"Washington, DC",Fireball Cinnamon Whisky,Liquor,10
+location,value
+Cluster 1,390
+Cluster 2,380
+Cluster 3,370
+Cluster 4,360
+Cluster 5,350
+Cluster 6,340
+Cluster 7,330
+Cluster 8,320
+Cluster 9,310
+Cluster 10,300
+Cluster 11,290
+Cluster 12,280
+Cluster 13,270
+Cluster 14,260
+Cluster 15,250
+Cluster 16,240
+Cluster 17,230
+Cluster 18,220
+Cluster 19,210
+Cluster 20,200
+Cluster 21,190
+Cluster 22,180
+Cluster 23,170
+Cluster 24,160
+Cluster 25,150
+Cluster 26,140
+Cluster 27,130
+Cluster 28,120
+Cluster 29,110
+Cluster 30,100
+Cluster 31,90
+Cluster 32,80
+Cluster 33,70
+Cluster 34,60
+Cluster 35,50
+Cluster 36,40
+Cluster 37,30
+Cluster 38,20
+Cluster 39,10
