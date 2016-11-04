@@ -94,7 +94,7 @@ var tooltipOffset = { x: 5, y: -25 };
 //Define function for populating detail view
 function detailView(location) {
     
-    d3.csv("MapData.csv", function(data){
+    d3.csv("static/MapData.csv", function(data){
 
     //Filter to only those observations that match the current location
     dataSubset = data.filter(function(locID) {
@@ -193,7 +193,7 @@ function detailView(location) {
      
 //Define function for populating mapView 
 
-  d3.json("DCzipcodes.geojson", function (geodata) {
+  d3.json("static/DCzipcodes.geojson", function (geodata) {
 var map = d3.select("#mapView").append("g").classed("DC", true)
 
 map.selectAll("path")
