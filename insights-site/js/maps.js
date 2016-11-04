@@ -2,16 +2,16 @@ $(function () {
 
     // Prepare random data
     var data = [
-        ['DE.SH', 728],
-        ['DE.BE', 710],
-        ['DE.MV', 963],
-        ['DE.HB', 541],
-        ['DE.HH', 622],
-        ['DE.RP', 866],
-        ['DE.SL', 398],
-        ['DE.BY', 785],
-        ['DE.SN', 223],
-        ['DE.ST', 605],
+        ['Cluster 1', 728],
+        ['Cluster 2', 710],
+        ['Cluster 3', 963],
+        ['Cluster 4', 541],
+        ['Cluster 5', 622],
+        ['Cluster 6', 866],
+        ['Cluster 7', 398],
+        ['Cluster 8', 785],
+        ['Cluster 9', 223],
+        ['Cluster 10', 605],
         ['DE.NW', 237],
         ['DE.BW', 157],
         ['DE.HE', 134],
@@ -43,8 +43,8 @@ $(function () {
             series: [{
                 data: data,
                 mapData: geojson,
-                joinBy: ['code_hasc', 0],
-                keys: ['code_hasc', 'value'],
+                joinBy: ['NAME', 0],
+                keys: ['NAME', 'value'],
                 name: 'Random data',
                 states: {
                     hover: {
