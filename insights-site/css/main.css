@@ -31,3 +31,7 @@ Much of this should be replaced with a bootstrap-theme.css file instead*/
 	background-color: #ffffff;
 }
 
+#highcharts-wrapper {
+    display: flex;
+    align-items: flex-end;
+}
