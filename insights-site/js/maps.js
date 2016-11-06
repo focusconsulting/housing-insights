@@ -1,38 +1,32 @@
 $(function () {
 
-    // Prepare random data
-    var data = [
-        ['Cluster 1', 728],
-        ['Cluster 2', 710],
-        ['Cluster 3', 963],
-        ['Cluster 4', 541],
-        ['Cluster 5', 622],
-        ['Cluster 6', 866],
-        ['Cluster 7', 398],
-        ['Cluster 8', 785],
-        ['Cluster 9', 223],
-        ['Cluster 10', 605]
-   
-    ]; 
-
-// Highcharts needs data sorted beforehand for the bar chart to be in order of value. It has no sorting function as far as I know. 
     
-function sortFunction(a, b) {
-    if (a[1] === b[1]) {
-        return 0;
-    }
-    else {
-        return (a[1] < b[1]) ? 1 : -1;
-    }
-}
-    
-data.sort(sortFunction);
-
-// end sort
-    
-    jsonPath = '/static/Neighborhood_Clusters.geojson'
-    $.getJSON(jsonPath, function (geojson) {
+    $.get('../data/summary_tax_values.csv', function(csv) { 
         
+        var results = Papa.parse(csv, {dynamicTyping: true}); // using papaParse.js to parsce csv string to array, returns object
+        console.log(results);
+        data = results.data.slice(1); //removes first row (headers) from data; keys are set below
+        
+    // Highcharts needs data sorted beforehand for the bar chart to be in order of value. It has no sorting function as far as I know. 
+
+    function sortFunction(a, b) {
+        if (a[9] === b[9]) {  // sorting by index 9: "sum_appraised_value_current_total"
+            return 0;
+        }
+        else {
+            return (a[9] < b[9]) ? 1 : -1;
+        }
+    }
+
+    data.sort(sortFunction);
+        
+    console.log(data);
+
+    // end sort
+
+    jsonPath = '/static/Neighborhood_Clusters.geojson'
+    $.getJSON(jsonPath, {data}, function (geojson) {
+     console.log(geojson);
                 //Initiate the chart
         // for some reason `data` only seems to share well if the chart renders before the map
        Highcharts.chart('container-2', {  // bar chart renders to #container-2
@@ -41,12 +35,12 @@ data.sort(sortFunction);
                   'display':'none'
               }  
             },
-           xAxis: {
+     /*      xAxis: {
              type: 'category'  
-           },
+           },*/
             series:[{
                 data: data,
-                keys: ['name', 'y'],
+                keys: ["NAME","project_count","ssl_distinct_count","ssl_count","appraised_value_count","missing_tax_count","sum_appraised_value_prior_land","sum_appraised_value_prior_total","sum_appraised_value_current_land","y","cluster_tr2000_name","percent_ssl_missing","average_land_appraisal"], // from original header of the csv file, changing 0 index to "NAME" and index 9 sum_appraised_value_current_total to 'y'
                 type: 'bar',
                 showInLegend: false,
                 states: {
@@ -65,6 +59,13 @@ data.sort(sortFunction);
                     }
                 }
             }],
+           tooltip:{
+               formatter: function(){
+                 var num = '$' + this.point.y.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); // converts number to cuurency string
+                 return this.point.cluster_tr2000_name + '<br /><b>Total value:</b> ' + num;
+               }
+           }
+           
           
         });
 
@@ -84,23 +85,24 @@ data.sort(sortFunction);
 
             colorAxis: {
             },
-                        
+                       
             series: [{
                 type:'map',
                 data: data,
                 mapData: geojson,
                 joinBy: ['NAME'],
-                keys: ['NAME', 'value'],
+                keys: ["NAME","project_count","ssl_distinct_count","ssl_count","appraised_value_count","missing_tax_count","sum_appraised_value_prior_land","sum_appraised_value_prior_total","sum_appraised_value_current_land","value","cluster_tr2000_name","percent_ssl_missing","average_land_appraisal"], // from original header of the csv file, changing 0 index to "NAME" and index 9 sum_appraised_value_current_total to 'value'
                 name: 'Land value',
                 states: {
                     hover: {
                         color: '#BADA55'
                     }
                 },
-                dataLabels: {
+        /*        dataLabels: {
                     enabled: true,
                     format: '{point.properties.postal}'
-                },
+                }, */
+                
                 point: { //same events as above in bar chart
                     events: {
                         mouseOver: function(point) {
@@ -112,7 +114,13 @@ data.sort(sortFunction);
                     }
                 }
             
-            }]
+            }],
+            tooltip:{
+               formatter: function(){
+                 var num = '$' + this.point.value.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); // converts number to cuurency string
+                 return this.point.cluster_tr2000_name + '<br /><b>Total value:</b> ' + num;
+               }
+            }
         });
         
         // function to link hovering on one chart to highlighting on the other
@@ -127,4 +135,5 @@ data.sort(sortFunction);
             }
         }
     });
+});
 });
