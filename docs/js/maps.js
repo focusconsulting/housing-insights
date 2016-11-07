@@ -1,27 +1,25 @@
 $(function () {
 
 
-    $.get('../data/summary_tax_values_plus_unit_counts.csv', function(csv) {
+    $.get('../data/summary_tax_active_plus_unit_counts.csv', function(csv) {
 
         var results = Papa.parse(csv, {dynamicTyping: true}); // using papaParse.js to parsce csv string to array, returns object
         console.log(results);
         data = results.data.slice(1); //removes first row (headers) from data; keys are set below
 
     // Highcharts needs data sorted beforehand for the bar chart to be in order of value. It has no sorting function as far as I know.
-
+    /* Temporarily hiding - sorting was returning one wrong value. Sorting source data instead.
     function sortFunction(a, b) {
-        if (a[9] === b[9]) {  // sorting by index 9: "sum_appraised_value_current_total"
+        if (a[17] === b[17]) {  // sorting by index 9: "sum_appraised_value_current_total"
             return 0;
         }
         else {
-            return (a[9] < b[9]) ? 1 : -1;
+            return (a[17] < b[17]) ? 1 : -1;
         }
     }
-
     data.sort(sortFunction);
 
-    console.log(data);
-
+    */
     // end sort
 
     jsonPath = '../data/Neighborhood_Clusters.geojson'
@@ -63,7 +61,7 @@ $(function () {
                         ,"sum_appraised_value_prior_land"
                         ,"sum_appraised_value_prior_total"
                         ,"sum_appraised_value_current_land"
-                        ,"y"/*sum_appraised_value_current_total*/
+                        ,"sum_appraised_value_current_total"/**/
                         ,"cluster_tr2000_name"
                         ,"percent_ssl_missing"
                         ,"average_land_appraisal"
@@ -71,8 +69,8 @@ $(function () {
                         ,"avg_sum_appraised_value_prior_land"
                         ,"avg_sum_appraised_value_prior_total"
                         ,"avg_sum_appraised_value_current_land"
-                        ,"avg_sum_appraised_value_current_total"
-                      ], // from original header of the csv file, changing 0 index to "NAME" and index 9 sum_appraised_value_current_total to 'y'
+                        ,"y"/*"avg_sum_appraised_value_current_total"*/
+                      ], // from original header of the csv file, changing 0 index to "NAME" and plotted column to to 'y'
                 type: 'bar',
                 showInLegend: false,
                 states: {
@@ -92,9 +90,19 @@ $(function () {
                 }
             }],
            tooltip:{
+             positioner: function (labelWidth, labelHeight, point) {
+                var tooltipX, tooltipY;
+                tooltipX = this.chart.plotWidth - labelWidth + 30;
+                tooltipY = this.chart.plotHeight - labelHeight;
+                return {
+                    x: tooltipX,
+                    y: tooltipY
+                };
+             },
                formatter: function(){
-                 var num = '$' + this.point.y.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); // converts number to currency string
-                 return this.point.cluster_tr2000_name + '<br /><b>Total value:</b> ' + num;
+                 var plot_value = '$' + this.point.y.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); // converts number to currency string
+                 return this.point.cluster_tr2000_name
+                        + '<br /><b>Average tax value per unit:</b> ' + plot_value;
                }
            }
 
@@ -141,7 +149,7 @@ $(function () {
                         ,"sum_appraised_value_prior_land"
                         ,"sum_appraised_value_prior_total"
                         ,"sum_appraised_value_current_land"
-                        ,"value"/*sum_appraised_value_current_total*/
+                        ,"sum_appraised_value_current_total"/**/
                         ,"cluster_tr2000_name"
                         ,"percent_ssl_missing"
                         ,"average_land_appraisal"
@@ -149,8 +157,8 @@ $(function () {
                         ,"avg_sum_appraised_value_prior_land"
                         ,"avg_sum_appraised_value_prior_total"
                         ,"avg_sum_appraised_value_current_land"
-                        ,"avg_sum_appraised_value_current_total"
-                      ], // from original header of the csv file, changing 0 index to "NAME" and index 9 sum_appraised_value_current_total to 'value'
+                        ,"value"/*"avg_sum_appraised_value_current_total"*/
+                      ], // from original header of the csv file, changing 0 index to "NAME" and plotted column to 'value'
                 name: 'Land value',
                 states: {
                     hover: {
@@ -175,12 +183,24 @@ $(function () {
 
             }],
             tooltip:{
+                positioner: function (labelWidth, labelHeight, point) {
+                   var tooltipX, tooltipY;
+                   tooltipX = this.chart.plotLeft;
+                   tooltipY = this.chart.plotTop;
+                   return {
+                       x: tooltipX,
+                       y: tooltipY
+                   };
+               },
+
                formatter: function(){
-                 var num = '$' + this.point.value.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); // converts number to cuurency string
-                 var average_value = '$' + this.point.avg_sum_appraised_value_current_total.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
-                 return this.point.cluster_tr2000_name
-                        + '<br /><b>Total tax assesed value:</b> ' + num
-                        + '<br/><b>Value Per affordable unit:</b> '+ average_value;
+                 var plot_value = '$' + this.point.value.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); // converts number to cuurency string
+                 var cluster_units = this.point.sum_assisted_units;
+                 var cluster_value = '$' + this.point.sum_appraised_value_current_total.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"); // converts number to cuurency string;
+                 return this.point.NAME + ': ' + this.point.cluster_tr2000_name
+                        + '<br /><b>Average tax value per unit:</b> ' + plot_value
+                        + '<br/>Affordable units in cluster: '+ cluster_units
+                        + '<br/>Total tax value affordable buildings: '+ cluster_value;
                }
             }
         });

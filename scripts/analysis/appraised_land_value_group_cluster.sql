@@ -91,6 +91,12 @@ FROM (
 		FROM project
 		LEFT JOIN parcel
 		     ON parcel.nlihc_id = project.nlihc_id
+		WHERE project.status = 'Active'
+
+			--Temporarily excluding these properties from analysis due to suspicious data. TODO - investigate data issues. 
+			AND project.nlihc_id NOT IN
+				('NL000215' --Distorting the Cluster 19 avg value. Maybe high appraised improvement value or too low unit count? 
+				)
 		GROUP BY parcel.ssl
 		    , cluster_tr2000
 		    , cluster_tr2000_name
@@ -103,6 +109,19 @@ FROM (
 	ORDER BY unique_ssls.cluster_tr2000
 	) AS summary_table
 ;
+
+/*Investigating why Cluster 19 has such high assessed values
+SELECT *
+FROM project
+LEFT JOIN parcel
+	ON parcel.nlihc_id = project.nlihc_id
+LEFT JOIN public.dc_tax
+		ON parcel.ssl = dc_tax.ssl
+WHERE cluster_tr2000 = 'Cluster 19'
+
+--This is the property that has a much higher assessed value. Either value or unit count might be wrong?
+AND project.nlihc_id NOT IN ('NL000215')
+*/
 
 
 /*

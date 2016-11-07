@@ -3,12 +3,26 @@ layout: main
 title: CTDC Home
 ---
 
-
-
-
 <!--add content here-->
-<h1>How much is DC's affordable housing worth?</h1>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</p>
+<h2>How much is DC's affordable housing worth?</h2>
+<p>Not all affordable housing units will cost the same to preserve if their building owners decide to sell.
+	To get a sense of this difference, we connected the Preservation Catalog to DC's Real Property Tax Database
+	to find out the assessed tax value of all the affordable buildings in DC.</p>
+
+<p>This graph sums the tax value of all affordable developments in the Preservation Catalog by neighborhood cluster.
+	The values on both the map and bar chart represent the average assessed value per affordable unit.</p>
+
+	<p>Note this is <b>draft</b> data - while close to accurate, we haven't completed full quality assurance to make sure
+		all buildings are accurately represented. But this should give you a sense of the type of information the
+		Housing Insights tool will provide.</p>
+
+<div class="jumbotron">
+			<h3>Tax Value of Affordable Housing</h3>
+			<p>$3.8 Billion total tax value of affordable housing in DC</p>
+			<p>38,455 affordable units</p>
+			<p>$98,500 avg DC tax value per affordable unit</p>
+		</div>
+<h3>Average Tax Assessed Value per Affordable Unit</h3>
 
 <div id="highcharts-wrapper" class="row">
 		<div class="col-sm-6">
@@ -19,8 +33,21 @@ title: CTDC Home
 		</div>
 </div>
 
-
-
+<div class="well">
+	<h3>Technical Notes</h3>
+	<p>This is <b>draft</b> analysis, and should not be quoted or used outside of this page until a final analysis is published.
+		The purpose of this page is to show Preservation Network Members the type of information that we intend to include
+		in the final Housing Insights tool.</p>
+	<p>Data on this page comes from matching all 'Active' projects in the Preservation Catalog to their corresponding tax
+		assessment records from the DC Government. A few known issues with the data include:</p>
+	<ul>
+		<li>While considered mostly accurate, comprehensive data quality checks have not yet been performed.</li>
+		<li>Some projects are missing unit counts, which will make averages appear higher than they should be.</li>
+		<li>Some projects could not be found in the tax database, which will make totals and averages appear lower than they should be.</li>
+		<li>Tax values represent the entire project, while average tax value refers only to the affordable units. This will make average values higher than they should be for buildings with lots of unsubsidized units (e.g. LIHTC).</li>
+		<li>Tax assessments typically lag real estate market prices by a significant amount, so the total market value will be higher.</li>
+	</ul>
+</div>
 
 	<!--custom includes-->
 	<!-- to use conventioanl chart type and map need to call highcharts.js first, then the map addon -->
