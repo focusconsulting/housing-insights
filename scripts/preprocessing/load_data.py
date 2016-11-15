@@ -57,7 +57,9 @@ def csv_to_sql(index_path):
     engine = create_engine(connect_str)
 
     for index, row in paths_df.iterrows():
-        if str(row['skip']) != "skip":
+        if (row['skip'] == "skip") or (row['skip'] == "loaded") or (row['skip'] == "invalid"):
+            logging.info("Row " + row['table_name'] + ": " + row['skip'])
+        else:
             full_path = row['path'] + row['filename']
             tablename = row['table_name']
 
@@ -84,12 +86,12 @@ def csv_to_sql(index_path):
             csv_df.columns = [c.replace('.', '_') for c in csv_df.columns]
             logging.info("  in memory...")
 
-            #Send to the database
-            csv_df.to_sql(tablename, engine, if_exists='replace')
-            logging.info("  table loaded")
+            #Add a column so that we can put all the snapshots in the same table
+            csv_df['data_version'] = row['data_version']
 
-        else:
-            logging.info("Row " + row['table_name'] + ": " + row['skip'])
+            #Send to the database
+            csv_df.to_sql(tablename, engine, if_exists='append')
+            logging.info("  table loaded")
 
 if __name__ == '__main__':
     #sample_add_to_database()
