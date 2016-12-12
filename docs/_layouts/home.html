@@ -21,7 +21,11 @@
 <body>
 	<div class="bg-white">
 	{% include navbar.html %}
-
+	<div class="alert alert-info" style="margin-top:-20px;">
+		<strong>Latest news:</strong> Help decide our priorities! Take a quick survey about what data we should include in the tool.
+			<a href="{{ site.baseurl }}/tool">Read more here</a>.
+	</div>
+	
 	<div class="hero-image">
 		<div class="jumbotron hero-image">
 		<div class="container">
@@ -30,7 +34,7 @@
 				<h2>{{ site.tagline }}</h2>
 				<p>
 					<button type="button" data-toggle="modal" data-target="#modal_email" class="btn btn-primary btn-lg get-updates">Get updates</button>
-					<button type="button" class="btn btn-primary btn-lg help-build">Help us build it</button>
+					<a href="resources" class="btn btn-primary btn-lg help-build">Help us build it</a>
 				</p>
 			</div>
 		</div>
