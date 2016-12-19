@@ -3,10 +3,10 @@ layout: main
 title: CTDC Home
 ---
 
-<h1>The Blog</h1>
+<h1>The Housing Insights Blog</h1>
 <div class="row">
   <div class="col-xs-12  col-md-8"> <!-- main div lists two most recent posts with teasers -->
-      {% for post in site.posts | limit: 2 %}
+      {% for post in site.posts | limit: 20 %}
       <h2>
         <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
       </h2>
