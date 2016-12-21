@@ -32,6 +32,20 @@ As I said last night, our next step is to sift through these ideas, and turn the
 
 Thanks! I hope to see many of you on Tuesday; if you can't make it or just want to wait to see the plan, I'll be in touch re: teams before the new year.
 
-Neal
 
-Project Manager, Housing Insights
+---------------------
+**Prototype Team:**
+
+We'll use Google Slides and Tableau to make a fake (but real-looking) version of our proposed design, or potentially 2-3 different versions. We'll show this to some affordable housing users and watch their interactions with it. 
+
+**General Data Team:**
+
+Responsible for wrangling and locating our data sources, making sure we can link them, and writing Python / SQL code to analyze them. Also can do some data exploration to find interesting stories. 
+
+**Location Data Team:**
+
+Writing code to do spatial-analysis related data. For example, this team would start working on putting affordable buildings on a map and calculating the distance to public transit, or find the other buildings within X miles. Most likely will do this client-side via [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/api/) and the [Directions API](https://www.mapbox.com/api-documentation/#retrieve-directions) (open to alternatives), but could also use [Python SDK](https://github.com/mapbox/mapbox-sdk-py) if it makes sense.
+
+**Javascript/D3 Team: **
+
+Setting up the core structure of our main page code. For now this will focus on the nuts-and-bolts part of the project that we will use no matter what the design, learning about [using D3](https://d3js.org/), and how we connect to our data. 
