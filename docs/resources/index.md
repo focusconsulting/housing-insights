@@ -4,6 +4,11 @@ title: H.I. Resources
 ---
 
 # Resources for Coders and Contributors
+
+<div class="well well-sm">
+  <p><strong>Current Contributors:</strong> We now have a list of all our upcoming meetings, events and ways to get involved on our <a href="{{site.baseurl}}/resources/latest">Latest Updates page</a>.</p>
+</div>
+
 Yes! We're glad you're interested in helping out on this project.
 
 If you're new to the project, read each of the resources below. In about 10 minutes you'll be up and running and ready to start contributing!
@@ -11,7 +16,7 @@ If you're new to the project, read each of the resources below. In about 10 minu
 ## 1) Project Purpose and Approach
 [Read the full project summary]({{site.baseurl}}/resources/summary.html)
 
-Then take a quick look at our planned [project phases]({{site.baseurl}}/resources/phases.html)
+<!--Then take a quick look at our planned [project phases]({{site.baseurl}}/resources/phases.html)-->
 
 ## 2) Find an issue you're interested in
 Issues are tagged with the language or technology needed to do them, and their category of issue. If you're a beginner or just have a little bit of time, look for issues marked 'easy.' When you start working on an issue, leave a note in the comments so others know you're going to start tackling it.
@@ -35,4 +40,4 @@ TBD
 
 * [Affordable housing program guide]({{ site.baseurl }}/resources/programs-guide.html)
 * [Database Schema]({{ site.baseurl }}/resources/database-schema.html)
-* [Roadmap]({{ site.baseurl }}/resources/roadmap.html)
+<!--* [Roadmap]({{ site.baseurl }}/resources/roadmap.html)-->
