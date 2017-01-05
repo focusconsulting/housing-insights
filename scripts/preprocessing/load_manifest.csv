@@ -14,9 +14,9 @@ loaded,nc_schools,nc_schools,20161103,../small_data/Neighborhood_Profiles/,nc_sc
 loaded,nc_population,nc_population,20161103,../small_data/Neighborhood_Profiles/,nc_population.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
 loaded,nc_housing,nc_housing,20161103,../small_data/Neighborhood_Profiles/,nc_housing.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
 loaded,nc_foreclosures,nc_foreclosures,20161103,../small_data/Neighborhood_Profiles/,nc_foreclosures.csv,from http://www.neighborhoodinfodc.org/comparisontables/comparisontables.html
-,ACS_09_5YR,acs_rent_lower,7/1/2007,../../../housing-risk/data/acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25057_with_ann.csv,lower_quartile
-,ACS_09_5YR,acs_rent_median,7/1/2007,../../../housing-risk/data/acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25058_with_ann.csv,median
-,ACS_09_5YR,acs_rent_upper,7/1/2007,../../../housing-risk/data/acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25059_with_ann.csv,upper_quartile
+loaded,ACS_09_5YR,acs_rent_lower,7/1/2007,../../../housing-risk/data/acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25057_with_ann.csv,lower_quartile
+loaded,ACS_09_5YR,acs_rent_median,7/1/2007,../../../housing-risk/data/acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25058_with_ann.csv,median
+loaded,ACS_09_5YR,acs_rent_upper,7/1/2007,../../../housing-risk/data/acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25059_with_ann.csv,upper_quartile
 skip,ACS_10_5YR,acs_rent_lower,7/1/2008,../../../housing-risk/data/acs/median_rent_by_tract/2010_5year/,ACS_10_5YR_B25057_with_ann.csv,lower_quartile
 skip,ACS_10_5YR,acs_rent_median,7/1/2008,../../../housing-risk/data/acs/median_rent_by_tract/2010_5year/,ACS_10_5YR_B25058_with_ann.csv,median
 skip,ACS_10_5YR,acs_rent_upper,7/1/2008,../../../housing-risk/data/acs/median_rent_by_tract/2010_5year/,ACS_10_5YR_B25059_with_ann.csv,upper_quartile
@@ -29,6 +29,7 @@ skip,ACS_12_5YR,acs_rent_upper,7/1/2010,../../../housing-risk/data/acs/median_re
 skip,ACS_13_5YR,acs_rent_lower,7/1/2011,../../../housing-risk/data/acs/median_rent_by_tract/2013_5year/,ACS_13_5YR_B25057_with_ann.csv,lower_quartile
 skip,ACS_13_5YR,acs_rent_median,7/1/2011,../../../housing-risk/data/acs/median_rent_by_tract/2013_5year/,ACS_13_5YR_B25058_with_ann.csv,median
 skip,ACS_13_5YR,acs_rent_upper,7/1/2011,../../../housing-risk/data/acs/median_rent_by_tract/2013_5year/,ACS_13_5YR_B25059_with_ann.csv,upper_quartile
-,ACS_14_5YR,acs_rent_lower,7/1/2012,../../../housing-risk/data/acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25057_with_ann.csv,lower_quartile
-,ACS_14_5YR,acs_rent_median,7/1/2012,../../../housing-risk/data/acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25058_with_ann.csv,median
-,ACS_14_5YR,acs_rent_upper,7/1/2012,../../../housing-risk/data/acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25059_with_ann.csv,upper_quartile
+loaded,ACS_14_5YR,acs_rent_lower,7/1/2012,../../../housing-risk/data/acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25057_with_ann.csv,lower_quartile
+loaded,ACS_14_5YR,acs_rent_median,7/1/2012,../../../housing-risk/data/acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25058_with_ann.csv,median
+loaded,ACS_14_5YR,acs_rent_upper,7/1/2012,../../../housing-risk/data/acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25059_with_ann.csv,upper_quartile
+,census_mapping,census_mapping,1/5/2017,../small_data/CensusTractMapping/,DC_census_tract_crosswalk.csv,manually created based on .txt file in same folder
