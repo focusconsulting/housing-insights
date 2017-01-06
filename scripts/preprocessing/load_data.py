@@ -16,6 +16,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import csv
 import dateutil
+import string
 
 #Configure logging. See /logs/example-logging.py for examples of how to use this.
 logging_filename = "../logs/ingestion.log"
@@ -80,10 +81,12 @@ def csv_to_sql(index_path):
             parser = lambda x: pd.to_datetime(x, errors='coerce', infer_datetime_format=True)
 
             #Read the file into Pandas, and then reformat the column names to follow SQL conventions/best practice.
-            csv_df = pd.read_csv(full_path, encoding="latin_1", parse_dates=to_parse, date_parser=parser)
+            csv_df = pd.read_csv(full_path, encoding="latin_1", parse_dates=to_parse, date_parser=parser, low_memory=False)
             csv_df.columns = map(str.lower, csv_df.columns)
             csv_df.columns = [c.replace(' ', '_') for c in csv_df.columns]
             csv_df.columns = [c.replace('.', '_') for c in csv_df.columns]
+            #remove nonprinting/non-ascii characters:
+            csv_df.columns = [''.join(filter(lambda x: x in string.printable, c)) for c in csv_df.columns]
             logging.info("  in memory...")
 
             #Add a column so that we can put all the snapshots in the same table
