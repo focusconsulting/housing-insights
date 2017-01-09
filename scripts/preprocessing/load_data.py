@@ -93,6 +93,7 @@ def csv_to_sql(index_path):
             csv_df['data_version'] = row['data_version']
 
             #Send to the database
+            logging.info("  sending to SQL (this may take several minutes...)")
             csv_df.to_sql(tablename, engine, if_exists='append')
             logging.info("  table loaded")
 
