@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() { // vanilla js doc ready w/ enough browswr support for this exercise
 
-// USING D3 v3.x
+// USING D3 v4.x
 // NOT YET USING CONSTRUCTOR METHOD
 
 /*
