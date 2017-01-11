@@ -74,13 +74,19 @@ chart.svg = d3.select(el)
     .attr('y', function(d, i) {
       return Math.floor(i / options.columns) * options.width + (Math.floor(i / options.columns) * options.spacer)
     }) // vertical placement function of index and number of columns. Math.floor rounds down to nearest integer
-    .append('title')
-    .text(function(d) {
-      return d.CLUSTER_TR2000 + ': ' + d3.format(',')(d[options.field]) + ' occupied units'
-    });
+    .on('mouseover', tool_tip.show)
+    .on('mouseout', tool_tip.hide);
 
 }
 
+var svg = d3.select('svg');
+
+var tool_tip = d3.tip()
+      .attr("class", "d3-tip")
+      .offset([-8, 0])
+      .html(function(d) { return "Percentage of vacant housing units for rent: " + d[options.field]; });
+
+svg.call(tool_tip);
 
 
 
