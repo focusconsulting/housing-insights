@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() { // vanilla js doc ready w/ enough browswr support for this exercise
 
-    // USING D3 v3.x
+// USING D3 v3.x
 // NOT YET USING CONSTRUCTOR METHOD
 
 /*
@@ -31,29 +31,29 @@ d3.csv("https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts
   spacer = 2, // space between each square
   columns = 7; 
   
-  var svg = d3.select('#chart-0').attr({
-    width: 100,
-    height: 100
-  });
+  var svg = d3.select('#chart-0')
+    .attr('width',100)
+    .attr('height',100); // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
+    
   var minValue = d3.min(dataset, function(d) { return d[field] });
   var maxValue = d3.max(dataset, function(d) { return d[field] });
-  var scale = d3.scale.linear().domain([minValue,maxValue]).range([0.1,1]); // in v4 this would be d3.scaleLinear()
+  var scale = d3.scaleLinear().domain([minValue,maxValue]).range([0.1,1]); // in v3 this was d3.scale.linear()
   var square = svg.selectAll('rect')
     .data(dataset)
     .enter()
     .append('rect')
-    .attr({
-        width:width,
-        height:width,
-        fill: '#325d88',
-        'fill-opacity': function(d){return scale(d[field])}, // fill-opacity is a function of the value
-        x: function(d,i){return (i * width + spacer *  i) - Math.floor( i / columns) * (width + spacer) * columns}, // horizontal placement is function of the index and the number of columns desired
-        y: function(d,i){return Math.floor(i / columns) * width + (Math.floor(i / columns) * spacer)} // vertical placement function of index and number of columns. Math.floor rounds down to nearest integer
-    })
+    .attr('width',width)
+    .attr('height',width)
+    .attr('fill', '#325d88')
+    .attr('fill-opacity', function(d){return scale(d[field])}) // fill-opacity is a function of the value
+     .attr('x', function(d,i){return (i * width + spacer *  i) - Math.floor( i / columns) * (width + spacer) * columns}) // horizontal placement is function of the index and the number of columns desired
+     .attr('y', function(d,i){return Math.floor(i / columns) * width + (Math.floor(i / columns) * spacer)}) // vertical placement function of index and number of columns. Math.floor rounds down to nearest integer
     .append('title')
     .text(function(d) { return d.CLUSTER_TR2000 + ': ' + d3.format(',')(d[field]) + ' occupied units'});
 
 });
+
+
 
 
 
