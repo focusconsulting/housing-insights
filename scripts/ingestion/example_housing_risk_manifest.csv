@@ -1,0 +1,106 @@
+skip,snapshot_id,table_name,date,local_folder,s3_path,subpath,filename,notes
+skip,_starting_urban_institute_copies_,,,,,,,
+use,c2005-07,contracts,7/1/2005,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2005-07/,MF_Assistance_&_Sec8_Contracts.txt,none
+use,c2006-04,contracts,4/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-04/,MF_Assistance_&_Sec8_Contracts.txt,none
+use,c2006-05,contracts,5/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-05/,MF_Assistance_&_Sec8_Contracts.txt,none
+use,c2008-03,contracts,3/1/2008,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2008-03/,MF_Assistance_&_Sec8_Contracts.txt,none
+use,c2015-04,contracts,4/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-04/,MF_Assistance_&_Sec8_Contracts.txt,none
+skip,c2003-06,contracts,6/1/2003,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2003-06/,MF_Assistance___Sec8_Contracts.txt,matching properties file has invalid data
+use,c2005-01,contracts,1/1/2005,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2005-01/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2005-05,contracts,5/1/2005,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2005-05/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2006-02,contracts,2/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-02/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2006-07,contracts,7/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-07/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2006-09,contracts,9/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-09/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2007-01,contracts,1/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-01/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2007-02,contracts,2/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-02/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2007-07,contracts,7/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-07/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2007-09,contracts,9/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-09/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2007-12,contracts,12/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-12/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2013-09,contracts,9/1/2013,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2013-09/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2014-10,contracts,10/1/2014,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2014-10/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2014-11,contracts,11/1/2014,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2014-11/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2015-03,contracts,3/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-03/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2015-05,contracts,5/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-05/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2015-08,contracts,8/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-08/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2015-10,contracts,10/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-10/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2015-11,contracts,11/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-11/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2015-12,contracts,12/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-12/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2016-01,contracts,1/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-01/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2016-04,contracts,4/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-04/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2016-05,contracts,5/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-05/,MF_Assistance___Sec8_Contracts.txt,none
+use,c2016-08,contracts,8/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-08/,MF_Assistance___Sec8_Contracts.txt,none
+use,p2005-07,properties,7/1/2005,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2005-07/,MF_Properties_with_Assistance_&_Sec8_Contracts.txt,none
+use,p2006-04,properties,4/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-04/,MF_Properties_with_Assistance_&_Sec8_Contracts.txt,none
+use,p2006-05,properties,5/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-05/,MF_Properties_with_Assistance_&_Sec8_Contracts.txt,none
+use,p2008-03,properties,3/1/2008,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2008-03/,MF_Properties_with_Assistance_&_Sec8_Contracts.txt,none
+use,p2015-04,properties,4/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-04/,MF_Properties_with_Assistance_&_Sec8_Contracts.txt,none
+invalid,p2003-06,properties,6/1/2003,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2003-06/,MF_Properties_with_Assistance___Sec8_Contracts.txt,"Invalid data - encoding, column numbers, etc (unclear)"
+use,p2005-01,properties,1/1/2005,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2005-01/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2005-05,properties,5/1/2005,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2005-05/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2006-02,properties,2/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-02/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2006-07,properties,7/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-07/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2006-09,properties,9/1/2006,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2006-09/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2007-01,properties,1/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-01/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2007-02,properties,2/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-02/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2007-07,properties,7/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-07/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2007-09,properties,9/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-09/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2007-12,properties,12/1/2007,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2007-12/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2013-09,properties,9/1/2013,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2013-09/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2014-10,properties,10/1/2014,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2014-10/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2014-11,properties,11/1/2014,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2014-11/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2015-03,properties,3/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-03/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2015-05,properties,5/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-05/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2015-08,properties,8/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-08/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2015-10,properties,10/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-10/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2015-11,properties,11/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-11/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2015-12,properties,12/1/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2015-12/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2016-01,properties,1/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-01/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2016-04,properties,4/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-04/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2016-05,properties,5/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-05/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+use,p2016-08,properties,8/1/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/urban_institute/2016-08/,MF_Properties_with_Assistance___Sec8_Contracts.txt,none
+skip,_starting_downloaded_copies_,,,/data/,https://s3.amazonaws.com/huddata/,,,
+use,c2016-09,contracts,9/29/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/main-website/,contracts_2016-09-29.csv,
+use,p2016-09,properties,9/29/2016,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/main-website/,properties_2016-09-29.csv,
+skip,_starting_internet_archive_copies_,,,/data/,https://s3.amazonaws.com/huddata/,,,
+use,c2011-09,contracts,9/22/2011,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2011-09-22/,sec8contracts_2011-09-22.csv,last modified date of access file is 2011-03-11
+skip,c2015-09,contracts,9/5/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2015-09-05/,sec8contracts_2015-09-05.csv,Don't use - internet archive is not as trustworthy as Urban and we have near that time period
+use,p2011-09,properties,9/22/2011,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2011-09-22/,properties_2011-09-22.csv,none
+skip,p2015-09,properties,9/5/2015,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2015-09-05/,properties_2015-09-05.csv,Don't use - internet archive is not as trustworthy as Urban and we have near that time period
+skip,_internet_archive_contracts,,,/data/,https://s3.amazonaws.com/huddata/,,,
+invalid,c2012-12,contracts,12/14/2012,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2012-12-14/,contracts_2012-12-14.csv,"Don't use - suspicious, date modified is 05/16/2014"
+invalid,c2012-03,contracts,3/27/2012,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2012-03-27/,contracts_2012-03-27.csv,"Don't use - suspicious, date modified is 05/16/2014"
+invalid,c2009-11,contracts,11/20/2009,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2009-11-20/,contracts_2009-11-20.csv,"Don't use - suspicious, date modified is 05/16/2014"
+use,c2009-02,contracts,2/17/2009,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2009-02-17/,contracts_2009-02-17.csv,date modified is 05/12/2009
+skip,c2003-05,contracts,5/3/2003,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2003-05-03/,contracts_2003-05-03.csv,date modified is 01/05/2003
+skip,c2003-01,contracts,1/5/2003,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2003-01-05/,contracts_2003-01-05.csv,date modified is 01/05/2003
+skip,c2002-08,contracts,8/30/2002,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2002-08-30/,contracts_2002-08-30.csv,date modified is 9/3/2002
+skip,c2001-11,contracts,11/27/2001,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2001-11-27/,contracts_2001-11-27.csv,date modified is 11/27/2001
+skip,c_internet_archive_properties,,,/data/,https://s3.amazonaws.com/huddata/,,,
+invalid,p2012-12,properties,12/14/2012,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2012-12-14/,properties_2012-12-14.csv,"Don't use - suspicious, date modified is 05/16/2014"
+invalid,p2012-03,properties,3/27/2012,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2012-03-27/,properties_2012-03-27.csv,"Don't use - suspicious, date modified is 05/16/2014"
+invalid,p2009-11,properties,11/20/2009,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2009-11-20/,properties_2009-11-20.csv,"Don't use - suspicious, date modified is 05/16/2014"
+use,p2009-02,properties,2/17/2009,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2009-02-17/,properties_2009-02-17.csv,date modified is 05/12/2009
+skip,p2003-05,properties,5/3/2003,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2003-05-03/,properties_2003-05-03.csv,date modified is 01/05/2003
+skip,p2003-01,properties,1/5/2003,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2003-01-05/,properties_2003-01-05.csv,date modified is 01/05/2003
+skip,p2002-08,properties,8/30/2002,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2002-08-30/,properties_2002-08-30.csv,date modified is 9/3/2002
+skip,p2001-11,properties,11/27/2001,/data/,https://s3.amazonaws.com/huddata/,section8/contracts_database/internetArchive/2001-11-27/,properties_2001-11-27.csv,date modified is 11/27/2001
+use,ACS_09_5YR_B25057_with_ann.csv,acs_rent_lower,7/1/2007,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25057_with_ann.csv,lower_quartile
+use,ACS_09_5YR_B25058_with_ann.csv,acs_rent_median,7/1/2007,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25058_with_ann.csv,median
+use,ACS_09_5YR_B25059_with_ann.csv,acs_rent_upper,7/1/2007,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25059_with_ann.csv,upper_quartile
+use,ACS_10_5YR_B25057_with_ann.csv,acs_rent_lower,7/1/2008,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2010_5year/,ACS_10_5YR_B25057_with_ann.csv,lower_quartile
+use,ACS_10_5YR_B25058_with_ann.csv,acs_rent_median,7/1/2008,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2010_5year/,ACS_10_5YR_B25058_with_ann.csv,median
+use,ACS_10_5YR_B25059_with_ann.csv,acs_rent_upper,7/1/2008,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2010_5year/,ACS_10_5YR_B25059_with_ann.csv,upper_quartile
+use,ACS_11_5YR_B25057_with_ann.csv,acs_rent_lower,7/1/2009,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2011_5year/,ACS_11_5YR_B25057_with_ann.csv,lower_quartile
+use,ACS_11_5YR_B25058_with_ann.csv,acs_rent_median,7/1/2009,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2011_5year/,ACS_11_5YR_B25058_with_ann.csv,median
+use,ACS_11_5YR_B25059_with_ann.csv,acs_rent_upper,7/1/2009,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2011_5year/,ACS_11_5YR_B25059_with_ann.csv,upper_quartile
+use,ACS_12_5YR_B25057_with_ann.csv,acs_rent_lower,7/1/2010,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2012_5year/,ACS_12_5YR_B25057_with_ann.csv,lower_quartile
+use,ACS_12_5YR_B25058_with_ann.csv,acs_rent_median,7/1/2010,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2012_5year/,ACS_12_5YR_B25058_with_ann.csv,median
+use,ACS_12_5YR_B25059_with_ann.csv,acs_rent_upper,7/1/2010,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2012_5year/,ACS_12_5YR_B25059_with_ann.csv,upper_quartile
+use,ACS_13_5YR_B25057_with_ann.csv,acs_rent_lower,7/1/2011,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2013_5year/,ACS_13_5YR_B25057_with_ann.csv,lower_quartile
+use,ACS_13_5YR_B25058_with_ann.csv,acs_rent_median,7/1/2011,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2013_5year/,ACS_13_5YR_B25058_with_ann.csv,median
+use,ACS_13_5YR_B25059_with_ann.csv,acs_rent_upper,7/1/2011,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2013_5year/,ACS_13_5YR_B25059_with_ann.csv,upper_quartile
+use,ACS_14_5YR_B25057_with_ann.csv,acs_rent_lower,7/1/2012,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25057_with_ann.csv,lower_quartile
+use,ACS_14_5YR_B25058_with_ann.csv,acs_rent_median,7/1/2012,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25058_with_ann.csv,median
+use,ACS_14_5YR_B25059_with_ann.csv,acs_rent_upper,7/1/2012,/data/,https://s3.amazonaws.com/huddata/,acs/median_rent_by_tract/2014_5year/,ACS_14_5YR_B25059_with_ann.csv,upper_quartile
+use,fair_market_rent,fmr,11/28/2016,/data/,https://s3.amazonaws.com/huddata/,fair_market_rents/,fmr_all_1983_2017.csv,fmr_all
+use,geocode_id,geocode,12/2/2016,/data/,https://s3.amazonaws.com/huddata/,geocode/,PropertyID_FIPS_GeoID.csv,geo_id

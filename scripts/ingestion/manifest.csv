@@ -1,0 +1,4 @@
+skip,table_name,data_version,date,local_folder,s3_folder,subpath,filename,notes
+use,project,april_2015,20160401,../data/small/,,PresCat_Export_20160401/,Project.csv,none
+use,acs_rent_median,ACS_09_5YR,7/1/2007,../data/large/,https://s3.amazonaws.com/huddata/,/acs/median_rent_by_tract/2009_5year/,ACS_09_5YR_B25058_with_ann.csv,none
+use,acs_rent_median,ACS_10_5YR,7/1/2008,../data/large/,https://s3.amazonaws.com/huddata/,/acs/median_rent_by_tract/2010_5year/,ACS_10_5YR_B25058_with_ann.csv,none
