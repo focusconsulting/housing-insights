@@ -48,7 +48,6 @@ def make_draft_json(filename, tablename): #use the name from constants as defaul
 
     dataframe_file = pandas.read_csv(filename)
     dataframe_iterator = dataframe_file.columns
-    
     output = {
         tablename: {
             "fields": []
