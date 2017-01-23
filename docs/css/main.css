@@ -88,8 +88,9 @@ h4, .h4 { font-size: 18px;}
 h5, .h5 { font-size: 18px; color: #29abe0;}
 h6, .h6 { font-size: 14px; color: #29abe0;}
 
+li,
 p {
-  font-size: 1.2em;
+  font-size: 18px;
 }
 
 .btn-lg {
@@ -129,4 +130,8 @@ p {
 
 .get-involved {
   min-height: 400px;
+}
+
+.calendar-link a {
+  color: #198CFF
 }
