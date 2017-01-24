@@ -14,3 +14,11 @@ title: Summary
 * [NYC Affordable Housing Data](http://coredata.nyc/)
 * [DC Zoning Maps](http://dcgis.maps.arcgis.com/apps/MapJournal/index.html?appid=ae5830535a384a7f9ae40527f607b32e)
 * [DC Zoning Changes](http://dcoz.dc.gov/onlineservices/changemap.shtm)
+
+
+# Existing data tools:
+
+* [Displacement Alert Map NYC](http://map.dapmapnyc.org/app/#openModal)
+* [Core Data NYC](http://coredata.nyc/)
+* [Corridor Housing Preservation Tool](http://envisiontomorrow.org/corridor-housing-preservation-tool)
+* [AFFH Mapping Tool](https://egis.hud.gov/affht/)
