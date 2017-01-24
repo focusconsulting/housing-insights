@@ -17,7 +17,16 @@
 
     Chart.prototype = {
         setup: function(el,field,sortField,asc) {
-            var chart = this;
+            var chart = this,
+                tool_tip = d3.tip()
+                  .attr("class", "d3-tip")
+                  .offset([-8, 0])
+                  .direction('e')
+                  .html(function(d){
+                      return "Percentage of vacant housing units for rent: " + d[field];
+                    });
+                //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
+                
               
             app.data.sort(function(a, b) { //sorting with JS prototype sort function
                 if (asc) return a[sortField] - b[sortField]; // if options abov was to sort ascending
@@ -53,10 +62,15 @@
                 .attr('y', function(d, i) {
                     return Math.floor(i / COLUMNS) * SQUARE_WIDTH + (Math.floor(i / COLUMNS) * SQUARE_SPACER);
                 }) // vertical placement function of index and number of columns. Math.floor rounds down to nearest integer
-            //    .on('mouseover', tool_tip.show)
-            //    .on('mouseout', tool_tip.hide);
+                .on('mouseover', tool_tip.show)
+                .on('mouseout', tool_tip.hide)
+                .call(tool_tip);
 
-        } // end setup()
+
+                  
+                
+
+        }// end setup()
     }; // end prototype
 
     app = {
