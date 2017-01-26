@@ -8,6 +8,9 @@ title: D3 Scaffolding
 ## The latest versions 
 
 ### Prototype #1: Moving blocks
+
+**Initial sort is by zip code (ltr then down)**
+
 a.
 <div id="chart-0"></div>
 <!-- next prototype goes below -->

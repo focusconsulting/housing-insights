@@ -60,11 +60,25 @@
             chart.positionBlocks(0);
             chart.changeOpacity(field);
 
-             chart.button = d3.select(el) // creates the button to randomly resort and appends it in the el (div#chart-0)
+             chart.buttonRand = d3.select(el) // creates the button to randomly resort and appends it in the el (div#chart-0)
                 .append('button')
                 .text('Resort randomly')
                 .on('click', function(){
-                    chart.resort();
+                    chart.resort('random');
+                });
+
+            chart.buttonZip = d3.select(el) // creates the button to randomly resort and appends it in the el (div#chart-0)
+                .append('button')
+                .text('Resort by zip')
+                .on('click', function(){
+                    chart.resort('zip');
+                });
+
+                chart.buttonUnit = d3.select(el) // creates the button to randomly resort and appends it in the el (div#chart-0)
+                .append('button')
+                .text('Resort by unit count')
+                .on('click', function(){
+                    chart.resort('unit');
                 });
         },  // end setup()
 
@@ -90,11 +104,30 @@
                 }) 
         },
 
-        resort: function(){
-            
-            this.svg.selectAll('rect').sort(function(a,b){
-                return d3.ascending(Math.random(), Math.random());
-            });
+        resort: function(value){
+            switch(value){
+                
+                case 'random':
+                this.svg.selectAll('rect').sort(function(a,b){
+                    return d3.ascending(Math.random(), Math.random());
+                });
+                break;
+
+                case 'zip':
+                this.svg.selectAll('rect').sort(function(a,b){
+                    return d3.ascending(a.Proj_Zip, b.Proj_Zip);
+                });
+                break;
+
+                case 'unit':
+                this.svg.selectAll('rect').sort(function(a,b){
+                    return d3.ascending(a.Proj_Units_Tot, b.Proj_Units_Tot);
+                });
+                break;
+            }
+/*            this.svg.selectAll('rect').sort(function(a,b){
+                if (value === 'random') return d3.ascending(Math.random(), Math.random());
+            });*/
             this.positionBlocks(500);
         } // end resort()
     }; // end prototype
