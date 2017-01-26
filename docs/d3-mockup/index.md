@@ -9,7 +9,7 @@ title: D3 Scaffolding
 
 ### Prototype #1: Moving blocks
 a.
-<svg id="chart-0"></svg>
+<div id="chart-0"></div>
 <!-- next prototype goes below -->
 <!--b.
 <svg id="chart-1"></svg>-->
