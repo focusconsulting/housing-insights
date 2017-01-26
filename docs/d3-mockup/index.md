@@ -10,7 +10,7 @@ customCSS: prototype-1a
 
 ### Prototype #1: Moving blocks
 
-**Initial sort is by zip code (ltr then down)**
+**Initial sort is by zip code (top to bottom then right)**
 
 a.
 <div id="chart-0" class="d3-chart"></div>

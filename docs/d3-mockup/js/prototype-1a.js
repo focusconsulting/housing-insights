@@ -6,7 +6,7 @@
 
         SQUARE_WIDTH = 10, // symbolic constants all caps following convention. removing from options object below. options may change
         SQUARE_SPACER = 2,
-        COLUMNS = 30,
+        ROWS = 12,
         DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
 
     Chart = function(el,field,sortField,asc) {
@@ -86,11 +86,11 @@
                        
              this.svg.selectAll('rect')
                 .transition().duration(duration)
-                .attr('x', function(d, i) {
-                    return (i * SQUARE_WIDTH + SQUARE_SPACER * i) - Math.floor(i / COLUMNS) * (SQUARE_WIDTH + SQUARE_SPACER) * COLUMNS;
-                }) // horizontal placement is function of the index and the number of columns desired
                 .attr('y', function(d, i) {
-                    return Math.floor(i / COLUMNS) * SQUARE_WIDTH + (Math.floor(i / COLUMNS) * SQUARE_SPACER);
+                    return (i * SQUARE_WIDTH + SQUARE_SPACER * i) - Math.floor(i / ROWS) * (SQUARE_WIDTH + SQUARE_SPACER) * ROWS;
+                }) // horizontal placement is function of the index and the number of ROWS desired
+                .attr('x', function(d, i) {
+                    return Math.floor(i / ROWS) * SQUARE_WIDTH + (Math.floor(i / ROWS) * SQUARE_SPACER);
                 }) // vertical placement function of index and number of columns. Math.floor rounds down to nearest integer
         }, // end positionBlocks
 
