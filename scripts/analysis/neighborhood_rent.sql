@@ -1,6 +1,7 @@
 WITH rent_joins AS (
  SELECT proj_name
         , geo2010
+        , acs_code
         , acs_rent_lower.hd01_vd01 AS quartile1_neighborhood_rent
         , acs_rent_median.hd01_vd01 AS median_neighborhood_rent
         , acs_rent_upper.hd01_vd01 AS quartile3_neighborhood_rent
