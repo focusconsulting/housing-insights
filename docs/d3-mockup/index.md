@@ -1,6 +1,7 @@
 ---
 layout: main
 title: D3 Scaffolding
+customCSS: prototype-1a
 ---
 
 # D3.js mockups of Housing Insights visualization types
@@ -12,7 +13,7 @@ title: D3 Scaffolding
 **Initial sort is by zip code (ltr then down)**
 
 a.
-<div id="chart-0"></div>
+<div id="chart-0" class="d3-chart"></div>
 <!-- next prototype goes below -->
 <!--b.
 <div id="chart-1"></div>-->

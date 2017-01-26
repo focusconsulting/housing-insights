@@ -1,7 +1,11 @@
 
 <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/css/bootstrap.css">
 <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/css/main.css">
-
+ {% if page.customCSS %}
+    {% for stylesheet in page.customCSS %}
+  <link rel="stylesheet" href="/css/{{ stylesheet }}.css" media="screen" type="text/css">
+    {% endfor %}
+  {% endif %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="{{ site.baseurl }}/js/external/jquery.js"></script>
