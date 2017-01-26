@@ -162,4 +162,9 @@ p {
     }
 
 
+rect:hover {
+    fill: #bada33;
+    fill-opacity: 1;
+}
+
 

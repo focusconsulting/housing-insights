@@ -6,8 +6,8 @@
 
         SQUARE_WIDTH = 10, // symbolic constants all caps following convention. removing from options object below. options may change
         SQUARE_SPACER = 2,
-        COLUMNS = 7,
-        DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/Neighborhood_Profiles/nc_housing.csv';
+        COLUMNS = 30,
+        DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
 
     Chart = function(el,field,sortField,asc) {
         this.setup(el,field,sortField,asc);
@@ -21,7 +21,7 @@
                   .offset([-8, 0])
                   .direction('e')
                   .html(function(d){
-                      return "Percentage of vacant housing units for rent: " + d[field];  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
+                      return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>Total units: ' + d.Proj_Units_Tot;  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
                     });
 
             app.data.sort(function(a, b) { // sorting data array with JS prototype sort function
@@ -31,8 +31,8 @@
 
             chart.svg = d3.select(el) // select elem (div#chart-0)
                 .append('svg')        // append svg element 
-                .attr('width', 100)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
-                .attr('height', 100);
+                .attr('width', 100 + '%')   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
+                .attr('height', 200);
                 
 
             chart.minValue = d3.min(app.data, function(d) { // d3.min iterates through datums (d) and return the smallest
@@ -110,8 +110,9 @@
                 }
             });
             app.data = json;
+            console.log(app.data);
                         //params:(element    , field to visualize            ,  field to sort by         , ascending [boolean])   
-            app.chart = new Chart('#chart-0', 'PctVacantHsgUnitsForRent_2000', 'NumOccupiedHsgUnits_2010', false);
+            app.chart = new Chart('#chart-0', 'Proj_Units_Tot', 'Proj_Zip', false);
 
         }
     }
