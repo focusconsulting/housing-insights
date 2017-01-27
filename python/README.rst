@@ -3,15 +3,16 @@
 Configuring the Amazon Web Services Command Line Interface (awscli)
 ==================================================================
 
-``
-# The aws configure command at the command line pulls up an interactive session. Press <enter> after each line. Values needed can be found in secrets.json, which you will need to request directly from the project team. 
-# This command configures a awscli profile called 'housinginsights', which means you will be required to add the argument "--profile housinginsights" to every awscli command. You can optionally omit this if housinginsights is the only project you want to use awscli for.
-$ aws configure --profile housinginsights
-AWS Access Key ID [None]: <use secrets.json.s3.access_key_id>
-AWS Secret Access Key [None]: <use secrets.json.s3.secret_access_key>
-Default region name [None]: us-east-1
-Default output format [None]: <none>
-``
+code block::
+
+   # The aws configure command at the command line pulls up an interactive session. Press <enter> after each line. Values needed can be found in secrets.json, which you will need to request directly from the project team. 
+   # This command configures a awscli profile called 'housinginsights', which means you will be required to add the argument "--profile housinginsights" to every awscli command. You can optionally omit this if housinginsights is the only project you want to use awscli for.
+   $ aws configure --profile housinginsights
+   AWS Access Key ID [None]: <use secrets.json.s3.access_key_id>
+   AWS Secret Access Key [None]: <use secrets.json.s3.secret_access_key>
+   Default region name [None]: us-east-1
+   Default output format [None]: <none>
+
 
 
 Using AWS Sync

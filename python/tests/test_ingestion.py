@@ -2,7 +2,7 @@
 ## Ingestion Package Tests
 ##########################################################################
 
-# to execute tests, cd to the /scripts folder. This runs all test packages
+# to execute tests, cd to the /python folder. This runs all test packages
 # (this one and any other in the /tests folder)
 #
 #   nosetests --verbosity=2 --with-coverage --cover-inclusive --cover-erase tests
@@ -21,7 +21,7 @@ import unittest
 from unittest import skip
 
 #Example import from our data structure
-import ingestion.load_data
+from ..housinginsights import ingestion
 #from ingestion.load_data import MyObjectName
 
 ##########################################################################

@@ -13,7 +13,7 @@ class InitializationTests(unittest.TestCase):
         Check import 'ingestion' as a whole package
         """
         try:
-            import ingestion
+            from ..housinginsights import ingestion
         except ImportError:
             self.fail("Was not able to import ingestion")
 

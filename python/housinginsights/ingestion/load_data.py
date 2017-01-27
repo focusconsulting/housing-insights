@@ -30,7 +30,7 @@ import database_management
 
 #configuration
 #See /logs/example-logging.py for usage examples
-logging_filename = "../logs/ingestion.log"
+logging_filename = "../../logs/ingestion.log"
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())     #Pushes everything from the logger to the command line output as well.
 
