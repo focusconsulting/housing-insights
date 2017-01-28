@@ -13,7 +13,7 @@ code-block::
    # which means you will be required to add the argument "--profile 
    # housinginsights" to every awscli command. You can optionally omit 
    # this if housinginsights is the only project you want to use awscli for.
-   
+
    $ aws configure --profile housinginsights
    AWS Access Key ID [None]: <use secrets.json.s3.access_key_id>
    AWS Secret Access Key [None]: <use secrets.json.s3.secret_access_key>
@@ -41,10 +41,13 @@ If you add or update any data files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1. Make sure you download updates before you start working.  
+
 2.  Navigate to the root project folder ``path\to\your\housing-insights\`` Type `ls` (`dir` on Windows) and check for the `data` folder
+
 3. Test push your changes: 
 ``aws s3 sync data s3://housinginsights --profile housinginsights --dryrun``
 Note, this is the same command as above, but with the order of the two folders reversed. 
+
 4. Make sure it all is what you want, then do it for real:
 ``aws s3 sync data s3://housinginsights --profile housinginsights``
 This pushes your folder contents *to* S3.
@@ -52,4 +55,5 @@ This pushes your folder contents *to* S3.
 If you delete files
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 The sync command only updates or adds files by default. If you deleted a file and actually want it to be deleted (e.g. it was moved to another folder), add the ``--delete`` flag
+
 1. Same as above, but add the `--delete` flag.
