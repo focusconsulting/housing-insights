@@ -1,0 +1,94 @@
+* {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+body {
+  background: #f7f7f7;
+}
+
+#content {
+	width: 90%;
+	margin: 0 auto;
+}
+
+header {
+	width: 100%;
+	height: 40px;
+	margin-bottom: 20px;
+	background-color: #325d88;
+}
+
+svg {
+  transform: translate(75%,0);
+}
+
+.d3-tip {
+  line-height: 1;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips specifically */
+.d3-tip.n:after {
+  margin: -2px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+#rail {
+  width: 60vw;
+  border: 1px solid black;
+  margin: 0 auto;
+}
+
+#min, #max {
+  display: inline-block;
+}
+
+#slider {
+  width: 3px;
+  height: 15px;
+  background-color: grey;
+  position: relative;
+  pointer-events: none;
+  
+}
+
+.number-display {
+  display: inline-block;
+}
+
+.minimum {
+  display: inline-block;
+  margin-left: 15%;
+}
+
+.percent {
+  display: inline-block;
+  margin-left: 18%;
+}
+
+.maximum {
+  display: inline-block;
+  margin-left: 18%;
+}
+
+
