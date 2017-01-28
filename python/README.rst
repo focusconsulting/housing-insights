@@ -32,8 +32,9 @@ Using AWS Sync
 Because our raw data is large, we don't store it in our GitHub repository (it has a 1Gb total limit on repository size). The sync command of the awscli acts like Dropbox or similar services, but manually using the command line. There is only ever one copy of the data (unlike Git), and you can download changes from S3 or push your own changes to S3. S3 is a file storage service from Amazon Web Services.
 
 
-Before doing work, when teammates add data, and before you download new data from the internet to your hard drive
+Getting the latest data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Do this before you add/download new files to the /data folder, to make sure you're up to date. 
 
 1. Navigate to the root project folder ``path\to\your\housing-insights\``, Type `ls` (`dir` on windows) and **make sure you see the `data` folder.**
 2. See if there are any updates to fetch: ``aws s3 sync s3://housinginsights data --profile housinginsights --dryrun``  
