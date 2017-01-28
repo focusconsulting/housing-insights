@@ -3,6 +3,11 @@
 Configuring the Amazon Web Services Command Line Interface (awscli)
 ==================================================================
 
+First off you can install the Command Line Interface with pip:
+
+``pip install awscli``
+
+
 .. code:: python
 
    # The aws configure command at the command line pulls up an interactive 
