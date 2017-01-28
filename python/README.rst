@@ -3,7 +3,7 @@
 Configuring the Amazon Web Services Command Line Interface (awscli)
 ==================================================================
 
-code-block::
+.. code:: python
 
    # The aws configure command at the command line pulls up an interactive 
    # session. Press <enter> after each line. Values needed can be found in 
@@ -45,12 +45,10 @@ If you add or update any data files
 2.  Navigate to the root project folder ``path\to\your\housing-insights\`` Type `ls` (`dir` on Windows) and check for the `data` folder
 
 3. Test push your changes: 
-``aws s3 sync data s3://housinginsights --profile housinginsights --dryrun``
-Note, this is the same command as above, but with the order of the two folders reversed. 
+``aws s3 sync data s3://housinginsights --profile housinginsights --dryrun`` Note, this is the same command as above, but with the order of the two folders reversed. 
 
 4. Make sure it all is what you want, then do it for real:
-``aws s3 sync data s3://housinginsights --profile housinginsights``
-This pushes your folder contents *to* S3.
+``aws s3 sync data s3://housinginsights --profile housinginsights`` This pushes your folder contents *to* S3.
 
 If you delete files
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
