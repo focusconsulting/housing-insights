@@ -1,9 +1,5 @@
-libpq-dev==9.0.0
-mkl==11.3.3
 numpy==1.11.2
-openssl==1.0.2
 pandas==0.19.0
-psycopg2==2.6.2
 python-dateutil==2.5.3
 pytz==2016.7
 setuptools==27.2.0
