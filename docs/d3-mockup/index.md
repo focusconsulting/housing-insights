@@ -19,6 +19,8 @@ a.
 <div id="chart-1"></div>-->
 Codebase: [https://github.com/codefordc/housing-insights/tree/dev/docs/d3-mockup](https://github.com/codefordc/housing-insights/tree/dev/docs/d3-mockup)
 
+**Please visit [this page](/d3-mockup/early-examples/) for earlier examples of the D3 prototypes.**
+
 <!-- scripts for D3, D3-tip, and the visualizations -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.4.1/d3.min.js"></script>
 <script src="{{ site.baseurl }}/d3-mockup/js/d3-tip.js"></script>
