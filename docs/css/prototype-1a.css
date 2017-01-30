@@ -1,24 +1,3 @@
-* {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-body {
-  background: #f7f7f7;
-}
-
-#content {
-	max-width: 750px;
-	margin: 0 auto;
-}
-
-header {
-	width: 100%;
-	height: 40px;
-	margin-bottom: 20px;
-	background-color: #325d88;
-}
 
 .d3-tip {
       line-height: 1;
@@ -27,20 +6,21 @@ header {
       color: #fff;
       border-radius: 4px;
       font-size: 12px;
+
     }
  
     /* Creates a small triangle extender for the tooltip */
-    .d3-tip:after {
+    /*   .d3-tip:before {
       box-sizing: border-box;
       display: inline;
       font-size: 10px;
-      width: 100%;
+      width: 100%; 
       line-height: 1;
       color: rgba(0, 0, 0, 0.8);
       content: "\25BC";
-      position: absolute;
+      position: relative;
       text-align: center;
-    }
+    }*/
  
     /* Style northward tooltips specifically */
     .d3-tip.n:after {
@@ -48,3 +28,13 @@ header {
       top: 100%;
       left: 0;
     }
+
+
+rect:hover {
+    fill: #bada33;
+    fill-opacity: 1;
+}
+
+.d3-chart button {
+  margin-right: 10px;
+}
