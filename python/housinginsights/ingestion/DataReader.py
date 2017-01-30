@@ -3,7 +3,9 @@ from csv import DictReader
 from argparse import ArgumentParser
 
 class DataReader(object):
-
+    """
+    Container object that will call read in csvs and marshal them to a Postgres Database.
+    """
     def __init__(self, path):
         self.path = path
         self ._length = None
@@ -49,5 +51,4 @@ if __name__ == "__main__":
     arguments = parser.parse_args()
     if arguments.source:
         reader = DataReader(arguments.source)
-        items = reader.items
-        print("Items: {}".format(len(items)))
+        print("Data Reader: {} rows".format(len(reader)))
