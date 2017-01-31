@@ -1,0 +1,90 @@
+body {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 100%;
+}
+
+#DrizlyData {
+    margin: 20px, 0px;
+    max-width: 800px;
+    width: 100%;
+}
+
+#DrizlyData > .views {
+    text-align: center;
+    margin: 20px 0px;
+}
+
+.title {
+    font-size: 2rem;
+}
+
+.subtitle {
+    font-size: 1.2em;
+}
+
+.zipcodes {
+    stroke-width: 2px;
+    stroke: white;
+    cursor: pointer;
+}
+
+.pane1 {
+    min-width: 320px;
+    width: calc(50% - 20px);
+    height: 380px;
+    display: inline-block;
+}
+
+.pane2 {
+    min-width: 320px;
+    width: calc(50% - 20px);
+    height: 380px;
+    display: inline-block;
+    overflow: hidden;
+}
+
+@media screen and (max-width: 400px) {
+    #DrizlyData {
+    margin: 0px;
+    width: 100%;
+    }
+    .pane1 {
+    width: auto;
+    }
+}
+
+.Beer {
+    fill: #fbb117;
+}
+
+.Wine {
+    fill: #722f37;
+}
+
+.Liquor {
+    fill: #bdc3c7;
+}
+
+#mapView {
+    display: inline-block;
+}
+
+#detailView {
+    display: inline-block;
+    margin: auto;
+}
+
+div.tooltip {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    color: black;
+
+    padding: 4px 8px;
+    display: none;
+}
+
+.source {
+    text-align: right;
+    font-size: .7em;
+}
