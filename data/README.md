@@ -10,3 +10,7 @@ Most users will not need to have access to the source files in this folder, as t
 			#This folder should be pruned regularly to have one copy of 
 			#the most up to date data when needed. 
 ```
+
+
+For updating the manifest that corresponds to this file, you can list all files in the directory with this terminal command (Windows):
+dir /b /s /a:-D > data_filepaths.txt
