@@ -1,3 +1,6 @@
+/data/*
+!/data/readme.md
+!/data/processed
 
 
 

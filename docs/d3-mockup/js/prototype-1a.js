@@ -4,13 +4,13 @@
     var Chart,
         app,
 
-        SQUARE_WIDTH = 10, // symbolic constants all caps following convention. removing from options object below. options may change
+        SQUARE_WIDTH = 10, // symbolic constants all caps following convention
         SQUARE_SPACER = 2,
         ROWS = 12,
         DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
 
     Chart = function(el,field,sortField,asc) {
-        this.setup(el,field,sortField,asc);
+        this.setup(el,field,sortField,asc); //on chart creation, we run setup function; setup function adds listeners for update chart behavior (e.g. resorting, etc.).
     };
 
     Chart.prototype = {
@@ -105,7 +105,12 @@
         },
 
         resort: function(value){
-            switch(value){
+            /* for demo purposes only. production tool will have many events that trigger update and 
+             * (potentially) resort functions. probably best and easiest to eventually  use an observer pattern
+             * or pub/sub (publish/subscribe) (same thing?) pattern to connect user- ot client-inititiated events (including resize)
+             * with update functions
+             */
+            switch(value){ 
                 
                 case 'random':
                 this.svg.selectAll('rect').sort(function(a,b){
@@ -125,9 +130,6 @@
                 });
                 break;
             }
-/*            this.svg.selectAll('rect').sort(function(a,b){
-                if (value === 'random') return d3.ascending(Math.random(), Math.random());
-            });*/
             this.positionBlocks(500);
         } // end resort()
     }; // end prototype
