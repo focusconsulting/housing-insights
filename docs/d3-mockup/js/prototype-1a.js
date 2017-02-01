@@ -51,7 +51,7 @@
                 .append('rect') // create the `rect`
                 .attr('width', SQUARE_WIDTH)
                 .attr('height', SQUARE_WIDTH)
-                .attr('fill', '#325d88') // note svg-specific propert names eg fill, not background
+                .attr('fill', '#325d88') // note svg-specific property names eg fill, not background
                 .attr('fill-opacity', 0.1)                
                 .on('mouseover', tool_tip.show) // .show is defined in links d3-tip library
                 .on('mouseout', tool_tip.hide)  // .hide is defined in links d3-tip library
@@ -80,6 +80,24 @@
                 .on('click', function(){
                     chart.resort('unit');
                 });
+
+            chart.slider = d3.select(el)
+                .append('input')
+                .attr('type', 'range')
+                .attr('id', 'inputSlider')
+                .attr('step', '.01')      // .01 is kind of a magic number and probably should be made responsive to the data
+                .style('margin-top', '1em') // these two style elements are pretty arbitrary
+                .style('width', '40%');
+                
+
+            d3.select('#inputSlider')
+                .attr('min', chart.minValue)
+                .attr('max', chart.maxValue);
+
+            chart.slider.on('mousedown', function(){ // this anonymous function wraps
+                     chart.sliderAction(field);  // another function in order to pass a
+                }, false);                      // parameter despite being an event listener
+
         },  // end setup()
 
         positionBlocks: function(duration){
@@ -129,7 +147,27 @@
                 if (value === 'random') return d3.ascending(Math.random(), Math.random());
             });*/
             this.positionBlocks(500);
-        } // end resort()
+        }, // end resort()
+
+        sliderAction: function(field){
+                        document.querySelector('body').addEventListener('mousemove', checkColors, false);
+                    
+                        function checkColors() {
+                            let value = document.querySelector('#inputSlider').value;
+                            d3.selectAll('rect').attr('fill', function(d){
+                              if(d[field] < value){
+                                return 'gray';
+                              } else {
+                                return 'blue';
+                              }
+                            });
+
+                            d3.select('body').on('mouseup', function(){
+                                document.querySelector('body').removeEventListener('mousemove', checkColors);
+                            }, false);
+                        };  
+        }       // end sliderAction()
+
     }; // end prototype
 
     app = {
