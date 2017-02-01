@@ -204,10 +204,10 @@
                         };  
         }       // end sliderAction()
 
-    }; // end prototype
+    }); // end prototype
 
        
-    });
+    
         
     app = {
         data: [],
