@@ -11,13 +11,16 @@
         ROWS = 12,
         DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
 
-    extendPrototype = function(destinationPrototype, obj){ // using this function for inheritance. 
+ /*
+  *  Going without the extendPrototype function 
+  */
+  /*  extendPrototype = function(destinationPrototype, obj){ // using this function for inheritance. 
                                                            // extend a constructor's prototype with 
                                                            // the keys/values in obj. 
         for(var i in obj){
             destinationPrototype[i] = obj[i];
         }
-    }
+    } */
     
     Chart = function(el,field,sortField,asc) {
 
@@ -65,8 +68,12 @@
     
     MovingBlockChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart
     
-    extendPrototype(MovingBlockChart.prototype, { // Final step of inheriting from Chart.
-        setup: function(el, field, sortField, asc){
+/*
+ * Without the extendPrototype function, we can set addition properties of MovingBlockChart.prototype directly
+ * with dot notation
+ */
+
+    MovingBlockChart.prototype.setup = function(el, field, sortField, asc){
             var chart = this, 
                 tool_tip = d3.tip()
                     .attr("class", "d3-tip")
@@ -129,9 +136,9 @@
                      chart.sliderAction(field);  // another function in order to pass a
                 }, false);                      // parameter despite being an event listener
 
-        },  // end setup()
+        };  // end setup()
 
-        positionBlocks: function(duration){
+        MovingBlockChart.prototype.positionBlocks = function(duration){
                     
             this.svg.selectAll('rect')
                 .transition().duration(duration)
@@ -141,9 +148,9 @@
                 .attr('x', function(d, i) {
                     return Math.floor(i / ROWS) * SQUARE_WIDTH + (Math.floor(i / ROWS) * SQUARE_SPACER);
                 }) // vertical placement function of index and number of columns. Math.floor rounds down to nearest integer
-        }, // end positionBlocks
+        }; // end positionBlocks
 
-        changeOpacity: function(field){
+        MovingBlockChart.prototype.changeOpacity = function(field){
           var chart = this;
           chart.svg.selectAll('rect')
          
@@ -151,9 +158,9 @@
           .attr('fill-opacity', function(d) { // opacity is a function of the value
               return chart.scale(d[field]); // takes the field value and maps it according to the scaling function defined above
           }) 
-        },
+        };
 
-        resort: function(value){
+        MovingBlockChart.prototype.resort = function(value){
 
             /* for demo purposes only. production tool will have many events that trigger update and 
              * (potentially) resort functions. probably best and easiest to eventually  use an observer pattern
@@ -183,9 +190,9 @@
             }
             this.positionBlocks(500);
 
-        }, // end resort()
+        }; // end resort()
 
-        sliderAction: function(field){
+        MovingBlockChart.prototype.sliderAction = function(field){
                         document.querySelector('body').addEventListener('mousemove', checkColors, false);
                     
                         function checkColors() {
@@ -202,12 +209,8 @@
                                 document.querySelector('body').removeEventListener('mousemove', checkColors);
                             }, false);
                         };  
-        }       // end sliderAction()
+        };       // end sliderAction()
 
-    }); // end prototype
-
-       
-    
         
     app = {
         data: [],
