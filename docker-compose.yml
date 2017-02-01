@@ -1,0 +1,4 @@
+version: "2"
+services:
+  db:
+    image: postgres:9.4.5
