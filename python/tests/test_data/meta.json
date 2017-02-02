@@ -1,0 +1,29 @@
+
+
+{
+    "buildings": {
+        "fields": [
+            {
+                "display_name": "Preservation Catalog ID",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "string"
+            },
+            {
+                "display_name": "Subsidy Status",
+                "display_text": "",
+                "source_name": "Status",
+                "sql_name": "status",
+                "type": "string"
+            },
+            {
+                "display_name": "Median Rent",
+                "display_text": "",
+                "source_name": "Rent",
+                "sql_name": "rent",
+                "type": "decimal"
+            }
+          ]
+         }
+}

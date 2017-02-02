@@ -10,29 +10,19 @@ tools for connecting to the database, which can be used in all of the project fo
 ##########################################################################
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import json
+import json, os
 
-constants = {
-    'secrets_filename': '\secrets.json',
-    'manifest_filename': '\snapshots_manifest.csv',
-    'date_headers_filename': '\postgres_date_headers.json',
-}
+secrets_filepath = os.path.join(os.path.dirname(__file__), '../secrets.json')
 
-#Allow modules to import each other at parallel file structure (TODO clean up this configuration in a refactor)
-from inspect import getsourcefile
-import os.path
-import sys
-current_path = os.path.abspath(getsourcefile(lambda:0))
-current_dir = os.path.dirname(current_path)
-parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
-sys.path.insert(0, parent_dir)
 
 ##########################################################################
 ## Functions
 ##########################################################################
 def get_connect_str(database_choice):
-    "Loads the secrets json file to retrieve the connection string"
-    with open(current_dir + constants['secrets_filename']) as fh:
+    '''
+    Loads the secrets json file to retrieve the connection string
+    '''
+    with open(secrets_filepath) as fh:
         secrets = json.load(fh)
     return secrets[database_choice]['connect_str']
 
