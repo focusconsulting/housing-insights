@@ -25,8 +25,13 @@ import pandas as pandas
 import csv
 from urllib.request import urlretrieve
 
-#project imports
-import database_management
+#Needed to make relative package imports when running this file as a script (i.e. for testing purposes). Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
+if __name__ == '__main__':
+    import sys, os
+    sys.path.append(os.path.abspath('../../'))
+
+#Relative package imports
+from housinginsights.tools import database
 
 #configuration
 #See /logs/example-logging.py for usage examples
@@ -61,13 +66,48 @@ def do_fields_match(csv_data, manifest):
     '''
     pass
 
-def should_file_be_loaded(manifest_row, sql_manifest_table):
+def load_meta_data(filename='meta.json'):
     '''
-    If the sql_manifest_table indicates that this file is already loaded into this copy of the database, returns False
-    Check the manifest.csv to decide if it should be loaded (currently called the 'skip' column in manifest.csv)
+    Expected meta data format: 
+        { tablename: {fields:[
+            {   "display_name": "nlihc_id",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "object"
+            }
+            ]}
+        }
+    '''
+    with open(filename) as fh:
+        meta = json.load(fh)
 
+    json_is_valid = True
+    try:
+        for table in meta:
+            for field in meta[table]['fields']:
+                for key in field:
+                    if key not in ('display_name', 'display_text', 'source_name', 'sql_name', 'type'):
+                        json_is_valid = False
+                        first_json_error = "Location: table: {}, section: {}, attribute: {}".format(table, field, key)
+                        raise ValueError("Error found in JSON, check expected format. {}".format(first_json_error))
+    except:
+        raise ValueError("Error found in JSON, check expected format.")
+
+    logging.info("{} imported. JSON format is valid: {}".format(filename, json_is_valid))
+
+    return meta
+
+def read_csv_manifest(filename = 'manifest.csv'):
     '''
-    pass
+    Reads each line of the csv manifest, which specifies which files should be loaded
+
+    TODO consider switching this to use the same DataReader class that is being developed for reading from SQL?
+    '''
+    with open(filename, 'rU') as data:
+        reader = csv.DictReader(data)
+        for row in reader:
+            yield row
 
 def get_sql_manifest_table(engine, manifest_filename = constants['manifest_filename']):
     '''
@@ -75,11 +115,13 @@ def get_sql_manifest_table(engine, manifest_filename = constants['manifest_filen
     The 'manifest' table is a duplicate of the 'manifest.csv' file, but it reflects the current status of the database.
     Returns the sql_manifest_table, which is a memory representation of the table - probably a Pandas dataframe.
     '''
+
+    #TODO probably make this a generator, as with read_csv_manifest?
     sql_manifest_table = None
     return sql_manifest_table
 
 
-def update_sql_manifest(status = None, engine):
+def update_sql_manifest(engine, status = None):
     '''
     If the 'manifest' table does not exist in SQL, create it.
         -in SQL, the manifest table has the exact same data as manifest.csv, but one additional column called 'status'
@@ -91,6 +133,15 @@ def update_sql_manifest(status = None, engine):
         -if the file loading encounters an error, call this function and set the 'status' column to 'error'
     '''
     pass
+
+def should_file_be_loaded(manifest_row, sql_manifest_table):
+    '''
+    If the sql_manifest_table indicates that this file is already loaded into this copy of the database, returns False
+    Check the manifest.csv to decide if it should be loaded (currently called the 'skip' column in manifest.csv)
+
+    '''
+    pass
+
 
 def download_csv_file(manifest_row):
     '''
@@ -156,26 +207,37 @@ def main(database_choice):
     - at the end of loading print an error message to the console
     '''
 
+   
+    meta = load_meta_data('meta_sample.json')
+
+    for idx, row in enumerate(read_csv_manifest()):
+        if idx > 10: break
+        print (row)
+
     #setup
-    sql_manifest_table = get_sql_manifest_table()
-    meta = load_meta_data()
+    #sql_manifest_table = get_sql_manifest_table()
+
+    
 
     #Run checks:
-    should_file_be_loaded()
-    do_fields_match()
+    #should_file_be_loaded()
+    #do_fields_match()
 
     #Load the table into SQL
-    download_csv_file()  #does nothing if the file already exists locally, otherwise it downloads it.
-    csv_to_sql()
+    #download_csv_file()  #does nothing if the file already exists locally, otherwise it downloads it.
+    #csv_to_sql()
 
 
 
 
 if __name__ == '__main__':
-
+    
+    #Eventual structure:
     database_choice = 'local_database' #the appropriate database name in secrets.json. Should make this changeable via optional positional sys.argv
 
-    if 'rebuild' in sys.argv
+    if 'rebuild' in sys.argv:
         drop_tables(database_choice)
 
     main(database_choice)
+
+    #load_meta_data("meta_sample.json")
