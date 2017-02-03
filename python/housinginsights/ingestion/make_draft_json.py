@@ -37,14 +37,12 @@ def make_draft_json(filename, tablename): #use the name from constants as defaul
     # The meat of the JSON data.  
     for field in dataframe_iterator:
         data = {
-            field: {
                 "type": str(dataframe_file[field].dtypes), 
                 "source_name": field, 
                 "sql_name": sql_name_clean(field),
                 "display_name": sql_name_clean(field),
                 "display_text":""
             }
-        }
         output[tablename]["fields"].append(data)
 
     with open(tablename + ".json", "w") as results:
@@ -53,6 +51,8 @@ def make_draft_json(filename, tablename): #use the name from constants as defaul
     print(tablename + " JSON table file created.")
 
 if __name__ == '__main__':
+    #Use: Run from command line with format 
+    # > python make_draft_json.py csv_filename table_name
     if len(sys.argv[1:])!= 2:
          print("Add a filename and/or tablename")
     else:
