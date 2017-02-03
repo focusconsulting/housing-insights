@@ -1,7 +1,7 @@
 from collections import Counter
 from csv import DictReader
 from argparse import ArgumentParser
-import psycopg2
+
 
 class DataReader(object):
     """
@@ -27,20 +27,21 @@ class DataReader(object):
 
     def __len__(self):
         if self._length is None:
-            for row in self: continue ## Read data for length and counter
+            for row in self:
+                # Read data for length and counter
+                continue
         return self._length
 
     @property
     def counter(self):
         if self._counter is None:
-            for row in self: continue
+            for row in self:
+                continue
         return self._counter
 
     @property
     def items(self):
         return self.counter.keys()
-
-
 
     def reset(self):
         """
@@ -50,10 +51,21 @@ class DataReader(object):
         self._length = None
         self._counter = None
 
+
+    def clean_row(self, cleaner):
+        """
+        Set of heuristics to clean a row in a csv file
+        :return: cleaned row
+        """
+
+
+
 if __name__ == "__main__":
     parser = ArgumentParser(description='Process some data')
     parser.add_argument('source', help='The location of the source file')
     arguments = parser.parse_args()
     if arguments.source:
         reader = DataReader(arguments.source)
+        for row in reader:
+            print("Row {}".format(row))
         print("Data Reader: {} rows ingested".format(len(reader)))
