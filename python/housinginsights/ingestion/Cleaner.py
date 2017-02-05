@@ -7,7 +7,8 @@ class Cleaner(object):
     """
     def __init__(self):
         self.TYPES = {
-            'parcel': self.clean_parcel_row
+            'parcel': self.clean_parcel_row,
+            'reac_score': self.clean_reac_score_row
         }
 
     def clean(self, _type, row):
@@ -47,6 +48,18 @@ class Cleaner(object):
             # TODO Will need more heuristics on what we expect we will encounter and will need to be cleaned.
         return 'CLEAN', row
 
+    def clean_reac_score_row(self, row):
+        if len(row) is not 6:
+            print("Missing column(s) in row: {}".format(row))
+            return 'DIRTY', row
+        for k, v in row.iteritems():
+            row[k] = trim_whitespace(v)
+            if k == 'REAC_date':
+                if format_date(row['REAC_date']) == 'N':
+                    return 'DIRTY', row
+                else:
+                    row['REAC_date'] = format_date(row['REAC_date'])
+        return 'CLEAN', row
 
 def format_date(date_string):
     if date_string == 'N':
