@@ -5,6 +5,9 @@
         MovingBlockChart,
         app,
         extendPrototype,
+        Metric,
+        replaceChart, // While replaceChart is only called in Metric so far, it exists
+                      // in the IIFE scope in case other objects need to call it.
 
         SQUARE_WIDTH = 10, // symbolic constants all caps following convention
         SQUARE_SPACER = 2,
@@ -58,22 +61,23 @@
 
     }; // end prototype
     
-    MovingBlockChart = function(el, field, sortField, asc) {
+    MovingBlockChart = function(el, field, sortField, asc, readableName) { // set text of Metric menu option and 
+                                                                           // tooltip with 'readableName' arg
         Chart.call(this, el, field, sortField, asc); // First step of inheriting from Chart
-        this.setup(el, field, sortField, asc); 
+        this.setup(el, field, sortField, asc, readableName); 
     }
     
     MovingBlockChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart
     
     extendPrototype(MovingBlockChart.prototype, { // Final step of inheriting from Chart.
-        setup: function(el, field, sortField, asc){
+        setup: function(el, field, sortField, asc, readableName){
             var chart = this, 
                 tool_tip = d3.tip()
                     .attr("class", "d3-tip")
                     .offset([-8, 0])
                     .direction('e')
                     .html(function(d){
-                        return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>Total units: ' + d.Proj_Units_Tot;  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
+                        return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>' + readableName + ': ' + d.Proj_Units_Tot;  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
                       });
              
             chart.svg.selectAll('rect') // selects svg element `rect`s whether they exist yet or not          
@@ -206,7 +210,46 @@
 
     }); // end prototype
 
-       
+    Metric = function(chartConstructor, chartArgsAry){ // The second argument is an array
+                                                   // of arguments for producing a new Chart.
+                                                   // Since calling 'new MovingBlockChart()' 
+                                                   // adds the chart to the document, storing the 
+                                                   // chart this way allows each Metric menu option
+                                                   // to store chart-related arguments.
+      this.element = document.createElement('li');
+      this.element.setAttribute('id', this.idStartsWith + chartArgsAry[1]); // Assumes that
+                                                                            // chartArgsAry[1] is 'field'
+      this.element.setAttribute('class', this.defaultClass);
+      this.element.textContent = chartArgsAry[4]; // Assumes chartArgsAry[4] is readableName.
+      this.initialSetup(chartConstructor, chartArgsAry);
+    }   
+    
+    Metric.prototype = {
+      
+      defaultClass: 'metric_option',
+      idStartsWith: 'metric_option_',
+      initialSetup: function(chartConstructor, chartArgsAry){
+        var metric = this;
+        document.getElementById('metric_menu').appendChild(this.element);
+        this.element.addEventListener('click', function(){
+          replaceChart(chartConstructor, chartArgsAry); 
+        });
+      }      
+
+    }
+    
+    replaceChart = function(chartConstructor, chartArgsAry){ // This function assumes that the
+                                                             // first element of chartArgsAry is
+                                                             // the svg element.
+      var chartElement = document.querySelector(chartArgsAry[0]);
+      while(chartElement.lastChild){
+        chartElement.removeChild(chartElement.lastChild);
+      }
+     // FOR ACTION: the line of code below this comment produces a new Chart based on the 'chartConstructor'
+     // argument. Ideally, we'd be using 'apply' (that's the reason for chartArgsAry). Let's find a 
+     // way to use 'apply' with 'new' below.
+      new (chartConstructor)(chartArgsAry[0], chartArgsAry[1], chartArgsAry[2], chartArgsAry[3], chartArgsAry[4]);
+    }
     
         
     app = {
@@ -222,7 +265,17 @@
             app.data = json;
             console.log(app.data);
                         //params:(element    , field to visualize            ,  field to sort by         , ascending [boolean])   
-            app.blockChart = new MovingBlockChart('#chart-0', 'Proj_Units_Tot', 'Proj_Zip', false);
+            app.blockChart = new MovingBlockChart('#chart-0', 'Proj_Units_Tot', 'Proj_Zip', false, "Total Units");
+            
+            // FOR ACTION: the assignment of app.blockChart to a new MovingBlockChart repeats the elements within
+            // the first call to new Metric() below.
+            
+            new Metric(MovingBlockChart,
+                       ['#chart-0', 'Proj_Units_Tot', 'Proj_Zip', false, "Total Units"]);
+            new Metric(MovingBlockChart,
+                       ['#chart-0', 'Proj_Units_Assist_Max', 'Proj_Zip', false, "Maximum Assisted Units"]);
+            new Metric(MovingBlockChart, 
+                       ['#chart-0', 'Proj_Units_Assist_Min', 'Proj_Zip', false, "Minimum Assisted Units"]);
 
         }
     }
