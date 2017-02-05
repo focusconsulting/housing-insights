@@ -5,8 +5,20 @@ class Cleaner(object):
     """
     A cleaner object for csv files
     """
-    def clean(self):
-        pass
+    def __init__(self):
+        self.TYPES = {
+            'parcel': self.clean_parcel_row
+        }
+
+    def clean(self, _type, row):
+        """
+        Reads type and determines which function to use to clean the row based on type
+        :param _type: type of cleaning function that should be used.
+        :param row: Row that is being cleaned.
+        :return:
+        """
+        _func = self.TYPES[_type]
+        return _func(row)
 
     def clean_parcel_row(self, row):
         # There should be twelve keys

@@ -48,14 +48,13 @@ class DataReader(object):
         :return:
         """
         self._length = None
-        self._counter = None
-
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='Process some data')
     parser.add_argument('source', help='The location of the source file')
     arguments = parser.parse_args()
     if arguments.source:
+        clean_type = path.split(arguments.source)[1].split('.')[0].lower()
         cleaner = Cleaner()
         reader = DataReader(arguments.source)
         clean_file = "clean_{}".format(path.split(arguments.source)[1])
@@ -67,7 +66,7 @@ if __name__ == "__main__":
 
         # Loop through rows..
         for row in reader:
-            disposition, row = cleaner.clean_parcel_row(row)
+            disposition, row = cleaner.clean(clean_type, row)
             writer.write_row(row, disposition)
 
         # Close handles to clean and dirty files
