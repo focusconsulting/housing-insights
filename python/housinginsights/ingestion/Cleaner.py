@@ -21,6 +21,7 @@ class Cleaner(object):
         _func = self.TYPES[_type]
         return _func(row)
 
+    # TODO need to come up with heuristics to clean different csv files.
     def clean_parcel_row(self, row):
         # There should be twelve keys
         if len(row) is not 12:
