@@ -13,7 +13,6 @@ class DataReader(object):
     def __init__(self, path):
         self.path = path
         self._length = None
-        self._counter = None
         self._keys = None
 
     def __iter__(self):
@@ -24,10 +23,6 @@ class DataReader(object):
             self._keys = reader.fieldnames
             for row in reader:
                 self._length += 1
-                # Nlihc_id is for the parcel.csv
-                # TO DO The counter should not be hard coded to different ids. Change this.
-                # Loop through all columns and update each individual column.
-                self._counter[row['Nlihc_id']] += 1
                 yield row
 
     def __len__(self):
@@ -36,13 +31,6 @@ class DataReader(object):
                 # Read data for length and counter
                 continue
         return self._length
-
-    @property
-    def counter(self):
-        if self._counter is None:
-            for row in self:
-                continue
-        return self._counter
 
     @property
     def items(self):
