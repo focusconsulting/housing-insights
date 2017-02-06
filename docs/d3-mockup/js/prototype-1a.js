@@ -77,7 +77,7 @@
                     .offset([-8, 0])
                     .direction('e')
                     .html(function(d){
-                        return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>' + readableName + ': ' + d.Proj_Units_Tot;  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
+                        return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>' + readableName + ': ' + d[field];  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
                       });
              
             chart.svg.selectAll('rect') // selects svg element `rect`s whether they exist yet or not          
@@ -86,8 +86,11 @@
                 .append('rect') // create the `rect`
                 .attr('width', SQUARE_WIDTH)
                 .attr('height', SQUARE_WIDTH)
-                .attr('fill', '#325d88') // note svg-specific property names eg fill, not background
-                .attr('fill-opacity', 0.1)                
+         //  removed setting fill attribute here in favor of setting it in CSS
+                .attr('fill-opacity', 0.1)
+                .attr('data-index', function(d, i){
+                  return i; // for debugging purposes
+                })                
                 .on('mouseover', tool_tip.show) // .show is defined in links d3-tip library
                 .on('mouseout', tool_tip.hide)  // .hide is defined in links d3-tip library
                 .call(tool_tip);
@@ -106,14 +109,14 @@
                 .append('button')
                 .text('Resort by zip')
                 .on('click', function(){
-                    chart.resort('zip');
+                    chart.resort('Proj_Zip');
                 });
 
             chart.buttonUnit = d3.select(el) // creates the button to randomly resort and appends it in the el (div#chart-0)
                 .append('button')
-                .text('Resort by unit count')
+                .text('Resort by value')
                 .on('click', function(){
-                    chart.resort('unit');
+                    chart.resort(field);
                 });
 
             chart.slider = d3.select(el)
@@ -152,8 +155,17 @@
           chart.svg.selectAll('rect')
          
           .transition().delay(250).duration(750)
-          .attr('fill-opacity', function(d) { // opacity is a function of the value
-              return chart.scale(d[field]); // takes the field value and maps it according to the scaling function defined above
+          .attr('fill-opacity', function(d,i,array) { // opacity is a function of the value
+              var value;
+              if (isNaN(d[field])) { // some fields have NaN values and d3.sort was puuting them in the middle of the range
+                value = 0;           // this sorts them as if their value was zero and also adds a null-value class to `rect`
+                                     //  so that it can be styled appropriately
+                array[i].setAttribute('class','null-value');
+              } else {
+                value = chart.scale(d[field]);
+              }
+              
+              return value;
           }) 
         },
 
@@ -164,27 +176,22 @@
              * or pub/sub (publish/subscribe) (same thing?) pattern to connect user- ot client-inititiated events (including resize)
              * with update functions
              */
-            
-          switch(value){ 
-                
-                case 'random':
-                this.svg.selectAll('rect').sort(function(a,b){
+              var chart = this;
+              console.log(value);
+              
+          if (value === 'random') {
+            this.svg.selectAll('rect').sort(function(a,b){
                     return d3.ascending(Math.random(), Math.random());
                 });
-                break;
-
-                case 'zip':
-                this.svg.selectAll('rect').sort(function(a,b){
-                    return d3.ascending(a.Proj_Zip, b.Proj_Zip);
+          } else {
+             this.svg.selectAll('rect').sort(function(a,b){
+                    var aProxy = (isNaN(a[value])) ? -1 : a[value];
+                    var bProxy = (isNaN(b[value])) ? -1 : b[value];
+                    return d3.ascending(aProxy, bProxy);
                 });
-                break;
 
-                case 'unit':
-                this.svg.selectAll('rect').sort(function(a,b){
-                    return d3.ascending(a.Proj_Units_Tot, b.Proj_Units_Tot);
-                });
-                break;
-            }
+          }
+         
             this.positionBlocks(500);
 
         }, // end resort()
@@ -194,11 +201,11 @@
                     
                         function checkColors() {
                             let value = document.querySelector('#inputSlider').value;
-                            d3.selectAll('rect').attr('fill', function(d){
-                              if(d[field] < value){
-                                return 'gray';
+                            d3.selectAll('rect').attr('class', function(d){
+                              if(d[field] < value){ // threshold now sets class of `rect` rather than hard-coding in value
+                                return 'under-threshold';
                               } else {
-                                return 'blue';
+                                return '';
                               }
                             });
 
@@ -232,6 +239,9 @@
         var metric = this;
         document.getElementById('metric_menu').appendChild(this.element);
         this.element.addEventListener('click', function(){
+          // remove active class from currently active Metric; add acruve class the the one that's clicked
+          document.querySelector('.metric_option.active').className = document.querySelector('.metric_option.active').className.replace(' active', '');
+          metric.element.className += ' active';
           replaceChart(chartConstructor, chartArgsAry); 
         });
       }      
@@ -276,6 +286,9 @@
                        ['#chart-0', 'Proj_Units_Assist_Max', 'Proj_Zip', false, "Maximum Assisted Units"]);
             new Metric(MovingBlockChart, 
                        ['#chart-0', 'Proj_Units_Assist_Min', 'Proj_Zip', false, "Minimum Assisted Units"]);
+
+            document.querySelector('.metric_option').className += ' active'; // gives the first metric class active. should probably
+            // do it more dynamically with the first constructor call instead, once the other action items are resolved
 
         }
     }

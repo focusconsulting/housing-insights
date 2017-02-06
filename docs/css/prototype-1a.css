@@ -1,4 +1,4 @@
-#metric_menu{
+#metric_menu {
   list-style: none;
   width: 20%;
 }
@@ -12,11 +12,12 @@
   margin-bottom: 0px;
   color: rgb(64, 180, 180);
 }
-.metric_option{
+.metric_option, #chart-0 button {
   border: 1px solid black;
   font-size: 1em;
   cursor: pointer;
   padding: 3px;
+  background-color: transparent;
 }
 
 .d3-tip {
@@ -37,11 +38,37 @@
     }
 
 
-rect:hover {
+#chart-0 rect {
+  fill: #325d88; 
+}
+
+#chart-0 rect.under-threshold {
+  fill: gray;
+  fill-opacity:0.2; 
+}
+
+#chart-0 rect:hover {
     fill: #bada33;
     fill-opacity: 1;
+}
+
+rect.null-value {
+  stroke: #ccc;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
 }
 
 .d3-chart button {
   margin-right: 10px;
 }
+
+.metric_option {
+  transition: background-color 0.2s linear, color 0.2s linear;
+}
+
+.metric_option.active {
+  background-color: #325d88;
+  color: #fff;
+
+}
+
