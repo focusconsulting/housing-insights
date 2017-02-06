@@ -331,5 +331,47 @@
                 "type": "object"
             }
         ]
+    },
+
+
+     "acs_rent_lower": {
+        "fields": [
+            {
+                "display_name": "Full Census Tract ID",
+                "display_text": "",
+                "source_name": "GEO.id",
+                "sql_name": "census_tract_id_full",
+                "type": "text"
+            },
+            {
+                "display_name": "Census Tract ID",
+                "display_text": "",
+                "source_name": "GEO.id2",
+                "sql_name": "census_tract_id",
+                "type": "text"
+            },
+            {
+                "display_name": "Census tract description",
+                "display_text": "",
+                "source_name": "GEO.display-label",
+                "sql_name": "census_tract_desc",
+                "type": "text"
+            },
+            {
+                "display_name": "Lower Quartile Rent, ACS",
+                "display_text": "Lower quartile contract rent estimate from the American Community Survey",
+                "source_name": "HD01_VD01",
+                "sql_name": "lower_quartile_rent",
+                "type": "integer"
+            },
+            {
+                "display_name": "Margin of Error, Lower Quartile Rent",
+                "display_text": "",
+                "source_name": "HD02_VD01",
+                "sql_name": "lower_quartile_rent_moe",
+                "type": "integer"
+            }
+        ]
     }
+    
 }

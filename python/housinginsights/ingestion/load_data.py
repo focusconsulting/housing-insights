@@ -31,6 +31,9 @@ if __name__ == '__main__':
 
 #Relative package imports
 from housinginsights.tools import database
+from housinginsights.ingestion.DataReader import DataReader, ManifestReader
+
+
 
 #configuration
 #See /logs/example-logging.py for usage examples
@@ -44,40 +47,6 @@ logging.getLogger().addHandler(logging.StreamHandler())     #Pushes everything f
 #############################
 
 #Completed, tests created. 
-def do_fields_match(data_row, meta, table_name):
-    '''
-    data_row = a dictionary representing one row of data, with the dict keys as header names
-    meta = the full meta.json. 
-
-    Checks that all fields are the same as expected,
-    If so, returns true. if not it raises an exception.
-    '''
-    field_list = meta[table_name]['fields']
-    included = {}
-
-    #Initialize values - start out assuming all is OK until we identify problems. 
-    return_value = True                     
-    not_found = []
-
-    #Check that all of the data columns are in the meta.json
-    for field in data_row:
-        if not any(d.get('source_name', None) == field for d in field_list):
-            not_found.append('"{}" in CSV not found in meta'.format(field))
-            return_value = False
-
-    #Check that all the meta.json columns are in the data
-    for field in field_list:
-        if field['source_name'] not in data_row:
-            not_found.append('"{}" in meta.json not found in data'.format(field['source_name']))
-            return_value = False
-    
-    #Log our errors if any
-    if return_value == False:
-        logging.warning("do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, table_name, not_found))
-    else:
-        logging.info("do_fields_match: {}. meta.json and csv field lists match completely for '{}'".format(return_value, table_name))
-    
-    return return_value
 
 
 #Completed, tests not written.
@@ -113,34 +82,6 @@ def load_meta_data(filename='meta.json'):
 
     return meta
 
-#Completed, tests not written
-def read_csv_manifest(filename = 'manifest.csv'):
-    '''
-    Reads each line of the csv manifest, which specifies which files should be loaded
-
-    TODO consider switching this to use the same DataReader class that is being developed for reading from SQL?
-    '''
-    with open(filename, 'rU') as data:
-        reader = csv.DictReader(data)
-        for row in reader:
-            yield row
-
-#Completed, test created
-def check_csv_manifest_unique_ids(filename = 'manifest.csv'):
-    '''
-    Makes sure that every value in the manifest column 'unique_data_id' is in fact unique. 
-    This makes sure that we can rely on this column to uniquely identify a source CSV file,
-    and and can connect a record in the SQL manifest to the manifest.csv
-    '''
-    unique_ids = {}
-
-    for row in read_csv_manifest(filename):
-        if row['unique_data_id'] in unique_ids:
-            return False
-        else:
-            unique_ids[row['unique_data_id']] = 'found'
-
-    return True
 
 #Completed, tests incomplete
 def get_sql_manifest_row(database_connection, csv_row):
@@ -185,54 +126,8 @@ def update_sql_manifest(database_connection, status = None):
     '''
     pass
 
-#complete, tests not written
-def should_file_be_loaded(csv_row, sql_row):
-    '''
-    If the sql_manifest_table indicates that this file is already loaded into this copy of the database, returns False
-    Check the manifest.csv to decide if it should be loaded (currently called the 'skip' column in manifest.csv)
-
-    '''
-    if csv_row['include_flag'] == 'use':
-        if sql_row == None:
-            return True
-        if sql_row['include_flag'] != 'loaded':
-            return True
-        if sql_row['include_flag'] == 'loaded':
-            logging.info("{} is already in the database, skipping".format(csv_row['unique_data_id'])) 
-            return False
-    else:
-        logging.info("{} include_flag is {}, skipping".format(csv_row['unique_data_id'], csv_row['include_flag'])) 
-        return False
 
 
-#complete, tests not written
-def download_data_file(csv_row):
-    '''
-    Checks to see if the file already exists locally.
-    If it doesn't exist, it downloads it from s3.
-    raises exception if the file does not exist and can't be downloaded for some reason.
-    Be careful about leading/trailing '/' in the manifest.csv - should probably be able to handle with and without so that less user knowledge is required when adding files to the manifest.csv
-    '''
-    from urllib.request import urlretrieve
-
-    #TODO make sure that both of these can handle trailing/leading slashes appropriately
-    local_path = os.path.join(os.path.dirname(__file__), csv_row['local_folder'], csv_row['filepath'])
-    s3_path = csv_row['s3_folder'] + csv_row['filepath']
-
-    try:
-        with open(local_path) as f:
-            myreader=csv.reader(f,delimiter=',')
-            headers = next(myreader)
-
-    except FileNotFoundError as e:
-        logging.info("  file not found. attempting to download file to disk: " + s3_path)
-        urlretrieve(s3_path,local_path)
-        logging.info("  download complete.")
-        with open(local_path) as f:
-            myreader=csv.reader(f,delimiter=',')
-            headers = next(myreader)
-
-    return headers #not strictly necessary, but if you want to verify the file
 
 #incomplete
 def csv_to_sql(manifest_row, engine, meta):
@@ -274,50 +169,35 @@ def main(database_choice):
     - use logging.warning() to write the specific error encountered to the log file
     - at the end of loading print an error message to the console
     '''
-
     
     meta = load_meta_data('meta_sample.json')
-    database_connection = tools.database.get_database_connection('local_database')
+    database_connection = database.get_database_connection('local_database')
 
-    if not check_csv_manifest_unique_ids('manifest.csv'): raise ValueError('Manifest has duplicate unique_data_id')
+    manifest = ManifestReader('manifest_sample.csv')
 
-    for idx, csv_row in enumerate(read_csv_manifest()):
-        sql_row = get_sql_manifest_row(database_connection = database_connection, csv_row = csv_row)
+    if not manifest.has_unique_ids(): 
+        raise ValueError('Manifest has duplicate unique_data_id!')
 
-        #only load the file if it is not already in the database
-        if not should_file_be_loaded(sql_row=sql_row, csv_row = csv_row):
-            pass #specific reason will be logged by should_file_be_loaded
-        else:
-            table_name = csv_row['table_name']
-            download_data_file(csv_row)             #performs the download if necessary, throws error if it can't open the file after downloading
-            
-            reader = DataReader()
-            able_to_load = True  #TODO it would be good to attach this as a property to the DataReader. If any problem occurs we can abandon 
-            for index, data_row in enumerate(DataReader()):
-                #When we first access the data, check the headers match.
-                if index == 0:
-                    if not do_fields_match(data_row=data_row, meta=meta, table_name=table_name):
-                        logging.info('data fields in {} do not match meta.json')
-                        able_to_load = False
-                        break       #abandom this file
+    for manifest_row in manifest:
+        csv_reader = DataReader(manifest_row)
 
-                #Continue the for loop - clean rows and add them to cleaned.csv
-                pass
-                #TODO normalize the date functions for all date field types
-                #TODO apply cleaning functions specific to this data file
-                #TODO write the row to a temporary cleaned.csv file
+        sql_manifest_row = get_sql_manifest_row(database_connection = database_connection, csv_row = manifest_row)
+        if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
+            if csv_reader.do_fields_match(meta):
+                
+                print("Ready to clean {}".format(csv_reader.destination_table))
+                for data_row in csv_reader:
+                    #clean rows and add them to cleaned.csv
+                    pass
+                    #TODO normalize the date functions for all date field types
+                    #TODO apply cleaning functions specific to this data file
+                    #TODO write the row to a temporary cleaned.csv file
 
-
-            if ready_to_load == True:
+                print("Ready to load")
+                
                 #TODO write the cleaned.csv to the appropriate SQL table
                 #TODO add/update the appropriate row to the SQL manifest table indicating new status
                 pass
-
-
-
-        #temporary code 
-        if idx > 10: break
-        print (csv_row)
 
 
 
