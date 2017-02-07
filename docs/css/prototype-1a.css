@@ -1,3 +1,24 @@
+#metric_menu {
+  list-style: none;
+  width: 20%;
+}
+
+#metric_menu h1{
+  font-size: 1em;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 3px;
+  border: 1px solid black;
+  margin-bottom: 0px;
+  color: rgb(64, 180, 180);
+}
+.metric_option, #chart-0 button {
+  border: 1px solid black;
+  font-size: 1em;
+  cursor: pointer;
+  padding: 3px;
+  background-color: transparent;
+}
 
 .d3-tip {
       line-height: 1;
@@ -8,20 +29,7 @@
       font-size: 12px;
 
     }
- 
-    /* Creates a small triangle extender for the tooltip */
-    /*   .d3-tip:before {
-      box-sizing: border-box;
-      display: inline;
-      font-size: 10px;
-      width: 100%; 
-      line-height: 1;
-      color: rgba(0, 0, 0, 0.8);
-      content: "\25BC";
-      position: relative;
-      text-align: center;
-    }*/
- 
+  
     /* Style northward tooltips specifically */
     .d3-tip.n:after {
       margin: -2px 0 0 0;
@@ -30,11 +38,37 @@
     }
 
 
-rect:hover {
+#chart-0 rect {
+  fill: #325d88; 
+}
+
+#chart-0 rect.under-threshold {
+  fill: gray;
+  fill-opacity:0.2; 
+}
+
+#chart-0 rect:hover {
     fill: #bada33;
     fill-opacity: 1;
+}
+
+rect.null-value {
+  stroke: #ccc;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
 }
 
 .d3-chart button {
   margin-right: 10px;
 }
+
+.metric_option {
+  transition: background-color 0.2s linear, color 0.2s linear;
+}
+
+.metric_option.active {
+  background-color: #325d88;
+  color: #fff;
+
+}
+

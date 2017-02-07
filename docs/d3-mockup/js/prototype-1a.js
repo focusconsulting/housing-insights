@@ -5,6 +5,9 @@
         MovingBlockChart,
         app,
         extendPrototype,
+        Metric,
+        replaceChart, // While replaceChart is only called in Metric so far, it exists
+                      // in the IIFE scope in case other objects need to call it.
 
         SQUARE_WIDTH = 10, // symbolic constants all caps following convention
         SQUARE_SPACER = 2,
@@ -58,22 +61,23 @@
 
     }; // end prototype
     
-    MovingBlockChart = function(el, field, sortField, asc) {
+    MovingBlockChart = function(el, field, sortField, asc, readableName) { // set text of Metric menu option and 
+                                                                           // tooltip with 'readableName' arg
         Chart.call(this, el, field, sortField, asc); // First step of inheriting from Chart
-        this.setup(el, field, sortField, asc); 
+        this.setup(el, field, sortField, asc, readableName); 
     }
     
     MovingBlockChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart
     
     extendPrototype(MovingBlockChart.prototype, { // Final step of inheriting from Chart.
-        setup: function(el, field, sortField, asc){
+        setup: function(el, field, sortField, asc, readableName){
             var chart = this, 
                 tool_tip = d3.tip()
                     .attr("class", "d3-tip")
                     .offset([-8, 0])
                     .direction('e')
                     .html(function(d){
-                        return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>Total units: ' + d.Proj_Units_Tot;  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
+                        return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>' + readableName + ': ' + d[field];  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
                       });
              
             chart.svg.selectAll('rect') // selects svg element `rect`s whether they exist yet or not          
@@ -82,8 +86,11 @@
                 .append('rect') // create the `rect`
                 .attr('width', SQUARE_WIDTH)
                 .attr('height', SQUARE_WIDTH)
-                .attr('fill', '#325d88') // note svg-specific property names eg fill, not background
-                .attr('fill-opacity', 0.1)                
+         //  removed setting fill attribute here in favor of setting it in CSS
+                .attr('fill-opacity', 0.1)
+                .attr('data-index', function(d, i){
+                  return i; // for debugging purposes
+                })                
                 .on('mouseover', tool_tip.show) // .show is defined in links d3-tip library
                 .on('mouseout', tool_tip.hide)  // .hide is defined in links d3-tip library
                 .call(tool_tip);
@@ -102,14 +109,15 @@
                 .append('button')
                 .text('Resort by zip')
                 .on('click', function(){
-                    chart.resort('zip');
+                    chart.resort('Proj_Zip');
                 });
 
             chart.buttonUnit = d3.select(el) // creates the button to randomly resort and appends it in the el (div#chart-0)
                 .append('button')
-                .text('Resort by unit count')
+                .text('Resort by value')
                 .on('click', function(){
                     chart.resort('unit');
+
 
                 });
 
@@ -150,8 +158,17 @@
           chart.svg.selectAll('rect')
          
           .transition().delay(250).duration(750)
-          .attr('fill-opacity', function(d) { // opacity is a function of the value
-              return chart.scale(d[field]); // takes the field value and maps it according to the scaling function defined above
+          .attr('fill-opacity', function(d,i,array) { // opacity is a function of the value
+              var value;
+              if (isNaN(d[field])) { // some fields have NaN values and d3.sort was puuting them in the middle of the range
+                value = 0;           // this sorts them as if their value was zero and also adds a null-value class to `rect`
+                                     //  so that it can be styled appropriately
+                array[i].setAttribute('class','null-value');
+              } else {
+                value = chart.scale(d[field]);
+              }
+              
+              return value;
           }) 
         },
 
@@ -162,27 +179,22 @@
              * or pub/sub (publish/subscribe) (same thing?) pattern to connect user- ot client-inititiated events (including resize)
              * with update functions
              */
-            
-          switch(value){ 
-                
-                case 'random':
-                this.svg.selectAll('rect').sort(function(a,b){
+              var chart = this;
+              console.log(value);
+              
+          if (value === 'random') {
+            this.svg.selectAll('rect').sort(function(a,b){
                     return d3.ascending(Math.random(), Math.random());
                 });
-                break;
-
-                case 'zip':
-                this.svg.selectAll('rect').sort(function(a,b){
-                    return d3.ascending(a.Proj_Zip, b.Proj_Zip);
+          } else {
+             this.svg.selectAll('rect').sort(function(a,b){
+                    var aProxy = (isNaN(a[value])) ? -1 : a[value];
+                    var bProxy = (isNaN(b[value])) ? -1 : b[value];
+                    return d3.ascending(aProxy, bProxy);
                 });
-                break;
 
-                case 'unit':
-                this.svg.selectAll('rect').sort(function(a,b){
-                    return d3.ascending(a.Proj_Units_Tot, b.Proj_Units_Tot);
-                });
-                break;
-            }
+          }
+         
             this.positionBlocks(500);
 
         }, // end resort()
@@ -192,11 +204,11 @@
                     
                         function checkColors() {
                             let value = document.querySelector('#inputSlider').value;
-                            d3.selectAll('rect').attr('fill', function(d){
-                              if(d[field] < value){
-                                return 'gray';
+                            d3.selectAll('rect').attr('class', function(d){
+                              if(d[field] < value){ // threshold now sets class of `rect` rather than hard-coding in value
+                                return 'under-threshold';
                               } else {
-                                return 'blue';
+                                return '';
                               }
                             });
 
@@ -209,7 +221,49 @@
 
     }); // end prototype
 
-       
+    Metric = function(chartConstructor, chartArgsAry){ // The second argument is an array
+                                                   // of arguments for producing a new Chart.
+                                                   // Since calling 'new MovingBlockChart()' 
+                                                   // adds the chart to the document, storing the 
+                                                   // chart this way allows each Metric menu option
+                                                   // to store chart-related arguments.
+      this.element = document.createElement('li');
+      this.element.setAttribute('id', this.idStartsWith + chartArgsAry[1]); // Assumes that
+                                                                            // chartArgsAry[1] is 'field'
+      this.element.setAttribute('class', this.defaultClass);
+      this.element.textContent = chartArgsAry[4]; // Assumes chartArgsAry[4] is readableName.
+      this.initialSetup(chartConstructor, chartArgsAry);
+    }   
+    
+    Metric.prototype = {
+      
+      defaultClass: 'metric_option',
+      idStartsWith: 'metric_option_',
+      initialSetup: function(chartConstructor, chartArgsAry){
+        var metric = this;
+        document.getElementById('metric_menu').appendChild(this.element);
+        this.element.addEventListener('click', function(){
+          // remove active class from currently active Metric; add acruve class the the one that's clicked
+          document.querySelector('.metric_option.active').className = document.querySelector('.metric_option.active').className.replace(' active', '');
+          metric.element.className += ' active';
+          replaceChart(chartConstructor, chartArgsAry); 
+        });
+      }      
+
+    }
+    
+    replaceChart = function(chartConstructor, chartArgsAry){ // This function assumes that the
+                                                             // first element of chartArgsAry is
+                                                             // the svg element.
+      var chartElement = document.querySelector(chartArgsAry[0]);
+      while(chartElement.lastChild){
+        chartElement.removeChild(chartElement.lastChild);
+      }
+     // FOR ACTION: the line of code below this comment produces a new Chart based on the 'chartConstructor'
+     // argument. Ideally, we'd be using 'apply' (that's the reason for chartArgsAry). Let's find a 
+     // way to use 'apply' with 'new' below.
+      new (chartConstructor)(chartArgsAry[0], chartArgsAry[1], chartArgsAry[2], chartArgsAry[3], chartArgsAry[4]);
+    }
     
 
         
@@ -226,7 +280,20 @@
             app.data = json;
             console.log(app.data);
                         //params:(element    , field to visualize            ,  field to sort by         , ascending [boolean])   
-            app.blockChart = new MovingBlockChart('#chart-0', 'Proj_Units_Tot', 'Proj_Zip', false);
+            app.blockChart = new MovingBlockChart('#chart-0', 'Proj_Units_Tot', 'Proj_Zip', false, "Total Units");
+            
+            // FOR ACTION: the assignment of app.blockChart to a new MovingBlockChart repeats the elements within
+            // the first call to new Metric() below.
+            
+            new Metric(MovingBlockChart,
+                       ['#chart-0', 'Proj_Units_Tot', 'Proj_Zip', false, "Total Units"]);
+            new Metric(MovingBlockChart,
+                       ['#chart-0', 'Proj_Units_Assist_Max', 'Proj_Zip', false, "Maximum Assisted Units"]);
+            new Metric(MovingBlockChart, 
+                       ['#chart-0', 'Proj_Units_Assist_Min', 'Proj_Zip', false, "Minimum Assisted Units"]);
+
+            document.querySelector('.metric_option').className += ' active'; // gives the first metric class active. should probably
+            // do it more dynamically with the first constructor call instead, once the other action items are resolved
 
         }
     }
