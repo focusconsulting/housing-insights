@@ -1,6 +1,7 @@
 from csv import DictWriter
 import os
 
+
 class DataWriter(object):
     """
     Class that will handle writing out the clean and dirty csv files

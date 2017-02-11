@@ -2,8 +2,8 @@ from collections import Counter
 from csv import DictReader
 from os import path
 from argparse import ArgumentParser
-from DataWriter import DataWriter
-from Cleaner import Cleaner
+from ..ingestion import DataWriter
+from ..ingestion import Cleaner
 
 
 class DataReader(object):
