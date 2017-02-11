@@ -60,4 +60,3 @@ if __name__ == '__main__':
         table_name = sys.argv[2]
         make_draft_json(csv_filename, table_name)
 
-    
