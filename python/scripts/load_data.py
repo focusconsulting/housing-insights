@@ -4,7 +4,7 @@ import logging
 import json
 import csv
 from urllib.request import urlretrieve
-from ..tools import database
+from ..housinginsights.tools import database
 
 ##########################################################################
 # Summary
