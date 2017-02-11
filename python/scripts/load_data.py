@@ -3,7 +3,7 @@ import os
 import logging
 import json
 import csv
-from urllib.request import urlretrieve
+from python.housinginsights.ingestion import DataReader
 from python.housinginsights.tools import database
 
 ##########################################################################
@@ -22,11 +22,6 @@ Notes:
    (i.e. two different versions of the same data), there will be more rows in the CSV than there are 'tables' in the json.
 
 '''
-
-# Needed to make relative package imports when running this file as a script (i.e. for testing purposes). Read why here:
-# https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
-if __name__ == '__main__':
-    sys.path.append(os.path.abspath('../../'))
 
 # configuration
 # See /logs/example-logging.py for usage examples
@@ -70,7 +65,7 @@ def do_fields_match(data_row, meta, table_name):
             return_value = False
 
     # Log our errors if any
-    if return_value == False:
+    if return_value is False:
         logging.warning("do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, table_name, not_found))
     else:
         logging.info("do_fields_match: {}. meta.json and csv field lists match completely for '{}'".format(return_value,
@@ -196,7 +191,7 @@ def should_file_be_loaded(csv_row, sql_row):
     Check the manifest.csv to decide if it should be loaded (currently called the 'skip' column in manifest.csv)
     """
     if csv_row['include_flag'] == 'use':
-        if sql_row == None:
+        if sql_row is None:
             return True
         if sql_row['include_flag'] != 'loaded':
             return True
@@ -225,7 +220,7 @@ def download_data_file(csv_row):
 
     try:
         with open(local_path) as f:
-            myreader = csv.reader(f,delimiter=',')
+            myreader = csv.reader(f, delimiter=',')
             headers = next(myreader)
 
     except FileNotFoundError as e:
@@ -233,7 +228,7 @@ def download_data_file(csv_row):
         urlretrieve(s3_path,local_path)
         logging.info("  download complete.")
         with open(local_path) as f:
-            myreader = csv.reader(f,delimiter=',')
+            myreader = csv.reader(f, delimiter=',')
             headers = next(myreader)
 
     # not strictly necessary, but if you want to verify the file
@@ -257,8 +252,8 @@ def drop_tables(database_choice):
     """
     used to rebuild the database by first dropping all tables before running main()
     """
-    connect_str = database_management.get_connect_str(database_choice)
-    engine = database_management.create_engine(connect_str)
+    connect_str = database.get_connect_str(database_choice)
+    engine = database.create_engine(connect_str)
     database_connection = engine.connect()
     query_result = database_connection.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
 
@@ -281,17 +276,17 @@ def main(database_choice):
     - at the end of loading print an error message to the console
     """
     meta = load_meta_data('meta_sample.json')
-    database_connection = tools.database.get_database_connection('local_database')
+    _database_connection = database.get_database_connection(database_choice)
 
     if not check_csv_manifest_unique_ids('manifest.csv'):
         raise ValueError('Manifest has duplicate unique_data_id')
 
     for idx, csv_row in enumerate(read_csv_manifest()):
-        sql_row = get_sql_manifest_row(database_connection=database_connection, csv_row=csv_row)
+        sql_row = get_sql_manifest_row(database_connection=_database_connection, csv_row=csv_row)
 
         # only load the file if it is not already in the database
         if not should_file_be_loaded(sql_row=sql_row, csv_row=csv_row):
-            pass # specific reason will be logged by should_file_be_loaded
+            pass  # specific reason will be logged by should_file_be_loaded
         else:
             table_name = csv_row['table_name']
             # performs the download if necessary, throws error if it can't open the file after downloading
@@ -314,8 +309,7 @@ def main(database_choice):
                 # TODO apply cleaning functions specific to this data file
                 # TODO write the row to a temporary cleaned.csv file
 
-
-            if ready_to_load == True:
+            if able_to_load is True:
                 # TODO write the cleaned.csv to the appropriate SQL table
                 # TODO add/update the appropriate row to the SQL manifest table indicating new status
                 pass
