@@ -4,7 +4,7 @@ import logging
 import json
 import csv
 from urllib.request import urlretrieve
-from ..housinginsights.tools import database
+from python.housinginsights.tools import database
 
 ##########################################################################
 # Summary
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
 # configuration
 # See /logs/example-logging.py for usage examples
-logging_filename = "../../logs/ingestion.log"
+logging_filename = "../logs/ingestion.log"
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 
 # Pushes everything from the logger to the command line output as well.
