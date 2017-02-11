@@ -3,7 +3,7 @@ import os
 import logging
 import json
 import csv
-from python.housinginsights.ingestion import DataReader
+from python.housinginsights.ingestion.DataReader import DataReader
 from python.housinginsights.tools import database
 
 ##########################################################################
@@ -129,8 +129,8 @@ def check_csv_manifest_unique_ids(filename='manifest.csv'):
     and and can connect a record in the SQL manifest to the manifest.csv
     """
     unique_ids = {}
-
-    for row in read_csv_manifest(filename):
+    reader = DataReader(filename)
+    for row in reader:
         if row['unique_data_id'] in unique_ids:
             return False
         else:
