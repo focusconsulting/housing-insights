@@ -3,20 +3,17 @@ from csv import DictReader
 import csv
 from os import path
 import os
-from argparse import ArgumentParser
-from ..ingestion import DataWriter
-from ..ingestion import Cleaner
 
 import logging
 from urllib.request import urlretrieve
 
 #DataReader edits (FYI for Walt):
-# -Renamed DataReader to Reader; extended 2 versions of it (ManifestReader and DataReader)
+# -Renamed DataReader to HIReader (housing insights reader); extended 2 versions of it (ManifestReader and DataReader)
 
 #TODOs
 #-convert relative path to full path when passed as argument
 
-class Reader(object):
+class HIReader(object):
     """
     Container object that will call read in csvs and marshal them to a Postgres Database.
     """
@@ -60,7 +57,7 @@ class Reader(object):
         self._length = None
 
 
-class ManifestReader(Reader):
+class ManifestReader(HIReader):
     '''
     Adds extra functions that make sure the manifest.csv works as expected
     '''
@@ -92,7 +89,7 @@ class ManifestReader(Reader):
 
 
 
-class DataReader(Reader):
+class DataReader(HIReader):
     def __init__(self, manifest_row):
         self.path = os.path.join(path.dirname(__file__), manifest_row['local_folder'], manifest_row['filepath'])
 
@@ -147,7 +144,7 @@ class DataReader(Reader):
         try:
             field_list = meta[self.destination_table]['fields']
         except KeyError:
-            logging.info('table "{}" not found in meta data'.format(self.destination_table))
+            logging.info('  table "{}" not found in meta data'.format(self.destination_table))
             return False
 
         included = {}
@@ -165,43 +162,14 @@ class DataReader(Reader):
         #Check that all the meta.json columns are in the data
         for field in field_list:
             if field['source_name'] not in self.keys:
-                not_found.append('"{}" in meta.json not found in data'.format(field['source_name']))
+                not_found.append('  "{}" in meta.json not found in data'.format(field['source_name']))
                 return_value = False
         
         #Log our errors if any
         if return_value == False:
-            logging.warning("do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, not_found))
+            logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, not_found))
         else:
-            logging.info("do_fields_match: {}. meta.json and csv field lists match completely for '{}'".format(return_value, self.destination_table))
+            logging.info("  do_fields_match: {}. \n    meta.json and csv field lists match completely for '{}'".format(return_value, self.destination_table))
         
         return return_value
 
-
-
-
-
-
-if __name__ == "__main__":
-    parser = ArgumentParser(description='Process some data')
-    parser.add_argument('source', help='The location of the source file')
-    arguments = parser.parse_args()
-    if arguments.source:
-        clean_type = path.split(arguments.source)[1].split('.')[0].lower()
-        cleaner = Cleaner()
-        reader = DataReader(arguments.source)
-        clean_file = "clean_{}".format(path.split(arguments.source)[1])
-        dirty_file = "dirty_{}".format(path.split(arguments.source)[1])
-        header = reader.keys
-
-        # Create writers...
-        writer = DataWriter(clean_file, dirty_file, header)
-
-        # Loop through rows..
-        for row in reader:
-            disposition, row = cleaner.clean(clean_type, row)
-            writer.write_row(row, disposition)
-
-        # Close handles to clean and dirty files
-        writer.save()
-        print("Finished reading file: {}".format(arguments.source))
-        print("Data Reader: {} rows ingested".format(len(reader)))

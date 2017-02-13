@@ -3,10 +3,19 @@ import os
 import logging
 import json
 import csv
-from python.housinginsights.ingestion.DataReader import DataReader
-from python.housinginsights.tools import database
 
-from python.housinginsights.ingestion.DataReader import DataReader, ManifestReader
+
+#Needed to make relative package imports when running this file as a script (i.e. for testing purposes). 
+#Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
+if __name__ == '__main__':
+    import sys, os
+    sys.path.append(os.path.abspath('../'))
+
+from housinginsights.ingestion.DataReader import DataReader
+from housinginsights.tools import database
+
+from housinginsights.ingestion.DataReader import DataReader, ManifestReader
+
 
 ##########################################################################
 # Summary
@@ -91,7 +100,7 @@ def get_sql_manifest_row(database_connection, csv_row):
 
     # temp
     # sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format('my_data_id')
-    logging.info(sql_query)
+    logging.info("  Getting SQL manifest row for {} using query {}".format(unique_data_id,sql_query))
     query_result = database_connection.execute(sql_query)
 
     # convert the sqlAlchemy ResultProxy object into a list of dictionaries
@@ -169,7 +178,7 @@ def main(database_choice):
     - at the end of loading print an error message to the console
     """
     meta = load_meta_data('meta_sample.json')
-    _database_connection = database.get_database_connection(database_choice)
+    database_connection = database.get_database_connection(database_choice)
 
     manifest = ManifestReader('manifest_sample.csv')
 
@@ -177,15 +186,15 @@ def main(database_choice):
         raise ValueError('Manifest has duplicate unique_data_id!')
 
     for manifest_row in manifest:
-        csv_reader = DataReader(manifest_row)
-            download_data_file(csv_row)
+        logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
 
         sql_manifest_row = get_sql_manifest_row(database_connection = database_connection, csv_row = manifest_row)
+        csv_reader = DataReader(manifest_row=manifest_row)
+        
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             if csv_reader.do_fields_match(meta):
-                        break
                 
-                print("Ready to clean {}".format(csv_reader.destination_table))
+                print("  Ready to clean {}".format(csv_reader.destination_table))
                 for data_row in csv_reader:
                     #clean rows and add them to cleaned.csv
                     pass
@@ -193,7 +202,7 @@ def main(database_choice):
                     #TODO apply cleaning functions specific to this data file
                     #TODO write the row to a temporary cleaned.csv file
 
-                print("Ready to load")
+                print("  Ready to load")
                 
                 #TODO write the cleaned.csv to the appropriate SQL table
                 #TODO add/update the appropriate row to the SQL manifest table indicating new status
@@ -204,25 +213,15 @@ def main(database_choice):
 
 if __name__ == '__main__':
 
-    #Eventual structure:
-    database_choice = 'local_database' #the appropriate database name in secrets.json. Should make this changeable via optional positional sys.argv
+    #the appropriate database name in secrets.json.
+    #TODO make this changeable via sys.argv
+    database_choice = 'local_database' 
 
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)
 
     main(database_choice)
 
-    # ------------------
-    # testing code follows
-    # ------------------
 
-    database_connection = database.get_database_connection('local_database')
-    MANIFEST_FILENAME = os.path.join(os.path.dirname(__file__), 'manifest_sample.csv')
-
-    if 'download_test' in sys.argv:
-        manifest = read_csv_manifest(MANIFEST_FILENAME)
-        csv_row_1 = next(manifest)
-        headers = download_data_file(csv_row_1)
-        print(headers)
 
 
