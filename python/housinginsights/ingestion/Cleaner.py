@@ -29,7 +29,7 @@ class Cleaner(object):
             return 'DIRTY', row
 
         # Iterate through each column
-        for k, v in row.iteritems():
+        for k, v in row.items():
             # Format Dates to ISO 8601 standards...
             if k == 'Parcel_Info_Source_Date':
                 if format_date(row['Parcel_Info_Source_Date']) == 'N':
