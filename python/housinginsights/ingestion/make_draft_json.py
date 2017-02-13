@@ -26,7 +26,7 @@ def make_draft_json(filename, tablename): #use the name from constants as defaul
         return name.lower()
 
     # Reads the initial CSV and sets up the basic output structure. 
-    dataframe_file = pandas.read_csv(filename)
+    dataframe_file = pandas.read_csv(filename, encoding='latin1')
     dataframe_iterator = dataframe_file.columns
     output = {
         tablename: {
