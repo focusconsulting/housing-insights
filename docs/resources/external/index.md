@@ -7,8 +7,10 @@ title: External Resources
 
 1. In 2015 the mayor convened a 'Strike Force' on affordable housing preservation. They [released a report in November 2016](https://dhcd.dc.gov/publication/housing-preservation-strike-force-final-report). In particular read the recommendations; this is the 'current state' of the DC governments thinking about future changes to DC's affordable housing policy. 
 
+2. The Preservation Network [published a report](http://www.neighborhoodinfodc.org/dcpreservationcatalog/Preservation%20Strategy%20Dec2014.pdf) in December 2015 about their suggestions for improving DC's affordable housing preservation. This report provided some of the impetus for this project in the first place. Scott (CNHED) and Peter (NeighborhoodInfo DC), our non-profit project partners, lead the Preservation Network. 
+
 ## Funding streams allocated by DHCD
-Big [list of reports](http://dhcd.dc.gov/page/dhcd-reports). The key ones for this group are called out below.
+Big [list of reports](http://dhcd.dc.gov/page/dhcd-reports) published by the Department of Housing and Community Development (DHCD). The key ones for this group are called out below.
 
 1. The Housing Production Trust Fund
     * 2016 scoring criteria and request for proposals [are located here](https://octo.quickbase.com/db/bjc34b76f?a=showpage&pageid=37). 
