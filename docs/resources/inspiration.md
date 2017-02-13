@@ -2,7 +2,15 @@
 layout: main
 title: Summary
 ---
-# Inspirational websites to look at:
+# Existing Housing Data Tools:
+
+* [Displacement Alert Map NYC](http://map.dapmapnyc.org/app/#openModal)
+* [Core Data NYC](http://coredata.nyc/)
+* [Corridor Housing Preservation Tool](http://envisiontomorrow.org/corridor-housing-preservation-tool)
+* [AFFH Mapping Tool](https://egis.hud.gov/affht/)
+
+
+# Other Data Driven Website Examples
 
 * [DCPS Schools Budget](http://dcpsbudget.ourdcschools.org/)
 * [DCPS At Risk Funds](http://atriskfunds.ourdcschools.org/)\
@@ -16,9 +24,3 @@ title: Summary
 * [DC Zoning Changes](http://dcoz.dc.gov/onlineservices/changemap.shtm)
 
 
-# Existing data tools:
-
-* [Displacement Alert Map NYC](http://map.dapmapnyc.org/app/#openModal)
-* [Core Data NYC](http://coredata.nyc/)
-* [Corridor Housing Preservation Tool](http://envisiontomorrow.org/corridor-housing-preservation-tool)
-* [AFFH Mapping Tool](https://egis.hud.gov/affht/)
