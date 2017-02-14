@@ -32,7 +32,7 @@ def findRailStations(railStations,project,radiusinmeters,distCsvWriter):
     for station in railStations:
         walkDist = getWalkingDistance(lat, lon, str(station['Lat']), str(station['Lon']))
         if walkDist <= radiusinmeters:
-            distCsvWriter.writerow((project['Nlihc_id'],'rail',station['Code'],getMiles(walkDist)))
+            distCsvWriter.writerow((project['Nlihc_id'],'rail',station['Code'],"{0:.2f}".format(getMiles(walkDist))))
 
 
 ###### Finds all bus stations within {radiusinmeters} from the given project. Writes to given CSV file.
@@ -50,7 +50,7 @@ def findBusStations(project, radiusinmeters, distCsvWriter):
         walkDist = getWalkingDistance(lat, lon, str(stop['Lat']), str(stop['Lon']))
 
         if walkDist <= radiusinmeters: #within 0.5 miles walking
-            distCsvWriter.writerow((project['Nlihc_id'],'bus',stop['StopID'],getMiles(walkDist)))
+            distCsvWriter.writerow((project['Nlihc_id'],'bus',stop['StopID'],"{0:.2f}".format(getMiles(walkDist))))
 
 
 ####### Writes rail station metadata to given CSV writer
@@ -119,6 +119,9 @@ def main(csvInputFileName,distOutputFileName,infoOutputFileName):
         radius = getMeters(0.5)
 
         numrow = numrow+1
+
+        #if numrow > 1: break
+
         print("Processing project {} of 400ish".format(numrow))
 
         # find all metro stations within 0.5 miles
