@@ -12,7 +12,7 @@ if __name__ == '__main__':
     sys.path.append(os.path.abspath('../'))
 
 from housinginsights.ingestion.DataReader import DataReader
-from housinginsights.tools import database
+from housinginsights.tools import dbtools
 
 from housinginsights.ingestion.DataReader import DataReader, ManifestReader
 
@@ -49,9 +49,6 @@ logging.getLogger().addHandler(logging.StreamHandler())
 #############################
 # FUNCTIONS
 #############################
-
-# Completed, tests created.
-
 
 # Completed, tests not written.
 def load_meta_data(filename='meta.json'):
@@ -118,35 +115,9 @@ def get_sql_manifest_row(database_connection, csv_row):
         return None
 
 
-# incomplete
-def update_sql_manifest(database_connection, status=None):
-    """
-    If the 'manifest' table does not exist in SQL, create it.
-        -in SQL, the manifest table has the exact same data as manifest.csv, but one additional column called 'status'
-         should be added, which reflects whether that file has been loaded into the database or not.
-    Call this function twice for every row of the database:
-        -immediately before loading a new file into the database, the 'status' column should be "started"
-        -immediately after loading is complete, 'status' column should be 'loaded'
-
-        -if the file loading encounters an error, call this function and set the 'status' column to 'error'
-    """
-    pass
 
 
 
-
-
-# incomplete
-def csv_to_sql(manifest_row, engine, meta):
-    """
-    Does the actual loading of the file into SQL. This assumes all necessary tests have been passed (i.e. do_fields_match etc.)
-
-   
-    If the table doesnt exist, create it, using meta.json data types
-    If the table already exists, it should be appended to.
-    Date parsing will assume one consistent format provided by cleaned.csv (format TBD)
-    """
-    pass
 
 
 # complete, tests not written
@@ -154,8 +125,8 @@ def drop_tables(database_choice):
     """
     used to rebuild the database by first dropping all tables before running main()
     """
-    connect_str = database.get_connect_str(database_choice)
-    engine = database.create_engine(connect_str)
+    connect_str = dbtools.get_connect_str(database_choice)
+    engine = dbtools.create_engine(connect_str)
     database_connection = engine.connect()
     query_result = database_connection.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
 
@@ -178,7 +149,7 @@ def main(database_choice):
     - at the end of loading print an error message to the console
     """
     meta = load_meta_data('meta_sample.json')
-    database_connection = database.get_database_connection(database_choice)
+    database_connection = dbtools.get_database_connection(database_choice)
 
     manifest = ManifestReader('manifest_sample.csv')
 

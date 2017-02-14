@@ -1,3 +1,17 @@
+
+
+
+
+
+
+
+
+#This class should be replaced / updated to merge functionality with tools.dbtools
+#Use sqlAlchemy instead of psycopg2
+
+
+
+
 import psycopg2
 
 
