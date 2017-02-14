@@ -12,14 +12,13 @@
   <link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
   <!-- end Mapbox requests -->
   
-  <!-- begin project-specific asset calls -->
+  <!-- begin project-specific STATIC asset calls.
+       page-specific calls that require ready DOM elements called at end of <body>.
+       may change that practice later. for now we can avoid listening for window.load, document.ready, etc  -->
   <script src="js/d3-tip.js"></script>
   <script src="js/PubSub.js"></script>
   <script src="js/housing-insights.js"></script>
-  <script src="js/building-chart.js"></script>
-  <script src="js/building-map.js"></script>
-  <script src="js/building-header.js"></script>
-  
+    
   <link rel="stylesheet" type="text/css" href="css/tool.css">
   <link rel="stylesheet" type="text/css" href="css/building.css">
   <!-- end project-specific asset calls -->
@@ -39,6 +38,10 @@
     </section>
   </section>
 
+  <!-- page-specific asset calls that require ready DOM elements -->
+  <script src="js/building-chart.js"></script>
+  <script src="js/building-map.js"></script>
+  <script src="js/building-header.js"></script>
 
 </body>
 </html>
