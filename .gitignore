@@ -118,3 +118,4 @@ ENV/
 
 # Rope project settings
 .ropeproject
+.Rproj.user
