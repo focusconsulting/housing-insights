@@ -49,17 +49,37 @@
       center: thisBuildingLayer['data']['geometry']['coordinates'],
       zoom: 16
     });
-    
-  // Guidance on adding layers is here: https://www.mapbox.com/mapbox-gl-js/style-spec/#layers
-  // FOR ACTION, ERROR TO FIX - currently receiving error message, 'Error: Style is not 
-  // done loading' from mapbox-gl.js:127.
-    map.addLayer({
-      id: "buildingLocation",
-      source: thisBuildingLayer,
-      type: "circle",
-      minzoom: 11,
+
+    // Guidance on adding layers is here: https://www.mapbox.com/mapbox-gl-js/style-spec/#layers
+    // The 'on()' function below appears to be a method of a Mapbox map, though there's no entry
+    // for 'on()' in the Mapbox JS GL API.
+    // Information on styling layers is here:
+    // https://www.mapbox.com/mapbox-gl-js/style-spec/#layer-paint
+    map.on('load', function(){
+      map.addLayer({
+        'id': "buildingLocation",
+        'source': thisBuildingLayer,
+        'type': "circle",
+        'minzoom': 11,
+        'paint': {
+          'circle-color': 'rgb(120,150,255)',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': 'rgb(150,150,150)',
+          'circle-radius': 10
+        }
+      });
+      map.addLayer({
+        'id': "buildingTitle",
+        'source': thisBuildingLayer,
+        'type': "symbol",
+        'minzoom': 11,
+        'layout': {
+          'text-field': "{Proj_Name}",
+          'text-anchor': "bottom-left"
+        }
+      });
     });
-  
+        
   }
   
   window.addEventListener('load', function(){
