@@ -1,4 +1,4 @@
-(function(){
+(function prepareBuildingMaps(){
   'use strict'
   
   // FOR ACTION - determine how to bind building data to a building page. 
@@ -6,8 +6,52 @@
   // Or when producing the document from a template on the server?
   
   var thisBuildingLayer,
-      MapboxPortal;
-      
+      MapboxPortal,
+      prepareGeoJSON; // FOR REVIEW: prepareGeoJSON (see below)
+  
+  
+  // FOR REVIEW - prepareGeoJSON takes a single flat object, i.e. an object in which no
+  // value is another object, and turns it into a geoJSON object based on the keys that
+  // are specified to represent longitude and latitude.
+  // So far this function only exists to work with Project.csv and app.dataCollection.
+  // It may no longer be useful if the plan is to load geoJSON directly from the server.
+
+  // SO FAR NOTHING CALLS THIS. Paul's goal was to use prepareGeoJSON to manipulate Project.csv 
+  // after processing it within app.getData() and storing it in app.dataCollection.
+  // Currently, app.getData() assumes that the data will be used in a Chart.
+  // POSSIBLE SOLUTIONS: 
+  // a- Make app.getData() work for both Charts and non-Chart objects (like Mapbox maps) that
+  //    use the same data. Remove some parameters from app.getData, including Chart.
+  // b- Keep MapboxPortals separate from the app/Chart relationship. MapboxPortals make their
+  //    own requests for geoJSON objects.
+  prepareGeoJSON = function(obj, longKey, latKey){
+    // Some keys of the resulting geoJSON object are hard-coded (see below). In the future
+    // we may want to extract them as parameters of prepareGeoJSON().
+    // Coordinates are added later.
+    var resultingObj = {
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [obj[longKey], obj[latKey]]        
+      },
+      properties: {}
+    };
+    
+    // The 'select' call and 'for' loop iterate over any properties of obj that aren't
+    // specified as longitude and latitude, adding them to the 'properties' property
+    // of the resulting geoJSON object.
+    var propertyKeys = Object.keys(obj).select(function(key){
+      return key != longKey && key != latKey;
+    });    
+    
+    for(var i = 0; i < propertyKeys.length; i++){
+      resultingObj['properties'][propertyKeys[i]] = obj[propertyKeys[i]];
+    }
+    
+    return resultingObj;      
+  }
+  
+        
   // The geoJSON object in thisBuildingLayer['data'] comes from 
   // one row within '/scripts/small_data/PresCat_Export_20160401/Project.csv'.
   // This is for exploratory purposes only, pending a way to load the building information 
