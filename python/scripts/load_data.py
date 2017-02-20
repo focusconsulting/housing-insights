@@ -148,8 +148,17 @@ def main(database_choice):
     - use logging.warning() to write the specific error encountered to the log file
     - at the end of loading print an error message to the console
     """
+    # Check if local database is running
+    try:
+        dbtools.start_local_database_server()
+    except Exception as e:
+        print("Could not start postgres database is docker running?")
+
     meta = load_meta_data('meta_sample.json')
     database_connection = dbtools.get_database_connection(database_choice)
+
+    # Load manifest data into a table.
+    dbtools.create_manifest_table('manifest_sample.csv')
 
     manifest = ManifestReader('manifest_sample.csv')
 
@@ -159,7 +168,7 @@ def main(database_choice):
     for manifest_row in manifest:
         logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
 
-        sql_manifest_row = get_sql_manifest_row(database_connection = database_connection, csv_row = manifest_row)
+        sql_manifest_row = get_sql_manifest_row(database_connection=database_connection, csv_row=manifest_row)
         csv_reader = DataReader(manifest_row=manifest_row)
         
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
