@@ -150,15 +150,16 @@ def main(database_choice):
     """
     # Check if local database is running
     try:
-        dbtools.start_local_database_server()
+        is_local_db_running = dbtools.check_for_local_database()
+        if not is_local_db_running:
+            dbtools.start_local_database_server()
+            # Load manifest data into a table.
+            dbtools.create_manifest_table('manifest_sample.csv')
     except Exception as e:
         print("Could not start postgres database is docker running?")
 
     meta = load_meta_data('meta_sample.json')
     database_connection = dbtools.get_database_connection(database_choice)
-
-    # Load manifest data into a table.
-    dbtools.create_manifest_table('manifest_sample.csv')
 
     manifest = ManifestReader('manifest_sample.csv')
 

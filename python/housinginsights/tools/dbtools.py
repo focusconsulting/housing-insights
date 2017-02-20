@@ -10,6 +10,7 @@ tools for connecting to the database, which can be used in all of the project fo
 ##########################################################################
 from sqlalchemy import create_engine, Column, String, Integer, MetaData, Table
 from sqlalchemy.orm import sessionmaker
+from subprocess import check_output
 import csv
 import json
 import os
@@ -47,23 +48,25 @@ def get_database_session(database_choice):
     return session
 
 
-def start_local_database_server():
+def check_for_local_database():
+    # TODO this needs to be updated, was just a quick and dirty way to check if postgres is running locally in a docker container.
+    running = False
     client = docker.from_env()
-    found_postgres = False
     containers = client.containers.list(filters={'status': 'running'})
     for container in containers:
         if 'postgres' in container.attrs['Args']:
-            found_postgres = True
+            running = True
             break
-    if found_postgres:
-        print("Local postgres server already running")
-        return
-    else:
-        client.containers.run('postgres:9.4.5', detach=True, ports={'5432/tcp': 5432})
-        conn = get_database_connection('postgres_database')
-        conn.execute("commit")
-        conn.execute("create database housinginsights_local")
-        conn.close()
+    return running
+
+
+def start_local_database_server():
+    client = docker.from_env()
+    client.containers.run('postgres:9.4.5', detach=True, ports={'5432/tcp': 5432})
+    conn = get_database_connection('postgres_database')
+    conn.execute("commit")
+    conn.execute("create database housinginsights_local")
+    conn.close()
 
 
 def create_manifest_table(manifest):
