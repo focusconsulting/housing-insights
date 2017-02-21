@@ -3,23 +3,44 @@ import csv
 import json
 import requests
 
-###### Converts meters to miles
-def getMiles(i):
-    return i*0.000621371192
+def getMiles(meters):
+    """Returns distance in miles
 
-###### Converst miles to meters
-def getMeters(i):
-    return i*1609.344
+    Parameters:
+    meters -- distance in meters
+    """
+    return meters*0.000621371192
+
+def getMeters(miles):
+    """Returns distance in meters
+
+    Parameters:
+    miles -- distance in miles
+    """
+    return miles*1609.344
 
 def getWmataHeaders(wmata_api_key):
+    """Given the wmata api key, returns the headers need for wmata REST request
+
+    Parameters:
+    wmata_api_key -- the api key for wmata REST services
+    """
     return { 'api_key': wmata_api_key }
 
-###### Gets walking distance between two locations in meters
+
 def getWalkingDistance(srcLat, srcLon, destLat, destLon, mapbox_api_key):
+    """Returns the walking distance in meters between two locations
+
+    Parameters:
+    srcLat - latitude for source location
+    srcLon - longitude for source location
+    destLat - latitude for destination location
+    destLon - longitude for destination location
+    mapbox_api_key - api key for mapbox REST services
+    """
     distReqCoords = srcLon + ',' + srcLat + ';' + destLon + ',' + destLat;
 
     mapbox_params = {'access_token':mapbox_api_key}
-
 
     #according to documentation, this doesn't work in Python SDK so switched to using REST API
     walkDistResponse = requests.get("https://api.mapbox.com/directions/v5/mapbox/walking/"+distReqCoords,
@@ -27,8 +48,16 @@ def getWalkingDistance(srcLat, srcLon, destLat, destLon, mapbox_api_key):
     return walkDistResponse.json()['routes'][0]['legs'][0]['distance']
 
 
-###### Finds all rail stations within {radiusinmeters} from the given project. Writes to given CSV file.
 def findRailStations(railStations,project,radiusinmeters,distCsvWriter, mapbox_api_key):
+    """Finds all the rail stations within a given distance from a given project.  Writes to the given CSV file.
+
+    Parameters:
+    railStations - json object containing all the wmata rail station information
+    project - housing project object
+    radiusinmeters - radius in meteres
+    distCsvWriter - csvWriter for distance
+    mapbox_api_key - api key for mapbox REST services
+    """
     lat = project['Proj_lat']
     lon = project['Proj_lon']
 
@@ -38,8 +67,16 @@ def findRailStations(railStations,project,radiusinmeters,distCsvWriter, mapbox_a
             distCsvWriter.writerow((project['Nlihc_id'],'rail',station['Code'],"{0:.2f}".format(getMiles(walkDist))))
 
 
-###### Finds all bus stations within {radiusinmeters} from the given project. Writes to given CSV file.
 def findBusStations(project, radiusinmeters, distCsvWriter, wmata_api_key, mapbox_api_key):
+    """Finds all the bus stations within a given distance from a given project.  Writes to the given CSV file.
+
+    Parameters:
+    project - housing project object
+    radiusinmeters - radius in meteres
+    distCsvWriter - csvWriter for distance
+    wmata_api_key - api key for wmata REST services
+    mapbox_api_key - api key for mapbox REST services
+    """
     lat = project['Proj_lat']
     lon = project['Proj_lon']
 
@@ -58,9 +95,13 @@ def findBusStations(project, radiusinmeters, distCsvWriter, wmata_api_key, mapbo
             distCsvWriter.writerow((project['Nlihc_id'],'bus',stop['StopID'],"{0:.2f}".format(getMiles(walkDist))))
 
 
-####### Writes rail station metadata to given CSV writer
-### Returnst the railStations info...
 def writeRailInfo(infoCsvWriter, wmata_api_key):
+    """Writes all rail station data to a given CSV writer. Returns the railStations json for future processing
+
+       Parameters:
+       infoCsvWriter - csv writer
+       wmata_api_key - api key for wmata REST services
+       """
 
     print("Writing RAIL INFO");
 
@@ -88,8 +129,14 @@ def writeRailInfo(infoCsvWriter, wmata_api_key):
 
     return railStations
 
-####### Writes bus station metadata to given CSV writer
 def writeBusInfo(infoCsvWriter, wmata_api_key):
+    """Writes all bus station data to a given CSV writer.
+
+       Parameters:
+       infoCsvWriter - csv writer
+       wmata_api_key - api key for wmata REST services
+       """
+
     print("Writing BUS INFO")
 
     wmata_headers = getWmataHeaders(wmata_api_key)
@@ -107,8 +154,15 @@ def writeBusInfo(infoCsvWriter, wmata_api_key):
         infoCsvWriter.writerow((stop['StopID'],'bus',stop['Name'],stop['Lat'],stop['Lon'],lines))
 
 
-########### MAIN #############
 def main(secretsFileName, csvInputFileName,distOutputFileName,infoOutputFileName):
+    """Writes two csvs: 1 for general bus/rail info, 1 with distances to wmata for projects
+
+   Parameters:
+   secretsFileName - json file name that contains various api keys
+   csvInputFileName - csv file with project information
+   distOutputFileName - csv file to output to for calculated metro distances for each project
+   infoOutputFileName - cvs file for general bus & rail info for each wmata station
+   """
 
     #pull API keys
     api_keys = json.loads(open(secretsFileName).read())
