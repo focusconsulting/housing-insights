@@ -38,7 +38,7 @@ def getWalkingDistance(srcLat, srcLon, destLat, destLon, mapbox_api_key):
     destLon - longitude for destination location
     mapbox_api_key - api key for mapbox REST services
     """
-    distReqCoords = srcLon + ',' + srcLat + ';' + destLon + ',' + destLat;
+    distReqCoords = srcLon + ',' + srcLat + ';' + destLon + ',' + destLat
 
     mapbox_params = {'access_token':mapbox_api_key}
 
@@ -103,7 +103,7 @@ def writeRailInfo(infoCsvWriter, wmata_api_key):
        wmata_api_key - api key for wmata REST services
        """
 
-    print("Writing RAIL INFO");
+    print("Writing RAIL INFO")
 
     wmata_headers = getWmataHeaders(wmata_api_key)
 
@@ -112,17 +112,10 @@ def writeRailInfo(infoCsvWriter, wmata_api_key):
 
     for station in railStations:
         #delimit list of lines with colon
-        lines = station['LineCode1'] #all stations have at least one line
-
-        #there is probably a more elegant way to write this...
-        if station['LineCode2'] != None:
-            lines = '{}:{}'.format(lines, station['LineCode2'])
-
-        if station['LineCode3'] != None:
-            lines = '{}:{}'.format(lines, station['LineCode3'])
-
-        if station['LineCode4'] != None:
-            lines = '{}:{}'.format(lines, station['LineCode4'])
+        lines = station["LineCode1"]  #there is always at least one station
+        for line_code in ["LineCode2", "LineCode3", "LineCode4"]:
+                if station[line_code] != None:
+                    lines += ':' + station[line_code]
 
         infoCsvWriter.writerow((station['Code'],'rail',station['Name'],str(station['Lat']),
                                                         str(station['Lon']),lines))
@@ -207,17 +200,17 @@ def main(secretsFileName, csvInputFileName,distOutputFileName,infoOutputFileName
         findBusStations(row, radius, distCsvWriter, wmata_api_key, mapbox_api_key)
         print("Completed processing bus stations for {}".format(numrow))
 
+if __name__ == '__main__':
+    if len(sys.argv) < 5:
+        print("Requires 4 arguments: [csv input file] [WMATA_DIST output file] [WMATA_INFO output file] [secrets.json]")
+    else:
+        inputFileName = sys.argv[1]
+        distOutputFileName = sys.argv[2]
+        infoOutputFileName = sys.argv[3]
+        secretsFileName = sys.argv[4]
 
-if len(sys.argv) < 5:
-    print("Requires 4 arguments: [csv input file] [WMATA_DIST output file] [WMATA_INFO output file] [secrets.json]")
-else:
-    inputFileName = sys.argv[1]
-    distOutputFileName = sys.argv[2]
-    infoOutputFileName = sys.argv[3]
-    secretsFileName = sys.argv[4]
+        print("Will read from {}".format(inputFileName))
+        print("Will write WMATA_DIST table to {}".format(distOutputFileName))
+        print("Will write WMATA_INFO table to {}".format(infoOutputFileName))
 
-    print("Will read from {}".format(inputFileName))
-    print("Will write WMATA_DIST table to {}".format(distOutputFileName))
-    print("Will write WMATA_INFO table to {}".format(infoOutputFileName))
-
-    main(secretsFileName, inputFileName, distOutputFileName, infoOutputFileName)
+        main(secretsFileName, inputFileName, distOutputFileName, infoOutputFileName)
