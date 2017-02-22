@@ -32,9 +32,25 @@
 
 // I'm not using ES6 syntax (e.g. const, let). Happy to do so if we determine it has enough browser support for the project.
 
+// add hashing function to String.prototype to hash data file names so that it can use to identify data objects
+// instead of the long string. from http://stackoverflow.com/a/7616484/5701184 modified to prepend 'd' to the return value
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr, len;
+  if (this.length === 0) return hash;
+  for (i = 0, len = this.length; i < len; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return 'd' + hash;
+};
+
+
 var app = {
     dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
-    getData: function(DATA_FILE,dataName,el,field,sortField,asc,chart,readableField){
+    getData: function(DATA_FILE, el, field, sortField, asc, readableField, chart){
+      console.log('getData');
         d3.csv(DATA_FILE, function(json) {
             json.forEach(function(obj) { 
                 for (var key in obj) {   
@@ -44,42 +60,39 @@ var app = {
                     }
                 }
             });
+            var dataName = DATA_FILE.hashCode();
             app.dataCollection[dataName] = json; // adds result of fetching data to the dataCollection
             console.log(app.dataCollection);
-           
-            PubSub.publish( dataName + '/load', '' ); // using the publish/subscribe module provided in local PubSubs.js
-                                                          // param1 = topic; param 2 = message
-                                                          // using here to publish that data has been loaded so that 
-                                                          // other Charts using the same data can be initiated  
-            chart.initialSetup(dataName,el,field,sortField,asc,readableField);
+            chart.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
         });
     }
 };
               
-var Chart = function(DATA_FILE,dataName,el,field,sortField,asc,readableField) { // Chart is called by specific chart constructors
+var Chart = function(DATA_FILE, el, field, sortField, asc, readableField) { // Chart is called by specific chart constructors
                                                                                 // in other files through Chart.call(...) method
-    this.initialize(DATA_FILE,dataName,el,field,sortField,asc,readableField); 
+    this.initialize(DATA_FILE, el, field, sortField, asc, readableField); 
 };
 // calling a new Constructor creates an object with the properties defined in the <object>.prototype such as 
 // the one defined below and runs the function literally defined in the conctructor. for more info see, among other sources,
 // the section on constructors in https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch4.md
 Chart.prototype = {
     data: [],
-    initialize: function(DATA_FILE,dataName,el,field,sortField,asc,readableField) { // parameters will be passed by the call to
+    initialize: function(DATA_FILE, el, field, sortField, asc, readableField) { // parameters will be passed by the call to
                                                                                     // the specific chart type         
         
         var chart = this; // so that `this` can be passed as parameter to app.getData
-        if (DATA_FILE) { // if DATA_FILE param is not null, fetch new data
-                         // and assign it to the app.dataCollection under name dataName
-            app.getData(DATA_FILE,dataName,el,field,sortField,asc,chart,readableField);
-        } else {         // if DATA_FILE is null proceed to intialSetup where data is defined as existing array
-                         // with name dataName in the app.dataCollection object
-            this.initialSetup(dataName,el,field,sortField,asc,readableField);
+        if (!app.dataCollection[DATA_FILE.hashCode()]) { // if dataCollection object assoc. with the data file
+                                                        // does not exis  fetch new data
+                                                        // and assign it to the app.dataCollection 
+            app.getData(DATA_FILE, el, field, sortField, asc, readableField, chart);
+        } else {  
+        console.log('already exists');       
+            this.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
         }
     },
-    initialSetup: function(dataName,el,field,sortField,asc,readableField){
-       console.log(app.dataCollection[dataName]);
-       this.data = app.dataCollection[dataName]; 
+    initialSetup: function(DATA_FILE,el,field,sortField,asc, readableField){
+       console.log(app.dataCollection[DATA_FILE.hashCode()]);
+       this.data = app.dataCollection[DATA_FILE.hashCode()]; 
        var data = this.data;
        
        data.sort(function(a, b) { // sorting data array with JS prototype sort function
@@ -94,8 +107,6 @@ Chart.prototype = {
             return d[field]
         });
        this.setup(el, field, sortField, asc, readableField); 
-console.log(this.minValue);
-console.log(this.maxValue);
     },
                       // ex: MovingBlockChart.prototype (param[0])
     extendPrototype: function(destinationPrototype, obj){ // using this function for inheritance. 
