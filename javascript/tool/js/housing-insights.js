@@ -42,9 +42,30 @@ String.prototype.hashCode = function() {
   return 'd' + hash;
 };
 
+function fromStorage(key){
+  return JSON.parse(key);
+}
+
 
 var app = {
-    dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
+    isInitialized: false,
+    initialize: function(DATA_FILE, el, field, sortField, asc, readableField, chart){
+      var housingData = sessionStorage.getItem('housingData');
+      if (housingData !== null){
+       
+        this.dataCollection = fromStorage(housingData);
+        
+      } else {
+       
+        this.dataCollection = {}; // empty object to house potentially shared data called by specific charts, see above
+      }
+      this.isInitialized = true;
+      console.log(this.isInitialized);
+       chart.initialize(DATA_FILE, el, field, sortField, asc, readableField);
+      
+      
+      
+    },
     getData: function(DATA_FILE, el, field, sortField, asc, readableField, chart){
       console.log('getData');
         d3.csv(DATA_FILE, function(json) {
@@ -59,14 +80,23 @@ var app = {
             var dataName = DATA_FILE.hashCode();
             app.dataCollection[dataName] = json; // adds result of fetching data to the dataCollection
             console.log(app.dataCollection);
+            if (typeof(Storage) !== "undefined") { // if browser supports session storage, save the dataCollection there
+              window.sessionStorage.setItem('housingData', JSON.stringify(app.dataCollection)); 
+            }
             chart.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
         });
     }
 };
               
 var Chart = function(DATA_FILE, el, field, sortField, asc, readableField) { // Chart is called by specific chart constructors
-                                                                                // in other files through Chart.call(...) method
-    this.initialize(DATA_FILE, el, field, sortField, asc, readableField); 
+          var chart = this;                                            // in other files through Chart.call(...) method
+    if (app.isInitialized){
+        console.log('already intialized');
+        this.initialize(DATA_FILE, el, field, sortField, asc, readableField); 
+    } else {
+      console.log('not yet initialized')
+      app.initialize(DATA_FILE, el, field, sortField, asc, readableField, chart);
+    }
 };
 // calling a new Constructor creates an object with the properties defined in the <object>.prototype such as 
 // the one defined below and runs the function literally defined in the constructor. for more info see, among other sources,
@@ -77,17 +107,19 @@ Chart.prototype = {
                                                                                     // the specific chart type         
         
         var chart = this; // so that `this` can be passed as parameter to app.getData
-        if (!app.dataCollection[DATA_FILE.hashCode()]) { // if dataCollection object assoc. with the data file
-                                                        // does not exist  fetch new data
-                                                        // and assign it to the app.dataCollection 
-            app.getData(DATA_FILE, el, field, sortField, asc, readableField, chart);
+        if (!app.dataCollection[DATA_FILE.hashCode()]) { // if dataCollection object assoc. with the data file doesn't exit
+            if (typeof(Storage) !== "undefined" && window.sessionStorage.housingData){
+                var retrievedObj = JSON.parse(sessionStorage.getItem('housingData'));
+            } else {
+              app.getData(DATA_FILE, el, field, sortField, asc, readableField, chart);
+            }
         } else {  
-        console.log('already exists');       
+            console.log('already exists');       
             this.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
         }
     },
     initialSetup: function(DATA_FILE,el,field,sortField,asc, readableField){
-       console.log(app.dataCollection[DATA_FILE.hashCode()]);
+       
        this.data = app.dataCollection[DATA_FILE.hashCode()]; 
        var data = this.data;
        
@@ -113,4 +145,4 @@ Chart.prototype = {
           destinationPrototype[i] = obj[i];
       } 
     } 
-}; 
+};
