@@ -62,6 +62,7 @@ class Cleaner(object):
                     row['REAC_date'] = format_date(row['REAC_date'])
         return 'CLEAN', row
 
+
 def format_date(date_string):
     if date_string == 'N':
         return 'N'

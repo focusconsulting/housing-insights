@@ -97,7 +97,7 @@ class DataReader(HIReader):
         self.s3_path = manifest_row['s3_folder'] + manifest_row['filepath']
         self.destination_table = manifest_row['destination_table']
 
-        self.download_data_file()
+        #self.download_data_file()
 
         super().__init__(self.path)
 
