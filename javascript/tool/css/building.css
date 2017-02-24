@@ -4,3 +4,11 @@
   width: 50%;
   min-width: 450px;
 }
+
+.building-info-block {
+  line-height: 0.5;
+}
+
+.building-info-block > h1 {
+  font-size: 14px;
+}
