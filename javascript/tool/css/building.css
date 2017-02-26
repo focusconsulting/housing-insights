@@ -1,8 +1,5 @@
 .mapbox-portal{
-  height: 80%;
   min-height: 300px;
-  width: 50%;
-  min-width: 450px;
 }
 
 .building-info-block {
