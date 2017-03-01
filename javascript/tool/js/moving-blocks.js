@@ -11,7 +11,7 @@ var SQUARE_WIDTH = 10, // symbolic constants all caps following convention
     ROWS = 12;
 // NEW 02/14/17: adding width and height to the parameters of the MovingBlockChart
 // NOTE: the first parameters of specific chart calls must mirror those in the Chart constructor (now 1–7);
-// parameters after tha can be additional
+// parameters after that can be additional
                                //   1         2       3     4       5       6       7 
 var MovingBlockChart = function(DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height) { 
     Chart.call(this, DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height); 
