@@ -87,6 +87,8 @@ chart.g.append("text")
 }
 };
 
+
+//var DATA_FILE =d3.csv('data/Project.csv')
 var DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
 
 // first Chart loads new data
