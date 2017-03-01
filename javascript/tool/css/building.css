@@ -1,0 +1,11 @@
+.mapbox-portal{
+  min-height: 300px;
+}
+
+.building-info-block {
+  line-height: 0.5;
+}
+
+.building-info-block > h1 {
+  font-size: 14px;
+}

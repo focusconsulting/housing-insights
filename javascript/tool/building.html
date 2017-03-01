@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Building View</title>
+  <!-- D3 v4.4.1  -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.4.1/d3.min.js"></script>
+
+  <!-- Bootstrap v3.3.7 -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  <!-- Begin Mapbox requests -->
+  <script src='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
+  <!-- end Mapbox requests -->
+
+  <!-- begin project-specific STATIC asset calls.
+       page-specific calls that require ready DOM elements called at end of <body>.
+       may change that practice later. for now we can avoid listening for window.load, document.ready, etc  -->
+  <script src="js/d3-tip.js"></script>
+  <script src="js/PubSub.js"></script>
+  <script src="js/housing-insights.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="css/tool.css">
+  <link rel="stylesheet" type="text/css" href="css/building.css">
+  <!-- end project-specific asset calls -->
+
+</head>
+<body>
+  <header class="building-header">
+    <div class="container">
+      <div class="row">
+        <a href="" class="col-sm-4" style="margin-bottom: -20px;">< Back</a>
+      </div>
+      <div class="row">
+        <h2 class="col-sm-8 building-name">Friendship Terrace</h2>
+        <div class="col-sm-4 search-bar-wrapper">
+          <p>Search for building or address</p>
+          <form id="building-search" method="get" action="" >
+            <input type="text" class="building-search-box" />
+            <input type="submit" value="Search" class="building-search-button" />
+          </form>
+        </div>
+      </div>
+
+      <div class="row">
+        <article class="col-sm-3 building-address">
+          <div class="building-info-block">
+            <h1 class="building-info-heading">Location</h1>
+            <p class="building-street">4201 Butterworth Place NW</p>
+            <p class="building-ward">Ward 3</p>
+            <p class="building-cluster">Cluster 11</p>
+          </div>
+        </article>
+        <article class="col-sm-4 building-info">
+          <div class="building-info-block">
+            <h1 class="building-info-heading">Owner</h1>
+            <p class="owner-name">Episcopal Church Home Friendship Inc.</p>
+            <p class="owner-phone">(866) 623 - 8249</p>
+            <br />
+            <h1 class="building-info-heading">Tax Assessment</h1>
+            <p class="tax-assessment-amount">$137,605</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="svg-zone">
+        <!-- circles go in here -->
+      </div>
+    </header>
+
+    <section class="accordion">
+      <section class="tile" id="chart-tile">
+        <!-- Alex's stuff  -->
+      </section>
+      <section class="tile" id="map-tile">
+        <!-- Paul's stuff -->
+        <div class="container">
+          <div class = "row">
+            <h3 class = "col-sm-12">Affordable housing nearby</h2>
+          </div>
+          <div class = "row">
+            <div class = "col-sm-6">
+              <div class="mapbox-portal" id="test-map"></div>
+            </div>
+            <div class = "col-sm-6">
+              Here's some test text.
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+  </div>
+
+  <!-- page-specific asset calls that require ready DOM elements -->
+  <script src="js/building-chart.js"></script>
+  <script src="js/building-map.js"></script>
+  <script src="js/building-header.js"></script>
+
+</body>
+</html>
