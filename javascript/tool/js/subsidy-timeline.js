@@ -1,18 +1,6 @@
 "use strict"; 
 
-/*
- * This file is an example of how to build a constructor (a specific chart) that prototypically inherits from the shared Chart
- * constructor (in housing-insight.js). The MovingBlockChart constructor inherits all methods and properties defined in Chart 
- * and add to its prototype the methods and properties specific to moving blocks.
- */
 
-var SQUARE_WIDTH = 10, // symbolic constants all caps following convention
-    SQUARE_SPACER = 2,
-    ROWS = 12;
-// NEW 02/14/17: adding width and height to the parameters of the MovingBlockChart
-// NOTE: the first parameters of specific chart calls must mirror those in the Chart constructor (now 1–7);
-// parameters after that can be additional
-                               //   1         2       3     4       5       6       7 
 var SubsidyTimelineChart = function(DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height, building) { 
     Chart.call(this, DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height, building); 
                                                                                      // First step of inheriting from Chart.
@@ -24,11 +12,14 @@ var SubsidyTimelineChart = function(DATA_FILE, dataName, el, field, sortField, a
                                                                                      // an existing object."
                                                                                      // https://www.w3schools.com/js/js_function_invocation.asp
         // extend prototype is a method of Chart, defined in housing-insights.js, which MovingBlockChart has inherited from
-                              // param1 = what to extend      param2 = with what 
-        this.extendPrototype(SubsidyTimelineChart.prototype, subsidyTimelineExtension); 
-        this.width = width;   // for extra parameters to be available in the extended prototype, they have to set
-        this.height = height; // as properties of `this`
+                              // param1 = what to extend      param2 = with what
+        this.extendPrototype(SubsidyTimelineChart.prototype, subsidyTimelineExtension);
+        this.margin = {top: 20, right: 10, bottom: 40, left: 10};         // Since this chart uses axes, I implemented the D3 margin
+        this.width = width - this.margin.left - this.margin.right;     // convention, which you may reference at https://bl.ocks.org/mbostock/3019563
+        this.height = height - this.margin.top - this.margin.bottom; 
         this.building = building;
+ 
+
         
     
   }
@@ -42,12 +33,15 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
     setup: function(el, field, sortField, asc, readableField){
         var chart = this,
             data = chart.data.filter(function(d){ return d['nlihc_id'] === chart.building}),
-            groups; // chart.data (this.data) is set in the Chart prototype, taken from app.dataCollection[dataName] 
- 
+            groups; // the groups variable is used to draw a complex figure for each datum
+        console.log(this.width, this.margin.left, this.margin.right);
         chart.svg = d3.select(el) // select elem (div#chart-0)
-                .append('svg')        // append svg element 
-                .attr('width', this.width)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
-                .attr('height', this.height);
+              .append('svg')        // append svg element 
+                .attr('width', this.width + this.margin.left + this.margin.right)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
+                .attr('height', this.height + this.margin.top + this.margin.bottom) // continuation of d3 margin convention
+              .append("g")
+                .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+
 
 
         chart.minTime = d3.min(data, function(d){
@@ -57,9 +51,9 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
           return chart.timeParser.UTC(d['poa_end']);
         });
         chart.xScale = d3.scaleTime()
-                    .domain([new Date(chart.minTime), new Date(chart.maxTime)]).range([20,600]);
+                    .domain([new Date(chart.minTime), new Date(chart.maxTime)]).range([0, .9 * this.width]);
         chart.yScale = function(i){
-              return 200/data.length * i + 20;
+              return this.height/data.length * i + 10;
           };
 
 
@@ -156,21 +150,26 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               })          
 
         chart.svg.append('g')
-                  .attr("transform", "translate(0," + 195 + ")")
+                  .attr("transform", "translate(0," + this.height + ")")
                   .call(d3.axisBottom(chart.xScale))
                   .style('stroke', 'black')
 
         chart.svg.append('line')
                   .attr('x1', chart.xScale(new Date()))
                   .attr('x2', chart.xScale(new Date()))
-                  .attr('y1', 15)
-                  .attr('y2', 160)
+                  .attr('y1', 0)
+                  .attr('y2', this.height + 20)
                   .style('stroke', 'rgba(0,0,0,.4)')
                   .style('stroke-width', 4)
+
+        chart.svg.append('text')
+                  .attr('x', chart.xScale(new Date()) - 15)
+                  .attr('y', this.height + 35)
+                  .text('Today')
       }, // end setup
 
       timeParser: {   // This is very data format dependent
-        //takes "2/1/04 0:00" and returns 2004, 2, 1     
+    
         month: function(string) {
           return string.split('/')[0];
         },
@@ -205,7 +204,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 var DATA_FILE = './project_sample_subsidy.csv';
 
 // first Chart loads new data
-new SubsidyTimelineChart(DATA_FILE,'projectCSV','#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units','100%',200, 'NL000001'); 
+new SubsidyTimelineChart(DATA_FILE,'projectCSV','#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,'NL000047'); 
 
 // second chart uses the same data as first. its constructor is wrapped in a function subscribed
 // to the publishing of the data being loaded. using this pattern, we can have several charts on a 
