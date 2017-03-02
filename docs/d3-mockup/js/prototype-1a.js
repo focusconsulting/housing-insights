@@ -128,6 +128,7 @@
                 .style('margin-top', '1em') // these two style elements are pretty arbitrary
                 .style('width', '40%');
             
+            
             d3.select('#inputSlider')		
                 .attr('min', chart.minValue)		
                 .attr('max', chart.maxValue);
