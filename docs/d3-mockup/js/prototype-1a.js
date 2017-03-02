@@ -114,9 +114,9 @@
 
             chart.buttonUnit = d3.select(el) // creates the button to randomly resort and appends it in the el (div#chart-0)
                 .append('button')
-                .text('Resort by total units')
+                .text('Resort by value')
                 .on('click', function(){
-                    chart.resort('Proj_Units_Tot');
+                    chart.resort('field');
 
 
                 });
