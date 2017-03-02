@@ -10,7 +10,7 @@ var SQUARE_WIDTH = 10, // symbolic constants all caps following convention
     SQUARE_SPACER = 2,
     ROWS = 12;
 
-// NOTE: the first parameters of specific chart calls mirror those in the Chart constructor (now 1–6);
+// NOTE: the first parameters of specific chart calls must mirror those in the Chart constructor (now 1–6);
 // parameters after tha can be additional
                                //   1      2    3         4       5       6       
 var MovingBlockChart = function(DATA_FILE, el, field, sortField, asc, readableField, width, height) { 
@@ -18,7 +18,7 @@ var MovingBlockChart = function(DATA_FILE, el, field, sortField, asc, readableFi
         // extend prototype is a method of Chart, defined in housing-insights.js, which MovingBlockChart has inherited from
                               // param1 = what to extend      param2 = with what 
         this.extendPrototype(MovingBlockChart.prototype, movingBlockExtension); 
-        
+        console.log(width);
 
         this.width = width;   // for extra parameters to be available in the extended prototype, they have to set
         this.height = height; // as properties of `this`
@@ -41,9 +41,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
     setup: function(el, field, sortField, asc, readableField){
         var chart = this,
             data = chart.data // chart.data (this.data) is set in the Chart prototype, taken from app.dataCollection[xxxx] 
-            console.log('44', data);
-            console.log(el, field, sortField, asc, readableField);
-      /*      var tool_tip = d3.tip()
+            var tool_tip = d3.tip()
                 .attr("class", "d3-tip")
                 .offset([-8, 0])
                 .direction('e')
@@ -52,13 +50,13 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
                   });
                   console.log(data);
                   console.log(el);
-                  console.log(chart.width);*/
-console.log(el);
+                  console.log(chart.width);
+
         chart.svg = d3.select(el) 
                 .append('svg')    
                 .attr('width', chart.width) 
                 .attr('height', chart.height); 
-           console.log('61');                          
+                                     
          
         chart.svg.selectAll('rect') 
             .data(data) 
@@ -67,11 +65,11 @@ console.log(el);
             .attr('width', SQUARE_WIDTH)
             .attr('height', SQUARE_WIDTH)
     
-            .attr('fill-opacity', 0.1);
-                      /*
+            .attr('fill-opacity', 0.1)
+                      
             .on('mouseover', tool_tip.show) 
             .on('mouseout', tool_tip.hide)  
-            .call(tool_tip);*/
+            .call(tool_tip);
 
         chart.scale = d3.scaleLinear().domain([chart.minValue, chart.maxValue]).range([0.1, 1]);
         chart.positionBlocks(0);
@@ -118,7 +116,7 @@ console.log(el);
     }, 
 
     positionBlocks: function(duration){
-                console.log('positionBlocks');
+                
         this.svg.selectAll('rect')
             .transition().duration(duration)
             .attr('y', function(d, i) {
@@ -205,18 +203,18 @@ var DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/de
 
 
                   // DATA_FILE,   el,          field,       sortField, asc, readableField, width, height
-// new MovingBlockChart(DATA_FILE,'#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units','100%',200); 
+new MovingBlockChart(DATA_FILE,'#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units','100%',200); 
 
 // second constructor is in a timeout function to illustrate how a later chart can use an existing data object
 // rather than fetch the data again. if called without the timeout, ihe data object would not be ready yet.
 // only for illusttation: no harm in calling it right away
 
                       
- // window.setTimeout(function(){
+  window.setTimeout(function(){
                         // DATA_FILE,   el,          field,       sortField, asc, readableField, width, height
     new MovingBlockChart(DATA_FILE,'#chart-1','Proj_Units_Tot','Proj_Units_Tot',true,'Total Units','100%',200);
                                                                                              
-  //}, 1000);
+  }, 1000);
 
 
 
