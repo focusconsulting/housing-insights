@@ -262,8 +262,7 @@
       new (chartConstructor)(chartArgsAry[0], chartArgsAry[1], chartArgsAry[2], chartArgsAry[3], chartArgsAry[4]);
     }
     
-
-  
+    
     app = {
         data: [],
         initialize: function(json) {
