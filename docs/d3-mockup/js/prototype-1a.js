@@ -127,15 +127,15 @@
                 .attr('step', '.01')      // .01 is kind of a magic number and probably should be made responsive to the data
                 .style('margin-top', '1em') // these two style elements are pretty arbitrary
                 .style('width', '40%');
+            
+            d3.select('#inputSlider')		
+                .attr('min', chart.minValue)		
+                .attr('max', chart.maxValue);
 
             chart.slider.on('mousedown', function(){ // this anonymous function wraps
                      chart.sliderAction(field);  // another function in order to pass a
                 }, false);                      // parameter despite being an event listener
         
-            d3.select('#inputSlider')		
-                .attr('min', chart.minValue)		
-                .attr('max', chart.maxValue);
-            
         },  // end setup()
 
 
