@@ -2,7 +2,7 @@
 
 /*
  *  This file contains the methods common to all d3 charts for housing insights. Specific charts
- *  are built in separate files with constructors that prototypically inherit form the Chart constructor. If prototypical
+ *  are built in separate files with constructors that prototypically inherit from the Chart constructor. If prototypical
  *  inheritance is new to you, check out https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch5.md.
  *  (among other sources). 
  *
@@ -13,11 +13,11 @@
  *  is constructed from a data file, the json object resulting from loading that data is added to the `dataCollection` object.
  *  Subsequent charts that use the same data file will use the existing data object instead of fetching the data again. A 
  *  chart that is called quickly after the first may still fetch the data because the the data from the first hasn't returned
- *  yet. That doesn't seem to casue any problems: the object just gets assigned again.
+ *  yet. That doesn't seem to cause any problems: the object just gets assigned again.
  *
  *  Other things to note:
  *
- *  1. The PubSub (publish/subscribe) module simplifies how we can connect events and the actions we want to occur as a result
+ *  1. The PubSub (publish/subscribe) module can simplify how we can connect events and the actions we want to occur as a result
  *  of that action. The module is provided by PubSub.js (MIT licence: https://github.com/mroderick/PubSubJS). Any function can
  *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. T
  *
@@ -29,7 +29,7 @@
 // I'm not using ES6 syntax (e.g. const, let). Happy to do so if we determine it has enough browser support for the project.
 
 // add hashing function to String.prototype to hash data file names so that it can use to identify data objects
-// instead of the long string. from http://stackoverflow.com/a/7616484/5701184 modified to prepend 'd' to the return value
+// instead of the long string of the DATA_FILE. from http://stackoverflow.com/a/7616484/5701184 modified to prepend 'd' to the return value
 
 String.prototype.hashCode = function() {
   var hash = 0, i, chr, len;

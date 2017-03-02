@@ -10,8 +10,9 @@ var SQUARE_WIDTH = 10, // symbolic constants all caps following convention
     SQUARE_SPACER = 2,
     ROWS = 12;
 
-// NOTE: the first parameters of specific chart calls must mirror those in the Chart constructor (now 1–6);
+// NOTE: the first parameters of specific chart calls mirror those in the Chart constructor (now 1–6);
 // parameters after tha can be additional
+                                          
                                //   1      2    3         4       5       6       
 var MovingBlockChart = function(DATA_FILE, el, field, sortField, asc, readableField, width, height) { 
         
@@ -199,15 +200,15 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
  * Constructor calls below. 
  */
 
-var DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
+var DATA_FILE ='data/Project.csv';
 
 
                   // DATA_FILE,   el,          field,       sortField, asc, readableField, width, height
 new MovingBlockChart(DATA_FILE,'#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units','100%',200); 
 
 // second constructor is in a timeout function to illustrate how a later chart can use an existing data object
-// rather than fetch the data again. if called without the timeout, ihe data object would not be ready yet.
-// only for illusttation: no harm in calling it right away
+// rather than fetch the data again. if called without the timeout, the data object would not be ready yet.
+// only for illusttation: no harm would be done by calling it right away
 
                       
   window.setTimeout(function(){
