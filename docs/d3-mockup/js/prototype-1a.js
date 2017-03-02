@@ -136,9 +136,8 @@
             chart.slider.on('mousedown', function(){ // this anonymous function wraps
                      chart.sliderAction(field);  // another function in order to pass a
                 }, false);                      // parameter despite being an event listener
-        
-        },  // end setup()
 
+        },  // end setup()
 
         positionBlocks: function(duration){
                     
