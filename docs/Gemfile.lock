@@ -34,7 +34,6 @@ GEM
     safe_yaml (1.0.4)
     sass (3.4.22)
 
-
 PLATFORMS
   ruby
 
