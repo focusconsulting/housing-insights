@@ -216,7 +216,6 @@
                         };  
         }       // end sliderAction()
 
-
     }); // end prototype
 
     Metric = function(chartConstructor, chartArgsAry){ // The second argument is an array
@@ -264,7 +263,7 @@
     }
     
 
-        
+  
     app = {
         data: [],
         initialize: function(json) {
