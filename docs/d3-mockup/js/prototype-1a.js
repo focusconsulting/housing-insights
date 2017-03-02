@@ -116,9 +116,7 @@
                 .append('button')
                 .text('Resort by value')
                 .on('click', function(){
-                    chart.resort('field');
-
-
+                    chart.resort(field);
                 });
 
             chart.slider = d3.select(el)
