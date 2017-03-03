@@ -80,6 +80,24 @@ map.addLayer({
             "line-width": 1
         }
 });
+
+map.addSource("zillow", {
+"type": "geojson",
+"data": "data/zillow.geojson"
+});
+
+map.addLayer({
+    "id": "zillow",
+    "type": "line",
+    "source": "zillow",
+    layout: {
+                visibility: 'none'
+            },
+    paint: {
+            "line-color": "#57CABD",
+            "line-width": 1
+        }
+});
 //zillow color 57CABD
 
 map.addSource("project", {
@@ -122,7 +140,7 @@ map.addSource("project", {
         },
       });
 
-var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip' ];
+var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
 
 for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
