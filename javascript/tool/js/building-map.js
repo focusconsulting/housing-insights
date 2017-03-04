@@ -70,13 +70,38 @@
     }
   }
   
+  // The MapboxPortal constructor inserts a Mapbox map into element with elementID.
+  // It always adds certain layers (the dot and label for the building-of-interest).
+  // For additional layers, name a function in onloadCAllback. The function will
+  // take the Mapbox map as an argument. 
+  MapboxPortal = function (elementID, layersArray){
+  // So far the style url and access token come from Paul's Mapbox account.
+  // FOR ACTION - find an accessToken that works for everyone.
+    mapboxgl.accessToken = 'pk.eyJ1IjoicGF1bGdvdHRzY2hsaW5nIiwiYSI6ImNpejF1Y2U3MzA1ZmQzMnA4c3N4a3FkczgifQ.6W04v2jEJFkZvVhOI-yL6A'
+    var map = new mapboxgl.Map({
+      container: elementID,
+      style: 'mapbox://styles/mapbox/streets-v9',
+      center: buildingForPage['geometry']['coordinates'],
+      zoom: 16
+    });
+    
+    // Guidance on adding layers is here: https://www.mapbox.com/mapbox-gl-js/style-spec/#layers
+    // The 'on()' function below appears to be a method of a Mapbox map, though there's no entry
+    // for 'on()' in the Mapbox JS GL API.
+    // Information on styling layers is here:
+    // https://www.mapbox.com/mapbox-gl-js/style-spec/#layer-paint
+    map.on('load', function(){
+      for(var i = 0; i < layersArray.length; i++){
+        map.addLayer(layersArray[i]);
+      }
+    });          
+  }
+  
   prepareMaps = function(ajaxResponseText){
-    console.log("prepareMaps has been called!");
 
     // FOR ACTION - we will need to change this assignment Of dataset once we start using other datasets.
     dataset = JSON.parse(ajaxResponseText);
     
-    console.log(dataset['features'][0]);
     mapboxSource = prepareSource(dataset, true);
     thisBuildingSource = prepareSource(buildingForPage, false);
     
@@ -126,52 +151,20 @@
         'text-field': "{PROJECT_NAME}",
         'text-anchor': "bottom-left"
       }
-    }
+    };
 
     new MapboxPortal('test-map', [targetBuildingDot, targetBuildingLabel, affordableHousingDots, affordableHousingLabels]);
-  }
-
-  // The MapboxPortal constructor inserts a Mapbox map into element with elementID.
-  // It always adds certain layers (the dot and label for the building-of-interest).
-  // For additional layers, name a function in onloadCAllback. The function will
-  // take the Mapbox map as an argument. 
-  MapboxPortal = function (elementID, layersArray){
-    console.log("There's a new MapboxPortal");
-    console.log("buildingForPage", buildingForPage);
-  // So far the style url and access token come from Paul's Mapbox account.
-  // FOR ACTION - find an accessToken that works for everyone.
-    mapboxgl.accessToken = 'pk.eyJ1IjoicGF1bGdvdHRzY2hsaW5nIiwiYSI6ImNpejF1Y2U3MzA1ZmQzMnA4c3N4a3FkczgifQ.6W04v2jEJFkZvVhOI-yL6A'
-    var map = new mapboxgl.Map({
-      container: elementID,
-      style: 'mapbox://styles/mapbox/streets-v9',
-      center: buildingForPage['geometry']['coordinates'],
-      zoom: 16
-    });
-    
-    // Guidance on adding layers is here: https://www.mapbox.com/mapbox-gl-js/style-spec/#layers
-    // The 'on()' function below appears to be a method of a Mapbox map, though there's no entry
-    // for 'on()' in the Mapbox JS GL API.
-    // Information on styling layers is here:
-    // https://www.mapbox.com/mapbox-gl-js/style-spec/#layer-paint
-    map.on('load', function(){
-      for(var i = 0; i < layersArray.length; i++){
-        map.addLayer(layersArray[i]);
-      }
-    });          
-  }
-    
-   // it looks like grabData isn't being called! 
-   // This might have to do with the mapbox error I'm getting: 't.classList is undefined'
+  };
+  
   (function grabData(callback){
     var req = new XMLHttpRequest();
-    console.log(callback);
-    console.log("grabData is being called!");
     req.open('GET', DATASET_URL);
     req.send();
     req.onreadystatechange = function(){
       if(req.readyState == 4){
-        return callback(req.responseText);
+        return prepareMaps(req.responseText);
       }
     }
-  })(prepareMaps);
+  })();
+
 })();
