@@ -79,40 +79,63 @@
     console.log(dataset['features'][0]);
     mapboxSource = prepareSource(dataset, true);
     thisBuildingSource = prepareSource(buildingForPage, false);
-
     
-    new MapboxPortal('test-map', function(map){
-          
-      map.addLayer({
-        'id': "buildingLocation",
-        'source': mapboxSource,
-        'type': "circle",
-        'minzoom': 11,
-        'paint': {
-          'circle-color': 'rgb(120,150,255)',
-          'circle-stroke-width': 3,
-          'circle-stroke-color': 'rgb(150,150,150)',
-          'circle-radius': 10
-        }
-      });
-      map.addLayer({
-        'id': "buildingTitle",
-        'source': mapboxSource,
-        'type': "symbol",
-        'minzoom': 11,
-        'layout': {
-          'text-field': "{PROJECT_NAME}",
-          'text-anchor': "bottom-left"
-        }
-      });
-    });
+    var targetBuildingDot = {
+      'id': "thisBuildingLocation",
+      'source': thisBuildingSource,
+      'type': 'circle',
+      'minzoom': 11,
+      'paint': {
+        'circle-color': 'red',
+        'circle-stroke-width': 3,
+        'circle-stroke-color': 'red',
+        'circle-radius': 10
+      }
+    };
+    
+    var targetBuildingLabel = {
+      'id': "thisBuildingTitle",
+      'source': thisBuildingSource,
+      'type': "symbol",
+      'minzoom': 11,
+      'layout': {
+        'text-field': "{PROJECT_NAME}",
+        'text-anchor': "bottom-left"
+      }
+    };
+    
+    var affordableHousingDots = {
+			'id': "buildingLocation",
+			'source': mapboxSource,
+			'type': "circle",
+			'minzoom': 11,
+			'paint': {
+				'circle-color': 'rgb(120,150,255)',
+				'circle-stroke-width': 3,
+				'circle-stroke-color': 'rgb(150,150,150)',
+				'circle-radius': 10
+			}
+    };
+    
+    var affordableHousingLabels = {
+      'id': "buildingTitle",
+      'source': mapboxSource,
+      'type': "symbol",
+      'minzoom': 11,
+      'layout': {
+        'text-field': "{PROJECT_NAME}",
+        'text-anchor': "bottom-left"
+      }
+    }
+
+    new MapboxPortal('test-map', [targetBuildingDot, targetBuildingLabel, affordableHousingDots, affordableHousingLabels]);
   }
 
   // The MapboxPortal constructor inserts a Mapbox map into element with elementID.
   // It always adds certain layers (the dot and label for the building-of-interest).
   // For additional layers, name a function in onloadCAllback. The function will
   // take the Mapbox map as an argument. 
-  MapboxPortal = function (elementID, onloadCallback){
+  MapboxPortal = function (elementID, layersArray){
     console.log("There's a new MapboxPortal");
     console.log("buildingForPage", buildingForPage);
   // So far the style url and access token come from Paul's Mapbox account.
@@ -131,35 +154,10 @@
     // Information on styling layers is here:
     // https://www.mapbox.com/mapbox-gl-js/style-spec/#layer-paint
     map.on('load', function(){
-      
-      map.addLayer({
-        'id': "thisBuildingLocation",
-        'source': thisBuildingSource,
-        'type': 'circle',
-        'minzoom': 11,
-        'paint': {
-          'circle-color': 'red',
-          'circle-stroke-width': 3,
-          'circle-stroke-color': 'red',
-          'circle-radius': 10
-        }
-      });
-      
-      map.addLayer({
-        'id': "thisBuildingTitle",
-        'source': thisBuildingSource,
-        'type': "symbol",
-        'minzoom': 11,
-        'layout': {
-          'text-field': "{PROJECT_NAME}",
-          'text-anchor': "bottom-left"
-        }
-      });
-      
-      if(onloadCallback){ onloadCallback(map); }
-      
-    });
-        
+      for(var i = 0; i < layersArray.length; i++){
+        map.addLayer(layersArray[i]);
+      }
+    });          
   }
     
    // it looks like grabData isn't being called! 
