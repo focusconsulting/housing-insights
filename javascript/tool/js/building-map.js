@@ -7,9 +7,7 @@
   // This dataset is for development purposes only.
   
   var MapboxPortal,
-      DATASET_URL = "http://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.geojson",
-      // dataset will likely be temporary, given that we will use other datasets!
-      dataset,
+      datasets,
       prepareSource,
       prepareMaps,
       thisBuildingSource,
@@ -44,6 +42,20 @@
           "coordinates":[-76.99087714595296,38.89995841328189]
         }
       };
+      
+      
+      // incorporate this with the 'app' object later. This will likely involve a different approach.
+      datasets = {
+        affordableHousing: {
+          url: "http://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.geojson",
+          data: {}
+        },
+        metroStations: {
+          url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
+          data: {}
+        }
+        
+      }
   
   
   // The below function turns a geoJSON object into a source object for Mapbox maps.
@@ -97,17 +109,17 @@
     });          
   }
   
-  prepareMaps = function(ajaxResponseText){
-
-    // FOR ACTION - we will need to change this assignment Of dataset once we start using other datasets.
-    dataset = JSON.parse(ajaxResponseText);
+  prepareMaps = function(){
     
-    mapboxSource = prepareSource(dataset, true);
-    thisBuildingSource = prepareSource(buildingForPage, false);
+    var sources = {
+      publicHousingSource: prepareSource(datasets['affordableHousing']['data'], true),
+      thisBuildingSource: prepareSource(buildingForPage, false),
+      metroStations: prepareSource(datasets['metroStations']['data'], false)
+    };
     
     var targetBuildingDot = {
       'id': "thisBuildingLocation",
-      'source': thisBuildingSource,
+      'source': sources['thisBuildingSource'],
       'type': 'circle',
       'minzoom': 11,
       'paint': {
@@ -120,7 +132,7 @@
     
     var targetBuildingLabel = {
       'id': "thisBuildingTitle",
-      'source': thisBuildingSource,
+      'source': sources['thisBuildingSource'],
       'type': "symbol",
       'minzoom': 11,
       'layout': {
@@ -131,7 +143,7 @@
     
     var affordableHousingDots = {
 			'id': "buildingLocation",
-			'source': mapboxSource,
+			'source': sources['publicHousingSource'],
 			'type': "circle",
 			'minzoom': 11,
 			'paint': {
@@ -144,7 +156,7 @@
     
     var affordableHousingLabels = {
       'id': "buildingTitle",
-      'source': mapboxSource,
+      'source': sources['publicHousingSource'],
       'type': "symbol",
       'minzoom': 11,
       'layout': {
@@ -152,19 +164,60 @@
         'text-anchor': "bottom-left"
       }
     };
+    
+    var metroStationDots = {
+			'id': "metroStationDots",
+			'source': sources['metroStations'],
+			'type': "circle",
+			'minzoom': 11,
+			'paint': {
+				'circle-color': 'rgb(120,150,255)',
+				'circle-stroke-width': 3,
+				'circle-stroke-color': 'green',
+				'circle-radius': 5
+			}
+    };
+    
+    var metroStationLabels = {
+      'id': "metroStationLabels",
+      'source': sources['metroStations'],
+      'type': "symbol",
+      'minzoom': 11,
+      'layout': {
+        'text-field': "{NAME}",
+        'text-anchor': "bottom-left"
+      }
+    };
 
-    new MapboxPortal('test-map', [targetBuildingDot, targetBuildingLabel, affordableHousingDots, affordableHousingLabels]);
+    new MapboxPortal('affordable-housing-map', [targetBuildingDot, targetBuildingLabel, affordableHousingDots, affordableHousingLabels]);
+    new MapboxPortal('metro-stations-map', [targetBuildingDot, targetBuildingLabel, metroStationDots, metroStationLabels]);
   };
   
-  (function grabData(callback){
-    var req = new XMLHttpRequest();
-    req.open('GET', DATASET_URL);
-    req.send();
-    req.onreadystatechange = function(){
-      if(req.readyState == 4){
-        return prepareMaps(req.responseText);
+  (function grabData(){
+   // There are weird issues with asynchronicity here, and my old approach didn't work. This was
+   // assigning an event listener to readystatechange for each request, calling prepareMaps()
+   // if a responseCount variable equaled the number of keys in datasets.
+   
+   // The next approach: try setInterval! The interval waits to see if all requests are met.
+    var ajaxRequests = {};
+    console.log('Object.keys(datasets)', Object.keys(datasets));
+    for(var i in datasets){
+      ajaxRequests[i] = new XMLHttpRequest();
+      ajaxRequests[i].open('GET', datasets[i]['url']);
+      ajaxRequests[i].send();
+      ajaxRequests[i].onreadystatechange = function(){
+        if(ajaxRequests[i].readyState == 4){
+          responseCount++;
+          console.log(responseCount);
+          datasets[i]['data'] = JSON.parse(ajaxRequests[i].responseText);
+          if(responseCount == Object.keys(datasets).length){
+            return prepareMaps();
+          }
+        }
       }
+      console.log(ajaxRequests);
     }
+
   })();
 
 })();
