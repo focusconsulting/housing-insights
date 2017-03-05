@@ -1,3 +1,5 @@
+// FOR ACTION: it doesn't seem like we can use the same source in more than one map on the same page.
+
 (function prepareBuildingMaps(){
   'use strict'
   
@@ -168,7 +170,7 @@
 			'type': "circle",
 			'minzoom': 11,
 			'paint': {
-				'circle-color': 'rgb(120,150,255)',
+				'circle-color': 'white',
 				'circle-stroke-width': 3,
 				'circle-stroke-color': 'green',
 				'circle-radius': 5
