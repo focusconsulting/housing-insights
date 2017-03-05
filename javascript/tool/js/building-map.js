@@ -1,16 +1,3 @@
-// NOW FIXING THIS ISSUE: datasets['affordableHousing']['data'] is never assigned, even
-// when it should be! After both AJAX requests are completed, datasets['metroStations']['data']
-// exists, but not datasets['affordableHousing']['data'].
-// - The program iterates through only the expected keys in dataset when producing
-//   XHR requests.
-// - If I log the ready state of each object in the 'ajaxRequests' dictionary, only
-//   metroStations gives any updates.
-// - However, the value of each key in ajaxRequests, the XHR object, has the expected
-//   responseText.
-// - At the same time, if you log 'dataset', only one key has a 'data' object as part of 
-//  its value, 'metroStations', the only key providing updates.
-
-
 (function prepareBuildingMaps(){
   'use strict'
   
@@ -59,13 +46,12 @@
       
       // incorporate this with the 'app' object later. This will likely involve a different approach.
       datasets = {
-        affordableHousing: {
-          url: "http://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.geojson"
-        },
         metroStations: {
           url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson"
-        }
-        
+        },
+        affordableHousing: {
+          url: "http://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.geojson"
+        }        
       }
   
   
@@ -127,9 +113,7 @@
       thisBuildingSource: prepareSource(buildingForPage, false),
       metroStations: prepareSource(datasets['metroStations']['data'], false)
     };
-    
-    console.log('sources near the top of prepareMaps', sources);
-    
+        
     var targetBuildingDot = {
       'id': "thisBuildingLocation",
       'source': sources['thisBuildingSource'],
@@ -166,10 +150,7 @@
 				'circle-radius': 10
 			}
     };
-    
-    console.log('thisBuildingSource', sources['thisBuildingSource']);
-    console.log('publicHousingSource', sources['publicHousingSource']);
-    
+        
     var affordableHousingLabels = {
       'id': "buildingTitle",
       'source': sources['publicHousingSource'],
@@ -206,10 +187,8 @@
     };
 
     new MapboxPortal('affordable-housing-map', [targetBuildingDot, targetBuildingLabel, affordableHousingDots, affordableHousingLabels]);
-    console.log("After the first call to new MapboxPortal");
     
-//     new MapboxPortal('metro-stations-map', [targetBuildingDot, targetBuildingLabel, metroStationDots, metroStationLabels]);
-    console.log("After the second call to new MapboxPortal");
+    new MapboxPortal('metro-stations-map', [targetBuildingDot, targetBuildingLabel, metroStationDots, metroStationLabels]);
   };
   
   (function grabData(){
@@ -222,12 +201,14 @@
       var completedRequests = Object.keys(ajaxRequests).filter(function(key){
         return ajaxRequests[key].readyState == 4;
       });
-      
-      console.log("ajaxRequests", ajaxRequests);
+            
       if(completedRequests.length == Object.keys(ajaxRequests).length){
         clearInterval(checkRequestsInterval);
-        console.log("I should be preparing the maps now");
-        console.log('datasets after all requests completed', datasets);
+        
+        for(var i in ajaxRequests){
+          var response = ajaxRequests[i].responseText;
+          datasets[i].data = JSON.parse(response);
+        }
         prepareMaps();
       }
       currentInterval = 0;
@@ -239,14 +220,6 @@
       ajaxRequests[i] = new XMLHttpRequest();
       ajaxRequests[i].open('GET', datasets[i]['url']);
       ajaxRequests[i].send();
-      ajaxRequests[i].onreadystatechange = function(){
-        console.log("Ready state for " + i, ajaxRequests[i].readyState);
-        if(ajaxRequests[i].readyState == 4){
-          var response = ajaxRequests[i].responseText;
-          console.log('ajaxRequests[i].responseText:', ajaxRequests[i].responseText);
-          datasets[i].data = JSON.parse(response);
-        }
-      }
     }
     checkRequestsInterval = setInterval(checkRequests, 500);
 
