@@ -2,7 +2,7 @@
 
 /*
  *  This file contains the methods and variables common to all d3 charts for housing insights. Specific charts
- *  are built in separate files with constructors that prototypically inherit form the Chart constructor. If prototypical
+ *  are built in separate files with constructors that prototypically inherit from the Chart constructor. If prototypical
  *  inheritance is new to you, check out https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch5.md.
  *  (among other sources). The Chart constructor is not called directly. Only specific chart constructors, like MovingBlockChart 
  *  (in moving-blocks.js) are called.
@@ -22,7 +22,7 @@
  *  of that action. The module is provided by PubSub.js (MIT licence: https://github.com/mroderick/PubSubJS). Any function can
  *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. The app.getData method below,
  *  for instance, publishes an event when a data object is loaded (when the d3.csv function in complete). Any function subscribed
- *  to that event will then fire. In moving-blocks.js, the second MovingBlockChart constructor is in a funciton subscribed to the
+ *  to that event will then fire. In moving-blocks.js, the second MovingBlockChart constructor is in a function subscribed to the
  *  that event and so only fires after the data object it needs exists.
  *
  *  2. The extendPrototype method of the Chart constructor is basically a helper function that allows us to easily and cleanly add
@@ -61,7 +61,7 @@ var Chart = function(DATA_FILE,dataName,el,field,sortField,asc,readableField) { 
     this.initialize(DATA_FILE,dataName,el,field,sortField,asc,readableField); 
 };
 // calling a new Constructor creates an object with the properties defined in the <object>.prototype such as 
-// the one defined below and runs the function literally defined in the conctructor. for more info see, among other sources,
+// the one defined below and runs the function literally defined in the constructor. For more info see, among other sources,
 // the section on constructors in https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch4.md
 Chart.prototype = {
     data: [],
