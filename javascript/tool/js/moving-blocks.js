@@ -144,7 +144,10 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
           }
           
           return value;
-      }) 
+      })
+      .attr('onclick', function(d){
+        return 'location.href="./building.html?building=' + d.Proj_address_id + '"';
+      }); 
     },
 
     resort: function(value){
