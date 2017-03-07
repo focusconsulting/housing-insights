@@ -1,14 +1,15 @@
-"use strict"; 
+"use strict";
 
 /*
  * This file is an example of how to build a constructor (a specific chart) that prototypically inherits from the shared Chart
- * constructor (in housing-insight.js). The MovingBlockChart constructor inherits all methods and properties defined in Chart 
+ * constructor (in housing-insight.js). The MovingBlockChart constructor inherits all methods and properties defined in Chart
  * and add to its prototype the methods and properties specific to moving blocks.
  */
 
 var SQUARE_WIDTH = 10, // symbolic constants all caps following convention
     SQUARE_SPACER = 2,
     ROWS = 12;
+
 
 // NOTE: the first parameters of specific chart calls mirror those in the Chart constructor (now 1–6);
 // parameters after tha can be additional
@@ -24,24 +25,37 @@ var MovingBlockChart = function(DATA_FILE, el, field, sortField, asc, readableFi
         this.width = width;   // for extra parameters to be available in the extended prototype, they have to set
         this.height = height; // as properties of `this`
         Chart.call(this, DATA_FILE, el, field, sortField, asc, readableField); 
+
                                                                                      // First step of inheriting from Chart.
                                                                                      // Call() calls a function. first param is
                                                                                      // the owner / context of the function
-                                                                                     // (the `this`). "With call() or apply() 
-                                                                                     // you can set the value of this, and 
+                                                                                     // (the `this`). "With call() or apply()
+                                                                                     // you can set the value of this, and
                                                                                      // invoke a function as a new method of
                                                                                      // an existing object."
                                                                                      // https://www.w3schools.com/js/js_function_invocation.asp
+
     
   }
 
 MovingBlockChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart. 
 
+        // extend prototype is a method of Chart, defined in housing-insights.js, which MovingBlockChart has inherited from
+                              // param1 = what to extend      param2 = with what
+        this.extendPrototype(MovingBlockChart.prototype, movingBlockExtension);
+        this.width = width;   // for extra parameters to be available in the extended prototype, they have to set
+        this.height = height; // as properties of `this`
+
+  }
+
+
 var movingBlockExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
-                             // as called in this.extendPrototype(...) above 
+                             // as called in this.extendPrototype(...) above
     setup: function(el, field, sortField, asc, readableField){
         var chart = this,
+
             data = chart.data // chart.data (this.data) is set in the Chart prototype, taken from app.dataCollection[xxxx] 
+
             var tool_tip = d3.tip()
                 .attr("class", "d3-tip")
                 .offset([-8, 0])
@@ -50,6 +64,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
                     return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>' + readableField + ': ' + d[field];  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
                   });
                   console.log(data);
+
                   console.log(el);
                   console.log(chart.width);
 
@@ -65,9 +80,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
             .append('rect') 
             .attr('width', SQUARE_WIDTH)
             .attr('height', SQUARE_WIDTH)
-    
             .attr('fill-opacity', 0.1)
-                      
             .on('mouseover', tool_tip.show) 
             .on('mouseout', tool_tip.hide)  
             .call(tool_tip);
@@ -104,7 +117,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
             .attr('step', '.01')      
             .style('margin-top', '1em') 
             .style('width', '40%');
-            
+
 
         d3.select('#inputSlider')
             .attr('min', chart.minValue)
@@ -117,7 +130,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
     }, 
 
     positionBlocks: function(duration){
-                
+
         this.svg.selectAll('rect')
             .transition().duration(duration)
             .attr('y', function(d, i) {
@@ -131,7 +144,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
     changeOpacity: function(field){
       var chart = this;
       chart.svg.selectAll('rect')
-     
+
       .transition().delay(250).duration(750)
       .attr('fill-opacity', function(d, i, array) { 
           var value;
@@ -142,21 +155,21 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
           } else {
             value = chart.scale(d[field]);
           }
-          
+
           return value;
-      }) 
+      })
     },
 
     resort: function(value){
 
-        /* for demo purposes only. production tool will have many events that trigger update and 
+        /* for demo purposes only. production tool will have many events that trigger update and
          * (potentially) resort functions. probably best and easiest to eventually  use an observer pattern
          * or pub/sub (publish/subscribe) (same thing?) pattern to connect user- ot client-inititiated events (including resize)
          * with update functions
          */
           var chart = this;
           console.log(value);
-          
+
       if (value === 'random') {
         this.svg.selectAll('rect').sort(function(a, b){
                 return d3.ascending(Math.random(), Math.random());
@@ -169,14 +182,14 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
             });
 
       }
-     
+
         this.positionBlocks(500);
 
     }, // end resort()
 
     sliderAction: function(field){
                     document.querySelector('body').addEventListener('mousemove', checkColors, false);
-                
+
                     function checkColors(event) {
                         console.log(event);
                         let value = document.querySelector('#inputSlider').value;
@@ -191,17 +204,19 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
                         d3.select('body').on('mouseup', function(){
                             document.querySelector('body').removeEventListener('mousemove', checkColors);
                         }, false);
-                    };  
+                    };
     }       // end sliderAction()
 
 }; // end prototype
 
 /*
+
  * Constructor calls below. 
  */
 
 var DATA_FILE ='data/Project.csv';
 
+// first Chart loads new data
 
                   // DATA_FILE,   el,          field,       sortField, asc, readableField, width, height
 new MovingBlockChart(DATA_FILE,'#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units','100%',200); 
@@ -216,6 +231,3 @@ new MovingBlockChart(DATA_FILE,'#chart-0','Proj_Units_Tot','Proj_Zip',false,'Tot
     new MovingBlockChart(DATA_FILE,'#chart-1','Proj_Units_Tot','Proj_Units_Tot',true,'Total Units','100%',200);
                                                                                              
   }, 1000);
-
-
-

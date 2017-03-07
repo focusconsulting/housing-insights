@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- *  This file contains the methods common to all d3 charts for housing insights. Specific charts
+ *  This file contains the methods and variables common to all d3 charts for housing insights. Specific charts
  *  are built in separate files with constructors that prototypically inherit from the Chart constructor. If prototypical
  *  inheritance is new to you, check out https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch5.md.
  *  (among other sources). 
@@ -20,6 +20,10 @@
  *  1. The PubSub (publish/subscribe) module can simplify how we can connect events and the actions we want to occur as a result
  *  of that action. The module is provided by PubSub.js (MIT licence: https://github.com/mroderick/PubSubJS). Any function can
  *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. T
+ *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. The app.getData method below,
+ *  for instance, publishes an event when a data object is loaded (when the d3.csv function in complete). Any function subscribed
+ *  to that event will then fire. In moving-blocks.js, the second MovingBlockChart constructor is in a function subscribed to the
+ *  that event and so only fires after the data object it needs exists.
  *
  *  2. The extendPrototype method of the Chart constructor is basically a helper function that allows us to easily and cleanly add
  *  methods to specfic chart types in addition to the shared prototype from Chart. It's defined here in the shared Chart "class"
@@ -69,7 +73,9 @@ var Chart = function(DATA_FILE, el, field, sortField, asc, readableField) { // C
     this.initialize(DATA_FILE, el, field, sortField, asc, readableField); 
 };
 // calling a new Constructor creates an object with the properties defined in the <object>.prototype such as 
+
 // the one defined below and runs the function literally defined in the constructor. for more info see, among other sources,
+
 // the section on constructors in https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch4.md
 Chart.prototype = {
     data: [],
