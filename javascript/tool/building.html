@@ -72,21 +72,50 @@
     </header>
 
     <section class="accordion">
+      <div class="accordion-header">
+        <span class="accordion-title">Building and Neighborhood Information</span>
+        <a class="accordion-collapser">Show All</a>
+      </div>
       <section class="tile" id="chart-tile">
-        <!-- Alex's stuff  -->
+        <div class="accordion-section-header">
+          <span class="accordion-section-title">Building Subsidy Status</span>
+          <div class="down-arrow-button arrow-button"></div>
+        </div>
+        <div class="accordion-panel subsidy-timeline-chart"></div>
       </section>
       <section class="tile" id="map-tile">
+        <div class="accordion-section-header">
+          <span class="accordion-section-title">Public Transit Accessibility</span>
+          <div class="down-arrow-button arrow-button"></div>
+        </div>
+        <div class="accordion-panel"></div>
         <!-- Paul's stuff -->
-        <div class="container">
-          <div class = "row">
-            <h3 class = "col-sm-12">Affordable housing nearby</h2>
-          </div>
-          <div class = "row">
-            <div class = "col-sm-6">
-              <div class="mapbox-portal" id="test-map"></div>
+      </section>
+      <section>
+        <div class="accordion-section-header">
+          <span class="accordion-section-title">Surrounding Area Development</span>
+          <div class="down-arrow-button arrow-button"></div>
+        </div>
+        <div class="accordion-panel"></div>
+
+      </section>
+      <section>
+        <div class="accordion-section-header">
+          <span class="accordion-section-title">Affordable Housing Nearby</span>
+          <div class="down-arrow-button arrow-button"></div>
+        </div>
+        <div class="accordion-panel">
+          <div class="container">
+            <div class = "row">
+              <h3 class = "col-sm-12">Affordable housing nearby</h3>
             </div>
-            <div class = "col-sm-6">
-              Here's some test text.
+            <div class = "row">
+              <div class = "col-sm-6">
+                <div class="mapbox-portal" id="test-map"></div>
+              </div>
+              <div class = "col-sm-6">
+                Here's some test text.
+              </div>
             </div>
           </div>
         </div>
@@ -99,6 +128,6 @@
   <script src="js/building-chart.js"></script>
   <script src="js/building-map.js"></script>
   <script src="js/building-header.js"></script>
-
+  <script type="text/javascript" src="js/accordion.js"></script>
 </body>
 </html>

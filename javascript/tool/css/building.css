@@ -9,3 +9,66 @@
 .building-info-block > h1 {
   font-size: 14px;
 }
+
+.accordion {
+	width: 100%;
+	padding: 5px;
+}
+
+.accordion-header {
+	border: 1px solid black;
+	background-color: teal;
+	color: white;
+	font-size: 24px;
+	padding: .5em;
+	position: relative;
+}
+
+
+.accordion-collapser {
+	color: white;
+	text-decoration: underline;
+	position: absolute;
+	right: .5em;
+}
+
+.accordion-collapser:hover {
+	color: #e5e5e5;
+	cursor: pointer;
+}
+
+.accordion-section-header{
+	border: 1px solid black;
+	background-color: rgba(0,128,128,.4);
+	color: black;
+	font-size: 24px;
+	padding: .5em;
+	position: relative;
+}
+
+.up-arrow-button, .down-arrow-button{
+	width: 1.2em;
+	height: 1.2em;
+	border-left: .6em solid transparent;
+	border-right: .6em solid transparent;
+	position: absolute;
+	right: .5em;
+	top: .75em;
+	cursor: pointer;
+}
+
+.down-arrow-button {
+	border-top: 1em solid #555555;
+}
+
+.up-arrow-button {
+	border-bottom: 1em solid #555555;
+}
+
+.accordion-panel{
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	height: 0px;
+	overflow: hidden;
+	transition: height .3s;
+}
