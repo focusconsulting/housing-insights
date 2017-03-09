@@ -40,13 +40,7 @@ var MovingBlockChart = function(DATA_FILE, el, field, sortField, asc, readableFi
 
 MovingBlockChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart. 
 
-        // extend prototype is a method of Chart, defined in housing-insights.js, which MovingBlockChart has inherited from
-                              // param1 = what to extend      param2 = with what
-        this.extendPrototype(MovingBlockChart.prototype, movingBlockExtension);
-        this.width = width;   // for extra parameters to be available in the extended prototype, they have to set
-        this.height = height; // as properties of `this`
-
-  }
+       
 
 
 var movingBlockExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
