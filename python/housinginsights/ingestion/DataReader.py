@@ -32,6 +32,9 @@ class HIReader(object):
                 self._length += 1
                 yield row
 
+    #TODO add __next__ method for more general purpose use
+    #https://www.ibm.com/developerworks/library/l-pycon/
+
     def __len__(self):
         if self._length is None:
             for row in self:
@@ -72,7 +75,7 @@ class ManifestReader(HIReader):
     #Completed, test created
     def has_unique_ids(self):
         '''
-        Makes sure that every value in the manifest column 'unique_data_id' is in fact unique. 
+        Makes sure that every value in the manifest column 'unique_data_id' is in fact unique.
         This makes sure that we can rely on this column to uniquely identify a source CSV file,
         and and can connect a record in the SQL manifest to the manifest.csv
         '''
@@ -129,15 +132,15 @@ class DataReader(HIReader):
             if sql_manifest_row['include_flag'] != 'loaded':
                 return True
             if sql_manifest_row['include_flag'] == 'loaded':
-                logging.info("{} is already in the database, skipping".format(self.manifest_row['unique_data_id'])) 
+                logging.info("{} is already in the database, skipping".format(self.manifest_row['unique_data_id']))
                 return False
         else:
-            logging.info("{} include_flag is {}, skipping".format(self.manifest_row['unique_data_id'], self.manifest_row['include_flag'])) 
+            logging.info("{} include_flag is {}, skipping".format(self.manifest_row['unique_data_id'], self.manifest_row['include_flag']))
             return False
 
     def do_fields_match(self, meta):
         '''
-        meta = the full meta.json nested dictionary 
+        meta = the full meta.json nested dictionary
         Checks that the csv headers match the expected values
         '''
 
@@ -149,8 +152,8 @@ class DataReader(HIReader):
 
         included = {}
 
-        #Initialize values - start out assuming all is OK until we identify problems. 
-        return_value = True                     
+        #Initialize values - start out assuming all is OK until we identify problems.
+        return_value = True
         not_found = []
 
         #Check that all of the data columns are in the meta.json
@@ -164,12 +167,14 @@ class DataReader(HIReader):
             if field['source_name'] not in self.keys:
                 not_found.append('  "{}" in meta.json not found in data'.format(field['source_name']))
                 return_value = False
-        
+
         #Log our errors if any
         if return_value == False:
             logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, not_found))
         else:
             logging.info("  do_fields_match: {}. \n    meta.json and csv field lists match completely for '{}'".format(return_value, self.destination_table))
-        
+
         return return_value
 
+
+    

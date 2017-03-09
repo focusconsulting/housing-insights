@@ -2,16 +2,27 @@ from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 
 class CleanerBase(object, metaclass=ABCMeta):
-    def __init__(self, meta, cleaned_csv='', removed_csv=''):
-        self.meta = meta
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
 
+        self.manifest_row = manifest_row
+        self.tablename = manifest_row['destination_table']
+        self.meta = meta
+        self.fields = meta[self.tablename]['fields']
+
+    def field_meta(self,field):
+        for field_meta in self.fields:
+            if f['source_name'] == field:
+                return field_meta
+            return None
+
     @staticmethod
     def replace_nulls(row):
-        for idx, value in enumerate(row):
-            if value in ('NA', '-', '+', None):
-                row[idx] = 'Null'
+        for key in row:
+            if row[key] in ('NA', '-', '+', None):
+                row[key] = 'Null'
+        return row
 
     @staticmethod
     def format_date(value):
@@ -29,6 +40,31 @@ class CleanerBase(object, metaclass=ABCMeta):
     @abstractmethod
     def clean(self):
         pass
+
+
+class GenericCleaner(CleanerBase):
+    def clean(self,row):
+        return row
+
+
+class ACSRentCleaner(CleanerBase):
+    def clean(self,row):
+        row = self.high_rent(row)
+        row = self.replace_nulls(row)
+
+        return row
+
+    def high_rent(self,row):
+        '''
+        Rent higher than the max reportable value are suppressed
+        e.g: instead of being reported as "3752", a plus sign is added
+        and the values over the max value are suppressed eg. "3,500+"
+        We assume that the actual value is the max value, and strip out the , and +
+        '''
+        if row['HD01_VD01'][-1] == "+":
+            row['HD01_VD01'] = row['HD01_VD01'].replace(',','')
+            row['HD01_VD01'] = row['HD01_VD01'].replace('+','')
+        return row
 
 
 class ParcelCleaner(CleanerBase):

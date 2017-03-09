@@ -1,5 +1,5 @@
 {
-    "buildings": {
+    "building": {
         "fields": [
             {
                 "display_name": "nlihc_id",
@@ -334,7 +334,7 @@
     },
 
 
-     "acs_rent_lower": {
+     "acs_rent_median": {
         "fields": [
             {
                 "display_name": "Full Census Tract ID",
@@ -358,8 +358,8 @@
                 "type": "text"
             },
             {
-                "display_name": "Lower Quartile Rent, ACS",
-                "display_text": "Lower quartile contract rent estimate from the American Community Survey",
+                "display_name": "Median Quartile Rent, ACS",
+                "display_text": "Median quartile contract rent estimate from the American Community Survey",
                 "source_name": "HD01_VD01",
                 "sql_name": "lower_quartile_rent",
                 "type": "integer"

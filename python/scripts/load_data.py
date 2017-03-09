@@ -5,7 +5,7 @@ import json
 import csv
 
 
-#Needed to make relative package imports when running this file as a script (i.e. for testing purposes). 
+#Needed to make relative package imports when running this file as a script (i.e. for testing purposes).
 #Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
 if __name__ == '__main__':
     import sys, os
@@ -15,17 +15,14 @@ from housinginsights.ingestion.DataReader import DataReader
 from housinginsights.tools import dbtools
 
 from housinginsights.ingestion.DataReader import DataReader, ManifestReader
-
-
+from housinginsights.ingestion import load_meta_data
 ##########################################################################
 # Summary
 ##########################################################################
 
 '''
 Loads our flat file data into the Postgres database
-'''
 
-'''
 Notes:
  - manifest.csv has every flat file that needs to be loaded (i.e. CSV's we have downloaded).
  - other scripts can get data that is available from APIs, so manifest won't reflect all the data we are including
@@ -33,9 +30,6 @@ Notes:
    (i.e. two different versions of the same data), there will be more rows in the CSV than there are 'tables' in the json.
 
 '''
-
-
-
 
 # configuration
 # See /logs/example-logging.py for usage examples
@@ -50,38 +44,6 @@ logging.getLogger().addHandler(logging.StreamHandler())
 # FUNCTIONS
 #############################
 
-# Completed, tests not written.
-def load_meta_data(filename='meta.json'):
-    """
-    Expected meta data format:
-        { tablename: {fields:[
-            {   "display_name": "Preservation Catalog ID",
-                "display_text": "description of what this field is",
-                "source_name": "Nlihc_id",
-                "sql_name": "nlihc_id",
-                "type": "object"
-            }
-            ]}
-        }
-    """
-    with open(filename) as fh:
-        meta = json.load(fh)
-
-    json_is_valid = True
-    try:
-        for table in meta:
-            for field in meta[table]['fields']:
-                for key in field:
-                    if key not in ('display_name', 'display_text', 'source_name', 'sql_name', 'type'):
-                        json_is_valid = False
-                        first_json_error = "Location: table: {}, section: {}, attribute: {}".format(table, field, key)
-                        raise ValueError("Error found in JSON, check expected format. {}".format(first_json_error))
-    except:
-        raise ValueError("Error found in JSON, check expected format.")
-
-    logging.info("{} imported. JSON format is valid: {}".format(filename, json_is_valid))
-
-    return meta
 
 
 
@@ -115,11 +77,6 @@ def get_sql_manifest_row(database_connection, csv_row):
         return None
 
 
-
-
-
-
-
 # complete, tests not written
 def drop_tables(database_choice):
     """
@@ -149,21 +106,22 @@ def main(database_choice):
     - at the end of loading print an error message to the console
     """
     # Check if local database is running
-    try:
-        is_local_db_running = dbtools.check_for_local_database()
-        if not is_local_db_running:
-            dbtools.start_local_database_server()
-            # Load manifest data into a table.
-            dbtools.create_manifest_table('manifest_sample.csv')
-    except Exception as e:
-        print("Could not start postgres database is docker running?")
+    if database_choice == "docker_database":
+        try:
+            is_local_db_running = dbtools.check_for_local_database()
+            if not is_local_db_running:
+                dbtools.start_local_database_server()
+                # Load manifest data into a table.
+                dbtools.create_manifest_table('manifest_sample.csv')
+        except Exception as e:
+            print("Could not start postgres database is docker running?")
 
     meta = load_meta_data('meta_sample.json')
     database_connection = dbtools.get_database_connection(database_choice)
 
     manifest = ManifestReader('manifest_sample.csv')
 
-    if not manifest.has_unique_ids(): 
+    if not manifest.has_unique_ids():
         raise ValueError('Manifest has duplicate unique_data_id!')
 
     for manifest_row in manifest:
@@ -171,10 +129,10 @@ def main(database_choice):
 
         sql_manifest_row = get_sql_manifest_row(database_connection=database_connection, csv_row=manifest_row)
         csv_reader = DataReader(manifest_row=manifest_row)
-        
+
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             if csv_reader.do_fields_match(meta):
-                
+
                 print("  Ready to clean {}".format(csv_reader.destination_table))
                 for data_row in csv_reader:
                     #clean rows and add them to cleaned.csv
@@ -184,7 +142,7 @@ def main(database_choice):
                     #TODO write the row to a temporary cleaned.csv file
 
                 print("  Ready to load")
-                
+
                 #TODO write the cleaned.csv to the appropriate SQL table
                 #TODO add/update the appropriate row to the SQL manifest table indicating new status
                 pass
@@ -196,13 +154,9 @@ if __name__ == '__main__':
 
     #the appropriate database name in secrets.json.
     #TODO make this changeable via sys.argv
-    database_choice = 'local_database' 
+    database_choice = 'local_database'
 
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)
 
     main(database_choice)
-
-
-
-
