@@ -18,10 +18,10 @@ class CleanerBase(object, metaclass=ABCMeta):
             return None
 
     @staticmethod
-    def replace_nulls(row):
+    def replace_nulls(row, null_values =  ['NA', '-', '+','', None]):
         for key in row:
-            if row[key] in ('NA', '-', '+', None):
-                row[key] = 0 #TODO replace this with 'Null', debugging error
+            if row[key] in null_values:
+                row[key] = 'Null' #TODO replace this with 'Null', debugging error
         return row
 
     @staticmethod
@@ -38,14 +38,18 @@ class CleanerBase(object, metaclass=ABCMeta):
             return date
 
     @abstractmethod
-    def clean(self):
+    def clean(self, row, row_num):
         pass
 
 
 class GenericCleaner(CleanerBase):
-    def clean(self,row):
+    def clean(self,row, row_num = None):
         return row
 
+class BuildingCleaner(CleanerBase):
+    def clean(self, row, row_num = None):
+        row = self.replace_nulls(row)
+        return row
 
 class ACSRentCleaner(CleanerBase):
     def clean(self,row, row_num = None):
@@ -68,6 +72,9 @@ class ACSRentCleaner(CleanerBase):
         return row
 
 
+
+
+#TODO haven't merged this original version w/ latest usage.
 class ParcelCleaner(CleanerBase):
 
     def clean(self, row):

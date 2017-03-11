@@ -230,7 +230,7 @@
                 "display_text": "",
                 "source_name": "Proj_address_id",
                 "sql_name": "proj_address_id",
-                "type": "text"
+                "type": "decimal"
             },
             {
                 "display_name": "proj_x",
@@ -279,7 +279,7 @@
                 "display_text": "",
                 "source_name": "Subsidy_info_source_property",
                 "sql_name": "subsidy_info_source_property",
-                "type": "text"
+                "type": "decimal"
             },
             {
                 "display_name": "contract_number",

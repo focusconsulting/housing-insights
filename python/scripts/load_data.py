@@ -14,7 +14,10 @@ if __name__ == '__main__':
 from housinginsights.ingestion.DataReader import DataReader
 from housinginsights.tools import dbtools
 
-from housinginsights.ingestion.DataReader import DataReader, ManifestReader
+from housinginsights.ingestion import DataReader, ManifestReader
+from housinginsights.ingestion import CSVWriter, DataReader, DataSql
+from housinginsights.ingestion import ACSRentCleaner, GenericCleaner
+from housinginsights.ingestion import BuildingCleaner
 from housinginsights.ingestion import load_meta_data
 ##########################################################################
 # Summary
@@ -48,7 +51,7 @@ logging.getLogger().addHandler(logging.StreamHandler())
 
 
 # Completed, tests incomplete
-def get_sql_manifest_row(database_connection, csv_row):
+def get_sql_manifest_row(db_conn, csv_row):
     """
     Loads the row from the manifest table that matches the unique_data_id in csv_row.
     Returns the manifest_row as a dictionary, or None if no matching database row was found
@@ -60,7 +63,7 @@ def get_sql_manifest_row(database_connection, csv_row):
     # temp
     # sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format('my_data_id')
     logging.info("  Getting SQL manifest row for {} using query {}".format(unique_data_id,sql_query))
-    query_result = database_connection.execute(sql_query)
+    query_result = db_conn.execute(sql_query)
 
     # convert the sqlAlchemy ResultProxy object into a list of dictionaries
     results = [dict(row.items()) for row in query_result]
@@ -84,8 +87,8 @@ def drop_tables(database_choice):
     """
     connect_str = dbtools.get_connect_str(database_choice)
     engine = dbtools.create_engine(connect_str)
-    database_connection = engine.connect()
-    query_result = database_connection.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+    db_conn = engine.connect()
+    query_result = db_conn.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
 
 
 def main(database_choice):
@@ -117,7 +120,7 @@ def main(database_choice):
             print("Could not start postgres database is docker running?")
 
     meta = load_meta_data('meta_sample.json')
-    database_connection = dbtools.get_database_connection(database_choice)
+    db_conn = dbtools.get_database_connection(database_choice)
 
     manifest = ManifestReader('manifest_sample.csv')
 
@@ -127,26 +130,37 @@ def main(database_choice):
     for manifest_row in manifest:
         logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
 
-        sql_manifest_row = get_sql_manifest_row(database_connection=database_connection, csv_row=manifest_row)
-        csv_reader = DataReader(manifest_row=manifest_row)
+        sql_manifest_row = get_sql_manifest_row(db_conn=db_conn, csv_row=manifest_row)
+        csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
+        csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row)
+        sql_writer = DataSql(meta = meta, manifest_row = manifest_row, db_conn=db_conn)
 
+        #Assign an appropriate testing cleaner
+        #TODO need more robust way to do this long term. get_cleaner function?
+        if manifest_row['destination_table'] == "acs_rent_median_temp":
+            cleaner = ACSRentCleaner(meta, manifest_row)
+        else:
+            cleaner = BuildingCleaner(meta, manifest_row)
+
+        #clean the file and save the output to a local pipe-delimited file
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
-            if csv_reader.do_fields_match(meta):
+            print("  Ready to clean {}".format(csv_reader.destination_table))
+            for idx, data_row in enumerate(csv_reader):
+                clean_data_row = cleaner.clean(data_row, idx)
+                if clean_data_row != None:
+                    csv_writer.write(clean_data_row)
 
-                print("  Ready to clean {}".format(csv_reader.destination_table))
-                for data_row in csv_reader:
-                    #clean rows and add them to cleaned.csv
-                    pass
-                    #TODO normalize the date functions for all date field types
-                    #TODO apply cleaning functions specific to this data file
-                    #TODO write the row to a temporary cleaned.csv file
+            csv_writer.close()
+            print("  Ready to load")
+            #TODO we are currently not appending, just dropping existing.
+            sql_writer.create_table()
+            sql_writer.write_file_to_sql()
 
-                print("  Ready to load")
 
-                #TODO write the cleaned.csv to the appropriate SQL table
-                #TODO add/update the appropriate row to the SQL manifest table indicating new status
-                pass
+            #TODO add/update the appropriate row to the SQL manifest table indicating new status
 
+    #finalize anything needed in the script
+    db_conn.close()
 
 if __name__ == '__main__':
 

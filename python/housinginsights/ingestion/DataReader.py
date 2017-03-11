@@ -93,14 +93,17 @@ class ManifestReader(HIReader):
 
 
 class DataReader(HIReader):
-    def __init__(self, manifest_row):
+    def __init__(self, meta, manifest_row):
         self.path = os.path.join(path.dirname(__file__), manifest_row['local_folder'], manifest_row['filepath'])
+
+        self.meta = meta
 
         self.manifest_row = manifest_row      #a dictionary from the manifest
         self.s3_path = manifest_row['s3_folder'] + manifest_row['filepath']
         self.destination_table = manifest_row['destination_table']
 
         #self.download_data_file()
+        self.not_found = [] #Used to log missing fields compared to meta data
 
         super().__init__(self.path)
 
@@ -124,6 +127,17 @@ class DataReader(HIReader):
 
     def should_file_be_loaded(self, sql_manifest_row):
         '''
+        Runs all the checks that the file is OK to use
+        '''
+        if self.do_fields_match() == False:
+            return False
+        if self.check_include_flag(sql_manifest_row) == False:
+            return False
+        return True
+
+
+    def check_include_flag(self, sql_manifest_row):
+        '''
         compares manifest from the csv to manifest in the database
         '''
         if self.manifest_row['include_flag'] == 'use':
@@ -138,14 +152,13 @@ class DataReader(HIReader):
             logging.info("{} include_flag is {}, skipping".format(self.manifest_row['unique_data_id'], self.manifest_row['include_flag']))
             return False
 
-    def do_fields_match(self, meta):
+    def do_fields_match(self):
         '''
-        meta = the full meta.json nested dictionary
         Checks that the csv headers match the expected values
         '''
 
         try:
-            field_list = meta[self.destination_table]['fields']
+            field_list = self.meta[self.destination_table]['fields']
         except KeyError:
             logging.info('  table "{}" not found in meta data'.format(self.destination_table))
             return False
@@ -154,27 +167,24 @@ class DataReader(HIReader):
 
         #Initialize values - start out assuming all is OK until we identify problems.
         return_value = True
-        not_found = []
+        self.not_found = []
 
         #Check that all of the data columns are in the meta.json
         for field in self.keys:
             if not any(d.get('source_name', None) == field for d in field_list):
-                not_found.append('"{}" in CSV not found in meta'.format(field))
+                self.not_found.append('"{}" in CSV not found in meta'.format(field))
                 return_value = False
 
         #Check that all the meta.json columns are in the data
         for field in field_list:
             if field['source_name'] not in self.keys:
-                not_found.append('  "{}" in meta.json not found in data'.format(field['source_name']))
+                self.not_found.append('  "{}" in meta.json not found in data'.format(field['source_name']))
                 return_value = False
 
         #Log our errors if any
         if return_value == False:
-            logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, not_found))
+            logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, self.not_found))
         else:
             logging.info("  do_fields_match: {}. \n    meta.json and csv field lists match completely for '{}'".format(return_value, self.destination_table))
 
         return return_value
-
-
-    

@@ -41,9 +41,8 @@ are we overriding or appending?
 
 
 '''
-
+import logging
 import os
-import pandas as pd
 import sys
 sys.path.append("../../")
 from housinginsights.tools import dbtools
@@ -74,29 +73,20 @@ class DataSql(HISql):
         for field in self.fields:
             self.sql_fields.append(field['sql_name'])
 
-    def read_and_write_to_sql(self, engine=None, cursor=None):
-        if engine != None:
-            csv_df = pd.read_csv(self.filename, delimiter="|")
-            csv_df['unique_data_id'] = self.unique_data_id
-            csv_df.to_sql(self.tablename, engine, if_exists='append')
-        if cursor != None:
-            print("using cursor!")
-            print(cursor)
-            with open(self.filename, 'r') as f:
-                cursor.copy_from(f, self.tablename, sep='|', null='Null', columns=None)
+    def write_file_to_sql(self):
+        #TODO let this use existing session/connection/engine instead?
+        engine = dbtools.get_database_engine("local_database")
+        ses = sessionmaker(bind=engine)
 
-        else:
-            engine = dbtools.get_database_engine("local_database")
-            ses = sessionmaker(bind=engine)
+        with open(self.filename, 'r') as f:
+            #copy_from is only available on the psycopg2 object, we need to dig in to get it
+            fake_conn = engine.raw_connection()
+            fake_cur = fake_conn.cursor()
+            fake_cur.copy_from(f, self.tablename, sep='|', null='Null', columns=None)
+            fake_conn.commit()
+            fake_conn.close()
 
-            with open(self.filename, 'r') as f:
-                fake_conn = engine.raw_connection()
-                fake_cur = fake_conn.cursor()
-                fake_cur.copy_from(f, self.tablename, sep='|', null='Null', columns=None)
-                fake_conn.commit()
-
-                print("tried to commit changes")
-
+            logging.info("  data file loaded into database")
 
     def create_table(self):
         #TODO use a better way to not drop if no table
