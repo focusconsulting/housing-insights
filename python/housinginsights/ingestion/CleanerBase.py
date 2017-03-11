@@ -21,7 +21,7 @@ class CleanerBase(object, metaclass=ABCMeta):
     def replace_nulls(row):
         for key in row:
             if row[key] in ('NA', '-', '+', None):
-                row[key] = 'Null'
+                row[key] = 0 #TODO replace this with 'Null', debugging error
         return row
 
     @staticmethod
@@ -48,10 +48,11 @@ class GenericCleaner(CleanerBase):
 
 
 class ACSRentCleaner(CleanerBase):
-    def clean(self,row):
+    def clean(self,row, row_num = None):
         row = self.high_rent(row)
         row = self.replace_nulls(row)
-
+        if row_num == 0:
+            return None
         return row
 
     def high_rent(self,row):

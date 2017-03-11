@@ -108,7 +108,7 @@ def main(database_choice):
     # Check if local database is running
     if database_choice == "docker_database":
         try:
-            is_local_db_running = dbtools.check_for_local_database()
+            is_local_db_running = dbtools.check_for_docker_database()
             if not is_local_db_running:
                 dbtools.start_local_database_server()
                 # Load manifest data into a table.
@@ -146,8 +146,6 @@ def main(database_choice):
                 #TODO write the cleaned.csv to the appropriate SQL table
                 #TODO add/update the appropriate row to the SQL manifest table indicating new status
                 pass
-
-
 
 
 if __name__ == '__main__':

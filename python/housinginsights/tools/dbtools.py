@@ -14,7 +14,7 @@ from subprocess import check_output
 import csv
 import json
 import os
-import docker
+#import docker
 
 secrets_filepath = os.path.join(os.path.dirname(__file__), '../secrets.json')
 
@@ -38,7 +38,12 @@ def get_database_connection(database_choice):
     database_connection = engine.connect()
     return database_connection
 
-
+def get_database_engine(database_choice):
+    # Connect to the database
+    connection_string = get_connect_str(database_choice)
+    engine = create_engine(connection_string)
+    return engine
+    
 def get_database_session(database_choice):
     # Connect to the database
     connection_string = get_connect_str(database_choice)
@@ -47,8 +52,13 @@ def get_database_session(database_choice):
     session = Session()
     return session
 
+def get_psycopg2_cursor(database_choice):
+    connection_string = get_connect_str(database_choice)
+    engine = create_engine(connection_string)
+    cursor = engine.raw_connection().cursor()
+    return cursor
 
-def check_for_local_database():
+def check_for_docker_database():
     # TODO this needs to be updated, was just a quick and dirty way to check if postgres is running locally in a docker container.
     running = False
     client = docker.from_env()
