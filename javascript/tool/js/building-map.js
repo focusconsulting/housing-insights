@@ -1,5 +1,3 @@
-// FOR ACTION: it doesn't seem like we can use the same source in more than one map on the same page.
-
 (function prepareBuildingMaps(){
   'use strict'
   
@@ -13,6 +11,7 @@
       prepareSource,
       prepareMaps,
       thisBuildingSource,
+      ProtoLayer,
       mapboxSource,
   // NOTE: Until we have a backend that identifies the building a user has chosen to look at
   // (or accomplish this with AJAX), buildingForPage specifies the building that the page is
@@ -44,7 +43,6 @@
           "coordinates":[-76.99087714595296,38.89995841328189]
         }
       };
-      
       
       // incorporate this with the 'app' object later. This will likely involve a different approach.
       datasets = {
@@ -81,11 +79,24 @@
     }
   };
   
-  // The MapboxPortal constructor inserts a Mapbox map into element with elementID.
-  // It always adds certain layers (the dot and label for the building-of-interest).
-  // For additional layers, name a function in onloadCAllback. The function will
-  // take the Mapbox map as an argument. 
-  MapboxPortal = function (elementID, layersArray){
+  // You call MapboxPortal with a ProtoLayer to ensure that source IDs are unique and that
+  // sources can be called with MapboxPortal after they load.
+  // This is because a Mapbox layer's 'source' property refers to an ID, rather than the source
+  // itself. Binding the source itself to the same object as the layer helps keep things
+  // orderly for calling MapboxPortal.
+  // layerObj is an object literal that you'd use to assign properties to a Mapbox layer.
+  // source is an object literal that you'd use to assign properties to any Mapbox source.
+  ProtoLayer = function(layerObj, source){
+    this.obj = layerObj;
+    this.source = source;
+  }
+  
+  //   The id of an html element        an array of ProtoLayer objects, which bundle 
+  //                        |           an object literal for a layer with an object literal
+  //                        |           for a source.
+  //                        |                    |
+  //                        V                    V 
+  MapboxPortal = function (elementID, protoLayersArray){
   // So far the style url and access token come from Paul's Mapbox account.
   // FOR ACTION - find an accessToken that works for everyone.
     mapboxgl.accessToken = 'pk.eyJ1IjoicGF1bGdvdHRzY2hsaW5nIiwiYSI6ImNpejF1Y2U3MzA1ZmQzMnA4c3N4a3FkczgifQ.6W04v2jEJFkZvVhOI-yL6A'
@@ -102,10 +113,16 @@
     // Information on styling layers is here:
     // https://www.mapbox.com/mapbox-gl-js/style-spec/#layer-paint
     map.on('load', function(){
-      for(var i = 0; i < layersArray.length; i++){
-        map.addLayer(layersArray[i]);
+      for(var i = 0; i < protoLayersArray.length; i++){
+        // Name a new source after the layer object's 'source' property within ProtoLayer
+        if(!map.getSource(protoLayersArray[i]['obj']['source'])){
+          map.addSource(protoLayersArray[i]['obj']['source'], protoLayersArray[i]['source']);
+        }
+        // Add the layer, which now refers to a source that's been loaded into map.
+        map.addLayer(protoLayersArray[i]['obj']);
       }
-    });          
+    });
+    
   }
   
   prepareMaps = function(){
@@ -116,9 +133,9 @@
       metroStations: prepareSource(datasets['metroStations']['data'], false)
     };
         
-    var targetBuildingDot = {
+    var targetBuildingDot = new ProtoLayer({
       'id': "thisBuildingLocation",
-      'source': sources['thisBuildingSource'],
+      'source': 'thisBuildingSource',
       'type': 'circle',
       'minzoom': 11,
       'paint': {
@@ -127,22 +144,22 @@
         'circle-stroke-color': 'red',
         'circle-radius': 10
       }
-    };
+    }, sources['thisBuildingSource']);
     
-    var targetBuildingLabel = {
+    var targetBuildingLabel = new ProtoLayer({
       'id': "thisBuildingTitle",
-      'source': sources['thisBuildingSource'],
+      'source': 'thisBuildingSource',
       'type': "symbol",
       'minzoom': 11,
       'layout': {
         'text-field': "{PROJECT_NAME}",
         'text-anchor': "bottom-left"
       }
-    };
+    }, sources['thisBuildingSource']);
     
-    var affordableHousingDots = {
+    var affordableHousingDots = new ProtoLayer({
 			'id': "buildingLocation",
-			'source': sources['publicHousingSource'],
+			'source': 'publicHousingSource',
 			'type': "circle",
 			'minzoom': 11,
 			'paint': {
@@ -151,22 +168,22 @@
 				'circle-stroke-color': 'rgb(150,150,150)',
 				'circle-radius': 10
 			}
-    };
+    }, sources['publicHousingSource']);
         
-    var affordableHousingLabels = {
+    var affordableHousingLabels = new ProtoLayer({
       'id': "buildingTitle",
-      'source': sources['publicHousingSource'],
+      'source': 'publicHousingSource',
       'type': "symbol",
       'minzoom': 11,
       'layout': {
         'text-field': "{PROJECT_NAME}",
         'text-anchor': "bottom-left"
       }
-    };
+    }, sources['publicHousingSource']);
     
-    var metroStationDots = {
+    var metroStationDots = new ProtoLayer({
 			'id': "metroStationDots",
-			'source': sources['metroStations'],
+			'source': 'metroStations',
 			'type': "circle",
 			'minzoom': 11,
 			'paint': {
@@ -175,22 +192,22 @@
 				'circle-stroke-color': 'green',
 				'circle-radius': 5
 			}
-    };
+    }, sources['metroStations']);
     
-    var metroStationLabels = {
+    var metroStationLabels = new ProtoLayer({
       'id': "metroStationLabels",
-      'source': sources['metroStations'],
+      'source': 'metroStations',
       'type': "symbol",
       'minzoom': 11,
       'layout': {
         'text-field': "{NAME}",
         'text-anchor': "bottom-left"
       }
-    };
+    }, sources['metroStations']);
 
-    new MapboxPortal('affordable-housing-map', [targetBuildingDot, targetBuildingLabel, affordableHousingDots, affordableHousingLabels]);
+    new MapboxPortal('affordable-housing-map', [targetBuildingDot, affordableHousingDots, affordableHousingLabels, targetBuildingLabel]);
     
-    new MapboxPortal('metro-stations-map', [targetBuildingDot, targetBuildingLabel, metroStationDots, metroStationLabels]);
+    new MapboxPortal('metro-stations-map', [targetBuildingDot, metroStationDots, targetBuildingLabel, metroStationLabels]);
   };
   
   (function grabData(){
