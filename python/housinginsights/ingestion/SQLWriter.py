@@ -47,6 +47,7 @@ import sys
 sys.path.append("../../")
 from housinginsights.tools import dbtools
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import ProgrammingError
 
 
 class HISql(object):
@@ -54,33 +55,37 @@ class HISql(object):
         pass
 
 class DataSql(HISql):
-    def __init__(self, meta, manifest_row, db_conn, filename=None):
+    def __init__(self, meta, manifest_row, engine, filename=None):
 
         self.meta = meta
         self.manifest_row = manifest_row
-        self.db_conn = db_conn
+        self.engine = engine
 
         #extract some values for convenience
         self.unique_data_id = self.manifest_row["unique_data_id"]
         self.tablename = self.manifest_row["destination_table"]
-        self.fields = meta[self.tablename]['fields']
+        self.metafields = meta[self.tablename]['fields']
 
         #assign defaults
         self.filename = 'temp_{}.psv'.format(self.tablename) if filename == None else filename
 
         #convert fields dictionary to lists
         self.sql_fields = []
-        for field in self.fields:
+        self.sql_field_types = []
+        for field in self.metafields:
             self.sql_fields.append(field['sql_name'])
+            self.sql_field_types.append(field['type'])
+        self.sql_fields.append('unique_data_id')
+        self.sql_field_types.append('text')
+
 
     def write_file_to_sql(self):
         #TODO let this use existing session/connection/engine instead?
-        engine = dbtools.get_database_engine("local_database")
-        ses = sessionmaker(bind=engine)
+        #engine = dbtools.get_database_engine("local_database")
 
         with open(self.filename, 'r') as f:
             #copy_from is only available on the psycopg2 object, we need to dig in to get it
-            fake_conn = engine.raw_connection()
+            fake_conn = self.engine.raw_connection()
             fake_cur = fake_conn.cursor()
             fake_cur.copy_from(f, self.tablename, sep='|', null='Null', columns=None)
             fake_conn.commit()
@@ -89,15 +94,33 @@ class DataSql(HISql):
             logging.info("  data file loaded into database")
 
     def create_table(self):
-        #TODO use a better way to not drop if no table
-        self.db_conn.execute("DROP TABLE {}".format(self.tablename))
+        '''
+        Creates the table associated with this data file if it doesn't already exist
+        '''
+        #TODO - a better long-term solution to this might be SQLAlchemy metadata: http://www.mapfish.org/doc/tutorials/sqlalchemy.html
+        
+        db_conn = self.engine.connect()
+        
+        try:
+            db_conn.execute("SELECT * FROM {}".format(self.tablename))
+            logging.info("  Did not create table because it already exists")
+        except ProgrammingError:
+            field_statements = []
+            for idx, field in enumerate(self.sql_fields):
+                field_statements.append(field + " " + self.sql_field_types[idx])
+            field_command = ",".join(field_statements)
+            create_command = "CREATE TABLE {}({});".format(self.tablename, field_command)
+            db_conn.execute(create_command)
 
-        field_commands = []
-        for field in self.fields:
-            field_commands.append(field['sql_name'] + " " + field['type'])
-        field_command = ",".join(field_commands)
-        create_command = "CREATE TABLE {}({});".format(self.tablename, field_command)
-        self.db_conn.execute(create_command)
+        db_conn.close()
+
+    def drop_table(self):
+        db_conn = self.engine.connect()
+        try:
+            db_conn.execute("DROP TABLE {}".format(self.tablename))
+        except ProgrammingError:
+            logging.warning("Table {} does can't be dropped because it doesn't exist".format(self.tablename))
+        db_conn.close()
 
     # check to see if table exists in database - look up how to iterate through sqlalchemy database when connected - stackoverflow
 

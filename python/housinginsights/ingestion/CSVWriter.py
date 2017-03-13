@@ -3,6 +3,7 @@
 
 from csv import DictWriter
 import os
+import copy
 
 
 class CSVWriter(object):
@@ -24,33 +25,39 @@ class CSVWriter(object):
         self.fields = meta[self.tablename]['fields']
 
         #DictWriter needs a list of fields, in order, with the same key as the row dict
-        #Meanwhile, we'll use the sql version of the headers in the temp file
+        #sql_fields could be used in the header row. Currently not using because psycopg2 doesn't like it.
         self.csv_fields = []
         self.sql_fields = []
         for field in self.fields:
             self.csv_fields.append(field['source_name'])
             self.sql_fields.append(field['sql_name'])
 
+        #We always want to append this to every table. write() should also append this to provided data
+        self.dictwriter_fields = copy.copy(self.csv_fields)
+        self.dictwriter_fields.append('unique_data_id')
+        self.sql_fields.append('unique_data_id')
+
         #By default, creates a temp csv file wherever the calling module was located
         self.filename = 'temp_{}.psv'.format(self.tablename) if filename == None else filename
+        
         try:
             os.remove(self.filename)
         except OSError:
             pass
 
-        #Using psycopg2 copy_from does not like having headers in the file.
-        #self.file = open(self.filename, 'w', newline='')
-        #headerwriter = DictWriter(self.file, fieldnames = self.sql_fields, delimiter="|")
-        #headerwriter.writeheader()
-        #self.file.close()
-        #print("header written")
+        #Using psycopg2 copy_from does not like having headers in the file. Commenting out
+            #self.file = open(self.filename, 'w', newline='')
+            #headerwriter = DictWriter(self.file, fieldnames = self.sql_fields, delimiter="|")
+            #headerwriter.writeheader()
+            #self.file.close()
+            #print("header written")
 
         self.file = open(self.filename, 'a', newline='')
-        self.writer = DictWriter(self.file, fieldnames=self.csv_fields, delimiter="|")
-        print("ready to append")
+        self.writer = DictWriter(self.file, fieldnames=self.dictwriter_fields, delimiter="|")
+
 
     def write(self, row):
-
+        row['unique_data_id'] = self.manifest_row['unique_data_id']
         self.writer.writerow(row)
 
     def open(self):

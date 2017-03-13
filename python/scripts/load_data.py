@@ -51,7 +51,7 @@ logging.getLogger().addHandler(logging.StreamHandler())
 
 
 # Completed, tests incomplete
-def get_sql_manifest_row(db_conn, csv_row):
+def get_sql_manifest_row(engine, csv_row):
     """
     Loads the row from the manifest table that matches the unique_data_id in csv_row.
     Returns the manifest_row as a dictionary, or None if no matching database row was found
@@ -62,11 +62,14 @@ def get_sql_manifest_row(db_conn, csv_row):
 
     # temp
     # sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format('my_data_id')
-    logging.info("  Getting SQL manifest row for {} using query {}".format(unique_data_id,sql_query))
+    #logging.info("  Getting SQL manifest row for {} using query {}".format(unique_data_id,sql_query))
+    db_conn = engine.connect()
     query_result = db_conn.execute(sql_query)
 
     # convert the sqlAlchemy ResultProxy object into a list of dictionaries
     results = [dict(row.items()) for row in query_result]
+
+    db_conn.close()
 
     # We expect there to be exactly one row matching the query if the csv_row is already in the database
     if len(results) > 1:
@@ -85,8 +88,7 @@ def drop_tables(database_choice):
     """
     used to rebuild the database by first dropping all tables before running main()
     """
-    connect_str = dbtools.get_connect_str(database_choice)
-    engine = dbtools.create_engine(connect_str)
+    engine = dbtools.get_database_engine(database_choice)
     db_conn = engine.connect()
     query_result = db_conn.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
 
@@ -120,8 +122,7 @@ def main(database_choice):
             print("Could not start postgres database is docker running?")
 
     meta = load_meta_data('meta_sample.json')
-    db_conn = dbtools.get_database_connection(database_choice)
-
+    engine = dbtools.get_database_engine(database_choice)
     manifest = ManifestReader('manifest_sample.csv')
 
     if not manifest.has_unique_ids():
@@ -130,10 +131,10 @@ def main(database_choice):
     for manifest_row in manifest:
         logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
 
-        sql_manifest_row = get_sql_manifest_row(db_conn=db_conn, csv_row=manifest_row)
+        sql_manifest_row = get_sql_manifest_row(engine = engine, csv_row=manifest_row)
         csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
         csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row)
-        sql_writer = DataSql(meta = meta, manifest_row = manifest_row, db_conn=db_conn)
+        sql_writer = DataSql(meta = meta, manifest_row = manifest_row, engine = engine)
 
         #Assign an appropriate testing cleaner
         #TODO need more robust way to do this long term. get_cleaner function?
@@ -152,15 +153,15 @@ def main(database_choice):
 
             csv_writer.close()
             print("  Ready to load")
-            #TODO we are currently not appending, just dropping existing.
+            
+            #Uncomment this to drop instead of append. 
+            #TODO add parameter to handle dropping data vs. appending. Should work w/ manifest.
+            #sql_writer.drop_table()
+            
             sql_writer.create_table()
             sql_writer.write_file_to_sql()
 
-
             #TODO add/update the appropriate row to the SQL manifest table indicating new status
-
-    #finalize anything needed in the script
-    db_conn.close()
 
 if __name__ == '__main__':
 
