@@ -132,28 +132,28 @@
                 "display_text": "",
                 "source_name": "Subsidy_Start_First",
                 "sql_name": "subsidy_start_first",
-                "type": "text"
+                "type": "date"
             },
             {
                 "display_name": "subsidy_start_last",
                 "display_text": "",
                 "source_name": "Subsidy_Start_Last",
                 "sql_name": "subsidy_start_last",
-                "type": "text"
+                "type": "date"
             },
             {
                 "display_name": "subsidy_end_first",
                 "display_text": "",
                 "source_name": "Subsidy_End_First",
                 "sql_name": "subsidy_end_first",
-                "type": "text"
+                "type": "date"
             },
             {
                 "display_name": "subsidy_end_last",
                 "display_text": "",
                 "source_name": "Subsidy_End_Last",
                 "sql_name": "subsidy_end_last",
-                "type": "text"
+                "type": "date"
             },
             {
                 "display_name": "ward2012",

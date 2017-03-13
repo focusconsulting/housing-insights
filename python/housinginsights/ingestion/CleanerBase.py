@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
+import dateutil.parser as dateparser
 
 class CleanerBase(object, metaclass=ABCMeta):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
@@ -9,7 +10,9 @@ class CleanerBase(object, metaclass=ABCMeta):
         self.manifest_row = manifest_row
         self.tablename = manifest_row['destination_table']
         self.meta = meta
-        self.fields = meta[self.tablename]['fields']
+        self.fields = meta[self.tablename]['fields'] #a list of dicts
+
+        self.null_value = 'Null' #what the SQLwriter expects in the temp csv
 
     def field_meta(self,field):
         for field_meta in self.fields:
@@ -17,25 +20,39 @@ class CleanerBase(object, metaclass=ABCMeta):
                 return field_meta
             return None
 
-    @staticmethod
-    def replace_nulls(row, null_values =  ['NA', '-', '+','', None]):
+    def replace_nulls(self, row, null_values =  ['NA', '-', '+','', None]):
         for key in row:
             if row[key] in null_values:
-                row[key] = 'Null' #TODO replace this with 'Null', debugging error
+                row[key] = self.null_value
         return row
 
-    @staticmethod
-    def format_date(value):
+    
+    def format_date(self, value):
         date = None
         try:
-            _date = datetime.strptime(value, '%m/%d/%Y')
+            _date = dateparser.parse(value,dayfirst=False, yearfirst=False)
+            #_date = datetime.strptime(value, '%m/%d/%Y')
             date = datetime.strftime(_date, '%Y-%m-%d')
         except Exception as e:
+            #TODO add logging w/ full info
             print("Unable to format date properly")
         finally:
             if date is None:
-                date = 'Null'
+                date = self.null_value
             return date
+
+    def parse_dates(self, row):
+        '''
+        Tries to automatically parse all dates that are of type:'date' in the meta
+        '''
+        date_fields = []
+        for field in self.fields:
+            if field['type'] == 'date':
+                date_fields.append(field['source_name'])
+
+        for source_name in date_fields:
+            row[source_name] = self.format_date(row[source_name])
+        return row
 
     @abstractmethod
     def clean(self, row, row_num):
@@ -49,7 +66,9 @@ class GenericCleaner(CleanerBase):
 class BuildingCleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row)
+        row = self.parse_dates(row)
         return row
+    
 
 class ACSRentCleaner(CleanerBase):
     def clean(self,row, row_num = None):

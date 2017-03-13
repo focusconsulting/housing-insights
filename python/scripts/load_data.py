@@ -156,7 +156,7 @@ def main(database_choice):
             
             #Uncomment this to drop instead of append. 
             #TODO add parameter to handle dropping data vs. appending. Should work w/ manifest.
-            #sql_writer.drop_table()
+            sql_writer.drop_table()
             
             sql_writer.create_table()
             sql_writer.write_file_to_sql()
