@@ -1,6 +1,6 @@
 import logging
 import json
-
+from sqlalchemy.exc import ProgrammingError
 
 # Completed, tests not written.
 def load_meta_data(filename='meta.json'):
@@ -34,3 +34,77 @@ def load_meta_data(filename='meta.json'):
     logging.info("{} imported. JSON format is valid: {}".format(filename, json_is_valid))
 
     return meta
+
+
+def check_or_create_sql_manifest(engine, rebuild=False):
+    '''
+    Makes sure we have a manifest table in the database. 
+    If not, it creates it with appropriate fields. 
+
+    This corresponds to the manifest.csv file, which contains a log
+    of all the individual data files we have used as well as which
+    table they each go into. 
+
+    The csv version of the manifest includes all files we have ever
+    used, including ones not in the database. 
+
+    The SQL version of the manifest only tracks those that have been
+    written to the database, and whether they are still there or 
+    have been deleted.
+
+    engine = the SQLalchemy engine to get to the database
+    rebuild = Boolean as to whether to drop the table first. 
+    '''
+    try:
+        db_conn = engine.connect()
+        sql_query = "SELECT * FROM manifest"
+        query_result = db_conn.execute(sql_query)
+        results = [dict(row.items()) for row in query_result]
+        db_conn.close()
+        return True
+    except ProgrammingError as e:
+        try:
+            #Create the query with appropriate fields and datatypes
+            db_conn = engine.connect()
+            fields = [
+                ("status","text"),
+                ("load_date", "timestamp"),
+                ("include_flag","text"),
+                ("destination_table","text"),
+                ("unique_data_id","text"),
+                ("data_date","date"),
+                ("local_folder","text"),
+                ("s3_folder","text"),
+                ("filepath","text"),
+                ("notes","text")
+                ]
+            field_statements = []
+            for tup in fields:
+                field_statements.append(tup[0] + " " + tup[1])
+            field_command = ",".join(field_statements)
+            create_command = "CREATE TABLE manifest({});".format(field_command)
+            db_conn.execute(create_command)
+            db_conn.close()
+            logging.info("Manifest table created in the SQL database")
+            return True
+
+        except Exception as e:
+            raise e
+
+
+#Used for testing purposes
+if __name__ == '__main__':
+    import sys, os
+    sys.path.append(os.path.abspath('../../'))
+    from housinginsights.tools import dbtools
+
+    logging_filename = "../../logs/ingestion.log"
+    logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    engine = dbtools.get_database_engine('local_database')
+    
+    #Run the test
+    sql_manifest_exists = check_or_create_sql_manifest(engine=engine)
+    print("sql_manifest_exists: {}".format(sql_manifest_exists))
+

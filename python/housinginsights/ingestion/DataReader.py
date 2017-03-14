@@ -6,6 +6,8 @@ import os
 
 import logging
 from urllib.request import urlretrieve
+from datetime import datetime
+import dateutil.parser as dateparser
 
 #DataReader edits (FYI for Walt):
 # -Renamed DataReader to HIReader (housing insights reader); extended 2 versions of it (ManifestReader and DataReader)
@@ -72,6 +74,23 @@ class ManifestReader(HIReader):
         super().__init__(path)
         self.unique_ids = {}            #from the unique_id column in the manifest
 
+
+    def __iter__(self):
+        self._length = 0
+        self._counter = Counter()
+        with open(self.path, 'rU') as data:
+            reader = DictReader(data)
+            self._keys = reader.fieldnames
+            for row in reader:
+                self._length += 1
+
+                #parse the date into proper format for sql 
+                _date = dateparser.parse(row['data_date'],dayfirst=False, yearfirst=False)
+                row['data_date'] = datetime.strftime(_date, '%Y-%m-%d')
+
+                #return the row
+                yield row
+
     #Completed, test created
     def has_unique_ids(self):
         '''
@@ -102,7 +121,9 @@ class DataReader(HIReader):
         self.s3_path = manifest_row['s3_folder'] + manifest_row['filepath']
         self.destination_table = manifest_row['destination_table']
 
-        #self.download_data_file()
+        if self.manifest_row['include_flag'] == 'use':
+            self.download_data_file()
+
         self.not_found = [] #Used to log missing fields compared to meta data
 
         super().__init__(self.path)
@@ -143,13 +164,13 @@ class DataReader(HIReader):
         if self.manifest_row['include_flag'] == 'use':
             if sql_manifest_row == None:
                 return True
-            if sql_manifest_row['include_flag'] != 'loaded':
+            if sql_manifest_row['status'] != 'loaded':
                 return True
-            if sql_manifest_row['include_flag'] == 'loaded':
-                logging.info("{} is already in the database, skipping".format(self.manifest_row['unique_data_id']))
+            if sql_manifest_row['status'] == 'loaded':
+                logging.info("  {} is already in the database, skipping".format(self.manifest_row['unique_data_id']))
                 return False
         else:
-            logging.info("{} include_flag is {}, skipping".format(self.manifest_row['unique_data_id'], self.manifest_row['include_flag']))
+            logging.info("  {} include_flag is {}, skipping".format(self.manifest_row['unique_data_id'], self.manifest_row['include_flag']))
             return False
 
     def do_fields_match(self):

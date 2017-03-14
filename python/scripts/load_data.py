@@ -15,10 +15,11 @@ from housinginsights.ingestion.DataReader import DataReader
 from housinginsights.tools import dbtools
 
 from housinginsights.ingestion import DataReader, ManifestReader
-from housinginsights.ingestion import CSVWriter, DataReader, DataSql
+from housinginsights.ingestion import CSVWriter, DataReader
+from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import ACSRentCleaner, GenericCleaner
 from housinginsights.ingestion import BuildingCleaner
-from housinginsights.ingestion import load_meta_data
+from housinginsights.ingestion import load_meta_data, check_or_create_sql_manifest
 ##########################################################################
 # Summary
 ##########################################################################
@@ -46,41 +47,6 @@ logging.getLogger().addHandler(logging.StreamHandler())
 #############################
 # FUNCTIONS
 #############################
-
-
-
-
-# Completed, tests incomplete
-def get_sql_manifest_row(engine, csv_row):
-    """
-    Loads the row from the manifest table that matches the unique_data_id in csv_row.
-    Returns the manifest_row as a dictionary, or None if no matching database row was found
-    """
-
-    unique_data_id = csv_row['unique_data_id']
-    sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format(unique_data_id)
-
-    # temp
-    # sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format('my_data_id')
-    #logging.info("  Getting SQL manifest row for {} using query {}".format(unique_data_id,sql_query))
-    db_conn = engine.connect()
-    query_result = db_conn.execute(sql_query)
-
-    # convert the sqlAlchemy ResultProxy object into a list of dictionaries
-    results = [dict(row.items()) for row in query_result]
-
-    db_conn.close()
-
-    # We expect there to be exactly one row matching the query if the csv_row is already in the database
-    if len(results) > 1:
-        raise ValueError('Found multiple rows in database for data id {}'.format(unique_data_id))
-
-    # Return just the dictionary of results, not the list of dictionaries
-    if len(results) == 1:
-        return results[0]
-
-    if len(results) == 0:
-        return None
 
 
 # complete, tests not written
@@ -125,16 +91,21 @@ def main(database_choice):
     engine = dbtools.get_database_engine(database_choice)
     manifest = ManifestReader('manifest_sample.csv')
 
+    sql_manifest_exists = check_or_create_sql_manifest(engine=engine)
+    print("sql_manifest_exists: {}".format(sql_manifest_exists))
+
+    #TODO should this be moved into the __init__ of ManifestReader? Do we ever want to use ManifestReader if it has duplicate rows?
     if not manifest.has_unique_ids():
         raise ValueError('Manifest has duplicate unique_data_id!')
 
     for manifest_row in manifest:
         logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
 
-        sql_manifest_row = get_sql_manifest_row(engine = engine, csv_row=manifest_row)
+        
         csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
         csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row)
-        sql_writer = DataSql(meta = meta, manifest_row = manifest_row, engine = engine)
+        sql_interface = HISql(meta = meta, manifest_row = manifest_row, engine = engine)
+        sql_manifest_row = sql_interface.get_sql_manifest_row()
 
         #Assign an appropriate testing cleaner
         #TODO need more robust way to do this long term. get_cleaner function?
@@ -156,11 +127,15 @@ def main(database_choice):
             
             #Uncomment this to drop instead of append. 
             #TODO add parameter to handle dropping data vs. appending. Should work w/ manifest.
-            sql_writer.drop_table()
+            sql_interface.drop_table()
             
-            sql_writer.create_table()
-            sql_writer.write_file_to_sql()
-
+            sql_interface.create_table()
+            try:
+                sql_interface.write_file_to_sql()
+            except TableWritingError:
+                #keep loading other files.
+                #TODO handle logging of missed files better - write_... function just writes in log
+                pass
             #TODO add/update the appropriate row to the SQL manifest table indicating new status
 
 if __name__ == '__main__':
