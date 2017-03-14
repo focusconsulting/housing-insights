@@ -2,6 +2,8 @@ import sys
 import csv
 import json
 import requests
+import os
+import time
 
 def getMiles(meters):
     """Returns distance in miles
@@ -201,13 +203,21 @@ def main(secretsFileName, csvInputFileName,distOutputFileName,infoOutputFileName
         print("Completed processing bus stations for {}".format(numrow))
 
 if __name__ == '__main__':
-    if len(sys.argv) < 5:
-        print("Requires 4 arguments: [csv input file] [WMATA_DIST output file] [WMATA_INFO output file] [secrets.json]")
+    if len(sys.argv) < 1:
+        print("Requires 1 arguments: [csv input file]")
     else:
         inputFileName = sys.argv[1]
-        distOutputFileName = sys.argv[2]
-        infoOutputFileName = sys.argv[3]
-        secretsFileName = sys.argv[4]
+        secretsFileName = "../housinginsights/secrets.json"
+
+        now = time.strftime("%Y%m%d")
+        outputDir = "../../data/raw/wmata/" + now
+
+        if not os.path.exists(outputDir):
+            os.makedirs(outputDir)
+
+        distOutputFileName = outputDir + "/dist.csv"
+        infoOutputFileName = outputDir + "/wmatainfo.csv"
+
 
         print("Will read from {}".format(inputFileName))
         print("Will write WMATA_DIST table to {}".format(distOutputFileName))
