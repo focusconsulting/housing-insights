@@ -1,6 +1,12 @@
 import logging
 import json
 from sqlalchemy.exc import ProgrammingError
+import sys, os
+
+from importlib import import_module
+sys.path.append(os.path.abspath('../../'))
+
+import housinginsights.ingestion.CleanerBase as CleanerBase
 
 # Completed, tests not written.
 def load_meta_data(filename='meta.json'):
@@ -92,19 +98,16 @@ def check_or_create_sql_manifest(engine, rebuild=False):
             raise e
 
 
+def get_cleaner_from_name(meta, manifest_row, name = "GenericCleaner"):
+
+    #Import
+    #module = import_module("module.submodule")
+    Class_ = getattr(CleanerBase, name)
+    instance = Class_(meta, manifest_row)
+    return instance
+
 #Used for testing purposes
 if __name__ == '__main__':
-    import sys, os
-    sys.path.append(os.path.abspath('../../'))
-    from housinginsights.tools import dbtools
-
-    logging_filename = "../../logs/ingestion.log"
-    logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
-
-    engine = dbtools.get_database_engine('local_database')
-    
-    #Run the test
-    sql_manifest_exists = check_or_create_sql_manifest(engine=engine)
-    print("sql_manifest_exists: {}".format(sql_manifest_exists))
-
+    pass
+    instance = get_cleaner_from_name("GenericCleaner")
+    print(type(instance))

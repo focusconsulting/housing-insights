@@ -19,7 +19,8 @@ from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import ACSRentCleaner, GenericCleaner
 from housinginsights.ingestion import BuildingCleaner
-from housinginsights.ingestion import load_meta_data, check_or_create_sql_manifest
+from housinginsights.ingestion import functions as ingestionfunctions
+
 ##########################################################################
 # Summary
 ##########################################################################
@@ -87,11 +88,11 @@ def main(database_choice):
         except Exception as e:
             print("Could not start postgres database is docker running?")
 
-    meta = load_meta_data('meta_sample.json')
+    meta = ingestionfunctions.load_meta_data('meta_sample.json')
     engine = dbtools.get_database_engine(database_choice)
     manifest = ManifestReader('manifest_sample.csv')
 
-    sql_manifest_exists = check_or_create_sql_manifest(engine=engine)
+    sql_manifest_exists = ingestionfunctions.check_or_create_sql_manifest(engine=engine)
     print("sql_manifest_exists: {}".format(sql_manifest_exists))
 
     #TODO should this be moved into the __init__ of ManifestReader? Do we ever want to use ManifestReader if it has duplicate rows?
@@ -108,11 +109,12 @@ def main(database_choice):
         sql_manifest_row = sql_interface.get_sql_manifest_row()
 
         #Assign an appropriate testing cleaner
-        #TODO need more robust way to do this long term. get_cleaner function?
-        if manifest_row['destination_table'] == "acs_rent_median_temp":
-            cleaner = ACSRentCleaner(meta, manifest_row)
-        else:
-            cleaner = BuildingCleaner(meta, manifest_row)
+        tablename = manifest_row['destination_table']
+        cleaner_class_name = meta[tablename]['cleaner']
+        cleaner = ingestionfunctions.get_cleaner_from_name(
+                                    meta=meta, 
+                                    manifest_row=manifest_row, 
+                                    name= cleaner_class_name)
 
         #clean the file and save the output to a local pipe-delimited file
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):

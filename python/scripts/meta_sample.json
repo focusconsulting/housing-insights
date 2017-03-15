@@ -1,5 +1,6 @@
 {
     "building_temp": {
+        "cleaner": "BuildingCleaner",
         "fields": [
             {
                 "display_name": "nlihc_id",
@@ -328,6 +329,7 @@
 
 
      "acs_rent_median_temp": {
+        "cleaner": "ACSRentCleaner",
         "fields": [
             {
                 "display_name": "Full Census Tract ID",

@@ -2,6 +2,12 @@ from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
 
+
+'''
+Usage:
+Dynamically import based on name of class in meta.json:
+http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-string-name-of-a-class-in-dynamically-imported
+'''
 class CleanerBase(object, metaclass=ABCMeta):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
         self.cleaned_csv = cleaned_csv

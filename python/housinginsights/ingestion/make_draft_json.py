@@ -30,7 +30,7 @@ def make_draft_json(filename, tablename): #use the name from constants as defaul
     dataframe_iterator = dataframe_file.columns
     output = {
         tablename: {
-            "cleaner_name": tablename + "{}".format("_cleaner"),
+            "cleaner": tablename + "{}".format("_cleaner"),
             "fields": []
         }
     }
