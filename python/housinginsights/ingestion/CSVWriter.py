@@ -5,6 +5,7 @@ from csv import DictWriter
 import os
 import copy
 
+logging_path = os.path.abspath("../../logs")
 
 class CSVWriter(object):
     '''
@@ -21,6 +22,7 @@ class CSVWriter(object):
 
         self.manifest_row = manifest_row
         self.tablename = manifest_row['destination_table']
+        self.unique_data_id = manifest_row['unique_data_id']
         self.meta = meta
         self.fields = meta[self.tablename]['fields']
 
@@ -37,13 +39,12 @@ class CSVWriter(object):
         self.dictwriter_fields.append('unique_data_id')
         self.sql_fields.append('unique_data_id')
 
+
         #By default, creates a temp csv file wherever the calling module was located
-        self.filename = 'temp_{}.psv'.format(self.tablename) if filename == None else filename
+        self.filename = 'temp_{}.psv'.format(self.unique_data_id) if filename == None else filename
         
-        try:
-            os.remove(self.filename)
-        except OSError:
-            pass
+        #remove any existing copy of the file so we are starting clean
+        self.remove_file()
 
         #Using psycopg2 copy_from does not like having headers in the file. Commenting out
             #self.file = open(self.filename, 'w', newline='')
@@ -72,3 +73,10 @@ class CSVWriter(object):
         responsibility to manually close the file when they are done writing
         '''
         self.file.close()
+
+    #TODO should this be part of the __del__
+    def remove_file(self):
+        try:
+            os.remove(self.filename)
+        except OSError:
+            pass

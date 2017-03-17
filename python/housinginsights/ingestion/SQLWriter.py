@@ -67,7 +67,7 @@ class HISql(object):
         self.metafields = meta[self.tablename]['fields']
 
         #assign defaults
-        self.filename = 'temp_{}.psv'.format(self.tablename) if filename == None else filename
+        self.filename = 'temp_{}.psv'.format(manifest_row['unique_data_id']) if filename == None else filename
 
         #convert fields dictionary to lists
         self.sql_fields = []
@@ -86,6 +86,7 @@ class HISql(object):
         conn = self.engine.connect()
         trans = conn.begin()
         try:
+            print("  opening {}".format(self.filename))
             with open(self.filename, 'r') as f:
                 #copy_from is only available on the psycopg2 object, we need to dig in to get it
                 dbapi_conn = conn.connection

@@ -39,6 +39,7 @@ Notes:
 # configuration
 # See /logs/example-logging.py for usage examples
 logging_filename = "../logs/ingestion.log"
+logging_path = os.path.abspath("../logs")
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 
 # Pushes everything from the logger to the command line output as well.
@@ -60,7 +61,7 @@ def drop_tables(database_choice):
     query_result = db_conn.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
 
 
-def main(database_choice):
+def main(database_choice, keep_temp_files = True):
     """
     Main routine, calls all the other ones in this file as needed.
 
@@ -93,7 +94,7 @@ def main(database_choice):
     manifest = ManifestReader('manifest_sample.csv')
 
     sql_manifest_exists = ingestionfunctions.check_or_create_sql_manifest(engine=engine)
-    print("sql_manifest_exists: {}".format(sql_manifest_exists))
+    logging.info("sql_manifest_exists: {}".format(sql_manifest_exists))
 
     #TODO should this be moved into the __init__ of ManifestReader? Do we ever want to use ManifestReader if it has duplicate rows?
     if not manifest.has_unique_ids():
@@ -102,10 +103,14 @@ def main(database_choice):
     for manifest_row in manifest:
         logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
 
-        
+        temp_filepath = os.path.abspath(
+                            os.path.join(
+                                logging_path,
+                                'temp_{}.psv'.format(manifest_row['unique_data_id'])
+                            ))
         csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
-        csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row)
-        sql_interface = HISql(meta = meta, manifest_row = manifest_row, engine = engine)
+        csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row, filename = temp_filepath)
+        sql_interface = HISql(meta = meta, manifest_row = manifest_row, engine = engine, filename=temp_filepath)
         sql_manifest_row = sql_interface.get_sql_manifest_row()
 
         #Assign an appropriate testing cleaner
@@ -127,18 +132,21 @@ def main(database_choice):
             csv_writer.close()
             print("  Ready to load")
             
-            #Uncomment this to drop instead of append. 
-            #TODO add parameter to handle dropping data vs. appending. Should work w/ manifest.
-            sql_interface.drop_table()
+            #Decide whether to append or replace the table
+            if meta[tablename]["replace_table"] == True:
+                logging.info("  replacing existing table")
+                sql_interface.drop_table()
             
+            #Appends to table; if dropped, it recreates
             sql_interface.create_table()
             try:
                 sql_interface.write_file_to_sql()
             except TableWritingError:
-                #keep loading other files.
-                #TODO handle logging of missed files better - write_... function just writes in log
+                #TODO tell user total count of errors. 
+                #currently write_file_to_sql() just writes in log that file failed
                 pass
-            #TODO add/update the appropriate row to the SQL manifest table indicating new status
+            if keep_temp_files == False:
+                csv_writer.remove_file()
 
 if __name__ == '__main__':
 
@@ -149,4 +157,4 @@ if __name__ == '__main__':
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)
 
-    main(database_choice)
+    main(database_choice, keep_temp_files = False)

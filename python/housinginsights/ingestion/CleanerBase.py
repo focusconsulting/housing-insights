@@ -78,22 +78,26 @@ class BuildingCleaner(CleanerBase):
 
 class ACSRentCleaner(CleanerBase):
     def clean(self,row, row_num = None):
-        row = self.high_rent(row)
+        row = self.high_low_rent(row)
         row = self.replace_nulls(row)
         if row_num == 0:
             return None
         return row
 
-    def high_rent(self,row):
+    def high_low_rent(self,row):
         '''
         Rent higher than the max reportable value are suppressed
         e.g: instead of being reported as "3752", a plus sign is added
         and the values over the max value are suppressed eg. "3,500+"
+        Rent lower than the lowest reportable is similar (e.g. "100-")
         We assume that the actual value is the max value, and strip out the , and +
         '''
         if row['HD01_VD01'][-1] == "+":
             row['HD01_VD01'] = row['HD01_VD01'].replace(',','')
             row['HD01_VD01'] = row['HD01_VD01'].replace('+','')
+        if row['HD01_VD01'][-1] == "-":
+            row['HD01_VD01'] = row['HD01_VD01'].replace(',','')
+            row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
 
