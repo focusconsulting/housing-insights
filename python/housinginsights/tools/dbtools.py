@@ -78,18 +78,3 @@ def start_local_database_server():
     conn.execute("create database housinginsights_local")
     conn.close()
 
-
-def create_manifest_table(manifest):
-    table = None
-    connection_string = get_connect_str('local_database')
-    engine = create_engine(connection_string)
-    metadata = MetaData(bind=engine)
-    with open(manifest) as f:
-        csv_reader = csv.DictReader(f, delimiter=',')
-
-        for row in csv_reader:
-            if table is None:
-                # create the table
-                table = Table('manifest', metadata, Column('id', Integer, primary_key=True), *(Column(rowname, String()) for rowname in row.keys()))
-                table.create()
-            table.insert().values(**row).execute()

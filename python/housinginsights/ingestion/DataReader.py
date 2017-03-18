@@ -27,7 +27,7 @@ class HIReader(object):
     def __iter__(self):
         self._length = 0
         self._counter = Counter()
-        with open(self.path, 'rU') as data:
+        with open(self.path, 'r', newline='') as data:
             reader = DictReader(data)
             self._keys = reader.fieldnames
             for row in reader:
@@ -78,16 +78,19 @@ class ManifestReader(HIReader):
     def __iter__(self):
         self._length = 0
         self._counter = Counter()
-        with open(self.path, 'rU') as data:
+        with open(self.path, 'r', newline='') as data:
             reader = DictReader(data)
             self._keys = reader.fieldnames
             for row in reader:
                 self._length += 1
 
                 #parse the date into proper format for sql 
-                _date = dateparser.parse(row['data_date'],dayfirst=False, yearfirst=False)
-                row['data_date'] = datetime.strftime(_date, '%Y-%m-%d')
-
+                try:
+                    _date = dateparser.parse(row['data_date'],dayfirst=False, yearfirst=False)
+                    row['data_date'] = datetime.strftime(_date, '%Y-%m-%d')
+                except ValueError:
+                    row['data_date'] = 'Null'
+                
                 #return the row
                 yield row
 
@@ -134,14 +137,14 @@ class DataReader(HIReader):
         Checks to see if the file already exists locally, if not downloads it
        '''
         try:
-            with open(self.path) as f:
+            with open(self.path, 'r', newline='') as f:
                 myreader=csv.reader(f,delimiter=',')
                 headers = next(myreader)
         except FileNotFoundError as e:
             logging.info("  file not found. attempting to download file to disk: " + s3_path)
             urlretrieve(s3_path,local_path)
             logging.info("  download complete.")
-            with open(local_path) as f:
+            with open(local_path, 'r', newline='') as f:
                 myreader=csv.reader(f,delimiter=',')
                 headers = next(myreader)
         return headers #not strictly necessary but useful for testing

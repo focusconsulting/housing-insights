@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
-
+import logging
 
 '''
 Usage:
@@ -31,7 +31,12 @@ class CleanerBase(object, metaclass=ABCMeta):
             if row[key] in null_values:
                 row[key] = self.null_value
         return row
-
+    def remove_line_breaks(self,row):
+        #TODO see if it's possible to not do this by getting the copy_from to be ok with breaks
+        for key in row:
+            row[key] = row[key].replace('\r','__')
+            row[key] = row[key].replace('\n','__')
+        return row
     
     def format_date(self, value):
         date = None
@@ -40,12 +45,26 @@ class CleanerBase(object, metaclass=ABCMeta):
             #_date = datetime.strptime(value, '%m/%d/%Y')
             date = datetime.strftime(_date, '%Y-%m-%d')
         except Exception as e:
-            #TODO add logging w/ full info
-            print("Unable to format date properly")
-        finally:
-            if date is None:
+            if value is None or value == self.null_value:
                 date = self.null_value
-            return date
+            else:
+                logging.warning("Unable to format date properly: {}".format(value))
+                date=self.null_value
+
+        return date
+
+    def convert_boolean(self,value):
+        mapping = {
+            'Yes':True,
+            'No':False,
+            'Y': True,
+            'N':False,
+            'TRUE':True,
+            'FALSE':False,
+            '1':True,
+            '0':False
+            }
+        return mapping[value]
 
     def parse_dates(self, row):
         '''
@@ -69,17 +88,35 @@ class GenericCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
 
-class BuildingCleaner(CleanerBase):
+class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
-        row = self.replace_nulls(row)
+        row = self.replace_nulls(row, null_values=['N','', None])
         row = self.parse_dates(row)
         return row
-    
+
+class SubsidyCleaner(CleanerBase):
+    def clean(self, row, row_nume=None):
+        row['Subsidy_Active'] = self.convert_boolean(row['Subsidy_Active'])
+        row['POA_end_actual'] = self.null_value if row['POA_end_actual']=='U' else row['POA_end_actual']
+        row = self.replace_nulls(row, null_values = ['N','',None])
+        row = self.parse_dates(row)
+        return row
+
+class BuildingPermitsCleaner(CleanerBase):
+    def clean(self, row, row_num = None):
+
+        row = self.replace_nulls(row, null_values=['NONE','', None])
+        row = self.parse_dates(row)
+        row = self.remove_line_breaks(row)
+
+        return row
+
 
 class ACSRentCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         row = self.high_low_rent(row)
-        row = self.replace_nulls(row)
+        #Note, we are losing data about statistical issues. Would be better to move these to a new column.
+        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-',''])
         if row_num == 0:
             return None
         return row

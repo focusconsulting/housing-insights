@@ -48,6 +48,7 @@ sys.path.append("../../")
 from housinginsights.tools import dbtools
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import ProgrammingError
+from psycopg2 import DataError
 import copy
 import datetime
 
@@ -105,7 +106,7 @@ class HISql(object):
         
         #TODO need to find out what types of expected errors might actually occur here  
         #For now, assume that SQLAlchemy will raise a programmingerror
-        except ProgrammingError as e:
+        except (ProgrammingError, DataError) as e:
             trans.rollback()
             
             logging.warning("  FAIL: something went wrong loading {}".format(self.unique_data_id))
@@ -174,6 +175,8 @@ class HISql(object):
         db_conn = self.engine.connect()
         table = self.tablename if table==None else table
 
+        #TODO also need to delete manifest row(s)
+        #TODO need to use a transaction to ensure both operations sync
         try:
             db_conn.execute("DROP TABLE {}".format(table))
         except ProgrammingError:

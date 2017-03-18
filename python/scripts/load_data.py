@@ -17,8 +17,8 @@ from housinginsights.tools import dbtools
 from housinginsights.ingestion import DataReader, ManifestReader
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
-from housinginsights.ingestion import ACSRentCleaner, GenericCleaner
-from housinginsights.ingestion import BuildingCleaner
+#from housinginsights.ingestion import ACSRentCleaner, GenericCleaner
+#from housinginsights.ingestion import BuildingCleaner
 from housinginsights.ingestion import functions as ingestionfunctions
 
 ##########################################################################
@@ -61,7 +61,7 @@ def drop_tables(database_choice):
     query_result = db_conn.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
 
 
-def main(database_choice, keep_temp_files = True):
+def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
     """
     Main routine, calls all the other ones in this file as needed.
 
@@ -78,20 +78,21 @@ def main(database_choice, keep_temp_files = True):
     - use logging.warning() to write the specific error encountered to the log file
     - at the end of loading print an error message to the console
     """
+    #Docker use is currently not fully configured. Saving this code for later use
     # Check if local database is running
     if database_choice == "docker_database":
         try:
             is_local_db_running = dbtools.check_for_docker_database()
             if not is_local_db_running:
                 dbtools.start_local_database_server()
-                # Load manifest data into a table.
-                dbtools.create_manifest_table('manifest_sample.csv')
+
         except Exception as e:
             print("Could not start postgres database is docker running?")
 
-    meta = ingestionfunctions.load_meta_data('meta_sample.json')
+
+    meta = ingestionfunctions.load_meta_data(meta_path)
     engine = dbtools.get_database_engine(database_choice)
-    manifest = ManifestReader('manifest_sample.csv')
+    manifest = ManifestReader(manifest_path)
 
     sql_manifest_exists = ingestionfunctions.check_or_create_sql_manifest(engine=engine)
     logging.info("sql_manifest_exists: {}".format(sql_manifest_exists))
@@ -101,60 +102,65 @@ def main(database_choice, keep_temp_files = True):
         raise ValueError('Manifest has duplicate unique_data_id!')
 
     for manifest_row in manifest:
-        logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
+        #Incompletely filled out rows in the manifest can break the other code
+        if manifest_row['include_flag'] == 'use':
+            logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
 
-        temp_filepath = os.path.abspath(
-                            os.path.join(
-                                logging_path,
-                                'temp_{}.psv'.format(manifest_row['unique_data_id'])
-                            ))
-        csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
-        csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row, filename = temp_filepath)
-        sql_interface = HISql(meta = meta, manifest_row = manifest_row, engine = engine, filename=temp_filepath)
-        sql_manifest_row = sql_interface.get_sql_manifest_row()
+            temp_filepath = os.path.abspath(
+                                os.path.join(
+                                    logging_path,
+                                    'temp_{}.psv'.format(manifest_row['unique_data_id'])
+                                ))
+            csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
+            csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row, filename = temp_filepath)
+            sql_interface = HISql(meta = meta, manifest_row = manifest_row, engine = engine, filename=temp_filepath)
+            sql_manifest_row = sql_interface.get_sql_manifest_row()
 
-        #Assign an appropriate testing cleaner
-        tablename = manifest_row['destination_table']
-        cleaner_class_name = meta[tablename]['cleaner']
-        cleaner = ingestionfunctions.get_cleaner_from_name(
-                                    meta=meta, 
-                                    manifest_row=manifest_row, 
-                                    name= cleaner_class_name)
+            #Assign an appropriate testing cleaner
+            tablename = manifest_row['destination_table']
+            cleaner_class_name = meta[tablename]['cleaner']
+            cleaner = ingestionfunctions.get_cleaner_from_name(
+                                        meta=meta, 
+                                        manifest_row=manifest_row, 
+                                        name= cleaner_class_name)
 
-        #clean the file and save the output to a local pipe-delimited file
-        if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
-            print("  Ready to clean {}".format(csv_reader.destination_table))
-            for idx, data_row in enumerate(csv_reader):
-                clean_data_row = cleaner.clean(data_row, idx)
-                if clean_data_row != None:
-                    csv_writer.write(clean_data_row)
+            #clean the file and save the output to a local pipe-delimited file
+            if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
+                print("  Ready to clean {}".format(csv_reader.destination_table))
+                for idx, data_row in enumerate(csv_reader):
+                    clean_data_row = cleaner.clean(data_row, idx)
+                    if clean_data_row != None:
+                        csv_writer.write(clean_data_row)
 
-            csv_writer.close()
-            print("  Ready to load")
-            
-            #Decide whether to append or replace the table
-            if meta[tablename]["replace_table"] == True:
-                logging.info("  replacing existing table")
-                sql_interface.drop_table()
-            
-            #Appends to table; if dropped, it recreates
-            sql_interface.create_table()
-            try:
-                sql_interface.write_file_to_sql()
-            except TableWritingError:
-                #TODO tell user total count of errors. 
-                #currently write_file_to_sql() just writes in log that file failed
-                pass
-            if keep_temp_files == False:
-                csv_writer.remove_file()
+                csv_writer.close()
+                print("  Ready to load")
+                
+                #Decide whether to append or replace the table
+                if meta[tablename]["replace_table"] == True:
+                    logging.info("  replacing existing table")
+                    sql_interface.drop_table()
+                
+                #Appends to table; if dropped, it recreates
+                sql_interface.create_table()
+                try:
+                    sql_interface.write_file_to_sql()
+                except TableWritingError:
+                    #TODO tell user total count of errors. 
+                    #currently write_file_to_sql() just writes in log that file failed
+                    pass
+                if keep_temp_files == False:
+                    csv_writer.remove_file()
 
 if __name__ == '__main__':
 
     #the appropriate database name in secrets.json.
     #TODO make this changeable via sys.argv
-    database_choice = 'local_database'
+    database_choice = 'remote_database'
+    meta_path = 'meta.json'
+    manifest_path = 'manifest.csv'
+    
 
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)
 
-    main(database_choice, keep_temp_files = False)
+    main(database_choice, meta_path, manifest_path, keep_temp_files = True)
