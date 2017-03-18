@@ -13,6 +13,12 @@
       thisBuildingSource,
       ProtoLayer,
       mapboxSource,
+      buildingForPage,
+      listRankings,
+      EARTH_RADIUS_MILES = 3959,
+      DISTANCE_UNIT = "miles";
+      
+      
   // NOTE: Until we have a backend that identifies the building a user has chosen to look at
   // (or accomplish this with AJAX), buildingForPage specifies the building that the page is
   // based around this object literal, which is taken from the first geoJSON feature
@@ -44,21 +50,20 @@
         }
       };
       
-      // incorporate this with the 'app' object later. This will likely involve a different approach.
-      datasets = {
-        metroStations: {
-          url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson"
-        },
-        affordableHousing: {
-          url: "http://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.geojson"
-        }        
-      }
+  // incorporate this with the 'app' object later. This will likely involve a different approach.
+  datasets = {
+    metroStations: {
+      url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson"
+    },
+    affordableHousing: {
+      url: "http://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.geojson"
+    }        
+  }
   
   
   // The below function turns a geoJSON object into a source object for Mapbox maps.
   // The second argument determines whether to exclude the building page's target
   // building from the data.
-  // FOR REVIEW - prepareSource seems to want to be a constructor.
   //                     geoJSON object    boolean
   prepareSource = function(dat, excludeThisBuilding){
     var dat = dat;
@@ -78,7 +83,7 @@
       data: dat
     }
   };
-  
+    
   // You call MapboxPortal with a ProtoLayer to ensure that source IDs are unique and that
   // sources can be called with MapboxPortal after they load.
   // This is because a Mapbox layer's 'source' property refers to an ID, rather than the source
@@ -91,6 +96,86 @@
     this.source = source;
   }
   
+  // This method returns a source object, but with an added distanceToTarget property
+  // in the 'properties' object.
+  ProtoLayer.prototype.addDistancesToSource = function(sourceForTarget){
+    var sourceCopy = this.source;
+    function getDistances(geoJSONFeature1, geoJSONFeature2){
+      var latLon1 = new LatLon(geoJSONFeature1['geometry']['coordinates'][1], geoJSONFeature1['geometry']['coordinates'][0]);
+      var latLon2 = new LatLon(geoJSONFeature2['geometry']['coordinates'][1], geoJSONFeature2['geometry']['coordinates'][0]);
+      
+  // This calls LatLong.prototype.distanceTo() from geo-distance.js. The second argument
+  // is the radius of the earth, which you specify to indicate units.
+      var result = latLon1.distanceTo(latLon2, EARTH_RADIUS_MILES);
+      
+  // Round to three decimal points following the suggestion of this SO post:
+  // http://stackoverflow.com/questions/11832914/round-to-at-most-2-decimal-places
+  // It runs into the constraints of JS' float type, as discussed in the comments, so it
+  // might be worthwhile to revisit if absolute precision is important here.
+      return Math.round(result * 1000)/1000;
+    }
+   
+    for(var i = 0, features = sourceCopy['data']['features']; i < features.length; i++){
+      features[i]['properties']['distanceToTarget'] = getDistances(features[i], sourceForTarget['data']);
+    }
+    return sourceCopy;
+  }
+  
+  // This method lists the features that are within 'distance' miles from the target building.
+  // containerId is a string.
+  // distance is a number.
+  // categoryName is a string such as 'Metro stations'.
+  // categoryField is the field within the ProtoLayer's source that we're listing. It's a string
+  // (e.g. 'NAME')
+  // targetSource is the object representing a Mapbox source for the target building.  
+  ProtoLayer.prototype.listWithinDistance = function(containerId, distance, categoryName, categoryField, targetSource){
+    var sourceWithDistances = this.addDistancesToSource(targetSource);
+    
+    var sortedFeatures = sourceWithDistances['data']['features'].sort(function(a, b){
+      return a['properties']['distanceToTarget'] - b['properties']['distanceToTarget'];
+    });
+    
+    var selectedSortedFeatures = sortedFeatures.filter(function(el){
+      return el['properties']['distanceToTarget'] <= distance;
+    });
+    
+    var nearestFeature = sortedFeatures[0];
+    
+    var nearbyListTitle = document.createElement('h2');
+    nearbyListTitle.className = 'nearbyListTitle';
+    nearbyListTitle.textContent = categoryName + " within " + distance + " " + DISTANCE_UNIT;
+    
+    var nearbyList = document.createElement('ol');
+    
+    var noFeaturesNotice = document.createElement('p');
+    noFeaturesNotice.textContent = "There are no " + categoryName.toLowerCase() + " within " 
+      + distance + " " + DISTANCE_UNIT + ".";
+    var nearestFeatureNotice = document.createElement('p');
+    nearestFeatureNotice.textContent = "Among local " + categoryName.toLowerCase() + ", the nearest is: " 
+      + nearestFeature['properties'][categoryField] + " (" + 
+      nearestFeature['properties']['distanceToTarget'] + " " + DISTANCE_UNIT + ").";
+    
+    document.getElementById(containerId).appendChild(nearbyListTitle);
+    
+    for(var i = 0; i < selectedSortedFeatures.length; i++){
+      var listing = document.createElement('li');
+      var listingName = selectedSortedFeatures[i]['properties'][categoryField];
+      var listingDistance = selectedSortedFeatures[i]['properties']['distanceToTarget'];
+      
+      listing.className = "nearbyListItem";
+      listing.textContent = listingName + ": " + listingDistance + " " + DISTANCE_UNIT;
+      nearbyList.appendChild(listing);
+    }
+    if(selectedSortedFeatures.length == 0){
+      document.getElementById(containerId).appendChild(noFeaturesNotice);
+      document.getElementById(containerId).appendChild(nearestFeatureNotice);
+    }
+    else{
+      document.getElementById(containerId).appendChild(nearbyList);
+    }
+    
+  }
+    
   //   The id of an html element        an array of ProtoLayer objects, which bundle 
   //                        |           an object literal for a layer with an object literal
   //                        |           for a source.
@@ -128,7 +213,7 @@
   prepareMaps = function(){
     
     var sources = {
-      publicHousingSource: prepareSource(datasets['affordableHousing']['data'], true),
+      affordableHousingSource: prepareSource(datasets['affordableHousing']['data'], true),
       thisBuildingSource: prepareSource(buildingForPage, false),
       metroStations: prepareSource(datasets['metroStations']['data'], false)
     };
@@ -159,7 +244,7 @@
     
     var affordableHousingDots = new ProtoLayer({
 			'id': "buildingLocation",
-			'source': 'publicHousingSource',
+			'source': 'affordableHousingSource',
 			'type': "circle",
 			'minzoom': 11,
 			'paint': {
@@ -168,18 +253,18 @@
 				'circle-stroke-color': 'rgb(150,150,150)',
 				'circle-radius': 10
 			}
-    }, sources['publicHousingSource']);
-        
+    }, sources['affordableHousingSource']);
+            
     var affordableHousingLabels = new ProtoLayer({
       'id': "buildingTitle",
-      'source': 'publicHousingSource',
+      'source': 'affordableHousingSource',
       'type': "symbol",
       'minzoom': 11,
       'layout': {
         'text-field': "{PROJECT_NAME}",
         'text-anchor': "bottom-left"
       }
-    }, sources['publicHousingSource']);
+    }, sources['affordableHousingSource']);
     
     var metroStationDots = new ProtoLayer({
 			'id': "metroStationDots",
@@ -205,9 +290,17 @@
       }
     }, sources['metroStations']);
 
-    new MapboxPortal('affordable-housing-map', [targetBuildingDot, affordableHousingDots, affordableHousingLabels, targetBuildingLabel]);
+    var affHousingMap = new MapboxPortal('affordable-housing-map', [targetBuildingDot, affordableHousingDots, affordableHousingLabels, targetBuildingLabel]);
     
-    new MapboxPortal('metro-stations-map', [targetBuildingDot, metroStationDots, targetBuildingLabel, metroStationLabels]);
+    var metroMap = new MapboxPortal('metro-stations-map', [targetBuildingDot, metroStationDots, targetBuildingLabel, metroStationLabels]);
+    
+    // These calls to ProtoLayer.listWithinDistance() are what create the text that accompanies
+    // the Mapbox maps, indicating how many features are within d distance from the target building.
+    affordableHousingLabels.listWithinDistance("nearbyAffordableHousing", .25, "Affordable housing", "PROJECT_NAME", sources['thisBuildingSource']);
+    
+    metroStationLabels.listWithinDistance("nearbyMetroStations", .25, "Metro stations", "NAME", sources['thisBuildingSource']);
+
+
   };
   
   (function grabData(){
