@@ -33,25 +33,57 @@ SubsidyTimelineChart.prototype = Object.create(Chart.prototype); // Second step 
 var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
                              // as called in this.extendPrototype(...) above 
     setup: function(el, field, sortField, asc, readableField){
-        var chart = this,
-            data = chart.data.filter(function(d){ return d['nlihc_id'] === chart.building}),
+        var chart = this;
                               // the filter here removes data for all other buildings using the building parameter
-            groups; // the groups variable is used to draw a multi-part figure for each datum
-        console.log(this.width, this.margin.left, this.margin.right);
         chart.svg = d3.select(el) // select elem (div#chart-0)
               .append('svg')        // append svg element 
                 .attr('width', this.width + this.margin.left + this.margin.right)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
                 .attr('height', this.height + this.margin.top + this.margin.bottom) // continuation of d3 margin convention
               .append("g")
-                .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+                .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");        
+
+        chart.update(chart.building);
+        
+      }, // end setup
+
+      timeParser: {   // This is very data format dependent, and will need to be replaced when we have
+                      // a final data format
+    
+        month: function(string) {
+          return string.split('/')[0];
+        },
+        day: function(string){
+          return string.split('/')[1];
+        },
+        year: function(string){
+          if(typeof(string) === 'string'){
+            return string.split('/')[2];
+          };
+        },
+        toUTC: function(string){
+          if(typeof(string) === 'string'){
+            return Date.UTC(this.year(string), this.month(string), this.day(string));
+          };
+        },
+        parsedDate: function(string){
+          return new Date(this.toUTC(string));
+        }
+        
 
 
+      }, // end timeParser
+
+      update: function(building){
+        console.log(this);
+        var chart = this,
+            data = (chart.data || app.dataCollection.projectCSV).filter(function(d){ return d['Nlihc_id'] ===  building}),
+            groups; // the groups variable is used to draw a multi-part figure for each datum
 
         chart.minTime = d3.min(data, function(d){
-          return chart.timeParser.toUTC(d['poa_start']);
+          return chart.timeParser.toUTC(d['POA_start']);
         });
         chart.maxTime = d3.max(data, function(d){
-          return chart.timeParser.toUTC(d['poa_end']);
+          return chart.timeParser.toUTC(d['POA_end']);
         });
         chart.xScale = d3.scaleTime()
                     .domain([new Date(chart.minTime), new Date(chart.maxTime)]).range([0, .9 * this.width]);
@@ -61,7 +93,6 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               // that I didn't want to spend the time to dig through the docs. You are welcome to
               // find it and replace this.
 
-
         groups = chart.svg.selectAll('g')
               .data(data)
               .enter()
@@ -70,10 +101,11 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
      
         groups.append('line')
               .attr('x1', function(d){
-                return chart.xScale(new Date(chart.timeParser.UTC(d['poa_start'])));
+                console.log(d);
+                return chart.xScale(new Date(chart.timeParser.toUTC(d['POA_start'])));
               })
               .attr('x2', function(d){
-                return chart.xScale(new Date(chart.timeParser.UTC(d['poa_end'])));
+                return chart.xScale(new Date(chart.timeParser.toUTC(d['POA_end'])));
               })
               .attr('y1', function(d, i){
                 return chart.yScale(i);
@@ -85,7 +117,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) + 3;
+                return chart.xScale(chart.timeParser.parsedDate(d['POA_end'])) + 3;
               })
               .attr('y', function(d,i){
                 return chart.yScale(i) + 5;
@@ -97,18 +129,18 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) - 100;
+                return chart.xScale(chart.timeParser.parsedDate(d['POA_end'])) - 100;
               })
               .attr('y', function(d,i){
                 return chart.yScale(i) - 8;
               })
               .text(function(d){
-                return d['program'].split(' ')[0] + ' ' + d['program'].split(' ')[1];
+                return d['Program'].split(' ')[0] + ' ' + d['Program'].split(' ')[1];
               })
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) - 100;
+                return chart.xScale(chart.timeParser.parsedDate(d['POA_end'])) - 100;
               })
               .attr('y', function(d,i){
                 return chart.yScale(i) + 20;
@@ -121,7 +153,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('circle')
               .attr('cx', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_start']));
+                return chart.xScale(chart.timeParser.parsedDate(d['POA_start']));
               })
               .attr('cy', function(d,i){
                 return chart.yScale(i);
@@ -131,7 +163,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('polygon')
               .attr('points', function(d, i){
-                let x2 = chart.xScale(chart.timeParser.parsedDate(d['poa_end'])),
+                let x2 = chart.xScale(chart.timeParser.parsedDate(d['POA_end'])),
                     x1 = x2 - 7,
                     y2 = chart.yScale(i),
                     y1 = y2 + 5,
@@ -143,10 +175,10 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('line')
               .attr('x1', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end']));
+                return chart.xScale(chart.timeParser.parsedDate(d['POA_end']));
               })
               .attr('x2', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end']));
+                return chart.xScale(chart.timeParser.parsedDate(d['POA_end']));
               })
               .attr('y1', function(d,i){
                 return chart.yScale(i) - 7;
@@ -173,34 +205,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                   .attr('x', chart.xScale(new Date()) - 15)
                   .attr('y', this.height + 35)
                   .text('Today')
-      }, // end setup
-
-      timeParser: {   // This is very data format dependent, and will need to be replaced when we have
-                      // a final data format
-    
-        month: function(string) {
-          return string.split('/')[0];
-        },
-        day: function(string){
-          return string.split('/')[1];
-        },
-        year: function(string){
-          if(typeof(string) === 'string'){
-            return ('20' + string.split('/')[2].slice(0,2));
-          };
-        },
-        toUTC: function(string){
-          if(typeof(string) === 'string'){
-            return Date.UTC(this.year(string), this.month(string), this.day(string));
-          };
-        },
-        parsedDate: function(string){
-          return new Date(this.UTC(string));
-        }
-        
-
-
-      } // end timeParser
+      }
 
 
 }; // end prototype
@@ -209,10 +214,10 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
  * Constructor calls below. First done inline; second only when the data from the first is available, using PubSub module 
  */
 
-var DATA_FILE = './project_sample_subsidy.csv';
+var DATA_FILE = 'https://s3.amazonaws.com/housinginsights/raw/preservation_catalog/20160401/Subsidy.csv';
 
 // first Chart loads new data
-new SubsidyTimelineChart(DATA_FILE,'projectCSV','#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,'NL000103'); 
+new SubsidyTimelineChart(DATA_FILE,'projectCSV','.subsidy-timeline-chart','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,'NL000001'); 
 
 // second chart uses the same data as first. its constructor is wrapped in a function subscribed
 // to the publishing of the data being loaded. using this pattern, we can have several charts on a 

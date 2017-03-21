@@ -1,7 +1,7 @@
 (function(){
 
 	var expandCounter = 0,
-		expandArray = { height: "auto", button: "up-arrow-button", remove: expand, add: collapse, threshold: 4, call: expandAll },
+		expandArray = { height: "350px", button: "up-arrow-button", remove: expand, add: collapse, threshold: 4, call: expandAll },
 		collapseArray = { height: "0px", button: "down-arrow-button", remove: collapse, add: expand, threshold: 0, call: collapseAll },
 		expandAllObject = { text: "Collapse All", remove: expandAll, add: collapseAll, call: expand },
 		collapseAllObject = { text: "Show All", remove: collapseAll, add: expandAll, call: collapse };
