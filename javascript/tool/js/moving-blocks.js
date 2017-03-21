@@ -9,12 +9,23 @@
 var SQUARE_WIDTH = 10, // symbolic constants all caps following convention
     SQUARE_SPACER = 2,
     ROWS = 12;
-// NEW 02/14/17: adding width and height to the parameters of the MovingBlockChart
-// NOTE: the first parameters of specific chart calls must mirror those in the Chart constructor (now 1–7);
-// parameters after that can be additional
-                               //   1         2       3     4       5       6       7
-var MovingBlockChart = function(DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height) {
-    Chart.call(this, DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height);
+
+
+// NOTE: the first parameters of specific chart calls mirror those in the Chart constructor (now 1–6);
+// parameters after tha can be additional
+                                          
+                               //   1      2    3         4       5       6       
+var MovingBlockChart = function(DATA_FILE, el, field, sortField, asc, readableField, width, height) { 
+        
+        // extend prototype is a method of Chart, defined in housing-insights.js, which MovingBlockChart has inherited from
+                              // param1 = what to extend      param2 = with what 
+        this.extendPrototype(MovingBlockChart.prototype, movingBlockExtension); 
+        console.log(width);
+
+        this.width = width;   // for extra parameters to be available in the extended prototype, they have to set
+        this.height = height; // as properties of `this`
+        Chart.call(this, DATA_FILE, el, field, sortField, asc, readableField); 
+
                                                                                      // First step of inheriting from Chart.
                                                                                      // Call() calls a function. first param is
                                                                                      // the owner / context of the function
@@ -23,23 +34,22 @@ var MovingBlockChart = function(DATA_FILE, dataName, el, field, sortField, asc, 
                                                                                      // invoke a function as a new method of
                                                                                      // an existing object."
                                                                                      // https://www.w3schools.com/js/js_function_invocation.asp
-        // extend prototype is a method of Chart, defined in housing-insights.js, which MovingBlockChart has inherited from
-                              // param1 = what to extend      param2 = with what
-        this.extendPrototype(MovingBlockChart.prototype, movingBlockExtension);
-        this.width = width;   // for extra parameters to be available in the extended prototype, they have to set
-        this.height = height; // as properties of `this`
 
+    
   }
 
-MovingBlockChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart. I can't remember why you
-                                                             // have to use Object.create instead of just assignment (=), but
-                                                             // you do
+MovingBlockChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart. 
+
+       
+
 
 var movingBlockExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
                              // as called in this.extendPrototype(...) above
     setup: function(el, field, sortField, asc, readableField){
         var chart = this,
-            data = chart.data // chart.data (this.data) is set in the Chart prototype, taken from app.dataCollection[dataName]
+
+            data = chart.data // chart.data (this.data) is set in the Chart prototype, taken from app.dataCollection[xxxx] 
+
             var tool_tip = d3.tip()
                 .attr("class", "d3-tip")
                 .offset([-8, 0])
@@ -48,30 +58,27 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
                     return '<b>' + d.Proj_Name + '<br>' + d.Proj_Addre + '</b><br><br>' + readableField + ': ' + d[field];  //here the text of the tooltip is hard coded in but we'll need a human-readable field in the data to provide that text
                   });
                   console.log(data);
-// chart.svg was in the Chart prototype, but better now to have it in specific prototypes
-        chart.svg = d3.select(el) // select elem (div#chart-0)
-                .append('svg')        // append svg element
-                .attr('width', this.width)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
-                .attr('height', this.height); // SVG object dimensions are hard-coded now, but it may be
-                                      // useful to set these as, say, a parameter in constructors that
-                                      // inherit from Chart.
 
-        chart.svg.selectAll('rect') // selects svg element `rect`s whether they exist yet or not
-            .data(data) // binds to data
-            .enter() // for all `rect`s that don't yet exist
-            .append('rect') // create the `rect`
+                  console.log(el);
+                  console.log(chart.width);
+
+        chart.svg = d3.select(el) 
+                .append('svg')    
+                .attr('width', chart.width) 
+                .attr('height', chart.height); 
+                                     
+         
+        chart.svg.selectAll('rect') 
+            .data(data) 
+            .enter() 
+            .append('rect') 
             .attr('width', SQUARE_WIDTH)
             .attr('height', SQUARE_WIDTH)
-     //  removed setting fill attribute here in favor of setting it in CSS
             .attr('fill-opacity', 0.1)
-            .attr('data-index', function(d, i){
-              return i; // for debugging purposes
-            })
-            .on('mouseover', tool_tip.show) // .show is defined in links d3-tip library
-            .on('mouseout', tool_tip.hide)  // .hide is defined in links d3-tip library
+            .on('mouseover', tool_tip.show) 
+            .on('mouseout', tool_tip.hide)  
             .call(tool_tip);
 
-    // chart.scale was defined in Chart prototype but now in specific prototype
         chart.scale = d3.scaleLinear().domain([chart.minValue, chart.maxValue]).range([0.1, 1]);
         chart.positionBlocks(0);
         chart.changeOpacity(field);
@@ -101,8 +108,8 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
             .append('input')
             .attr('type', 'range')
             .attr('id', 'inputSlider')
-            .attr('step', '.01')      // .01 is kind of a magic number and probably should be made responsive to the data
-            .style('margin-top', '1em') // these two style elements are pretty arbitrary
+            .attr('step', '.01')      
+            .style('margin-top', '1em') 
             .style('width', '40%');
 
 
@@ -114,7 +121,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
                  chart.sliderAction(field);  // another function in order to pass a
             }, false);                      // parameter despite being an event listener
 
-    },  // end setup()
+    }, 
 
     positionBlocks: function(duration){
 
@@ -133,7 +140,7 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
       chart.svg.selectAll('rect')
 
       .transition().delay(250).duration(750)
-      .attr('fill-opacity', function(d, i, array) { // opacity is a function of the value
+      .attr('fill-opacity', function(d, i, array) { 
           var value;
           if (isNaN(d[field])) { // some fields have NaN values and d3.sort was puuting them in the middle of the range
             value = 0;           // this sorts them as if their value was zero and also adds a null-value class to `rect`
@@ -144,7 +151,12 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
           }
 
           return value;
+
       })
+      .attr('onclick', function(d){
+        return 'location.href="./building.html?building=' + d.Proj_address_id + '"';
+      }); 
+
     },
 
     resort: function(value){
@@ -197,36 +209,24 @@ var movingBlockExtension = { // Final step of inheriting from Chart, defines the
 }; // end prototype
 
 /*
- * Constructor calls below. First done inline; second only when the data from the first is available, using PubSub module
+
+ * Constructor calls below. 
  */
 
-var DATA_FILE = 'https://s3.amazonaws.com/housinginsights/raw/preservation_catalog/20160401/Project.csv';
+var DATA_FILE ='data/Project.csv';
 
 // first Chart loads new data
-new MovingBlockChart(DATA_FILE,'projectCSV','#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units','100%',200);
 
-// second chart uses the same data as first. its constructor is wrapped in a function subscribed
-// to the publishing of the data being loaded. using this pattern, we can have several charts on a
-// page based on the same data
+                  // DATA_FILE,   el,          field,       sortField, asc, readableField, width, height
+new MovingBlockChart(DATA_FILE,'#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units','100%',200); 
 
+// second constructor is in a timeout function to illustrate how a later chart can use an existing data object
+// rather than fetch the data again. if called without the timeout, the data object would not be ready yet.
+// only for illusttation: no harm would be done by calling it right away
 
-/* EXAMPLE OF HOW TO CALL SEUBSEQUENT CHART BASED ON SAME DATE AS ANOTHER */
-
-// wrapper function.the name doesn't matter; it just needs to be echoed below in the PubSu.subscribe method
-
-function subscriber1( msg, data ){ // for now the subscribed function directly calls the Chart constructor but
-                                          // in future we could have it look for all constructors waiting to be called,
-                                          // defined elsewhere
-    console.log( msg, data );
-    new MovingBlockChart(null,'projectCSV','#chart-1','Proj_Units_Tot','Proj_Units_Tot',true,'Total Units','100%',200);
-                                                                                             // second Chart uses same data
-                                                                                             // as first. Needs to wait until
-                                                                                             // that data is loaded before being
-                                                                                             // initiated.
-
-};
-
-// add the function to the list of subscribers for a particular topic (projectCSV/load in this case)
-// we're keeping the returned token, in order to be able to unsubscribe
-// from the topic later on (probably not necessary for us, not yet at least)
-var token = PubSub.subscribe( 'projectCSV/load', subscriber1 );
+                      
+  window.setTimeout(function(){
+                        // DATA_FILE,   el,          field,       sortField, asc, readableField, width, height
+    new MovingBlockChart(DATA_FILE,'#chart-1','Proj_Units_Tot','Proj_Units_Tot',true,'Total Units','100%',200);
+                                                                                             
+  }, 1000);
