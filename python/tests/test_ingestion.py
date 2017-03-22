@@ -20,18 +20,15 @@
 import unittest
 from unittest import skip
 
-
 import sys, os
 sys.path.append(os.path.abspath('./'))
 
-#Example import from our data structure
-from housinginsights import ingestion
-from housinginsights.ingestion import load_data
-from housinginsights import tools
+from housinginsights.ingestion import load_meta_data
+from housinginsights.tools import dbtools
+from housinginsights.ingestion import DataReader, ManifestReader
+from housinginsights.ingestion import CSVWriter
+from housinginsights.ingestion import GenericCleaner
 
-
-
-#from ingestion.load_data import MyObjectName
 
 ##########################################################################
 ## Tests
@@ -44,49 +41,46 @@ class IngestionTests(unittest.TestCase):
         """
         Make sure that tests works for test_ingestion.py
         """
-        print("I am running")
         assert(True)
 
 
-    def test_do_fields_match(self):
-        META_FILENAME = os.path.join(os.path.dirname(__file__), 'test_data/meta.json')
-        meta = ingestion.load_data.load_meta_data(META_FILENAME)
+    def test_file_checking(self):
+        '''
+        Various quality assurance checks on the DataReader's validation functions
+        - include_flag in manifest used properly to determine loading or skipping
+        - CSV file being loaded has the expected number of fields as found in meta.json
+        - convenience function should_file_be_loaded performs properly
+        '''
+        META_FILENAME = os.path.join(os.path.dirname(__file__), 'test_data/meta_sample.json')
+        meta = load_meta_data(META_FILENAME)
         table_name = 'buildings'
 
-        #check when they match completely:
-        data_row = { 'Nlihc_id': 'a name', 'Status': 'a date', 'Rent': 132.5}
-        assert(load_data.do_fields_match(data_row, meta, table_name))
+        MANIFEST_FILENAME = os.path.join(os.path.dirname(__file__), 'test_data/manifest_sample.csv')
+        manifest = ManifestReader(MANIFEST_FILENAME)
 
-         #check when csv has extra data:
-        data_row = { 'Nlihc_id': 'a name', 'Status': 'a date', 'Rent': 132.5, 'extra_column': 'data'}
-        self.assertFalse(load_data.do_fields_match(data_row, meta, table_name))
+        for manifest_row in manifest:
+            print(manifest_row)
+            csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
+            assert(csv_reader.do_fields_match())
+            sql_manifest_row = manifest_row #assume they exactly match
+            if manifest_row['include_flag'] == "skip":
+                self.assertFalse(csv_reader.check_include_flag(sql_manifest_row))
+                self.assertFalse(csv_reader.should_file_be_loaded(sql_manifest_row))
+            elif manifest_row['include_flag'] == "use":
+                self.assertTrue(csv_reader.check_include_flag(sql_manifest_row))
+                self.assertTrue(csv_reader.should_file_be_loaded(sql_manifest_row))
+            #all previous fields
 
-        #check when csv has missing data:
-        data_row = { 'Nlihc_id': 'a name', 'Status': 'a date'}
-        self.assertFalse(load_data.do_fields_match(data_row, meta, table_name))
+
 
     def test_unique_manifest_ids(self):
-
-        #Check that non-duplicated at returns True
+        '''Make sure the 'unique_data_id' column in the manifest is unique to each row'''
+        #Example with all unique values
         MANIFEST_FILENAME = os.path.join(os.path.dirname(__file__), 'test_data/manifest_unique.csv')
-        test = load_data.check_csv_manifest_unique_ids(MANIFEST_FILENAME)
-        self.assertTrue(test)
+        manifest1 = ManifestReader(MANIFEST_FILENAME)
+        self.assertTrue(manifest1.has_unique_ids())
 
-        #check that duplicated unique_data_id returns False
+        #Example with a duplicated name
         MANIFEST_FILENAME = os.path.join(os.path.dirname(__file__), 'test_data/manifest_duplicates.csv')
-        test = load_data.check_csv_manifest_unique_ids(MANIFEST_FILENAME)
-        self.assertFalse(test)
-
-
-    #TODO this needs to be completed. Need to set up database w/ sample data
-    def test_get_sql_manifest_row(self):
-        database_connection = tools.database.get_database_connection('local_database')
-        MANIFEST_FILENAME = os.path.join(os.path.dirname(__file__), 'test_data/manifest_unique.csv')
-
-        csv_manifest = ingestion.load_data.read_csv_manifest(MANIFEST_FILENAME)
-       
-        #only need one row
-        csv_row_1 = next(csv_manifest)
-        sql_row = load_data.get_sql_manifest_row(database_connection = database_connection, csv_row = csv_row_1)
-
-        assert(True)
+        manifest2 = ManifestReader(MANIFEST_FILENAME)
+        self.assertFalse(manifest2.has_unique_ids())
