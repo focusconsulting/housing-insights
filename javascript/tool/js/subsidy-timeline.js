@@ -41,8 +41,9 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 .attr('height', this.height + this.margin.top + this.margin.bottom) // continuation of d3 margin convention
               .append("g")
                 .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");        
-
         chart.update(chart.building);
+        console.log(chart.building);
+        
         
       }, // end setup
 
@@ -98,7 +99,6 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               .enter()
               .append('g')
 
-     
         groups.append('line')
               .attr('x1', function(d){
                 console.log(d);
@@ -217,7 +217,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 var DATA_FILE = 'https://s3.amazonaws.com/housinginsights/raw/preservation_catalog/20160401/Subsidy.csv';
 
 // first Chart loads new data
-new SubsidyTimelineChart(DATA_FILE,'projectCSV','.subsidy-timeline-chart','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,'NL000001'); 
+new SubsidyTimelineChart(DATA_FILE,'.subsidy-timeline-chart','projectCSV','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,'NL000001'); 
 
 // second chart uses the same data as first. its constructor is wrapped in a function subscribed
 // to the publishing of the data being loaded. using this pattern, we can have several charts on a 
