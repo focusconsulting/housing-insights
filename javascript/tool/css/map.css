@@ -1,0 +1,137 @@
+.mapbox-portal{
+  height: 80%;
+  min-height: 300px;
+  width: 50%;
+  min-width: 450px;
+}
+
+html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Open Sans', sans-serif;
+      }
+
+h2, h3 {
+        margin: 10px;
+        font-size: 1.2em;
+        font-family: 'Open Sans', sans-serif;
+    }
+h3 {
+        font-size: 1em;
+        font-family: 'Open Sans', sans-serif;
+    }
+p {
+        font-size: 0.85em;
+        margin: 10px;
+        text-align: left;
+        font-family: 'Open Sans', sans-serif;
+    }
+    /**
+    * Create a position for the map
+    * on the page */
+    #map {
+        position:absolute;
+        top:0;
+        bottom:0;
+        width:100%;
+    }
+    .pie {
+      height:150px;
+    }
+    .pie_text {
+      font-size: 0.85em;
+      margin: 10px;
+      text-align: left;
+      font-family: 'Open Sans', sans-serif;
+    }
+    .pie_number {
+    font-size: 1em;
+    font-family: 'Open Sans', sans-serif;
+    }
+    /**
+    * Set rules for how the map overlays
+    * (info box and legend) will be displayed
+    * on the page. */
+    .map-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: rgba(255, 255, 255,1);
+        margin-right: 20px;
+        font-family: Arial, sans-serif;
+        overflow: auto;
+        border-radius: 3px;
+    }
+    .btn {
+     position: center;
+     outline:none;
+     background: transparent;
+     border: 1px solid color: #CECECE;;
+     border-radius: 24px;
+     outline:0;
+}
+ 
+    #features {
+        top: 0;
+        height: 97%;
+        margin-top: 20px;
+        width: 45%;
+    }
+    #legend {
+        padding: 10px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+        line-height: 18px;
+        height: 50px;
+        margin-bottom: 40px;
+        width: 100px;
+    }
+    .legend-key {
+        display:inline-block;
+        border-radius: 20%;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+    }
+
+    #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        bottom: 10px;
+        left: 10px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0,0,0,0.4);
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    #menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    #menu a:last-child {
+        border: none;
+    }
+
+    #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+    }
+
+    #menu a.active {
+        background-color: #b3cde3;
+        color: #404040;
+    }
+
+    #menu a.active:hover {
+        background: #b3cde3;
+    }

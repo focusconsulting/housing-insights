@@ -1,0 +1,1947 @@
+{
+     "acs_rent_lower": {
+        "cleaner": "ACSRentCleaner",
+        "replace_table": false,
+        "fields": [
+            {
+                "display_name": "geo_id",
+                "display_text": "",
+                "source_name": "GEO.id",
+                "sql_name": "geo_id",
+                "type": "text"
+            },
+            {
+                "display_name": "geo_id2",
+                "display_text": "",
+                "source_name": "GEO.id2",
+                "sql_name": "geo_id2",
+                "type": "text"
+            },
+            {
+                "display_name": "geo_display_label",
+                "display_text": "",
+                "source_name": "GEO.display-label",
+                "sql_name": "geo_display_label",
+                "type": "text"
+            },
+            {
+                "display_name": "Lower quartile rent (ACS)",
+                "display_text": "Lower quartile rent from the American Community Survey table B25057",
+                "source_name": "HD01_VD01",
+                "sql_name": "lower_quartile_rent",
+                "type": "integer"
+            },
+            {
+                "display_name": "Margin of error",
+                "display_text": "",
+                "source_name": "HD02_VD01",
+                "sql_name": "lower_quartile_rent_moe",
+                "type": "integer"
+            }
+        ]
+    },
+    
+     "acs_rent_median": {
+        "cleaner": "ACSRentCleaner",
+        "replace_table": false,
+        "fields": [
+            {
+                "display_name": "geo_id",
+                "display_text": "",
+                "source_name": "GEO.id",
+                "sql_name": "geo_id",
+                "type": "text"
+            },
+            {
+                "display_name": "geo_id2",
+                "display_text": "",
+                "source_name": "GEO.id2",
+                "sql_name": "geo_id2",
+                "type": "text"
+            },
+            {
+                "display_name": "geo_display_label",
+                "display_text": "",
+                "source_name": "GEO.display-label",
+                "sql_name": "geo_display_label",
+                "type": "text"
+            },
+            {
+                "display_name": "Median Rent (ACS)",
+                "display_text": "Median rent from the American Community Survey table B25058",
+                "source_name": "HD01_VD01",
+                "sql_name": "median_rent",
+                "type": "integer"
+            },
+            {
+                "display_name": "Margin of error",
+                "display_text": "",
+                "source_name": "HD02_VD01",
+                "sql_name": "median_rent_moe",
+                "type": "integer"
+            }
+        ]       
+    },
+
+    "acs_rent_upper": {
+        "cleaner": "ACSRentCleaner",
+        "replace_table": false,
+        "fields": [
+            {
+                "display_name": "geo_id",
+                "display_text": "",
+                "source_name": "GEO.id",
+                "sql_name": "geo_id",
+                "type": "text"
+            },
+            {
+                "display_name": "geo_id2",
+                "display_text": "",
+                "source_name": "GEO.id2",
+                "sql_name": "geo_id2",
+                "type": "text"
+            },
+            {
+                "display_name": "geo_display_label",
+                "display_text": "",
+                "source_name": "GEO.display-label",
+                "sql_name": "geo_display_label",
+                "type": "text"
+            },
+            {
+                "display_name": "Upper quartile rent (ACS)",
+                "display_text": "Upper quartile rent from the American Community Survey table B25059",
+                "source_name": "HD01_VD01",
+                "sql_name": "upper_quartile_rent",
+                "type": "integer"
+            },
+            {
+                "display_name": "Margin of error",
+                "display_text": "",
+                "source_name": "HD02_VD01",
+                "sql_name": "upper_quartile_rent_moe",
+                "type": "integer"
+            }
+        ]
+    },
+
+    "building_permits": {
+        "cleaner": "BuildingPermitsCleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "x",
+                "display_text": "Longitude field should be used instead",
+                "source_name": "X",
+                "sql_name": "x",
+                "type": "decimal"
+            },
+            {
+                "display_name": "y",
+                "display_text": "Latitude field should be used instead",
+                "source_name": "Y",
+                "sql_name": "y",
+                "type": "decimal"
+            },
+            {
+                "display_name": "objectid",
+                "display_text": "",
+                "source_name": "OBJECTID",
+                "sql_name": "objectid",
+                "type": "text"
+            },
+            {
+                "display_name": "dcrainternalnumber",
+                "display_text": "",
+                "source_name": "DCRAINTERNALNUMBER",
+                "sql_name": "dcrainternalnumber",
+                "type": "text"
+            },
+            {
+                "display_name": "issue_date",
+                "display_text": "",
+                "source_name": "ISSUE_DATE",
+                "sql_name": "issue_date",
+                "type": "timestamp"
+            },
+            {
+                "display_name": "permit_id",
+                "display_text": "",
+                "source_name": "PERMIT_ID",
+                "sql_name": "permit_id",
+                "type": "text"
+            },
+            {
+                "display_name": "permit_type_name",
+                "display_text": "",
+                "source_name": "PERMIT_TYPE_NAME",
+                "sql_name": "permit_type_name",
+                "type": "text"
+            },
+            {
+                "display_name": "permit_subtype_name",
+                "display_text": "",
+                "source_name": "PERMIT_SUBTYPE_NAME",
+                "sql_name": "permit_subtype_name",
+                "type": "text"
+            },
+            {
+                "display_name": "permit_category_name",
+                "display_text": "",
+                "source_name": "PERMIT_CATEGORY_NAME",
+                "sql_name": "permit_category_name",
+                "type": "text"
+            },
+            {
+                "display_name": "application_status_name",
+                "display_text": "",
+                "source_name": "APPLICATION_STATUS_NAME",
+                "sql_name": "application_status_name",
+                "type": "text"
+            },
+            {
+                "display_name": "full_address",
+                "display_text": "",
+                "source_name": "FULL_ADDRESS",
+                "sql_name": "full_address",
+                "type": "text"
+            },
+            {
+                "display_name": "desc_of_work",
+                "display_text": "",
+                "source_name": "DESC_OF_WORK",
+                "sql_name": "desc_of_work",
+                "type": "text"
+            },
+            {
+                "display_name": "ssl",
+                "display_text": "",
+                "source_name": "SSL",
+                "sql_name": "ssl",
+                "type": "text"
+            },
+            {
+                "display_name": "zoning",
+                "display_text": "",
+                "source_name": "ZONING",
+                "sql_name": "zoning",
+                "type": "text"
+            },
+            {
+                "display_name": "permit_applicant",
+                "display_text": "",
+                "source_name": "PERMIT_APPLICANT",
+                "sql_name": "permit_applicant",
+                "type": "text"
+            },
+            {
+                "display_name": "fee_type",
+                "display_text": "",
+                "source_name": "FEE_TYPE",
+                "sql_name": "fee_type",
+                "type": "text"
+            },
+            {
+                "display_name": "fees_paid",
+                "display_text": "",
+                "source_name": "FEES_PAID",
+                "sql_name": "fees_paid",
+                "type": "decimal"
+            },
+            {
+                "display_name": "owner_name",
+                "display_text": "",
+                "source_name": "OWNER_NAME",
+                "sql_name": "owner_name",
+                "type": "text"
+            },
+            {
+                "display_name": "Last Modified Date",
+                "display_text": "",
+                "source_name": "LASTMODIFIEDDATE",
+                "sql_name": "lastmodifieddate",
+                "type": "timestamp"
+            },
+            {
+                "display_name": "city",
+                "display_text": "",
+                "source_name": "CITY",
+                "sql_name": "city",
+                "type": "text"
+            },
+            {
+                "display_name": "state",
+                "display_text": "",
+                "source_name": "STATE",
+                "sql_name": "state",
+                "type": "text"
+            },
+            {
+                "display_name": "latitude",
+                "display_text": "",
+                "source_name": "LATITUDE",
+                "sql_name": "latitude",
+                "type": "decimal"
+            },
+            {
+                "display_name": "longitude",
+                "display_text": "",
+                "source_name": "LONGITUDE",
+                "sql_name": "longitude",
+                "type": "decimal"
+            },
+            {
+                "display_name": "xcoord",
+                "display_text": "",
+                "source_name": "XCOORD",
+                "sql_name": "xcoord",
+                "type": "decimal"
+            },
+            {
+                "display_name": "ycoord",
+                "display_text": "",
+                "source_name": "YCOORD",
+                "sql_name": "ycoord",
+                "type": "decimal"
+            },
+            {
+                "display_name": "zipcode",
+                "display_text": "",
+                "source_name": "ZIPCODE",
+                "sql_name": "zipcode",
+                "type": "text"
+            },
+            {
+                "display_name": "maraddressrepositoryid",
+                "display_text": "",
+                "source_name": "MARADDRESSREPOSITORYID",
+                "sql_name": "maraddressrepositoryid",
+                "type": "text"
+            },
+            {
+                "display_name": "dcstataddresskey",
+                "display_text": "",
+                "source_name": "DCSTATADDRESSKEY",
+                "sql_name": "dcstataddresskey",
+                "type": "text"
+            },
+            {
+                "display_name": "dcstatlocationkey",
+                "display_text": "",
+                "source_name": "DCSTATLOCATIONKEY",
+                "sql_name": "dcstatlocationkey",
+                "type": "text"
+            },
+            {
+                "display_name": "ward",
+                "display_text": "",
+                "source_name": "WARD",
+                "sql_name": "ward",
+                "type": "integer"
+            },
+            {
+                "display_name": "ANC",
+                "display_text": "",
+                "source_name": "ANC",
+                "sql_name": "anc",
+                "type": "text"
+            },
+            {
+                "display_name": "smd",
+                "display_text": "",
+                "source_name": "SMD",
+                "sql_name": "smd",
+                "type": "text"
+            },
+            {
+                "display_name": "district",
+                "display_text": "",
+                "source_name": "DISTRICT",
+                "sql_name": "district",
+                "type": "text"
+            },
+            {
+                "display_name": "psa",
+                "display_text": "",
+                "source_name": "PSA",
+                "sql_name": "psa",
+                "type": "text"
+            },
+            {
+                "display_name": "neighborhoodcluster",
+                "display_text": "",
+                "source_name": "NEIGHBORHOODCLUSTER",
+                "sql_name": "neighborhoodcluster",
+                "type": "integer"
+            },
+            {
+                "display_name": "hotspot2006name",
+                "display_text": "",
+                "source_name": "HOTSPOT2006NAME",
+                "sql_name": "hotspot2006name",
+                "type": "text"
+            },
+            {
+                "display_name": "hotspot2005name",
+                "display_text": "",
+                "source_name": "HOTSPOT2005NAME",
+                "sql_name": "hotspot2005name",
+                "type": "text"
+            },
+            {
+                "display_name": "hotspot2004name",
+                "display_text": "",
+                "source_name": "HOTSPOT2004NAME",
+                "sql_name": "hotspot2004name",
+                "type": "text"
+            },
+            {
+                "display_name": "businessimprovementdistrict",
+                "display_text": "",
+                "source_name": "BUSINESSIMPROVEMENTDISTRICT",
+                "sql_name": "businessimprovementdistrict",
+                "type": "text"
+            }
+        ]
+    },
+
+     "census_mapping": {
+        "cleaner": "GenericCleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "acs_code",
+                "display_text": "",
+                "source_name": "acs_code",
+                "sql_name": "acs_code",
+                "type": "text"
+            },
+            {
+                "display_name": "tract_code",
+                "display_text": "",
+                "source_name": "tract_code",
+                "sql_name": "tract_code",
+                "type": "text"
+            },
+            {
+                "display_name": "prescat_code",
+                "display_text": "",
+                "source_name": "prescat_code",
+                "sql_name": "prescat_code",
+                "type": "text"
+            }
+        ]
+    },
+
+    "dc_tax": {
+        "cleaner": "dc_tax_cleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "objectid",
+                "display_text": "",
+                "source_name": "OBJECTID",
+                "sql_name": "objectid",
+                "type": "text"
+            },
+            {
+                "display_name": "ssl",
+                "display_text": "",
+                "source_name": "SSL",
+                "sql_name": "ssl",
+                "type": "text"
+            },
+            {
+                "display_name": "assessor_name",
+                "display_text": "",
+                "source_name": "ASSESSOR_NAME",
+                "sql_name": "assessor_name",
+                "type": "text"
+            },
+            {
+                "display_name": "land_use_code",
+                "display_text": "",
+                "source_name": "LAND_USE_CODE",
+                "sql_name": "land_use_code",
+                "type": "text"
+            },
+            {
+                "display_name": "land_use_description",
+                "display_text": "",
+                "source_name": "LAND_USE_DESCRIPTION",
+                "sql_name": "land_use_description",
+                "type": "text"
+            },
+            {
+                "display_name": "landarea",
+                "display_text": "",
+                "source_name": "LANDAREA",
+                "sql_name": "landarea",
+                "type": "integer"
+            },
+            {
+                "display_name": "property_address",
+                "display_text": "",
+                "source_name": "PROPERTY_ADDRESS",
+                "sql_name": "property_address",
+                "type": "text"
+            },
+            {
+                "display_name": "otr_neighborhood_code",
+                "display_text": "",
+                "source_name": "OTR_NEIGHBORHOOD_CODE",
+                "sql_name": "otr_neighborhood_code",
+                "type": "text"
+            },
+            {
+                "display_name": "otr_neighborhood_name",
+                "display_text": "",
+                "source_name": "OTR_NEIGHBORHOOD_NAME",
+                "sql_name": "otr_neighborhood_name",
+                "type": "text"
+            },
+            {
+                "display_name": "owner_name_primary",
+                "display_text": "",
+                "source_name": "OWNER_NAME_PRIMARY",
+                "sql_name": "owner_name_primary",
+                "type": "text"
+            },
+            {
+                "display_name": "careof_name",
+                "display_text": "",
+                "source_name": "CAREOF_NAME",
+                "sql_name": "careof_name",
+                "type": "text"
+            },
+            {
+                "display_name": "owner_address_line1",
+                "display_text": "",
+                "source_name": "OWNER_ADDRESS_LINE1",
+                "sql_name": "owner_address_line1",
+                "type": "text"
+            },
+            {
+                "display_name": "owner_address_line2",
+                "display_text": "",
+                "source_name": "OWNER_ADDRESS_LINE2",
+                "sql_name": "owner_address_line2",
+                "type": "text"
+            },
+            {
+                "display_name": "owner_address_citystzip",
+                "display_text": "",
+                "source_name": "OWNER_ADDRESS_CITYSTZIP",
+                "sql_name": "owner_address_citystzip",
+                "type": "text"
+            },
+            {
+                "display_name": "appraised_value_baseyear_land",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_BASEYEAR_LAND",
+                "sql_name": "appraised_value_baseyear_land",
+                "type": "integer"
+            },
+            {
+                "display_name": "appraised_value_baseyear_bldg",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_BASEYEAR_BLDG",
+                "sql_name": "appraised_value_baseyear_bldg",
+                "type": "integer"
+            },
+            {
+                "display_name": "appraised_value_prior_land",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_PRIOR_LAND",
+                "sql_name": "appraised_value_prior_land",
+                "type": "integer"
+            },
+            {
+                "display_name": "appraised_value_prior_impr",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_PRIOR_IMPR",
+                "sql_name": "appraised_value_prior_impr",
+                "type": "integer"
+            },
+            {
+                "display_name": "appraised_value_prior_total",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_PRIOR_TOTAL",
+                "sql_name": "appraised_value_prior_total",
+                "type": "integer"
+            },
+            {
+                "display_name": "appraised_value_current_land",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_CURRENT_LAND",
+                "sql_name": "appraised_value_current_land",
+                "type": "integer"
+            },
+            {
+                "display_name": "appraised_value_current_impr",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_CURRENT_IMPR",
+                "sql_name": "appraised_value_current_impr",
+                "type": "integer"
+            },
+            {
+                "display_name": "appraised_value_current_total",
+                "display_text": "",
+                "source_name": "APPRAISED_VALUE_CURRENT_TOTAL",
+                "sql_name": "appraised_value_current_total",
+                "type": "integer"
+            },
+            {
+                "display_name": "phasein_value_current_land",
+                "display_text": "",
+                "source_name": "PHASEIN_VALUE_CURRENT_LAND",
+                "sql_name": "phasein_value_current_land",
+                "type": "integer"
+            },
+            {
+                "display_name": "phasein_value_current_bldg",
+                "display_text": "",
+                "source_name": "PHASEIN_VALUE_CURRENT_BLDG",
+                "sql_name": "phasein_value_current_bldg",
+                "type": "integer"
+            },
+            {
+                "display_name": "vacant_use",
+                "display_text": "",
+                "source_name": "VACANT_USE",
+                "sql_name": "vacant_use",
+                "type": "boolean"
+            },
+            {
+                "display_name": "homestead_description",
+                "display_text": "",
+                "source_name": "HOMESTEAD_DESCRIPTION",
+                "sql_name": "homestead_description",
+                "type": "text"
+            },
+            {
+                "display_name": "tax_type_description",
+                "display_text": "",
+                "source_name": "TAX_TYPE_DESCRIPTION",
+                "sql_name": "tax_type_description",
+                "type": "text"
+            },
+            {
+                "display_name": "taxrate",
+                "display_text": "",
+                "source_name": "TAXRATE",
+                "sql_name": "taxrate",
+                "type": "decimal"
+            },
+            {
+                "display_name": "mixed_use",
+                "display_text": "",
+                "source_name": "MIXED_USE",
+                "sql_name": "mixed_use",
+                "type": "text"
+            },
+            {
+                "display_name": "owner_occupied_coop_units",
+                "display_text": "",
+                "source_name": "OWNER_OCCUPIED_COOP_UNITS",
+                "sql_name": "owner_occupied_coop_units",
+                "type": "integer"
+            },
+            {
+                "display_name": "last_sale_price",
+                "display_text": "",
+                "source_name": "LAST_SALE_PRICE",
+                "sql_name": "last_sale_price",
+                "type": "integer"
+            },
+            {
+                "display_name": "last_sale_date",
+                "display_text": "",
+                "source_name": "LAST_SALE_DATE",
+                "sql_name": "last_sale_date",
+                "type": "timestamp"
+            },
+            {
+                "display_name": "deed_date",
+                "display_text": "",
+                "source_name": "DEED_DATE",
+                "sql_name": "deed_date",
+                "type": "timestamp"
+            },
+            {
+                "display_name": "current_assessment_cap",
+                "display_text": "",
+                "source_name": "CURRENT_ASSESSMENT_CAP",
+                "sql_name": "current_assessment_cap",
+                "type": "integer"
+            },
+            {
+                "display_name": "proposed_assessment_cap",
+                "display_text": "",
+                "source_name": "PROPOSED_ASSESSMENT_CAP",
+                "sql_name": "proposed_assessment_cap",
+                "type": "integer"
+            },
+            {
+                "display_name": "owner_name_secondary",
+                "display_text": "",
+                "source_name": "OWNER_NAME_SECONDARY",
+                "sql_name": "owner_name_secondary",
+                "type": "text"
+            },
+            {
+                "display_name": "address_id",
+                "display_text": "",
+                "source_name": "ADDRESS_ID",
+                "sql_name": "address_id",
+                "type": "text"
+            },
+            {
+                "display_name": "lastmodifieddate",
+                "display_text": "",
+                "source_name": "LASTMODIFIEDDATE",
+                "sql_name": "lastmodifieddate",
+                "type": "date"
+            }
+        ]
+    },
+
+     "parcel": {
+        "cleaner": "parcel_cleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "nlihc_id",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "text"
+            },
+            {
+                "display_name": "ssl",
+                "display_text": "",
+                "source_name": "Ssl",
+                "sql_name": "ssl",
+                "type": "text"
+            },
+            {
+                "display_name": "parcel_address_id",
+                "display_text": "",
+                "source_name": "Parcel_address_id",
+                "sql_name": "parcel_address_id",
+                "type": "text"
+            },
+            {
+                "display_name": "ssl_orig",
+                "display_text": "",
+                "source_name": "Ssl_orig",
+                "sql_name": "ssl_orig",
+                "type": "text"
+            },
+            {
+                "display_name": "parcel_owner_date",
+                "display_text": "",
+                "source_name": "Parcel_owner_date",
+                "sql_name": "parcel_owner_date",
+                "type": "text"
+            },
+            {
+                "display_name": "parcel_info_source_date",
+                "display_text": "",
+                "source_name": "Parcel_Info_Source_Date",
+                "sql_name": "parcel_info_source_date",
+                "type": "text"
+            },
+            {
+                "display_name": "in_last_ownerpt",
+                "display_text": "",
+                "source_name": "in_last_ownerpt",
+                "sql_name": "in_last_ownerpt",
+                "type": "boolean"
+            },
+            {
+                "display_name": "parcel_type",
+                "display_text": "",
+                "source_name": "Parcel_type",
+                "sql_name": "parcel_type",
+                "type": "text"
+            },
+            {
+                "display_name": "parcel_x",
+                "display_text": "",
+                "source_name": "Parcel_x",
+                "sql_name": "parcel_x",
+                "type": "decimal"
+            },
+            {
+                "display_name": "parcel_y",
+                "display_text": "",
+                "source_name": "Parcel_y",
+                "sql_name": "parcel_y",
+                "type": "decimal"
+            },
+            {
+                "display_name": "parcel_owner_name",
+                "display_text": "",
+                "source_name": "Parcel_owner_name",
+                "sql_name": "parcel_owner_name",
+                "type": "text"
+            },
+            {
+                "display_name": "parcel_owner_type",
+                "display_text": "",
+                "source_name": "Parcel_owner_type",
+                "sql_name": "parcel_owner_type",
+                "type": "text"
+            }
+        ]
+    },
+
+    "project": {
+        "cleaner": "ProjectCleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "nlihc_id",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "text"
+            },
+            {
+                "display_name": "status",
+                "display_text": "",
+                "source_name": "Status",
+                "sql_name": "status",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidized",
+                "display_text": "",
+                "source_name": "Subsidized",
+                "sql_name": "subsidized",
+                "type": "text"
+            },
+            {
+                "display_name": "cat_expiring",
+                "display_text": "",
+                "source_name": "Cat_Expiring",
+                "sql_name": "cat_expiring",
+                "type": "text"
+            },
+            {
+                "display_name": "cat_failing_insp",
+                "display_text": "",
+                "source_name": "Cat_Failing_Insp",
+                "sql_name": "cat_failing_insp",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_name",
+                "display_text": "",
+                "source_name": "Proj_Name",
+                "sql_name": "proj_name",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_addre",
+                "display_text": "",
+                "source_name": "Proj_Addre",
+                "sql_name": "proj_addre",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_city",
+                "display_text": "",
+                "source_name": "Proj_City",
+                "sql_name": "proj_city",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_st",
+                "display_text": "",
+                "source_name": "Proj_ST",
+                "sql_name": "proj_st",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_zip",
+                "display_text": "",
+                "source_name": "Proj_Zip",
+                "sql_name": "proj_zip",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_units_tot",
+                "display_text": "",
+                "source_name": "Proj_Units_Tot",
+                "sql_name": "proj_units_tot",
+                "type": "decimal"
+            },
+            {
+                "display_name": "proj_units_assist_min",
+                "display_text": "",
+                "source_name": "Proj_Units_Assist_Min",
+                "sql_name": "proj_units_assist_min",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_units_assist_max",
+                "display_text": "",
+                "source_name": "Proj_Units_Assist_Max",
+                "sql_name": "proj_units_assist_max",
+                "type": "text"
+            },
+            {
+                "display_name": "hud_own_effect_dt",
+                "display_text": "",
+                "source_name": "Hud_Own_Effect_dt",
+                "sql_name": "hud_own_effect_dt",
+                "type": "date"
+            },
+            {
+                "display_name": "hud_own_name",
+                "display_text": "",
+                "source_name": "Hud_Own_Name",
+                "sql_name": "hud_own_name",
+                "type": "text"
+            },
+            {
+                "display_name": "hud_own_type",
+                "display_text": "",
+                "source_name": "Hud_Own_Type",
+                "sql_name": "hud_own_type",
+                "type": "text"
+            },
+            {
+                "display_name": "hud_mgr_name",
+                "display_text": "",
+                "source_name": "Hud_Mgr_Name",
+                "sql_name": "hud_mgr_name",
+                "type": "text"
+            },
+            {
+                "display_name": "hud_mgr_type",
+                "display_text": "",
+                "source_name": "Hud_Mgr_Type",
+                "sql_name": "hud_mgr_type",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidy_start_first",
+                "display_text": "",
+                "source_name": "Subsidy_Start_First",
+                "sql_name": "subsidy_start_first",
+                "type": "date"
+            },
+            {
+                "display_name": "subsidy_start_last",
+                "display_text": "",
+                "source_name": "Subsidy_Start_Last",
+                "sql_name": "subsidy_start_last",
+                "type": "date"
+            },
+            {
+                "display_name": "subsidy_end_first",
+                "display_text": "",
+                "source_name": "Subsidy_End_First",
+                "sql_name": "subsidy_end_first",
+                "type": "date"
+            },
+            {
+                "display_name": "subsidy_end_last",
+                "display_text": "",
+                "source_name": "Subsidy_End_Last",
+                "sql_name": "subsidy_end_last",
+                "type": "date"
+            },
+            {
+                "display_name": "ward2012",
+                "display_text": "",
+                "source_name": "Ward2012",
+                "sql_name": "ward2012",
+                "type": "text"
+            },
+            {
+                "display_name": "pbca",
+                "display_text": "",
+                "source_name": "PBCA",
+                "sql_name": "pbca",
+                "type": "text"
+            },
+            {
+                "display_name": "anc2012",
+                "display_text": "",
+                "source_name": "Anc2012",
+                "sql_name": "anc2012",
+                "type": "text"
+            },
+            {
+                "display_name": "psa2012",
+                "display_text": "",
+                "source_name": "Psa2012",
+                "sql_name": "psa2012",
+                "type": "text"
+            },
+            {
+                "display_name": "geo2010",
+                "display_text": "",
+                "source_name": "Geo2010",
+                "sql_name": "geo2010",
+                "type": "text"
+            },
+            {
+                "display_name": "cluster_tr2000",
+                "display_text": "",
+                "source_name": "Cluster_tr2000",
+                "sql_name": "cluster_tr2000",
+                "type": "text"
+            },
+            {
+                "display_name": "cluster_tr2000_name",
+                "display_text": "",
+                "source_name": "Cluster_tr2000_name",
+                "sql_name": "cluster_tr2000_name",
+                "type": "text"
+            },
+            {
+                "display_name": "zip",
+                "display_text": "",
+                "source_name": "Zip",
+                "sql_name": "zip",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_image_url",
+                "display_text": "",
+                "source_name": "Proj_image_url",
+                "sql_name": "proj_image_url",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_streetview_url",
+                "display_text": "",
+                "source_name": "Proj_streetview_url",
+                "sql_name": "proj_streetview_url",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_address_id",
+                "display_text": "",
+                "source_name": "Proj_address_id",
+                "sql_name": "proj_address_id",
+                "type": "text"
+            },
+            {
+                "display_name": "proj_x",
+                "display_text": "",
+                "source_name": "Proj_x",
+                "sql_name": "proj_x",
+                "type": "decimal"
+            },
+            {
+                "display_name": "proj_y",
+                "display_text": "",
+                "source_name": "Proj_y",
+                "sql_name": "proj_y",
+                "type": "decimal"
+            },
+            {
+                "display_name": "proj_lat",
+                "display_text": "",
+                "source_name": "Proj_lat",
+                "sql_name": "proj_lat",
+                "type": "decimal"
+            },
+            {
+                "display_name": "proj_lon",
+                "display_text": "",
+                "source_name": "Proj_lon",
+                "sql_name": "proj_lon",
+                "type": "decimal"
+            },
+            {
+                "display_name": "bldg_count",
+                "display_text": "",
+                "source_name": "Bldg_count",
+                "sql_name": "bldg_count",
+                "type": "integer"
+            },
+            {
+                "display_name": "update_dtm",
+                "display_text": "",
+                "source_name": "Update_Dtm",
+                "sql_name": "update_dtm",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidy_info_source_property",
+                "display_text": "",
+                "source_name": "Subsidy_info_source_property",
+                "sql_name": "subsidy_info_source_property",
+                "type": "text"
+            },
+            {
+                "display_name": "contract_number",
+                "display_text": "",
+                "source_name": "contract_number",
+                "sql_name": "contract_number",
+                "type": "text"
+            },
+            {
+                "display_name": "category_code",
+                "display_text": "",
+                "source_name": "Category_Code",
+                "sql_name": "category_code",
+                "type": "text"
+            },
+            {
+                "display_name": "cat_at_risk",
+                "display_text": "",
+                "source_name": "Cat_At_Risk",
+                "sql_name": "cat_at_risk",
+                "type": "text"
+            },
+            {
+                "display_name": "cat_more_info",
+                "display_text": "",
+                "source_name": "Cat_More_Info",
+                "sql_name": "cat_more_info",
+                "type": "text"
+            },
+            {
+                "display_name": "cat_lost",
+                "display_text": "",
+                "source_name": "Cat_Lost",
+                "sql_name": "cat_lost",
+                "type": "text"
+            },
+            {
+                "display_name": "cat_replaced",
+                "display_text": "",
+                "source_name": "Cat_Replaced",
+                "sql_name": "cat_replaced",
+                "type": "text"
+            }
+        ]
+    },
+
+    "reac_score": {
+        "cleaner": "reac_score_cleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "nlihc_id",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "text"
+            },
+            {
+                "display_name": "reac_date",
+                "display_text": "",
+                "source_name": "REAC_date",
+                "sql_name": "reac_date",
+                "type": "date"
+            },
+            {
+                "display_name": "reac_score",
+                "display_text": "",
+                "source_name": "REAC_score",
+                "sql_name": "reac_score",
+                "type": "text"
+            },
+            {
+                "display_name": "reac_score_num",
+                "display_text": "",
+                "source_name": "REAC_score_num",
+                "sql_name": "reac_score_num",
+                "type": "integer"
+            },
+            {
+                "display_name": "reac_score_letter",
+                "display_text": "",
+                "source_name": "REAC_score_letter",
+                "sql_name": "reac_score_letter",
+                "type": "text"
+            },
+            {
+                "display_name": "reac_score_star",
+                "display_text": "",
+                "source_name": "REAC_score_star",
+                "sql_name": "reac_score_star",
+                "type": "text"
+            }
+        ]
+    },
+
+    "real_property": {
+        "cleaner": "real_property_cleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "nlihc_id",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "text"
+            },
+            {
+                "display_name": "ssl",
+                "display_text": "",
+                "source_name": "Ssl",
+                "sql_name": "ssl",
+                "type": "text"
+            },
+            {
+                "display_name": "rp_date",
+                "display_text": "",
+                "source_name": "RP_date",
+                "sql_name": "rp_date",
+                "type": "date"
+            },
+            {
+                "display_name": "rp_type",
+                "display_text": "",
+                "source_name": "RP_type",
+                "sql_name": "rp_type",
+                "type": "text"
+            },
+            {
+                "display_name": "rp_desc",
+                "display_text": "",
+                "source_name": "RP_desc",
+                "sql_name": "rp_desc",
+                "type": "text"
+            }
+        ]
+    },
+
+    "subsidy": {
+        "cleaner": "SubsidyCleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "nlihc_id",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidy_id",
+                "display_text": "",
+                "source_name": "Subsidy_id",
+                "sql_name": "subsidy_id",
+                "type": "text"
+            },
+            {
+                "display_name": "units_assist",
+                "display_text": "",
+                "source_name": "Units_Assist",
+                "sql_name": "units_assist",
+                "type": "integer"
+            },
+            {
+                "display_name": "poa_start",
+                "display_text": "",
+                "source_name": "POA_start",
+                "sql_name": "poa_start",
+                "type": "date"
+            },
+            {
+                "display_name": "poa_end",
+                "display_text": "",
+                "source_name": "POA_end",
+                "sql_name": "poa_end",
+                "type": "date"
+            },
+            {
+                "display_name": "contract_number",
+                "display_text": "",
+                "source_name": "contract_number",
+                "sql_name": "contract_number",
+                "type": "text"
+            },
+            {
+                "display_name": "rent_to_fmr_description",
+                "display_text": "",
+                "source_name": "rent_to_fmr_description",
+                "sql_name": "rent_to_fmr_description",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidy_active",
+                "display_text": "",
+                "source_name": "Subsidy_Active",
+                "sql_name": "subsidy_active",
+                "type": "boolean"
+            },
+            {
+                "display_name": "subsidy_info_source_id",
+                "display_text": "",
+                "source_name": "Subsidy_Info_Source_ID",
+                "sql_name": "subsidy_info_source_id",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidy_info_source",
+                "display_text": "",
+                "source_name": "Subsidy_Info_Source",
+                "sql_name": "subsidy_info_source",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidy_info_source_date",
+                "display_text": "",
+                "source_name": "Subsidy_Info_Source_Date",
+                "sql_name": "subsidy_info_source_date",
+                "type": "date"
+            },
+            {
+                "display_name": "update_dtm",
+                "display_text": "",
+                "source_name": "Update_Dtm",
+                "sql_name": "update_dtm",
+                "type": "text"
+            },
+            {
+                "display_name": "program",
+                "display_text": "",
+                "source_name": "Program",
+                "sql_name": "program",
+                "type": "text"
+            },
+            {
+                "display_name": "compl_end",
+                "display_text": "",
+                "source_name": "Compl_end",
+                "sql_name": "compl_end",
+                "type": "date"
+            },
+            {
+                "display_name": "poa_end_prev",
+                "display_text": "",
+                "source_name": "POA_end_prev",
+                "sql_name": "poa_end_prev",
+                "type": "date"
+            },
+            {
+                "display_name": "agency",
+                "display_text": "",
+                "source_name": "Agency",
+                "sql_name": "agency",
+                "type": "text"
+            },
+            {
+                "display_name": "poa_start_orig",
+                "display_text": "",
+                "source_name": "POA_start_orig",
+                "sql_name": "poa_start_orig",
+                "type": "date"
+            },
+            {
+                "display_name": "portfolio",
+                "display_text": "",
+                "source_name": "Portfolio",
+                "sql_name": "portfolio",
+                "type": "text"
+            },
+            {
+                "display_name": "subsidy_info_source_property",
+                "display_text": "",
+                "source_name": "Subsidy_info_source_property",
+                "sql_name": "subsidy_info_source_property",
+                "type": "text"
+            },
+            {
+                "display_name": "poa_end_actual",
+                "display_text": "",
+                "source_name": "POA_end_actual",
+                "sql_name": "poa_end_actual",
+                "type": "date"
+            }
+        ]
+    },
+
+    "zillow_zrisqft_neighbor": {
+        "cleaner": "zillow_zrisqft_neighbor_cleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "regionid",
+                "display_text": "",
+                "source_name": "RegionID",
+                "sql_name": "regionid",
+                "type": "text"
+            },
+            {
+                "display_name": "regionname",
+                "display_text": "",
+                "source_name": "RegionName",
+                "sql_name": "regionname",
+                "type": "text"
+            },
+            {
+                "display_name": "city",
+                "display_text": "",
+                "source_name": "City",
+                "sql_name": "city",
+                "type": "text"
+            },
+            {
+                "display_name": "state",
+                "display_text": "",
+                "source_name": "State",
+                "sql_name": "state",
+                "type": "text"
+            },
+            {
+                "display_name": "metro",
+                "display_text": "",
+                "source_name": "Metro",
+                "sql_name": "metro",
+                "type": "text"
+            },
+            {
+                "display_name": "countyname",
+                "display_text": "",
+                "source_name": "CountyName",
+                "sql_name": "countyname",
+                "type": "text"
+            },
+            {
+                "display_name": "sizerank",
+                "display_text": "",
+                "source_name": "SizeRank",
+                "sql_name": "sizerank",
+                "type": "integer"
+            },
+            {
+                "display_name": "2010_11",
+                "display_text": "",
+                "source_name": "2010-11",
+                "sql_name": "2010_11",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2010_12",
+                "display_text": "",
+                "source_name": "2010-12",
+                "sql_name": "2010_12",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_01",
+                "display_text": "",
+                "source_name": "2011-01",
+                "sql_name": "2011_01",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_02",
+                "display_text": "",
+                "source_name": "2011-02",
+                "sql_name": "2011_02",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_03",
+                "display_text": "",
+                "source_name": "2011-03",
+                "sql_name": "2011_03",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_04",
+                "display_text": "",
+                "source_name": "2011-04",
+                "sql_name": "2011_04",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_05",
+                "display_text": "",
+                "source_name": "2011-05",
+                "sql_name": "2011_05",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_06",
+                "display_text": "",
+                "source_name": "2011-06",
+                "sql_name": "2011_06",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_07",
+                "display_text": "",
+                "source_name": "2011-07",
+                "sql_name": "2011_07",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_08",
+                "display_text": "",
+                "source_name": "2011-08",
+                "sql_name": "2011_08",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_09",
+                "display_text": "",
+                "source_name": "2011-09",
+                "sql_name": "2011_09",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_10",
+                "display_text": "",
+                "source_name": "2011-10",
+                "sql_name": "2011_10",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_11",
+                "display_text": "",
+                "source_name": "2011-11",
+                "sql_name": "2011_11",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2011_12",
+                "display_text": "",
+                "source_name": "2011-12",
+                "sql_name": "2011_12",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_01",
+                "display_text": "",
+                "source_name": "2012-01",
+                "sql_name": "2012_01",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_02",
+                "display_text": "",
+                "source_name": "2012-02",
+                "sql_name": "2012_02",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_03",
+                "display_text": "",
+                "source_name": "2012-03",
+                "sql_name": "2012_03",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_04",
+                "display_text": "",
+                "source_name": "2012-04",
+                "sql_name": "2012_04",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_05",
+                "display_text": "",
+                "source_name": "2012-05",
+                "sql_name": "2012_05",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_06",
+                "display_text": "",
+                "source_name": "2012-06",
+                "sql_name": "2012_06",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_07",
+                "display_text": "",
+                "source_name": "2012-07",
+                "sql_name": "2012_07",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_08",
+                "display_text": "",
+                "source_name": "2012-08",
+                "sql_name": "2012_08",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_09",
+                "display_text": "",
+                "source_name": "2012-09",
+                "sql_name": "2012_09",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_10",
+                "display_text": "",
+                "source_name": "2012-10",
+                "sql_name": "2012_10",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_11",
+                "display_text": "",
+                "source_name": "2012-11",
+                "sql_name": "2012_11",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2012_12",
+                "display_text": "",
+                "source_name": "2012-12",
+                "sql_name": "2012_12",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_01",
+                "display_text": "",
+                "source_name": "2013-01",
+                "sql_name": "2013_01",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_02",
+                "display_text": "",
+                "source_name": "2013-02",
+                "sql_name": "2013_02",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_03",
+                "display_text": "",
+                "source_name": "2013-03",
+                "sql_name": "2013_03",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_04",
+                "display_text": "",
+                "source_name": "2013-04",
+                "sql_name": "2013_04",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_05",
+                "display_text": "",
+                "source_name": "2013-05",
+                "sql_name": "2013_05",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_06",
+                "display_text": "",
+                "source_name": "2013-06",
+                "sql_name": "2013_06",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_07",
+                "display_text": "",
+                "source_name": "2013-07",
+                "sql_name": "2013_07",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_08",
+                "display_text": "",
+                "source_name": "2013-08",
+                "sql_name": "2013_08",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_09",
+                "display_text": "",
+                "source_name": "2013-09",
+                "sql_name": "2013_09",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_10",
+                "display_text": "",
+                "source_name": "2013-10",
+                "sql_name": "2013_10",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_11",
+                "display_text": "",
+                "source_name": "2013-11",
+                "sql_name": "2013_11",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2013_12",
+                "display_text": "",
+                "source_name": "2013-12",
+                "sql_name": "2013_12",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_01",
+                "display_text": "",
+                "source_name": "2014-01",
+                "sql_name": "2014_01",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_02",
+                "display_text": "",
+                "source_name": "2014-02",
+                "sql_name": "2014_02",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_03",
+                "display_text": "",
+                "source_name": "2014-03",
+                "sql_name": "2014_03",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_04",
+                "display_text": "",
+                "source_name": "2014-04",
+                "sql_name": "2014_04",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_05",
+                "display_text": "",
+                "source_name": "2014-05",
+                "sql_name": "2014_05",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_06",
+                "display_text": "",
+                "source_name": "2014-06",
+                "sql_name": "2014_06",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_07",
+                "display_text": "",
+                "source_name": "2014-07",
+                "sql_name": "2014_07",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_08",
+                "display_text": "",
+                "source_name": "2014-08",
+                "sql_name": "2014_08",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_09",
+                "display_text": "",
+                "source_name": "2014-09",
+                "sql_name": "2014_09",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_10",
+                "display_text": "",
+                "source_name": "2014-10",
+                "sql_name": "2014_10",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_11",
+                "display_text": "",
+                "source_name": "2014-11",
+                "sql_name": "2014_11",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2014_12",
+                "display_text": "",
+                "source_name": "2014-12",
+                "sql_name": "2014_12",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_01",
+                "display_text": "",
+                "source_name": "2015-01",
+                "sql_name": "2015_01",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_02",
+                "display_text": "",
+                "source_name": "2015-02",
+                "sql_name": "2015_02",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_03",
+                "display_text": "",
+                "source_name": "2015-03",
+                "sql_name": "2015_03",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_04",
+                "display_text": "",
+                "source_name": "2015-04",
+                "sql_name": "2015_04",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_05",
+                "display_text": "",
+                "source_name": "2015-05",
+                "sql_name": "2015_05",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_06",
+                "display_text": "",
+                "source_name": "2015-06",
+                "sql_name": "2015_06",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_07",
+                "display_text": "",
+                "source_name": "2015-07",
+                "sql_name": "2015_07",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_08",
+                "display_text": "",
+                "source_name": "2015-08",
+                "sql_name": "2015_08",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_09",
+                "display_text": "",
+                "source_name": "2015-09",
+                "sql_name": "2015_09",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_10",
+                "display_text": "",
+                "source_name": "2015-10",
+                "sql_name": "2015_10",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_11",
+                "display_text": "",
+                "source_name": "2015-11",
+                "sql_name": "2015_11",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2015_12",
+                "display_text": "",
+                "source_name": "2015-12",
+                "sql_name": "2015_12",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_01",
+                "display_text": "",
+                "source_name": "2016-01",
+                "sql_name": "2016_01",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_02",
+                "display_text": "",
+                "source_name": "2016-02",
+                "sql_name": "2016_02",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_03",
+                "display_text": "",
+                "source_name": "2016-03",
+                "sql_name": "2016_03",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_04",
+                "display_text": "",
+                "source_name": "2016-04",
+                "sql_name": "2016_04",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_05",
+                "display_text": "",
+                "source_name": "2016-05",
+                "sql_name": "2016_05",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_06",
+                "display_text": "",
+                "source_name": "2016-06",
+                "sql_name": "2016_06",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_07",
+                "display_text": "",
+                "source_name": "2016-07",
+                "sql_name": "2016_07",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_08",
+                "display_text": "",
+                "source_name": "2016-08",
+                "sql_name": "2016_08",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_09",
+                "display_text": "",
+                "source_name": "2016-09",
+                "sql_name": "2016_09",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_10",
+                "display_text": "",
+                "source_name": "2016-10",
+                "sql_name": "2016_10",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_11",
+                "display_text": "",
+                "source_name": "2016-11",
+                "sql_name": "2016_11",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2016_12",
+                "display_text": "",
+                "source_name": "2016-12",
+                "sql_name": "2016_12",
+                "type": "decimal"
+            },
+            {
+                "display_name": "2017_01",
+                "display_text": "",
+                "source_name": "2017-01",
+                "sql_name": "2017_01",
+                "type": "decimal"
+            }
+        ]
+    }
+}

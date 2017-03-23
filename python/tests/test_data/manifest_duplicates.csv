@@ -1,0 +1,4 @@
+include_flag,destination_table,unique_data_id,data_date,local_folder,s3_folder,filepath,notes
+use,acs_rent_lower,ACS_09_5YR,7/1/2007,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25057_lower_rent_by_tract/2009_5year/ACS_09_5YR_B25057_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
+use,acs_rent_lower,ACS_10_5YR,7/1/2008,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25057_lower_rent_by_tract/2010_5year/ACS_10_5YR_B25057_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
+use,acs_rent_lower,ACS_10_5YR,7/1/2008,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25057_lower_rent_by_tract/2010_5year/ACS_10_5YR_B25057_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error

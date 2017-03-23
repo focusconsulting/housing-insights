@@ -1,3 +1,0 @@
-proj_name	geo2010	quartile1_neighborhood_rent	median_neighborhood_rent	quartile3_neighborhood_rent	upper_data_version	median_data_version	lower_data_version
-"Friendship Terrace"	"Tract 10.01"	1010	1358	1929	ACS_09_5YR	ACS_09_5YR	ACS_09_5YR
-"Friendship Terrace"	"Tract 10.01"	1234	2,000+	2,000+	ACS_14_5YR	ACS_14_5YR	ACS_14_5YR

@@ -13,6 +13,9 @@ customCSS: prototype-1a
 **Initial sort is by zip code (top to bottom then right)**
 
 a.
+<ul id = "metric_menu">
+  <h1>Metrics</h1>
+</ul>
 <div id="chart-0" class="d3-chart"></div>
 <!-- next prototype goes below -->
 <!--b.

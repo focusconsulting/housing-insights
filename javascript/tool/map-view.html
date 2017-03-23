@@ -1,0 +1,75 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset = 'utf 8'>
+	<title>Map View</title>
+ 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.4.1/d3.min.js"></script>
+	<script src='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
+  	<link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
+  	<!-- Begin Mapbox requests -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
+  <!-- end Mapbox requests -->
+  <!-- begin project-specific STATIC asset calls.
+       page-specific calls that require ready DOM elements called at end of <body>.
+       may change that practice later. for now we can avoid listening for window.load, document.ready, etc  -->
+  <script src="js/d3-tip.js"></script>
+  <script src="js/PubSub.js"></script>
+  <script src="js/housing-insights.js"></script>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fjalla+One|Exo:400,600|Ropa+Sans' rel='stylesheet' type='text/css'>
+  <link href="https://fonts.googleapis.com/css?family=Exo" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=PT+Sans+Narrow|Arimo|Dosis|Lato' rel='stylesheet' type='text/css'>
+  <script src="https://use.typekit.net/lkf2nvl.js"></script>
+  <script>try{Typekit.load({ async: true });}catch(e){}</script>
+    
+  <link rel="stylesheet" type="text/css" href="css/tool.css">
+  <link rel="stylesheet" type="text/css" href="css/map.css">
+  <!-- end project-specific asset calls -->
+</head>
+<body>
+	<div id='map'></div>
+	<nav id="menu"></nav>
+		<div class='map-overlay' id='features'>
+			<div id='ward'>
+			<h2 class='text-center'>Ward Details</h2>
+				<p class='text-center'>Select a Ward to Zoom to Area</p>
+				<div class='text-center row'>  
+				  <div class="btn-group" role="group" aria-label="Filter">
+				          <button type="button" class="btn btn-default" id="ward-all">All</button>
+				          <button type="button" class="btn btn-default" id="ward-1">1</button>
+				          <button type="button" class="btn btn-default" id="ward-2">2</button>
+				          <button type="button" class="btn btn-default" id="ward-3">3</button>
+				          <button type="button" class="btn btn-default" id="ward-4">4</button>
+				          <button type="button" class="btn btn-default" id="ward-5">5</button>
+				          <button type="button" class="btn btn-default" id="ward-6">6</button>
+				          <button type="button" class="btn btn-default" id="ward-7">7</button>
+				          <button type="button" class="btn btn-default" id="ward-8">8</button>
+				</div>
+				</div>
+<div class='text-center row'>  
+			  <div class="col-lg-3" id="pie" style="float: left"></div>
+			  <div class="col-lg-3" id="pie-1" style="float: left"></div>
+			  <div class="col-lg-3" id="pie-2" style="float: left"></div>
+			  <div class="col-lg-3" id="pie-3" style="float: left"></div>
+</div>
+		</div>
+		<div id='building'>
+			<h2 class='text-center'>Building Details</h2>
+			<div id="pd"></div>
+			<div id="chart-0"></div>    
+		</div>
+	</div>
+	<script src="js/rich-map.js"></script>
+	<script src="js/building-chart.js"></script>
+	<!--<script src="js/moving-blocks.js"></script>-->
+  	<script src="js/building-header.js"></script>
+  	<script src="js/pie.js"></script>
+  	<!--<script src="js/PubSub.js"></script>-->
+
+</body>
+
+</html>
