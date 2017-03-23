@@ -6,7 +6,7 @@ import sys, os
 from importlib import import_module
 sys.path.append(os.path.abspath('../../'))
 
-import housinginsights.ingestion.CleanerBase as CleanerBase
+import housinginsights.ingestion.Cleaners as Cleaners
 
 # Completed, tests not written.
 def load_meta_data(filename='meta.json'):
@@ -102,7 +102,7 @@ def get_cleaner_from_name(meta, manifest_row, name = "GenericCleaner"):
 
     #Import
     #module = import_module("module.submodule")
-    Class_ = getattr(CleanerBase, name)
+    Class_ = getattr(Cleaners, name)
     instance = Class_(meta, manifest_row)
     return instance
 
