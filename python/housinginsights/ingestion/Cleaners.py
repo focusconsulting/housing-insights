@@ -83,6 +83,9 @@ class CleanerBase(object, metaclass=ABCMeta):
     def clean(self, row, row_num):
         pass
 
+#############################################
+# Custom Cleaners
+#############################################
 
 class GenericCleaner(CleanerBase):
     def clean(self,row, row_num = None):
@@ -111,11 +114,10 @@ class BuildingPermitsCleaner(CleanerBase):
 
         return row
 
-
 class ACSRentCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         row = self.high_low_rent(row)
-        #Note, we are losing data about statistical issues. Would be better to move these to a new column.
+        #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
         row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-',''])
         if row_num == 0:
             return None
@@ -138,28 +140,3 @@ class ACSRentCleaner(CleanerBase):
         return row
 
 
-
-#TODO haven't merged this original version w/ latest usage.
-class ParcelCleaner(CleanerBase):
-
-    def clean(self, row):
-        super(ParcelCleaner, self).replace_nulls(row)
-        self.clean_parcel_row(row)
-
-    def clean_parcel_row(self, row):
-        if len(row) is not 12:
-            print("Print missing columns in row: {}".format(row))
-            return 'DIRTY', row
-
-        for k, v in row.items():
-            if k == 'Parcel_Info_Source_Date':
-                if super(ParcelCleaner, self).format_date(v) == 'N':
-                    return 'DIRTY', row
-                else:
-                    row[k] = super(ParcelCleaner, self).format_date(v)
-            if k == 'Parcel_owner_date':
-                if super(ParcelCleaner, self).format_date(v) == 'N':
-                    return 'DIRTY', row
-                else:
-                    row[k] = super(ParcelCleaner, self).format_date(v)
-        return 'CLEAN', row

@@ -1,0 +1,2 @@
+
+Add this file to any directory to tell Git to store the directory. Contents of the directory will still be ignored by Git if the top-level .gitignore file tells it to ignore them. 

@@ -17,8 +17,6 @@ from housinginsights.tools import dbtools
 from housinginsights.ingestion import DataReader, ManifestReader
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
-#from housinginsights.ingestion import ACSRentCleaner, GenericCleaner
-#from housinginsights.ingestion import BuildingCleaner
 from housinginsights.ingestion import functions as ingestionfunctions
 
 ##########################################################################

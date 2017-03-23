@@ -12,7 +12,7 @@
         SQUARE_WIDTH = 10, // symbolic constants all caps following convention
         SQUARE_SPACER = 2,
         ROWS = 12,
-        DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
+        DATA_FILE = 'https://s3.amazonaws.com/housinginsights/raw/preservation_catalog/20160401/Project.csv';
 
     extendPrototype = function(destinationPrototype, obj){ // using this function for inheritance. 
                                                            // extend a constructor's prototype with 

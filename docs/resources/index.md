@@ -79,8 +79,9 @@ $ git fetch codefordc <branch-name>   #fetches from the codefordc repo
 * We use Python, Javascript, and Jekyll. Follow the instructions for [setting up your dev environment](https://github.com/codefordc/housing-preservation) to make sure you have everything you need installed. **Coming soon** Docker setup files to make configuration quick and easy. 
 * Our [CONTRIBUTING](https://github.com/codefordc/housing-insights/blob/master/CONTRIBUTING.md) document in our Github repo has important information on code conventions.
 
+## 5) Adding new data sources
 
-
+[Read the instructions]({{site.baseurl}}/resources/adding-data-sources.html) on how to add a new data source. 
 
 
 {% include modal_email.html %}
