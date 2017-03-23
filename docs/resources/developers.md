@@ -1,4 +1,0 @@
----
-layout: main
-title: Summary
----
