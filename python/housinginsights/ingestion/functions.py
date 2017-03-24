@@ -106,6 +106,14 @@ def get_cleaner_from_name(meta, manifest_row, name = "GenericCleaner"):
     instance = Class_(meta, manifest_row)
     return instance
 
+
+def join_paths(pieces=[]):
+    '''
+    Joins arbitrary pieces of a url or path. 
+    Alternative to os.path.join if the second argument might start with "/"
+    '''
+    return '/'.join(s.strip('/') for s in pieces)
+
 #Used for testing purposes
 if __name__ == '__main__':
     pass

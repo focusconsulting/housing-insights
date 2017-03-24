@@ -167,6 +167,7 @@ class HISql(object):
             field_command = ",".join(field_statements)
             create_command = "CREATE TABLE {}({});".format(table, field_command)
             db_conn.execute(create_command)
+            logging.info("  Table created: {}".format(table))
 
         db_conn.close()
 
@@ -180,7 +181,7 @@ class HISql(object):
         try:
             db_conn.execute("DROP TABLE {}".format(table))
         except ProgrammingError:
-            logging.warning("Table {} does can't be dropped because it doesn't exist".format(self.tablename))
+            logging.warning("  {} table can't be dropped because it doesn't exist".format(self.tablename))
         db_conn.close()
 
     def get_sql_manifest_row(self, db_conn=None, close_conn=True):
