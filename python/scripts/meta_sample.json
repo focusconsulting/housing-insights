@@ -1,6 +1,6 @@
 {
-    "building_temp": {
-        "cleaner": "BuildingCleaner",
+    "project_temp": {
+        "cleaner": "ProjectCleaner",
         "replace_table": true,
         "fields": [
             {
