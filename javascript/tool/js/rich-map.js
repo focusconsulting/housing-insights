@@ -175,8 +175,18 @@ map.on('load', function() {
   }
 
   map.on('click', function (e) {
-    var building = map.queryRenderedFeatures(e.point, { });
-    document.getElementById('pd').innerHTML = "<h3><strong>" + building[0].properties.Proj_Addre +"</strong><br>"+building[0].properties.Proj_Name + "<br><br>" + "</h3><p>" + "Owner: " + building[0].properties.Hud_Own_Name +"<br>"+"Cluster Name: "+ building[0].properties.Cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building[0].properties.Hud_Own_Name+"<br>"+"HUD Owner Type: " + building[0].properties.Hud_Own_Type +"<br>"+"HUD Manager Name: " + building[0].properties.Hud_Mgr_Name+"<br>"+"HUD Manager Type: " + building[0].properties.Hud_Mgr_Type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building[0].properties.Cat_At_Risk+"<br>"+building[0].properties.Category_Code +"</p>";
+    var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
+    console.log(building);
+    var projAddressId = building['properties']['Proj_address_id'];
+    var projectName = building['properties']['Proj_Name'];
+    var queryString = '?building=' + encodeURIComponent(projAddressId);
+    
+    document.getElementById('pd').innerHTML = "<h3><strong>" + building.properties.Proj_Addre +"</strong><br>"+building.properties.Proj_Name + "<br><br>" + "</h3><p>" + "Owner: " + building.properties.Hud_Own_Name +"<br>"+"Cluster Name: "+ building.properties.Cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building.properties.Hud_Own_Name+"<br>"+"HUD Owner Type: " + building.properties.Hud_Own_Type +"<br>"+"HUD Manager Name: " + building.properties.Hud_Mgr_Name+"<br>"+"HUD Manager Type: " + building.properties.Hud_Mgr_Type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.Cat_At_Risk+"<br>"+building.properties.Category_Code +"</p>";
+        
+    var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
+      .setLngLat(e.lngLat)
+      .setHTML("<a href = '/javascript/tool/building.html" + queryString + "' >See more about " + projectName + "</a>" )
+      .addTo(map);
 
   });
 
