@@ -57,24 +57,3 @@ def get_psycopg2_cursor(database_choice):
     engine = create_engine(connection_string)
     cursor = engine.raw_connection().cursor()
     return cursor
-
-def check_for_docker_database():
-    # TODO this needs to be updated, was just a quick and dirty way to check if postgres is running locally in a docker container.
-    running = False
-    client = docker.from_env()
-    containers = client.containers.list(filters={'status': 'running'})
-    for container in containers:
-        if 'postgres' in container.attrs['Args']:
-            running = True
-            break
-    return running
-
-
-def start_local_database_server():
-    client = docker.from_env()
-    client.containers.run('postgres:9.4.5', detach=True, ports={'5432/tcp': 5432})
-    conn = get_database_connection('postgres_database')
-    conn.execute("commit")
-    conn.execute("create database housinginsights_local")
-    conn.close()
-
