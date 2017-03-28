@@ -7,9 +7,9 @@ import csv
 
 #Needed to make relative package imports when running this file as a script (i.e. for testing purposes).
 #Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
-if __name__ == '__main__':
-    import sys, os
-    sys.path.append(os.path.abspath('../'))
+
+import sys, os
+sys.path.append(os.path.abspath('../'))
 
 from housinginsights.ingestion.DataReader import DataReader
 from housinginsights.tools import dbtools
