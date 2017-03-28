@@ -76,18 +76,6 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
     - use logging.warning() to write the specific error encountered to the log file
     - at the end of loading print an error message to the console
     """
-
-    #Docker use is currently not fully configured. Saving this code for later use
-    if database_choice == "docker_database":
-        try:
-            is_local_db_running = dbtools.check_for_docker_database()
-            if not is_local_db_running:
-                dbtools.start_local_database_server()
-
-        except Exception as e:
-            print("Could not start postgres database is docker running?")
-
-
     meta = ingestionfunctions.load_meta_data(meta_path)
     engine = dbtools.get_database_engine(database_choice)
     manifest = ManifestReader(manifest_path)
@@ -161,11 +149,17 @@ if __name__ == '__main__':
         meta_path = 'meta_sample.json'
         manifest_path = 'manifest_sample.csv'
 
+    if 'docker' in sys.argv:
+        database_choice = 'docker_database'
+
+
+
     if 'remote' in sys.argv:
         database_choice = 'remote_database'
         #Don't want sample data in the remote database
         meta_path = 'meta.json'
         manifest_path = 'manifest.csv'
+
 
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)
