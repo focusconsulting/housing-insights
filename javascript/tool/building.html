@@ -33,7 +33,7 @@
 				<a class="col-sm-4" href="" style="margin-bottom: -20px;">&lt; Back</a>
 			</div>
 			<div class="row">
-				<h2 class="col-sm-8" id="building-name">Friendship Terrace</h2>
+				<h2 class="col-sm-8" id="building-name"></h2>
 				<div class="col-sm-4 search-bar-wrapper">
 					<p>Search for building or address</p>
 					<form action="" id="building-search" method="get" name="building-search">
@@ -45,18 +45,18 @@
 				<article class="col-sm-3 building-address">
 					<div class="building-info-block">
 						<h1 class="building-info-heading">Location</h1>
-						<p id="building-street">4201 Butterworth Place NW</p>
-						<p id="building-ward">Ward 3</p>
-						<p id="building-cluster">Cluster 11</p>
+						<p id="building-street"></p>
+						<p id="building-ward"></p>
+						<p id="building-cluster"></p>
 					</div>
 				</article>
 				<article class="col-sm-4 building-info">
 					<div class="building-info-block">
 						<h1 class="building-info-heading">Owner</h1>
-						<p id="owner-name">Episcopal Church Home Friendship Inc.</p>
-						<p id="owner-phone">(866) 623 - 8249</p><br>
+						<p id="owner-name"></p>
+						<p id="owner-phone"></p><br>
 						<h1 class="building-info-heading">Tax Assessment</h1>
-						<p id="tax-assessment-amount">$137,605</p>
+						<p id="tax-assessment-amount"></p>
 					</div>
 				</article>
 			</div>
@@ -104,8 +104,7 @@
 						<div class="col-sm-6">
 							<div class="mapbox-portal" id="affordable-housing-map"></div>
 						</div>
-						<div class="col-sm-6">
-							Here's some test text.
+						<div class="col-sm-6" id = "nearbyAffordableHousing">
 						</div>
 					</div>
 				</div>
@@ -125,8 +124,7 @@
 						<div class="col-sm-6">
 							<div class="mapbox-portal" id="metro-stations-map"></div>
 						</div>
-						<div class="col-sm-6">
-							Here's some test text.
+						<div class="col-sm-6" id = "nearbyMetroStations">
 						</div>
 					</div>
 				</div>
@@ -135,6 +133,8 @@
 	</section><!-- page-specific asset calls that require ready DOM elements -->
 	<script src="js/building-chart.js">
 	</script> 
+  <script src="js/geo-distance.js">
+	</script>
 	<script src="js/building-map.js">
 	</script> 
 	<script src="js/building-header.js">

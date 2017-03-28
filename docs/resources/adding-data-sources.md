@@ -9,13 +9,84 @@ title: Adding Data Sources
 
 ## 0) Setup
 
+### Docker
+
+**One time setup**
+
+Start by installing [Docker Toolbox](https://www.docker.com/products/docker-toolbox). After it's installed, run the Docker Quickstart Terminal. Once this is open and running, you'll have a command prompt. Run this command:
+
+```
+$docker-machine ip
+```
+
+This will print the IP address of your local Docker instance. Open up `/python/housinginsights/secrets.json` and make sure you have a couple lines like this:
+
+```
+    "docker_database": {
+        "connect_str": "postgresql://codefordc:codefordc@192.167.55.100:5432/housinginsights_docker"
+    },
+```
+
+Substitute your IP address for the one that says `192.167.55.100` in this example (but keep `:5432` at the end).
+
+**Day-to-day use**
+
+When you start each work session, navigate into wherever you keep your housing-insights repository. The current directory should appear just above the `$` in the Quickstart Terminal. You'll need to use these standard Unix command line commands to get to the right place:
+
+```
+cd ..         //move up a level
+cd myfolder   //move down a level into "myfolder"
+ls            //lists all files and folders in your current directory
+```
+
+In your housing-insights repository folder, run this command:
+
+```
+docker-compose up
+```
+
+Once it starts up (might take a moment), you can go to these web addresses:
+
+* `<yourip>:8081`: a web-based Postgres SQL client that lets you run commands on the database, much like pgAdmin or any other database client. 
+* `<yourip>:4000`: a local copy of our website, housinginsights.org. If you edit any file in the housing-insights/docs folder and save it, the website will be regenerated and you can see the changes when you reload the page. 
+* `<yourip>:5432`: This one does not work in a browser, but you can use this IP address and port to connect to your local Docker database via your preferred SQL client ([Valentina Studio](https://valentina-db.com/en/get-free-valentina-studio) is a good one). This can sometimes be easier to use than the web version at 8081. 
+
+You can press `ctrl+c` or `command+c` at any time to end the process. Give it about 10 seconds to shut down, if it hasn't shut down yet you can hit `ctrl+c` again to force it. 
+
+### Add data to your local database copy
+
+If you've got Docker running, you should be able to see your database in the web browser at port `8081`. But there's nothing there! 
+
+**One time setup**
+
+1) Make sure you have Python installed (we're currently using Python 3.5, though this may change soon). We recommend [Miniconda](https://conda.io/miniconda.html). Select the Python 3.6 version - you can use Miniconda to install any other Python version. 
+
+2) Open a regular command line (not Docker - though we will have a Docker option for this soon!) and navigate to `path\to\housing-insights\python`
+
+3) Run `>conda env create`. This will create a virtual environment using the `environment.yml` file. (If you're not using Anaconda/Miniconda, we try to keep both requirements.txt and environment.yml in sync, but let us know if you have any problems)
+
+
+<strong>Regular use</strong>
+
+Any time you need to recreate the database:
+
+1) Make sure you're using the virtual environment: `>activate housing-insights`
+
+2) Navigate to `path\to\housing-insights\python\scripts`
+
+3) On the command line, run `>python load_data.py docker rebuild sample`. This will use the docker version of the database (frome secrets.json), first delete any data in the repository, and then re-load a set of sample data into the repository. If you want to rebuild the data with actual data (i.e. what is in manifest.csv instead of manifest_sample.csv), run the same command without 'sample' at the end. 
+
+### Downloading Data
+
 We recommend that if you are going to be someone adding new data sources, you should first download all the raw data files. Downloading all the data locally helps us all keep a consistent folder structure; you'll also need much of this data to recreate a local copy of the database. 
 
-Follow the instructions under [Get the latest data](https://github.com/codefordc/housing-insights/tree/dev/python) in the /python/readme.md file. 
+Follow the instructions under [Get the latest data](https://github.com/codefordc/housing-insights/tree/dev/python) in the /python/readme.md file. If you use the virtual environment from above, you will already have the awscli installed.
 
 As of 3/23/2017, this will download approximately 1.6Gb, so make sure you have both bandwidth and space (i.e. don't do this at a hacknight). 
 
-## 1) Download the raw data file
+<br/>
+<br/>
+## 1) Download the raw data file for your new data source
 
 Store the raw data file on your local hard drive. 
 

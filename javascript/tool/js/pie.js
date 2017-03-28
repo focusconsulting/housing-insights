@@ -46,10 +46,6 @@ chart.pie = d3.pie()
     .sort(null)
     .value(function(d) { return d.value; })(pieVariable);
 
-//lets you see the angles
-console.log(chart.pie);
-console.log(chart.options);
-
 chart.arc = d3.arc()
     .outerRadius(chart.radius - width/20)
     .innerRadius(chart.radius - width/4);

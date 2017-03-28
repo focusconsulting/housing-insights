@@ -7,9 +7,9 @@ import csv
 
 #Needed to make relative package imports when running this file as a script (i.e. for testing purposes).
 #Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
-if __name__ == '__main__':
-    import sys, os
-    sys.path.append(os.path.abspath('../'))
+
+import sys, os
+sys.path.append(os.path.abspath('../'))
 
 from housinginsights.ingestion.DataReader import DataReader
 from housinginsights.tools import dbtools
@@ -76,18 +76,6 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
     - use logging.warning() to write the specific error encountered to the log file
     - at the end of loading print an error message to the console
     """
-    #Docker use is currently not fully configured. Saving this code for later use
-    # Check if local database is running
-    if database_choice == "docker_database":
-        try:
-            is_local_db_running = dbtools.check_for_docker_database()
-            if not is_local_db_running:
-                dbtools.start_local_database_server()
-
-        except Exception as e:
-            print("Could not start postgres database is docker running?")
-
-
     meta = ingestionfunctions.load_meta_data(meta_path)
     engine = dbtools.get_database_engine(database_choice)
     manifest = ManifestReader(manifest_path)
@@ -102,14 +90,14 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
     for manifest_row in manifest:
         #Incompletely filled out rows in the manifest can break the other code
         if manifest_row['include_flag'] == 'use':
-            logging.info("Preparing to load row {} from the manifest".format(len(manifest)))
+            logging.info("{}: preparing to load row {} from the manifest".format(manifest_row['unique_data_id'],len(manifest)))
 
             temp_filepath = os.path.abspath(
                                 os.path.join(
                                     logging_path,
                                     'temp_{}.psv'.format(manifest_row['unique_data_id'])
                                 ))
-            csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
+            csv_reader = DataReader(meta = meta, manifest_row=manifest_row, load_from="file")
             csv_writer = CSVWriter(meta = meta, manifest_row = manifest_row, filename = temp_filepath)
             sql_interface = HISql(meta = meta, manifest_row = manifest_row, engine = engine, filename=temp_filepath)
             sql_manifest_row = sql_interface.get_sql_manifest_row()
@@ -151,12 +139,27 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
 
 if __name__ == '__main__':
 
-    #the appropriate database name in secrets.json.
-    #TODO make this changeable via sys.argv
-    database_choice = 'remote_database'
+
+    #local, real data is the default
+    database_choice = 'local_database'
     meta_path = 'meta.json'
     manifest_path = 'manifest.csv'
     
+    if 'sample' in sys.argv:
+        meta_path = 'meta_sample.json'
+        manifest_path = 'manifest_sample.csv'
+
+    if 'docker' in sys.argv:
+        database_choice = 'docker_database'
+
+
+
+    if 'remote' in sys.argv:
+        database_choice = 'remote_database'
+        #Don't want sample data in the remote database
+        meta_path = 'meta.json'
+        manifest_path = 'manifest.csv'
+
 
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)

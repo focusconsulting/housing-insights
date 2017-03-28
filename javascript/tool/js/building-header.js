@@ -20,13 +20,11 @@ var DataOnly = function(DATA_FILE){  // set up kind of dummy constructor that in
                                      // just to get the data from DATA_FILE and put it in the dataCollection
  Chart.call(this, DATA_FILE);
  this.setup = function(){ // to avoid error of this.setup being called by Chart prototype
-    console.log(this.data);
     var data = this.data;
     var d = data.filter(function(obj){
         
         return obj.Proj_address_id === parseInt(buildingID);
     });
-    console.log(d);
     d = d[0];
     document.getElementById('building-name').innerText = d.Proj_Name;
     document.getElementById('building-street').innerText = d.Proj_Addre;
