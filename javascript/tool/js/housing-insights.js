@@ -50,7 +50,6 @@ String.prototype.hashCode = function() {
 var app = {
     dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
     getData: function(DATA_FILE, el, field, sortField, asc, readableField, chart){
-      console.log('getData');
         d3.csv(DATA_FILE, function(json) {
             json.forEach(function(obj) { 
                 for (var key in obj) {   
@@ -62,7 +61,6 @@ var app = {
             });
             var dataName = DATA_FILE.hashCode();
             app.dataCollection[dataName] = json; // adds result of fetching data to the dataCollection
-            console.log(app.dataCollection);
             chart.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
         });
     }
@@ -88,12 +86,10 @@ Chart.prototype = {
                                                         // and assign it to the app.dataCollection 
             app.getData(DATA_FILE, el, field, sortField, asc, readableField, chart);
         } else {  
-        console.log('already exists');       
             this.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
         }
     },
     initialSetup: function(DATA_FILE,el,field,sortField,asc, readableField){
-       console.log(app.dataCollection[DATA_FILE.hashCode()]);
        this.data = app.dataCollection[DATA_FILE.hashCode()]; 
        var data = this.data;
        
