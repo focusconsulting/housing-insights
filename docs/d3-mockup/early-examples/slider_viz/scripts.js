@@ -26,7 +26,7 @@ var options = { // options declared in global scope for access in .json callback
  */
  
  
-d3.csv("https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/Neighborhood_Profiles/nc_housing.csv", function(error, json) {
+d3.csv("https://s3.amazonaws.com/housinginsights/raw/neighborhood_info_dc/neighborhood_clusters/nc_housing.csv", function(error, json) {
   if (error) throw error;
   
   json.forEach(function(obj) { //iterate over each object of the data array

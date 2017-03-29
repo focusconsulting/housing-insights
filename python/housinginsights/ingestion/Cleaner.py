@@ -1,5 +1,7 @@
 from datetime import datetime
-
+'''
+This module is outdated. Check the cleanerbase module instead
+'''
 
 class Cleaner(object):
     """

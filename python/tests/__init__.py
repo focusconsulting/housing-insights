@@ -6,6 +6,9 @@
 import unittest
 from unittest import skip
 
+import sys, os
+sys.path.append(os.path.abspath('./'))
+
 class InitializationTests(unittest.TestCase):
 
     def test_import_ingestion(self):
@@ -13,13 +16,6 @@ class InitializationTests(unittest.TestCase):
         Check import 'ingestion' as a whole package
         """
         try:
-            from ..housinginsights import ingestion
+            from housinginsights import ingestion
         except ImportError:
             self.fail("Was not able to import ingestion")
-
-    @skip("Test not written yet")
-    def test_import_other_stuff(self):
-        """
-        Another test of imports
-        """
-        pass

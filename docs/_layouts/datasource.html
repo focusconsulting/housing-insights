@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<header>
+	{% include header-includes.html %}
+	{{page.css}}
+
+	<title>{{ page.title }}</title>
+
+</header>
+
+
+<!--Optional on-page styles-->
+<style>
+
+</style>
+
+
+
+<!--Main body of the content here-->
+<body>
+	<div class="bg-white">
+	{% include navbar.html %}
+		<!--main body-->
+		<div class="container">
+			<div class="row">
+			<div class="col-xs-12"><!--id="container-sub-wrapper"-->
+				<a href="{{site.baseurl}}/data"><-- All data sources</a>
+				<h1>{{page.title}}</h1>
+				<!--TODO when the API is ready, this will pull from the manifest
+				 table in the database to tell when the data was obtained-->
+				<div class="lastupdated"></div>
+
+	  			{{content}}
+
+
+	  			<h2>Data Fields</h2>
+	  			<p><i>This section will be pulled in automatically from meta.json. Make any appropriate edits that are specific to individual fields of the table there.</i></p>
+	  			<!--TODO this is where we should pull in the appropriate meta.json data for each of the fields. 
+	  			Methodology here: https://jekyllrb.com/docs/datafiles/ -->
+
+			</div>
+			</div>
+		</div>
+	</div>
+
+<!--.sitewide includes-->
+{% include footer-includes.html %}
+{{page.javascript}}
+<!--page specific includes-->
+	<!--none-->
+<!--.page specific includes-->
+
+</body>
+
+</html>

@@ -46,10 +46,6 @@ chart.pie = d3.pie()
     .sort(null)
     .value(function(d) { return d.value; })(pieVariable);
 
-//lets you see the angles
-console.log(chart.pie);
-console.log(chart.options);
-
 chart.arc = d3.arc()
     .outerRadius(chart.radius - width/20)
     .innerRadius(chart.radius - width/4);
@@ -92,16 +88,16 @@ var DATA_FILE ='data/Project.csv';
 //var DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
 
 // first Chart loads new data
-new PieChart(DATA_FILE,'projectCSV','#pie', 'Subsidized',75,75); 
+new PieChart(DATA_FILE,'#pie', 'Subsidized',75,75); 
 
-function buildingPieSubscriber( msg, data ){
-    new PieChart(null,'projectCSV','#pie-1','Cat_Expiring',75,75); 
-    new PieChart(null,'projectCSV','#pie-2','Cat_Failing_Insp',75,75); 
-    new PieChart(null,'projectCSV','#pie-3','Cat_At_Risk',75,75);
-    new PieChart(null,'projectCSV','#pie-4','PBCA',75,75); 
-}
 
-var pieToken = PubSub.subscribe( 'projectCSV/load', buildingPieSubscriber );
+    new PieChart(DATA_FILE,'#pie-1','Cat_Expiring',75,75); 
+    new PieChart(DATA_FILE,'#pie-2','Cat_Failing_Insp',75,75); 
+    new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75);
+    new PieChart(DATA_FILE,'#pie-4','PBCA',75,75); 
+
+
+
 
 
 

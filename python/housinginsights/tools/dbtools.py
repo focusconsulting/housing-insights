@@ -14,7 +14,7 @@ from subprocess import check_output
 import csv
 import json
 import os
-import docker
+#import docker
 
 secrets_filepath = os.path.join(os.path.dirname(__file__), '../secrets.json')
 
@@ -38,7 +38,12 @@ def get_database_connection(database_choice):
     database_connection = engine.connect()
     return database_connection
 
-
+def get_database_engine(database_choice):
+    # Connect to the database
+    connection_string = get_connect_str(database_choice)
+    engine = create_engine(connection_string)
+    return engine
+    
 def get_database_session(database_choice):
     # Connect to the database
     connection_string = get_connect_str(database_choice)
@@ -47,39 +52,8 @@ def get_database_session(database_choice):
     session = Session()
     return session
 
-
-def check_for_local_database():
-    # TODO this needs to be updated, was just a quick and dirty way to check if postgres is running locally in a docker container.
-    running = False
-    client = docker.from_env()
-    containers = client.containers.list(filters={'status': 'running'})
-    for container in containers:
-        if 'postgres' in container.attrs['Args']:
-            running = True
-            break
-    return running
-
-
-def start_local_database_server():
-    client = docker.from_env()
-    client.containers.run('postgres:9.4.5', detach=True, ports={'5432/tcp': 5432})
-    conn = get_database_connection('postgres_database')
-    conn.execute("commit")
-    conn.execute("create database housinginsights_local")
-    conn.close()
-
-
-def create_manifest_table(manifest):
-    table = None
-    connection_string = get_connect_str('local_database')
+def get_psycopg2_cursor(database_choice):
+    connection_string = get_connect_str(database_choice)
     engine = create_engine(connection_string)
-    metadata = MetaData(bind=engine)
-    with open(manifest) as f:
-        csv_reader = csv.DictReader(f, delimiter=',')
-
-        for row in csv_reader:
-            if table is None:
-                # create the table
-                table = Table('manifest', metadata, Column('id', Integer, primary_key=True), *(Column(rowname, String()) for rowname in row.keys()))
-                table.create()
-            table.insert().values(**row).execute()
+    cursor = engine.raw_connection().cursor()
+    return cursor

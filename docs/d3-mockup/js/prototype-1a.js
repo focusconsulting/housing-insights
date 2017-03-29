@@ -12,7 +12,7 @@
         SQUARE_WIDTH = 10, // symbolic constants all caps following convention
         SQUARE_SPACER = 2,
         ROWS = 12,
-        DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
+        DATA_FILE = 'https://s3.amazonaws.com/housinginsights/raw/preservation_catalog/20160401/Project.csv';
 
     extendPrototype = function(destinationPrototype, obj){ // using this function for inheritance. 
                                                            // extend a constructor's prototype with 
@@ -123,13 +123,14 @@
                 .append('input')
                 .attr('type', 'range')
                 .attr('id', 'inputSlider')
+                .attr('value', chart.minValue) // start the slider at min, to facilitate redrawing
                 .attr('step', '.01')      // .01 is kind of a magic number and probably should be made responsive to the data
                 .style('margin-top', '1em') // these two style elements are pretty arbitrary
                 .style('width', '40%');
-                
-
-            d3.select('#inputSlider')
-                .attr('min', chart.minValue)
+            
+            
+            d3.select('#inputSlider')		
+                .attr('min', chart.minValue)		
                 .attr('max', chart.maxValue);
 
             chart.slider.on('mousedown', function(){ // this anonymous function wraps
@@ -261,7 +262,7 @@
       new (chartConstructor)(chartArgsAry[0], chartArgsAry[1], chartArgsAry[2], chartArgsAry[3], chartArgsAry[4]);
     }
     
-        
+    
     app = {
         data: [],
         initialize: function(json) {

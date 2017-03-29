@@ -1,340 +1,337 @@
 {
-    "buildings": {
+    "project_temp": {
+        "cleaner": "ProjectCleaner",
+        "replace_table": true,
         "fields": [
             {
                 "display_name": "nlihc_id",
                 "display_text": "",
                 "source_name": "Nlihc_id",
                 "sql_name": "nlihc_id",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "status",
                 "display_text": "",
                 "source_name": "Status",
                 "sql_name": "status",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "subsidized",
                 "display_text": "",
                 "source_name": "Subsidized",
                 "sql_name": "subsidized",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cat_expiring",
                 "display_text": "",
                 "source_name": "Cat_Expiring",
                 "sql_name": "cat_expiring",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cat_failing_insp",
                 "display_text": "",
                 "source_name": "Cat_Failing_Insp",
                 "sql_name": "cat_failing_insp",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_name",
                 "display_text": "",
                 "source_name": "Proj_Name",
                 "sql_name": "proj_name",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_addre",
                 "display_text": "",
                 "source_name": "Proj_Addre",
                 "sql_name": "proj_addre",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_city",
                 "display_text": "",
                 "source_name": "Proj_City",
                 "sql_name": "proj_city",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_st",
                 "display_text": "",
                 "source_name": "Proj_ST",
                 "sql_name": "proj_st",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_zip",
                 "display_text": "",
                 "source_name": "Proj_Zip",
                 "sql_name": "proj_zip",
-                "type": "int64"
+                "type": "text"
             },
             {
                 "display_name": "proj_units_tot",
                 "display_text": "",
                 "source_name": "Proj_Units_Tot",
                 "sql_name": "proj_units_tot",
-                "type": "float64"
+                "type": "decimal"
             },
             {
                 "display_name": "proj_units_assist_min",
                 "display_text": "",
                 "source_name": "Proj_Units_Assist_Min",
                 "sql_name": "proj_units_assist_min",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_units_assist_max",
                 "display_text": "",
                 "source_name": "Proj_Units_Assist_Max",
                 "sql_name": "proj_units_assist_max",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "hud_own_effect_dt",
                 "display_text": "",
                 "source_name": "Hud_Own_Effect_dt",
                 "sql_name": "hud_own_effect_dt",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "hud_own_name",
                 "display_text": "",
                 "source_name": "Hud_Own_Name",
                 "sql_name": "hud_own_name",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "hud_own_type",
                 "display_text": "",
                 "source_name": "Hud_Own_Type",
                 "sql_name": "hud_own_type",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "hud_mgr_name",
                 "display_text": "",
                 "source_name": "Hud_Mgr_Name",
                 "sql_name": "hud_mgr_name",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "hud_mgr_type",
                 "display_text": "",
                 "source_name": "Hud_Mgr_Type",
                 "sql_name": "hud_mgr_type",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "subsidy_start_first",
                 "display_text": "",
                 "source_name": "Subsidy_Start_First",
                 "sql_name": "subsidy_start_first",
-                "type": "object"
+                "type": "date"
             },
             {
                 "display_name": "subsidy_start_last",
                 "display_text": "",
                 "source_name": "Subsidy_Start_Last",
                 "sql_name": "subsidy_start_last",
-                "type": "object"
+                "type": "date"
             },
             {
                 "display_name": "subsidy_end_first",
                 "display_text": "",
                 "source_name": "Subsidy_End_First",
                 "sql_name": "subsidy_end_first",
-                "type": "object"
+                "type": "date"
             },
             {
                 "display_name": "subsidy_end_last",
                 "display_text": "",
                 "source_name": "Subsidy_End_Last",
                 "sql_name": "subsidy_end_last",
-                "type": "object"
+                "type": "date"
             },
             {
                 "display_name": "ward2012",
                 "display_text": "",
                 "source_name": "Ward2012",
                 "sql_name": "ward2012",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "pbca",
                 "display_text": "",
                 "source_name": "PBCA",
                 "sql_name": "pbca",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "anc2012",
                 "display_text": "",
                 "source_name": "Anc2012",
                 "sql_name": "anc2012",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "psa2012",
                 "display_text": "",
                 "source_name": "Psa2012",
                 "sql_name": "psa2012",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "geo2010",
                 "display_text": "",
                 "source_name": "Geo2010",
                 "sql_name": "geo2010",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cluster_tr2000",
                 "display_text": "",
                 "source_name": "Cluster_tr2000",
                 "sql_name": "cluster_tr2000",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cluster_tr2000_name",
                 "display_text": "",
                 "source_name": "Cluster_tr2000_name",
                 "sql_name": "cluster_tr2000_name",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "zip",
                 "display_text": "",
                 "source_name": "Zip",
                 "sql_name": "zip",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_image_url",
                 "display_text": "",
                 "source_name": "Proj_image_url",
                 "sql_name": "proj_image_url",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_streetview_url",
                 "display_text": "",
                 "source_name": "Proj_streetview_url",
                 "sql_name": "proj_streetview_url",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "proj_address_id",
                 "display_text": "",
                 "source_name": "Proj_address_id",
                 "sql_name": "proj_address_id",
-                "type": "float64"
+                "type": "text"
             },
             {
                 "display_name": "proj_x",
                 "display_text": "",
                 "source_name": "Proj_x",
                 "sql_name": "proj_x",
-                "type": "float64"
+                "type": "decimal"
             },
             {
                 "display_name": "proj_y",
                 "display_text": "",
                 "source_name": "Proj_y",
                 "sql_name": "proj_y",
-                "type": "float64"
+                "type": "decimal"
             },
             {
                 "display_name": "proj_lat",
                 "display_text": "",
                 "source_name": "Proj_lat",
                 "sql_name": "proj_lat",
-                "type": "float64"
+                "type": "decimal"
             },
             {
                 "display_name": "proj_lon",
                 "display_text": "",
                 "source_name": "Proj_lon",
                 "sql_name": "proj_lon",
-                "type": "float64"
+                "type": "decimal"
             },
             {
                 "display_name": "bldg_count",
                 "display_text": "",
                 "source_name": "Bldg_count",
                 "sql_name": "bldg_count",
-                "type": "int64"
+                "type": "integer"
             },
             {
                 "display_name": "update_dtm",
                 "display_text": "",
                 "source_name": "Update_Dtm",
                 "sql_name": "update_dtm",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "subsidy_info_source_property",
                 "display_text": "",
                 "source_name": "Subsidy_info_source_property",
                 "sql_name": "subsidy_info_source_property",
-                "type": "float64"
+                "type": "text"
             },
             {
                 "display_name": "contract_number",
                 "display_text": "",
                 "source_name": "contract_number",
                 "sql_name": "contract_number",
-                "type": "object"
-            },
-            {
-                "display_name": "nlihc_id_1",
-                "display_text": "",
-                "source_name": "Nlihc_id.1",
-                "sql_name": "nlihc_id_1",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "category_code",
                 "display_text": "",
                 "source_name": "Category_Code",
                 "sql_name": "category_code",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cat_at_risk",
                 "display_text": "",
                 "source_name": "Cat_At_Risk",
                 "sql_name": "cat_at_risk",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cat_more_info",
                 "display_text": "",
                 "source_name": "Cat_More_Info",
                 "sql_name": "cat_more_info",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cat_lost",
                 "display_text": "",
                 "source_name": "Cat_Lost",
                 "sql_name": "cat_lost",
-                "type": "object"
+                "type": "text"
             },
             {
                 "display_name": "cat_replaced",
                 "display_text": "",
                 "source_name": "Cat_Replaced",
                 "sql_name": "cat_replaced",
-                "type": "object"
+                "type": "text"
             }
         ]
     },
 
 
-     "acs_rent_lower": {
+     "acs_rent_median_temp": {
+        "cleaner": "ACSRentCleaner",
+        "replace_table": false,
         "fields": [
             {
                 "display_name": "Full Census Tract ID",
@@ -358,20 +355,20 @@
                 "type": "text"
             },
             {
-                "display_name": "Lower Quartile Rent, ACS",
-                "display_text": "Lower quartile contract rent estimate from the American Community Survey",
+                "display_name": "Median Quartile Rent, ACS",
+                "display_text": "Median quartile contract rent estimate from the American Community Survey",
                 "source_name": "HD01_VD01",
-                "sql_name": "lower_quartile_rent",
+                "sql_name": "median_rent",
                 "type": "integer"
             },
             {
-                "display_name": "Margin of Error, Lower Quartile Rent",
+                "display_name": "Margin of Error, Median Rent",
                 "display_text": "",
                 "source_name": "HD02_VD01",
-                "sql_name": "lower_quartile_rent_moe",
-                "type": "integer"
+                "sql_name": "median_rent_moe",
+                "type": "text"
             }
         ]
     }
-    
+
 }
