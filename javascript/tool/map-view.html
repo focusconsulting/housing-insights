@@ -35,21 +35,13 @@
 	<div id='map'></div>
 	<nav id="menu"></nav>
 		<div class='map-overlay' id='features'>
-			<div id='ward'>
-			<h2 class='text-center'>Ward Details</h2>
-				<p class='text-center'>Select a Ward to Zoom to Area</p>
+			<div id='zone'>
+			<h2 class='text-center'>{{zone}} Details</h2>
+				<p class='text-center'>Select a {{zone}} to Zoom to Area</p>
 				<div class='text-center row'>  
-				  <div class="btn-group" role="group" aria-label="Filter">
-				          <button type="button" class="btn btn-default" id="ward-all">All</button>
-				          <button type="button" class="btn btn-default" id="ward-1">1</button>
-				          <button type="button" class="btn btn-default" id="ward-2">2</button>
-				          <button type="button" class="btn btn-default" id="ward-3">3</button>
-				          <button type="button" class="btn btn-default" id="ward-4">4</button>
-				          <button type="button" class="btn btn-default" id="ward-5">5</button>
-				          <button type="button" class="btn btn-default" id="ward-6">6</button>
-				          <button type="button" class="btn btn-default" id="ward-7">7</button>
-				          <button type="button" class="btn btn-default" id="ward-8">8</button>
-				</div>
+				  <select id="zone-selector" role="group" aria-label="Filter">
+				   
+				</select>
 				</div>
 <div class='text-center row'>  
 			  <div class="col-lg-3" id="pie" style="float: left"></div>
