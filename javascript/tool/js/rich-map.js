@@ -9,187 +9,192 @@ var map = new mapboxgl.Map({
   preserveDrawingBuffer: true
 });
 
-map.on('load', function() {
+function prepareMaps(){
 
-  map.addSource("zip", {
-    "type": "geojson",
-    "data": "data/zip.geojson"
-  });
+  map.on('load', function() {
 
-  map.addLayer({
-    "id": "zip",
-    "type": "line",
-    "source": "zip",
-    layout: {
-      visibility: 'none'
-    },
-    paint: {
-      "line-color": "#0D7B8A",
-      "line-width": 1
-    }
-  });
+    map.addSource("zip", {
+      "type": "geojson",
+      "data": "data/zip.geojson"
+    });
 
-  map.addSource("tract", {
-    "type": "geojson",
-    "data": "data/tract.geojson"
-  });
-
-  map.addLayer({
-    "id": "tract",
-    "type": "line",
-    "source": "tract",
+    map.addLayer({
+      "id": "zip",
+      "type": "line",
+      "source": "zip",
       layout: {
         visibility: 'none'
       },
       paint: {
-        "line-color": "#8DE2B8",
+        "line-color": "#0D7B8A",
         "line-width": 1
       }
-  });
+    });
+
+    map.addSource("tract", {
+      "type": "geojson",
+      "data": "data/tract.geojson"
+    });
+
+    map.addLayer({
+      "id": "tract",
+      "type": "line",
+      "source": "tract",
+        layout: {
+          visibility: 'none'
+        },
+        paint: {
+          "line-color": "#8DE2B8",
+          "line-width": 1
+        }
+    });
   
-  map.addSource("neighborhood", {
-    "type": "geojson",
-    "data": "data/neighborhood.geojson"
-  });
+    map.addSource("neighborhood", {
+      "type": "geojson",
+      "data": "data/neighborhood.geojson"
+    });
 
-  map.addLayer({
-    "id": "neighborhood",
-    "type": "line",
-    "source": "neighborhood",
-    layout: {
-      visibility: 'none'
-    },
-    paint: {
-      "line-color": "#0D5C7D",
-      "line-width": 1
-    }
-  });
-
-  map.addSource("ward", {
-    "type": "geojson",
-    "data": "data/ward.geojson"
-  });
-
-  map.addLayer({
-    "id": "ward",
-    "type": "line",
-    "source": "ward",
-    layout: {
-      visibility: 'none'
-    },
-    paint: {
-      "line-color": "#002D61",
-      "line-width": 1
-    }
-  });
-
-  map.addSource("zillow", {
-    "type": "geojson",
-    "data": "data/zillow.geojson"
-  });
-
-  map.addLayer({
-		"id": "zillow",
-		"type": "line",
-		"source": "zillow",
-		layout: {
-		  visibility: 'none'
-		},
-		paint: {
-		  "line-color": "#57CABD",
-		  "line-width": 1
-		}
-  });
-  //zillow color 57CABD
-
-  map.addSource("project", {
-    "type": "geojson",
-    "data": "data/project.geojson"
-  });
-
-  map.addLayer({
-    'id': 'project',
-    'type': 'circle',
-    'source': 'project',
-    'paint': {
-      // make circles larger as the user zooms from z12 to z22
-      'circle-radius': {
-        'base': 1.75,
-        'stops': [[12, 3], [22, 180]]
+    map.addLayer({
+      "id": "neighborhood",
+      "type": "line",
+      "source": "neighborhood",
+      layout: {
+        visibility: 'none'
       },
-      // color circles by ethnicity, using data-driven styles
-      'circle-color': {
-        property: 'Category_Code',
-        type: 'categorical',
-        stops: [
-					['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-					['2 - Expiring Subsidy', '#fecc5c'],
-					['3 - Recent Failing REAC Score', '#fd8d3c'],
-					['4 - More Info Needed', '#A9A9A9'],
-					['5 - Other Subsidized Property', '#A9A9A9'],
-					['6 - Lost Rental', '#bd0026']
-        ]
+      paint: {
+        "line-color": "#0D5C7D",
+        "line-width": 1
       }
-    }
-  });
-  
-  map.addLayer({
-    'id': 'projecttext',
-    'source': 'project',
-    'type': 'symbol',
-    'minzoom': 14,
-    layout: {
-      'text-field': "{Proj_Name}",
-      'text-anchor': "bottom-left"
-    },
-  });
+    });
 
-  var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
+    map.addSource("ward", {
+      "type": "geojson",
+      "data": "data/ward.geojson"
+    });
 
-  for (var i = 0; i < toggleableLayerIds.length; i++) {
-    var id = toggleableLayerIds[i];
-
-    var link = document.createElement('a');
-    link.href = '#';
-    link.className = 'disabled';
-    link.textContent = id;
-
-    link.onclick = function (e) {
-      var clickedLayer = this.textContent;
-      e.preventDefault();
-      e.stopPropagation();
-
-      var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-
-      if (visibility === 'visible') {
-        map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-        this.className = '';
-      } else {
-        this.className = 'active';
-        map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+    map.addLayer({
+      "id": "ward",
+      "type": "line",
+      "source": "ward",
+      layout: {
+        visibility: 'none'
+      },
+      paint: {
+        "line-color": "#002D61",
+        "line-width": 1
       }
-    };
+    });
 
-    var layers = document.getElementById('menu');
-    layers.appendChild(link);
-  }
+    map.addSource("zillow", {
+      "type": "geojson",
+      "data": "data/zillow.geojson"
+    });
 
-  map.on('click', function (e) {
-    var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
-    console.log(building);
-    var projAddressId = building['properties']['Proj_address_id'];
-    var projectName = building['properties']['Proj_Name'];
-    var queryString = '?building=' + encodeURIComponent(projAddressId);
+    map.addLayer({
+      "id": "zillow",
+      "type": "line",
+      "source": "zillow",
+      layout: {
+        visibility: 'none'
+      },
+      paint: {
+        "line-color": "#57CABD",
+        "line-width": 1
+      }
+    });
+    //zillow color 57CABD
     
-    document.getElementById('pd').innerHTML = "<h3><strong>" + building.properties.Proj_Addre +"</strong><br>"+building.properties.Proj_Name + "<br><br>" + "</h3><p>" + "Owner: " + building.properties.Hud_Own_Name +"<br>"+"Cluster Name: "+ building.properties.Cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building.properties.Hud_Own_Name+"<br>"+"HUD Owner Type: " + building.properties.Hud_Own_Type +"<br>"+"HUD Manager Name: " + building.properties.Hud_Mgr_Name+"<br>"+"HUD Manager Type: " + building.properties.Hud_Mgr_Type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.Cat_At_Risk+"<br>"+building.properties.Category_Code +"</p>";
+    map.addSource("project", {
+      "type": "geojson",
+      "data": app.dataCollection.project.geoJSON()
+    });
+
+    map.addLayer({
+      'id': 'project',
+      'type': 'circle',
+      'source': 'project',
+      'paint': {
+        // make circles larger as the user zooms from z12 to z22
+        'circle-radius': {
+          'base': 1.75,
+          'stops': [[12, 3], [22, 180]]
+        },
+        // color circles by ethnicity, using data-driven styles
+        'circle-color': {
+          property: 'Category_Code',
+          type: 'categorical',
+          stops: [
+            ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+            ['2 - Expiring Subsidy', '#fecc5c'],
+            ['3 - Recent Failing REAC Score', '#fd8d3c'],
+            ['4 - More Info Needed', '#A9A9A9'],
+            ['5 - Other Subsidized Property', '#A9A9A9'],
+            ['6 - Lost Rental', '#bd0026']
+          ]
+        }
+      }
+    });
+  
+    map.addLayer({
+      'id': 'projecttext',
+      'source': 'project',
+      'type': 'symbol',
+      'minzoom': 14,
+      layout: {
+        'text-field': "{Proj_Name}",
+        'text-anchor': "bottom-left"
+      },
+    });
+
+    var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
+
+    for (var i = 0; i < toggleableLayerIds.length; i++) {
+      var id = toggleableLayerIds[i];
+
+      var link = document.createElement('a');
+      link.href = '#';
+      link.className = 'disabled';
+      link.textContent = id;
+
+      link.onclick = function (e) {
+        var clickedLayer = this.textContent;
+        e.preventDefault();
+        e.stopPropagation();
+
+        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+        if (visibility === 'visible') {
+          map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+          this.className = '';
+        } else {
+          this.className = 'active';
+          map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+        }
+      };
+
+      var layers = document.getElementById('menu');
+      layers.appendChild(link);
+    }
+
+    map.on('click', function (e) {
+      var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
+      var projAddressId = building['properties']['Proj_address_id'];
+      var projectName = building['properties']['Proj_Name'];
+      var queryString = '?building=' + encodeURIComponent(projAddressId);
+    
+      document.getElementById('pd').innerHTML = "<h3><strong>" + building.properties.Proj_Addre +"</strong><br>"+building.properties.Proj_Name + "<br><br>" + "</h3><p>" + "Owner: " + building.properties.Hud_Own_Name +"<br>"+"Cluster Name: "+ building.properties.Cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building.properties.Hud_Own_Name+"<br>"+"HUD Owner Type: " + building.properties.Hud_Own_Type +"<br>"+"HUD Manager Name: " + building.properties.Hud_Mgr_Name+"<br>"+"HUD Manager Type: " + building.properties.Hud_Mgr_Type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.Cat_At_Risk+"<br>"+building.properties.Category_Code +"</p>";
         
-    var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
-      .setLngLat(e.lngLat)
-      .setHTML("<a href = '/javascript/tool/building.html" + queryString + "' >See more about " + projectName + "</a>" )
-      .addTo(map);
+      var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
+        .setLngLat(e.lngLat)
+        .setHTML("<a href = '/javascript/tool/building.html" + queryString + "' >See more about " + projectName + "</a>" )
+        .addTo(map);
+
+    });
+
+    map.getCanvas().style.cursor = 'default';
 
   });
 
-  map.getCanvas().style.cursor = 'default';
+}
 
-});
+app.getAPIData(['project'], prepareMaps);
