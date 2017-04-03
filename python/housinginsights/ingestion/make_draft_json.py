@@ -107,8 +107,8 @@ if __name__ == '__main__':
 
     if 'single' in sys.argv:
         #Edit this filepaths before running
-        csv_filename = os.path.abspath("C:/Users/humph/Documents/Github/housing-insights/data/raw/zillow/Neighborhood_ZriPerSqft_AllHomes.csv")
-        table_name = "zillow_zrisqft_neighbor"
+        csv_filename = os.path.abspath("C:/Users/humph/Documents/Github/housing-insights/data/raw/crime/mpd-crime-map/20170403/2016-all.csv")
+        table_name = "crime"
         make_draft_json(csv_filename, table_name)
     if 'multi' in sys.argv:
         manifest_path = os.path.abspath('../../scripts/manifest.csv')

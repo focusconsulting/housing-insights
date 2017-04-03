@@ -417,6 +417,13 @@
                 "type": "text"
             },
             {
+                "display_name": "acs_remove_state_county",
+                "display_text": "acs_code stripped of its duplicative state and county codes",
+                "source_name": "acs_remove_state_county",
+                "sql_name": "acs_remove_state_county",
+                "type": "text"
+            },
+            {
                 "display_name": "tract_code",
                 "display_text": "",
                 "source_name": "tract_code",
@@ -1943,5 +1950,139 @@
                 "type": "decimal"
             }
         ]
+    },
+
+    "crime": {
+        "cleaner": "CrimeCleaner",
+        "replace_table": false,
+        "fields": [
+            {
+                "display_name": "Date Reported",
+                "display_text": "A timestamp indicating the date and time that the crime was reported.",
+                "source_name": "REPORT_DAT",
+                "sql_name": "report_date",
+                "type": "timestamp"
+            },
+            {
+                "display_name": "Shift",
+                "display_text": "Indicates which of the three shifts this was reported in (Day, Evening, Midnight)",
+                "source_name": "SHIFT",
+                "sql_name": "shift",
+                "type": "text"
+            },
+            {
+                "display_name": "Offense Category",
+                "display_text": "",
+                "source_name": "OFFENSE",
+                "sql_name": "offense",
+                "type": "text"
+            },
+            {
+                "display_name": "Method",
+                "display_text": "A subtype of category only applicable to some crimes.",
+                "source_name": "METHOD",
+                "sql_name": "method",
+                "type": "text"
+            },
+            {
+                "display_name": "Block",
+                "display_text": "City block name consistent with the Master Address Repository format.",
+                "source_name": "BLOCK",
+                "sql_name": "block",
+                "type": "text"
+            },
+            {
+                "display_name": "Police District",
+                "display_text": "",
+                "source_name": "DISTRICT",
+                "sql_name": "district",
+                "type": "integer"
+            },
+            {
+                "display_name": "PSA",
+                "display_text": "",
+                "source_name": "PSA",
+                "sql_name": "psa",
+                "type": "integer"
+            },
+            {
+                "display_name": "Ward",
+                "display_text": "",
+                "source_name": "WARD",
+                "sql_name": "ward",
+                "type": "integer"
+            },
+            {
+                "display_name": "ANC",
+                "display_text": "",
+                "source_name": "ANC",
+                "sql_name": "anc",
+                "type": "text"
+            },
+            {
+                "display_name": "Neighborhood Cluster",
+                "display_text": "",
+                "source_name": "NEIGHBORHOOD_CLUSTER",
+                "sql_name": "neighborhood_cluster",
+                "type": "text"
+            },
+            {
+                "display_name": "Census Block Group",
+                "display_text": "",
+                "source_name": "BLOCK_GROUP",
+                "sql_name": "block_group",
+                "type": "text"
+            },
+            {
+                "display_name": "Census Tract",
+                "display_text": "",
+                "source_name": "CENSUS_TRACT",
+                "sql_name": "census_tract",
+                "type": "text"
+            },
+            {
+                "display_name": "Voting Precint",
+                "display_text": "",
+                "source_name": "VOTING_PRECINCT",
+                "sql_name": "voting_precinct",
+                "type": "text"
+            },
+            {
+                "display_name": "ccn",
+                "display_text": "",
+                "source_name": "CCN",
+                "sql_name": "ccn",
+                "type": "integer"
+            },
+            {
+                "display_name": "xblock",
+                "display_text": "",
+                "source_name": "XBLOCK",
+                "sql_name": "xblock",
+                "type": "decimal"
+            },
+            {
+                "display_name": "yblock",
+                "display_text": "",
+                "source_name": "YBLOCK",
+                "sql_name": "yblock",
+                "type": "decimal"
+            },
+            {
+                "display_name": "Start Date",
+                "display_text": "",
+                "source_name": "START_DATE",
+                "sql_name": "start_date",
+                "type": "timestamp"
+            },
+            {
+                "display_name": "End Date",
+                "display_text": "",
+                "source_name": "END_DATE",
+                "sql_name": "end_date",
+                "type": "timestamp"
+            }
+        ]
+
     }
 }
