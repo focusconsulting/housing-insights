@@ -11,8 +11,6 @@ BINDIR="$( dirname $0 )"
 cd "${BINDIR}"
 cd ..
 
-echo $PWD
-
 # Find our python path so our other script will work.
 PYPATH=".:$( realpath .. )"
 

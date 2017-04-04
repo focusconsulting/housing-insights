@@ -43,7 +43,11 @@ class BaseApiConn(object):
         :param params: Dictionary of request parameters.
         :type  params: dict of String.
         """
-        url = urljoin(self.baseurl, urlpath)
+        if self.baseurl[-1] == '/':
+            self.baseurl = self.baseurl[:-1]
+        if urlpath[0] != '/':
+            urlpath = '/' + urlpath
+        url = self.baseurl + urlpath
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):
