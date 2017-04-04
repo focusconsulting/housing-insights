@@ -55,19 +55,21 @@ function APIDataObj(json){
   
   // this.geoJSON assumes that we'll be producing a FeatureCollection with Features
   // that are points. For shapes, we may want to add an argument and code that responds to it.
-  // This code also assumes that each element in 'json' has a 'longitude' and 'latitude'
-  // property.
-  this.geoJSON = function(){
+  // Currently this method requires us to specify the latitude and longitude fields
+  // of the data within the json. If we standardize the json to always call its geospatial
+  // fields 'longitude' and 'latitude', this may not be necessary.
+  this.geoJSON = function(longitudeField, latitudeField){
     var features = json.map(function(element){
       return {
         'type': 'Feature',
         'geometry': {
           'type': 'Point',
-          'coordinates': [+element.longitude, +element.latitude]
+          'coordinates': [+element[longitudeField], +element[latitudeField]]
         },
         'properties': element        
       }
     });
+    console.log('json', json);
     return {
       'type': 'FeatureCollection',
       'features': features
@@ -102,7 +104,8 @@ var app = {
           ajaxRequests = {},
           currentInterval = 0,
           checkRequestsInterval,
-          REQUEST_TIME = 500;
+          REQUEST_TIME = 500,
+          _this = this; // To resolve scoping issues
                 
        function checkRequests(){
          var completedRequests = Object.keys(ajaxRequests).filter(function(key){
@@ -115,9 +118,7 @@ var app = {
         
            for(var tableName in ajaxRequests){
              var response = ajaxRequests[tableName].responseText;
-             console.log("ajaxRequests", ajaxRequests);
-             console.log("response", response);
-             this.dataCollection[tableName] = new APIDataObj(JSON.parse(response));
+             _this.dataCollection[tableName] = new APIDataObj(JSON.parse(response));
            }
            doAfter();
          }

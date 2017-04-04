@@ -104,10 +104,15 @@ function prepareMaps(){
     });
     //zillow color 57CABD
     
+    console.log('app in rich-map.js', app);
+    console.log('app.dataCollection.project.geoJSON()', app.dataCollection.project.geoJSON());
+    
     map.addSource("project", {
       "type": "geojson",
-      "data": app.dataCollection.project.geoJSON()
+      "data": app.dataCollection.project.geoJSON('proj_lon', 'proj_lat')
     });
+    
+    console.log(map.getSource('project'));
 
     map.addLayer({
       'id': 'project',
@@ -121,7 +126,7 @@ function prepareMaps(){
         },
         // color circles by ethnicity, using data-driven styles
         'circle-color': {
-          property: 'Category_Code',
+          property: 'category_code',
           type: 'categorical',
           stops: [
             ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
@@ -141,7 +146,7 @@ function prepareMaps(){
       'type': 'symbol',
       'minzoom': 14,
       layout: {
-        'text-field': "{Proj_Name}",
+        'text-field': "{proj_name}",
         'text-anchor': "bottom-left"
       },
     });
@@ -178,11 +183,11 @@ function prepareMaps(){
 
     map.on('click', function (e) {
       var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
-      var projAddressId = building['properties']['Proj_address_id'];
-      var projectName = building['properties']['Proj_Name'];
+      var projAddressId = building['properties']['proj_address_id'];
+      var projectName = building['properties']['proj_name'];
       var queryString = '?building=' + encodeURIComponent(projAddressId);
     
-      document.getElementById('pd').innerHTML = "<h3><strong>" + building.properties.Proj_Addre +"</strong><br>"+building.properties.Proj_Name + "<br><br>" + "</h3><p>" + "Owner: " + building.properties.Hud_Own_Name +"<br>"+"Cluster Name: "+ building.properties.Cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building.properties.Hud_Own_Name+"<br>"+"HUD Owner Type: " + building.properties.Hud_Own_Type +"<br>"+"HUD Manager Name: " + building.properties.Hud_Mgr_Name+"<br>"+"HUD Manager Type: " + building.properties.Hud_Mgr_Type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.Cat_At_Risk+"<br>"+building.properties.Category_Code +"</p>";
+      document.getElementById('pd').innerHTML = "<h3><strong>" + building.properties.proj_addre +"</strong><br>"+building.properties.proj_name + "<br><br>" + "</h3><p>" + "Owner: " + building.properties.hud_own_name +"<br>"+"Cluster Name: "+ building.properties.cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building.properties.hud_own_name+"<br>"+"HUD Owner Type: " + building.properties.hud_own_type +"<br>"+"HUD Manager Name: " + building.properties.hud_mgr_name+"<br>"+"HUD Manager Type: " + building.properties.hud_mgr_type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.cat_at_risk+"<br>"+building.properties.category_Code +"</p>";
         
       var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
         .setLngLat(e.lngLat)
