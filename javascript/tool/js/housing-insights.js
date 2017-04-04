@@ -46,6 +46,9 @@ String.prototype.hashCode = function() {
   return 'd' + hash;
 };
 
+String.prototype.capitalizeFirstLetter = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+};
 
 var app = {
     dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above

@@ -145,6 +145,28 @@ map.on('load', function() {
   });
 
   var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
+  map.clickedLayer = toggleableLayerIds[0];
+  var previousLayer; // keeping track of previously selected layer so it can be turned off
+
+  function showLayer() { // JO putting this bit in a reusable function
+
+    var visibility = map.getLayoutProperty(map.clickedLayer, 'visibility');
+
+    if (previousLayer !== undefined) {
+      map.setLayoutProperty(previousLayer, 'visibility', 'none');
+    }
+    document.querySelectorAll('nav#menu a').forEach(function(item){
+
+      item.className = 'disabled';
+    });
+    this.className = 'active';
+    map.setLayoutProperty(map.clickedLayer, 'visibility', 'visible');
+    
+    previousLayer = map.clickedLayer;
+
+
+
+  };
 
   for (var i = 0; i < toggleableLayerIds.length; i++) {
     var id = toggleableLayerIds[i];
@@ -155,24 +177,21 @@ map.on('load', function() {
     link.textContent = id;
 
     link.onclick = function (e) {
-      var clickedLayer = this.textContent;
+      map.clickedLayer = this.textContent;
       e.preventDefault();
       e.stopPropagation();
+      showLayer.call(this); // call reusable function with current `this` (element) as context -JO
+      setHeader();
+      changeZoneType(); // defined in pie.js
 
-      var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-
-      if (visibility === 'visible') {
-        map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-        this.className = '';
-      } else {
-        this.className = 'active';
-        map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
-      }
     };
 
     var layers = document.getElementById('menu');
     layers.appendChild(link);
   }
+console.log(document.querySelector('nav#menu a:first-of-type'));
+ showLayer.call(document.querySelector('nav#menu a:first-of-type')); // this call happens once on load, sets up initial
+                                                                     // condition of having first option active.
 
   map.on('click', function (e) {
     var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
@@ -192,4 +211,29 @@ map.on('load', function() {
 
   map.getCanvas().style.cursor = 'default';
 
+  setHeader();
+
+                                                      // putting maps here so they are not called until
+                                                      // the map renders, so that the zone (ward, neighborhood) can
+                                                      // be selected programmatically 
+                                                      
+// putting pie charts in an array property of map so we can access them later, for updating
+map.pieCharts = [
+    new PieChart(DATA_FILE,'#pie', 'Subsidized',75,75), 
+    new PieChart(DATA_FILE,'#pie-1','Cat_Expiring',75,75), 
+    new PieChart(DATA_FILE,'#pie-2','Cat_Failing_Insp',75,75), 
+    new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75),
+  //  new PieChart(DATA_FILE,'#pie-4','PBCA',75,75)
+  ];
+
 });
+
+function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
+  console.log(currentZoneType);
+  if (currentZoneType !== map.clickedLayer) {
+    document.querySelector('div#zone h2').innerText = map.clickedLayer.capitalizeFirstLetter() + ' Details';
+    document.querySelector('div#zone p:first-of-type').innerText = 'Select a ' + map.clickedLayer + ' to drill down';
+    document.getElementById('zone-selector').onchange = changeZone;
+
+  }
+  };
