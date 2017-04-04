@@ -37,7 +37,7 @@ class HIReader(object):
         self._counter = Counter()
 
         if self.path_type == "file":
-            with open(self.path, 'r', newline='') as data:
+            with open(self.path, 'r', newline='', encoding='latin-1') as data:
                 reader = DictReader(data)
                 self._keys = reader.fieldnames
                 for row in reader:
