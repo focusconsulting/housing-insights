@@ -172,6 +172,16 @@ class DataReader(HIReader):
 
         super().__init__(self.path, self.path_type)
 
+    def validate_or_create_path(self):
+        root_path = os.path.abspath(os.path.dirname(self.path))
+        sub_root_path = os.path.abspath(os.path.join(root_path, '..'))
+        if os.path.exists(root_path):
+            return
+        if not os.path.exists(sub_root_path):
+            os.mkdir(sub_root_path)
+        os.mkdir(root_path)
+        return
+
     def download_data_file(self):
         '''
         Checks to see if the file already exists locally, if not downloads it
@@ -181,6 +191,7 @@ class DataReader(HIReader):
                 myreader=csv.reader(f,delimiter=',')
                 headers = next(myreader)
         except FileNotFoundError as e:
+            self.validate_or_create_path()
             logging.info("  file not found. attempting to download file to disk: " + self.s3_path)
             urlretrieve(self.s3_path, self.path)
             logging.info("  download complete.")
