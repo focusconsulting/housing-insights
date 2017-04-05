@@ -174,12 +174,9 @@ class DataReader(HIReader):
 
     def validate_or_create_path(self):
         root_path = os.path.abspath(os.path.dirname(self.path))
-        sub_root_path = os.path.abspath(os.path.join(root_path, '..'))
         if os.path.exists(root_path):
             return
-        if not os.path.exists(sub_root_path):
-            os.mkdir(sub_root_path)
-        os.mkdir(root_path)
+        os.makedirs(root_path)
         return
 
     def download_data_file(self):
