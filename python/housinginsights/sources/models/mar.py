@@ -11,10 +11,19 @@ FIELDS = ['ADDRESS_ID', 'ADDRNUM', 'ADDRNUMSUFFIX', 'ANC', 'ANC_2002',
           'SSL', 'STATE', 'STATUS', 'STNAME', 'STREETVIEWURL', 'STREET_TYPE',
           'VOTE_PRCNCT', 'WARD', 'WARD_2002', 'WARD_2012', 'XCOORD', 'YCOORD', 'ZIPCODE']
 
+CONDO_FIELDS = ['UNITNUM', 'UNITTYPE', 'UNITSSL', 'STATUS', 'MARID', 'ADDRESS_ID']
+
 
 class MarResult(object):
     def __init__(self, result):
         self.data = []
         for attr in FIELDS:
+            value = result.get(attr) or ''
+            self.data.append(value)
+
+class CondoResult(object):
+    def __init__(self, result):
+        self.data = []
+        for attr in CONDO_FIELDS:
             value = result.get(attr) or ''
             self.data.append(value)
