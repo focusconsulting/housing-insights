@@ -61,3 +61,32 @@ If you delete files
 The sync command only updates or adds files by default. If you deleted a file and actually want it to be deleted (e.g. it was moved to another folder), add the ``--delete`` flag
 
 1. Same as above, but add the `--delete` flag.
+
+
+Using data.sh
+-------------
+
+data.sh is a command line script to pull data from external data sources. It only supports nix environments (no Windows).
+It uses modules in the housinginsights/sources directory to pull information from external data sources. It defaults
+to outputing the data to a csv file (you need to specifiy one with -o or --ouput), but if you specify --outtype stdout,
+it will print the raw json returned from the data source to your terminal.
+
+
+1. Navigate to your root project folder: ``cd /path/to/your/housing-insights`` . Change to `python` directory. ``cd python``.
+
+2. Make sure your vitual environment named `env` is set up. ``virtualenv env && env/bin/pip install -r requirements.txt``.
+
+3. To see the available options, run `bin/data.sh --help`. Usage with common options would look like:
+  
+  ``bin/data.sh -o /path/to/some/csvfile.csv --params "key:value;key2:value2" [api] [api_method]``
+
+As an example, to access data from the Master Address Record (MAR) using the mar.py sources module, you could run:
+
+``bin/data.sh -o ~/csvfile --params "location:641 S St NW" mar find_location``
+
+The available api modules are the modules in the sources directory. For example: if there was a file named `myapi.py`
+which has a method in its APIConn class named `find_stuff` which takes the parameters `location` and `radius`, 
+you would make the call:
+
+``bin/data.sh -o ~/csvfile --params "location:Some Place;radius:5m" myapi find_stuff``
+
