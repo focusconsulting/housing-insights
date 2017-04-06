@@ -14,6 +14,10 @@ Example usage:
 
 bin/data.sh -o ~/csvfile --params "location:641 S St NW" mar find_location
 
+Calling from this folder using Python directly (with your virtual environment activated):
+
+python data.py mar find_location --output ../../data/interim/out.csv --params "location:617 Morton Street NW"
+
 
 DETAILED EXPLANATION:
 --------------------
