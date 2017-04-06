@@ -157,7 +157,7 @@ class MarApiConn(object):
         """
         Write the results to a csv file.
         """
-        with open(csvfile, 'w') as f:
+        with open(csvfile, 'w', encoding='utf-8') as f:
             writer = csv.writer(f, delimiter=',')
             writer.writerow(FIELDS)
             for result in result:
