@@ -18,7 +18,8 @@ services:
             - postgres
         ports:
             - "8081:8081"
-      
+        restart: "on-failure:10"
+
     postgres:
         image: codefordc2/housing-insights-postgres
         environment:
@@ -27,3 +28,4 @@ services:
             - POSTGRES_DB=housinginsights_docker
         ports:
             - "5432:5432"
+        restart: "on-failure:3"
