@@ -18,7 +18,7 @@ superseded,real_property,real_property_Apr2016,4/1/16,../../../data,https://s3.a
 superseded,subsidy,subsidy_Apr2016,4/1/16,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20160401/Subsidy.csv,"Provided directly by NeighborhoodInfoDC, manually created flat files from their database dated April 2016"
 needs cleaner,parcel,parcel_Mar2017,3/15/17,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20160401/Parcel.csv,
 use,project,project_Mar2017,3/15/17,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20160401/Project.csv,
-use,reac_score,reac_score_Mar2017,3/15/17,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Reac_score.csv,
+needs cleaner,reac_score,reac_score_Mar2017,3/15/17,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Reac_score.csv,
 needs cleaner,real_property,real_property_Mar2017,3/15/17,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20160401/Real_property.csv,
 use,subsidy,subsidy_Mar2017,3/15/17,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20160401/Subsidy.csv,
 _____Planned Unit Developments_____,,,,,,,
