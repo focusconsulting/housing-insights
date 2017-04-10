@@ -1,105 +1,276 @@
 "use strict";
-// NOW USING CONSTRUCTOR METHOD
-// ADDS SEPARATE SORTING FIELD AND DIRECTION ADN SEPARATES THE SORTING FUNCTIONS
-  
 
-/*
- * d3.csv returns all strings regardless of data type. code below
- * uses + operator to convert strings to numbers. if using the
- * + operator would result in NaN (not a number), the value is not
- * converted. alternatively could allow data to pass as strings and 
- * deal with conversion later, when appending elements
- */
+Array.prototype.move = function (old_index, new_index) { // HT http://stackoverflow.com/questions/5306680/move-an-array-element-from-one-array-position-to-another
+                                                         // native JS for moving around array items
+                                                         // used below to always move the all-zone option to the top 
+    while (old_index < 0) {
+        old_index += this.length;
+    }
+    while (new_index < 0) {
+        new_index += this.length;
+    }
+    if (new_index >= this.length) {
+        var k = new_index - this.length;
+        while ((k--) + 1) {
+            this.push(undefined);
+        }
+    }
+    this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+    return this; // for testing purposes
+};
+ 
+ var mapZones = { // object to map mapLayer names (the keys) to the field in the data
+                  // later code adds an array of all the values for each type to the objects
+                  // for populating the dropdown list
+        ward: {
+          name: 'Ward2012'
+          
+        },
+        tract: {
+          name: 'Geo2010'
+          
+        },
+        zip: {
+          name: 'Zip'
+        }
+    };
 
-//start new
-var PieChart = function(DATA_FILE, dataName, el, field, width, height) { // set text of tooltip with 'readableField' arg
-    Chart.call(this, DATA_FILE, dataName, el, field, width, height); // First step of inheriting from Chart
+var currentZoneType; // 
+
+
+var PieChart = function(DATA_FILE, dataName, el, field, width, height) { 
+    Chart.call(this, DATA_FILE, dataName, el, field, width, height); 
     this.extendPrototype(PieChart.prototype, PieExtension);
 }
 
 PieChart.prototype = Object.create(Chart.prototype);
 
-var PieExtension = { // Final step of inheriting from Chart.
+var PieExtension = { 
+
+
+  returnPieVariable: function(field,zoneType,zoneName) {
+    var chart = this,
+    zoneIndex;
+
+    if (zoneType === undefined) {
+        zoneType = 'ward';
+    }
+
+    
+    this.nested = d3.nest()    //aggregate data by unique values in [field] defined for each pie at bottom
+      .key(function(d) { return d[mapZones[zoneType].name]; }) 
+      .key(function(d) { return d[field]; })
+      .rollup(function(v) { return v.length; })
+      .entries(chart.data);
+
+    var allObject = { // create object for sum of all zones
+        key:'All',
+        values: [
+            {
+                key: 'No',
+                value: 0
+            },
+            {
+                key: 'Yes',
+                value: 0
+            }
+        ]    
+    };
+
+    this.nested.forEach(function(obj){ // sum up the yeses and nos
+
+        obj.values.forEach(function(yesNo){
+            allObject.values.find(function(allValue){ 
+                return allValue.key === yesNo.key;
+            }).value += yesNo.value;
+        });
+    });
+    this.nested.sort(function(a,b){
+      return d3.ascending(a.key,b.key);
+    });
+    this.nested.push(allObject);
+    this.nested.move(-1,0); // uses array.prototype.move defined above to move last item ("All") to be first.
+    console.log(this.nested);
+    if ( zoneType !== currentZoneType ) {
+      setOptions(chart.nested);
+     }
+
+    if (zoneName === undefined){
+        zoneIndex = 0; // default to the first item in the options list, All
+    } else {
+        zoneIndex = this.nested.findIndex(function(obj){ // ATTN: array.findIndex is ECMAScript 2016; may need
+                                                         // different method or polyfill for older browsers
+            return obj.key === zoneName;
+        });
+    }
+    this.nested = this.checkForEmpties();
+    console.log(this.nested);
+    return this.nested[zoneIndex].values.sort(function(a,b){ // need to sort so that 'yes' is always in index 0
+        return d3.descending(a.key,b.key);
+    });
+
+  },
+  checkForEmpties: function(){ // when the sum is zero, the nesting fails to create an object. this method
+                               // creates a dummy object such as {key:'Yes',value:0}
+        
+        this.nested.forEach(function(zone){
+            if ( zone.values.length < 2 ) {
+                var presentKey = zone.values[0].key;
+                var missingKey = presentKey === 'Yes' ? 'No' : 'Yes';
+                zone.values.push({key: missingKey, value: 0});
+            }
+        });
+        return this.nested; 
+  },  
   setup: function(el, field, width, height){
-        var chart = this,
+    this.field = field;
+   
+    this.width = width;
+    this.height = height;
+    
+    
+    var chart = this;
+    this.pieVariable = this.returnPieVariable(field); // order of yes and no objects in the array cannot be guaranteed, so JO is programmatically finding the index of yes
+    console.log(this.pieVariable);
+    chart.radius=Math.min(width, height)/2;
 
-data=chart.data;
+    chart.color = d3.scaleOrdinal()
+      .domain(['No','Yes'])
+      .range(["#b3cde3","#fbb4ae"]);
 
-
-//aggregate data by unique values in [field] defined for each pie at bottom
-var pieVariable = d3.nest()
-  .key(function(d) { return d[field]; })
-  .rollup(function(v) { return v.length; })
-  .entries(data);
-
-var textPercent= d3.format(".0%")((pieVariable[0].value)/(pieVariable[1].value+pieVariable[0].value));
-
-chart.radius=Math.min(width, height)/2;
-
-chart.color = d3.scaleOrdinal()
-  .range(["#b3cde3","#fbb4ae"]);
-
-// old colors "#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f","#2C93E8","#F56C4E"]);
-
-//d3 pie layout, which calculates the section angles for you
-chart.pie = d3.pie()
-    .sort(null)
-    .value(function(d) { return d.value; })(pieVariable);
-
-chart.arc = d3.arc()
-    .outerRadius(chart.radius - width/20)
-    .innerRadius(chart.radius - width/4);
-
-chart.svg = d3.select(el)
+   chart.svg = d3.select(el)
     .append("svg")
     .attr('width', width+10)
     .attr('height', height+20) // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
     .append("g")
     .attr("transform","translate(" + width /2 + "," + height /2 + ")");
 
-chart.g = chart.svg.selectAll("arc")
-    .data(chart.pie)
-    .enter().append("g")
-    .attr("class", "arc");
-    //.on("mouseover", function(d) {
-        //  options.groceryName=d.data.key;
-        //  options.groceryNumber=d.value;
-        //  });
-chart.g.append("path")
-      .attr("d", chart.arc)
-      .style("fill", function(d) { return chart.color(d.data.key); });
+    chart.arc = d3.arc()
+        .outerRadius(chart.radius - width/20)
+        .innerRadius(chart.radius - width/4);
 
-chart.g.append("text")
-    .attr("text-anchor", "middle")
-    .attr('class','pie_number')
-    .text(textPercent);
+    chart.pie = d3.pie()
+        .sort(null)
+        .value(function(d) { return d.value; });
 
-//this is bad. 
-chart.g.append("text")
-    .attr("x",-30)
-    .attr("y",45)
-    .attr('class','pie_text')
-    .text(field);
-}
+   
+
+    // old colors "#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f","#2C93E8","#F56C4E"]);
+
+    //d3 pie layout, which calculates the section angles for you
+    this.update();
+  },
+  returnTextPercent: function(){
+    var chart = this;
+
+    
+    var textPercent;
+        textPercent = d3.format(".0%")((chart.pieVariable[0].value)/(chart.pieVariable[1].value+chart.pieVariable[0].value));
+        
+    return textPercent;
+  },
+  update: function(){
+
+    var chart = this;
+
+    chart.g = chart.svg.selectAll("arc")
+
+        .data(chart.pie(chart.pieVariable))
+        .enter().append("g")
+        .attr("class", "arc");
+        
+
+
+    chart.paths = chart.g.append('path')
+
+          .attr("d", function(d,i){ // same as chart.arc without function, passes in d
+             
+             console.log(i,d.data.key)
+            return chart.arc(d);
+        })
+          .style("fill", function(d) { return chart.color(d.data.key); });
+
+
+
+    chart.percentage = chart.g.append("text")
+        .attr("text-anchor", "middle")
+        .attr('class','pie_number')
+        .attr('y',5)
+        .text(this.returnTextPercent());
+
+    //this is bad. 
+    chart.g.append("text")
+        
+        .attr("y", chart.height / 2 + 10)
+        .attr('class','pie_text')
+        .attr('text-anchor','middle')
+        .text(chart.field);
+  }
 };
 
 
 var DATA_FILE ='data/Project.csv';
-//var DATA_FILE = 'https://raw.githubusercontent.com/codefordc/housing-insights/dev/scripts/small_data/PresCat_Export_20160401/Project.csv';
 
-// first Chart loads new data
-new PieChart(DATA_FILE,'#pie', 'Subsidized',75,75); 
+/*
+ *
+ */
+
+function changeZoneType() {
+  if ( map.clickedLayer !== currentZoneType ) {
+    changeZone();
+  }
+}
+
+ function changeZone(e){
+    var zType,
+        zName;
+    if ( e !== undefined ) { // i.e. function call comes from selecting option in drop-down
+      zType = e.target.selectedOptions[0].className;
+      zName = e.target.selectedOptions[0].value; 
+    } else { // i.e. function call comes from selecting different map layer
+      zType = map.clickedLayer;
+      zName = 'All';
+    }
+    
+    map.pieCharts.forEach(function(chart){
+
+        chart.pieVariable = chart.returnPieVariable(chart.field,zType,zName); 
+    
+    chart.paths
+      .data(chart.pie(chart.pieVariable))
+
+      .attr("d", function(d,i){ // same as chart.arc without function, passes in d
+            console.log(i,d.data.key)
+            return chart.arc(d);
+        });
+
+      chart.percentage
+        .text(chart.returnTextPercent())
+
+     });
+  };
 
 
-    new PieChart(DATA_FILE,'#pie-1','Cat_Expiring',75,75); 
-    new PieChart(DATA_FILE,'#pie-2','Cat_Failing_Insp',75,75); 
-    new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75);
-    new PieChart(DATA_FILE,'#pie-4','PBCA',75,75); 
-
-
-
-
-
-
-
-
+function setOptions(nested) {
+  
+  if ( mapZones[map.clickedLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
+                                                           // enumerated yet
+        mapZones[map.clickedLayer].values = [];
+        nested.forEach(function(obj) {
+          mapZones[map.clickedLayer].values.push(obj.key)
+        });
+        
+  }
+  var selector = document.getElementById('zone-selector');
+  selector.innerHTML = '';
+  mapZones[map.clickedLayer].values.forEach(function(zone,i){
+    var option = document.createElement('option');
+    if ( i === 0 ) { option.setAttribute('selected','selected'); }
+    option.setAttribute('class',map.clickedLayer);
+    option.setAttribute('value',zone);
+    option.id = zone.toLowerCase().replace(/ /g,'-');
+    option.innerHTML = zone;
+    selector.appendChild(option);
+  });  
+currentZoneType = map.clickedLayer;
+}
