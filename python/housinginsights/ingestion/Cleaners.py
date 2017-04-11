@@ -373,3 +373,10 @@ class CrimeCleaner(CleanerBase):
         row = self.parse_dates(row)
         row = self.replace_tracts(row,row_num,column_name='CENSUS_TRACT')
         return row
+
+class reac_score_cleaner(CleanerBase):
+    def clean(self, row, row_num = None):
+
+        row = self.replace_nulls(row, null_values=['', None])
+
+        
