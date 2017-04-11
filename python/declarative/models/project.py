@@ -1,168 +1,21 @@
-from sqlalchemy import (
-    Column,
-    Integer,
-    Float,
-    Text,
-    String,
-    Date,
-    ForeignKeyConstraint,
-)
-from sqlalchemy.ext.declarative import declared_attr, declarative_base
-from sqlalchemy.orm import relationship, reconstructor, validates
-from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy import Column, Integer, Float, Date, Text
+from sqlalchemy.orm import validates
+from .mixins.Ingestible import Ingestible
+from database import Base
 
-Base = declarative_base()
-
-
-class ACSRent():
-
-    geo_id = Column(
-        "geo_id",
-        Text,
-        info={
-            "display_name": "geo_id",
-            "display_text": "",
-            "source_name": "GEO.id"
-        }
-    )
-
-    geo_id2 = Column(
-        "geo_id2",
-        Text,
-        info={
-            "display_name": "geo_id2",
-            "display_text": "",
-            "source_name": "GEO.id2"
-        }
-    )
-
-    geo_display_label = Column(
-        "geo_display_label",
-        Text,
-        info={
-            "display_name": "geo_display_label",
-            "display_text": "",
-            "source_name": "GEO.display-label"
-        }
-    )
-
-
-class ACSRentLower(Base, ACSRent):
-    __table_name__ = 'acs_rent_lower'
-    CLEANER = "ACSRentCleaner"
-    REPLACE_TABLE = False
-
-    lower_quartile_rent = Column(
-        "lower_quartile_rent",
-        Integer,
-        info={
-            "display_name": "Lower quartile rent (ACS)",
-            "display_text": "Lower quartile rent from the American Community Survey table B25057",
-            "source_name": "HD01_VD01"
-        }
-    )
-    
-
-class ACSRentMedian(Base, ACSRent):
-    __table_name__ = "acs_rent_median"
-    CLEANER ="ACSRentCleaner"
-    REPLACE_TABLE = False
-
-    median_rent = Column(
-        "median_rent",
-        Integer,
-        info={
-            "display_name": "Median Rent (ACS)",
-            "display_text": "Median rent from the American Community Survey table B25058",
-            "source_name": "HD01_VD01"
-        }
-    )
-
-    median_rent_moe = Column(
-        "median_rent_moe",
-        Integer,
-        info={
-            "display_name": "Margin of error",
-            "display_text": "",
-            "source_name": "HD02_VD01"
-        }
-    )
-
-class ACERentUpper(Base, ACSRent):
-    __table_name__ = "acs_rent_upper"
-    CLEANER = "ACSRentCleaner"
-    REPLACE_TABLE = False
-
-    upper_quartile_rent = Column(
-        "upper_quartile_rent",
-        Integer,
-        info={
-                "display_name": "Upper quartile rent (ACS)",
-                "display_text": "Upper quartile rent from the American Community Survey table B25059",
-                "source_name": "HD01_VD01",
-        }
-    )
-
-    upper_quartile_rent_moe = Column(
-        "upper_quartile_rent_moe",
-        Integer,
-        info={
-                "display_name": "Margin of error",
-                "display_text": "",
-                "source_name": "HD02_VD01",
-        }
-    )
-
-class CensusMapping(Base):
-    __table_name__ = "census_mapping"
-    CLEANER = "GenericCleaner"
-    REPLACE_TABLE = True
-
-    acs_code = Column(
-        "acs_code",
-        Text,            
-        info={
-            "display_name": "acs_code",
-            "display_text": "",
-            "source_name": "acs_code",
-        }
-    )
-
-    acs_remove_state_county = Column(
-        "acs_remove_state_county",
-        Text,
-        info={
-            "display_name": "acs_remove_state_county",
-            "display_text": "acs_code stripped of its duplicative state and county codes",
-            "source_name": "acs_remove_state_county",
-        }
-    )
-
-    tract_code = Column(
-        "tract_code",
-        Text,
-        info={
-            "display_name": "tract_code",
-            "display_text": "",
-            "source_name": "tract_code",
-        }
-    )
-
-    prescat_code = Column(
-        "prescat_code",
-        Text,
-        info={
-            "display_name": "prescat_code",
-            "display_text": "",
-            "source_name": "prescat_code",
-        }
-    )
-
-
-class Project(Base):
-    __table_name__ = "project"
+class Project(Base, Ingestible):
+    __tablename__ = "project"
     CLEANER = "ProjectCleaner"
     REPLACE_TABLE = True
+    FILE_PATH = "raw/preservation_catalog/20160401/Project.csv"
+
+    @validates()
+    def replace_nulls():
+        raise NotImplementedError
+
+    @validates()
+    def parse_dates():
+        raise NotImplementedError
 
     nlihc_id = Column(        
         "nlihc_id",
@@ -171,7 +24,7 @@ class Project(Base):
                 "display_name": "nlihc_id",
                 "display_text": "",
                 "source_name": "Nlihc_id",
-        }
+        },
     )
     
     status = Column(
@@ -266,7 +119,7 @@ class Project(Base):
 
     proj_units_tot = Column(
         "proj_units_tot",
-        Decimal,
+        Float,
         info={
                 "display_name": "proj_units_tot",
                 "display_text": "",
@@ -336,7 +189,7 @@ class Project(Base):
 
     hud_mgr_type = Column(
         "hud_mgr_type",
-        Text,,
+        Text,
         info={
                 "display_name": "hud_mgr_type",
                 "display_text": "",
@@ -496,7 +349,7 @@ class Project(Base):
 
     proj_x = Column(
         "proj_x",
-        Decimal,
+        Float,
         info={
                 "display_name": "proj_x",
                 "display_text": "",
@@ -506,7 +359,7 @@ class Project(Base):
 
     proj_y = Column(
         "proj_y",
-        Decimal,
+        Float,
         info={
                 "display_name": "proj_y",
                 "display_text": "",
@@ -516,7 +369,7 @@ class Project(Base):
 
     proj_lat = Column(
         "proj_lat",
-        Decimal,
+        Float,
         info={
                 "display_name": "proj_lat",
                 "display_text": "",
@@ -526,7 +379,7 @@ class Project(Base):
 
     proj_lon = Column(
         "proj_lon",
-        Decimal,
+        Float,
         info={
                 "display_name": "proj_lon",
                 "display_text": "",
