@@ -18,7 +18,7 @@ class Project(Base, Ingestible):
         raise NotImplementedError
 
     nlihc_id = Column(        
-        "nlihc_id",
+        "Nlihc_id",
         Text,
         info={
                 "display_name": "nlihc_id",
@@ -28,7 +28,7 @@ class Project(Base, Ingestible):
     )
     
     status = Column(
-        "status",
+        "Status",
         Text,
         info={
                 "display_name": "status",
@@ -38,7 +38,7 @@ class Project(Base, Ingestible):
     )
 
     subsidized = Column(
-        "subsidized",
+        "Subsidized",
         Text,
         info={
                 "display_name": "subsidized",
@@ -48,7 +48,7 @@ class Project(Base, Ingestible):
     )
 
     cat_expiring = Column(
-        "cat_expiring",
+        "Cat_Expiring",
         Text,
         info={
                 "display_name": "cat_expiring",
@@ -58,7 +58,7 @@ class Project(Base, Ingestible):
     )
 
     cat_failing_insp = Column(
-        "cat_failing_insp",
+        "Cat_Failing_Insp",
         Text,
         info={
                 "display_name": "cat_failing_insp",
@@ -68,7 +68,7 @@ class Project(Base, Ingestible):
     )
 
     proj_name = Column(
-        "proj_name",
+        "Proj_Name",
         Text,
         info={
                 "display_name": "proj_name",
@@ -78,7 +78,7 @@ class Project(Base, Ingestible):
     )
 
     proj_addre = Column(
-        "proj_addre",
+        "Proj_Addre",
         Text,
         info={
                 "display_name": "proj_addre",
@@ -88,7 +88,7 @@ class Project(Base, Ingestible):
     )
 
     proj_city = Column(
-        "proj_city",
+        "Proj_City",
         Text,
         info={
                 "display_name": "proj_city",
@@ -98,7 +98,7 @@ class Project(Base, Ingestible):
     )
 
     proj_st = Column(
-        "proj_st",
+        "Proj_ST",
         Text,
         info={
                 "display_name": "proj_st",
@@ -108,7 +108,7 @@ class Project(Base, Ingestible):
     )
 
     proj_zip = Column(
-        "proj_zip",
+        "Proj_Zip",
         Text,
         info={
                 "display_name": "proj_zip",
@@ -118,7 +118,7 @@ class Project(Base, Ingestible):
     )
 
     proj_units_tot = Column(
-        "proj_units_tot",
+        "Proj_Units_Tot",
         Float,
         info={
                 "display_name": "proj_units_tot",
@@ -128,7 +128,7 @@ class Project(Base, Ingestible):
     )
 
     proj_units_assist_min = Column(
-        "proj_units_assist_min",
+        "Proj_Units_Assist_Min",
         Text,
         info={
                 "display_name": "proj_units_assist_min",
@@ -138,7 +138,7 @@ class Project(Base, Ingestible):
     )
 
     proj_units_assist_max = Column(
-        "proj_units_assist_max",
+        "Proj_Units_Assist_Max",
         Text,
         info={
                 "display_name": "proj_units_assist_max",
@@ -148,7 +148,7 @@ class Project(Base, Ingestible):
     )
 
     hud_own_effect_dt = Column(
-        "hud_own_effect_dt",
+        "Hud_Own_Effect_dt",
         Date,
         info={
                 "display_name": "hud_own_effect_dt",
@@ -158,7 +158,7 @@ class Project(Base, Ingestible):
     )
 
     hud_own_name = Column(
-        "hud_own_name",
+        "Hud_Own_Name",
         Text,
         info={
                 "display_name": "hud_own_name",
@@ -168,7 +168,7 @@ class Project(Base, Ingestible):
     )
 
     hud_own_type = Column(
-        "hud_own_type",
+        "Hud_Own_Type",
         Text,
         info={
                 "display_name": "hud_own_type",
@@ -178,7 +178,7 @@ class Project(Base, Ingestible):
     )
 
     hud_mgr_name = Column(
-        "hud_mgr_name",
+        "Hud_Mgr_Name",
         Text,
         info={
                 "display_name": "hud_mgr_name",
@@ -188,7 +188,7 @@ class Project(Base, Ingestible):
     )
 
     hud_mgr_type = Column(
-        "hud_mgr_type",
+        "Hud_Mgr_Type",
         Text,
         info={
                 "display_name": "hud_mgr_type",
@@ -198,7 +198,7 @@ class Project(Base, Ingestible):
     )
 
     subsidy_start_first = Column(
-        "subsidy_start_first",
+        "Subsidy_Start_First",
         Date,
         info={
                 "display_name": "subsidy_start_first",
@@ -208,7 +208,7 @@ class Project(Base, Ingestible):
     )
 
     subsidy_start_last = Column(
-        "subsidy_start_last",
+        "Subsidy_Start_Last",
         Date,
         info={
                 "display_name": "subsidy_start_last",
@@ -218,7 +218,7 @@ class Project(Base, Ingestible):
     )
 
     subsidy_end_first = Column(
-        "subsidy_end_first",
+        "Subsidy_End_First",
         Date,
         info={
                 "display_name": "subsidy_end_first",
@@ -228,7 +228,7 @@ class Project(Base, Ingestible):
     )
 
     subsidy_end_last = Column(
-        "subsidy_end_last",
+        "Subsidy_End_Last",
         Date,
         info={
                 "display_name": "subsidy_end_last",
@@ -238,7 +238,7 @@ class Project(Base, Ingestible):
     )
 
     ward2012 = Column(
-        "ward2012",
+        "Ward2012",
         Text,
         info={
                 "display_name": "ward2012",
@@ -248,7 +248,7 @@ class Project(Base, Ingestible):
     )
 
     pbca = Column(
-        "pbca",
+        "PBCA",
         Text,
         info={
                 "display_name": "pbca",
@@ -258,7 +258,7 @@ class Project(Base, Ingestible):
     )
 
     anc2012 = Column(
-        "anc2012",
+        "Anc2012",
         Text,
         info={
                 "display_name": "anc2012",
@@ -268,7 +268,7 @@ class Project(Base, Ingestible):
     )
 
     psa2012 = Column(
-        "psa2012",
+        "Psa2012",
         Text,
         info={
                 "display_name": "psa2012",
@@ -278,7 +278,7 @@ class Project(Base, Ingestible):
     )
 
     geo2010 = Column(
-        "geo2010",
+        "Geo2010",
         Text,
         info={
                 "display_name": "geo2010",
@@ -288,7 +288,7 @@ class Project(Base, Ingestible):
     )
 
     cluster_tr2000 = Column(
-        "cluster_tr2000",
+        "Cluster_tr2000",
         Text,
         info={
                 "display_name": "cluster_tr2000",
@@ -298,7 +298,7 @@ class Project(Base, Ingestible):
     )
 
     cluster_tr2000_name = Column(
-        "cluster_tr2000_name",
+        "Cluster_tr2000_name",
         Text,
         info={
                 "display_name": "cluster_tr2000_name",
@@ -308,7 +308,7 @@ class Project(Base, Ingestible):
     )
 
     zip_code = Column(
-        "zip",
+        "Zip",
         Text,
         info={
                 "display_name": "zip",
@@ -318,7 +318,7 @@ class Project(Base, Ingestible):
     )
 
     proj_image_url = Column(
-        "proj_image_url",
+        "Proj_image_url",
         Text,
         info={
                 "display_name": "proj_image_url",
@@ -328,7 +328,7 @@ class Project(Base, Ingestible):
     )
 
     proj_streetview_url = Column(
-        "proj_streetview_url",
+        "Proj_streetview_url",
         Text,
         info={
                 "display_name": "proj_streetview_url",
@@ -338,7 +338,7 @@ class Project(Base, Ingestible):
     )
 
     proj_address_id = Column(
-        "proj_address_id",
+        "Proj_address_id",
         Text,
         info={
                 "display_name": "proj_address_id",
@@ -348,7 +348,7 @@ class Project(Base, Ingestible):
     )
 
     proj_x = Column(
-        "proj_x",
+        "Proj_x",
         Float,
         info={
                 "display_name": "proj_x",
@@ -358,7 +358,7 @@ class Project(Base, Ingestible):
     )
 
     proj_y = Column(
-        "proj_y",
+        "Proj_y",
         Float,
         info={
                 "display_name": "proj_y",
@@ -368,7 +368,7 @@ class Project(Base, Ingestible):
     )
 
     proj_lat = Column(
-        "proj_lat",
+        "Proj_lat",
         Float,
         info={
                 "display_name": "proj_lat",
@@ -378,7 +378,7 @@ class Project(Base, Ingestible):
     )
 
     proj_lon = Column(
-        "proj_lon",
+        "Proj_lon",
         Float,
         info={
                 "display_name": "proj_lon",
@@ -388,7 +388,7 @@ class Project(Base, Ingestible):
     )
 
     bldg_count = Column(
-        "bldg_count",
+        "Bldg_count",
         Integer,
         info={
                 "display_name": "bldg_count",
@@ -398,7 +398,7 @@ class Project(Base, Ingestible):
     )
 
     update_dtm = Column(
-        "update_dtm",
+        "Update_Dtm",
         Text,
         info={
                 "display_name": "update_dtm",
@@ -408,7 +408,7 @@ class Project(Base, Ingestible):
     )
 
     subsidy_info_source_property = Column(
-        "subsidy_info_source_property",
+        "Subsidy_info_source_property",
         Text,
         info={
                 "display_name": "subsidy_info_source_property",
@@ -428,7 +428,7 @@ class Project(Base, Ingestible):
     )
 
     category_code = Column(
-        "category_code",
+        "Category_Code",
         Text,
         info={
                 "display_name": "category_code",
@@ -438,7 +438,7 @@ class Project(Base, Ingestible):
     )
 
     cat_at_risk = Column(
-        "cat_at_risk",
+        "Cat_At_Risk",
         Text,
         info={
                 "display_name": "cat_at_risk",
@@ -448,7 +448,7 @@ class Project(Base, Ingestible):
     )
 
     cat_more_info = Column(
-        "cat_more_info",
+        "Cat_More_Info",
         Text,
         info={
                 "display_name": "cat_more_info",
@@ -458,7 +458,7 @@ class Project(Base, Ingestible):
     )
 
     cat_lost = Column(
-        "cat_lost",
+        "Cat_Lost",
         Text,
         info={
                 "display_name": "cat_lost",
@@ -468,7 +468,7 @@ class Project(Base, Ingestible):
     )
 
     cat_replaced = Column(
-        "cat_replaced",
+        "Cat_Replaced",
         Text,
         info={
                 "display_name": "cat_replaced",
