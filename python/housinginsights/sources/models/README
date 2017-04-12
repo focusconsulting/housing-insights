@@ -1,0 +1,7 @@
+Models Directory
+----------------
+
+Use this directory to store objects/fields to represent the
+data you pull from whatever API you are using. This way,
+whenever the API changes, you can just make one modification to
+your model instead of having to change 50 functions.

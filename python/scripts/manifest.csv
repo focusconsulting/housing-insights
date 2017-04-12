@@ -57,3 +57,11 @@ use,acs_rent_upper,acs_rent_upper_12_5YR,7/1/2010,../../../data,https://s3.amazo
 use,acs_rent_upper,acs_rent_upper_13_5YR,7/1/2011,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2013_5year/ACS_13_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
 use,acs_rent_upper,acs_rent_upper_14_5YR,7/1/2012,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2014_5year/ACS_14_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
 use,acs_rent_upper,acs_rent_upper_15_5YR,7/1/2013,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2015_5year/ACS_15_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
+____Crime Data____,,,,,,,
+skip,crime,crime_2011,12/31/2011,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2011-all.csv,skipping for now until we are able to display older data
+skip,crime,crime_2012,12/31/2012,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2012-all.csv,skipping for now until we are able to display older data
+skip,crime,crime_2013,12/31/2013,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2013-all.csv,skipping for now until we are able to display older data
+skip,crime,crime_2014,12/31/2014,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2014-all.csv,skipping for now until we are able to display older data
+use,crime,crime_2015,12/31/2015,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2015-all.csv,
+use,crime,crime_2016,12/31/2016,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2016-all.csv,
+use,crime,crime_2017,4/3/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2017-to-date.csv,

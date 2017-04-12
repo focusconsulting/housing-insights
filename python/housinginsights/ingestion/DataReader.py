@@ -37,7 +37,7 @@ class HIReader(object):
         self._counter = Counter()
 
         if self.path_type == "file":
-            with open(self.path, 'r', newline='') as data:
+            with open(self.path, 'r', newline='', encoding='latin-1') as data:
                 reader = DictReader(data)
                 self._keys = reader.fieldnames
                 for row in reader:
@@ -172,6 +172,13 @@ class DataReader(HIReader):
 
         super().__init__(self.path, self.path_type)
 
+    def validate_or_create_path(self):
+        root_path = os.path.abspath(os.path.dirname(self.path))
+        if os.path.exists(root_path):
+            return
+        os.makedirs(root_path)
+        return
+
     def download_data_file(self):
         '''
         Checks to see if the file already exists locally, if not downloads it
@@ -181,6 +188,7 @@ class DataReader(HIReader):
                 myreader=csv.reader(f,delimiter=',')
                 headers = next(myreader)
         except FileNotFoundError as e:
+            self.validate_or_create_path()
             logging.info("  file not found. attempting to download file to disk: " + self.s3_path)
             urlretrieve(self.s3_path, self.path)
             logging.info("  download complete.")
