@@ -58,6 +58,33 @@ def count_per_zip(zipcode):
         results = cur.fetchall()[0][0]
 
     return jsonify({'count': results})
+    
+
+@application.route('/api/building_permits/nc/<nc>', methods=['GET'])
+def count_per_neighborhood_cluster(nc):
+    """ Example endpoint of doing a COUNT on a specific neighborhood cluster. """
+
+    application.logger.debug('Neighborhood cluster selected: {}'.format(nc))
+    with conn.cursor() as cur:
+        q = "SELECT COUNT(*) FROM building_permits WHERE neighborhoodcluster = '{}'".format(nc)
+        cur.execute(q)
+        results = cur.fetchall()[0][0]
+
+    return jsonify({'count': results})
+
+
+@application.route('/api/building_permits/ward/<ward>', methods=['GET'])
+def count_per_ward(ward):
+    """ Example endpoint of doing a COUNT on a specific ward. """
+
+    application.logger.debug('Ward selected: {}'.format(ward))
+    with conn.cursor() as cur:
+        q = "SELECT COUNT(*) FROM building_permits WHERE ward = '{}'".format(ward)
+        cur.execute(q)
+        results = cur.fetchall()[0][0]
+
+    return jsonify({'count': results})
+
 
 @application.route('/api/building_permits/all/<grouping>', methods=['GET'])
 def count_all_zip(grouping):
