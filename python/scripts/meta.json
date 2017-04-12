@@ -2241,7 +2241,7 @@
                 "display_text": "",
                 "source_name": "as_of_year",
                 "sql_name": "as_of_year",
-                "type": "text"
+                "type": "integer"
             },
             {
                 "display_name": "census_tract_number",
