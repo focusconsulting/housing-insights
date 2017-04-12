@@ -49,9 +49,97 @@ String.prototype.hashCode = function() {
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
+// This constructor stores json data fetched from AWS so that we can do various things with it,
+// like convert it to geoJSON or grab its display name and other information 
+// (regardless of the data source) using conventions from meta.json.
+// This assumes that 'json' is an array of objects.
+function APIDataObj(json){
+  this.json = json;
+  
+  // this.geoJSON assumes that we'll be producing a FeatureCollection with Features
+  // that are points. For shapes, we may want to add an argument and code that responds to it.
+  // Currently this method requires us to specify the latitude and longitude fields
+  // of the data within the json. If we standardize the json to always call its geospatial
+  // fields 'longitude' and 'latitude', this may not be necessary.
+  this.geoJSON = function(longitudeField, latitudeField){
+    var features = json.map(function(element){
+      return {
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [+element[longitudeField], +element[latitudeField]]
+        },
+        'properties': element        
+      }
+    });
+    console.log('json', json);
+    return {
+      'type': 'FeatureCollection',
+      'features': features
+    }
+  }
+  
+}
+
 
 var app = {
     dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
+    
+    // getAPIData exists to fetch data from the AWS API based on meta.json. This is a separate 
+    // method from getData() to allow us to replace calls to getData a bit at a time. If 
+    // there are no calls to getData() after everything that needs to call getAPIData() does
+    // so, then we can rename getAPIData() 'getData()' or combine the two methods.
+    
+    // The purpose of getAPIData() is to keep the interface with the data API in one place so we 
+    // can change it as the Python side of the project develops.
+    // This function adds the resulting json to dataCollection.
+    
+    // 'tableNamesArray' is an array of strings, each element corresponding to the name
+    // of a table in meta.json in the '/python/scripts/' directory.
+    // This will allow us to keep all of our asynchronous requests in one place so that 
+    // we can use them for maps and charts when they finish.
+    
+    // 'doAfter' is a callback where we can specify all the specific constructors to call with the data
+    getAPIData: function(tableNamesArray, doAfter){
+      var API_BASE_URL = 'https://zjlpq5zz7e.execute-api.us-east-1.amazonaws.com/test/',
+          QUERY_STRING_BASE = '/raw?tablename=',
+          MAX_INTERVALS = 10,
+          ajaxRequests = {},
+          currentInterval = 0,
+          checkRequestsInterval,
+          REQUEST_TIME = 500,
+          _this = this; // To resolve scoping issues
+                
+       function checkRequests(){
+         var completedRequests = Object.keys(ajaxRequests).filter(function(key){
+           return ajaxRequests[key].readyState == 4;
+         });
+            
+         if(completedRequests.length == Object.keys(ajaxRequests).length){
+         
+           clearInterval(checkRequestsInterval);
+        
+           for(var tableName in ajaxRequests){
+             var response = ajaxRequests[tableName].responseText;
+             _this.dataCollection[tableName] = new APIDataObj(JSON.parse(response));
+           }
+           doAfter();
+         }
+         if(MAX_INTERVALS == currentInterval){
+           clearInterval(checkRequestsInterval);
+         }
+         currentInterval++;
+       }
+       
+       for(var i = 0; i < tableNamesArray.length; i++){
+         ajaxRequests[tableNamesArray[i]] = new XMLHttpRequest();
+         ajaxRequests[tableNamesArray[i]].open('GET',API_BASE_URL + QUERY_STRING_BASE + tableNamesArray[i]);
+         ajaxRequests[tableNamesArray[i]].send();
+       }
+       checkRequestsInterval = setInterval(checkRequests, REQUEST_TIME);
+
+    },
+    
     getData: function(DATA_FILE, el, field, sortField, asc, readableField, chart){
         d3.csv(DATA_FILE, function(json) {
             json.forEach(function(obj) { 
