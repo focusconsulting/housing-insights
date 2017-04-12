@@ -62,7 +62,7 @@ function APIDataObj(json){
   // of the data within the json. If we standardize the json to always call its geospatial
   // fields 'longitude' and 'latitude', this may not be necessary.
   this.geoJSON = function(longitudeField, latitudeField){
-    var features = json.map(function(element){
+    var features = json.items.map(function(element){
       return {
         'type': 'Feature',
         'geometry': {
@@ -101,8 +101,8 @@ var app = {
     
     // 'doAfter' is a callback where we can specify all the specific constructors to call with the data
     getAPIData: function(tableNamesArray, doAfter){
-      var API_BASE_URL = 'https://zjlpq5zz7e.execute-api.us-east-1.amazonaws.com/test/',
-          QUERY_STRING_BASE = '/raw?tablename=',
+      var API_BASE_URL = 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/',
+          QUERY_STRING_BASE = 'raw/',
           MAX_INTERVALS = 10,
           ajaxRequests = {},
           currentInterval = 0,

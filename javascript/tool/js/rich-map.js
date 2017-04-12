@@ -170,10 +170,7 @@ function prepareMaps(){
       map.setLayoutProperty(map.clickedLayer, 'visibility', 'visible');
     
       previousLayer = map.clickedLayer;
-
-
-
-  };
+    };
 
     for (var i = 0; i < toggleableLayerIds.length; i++) {
       var id = toggleableLayerIds[i];
@@ -196,8 +193,9 @@ function prepareMaps(){
       var layers = document.getElementById('menu');
       layers.appendChild(link);
     }
-console.log(document.querySelector('nav#menu a:first-of-type'));
- showLayer.call(document.querySelector('nav#menu a:first-of-type')); // this call happens once on load, sets up initial
+
+   console.log(document.querySelector('nav#menu a:first-of-type'));
+   showLayer.call(document.querySelector('nav#menu a:first-of-type')); // this call happens once on load, sets up initial
                                                                      // condition of having first option active.
 
     map.on('click', function (e) {
@@ -212,27 +210,27 @@ console.log(document.querySelector('nav#menu a:first-of-type'));
         .setLngLat(e.lngLat)
         .setHTML("<a href = '/javascript/tool/building.html" + queryString + "' >See more about " + projectName + "</a>" )
         .addTo(map);
-
     });
 
     map.getCanvas().style.cursor = 'default';
 
-  setHeader();
+    setHeader();
 
-                                                      // putting maps here so they are not called until
-                                                      // the map renders, so that the zone (ward, neighborhood) can
-                                                      // be selected programmatically 
-                                                      
-// putting pie charts in an array property of map so we can access them later, for updating
-map.pieCharts = [
-    new PieChart(DATA_FILE,'#pie', 'Subsidized',75,75), 
-    new PieChart(DATA_FILE,'#pie-1','Cat_Expiring',75,75), 
-    new PieChart(DATA_FILE,'#pie-2','Cat_Failing_Insp',75,75), 
-    new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75),
-  //  new PieChart(DATA_FILE,'#pie-4','PBCA',75,75)
-  ];
-
+                                                        // putting maps here so they are not called until
+                                                        // the map renders, so that the zone (ward, neighborhood) can
+                                                        // be selected programmatically 
+                                                        
+    // putting pie charts in an array property of map so we can access them later, for updating
+    map.pieCharts = [
+      new PieChart(DATA_FILE,'#pie', 'Subsidized',75,75), 
+      new PieChart(DATA_FILE,'#pie-1','Cat_Expiring',75,75), 
+      new PieChart(DATA_FILE,'#pie-2','Cat_Failing_Insp',75,75), 
+      new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75),
+    //  new PieChart(DATA_FILE,'#pie-4','PBCA',75,75)
+    ];
   });
+
+};
 
 function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
   console.log(currentZoneType);
@@ -246,4 +244,5 @@ function setHeader(){ // sets the text in the sidebar header according to the se
 
   }
   };
+
 app.getAPIData(['project'], prepareMaps);
