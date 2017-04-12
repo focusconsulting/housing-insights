@@ -10,27 +10,42 @@ This is a simple Flask applicationlication that creates SQL query endpoints.
 from flask import Flask, jsonify, request, Response, abort, json
 import psycopg2
 import logging
+from flask_cors import CORS, cross_origin
 
+
+#######################
+# Setup
+#######################
 logging.basicConfig(level=logging.DEBUG)
 application = Flask(__name__)
+
+#Allow cross-origin requests.
+#TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
+CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
 
 with open('secrets.json') as f:
     secrets = json.load(f)
     connect_str = secrets['remote_database']['connect_str']
 
+#Demo query - show we can connect to the database. 
 conn = psycopg2.connect(connect_str)
-
 with conn.cursor() as cur:
     q = "SELECT tablename FROM pg_catalog.pg_tables where schemaname = 'public'"
     cur.execute(q)
     tables = [x[0] for x in cur.fetchall()]
     application.logger.debug('Database tables: {}'.format(tables))
 
+
+
+##########################################
+# API Endpoints
+##########################################
+
 @application.route('/')
 def hello():
     return("The Housing Insights API Rules!")
 
-@application.route('/api/<table>', methods=['GET'])
+@application.route('/api/raw/<table>', methods=['GET'])
 def list_all(table):
     """ Generate endpoint to list all data in the tables. """
 
@@ -41,8 +56,8 @@ def list_all(table):
     with conn.cursor() as cur:
         q = 'SELECT row_to_json({}) from {};'.format(table, table)
         cur.execute(q)
-        # Only fetching 100 for now, need to implement scrolling
-        results = [x[0] for x in cur.fetchmany(100)]
+        # Only fetching 1000 for now, need to implement scrolling
+        results = [x[0] for x in cur.fetchmany(1000)]
 
     return jsonify(items=results)
 
@@ -116,6 +131,12 @@ def count_all_zip(grouping):
 
     return jsonify({'results': results})
 
+
+
+
+##########################################
+# Start the app
+##########################################
 
 if __name__ == "__main__":
     try:
