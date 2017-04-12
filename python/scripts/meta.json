@@ -2084,5 +2084,558 @@
             }
         ]
 
+    },
+    
+    "hmda": {
+        "cleaner": "hmda_cleaner",
+        "fields": [
+            {
+                "display_name": "action_taken",
+                "display_text": "",
+                "source_name": "action_taken",
+                "sql_name": "action_taken",
+                "type": "text"
+            },
+            {
+                "display_name": "action_taken_name",
+                "display_text": "",
+                "source_name": "action_taken_name",
+                "sql_name": "action_taken_name",
+                "type": "text"
+            },
+            {
+                "display_name": "agency_code",
+                "display_text": "",
+                "source_name": "agency_code",
+                "sql_name": "agency_code",
+                "type": "text"
+            },
+            {
+                "display_name": "agency_abbr",
+                "display_text": "",
+                "source_name": "agency_abbr",
+                "sql_name": "agency_abbr",
+                "type": "text"
+            },
+            {
+                "display_name": "agency_name",
+                "display_text": "",
+                "source_name": "agency_name",
+                "sql_name": "agency_name",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_ethnicity",
+                "display_text": "",
+                "source_name": "applicant_ethnicity",
+                "sql_name": "applicant_ethnicity",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_ethnicity_name",
+                "display_text": "",
+                "source_name": "applicant_ethnicity_name",
+                "sql_name": "applicant_ethnicity_name",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_income_000s",
+                "display_text": "",
+                "source_name": "applicant_income_000s",
+                "sql_name": "applicant_income_000s",
+                "type": "decimal"
+            },
+            {
+                "display_name": "applicant_race_1",
+                "display_text": "",
+                "source_name": "applicant_race_1",
+                "sql_name": "applicant_race_1",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_2",
+                "display_text": "",
+                "source_name": "applicant_race_2",
+                "sql_name": "applicant_race_2",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_3",
+                "display_text": "",
+                "source_name": "applicant_race_3",
+                "sql_name": "applicant_race_3",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_4",
+                "display_text": "",
+                "source_name": "applicant_race_4",
+                "sql_name": "applicant_race_4",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_5",
+                "display_text": "",
+                "source_name": "applicant_race_5",
+                "sql_name": "applicant_race_5",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_name_1",
+                "display_text": "",
+                "source_name": "applicant_race_name_1",
+                "sql_name": "applicant_race_name_1",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_name_2",
+                "display_text": "",
+                "source_name": "applicant_race_name_2",
+                "sql_name": "applicant_race_name_2",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_name_3",
+                "display_text": "",
+                "source_name": "applicant_race_name_3",
+                "sql_name": "applicant_race_name_3",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_name_4",
+                "display_text": "",
+                "source_name": "applicant_race_name_4",
+                "sql_name": "applicant_race_name_4",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_race_name_5",
+                "display_text": "",
+                "source_name": "applicant_race_name_5",
+                "sql_name": "applicant_race_name_5",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_sex",
+                "display_text": "",
+                "source_name": "applicant_sex",
+                "sql_name": "applicant_sex",
+                "type": "text"
+            },
+            {
+                "display_name": "applicant_sex_name",
+                "display_text": "",
+                "source_name": "applicant_sex_name",
+                "sql_name": "applicant_sex_name",
+                "type": "text"
+            },
+            {
+                "display_name": "application_date_indicator",
+                "display_text": "",
+                "source_name": "application_date_indicator",
+                "sql_name": "application_date_indicator",
+                "type": "text"
+            },
+            {
+                "display_name": "as_of_year",
+                "display_text": "",
+                "source_name": "as_of_year",
+                "sql_name": "as_of_year",
+                "type": "integer"
+            },
+            {
+                "display_name": "census_tract_number",
+                "display_text": "",
+                "source_name": "census_tract_number",
+                "sql_name": "census_tract_number",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_ethnicity",
+                "display_text": "",
+                "source_name": "co_applicant_ethnicity",
+                "sql_name": "co_applicant_ethnicity",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_ethnicity_name",
+                "display_text": "",
+                "source_name": "co_applicant_ethnicity_name",
+                "sql_name": "co_applicant_ethnicity_name",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_1",
+                "display_text": "",
+                "source_name": "co_applicant_race_1",
+                "sql_name": "co_applicant_race_1",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_2",
+                "display_text": "",
+                "source_name": "co_applicant_race_2",
+                "sql_name": "co_applicant_race_2",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_3",
+                "display_text": "",
+                "source_name": "co_applicant_race_3",
+                "sql_name": "co_applicant_race_3",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_4",
+                "display_text": "",
+                "source_name": "co_applicant_race_4",
+                "sql_name": "co_applicant_race_4",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_5",
+                "display_text": "",
+                "source_name": "co_applicant_race_5",
+                "sql_name": "co_applicant_race_5",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_name_1",
+                "display_text": "",
+                "source_name": "co_applicant_race_name_1",
+                "sql_name": "co_applicant_race_name_1",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_name_2",
+                "display_text": "",
+                "source_name": "co_applicant_race_name_2",
+                "sql_name": "co_applicant_race_name_2",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_name_3",
+                "display_text": "",
+                "source_name": "co_applicant_race_name_3",
+                "sql_name": "co_applicant_race_name_3",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_name_4",
+                "display_text": "",
+                "source_name": "co_applicant_race_name_4",
+                "sql_name": "co_applicant_race_name_4",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_race_name_5",
+                "display_text": "",
+                "source_name": "co_applicant_race_name_5",
+                "sql_name": "co_applicant_race_name_5",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_sex",
+                "display_text": "",
+                "source_name": "co_applicant_sex",
+                "sql_name": "co_applicant_sex",
+                "type": "text"
+            },
+            {
+                "display_name": "co_applicant_sex_name",
+                "display_text": "",
+                "source_name": "co_applicant_sex_name",
+                "sql_name": "co_applicant_sex_name",
+                "type": "text"
+            },
+            {
+                "display_name": "county_code",
+                "display_text": "",
+                "source_name": "county_code",
+                "sql_name": "county_code",
+                "type": "text"
+            },
+            {
+                "display_name": "county_name",
+                "display_text": "",
+                "source_name": "county_name",
+                "sql_name": "county_name",
+                "type": "text"
+            },
+            {
+                "display_name": "denial_reason_1",
+                "display_text": "",
+                "source_name": "denial_reason_1",
+                "sql_name": "denial_reason_1",
+                "type": "text"
+            },
+            {
+                "display_name": "denial_reason_2",
+                "display_text": "",
+                "source_name": "denial_reason_2",
+                "sql_name": "denial_reason_2",
+                "type": "text"
+            },
+            {
+                "display_name": "denial_reason_3",
+                "display_text": "",
+                "source_name": "denial_reason_3",
+                "sql_name": "denial_reason_3",
+                "type": "text"
+            },
+            {
+                "display_name": "denial_reason_name_1",
+                "display_text": "",
+                "source_name": "denial_reason_name_1",
+                "sql_name": "denial_reason_name_1",
+                "type": "text"
+            },
+            {
+                "display_name": "denial_reason_name_2",
+                "display_text": "",
+                "source_name": "denial_reason_name_2",
+                "sql_name": "denial_reason_name_2",
+                "type": "text"
+            },
+            {
+                "display_name": "denial_reason_name_3",
+                "display_text": "",
+                "source_name": "denial_reason_name_3",
+                "sql_name": "denial_reason_name_3",
+                "type": "text"
+            },
+            {
+                "display_name": "edit_status",
+                "display_text": "",
+                "source_name": "edit_status",
+                "sql_name": "edit_status",
+                "type": "text"
+            },
+            {
+                "display_name": "edit_status_name",
+                "display_text": "",
+                "source_name": "edit_status_name",
+                "sql_name": "edit_status_name",
+                "type": "text"
+            },
+            {
+                "display_name": "hoepa_status",
+                "display_text": "",
+                "source_name": "hoepa_status",
+                "sql_name": "hoepa_status",
+                "type": "text"
+            },
+            {
+                "display_name": "hoepa_status_name",
+                "display_text": "",
+                "source_name": "hoepa_status_name",
+                "sql_name": "hoepa_status_name",
+                "type": "text"
+            },
+            {
+                "display_name": "lien_status",
+                "display_text": "",
+                "source_name": "lien_status",
+                "sql_name": "lien_status",
+                "type": "text"
+            },
+            {
+                "display_name": "lien_status_name",
+                "display_text": "",
+                "source_name": "lien_status_name",
+                "sql_name": "lien_status_name",
+                "type": "text"
+            },
+            {
+                "display_name": "loan_purpose",
+                "display_text": "",
+                "source_name": "loan_purpose",
+                "sql_name": "loan_purpose",
+                "type": "text"
+            },
+            {
+                "display_name": "loan_purpose_name",
+                "display_text": "",
+                "source_name": "loan_purpose_name",
+                "sql_name": "loan_purpose_name",
+                "type": "text"
+            },
+            {
+                "display_name": "loan_type",
+                "display_text": "",
+                "source_name": "loan_type",
+                "sql_name": "loan_type",
+                "type": "text"
+            },
+            {
+                "display_name": "loan_type_name",
+                "display_text": "",
+                "source_name": "loan_type_name",
+                "sql_name": "loan_type_name",
+                "type": "text"
+            },
+            {
+                "display_name": "msamd",
+                "display_text": "",
+                "source_name": "msamd",
+                "sql_name": "msamd",
+                "type": "text"
+            },
+            {
+                "display_name": "msamd_name",
+                "display_text": "",
+                "source_name": "msamd_name",
+                "sql_name": "msamd_name",
+                "type": "text"
+            },
+            {
+                "display_name": "owner_occupancy",
+                "display_text": "",
+                "source_name": "owner_occupancy",
+                "sql_name": "owner_occupancy",
+                "type": "text"
+            },
+            {
+                "display_name": "owner_occupancy_name",
+                "display_text": "",
+                "source_name": "owner_occupancy_name",
+                "sql_name": "owner_occupancy_name",
+                "type": "text"
+            },
+            {
+                "display_name": "preapproval",
+                "display_text": "",
+                "source_name": "preapproval",
+                "sql_name": "preapproval",
+                "type": "text"
+            },
+            {
+                "display_name": "preapproval_name",
+                "display_text": "",
+                "source_name": "preapproval_name",
+                "sql_name": "preapproval_name",
+                "type": "text"
+            },
+            {
+                "display_name": "property_type",
+                "display_text": "",
+                "source_name": "property_type",
+                "sql_name": "property_type",
+                "type": "text"
+            },
+            {
+                "display_name": "property_type_name",
+                "display_text": "",
+                "source_name": "property_type_name",
+                "sql_name": "property_type_name",
+                "type": "text"
+            },
+            {
+                "display_name": "purchaser_type",
+                "display_text": "",
+                "source_name": "purchaser_type",
+                "sql_name": "purchaser_type",
+                "type": "text"
+            },
+            {
+                "display_name": "purchaser_type_name",
+                "display_text": "",
+                "source_name": "purchaser_type_name",
+                "sql_name": "purchaser_type_name",
+                "type": "text"
+            },
+            {
+                "display_name": "respondent_id",
+                "display_text": "",
+                "source_name": "respondent_id",
+                "sql_name": "respondent_id",
+                "type": "text"
+            },
+            {
+                "display_name": "sequence_number",
+                "display_text": "",
+                "source_name": "sequence_number",
+                "sql_name": "sequence_number",
+                "type": "text"
+            },
+            {
+                "display_name": "state_code",
+                "display_text": "",
+                "source_name": "state_code",
+                "sql_name": "state_code",
+                "type": "text"
+            },
+            {
+                "display_name": "state_abbr",
+                "display_text": "",
+                "source_name": "state_abbr",
+                "sql_name": "state_abbr",
+                "type": "text"
+            },
+            {
+                "display_name": "state_name",
+                "display_text": "",
+                "source_name": "state_name",
+                "sql_name": "state_name",
+                "type": "text"
+            },
+            {
+                "display_name": "hud_median_family_income",
+                "display_text": "",
+                "source_name": "hud_median_family_income",
+                "sql_name": "hud_median_family_income",
+                "type": "decimal"
+            },
+            {
+                "display_name": "loan_amount_000s",
+                "display_text": "",
+                "source_name": "loan_amount_000s",
+                "sql_name": "loan_amount_000s",
+                "type": "integer"
+            },
+            {
+                "display_name": "number_of_1_to_4_family_units",
+                "display_text": "",
+                "source_name": "number_of_1_to_4_family_units",
+                "sql_name": "number_of_1_to_4_family_units",
+                "type": "decimal"
+            },
+            {
+                "display_name": "number_of_owner_occupied_units",
+                "display_text": "",
+                "source_name": "number_of_owner_occupied_units",
+                "sql_name": "number_of_owner_occupied_units",
+                "type": "decimal"
+            },
+            {
+                "display_name": "minority_population",
+                "display_text": "",
+                "source_name": "minority_population",
+                "sql_name": "minority_population",
+                "type": "decimal"
+            },
+            {
+                "display_name": "population",
+                "display_text": "",
+                "source_name": "population",
+                "sql_name": "population",
+                "type": "decimal"
+            },
+            {
+                "display_name": "rate_spread",
+                "display_text": "",
+                "source_name": "rate_spread",
+                "sql_name": "rate_spread",
+                "type": "decimal"
+            },
+            {
+                "display_name": "tract_to_msamd_income",
+                "display_text": "",
+                "source_name": "tract_to_msamd_income",
+                "sql_name": "tract_to_msamd_income",
+                "type": "decimal"
+            }
+        ],
+        "replace_table": true
     }
 }

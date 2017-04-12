@@ -10,6 +10,7 @@ services:
             - ./docs:/srv/jekyll
         ports:
             - "4000:4000"
+
     web:
         image: sosedoff/pgweb
         environment:
