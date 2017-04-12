@@ -307,6 +307,23 @@ class CleanerBase(object, metaclass=ABCMeta):
             #this prints error for many rows with nulls. 
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
+        
+        
+    def append_tract_label(self,row,row_num,column_name='census_tract_number'):
+        '''
+        Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value 
+        consistent with the more readable format used by PresCat 
+        '''
+        current = row[column_name]
+        try:
+            row[column_name] = "Tract " + str(current)
+        except KeyError:
+            pass
+            #this prints error for many rows with nulls. 
+            logging.warning('  no matching Tract found for row {}'.format(row_num,row))
+        return row
+
+
 
 #############################################
 # Custom Cleaners
@@ -372,4 +389,11 @@ class CrimeCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', None])
         row = self.parse_dates(row)
         row = self.replace_tracts(row,row_num,column_name='CENSUS_TRACT')
+        return row
+        
+class hmda_cleaner(CleanerBase):    
+    def clean(self, row, row_num = None):
+        row = self.replace_nulls(row, null_values=['', None])
+        row = self.parse_dates(row)
+        row = self.append_tract_label(row,row_num,column_name='census_tract_number')
         return row
