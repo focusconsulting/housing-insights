@@ -8,7 +8,10 @@ This is a simple Flask applicationlication that creates SQL query endpoints.
 """
 
 from flask import Flask, jsonify, request, Response, abort, json
+
 import psycopg2
+from sqlalchemy import create_engine
+
 import logging
 from flask_cors import CORS, cross_origin
 
@@ -19,23 +22,25 @@ from flask_cors import CORS, cross_origin
 logging.basicConfig(level=logging.DEBUG)
 application = Flask(__name__)
 
-#Allow cross-origin requests.
-#TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
+#Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
 CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
 
 with open('secrets.json') as f:
     secrets = json.load(f)
     connect_str = secrets['remote_database']['connect_str']
 
-#Demo query - show we can connect to the database. 
-conn = psycopg2.connect(connect_str)
-with conn.cursor() as cur:
-    q = "SELECT tablename FROM pg_catalog.pg_tables where schemaname = 'public'"
-    cur.execute(q)
-    tables = [x[0] for x in cur.fetchall()]
-    application.logger.debug('Database tables: {}'.format(tables))
 
+#Should create a new connection each time a separate query is needed so that API can recover from bad queries
+#Engine is used to create connections in the below methods
+engine = create_engine(connect_str)
 
+#Establish a list of tables so that we can validate queries before executing
+conn = engine.connect()
+q = "SELECT tablename FROM pg_catalog.pg_tables where schemaname = 'public'"
+proxy = conn.execute(q)
+results = proxy.fetchall()
+tables = [x[0] for x in results]
+application.logger.debug('Tables available: {}'.format(tables))
 
 ##########################################
 # API Endpoints
@@ -53,84 +58,70 @@ def list_all(table):
     if table not in tables:
         application.logger.error('Error:  Table does not exist.')
         abort(404)
-    with conn.cursor() as cur:
-        q = 'SELECT row_to_json({}) from {};'.format(table, table)
-        cur.execute(q)
-        # Only fetching 1000 for now, need to implement scrolling
-        results = [x[0] for x in cur.fetchmany(1000)]
+
+    #Query the database
+    conn = engine.connect()
+    q = 'SELECT row_to_json({}) from {} limit 1000;'.format(table, table)
+    proxy = conn.execute(q)
+    results = [x[0] for x in proxy.fetchmany(1000)] # Only fetching 1000 for now, need to implement scrolling
+    #print(results)
 
     return jsonify(items=results)
 
 
-@application.route('/api/building_permits/zip/<zipcode>', methods=['GET'])
-def count_per_zip(zipcode):
+@application.route('/api/<data_source>/all/<grouping>', methods=['GET'])
+def count_all(data_source,grouping):
     """ Example endpoint of doing a COUNT on a specific zipcode. """
 
-    application.logger.debug('Zip selected: {}'.format(zipcode))
-    with conn.cursor() as cur:
-        q = "SELECT COUNT(*) FROM building_permits WHERE zipcode = '{}'".format(zipcode)
-        cur.execute(q)
-        results = cur.fetchall()[0][0]
 
-    return jsonify({'count': results})
-    
+    #input validation so users only execute valid queries
+    if grouping not in ['zipcode','ward','anc', 'neighborhood_cluster']:
+        return jsonify({'items': None})
+    if data_source not in ['building_permits', 'crime']:
+        return jsonify({'items': None})
 
-@application.route('/api/building_permits/nc/<nc>', methods=['GET'])
-def count_per_neighborhood_cluster(nc):
-    """ Example endpoint of doing a COUNT on a specific neighborhood cluster. """
-
-    application.logger.debug('Neighborhood cluster selected: {}'.format(nc))
-    with conn.cursor() as cur:
-        q = "SELECT COUNT(*) FROM building_permits WHERE neighborhoodcluster = '{}'".format(nc)
-        cur.execute(q)
-        results = cur.fetchall()[0][0]
-
-    return jsonify({'count': results})
-
-
-@application.route('/api/building_permits/ward/<ward>', methods=['GET'])
-def count_per_ward(ward):
-    """ Example endpoint of doing a COUNT on a specific ward. """
-
-    application.logger.debug('Ward selected: {}'.format(ward))
-    with conn.cursor() as cur:
-        q = "SELECT COUNT(*) FROM building_permits WHERE ward = '{}'".format(ward)
-        cur.execute(q)
-        results = cur.fetchall()[0][0]
-
-    return jsonify({'count': results})
-
-
-@application.route('/api/building_permits/all/<grouping>', methods=['GET'])
-def count_all_zip(grouping):
-    """ Example endpoint of doing a COUNT on a specific zipcode. """
-
-    #this query structure will only work for certain filed names
-    if grouping not in ['zipcode','ward','anc','neighborhoodcluster']:
-        return jsonify({'results': None})
 
     application.logger.debug('Getting all {}'.format(grouping))
 
-    #COALESCE needs the right data type in the fallback
-    fallback = "'Unknown'" if grouping in ['zipcode','anc'] else 0
+    #Determine some parameters based on user submissions
+    #TODO this approach will get unwieldy soon - temporary quick approach
+    #date field name varies by data_source
+    date_fields = {'building_permits': 'issue_date', 'crime': 'report_date'}
+    date_field = date_fields[data_source]
+    fallback = "'Unknown'"
 
-    with conn.cursor() as cur:
+    try:
+        conn = engine.connect()
+
         q = """
             SELECT COALESCE({},{}) --'Unknown'
-            ,count(permit_id) AS permits
-            FROM building_permits
-            where issue_date between '2016-01-01' and '2016-12-31'
+            ,count(*) AS records
+            FROM {}
+            where {} between '2016-01-01' and '2016-12-31'
             --WHERE report_date BETWEEN (now()::TIMESTAMP - INTERVAL '1 year') AND now()::TIMESTAMP
             GROUP BY {} 
             ORDER BY {}
-            """.format(grouping,fallback,grouping,grouping)
+            """.format(grouping,fallback,data_source,date_field,grouping,grouping)
 
-        cur.execute(q)
-        results = cur.fetchall()
-        results = dict(results)
+        proxy = conn.execute(q)
+        results = proxy.fetchall()
 
-    return jsonify({'results': results})
+        #transform the results.
+        #TODO should come up with a better generic way to do this using column
+          #names for any arbitrary sql table results. 
+        formatted = []
+        for x in results:
+            dictionary = dict({'group':x[0], 'count':x[1]})
+            formatted.append(dictionary)
 
+
+        conn.close()
+        return jsonify({'items': formatted, 'grouping':grouping, 'table':data_source})
+
+    #TODO do better error handling - for interim development purposes only
+    except Exception as e:
+        #conn.close()
+        return "Query failed: {}".format(e)
 
 
 

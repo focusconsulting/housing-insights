@@ -1,7 +1,7 @@
 include_flag,destination_table,unique_data_id,data_date,local_folder,s3_folder,filepath,notes
 ____City Development Data__,,,,,,,
 superseded,building_permits,building_permits_2016_old,1/1/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits_2016.csv,
-skip,building_permits,building_permits_2016,2/2/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits__2016_updated.csv,
+use,building_permits,building_permits_2016,2/2/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits__2016_updated.csv,
 _____Crosswalks_____,,,,,,,
 use,census_mapping,census_mapping_2016_mapping,1/1/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/geographic_data/census_tract_mapping/DC_census_tract_crosswalk.csv,Created manually based on a crosswalk downloaded from census
 _____Neighborhood Info_____,,,,,,,
@@ -29,7 +29,7 @@ superseded,dc_tax,dc_tax_opendata_2016,1/1/2017,../../../data,https://s3.amazona
 needs cleaner,dc_tax,dc_tax_20170315,3/15/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/tax_assessment/IntTaxSysPubExtFacts/20170317/Integrated_Tax_System_Public_Extract_Facts.csv,Downloaded from: http://opendata.dc.gov/datasets/014f4b4f94ea461498bfeba877d92319_56
 _____Other DC Affordable Housing Data_____,,,,,,,
 pending,,,,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Real_property_rpt_20161110.xls,provided directly by CNHED. Still need to investigate
-use,hmda,hmda_all_dc,4/6/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
+skip,hmda,hmda_all_dc,4/6/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
 _____Market Rate Rent_____,,,,,,,
 superseded,zillow_zrisqft_zip,zillow_zrisqft_zip_Sept2016,1/11/2016,../../../data,https://s3.amazonaws.com/housinginsights/,raw/zillow/20160901/Zip_ZriPerSqft_AllHomes.csv,Excludes multifamily
 superseded,zillow_zri_zip,zillow_zri_zip_Sept2016,1/11/2016,../../../data,https://s3.amazonaws.com/housinginsights/,raw/zillow/20160901/Zip_Zri_AllHomes.csv,Excludes multifamily

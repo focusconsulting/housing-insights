@@ -323,7 +323,12 @@ class CleanerBase(object, metaclass=ABCMeta):
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
-
+    def rename_ward(self,row):
+        if row['WARD'] == self.null_value:
+            return row
+        else:
+            row['WARD'] = "Ward " + str(row['WARD'])
+            return row
 
 #############################################
 # Custom Cleaners
@@ -353,8 +358,16 @@ class BuildingPermitsCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['NONE','', None])
         row = self.parse_dates(row)
         row = self.remove_line_breaks(row)
-
+        row = self.rename_cluster(row)
+        row = self.rename_ward(row)
         return row
+
+    def rename_cluster(self,row):
+        if row['NEIGHBORHOODCLUSTER'] == self.null_value:
+            return row
+        else:
+            row['NEIGHBORHOODCLUSTER'] = 'Cluster ' + str(row['NEIGHBORHOODCLUSTER'])
+            return row
 
 class ACSRentCleaner(CleanerBase):
     def clean(self,row, row_num = None):
@@ -385,10 +398,10 @@ class ACSRentCleaner(CleanerBase):
 
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
-
         row = self.replace_nulls(row, null_values=['', None])
         row = self.parse_dates(row)
         row = self.replace_tracts(row,row_num,column_name='CENSUS_TRACT')
+        row = self.rename_ward(row)
         return row
         
 class hmda_cleaner(CleanerBase):    

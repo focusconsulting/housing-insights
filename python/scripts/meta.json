@@ -337,7 +337,7 @@
                 "display_text": "",
                 "source_name": "WARD",
                 "sql_name": "ward",
-                "type": "integer"
+                "type": "text"
             },
             {
                 "display_name": "ANC",
@@ -371,8 +371,8 @@
                 "display_name": "neighborhoodcluster",
                 "display_text": "",
                 "source_name": "NEIGHBORHOODCLUSTER",
-                "sql_name": "neighborhoodcluster",
-                "type": "integer"
+                "sql_name": "neighborhood_cluster",
+                "type": "text"
             },
             {
                 "display_name": "hotspot2006name",
@@ -1996,21 +1996,21 @@
                 "display_text": "",
                 "source_name": "DISTRICT",
                 "sql_name": "district",
-                "type": "integer"
+                "type": "text"
             },
             {
                 "display_name": "PSA",
                 "display_text": "",
                 "source_name": "PSA",
                 "sql_name": "psa",
-                "type": "integer"
+                "type": "text"
             },
             {
                 "display_name": "Ward",
                 "display_text": "",
                 "source_name": "WARD",
                 "sql_name": "ward",
-                "type": "integer"
+                "type": "text"
             },
             {
                 "display_name": "ANC",
@@ -2088,6 +2088,7 @@
     
     "hmda": {
         "cleaner": "hmda_cleaner",
+        "replace_table": true,
         "fields": [
             {
                 "display_name": "action_taken",
@@ -2635,7 +2636,6 @@
                 "sql_name": "tract_to_msamd_income",
                 "type": "decimal"
             }
-        ],
-        "replace_table": true
+        ]
     }
 }
