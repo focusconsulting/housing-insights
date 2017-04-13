@@ -271,7 +271,7 @@ class DataReader(HIReader):
         # Check that all REQUIRED the meta.json columns are in the data
         success = True
         for field in field_list:
-            if field['source_name'] not in self.keys:
+            if (field['required_in_source']) and (field['source_name'] not in self.keys):
                 self.not_found.append('  "{}" in meta.json not found in data'.format(field['source_name']))
                 success = False
         return success
