@@ -66,3 +66,6 @@ skip,crime,crime_2014,12/31/2014,../../../data,https://s3.amazonaws.com/housingi
 use,crime,crime_2015,12/31/2015,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2015-all.csv,
 use,crime,crime_2016,12/31/2016,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2016-all.csv,
 use,crime,crime_2017,4/3/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2017-to-date.csv,
+____WMATA Data____,,,,,,,
+use,wmata_dist,wmata_dist_20170215,2/15/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist.csv,
+use,wmata_info,wmata_info_20170215,2/15/2017,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,

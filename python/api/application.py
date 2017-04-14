@@ -91,6 +91,7 @@ def count_all(data_source,grouping):
     fallback = "'Unknown'"
 
     try:
+        #TODO verify if this is auto-closed if the transaction errors out. Or does it matter?
         conn = engine.connect()
 
         q = """
@@ -123,8 +124,79 @@ def count_all(data_source,grouping):
         #conn.close()
         return "Query failed: {}".format(e)
 
+@application.route('/api/wmata/<nlihc_id>')
+def nearby_transit(nlihc_id):
+    '''
+    Returns the nearby bus and metro routes and stops. 
+    Currently this assumes that all entries in the wmata_dist
+    table are those that have a walking distance of 0.5 miles 
+    or less. We may later want to implement functionality to
+    filter this to those with less distance. 
+    '''
+
+    conn = engine.connect()
+    try:
+        q = """
+            SELECT dist_in_miles, type, stop_id_or_station_code
+            FROM wmata_dist
+            WHERE nlihc_id = '{}'
+            """.format(nlihc_id)
+
+        proxy = conn.execute(q)
+        results = proxy.fetchall()
+
+        #transform the results.
+        stops = {'bus':[],'rail':[]};
+        rail_stops = []; bus_stops = [];
+        for x in results:
+            #reformat the data into appropriate json
+            dist = str(x[0])
+            typ = x[1]
+            stop_id = x[2]
+            dictionary = dict({'dist_in_miles':dist, 'type':typ, 'stop_id_or_station_code':stop_id})
+            
+            #Calculate summary statistics for ease of use
+            if typ == 'bus':
+                stops['bus'].append(dictionary)
+                bus_stops.append(stop_id)
+
+            if typ == 'rail':
+                stops['rail'].append(dictionary)
+                rail_stops.append(stop_id)
+            
+
+        bus_routes = unique_transit_routes(bus_stops)
+        rail_routes = unique_transit_routes(rail_stops)
+
+        return jsonify({'stops':stops,
+                        'bus_routes':bus_routes,
+                        'rail_routes':rail_routes
+                        })
+
+    except Exception as e:
+        return "Query failed: {}".format(e)
 
 
+def unique_transit_routes(stop_ids):
+    if len(stop_ids) == 0:
+        return []
+    else:
+        #Second query to get the unique transit lines
+        q_list = str(stop_ids).replace('[','(').replace(']',')')
+        q = """
+            SELECT lines FROM wmata_info
+            WHERE stop_id_or_station_code in {}
+            """.format(q_list)
+        conn = engine.connect()
+        proxy = conn.execute(q)
+        routes = [x[0] for x in proxy.fetchall()]
+        conn.close()
+
+        #Parse the : separated items
+        routes = ':'.join(routes)
+        routes = routes.split(':')
+        unique = list(set(routes))
+        return unique
 ##########################################
 # Start the app
 ##########################################
