@@ -15,7 +15,10 @@
         },
         metroStations: {
           url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson"
-        }    
+        },
+        busStops: {
+          url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson"
+        }
       }
   
   // So far the style url and access token come from Paul's Mapbox account.
@@ -108,31 +111,26 @@
     });
     
     metroStationsMap.on('load', function(){
+      
+      //Metro stops
       metroStationsMap.addSource(
         'metros', {
           'type': 'geojson',
           'data': datasets['metroStations']['data']
         }
       );
-      
-      metroStationsMap.addSource(
-        'targetBuilding2', {
-          'type': 'geojson',
-          'data': buildingForPage
-        }
-      );
-      
+
       metroStationsMap.addLayer({
         'id': "metroStationDots",
-			  'source': 'metros',
-			  'type': "circle",
-  			'minzoom': 11,
-	  		'paint': {
+        'source': 'metros',
+        'type': "circle",
+        'minzoom': 11,
+        'paint': {
           'circle-color': 'white',
           'circle-stroke-width': 3,
           'circle-stroke-color': 'green',
-          'circle-radius': 5
-  			}
+          'circle-radius': 7
+        }
       });
       
       metroStationsMap.addLayer({
@@ -146,7 +144,37 @@
         }
       });     
       
-            
+       
+      //Bus Stops
+      metroStationsMap.addSource(
+        'busStops', {
+          'type': 'geojson',
+          'data': datasets['busStops']['data']
+        }
+      );
+      metroStationsMap.addLayer({
+        'id': "busStopDots",
+        'source': 'busStops',
+        'type': 'circle',
+        'minzoom': 11,
+        'paint': {
+          'circle-color': 'white',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': 'blue',
+          'circle-radius': 7
+        }
+      });
+      //No titles for now, as the geojson from OpenData does not include routes (what we want)
+
+
+      //The current building
+      metroStationsMap.addSource(
+        'targetBuilding2', {
+          'type': 'geojson',
+          'data': buildingForPage
+        }
+      );
+
       metroStationsMap.addLayer({
 				'id': "thisBuildingLocation",
 				'source': 'targetBuilding2',
@@ -169,7 +197,8 @@
           'text-field': "{Proj_Name}",
           'text-anchor': "bottom-left"
         }
-			}); 
+			});
+
 			
 			console.log(app);
       
