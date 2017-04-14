@@ -81,6 +81,27 @@ function APIDataObj(json){
   
 }
 
+// geoJSONPolygons = a geoJSON FeatureCollection where the Features have a 'geometry'
+// object of type 'Polygon'.
+// aggregateData = a json object resulting from a query for aggregate data from the 
+// project's Flask API.
+// zoneNamesMatch = a callback with two arguments: (a) an element within the array of 
+// objects returned from an API call. and (b) a geoJSON polygon feature. The callback
+// returns true if the zone name within (a) matches the zone name within (b). 
+function addDataToPolygons(geoJSONPolygons, aggregateData, zoneNamesMatch){
+  var modifiedPolygons = geoJSONPolygons;
+  for(var i = 0; i < modifiedPolygons.features.length;i++){
+    var matchingAggregateZone = (aggregateData['items'].filter(function(el){
+      return zoneNamesMatch(el,modifiedPolygons.features[i]);
+    }))[0];
+
+    modifiedPolygons.features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){
+      return el.group == matchingAggregateZone.group;
+    }))[0].count;
+  }
+  return modifiedPolygons;
+}
+
 
 var app = {
     dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
