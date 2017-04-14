@@ -61,7 +61,7 @@ function APIDataObj(json){
   // Currently this method requires us to specify the latitude and longitude fields
   // of the data within the json. If we standardize the json to always call its geospatial
   // fields 'longitude' and 'latitude', this may not be necessary.
-  this.geoJSON = function(longitudeField, latitudeField){
+  this.toGeoJSON = function(longitudeField, latitudeField){
     var features = json.items.map(function(element){
       return {
         'type': 'Feature',
@@ -85,25 +85,14 @@ function APIDataObj(json){
 var app = {
     dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
     
-    // getAPIData exists to fetch data from the AWS API based on meta.json. This is a separate 
-    // method from getData() to allow us to replace calls to getData a bit at a time. If 
-    // there are no calls to getData() after everything that needs to call getAPIData() does
-    // so, then we can rename getAPIData() 'getData()' or combine the two methods.
+    // getInitialData exists to fetch data that we need to use as soon as possible after the DOM loads.
     
-    // The purpose of getAPIData() is to keep the interface with the data API in one place so we 
-    // can change it as the Python side of the project develops.
-    // This function adds the resulting json to dataCollection.
-    
-    // 'tableNamesArray' is an array of strings, each element corresponding to the name
-    // of a table in meta.json in the '/python/scripts/' directory.
-    // This will allow us to keep all of our asynchronous requests in one place so that 
-    // we can use them for maps and charts when they finish.
-    
-    // 'doAfter' is a callback where we can specify all the specific constructors to call with the data
-    getAPIData: function(tableNamesArray, doAfter){
-      var API_BASE_URL = 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/',
-          QUERY_STRING_BASE = 'raw/',
-          MAX_INTERVALS = 10,
+    // 'urlsObjArray' is an array of object literals, each with two keys: 'dataName' is a string that we
+    // will later use as a key within app.dataCollection; and 'dataURL' is where we fetch the data
+    // from. 'doAfter' is a callback where we can specify all the specific constructors to call with the 
+    // data
+    getInitialData: function(urlsObjArray, doAfter){
+      var MAX_INTERVALS = 10,
           ajaxRequests = {},
           currentInterval = 0,
           checkRequestsInterval,
@@ -131,10 +120,10 @@ var app = {
          currentInterval++;
        }
        
-       for(var i = 0; i < tableNamesArray.length; i++){
-         ajaxRequests[tableNamesArray[i]] = new XMLHttpRequest();
-         ajaxRequests[tableNamesArray[i]].open('GET',API_BASE_URL + QUERY_STRING_BASE + tableNamesArray[i]);
-         ajaxRequests[tableNamesArray[i]].send();
+       for(var i = 0; i < urlsObjArray.length; i++){
+         ajaxRequests[urlsObjArray[i].dataName] = new XMLHttpRequest();
+         ajaxRequests[urlsObjArray[i].dataName].open('GET', urlsObjArray[i].dataURL);
+         ajaxRequests[urlsObjArray[i].dataName].send();
        }
        checkRequestsInterval = setInterval(checkRequests, REQUEST_TIME);
 
