@@ -9,6 +9,10 @@ var map = new mapboxgl.Map({
   preserveDrawingBuffer: true
 });
 
+var map_loaded = new Promise(function(resolve, reject){
+  map.on('load', resolve);
+});
+
 function prepareMaps(){
 
   app.dataCollection.neighborhood_data_polygons = addDataToPolygons(
@@ -43,7 +47,7 @@ function prepareMaps(){
     } 
   );
 
-  map.on('load', function() {
+  map_loaded.then(function() {
 
     map.addSource("neighborhood_data",{
       "type": "geojson",
