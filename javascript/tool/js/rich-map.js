@@ -9,9 +9,13 @@ var map = new mapboxgl.Map({
   preserveDrawingBuffer: true
 });
 
+var map_loaded = new Promise(function(resolve, reject){
+  map.on('load', resolve);
+});
+
 function prepareMaps(){
 
-  map.on('load', function() {
+  map_loaded.then(function() {
 
     map.addSource("zip", {
       "type": "geojson",
