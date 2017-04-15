@@ -49,13 +49,13 @@ function prepareMaps(){
   );
 
   if (map_loaded) {
-    map_loaded_callback()
+    mapLoadedCallback()
   }
   else {
-    map.on('load', map_loaded_callback);
+    map.on('load', mapLoadedCallback);
   }
 
-  function map_loaded_callback() {
+  function mapLoadedCallback() {
 
     map.addSource("neighborhood_data",{
       "type": "geojson",
