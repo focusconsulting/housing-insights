@@ -113,6 +113,7 @@ if __name__ == '__main__':
         table_name = "foobar"
         encoding = "latin1"
         make_draft_json(csv_filename, table_name, encoding)
+        
     if 'multi' in sys.argv:
         manifest_path = os.path.abspath('../../scripts/manifest.csv')
         make_all_json(manifest_path)
