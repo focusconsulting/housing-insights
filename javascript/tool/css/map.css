@@ -129,7 +129,7 @@ p {
   font-family: 'Open Sans', sans-serif;
 }
 
-#menu a {
+.map-menu a {
   font-size: 13px;
   color: #404040;
   display: block;
@@ -141,20 +141,32 @@ p {
   text-align: center;
 }
 
-#menu a:last-child {
+.map-menu a:last-child {
 	border: none;
 }
 
-#menu a:hover {
+.map-menu a:hover {
   background-color: #f8f8f8;
   color: #404040;
 }
 
-#menu a.active {
+.map-menu a.active {
   background-color: #b3cde3;
   color: #404040;
 }
 
-#menu a.active:hover {
+.map-menu a.active:hover {
   background: #b3cde3;
+}
+
+#data-menu {
+  background: #fff;
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  left: 10px;
+  border-radius: 3px;
+  width: 140px;
+  border: 1px solid rgba(0,0,0,0.4);
+  font-family: 'Open Sans', sans-serif;
 }
