@@ -11,8 +11,8 @@ from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 
 # SETUP - Mostly taken from load_data.py
-meta_path = 'scripts/new_meta_v2.json'
-manifest_path = 'scripts/manifest.csv'
+meta_path = 'test_data/new_meta_v2.json' # TODO Update when meta.json is updated.
+manifest_path = 'test_data/manifest_unique.csv' # TODO Consider updating manifest_sample
 database_choice = 'docker_database'
 logging_path = os.path.abspath("../logs")
 
@@ -47,7 +47,7 @@ class TestVerifyRequiredMetadata(unittest.TestCase):
         # and I don't want to modify any of the csvs. Consider setting up fixtures for these types of tests.
 
 
-# Helper functions replicate certain functionality of load_data.py
+# Setup functions replicate certain logic from load_data.py
 # to help us properly instantiate the required objects.
 def prep_manifest_row_and_csv_reader():
     for manifest_row in manifest:
