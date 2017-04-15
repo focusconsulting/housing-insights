@@ -9,11 +9,6 @@ var map = new mapboxgl.Map({
   preserveDrawingBuffer: true
 });
 
-var map_loaded = false;
-map.on('load', function(){
-  map_loaded = true;
-});
-
 function prepareMaps(){
 
   app.dataCollection.neighborhood_data_polygons = addDataToPolygons(
@@ -48,8 +43,8 @@ function prepareMaps(){
     } 
   );
 
-  if (map_loaded) {
-    mapLoadedCallback()
+  if (map.loaded()) {
+    mapLoadedCallback();
   }
   else {
     map.on('load', mapLoadedCallback);
