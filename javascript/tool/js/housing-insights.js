@@ -49,9 +49,107 @@ String.prototype.hashCode = function() {
 String.prototype.capitalizeFirstLetter = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 };
+// This constructor stores json data fetched from AWS so that we can do various things with it,
+// like convert it to geoJSON or grab its display name and other information 
+// (regardless of the data source) using conventions from meta.json.
+// This assumes that 'json' is an array of objects.
+function APIDataObj(json){
+  this.json = json;
+  
+  // this.geoJSON assumes that we'll be producing a FeatureCollection with Features
+  // that are points. For shapes, we may want to add an argument and code that responds to it.
+  // Currently this method requires us to specify the latitude and longitude fields
+  // of the data within the json. If we standardize the json to always call its geospatial
+  // fields 'longitude' and 'latitude', this may not be necessary.
+  this.toGeoJSON = function(longitudeField, latitudeField){
+    var features = json.items.map(function(element){
+      return {
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [+element[longitudeField], +element[latitudeField]]
+        },
+        'properties': element        
+      }
+    });
+    console.log('json', json);
+    return {
+      'type': 'FeatureCollection',
+      'features': features
+    }
+  }
+  
+}
+
+// geoJSONPolygons = a geoJSON FeatureCollection where the Features have a 'geometry'
+// object of type 'Polygon'.
+// aggregateData = a json object resulting from a query for aggregate data from the 
+// project's Flask API.
+// zoneNamesMatch = a callback with two arguments: (a) an element within the array of 
+// objects returned from an API call. and (b) a geoJSON polygon feature. The callback
+// returns true if the zone name within (a) matches the zone name within (b). 
+function addDataToPolygons(geoJSONPolygons, aggregateData, zoneNamesMatch){
+  var modifiedPolygons = geoJSONPolygons;
+  for(var i = 0; i < modifiedPolygons.features.length;i++){
+    var matchingAggregateZone = (aggregateData['items'].filter(function(el){
+      return zoneNamesMatch(el,modifiedPolygons.features[i]);
+    }))[0];
+
+    modifiedPolygons.features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){
+      return el.group == matchingAggregateZone.group;
+    }))[0].count;
+  }
+  return modifiedPolygons;
+}
+
 
 var app = {
     dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
+    
+    // getInitialData exists to fetch data that we need to use as soon as possible after the DOM loads.
+    
+    // 'urlsObjArray' is an array of object literals, each with two keys: 'dataName' is a string that we
+    // will later use as a key within app.dataCollection; and 'dataURL' is where we fetch the data
+    // from. 'doAfter' is a callback where we can specify all the specific constructors to call with the 
+    // data
+    getInitialData: function(urlsObjArray, doAfter){
+      var MAX_INTERVALS = 10,
+          ajaxRequests = {},
+          currentInterval = 0,
+          checkRequestsInterval,
+          REQUEST_TIME = 500,
+          _this = this; // To resolve scoping issues
+                
+       function checkRequests(){
+         var completedRequests = Object.keys(ajaxRequests).filter(function(key){
+           return ajaxRequests[key].readyState == 4;
+         });
+            
+         if(completedRequests.length == Object.keys(ajaxRequests).length){
+         
+           clearInterval(checkRequestsInterval);
+        
+           for(var tableName in ajaxRequests){
+             var response = ajaxRequests[tableName].responseText;
+             _this.dataCollection[tableName] = new APIDataObj(JSON.parse(response));
+           }
+           doAfter();
+         }
+         if(MAX_INTERVALS == currentInterval){
+           clearInterval(checkRequestsInterval);
+         }
+         currentInterval++;
+       }
+       
+       for(var i = 0; i < urlsObjArray.length; i++){
+         ajaxRequests[urlsObjArray[i].dataName] = new XMLHttpRequest();
+         ajaxRequests[urlsObjArray[i].dataName].open('GET', urlsObjArray[i].dataURL);
+         ajaxRequests[urlsObjArray[i].dataName].send();
+       }
+       checkRequestsInterval = setInterval(checkRequests, REQUEST_TIME);
+
+    },
+    
     getData: function(DATA_FILE, el, field, sortField, asc, readableField, chart){
         d3.csv(DATA_FILE, function(json) {
             json.forEach(function(obj) { 

@@ -46,15 +46,12 @@ def pandas_to_sql_data_type(pandas_type_string):
 
 def make_draft_json(filename, tablename, encoding): #use the name from constants as default
 
-
-
     # Reads the initial CSV and sets up the basic output structure.
     dataframe_file = pandas.read_csv(filename, encoding=encoding)
     dataframe_iterator = dataframe_file.columns
     output = {
         tablename: {
             "cleaner": tablename + "{}".format("_cleaner"),
-            "encoding": encoding,
             "replace_table": True,
             "fields": []
         }
@@ -90,7 +87,7 @@ def make_all_json(manifest_path):
     if manifest.has_unique_ids():
         for manifest_row in manifest:
             tablename = manifest_row['destination_table']
-            encoding = manifest_row.get('encoding', 'latin1')
+            encoding = manifest_row.get('encoding')
             if tablename not in completed_tables:
                 if manifest_row['include_flag'] == 'use':
                     filepath = os.path.abspath(
@@ -112,8 +109,9 @@ if __name__ == '__main__':
         # Edit these values before running!
         csv_filename = os.path.abspath("/Users/williammcmonagle/GitHub/housing-insights/data/raw/acs/B25058_median_rent_by_tract/2009_5year/ACS_09_5YR_B25058_with_ann.csv")
         table_name = "foobar"
-        encoding = "latin1"
+        encoding = "latin1" #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
         make_draft_json(csv_filename, table_name, encoding)
+        
     if 'multi' in sys.argv:
         manifest_path = os.path.abspath('../../scripts/manifest.csv')
         make_all_json(manifest_path)

@@ -79,6 +79,7 @@ def check_or_create_sql_manifest(engine, rebuild=False):
                 ("destination_table","text"),
                 ("unique_data_id","text"),
                 ("data_date","date"),
+                ("encoding", "text"),
                 ("local_folder","text"),
                 ("s3_folder","text"),
                 ("filepath","text"),

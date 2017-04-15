@@ -156,6 +156,9 @@ class DataReader(HIReader):
 
         self.manifest_row = manifest_row      #a dictionary from the manifest
         self.destination_table = manifest_row['destination_table']
+        
+        if 'encoding' not in manifest_row:
+            logging.warning("  Warning: encoding not found in manifest. Falling back to latin-1.")
         self.encoding = manifest_row.get('encoding', 'latin-1') # Defaults to latin-1 in case key not present in manifest.
 
         self.load_from=load_from
