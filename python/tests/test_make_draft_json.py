@@ -40,7 +40,7 @@ class TestMakeDraftJson(unittest.TestCase):
 
             Consider re-factoring this function.
         """
-        make_draft_json(self.filename, self.tablename)
+        make_draft_json(self.filename, self.tablename, encoding='latin1')
         mock_read_csv.assert_called_with(self.filename, encoding='latin1')
 
     @patch('housinginsights.ingestion.make_draft_json.ManifestReader')

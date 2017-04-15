@@ -410,3 +410,11 @@ class hmda_cleaner(CleanerBase):
         row = self.parse_dates(row)
         row = self.append_tract_label(row,row_num,column_name='census_tract_number')
         return row
+
+class WmataDistCleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        return row
+
+class WmataInfoCleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        return row

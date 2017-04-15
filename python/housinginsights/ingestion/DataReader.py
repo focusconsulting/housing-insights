@@ -26,18 +26,19 @@ class HIReader(object):
     File can be local (path_type="file") or remote (path_type="s3"). Note, local files are preferred
     when possible for faster processing time and lower bandwidth usage. 
     """
-    def __init__(self, path, path_type="file"):
+    def __init__(self, path, path_type="file", encoding="latin-1"):
         self.path = path
         self._length = None
         self._keys = None
         self.path_type = path_type
+        self.encoding = encoding
 
     def __iter__(self):
         self._length = 0
         self._counter = Counter()
 
         if self.path_type == "file":
-            with open(self.path, 'r', newline='', encoding='latin-1') as data:
+            with open(self.path, 'r', newline='', encoding=self.encoding) as data:
                 reader = DictReader(data)
                 self._keys = reader.fieldnames
                 for row in reader:
@@ -155,6 +156,10 @@ class DataReader(HIReader):
 
         self.manifest_row = manifest_row      #a dictionary from the manifest
         self.destination_table = manifest_row['destination_table']
+        
+        if 'encoding' not in manifest_row:
+            logging.warning("  Warning: encoding not found in manifest. Falling back to latin-1.")
+        self.encoding = manifest_row.get('encoding', 'latin-1') # Defaults to latin-1 in case key not present in manifest.
 
         self.load_from=load_from
         self.s3_path = os.path.join(manifest_row['s3_folder'], manifest_row['filepath'].strip("\/")).replace("\\","/")
@@ -170,7 +175,7 @@ class DataReader(HIReader):
 
         self.not_found = [] #Used to log missing fields compared to meta data
 
-        super().__init__(self.path, self.path_type)
+        super().__init__(self.path, self.path_type, self.encoding)
 
     def validate_or_create_path(self):
         root_path = os.path.abspath(os.path.dirname(self.path))

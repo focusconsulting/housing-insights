@@ -853,7 +853,7 @@
             {
                 "display_name": "proj_addre",
                 "display_text": "",
-                "source_name": "Proj_Addre",
+                "source_name": "Proj_addre",
                 "sql_name": "proj_addre",
                 "type": "text"
             },
@@ -2637,5 +2637,90 @@
                 "type": "decimal"
             }
         ]
+    },
+
+    "wmata_info": {
+        "cleaner": "WmataInfoCleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "Metro Stop ID or Bus Station Code",
+                "display_text": "",
+                "source_name": "code_or_id",
+                "sql_name": "stop_id_or_station_code",
+                "type": "text"
+            },
+            {
+                "display_name": "Bus or Metro",
+                "display_text": "",
+                "source_name": "type",
+                "sql_name": "type",
+                "type": "text"
+            },
+            {
+                "display_name": "Stop name",
+                "display_text": "",
+                "source_name": "name",
+                "sql_name": "name",
+                "type": "text"
+            },
+            {
+                "display_name": "Latitude",
+                "display_text": "",
+                "source_name": "lat",
+                "sql_name": "latitude",
+                "type": "decimal"
+            },
+            {
+                "display_name": "Longitude",
+                "display_text": "",
+                "source_name": "lon",
+                "sql_name": "longitude",
+                "type": "decimal"
+            },
+            {
+                "display_name": "Available lines",
+                "display_text": "",
+                "source_name": "lines",
+                "sql_name": "lines",
+                "type": "text"
+            }
+        ]
+    },
+
+    "wmata_dist": {
+        "cleaner": "WmataDistCleaner",
+        "replace_table": true,
+        "fields": [
+            {
+                "display_name": "Nlihc ID",
+                "display_text": "",
+                "source_name": "Nlihc_id",
+                "sql_name": "nlihc_id",
+                "type": "text"
+            },
+            {
+                "display_name": "type",
+                "display_text": "",
+                "source_name": "type",
+                "sql_name": "type",
+                "type": "text"
+            },
+            {
+                "display_name": "stop_id_or_station_code",
+                "display_text": "",
+                "source_name": "stop_id_or_station_code",
+                "sql_name": "stop_id_or_station_code",
+                "type": "text"
+            },
+            {
+                "display_name": "dist_in_miles",
+                "display_text": "",
+                "source_name": "dist_in_miles",
+                "sql_name": "dist_in_miles",
+                "type": "decimal"
+            }
+        ]
     }
+
 }

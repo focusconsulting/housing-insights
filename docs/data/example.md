@@ -1,4 +1,5 @@
 ---
+---
 layout: datasource
 tablename: example_table_name
 title: Example Table
