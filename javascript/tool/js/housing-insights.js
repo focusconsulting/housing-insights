@@ -164,7 +164,22 @@ var app = {
             app.dataCollection[dataName] = json; // adds result of fetching data to the dataCollection
             chart.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
         });
-    }
+    },
+
+    /* function to get parameter value from query string in url */
+
+    getParameterByName: function(name, url) { // HT http://stackoverflow.com/a/901144/5701184
+      if (!url) {
+        url = window.location.href;
+      }
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+  }
+
 };
               
 var Chart = function(DATA_FILE, el, field, sortField, asc, readableField) { // Chart is called by specific chart constructors
