@@ -43,7 +43,14 @@ function prepareMaps(){
     } 
   );
 
-  map.on('load', function() {
+  if (map.loaded()) {
+    mapLoadedCallback();
+  }
+  else {
+    map.on('load', mapLoadedCallback);
+  }
+
+  function mapLoadedCallback() {
 
     map.addSource("neighborhood_data",{
       "type": "geojson",
@@ -332,9 +339,8 @@ function prepareMaps(){
       new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75),
     //  new PieChart(DATA_FILE,'#pie-4','PBCA',75,75)
     ];
-  });
-
-};
+  }
+}
 
 function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
   if (currentZoneType !== map.clickedLayer) {
@@ -346,7 +352,7 @@ function setHeader(){ // sets the text in the sidebar header according to the se
     document.getElementById('zone-selector').onchange = changeZone;
 
   }
-  };
+  }
 
 app.getInitialData([{
   dataName: 'project', 
