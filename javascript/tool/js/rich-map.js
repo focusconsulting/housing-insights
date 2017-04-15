@@ -9,6 +9,11 @@ var map = new mapboxgl.Map({
   preserveDrawingBuffer: true
 });
 
+var map_loaded = false;
+map.on('load', function(){
+  map_loaded = true;
+});
+
 function prepareMaps(){
 
   app.dataCollection.neighborhood_data_polygons = addDataToPolygons(
@@ -43,7 +48,14 @@ function prepareMaps(){
     } 
   );
 
-  map.on('load', function() {
+  if (map_loaded) {
+    map_loaded_callback()
+  }
+  else {
+    map.on('load', map_loaded_callback);
+  }
+
+  function map_loaded_callback() {
 
     map.addSource("neighborhood_data",{
       "type": "geojson",
@@ -332,9 +344,8 @@ function prepareMaps(){
       new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75),
     //  new PieChart(DATA_FILE,'#pie-4','PBCA',75,75)
     ];
-  });
-
-};
+  }
+}
 
 function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
   if (currentZoneType !== map.clickedLayer) {
@@ -346,7 +357,7 @@ function setHeader(){ // sets the text in the sidebar header according to the se
     document.getElementById('zone-selector').onchange = changeZone;
 
   }
-  };
+  }
 
 app.getInitialData([{
   dataName: 'project', 
