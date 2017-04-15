@@ -148,34 +148,82 @@ def nearby_transit(nlihc_id):
         #transform the results.
         stops = {'bus':[],'rail':[]};
         rail_stops = []; bus_stops = [];
+        bus_routes = {}; rail_routes = {};
+
         for x in results:
             #reformat the data into appropriate json
             dist = str(x[0])
             typ = x[1]
             stop_id = x[2]
-            dictionary = dict({'dist_in_miles':dist, 'type':typ, 'stop_id_or_station_code':stop_id})
+            routes = unique_transit_routes([stop_id])
+
+            stop_dict = dict({'dist_in_miles':dist,
+                            'type':typ, 
+                            'stop_id_or_station_code':stop_id,
+                            'routes':routes
+                            })
             
             #Calculate summary statistics for ease of use
             if typ == 'bus':
-                stops['bus'].append(dictionary)
+                stops['bus'].append(stop_dict)
                 bus_stops.append(stop_id)
+                
+                #Add all unique routes to a master list, with the shortest walking distance to that route
+                for route in routes:
+                    if route not in bus_routes:
+                        bus_routes[route] = {'route':route,'shortest_dist':10000}
+                    if float(dist) < float(bus_routes[route]['shortest_dist']):
+                        bus_routes[route]['shortest_dist'] = dist
 
             if typ == 'rail':
-                stops['rail'].append(dictionary)
+                stops['rail'].append(stop_dict)
                 rail_stops.append(stop_id)
-            
 
-        bus_routes = unique_transit_routes(bus_stops)
-        rail_routes = unique_transit_routes(rail_stops)
+                #Add all unique routes to a master list, with the shortest walking distance to that route
+                #TODO refactor this into reusable function
+                for route in routes:
+                    if route not in rail_routes:
+                        rail_routes[route] = {'route':route,'shortest_dist':10000}
+                    if float(dist) < float(rail_routes[route]['shortest_dist']):
+                        rail_routes[route]['shortest_dist'] = dist
 
+        #Rearrange the bus routes into a groups of shortest distance for easier display on front end
+        bus_routes_grouped = {}
+        for key in bus_routes:
+            dist = bus_routes[key]['shortest_dist']
+            if dist not in bus_routes_grouped:
+                bus_routes_grouped[dist] = []
+            bus_routes_grouped[dist].append(key)
+
+        #Rearrange rail
+        rail_routes_grouped = {}
+        for key in rail_routes:
+            dist = rail_routes[key]['shortest_dist']
+            if dist not in rail_routes_grouped:
+                rail_routes_grouped[dist] = []
+            rail_routes_grouped[dist].append(key)
+        
         return jsonify({'stops':stops,
                         'bus_routes':bus_routes,
-                        'rail_routes':rail_routes
+                        'rail_routes':rail_routes,
+                        'bus_routes_grouped':bus_routes_grouped,
+                        'rail_routes_grouped':rail_routes_grouped
                         })
 
     except Exception as e:
         return "Query failed: {}".format(e)
 
+
+def idx_from_ld(lst,key,value):
+    '''
+    Takes a list of dictionaries and returns the dictionary 
+    entry matching the key and value supplied
+    Used for data forms like this: [{'foo':'bar'},{'foo':'asdf'}]
+    '''
+    for idx, dic in enumerate(lst):
+        if dic[key] == value:
+            return idx
+    return None
 
 def unique_transit_routes(stop_ids):
     if len(stop_ids) == 0:
