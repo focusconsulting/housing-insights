@@ -11,11 +11,128 @@ var map = new mapboxgl.Map({
 
 function prepareMaps(){
 
-  map.on('load', function() {
+  app.dataCollection.neighborhood_data_polygons = addDataToPolygons(
+    app.dataCollection.neighborhood_polygons.json,
+    app.dataCollection.crime_neighborhood.json,
+    function(aggregateEl, feature){
+      return aggregateEl.group == feature.properties["NAME"];
+    } 
+  );
 
+  app.dataCollection.neighborhood_data_polygons = addDataToPolygons(
+    app.dataCollection.neighborhood_polygons.json,
+    app.dataCollection.building_permits_neighborhood.json,
+    function(aggregateEl, feature){
+      return aggregateEl.group == feature.properties["NAME"];
+    } 
+  );
+
+  app.dataCollection.ward_data_polygons = addDataToPolygons(
+    app.dataCollection.ward_polygons.json,
+    app.dataCollection.crime_ward.json,
+    function(aggregateEl, feature){
+      return aggregateEl.group == feature.properties["NAME"];
+    } 
+  );
+
+  app.dataCollection.ward_data_polygons = addDataToPolygons(
+    app.dataCollection.ward_polygons.json,
+    app.dataCollection.building_permits_ward.json,
+    function(aggregateEl, feature){
+      return aggregateEl.group == feature.properties["NAME"];
+    } 
+  );
+
+  if (map.loaded()) {
+    mapLoadedCallback();
+  }
+  else {
+    map.on('load', mapLoadedCallback);
+  }
+
+  function mapLoadedCallback() {
+
+    map.addSource("neighborhood_data",{
+      "type": "geojson",
+      "data": app.dataCollection.neighborhood_data_polygons
+    });
+
+    map.addLayer({
+      "id": "crime_neighborhood", 
+      "type": "fill",
+      "source": "neighborhood_data",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-color": {
+          "property": 'crime',
+      // So far the stops are defined arbitrarily. We may want to define them using d3.
+          "stops": [[0, '#fff'], [2000, '#ec3d18']]
+        },
+        "fill-opacity": .5
+      }
+    });
+
+    map.addLayer({
+      "id": "building_permits_neighborhood", 
+      "type": "fill",
+      "source": "neighborhood_data",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-color": {
+          "property": 'building_permits',
+      // So far the stops are defined arbitrarily. We may want to define them using d3.
+          "stops": [[0, '#fff'], [4000, '#1e5cdf']]
+        },
+        "fill-opacity": .5
+      }
+    });
+
+    map.addSource("ward_data",{
+      "type": "geojson",
+      "data": app.dataCollection.ward_data_polygons
+    });
+
+    map.addLayer({
+      "id": "crime_ward", 
+      "type": "fill",
+      "source": "ward_data",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-color": {
+          "property": 'crime',
+      // So far the stops are defined arbitrarily. We may want to define them using d3.
+          "stops": [[0, '#fff'], [6000, '#ec3d18']]
+        },
+        "fill-opacity": .5
+      }
+    });
+
+    map.addLayer({
+      "id": "building_permits_ward", 
+      "type": "fill",
+      "source": "ward_data",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-color": {
+          "property": 'building_permits',
+      // So far the stops are defined arbitrarily. We may want to define them using d3.
+          "stops": [[0, '#fff'], [11000, '#1e5cdf']]
+        },
+        "fill-opacity": .5
+      }
+    });
+    
     map.addSource("zip", {
       "type": "geojson",
-      "data": "data/zip.geojson"
+      "data": app.dataCollection.zip_polygons.json
     });
 
     map.addLayer({
@@ -33,7 +150,7 @@ function prepareMaps(){
 
     map.addSource("tract", {
       "type": "geojson",
-      "data": "data/tract.geojson"
+      "data": app.dataCollection.tract_polygons.json
     });
 
     map.addLayer({
@@ -51,7 +168,7 @@ function prepareMaps(){
   
     map.addSource("neighborhood", {
       "type": "geojson",
-      "data": "data/neighborhood.geojson"
+      "data": app.dataCollection.neighborhood_polygons.json
     });
 
     map.addLayer({
@@ -69,7 +186,7 @@ function prepareMaps(){
 
     map.addSource("ward", {
       "type": "geojson",
-      "data": "data/ward.geojson"
+      "data": app.dataCollection.ward_polygons.json
     });
 
     map.addLayer({
@@ -87,7 +204,7 @@ function prepareMaps(){
 
     map.addSource("zillow", {
       "type": "geojson",
-      "data": "data/zillow.geojson"
+      "data": app.dataCollection.zillow_polygons.json
     });
 
     map.addLayer({
@@ -103,17 +220,12 @@ function prepareMaps(){
       }
     });
     //zillow color 57CABD
-    
-    console.log('app in rich-map.js', app);
-    console.log('app.dataCollection.project.geoJSON()', app.dataCollection.project.geoJSON());
-    
+      
     map.addSource("project", {
       "type": "geojson",
-      "data": app.dataCollection.project.geoJSON('proj_lon', 'proj_lat')
+      "data": app.dataCollection.project.toGeoJSON('proj_lon', 'proj_lat')
     });
     
-    console.log(map.getSource('project'));
-
     map.addLayer({
       'id': 'project',
       'type': 'circle',
@@ -194,7 +306,6 @@ function prepareMaps(){
       layers.appendChild(link);
     }
 
-   console.log(document.querySelector('nav#menu a:first-of-type'));
    showLayer.call(document.querySelector('nav#menu a:first-of-type')); // this call happens once on load, sets up initial
                                                                      // condition of having first option active.
 
@@ -228,12 +339,10 @@ function prepareMaps(){
       new PieChart(DATA_FILE,'#pie-3','Cat_At_Risk',75,75),
     //  new PieChart(DATA_FILE,'#pie-4','PBCA',75,75)
     ];
-  });
-
-};
+  }
+}
 
 function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
-  console.log(currentZoneType);
   if (currentZoneType !== map.clickedLayer) {
 
 
@@ -243,6 +352,39 @@ function setHeader(){ // sets the text in the sidebar header according to the se
     document.getElementById('zone-selector').onchange = changeZone;
 
   }
-  };
+  }
 
-app.getAPIData(['project'], prepareMaps);
+app.getInitialData([{
+  dataName: 'project', 
+  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/project'
+},{
+  dataName: 'crime_ward',
+  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/ward'
+},{
+  dataName: 'crime_anc',
+  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/anc'
+},{
+  dataName: 'crime_neighborhood',
+  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/neighborhood_cluster'
+},{
+  dataName: 'building_permits_ward',
+  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/ward'
+},{
+  dataName: 'building_permits_neighborhood',
+  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/neighborhood_cluster'
+},{
+  dataName: 'ward_polygons',
+  dataURL: 'data/ward.geojson'
+}, {
+  dataName: 'tract_polygons',
+  dataURL: 'data/tract.geojson'
+}, {
+  dataName: 'neighborhood_polygons',
+  dataURL: 'data/neighborhood.geojson'
+},{
+  dataName: 'zip_polygons',
+  dataURL: 'data/zip.geojson'
+},{
+  dataName: 'zillow_polygons',
+  dataURL: 'data/zillow.geojson'
+}], prepareMaps);
