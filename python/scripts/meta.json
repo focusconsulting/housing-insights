@@ -853,7 +853,7 @@
             {
                 "display_name": "proj_addre",
                 "display_text": "",
-                "source_name": "Proj_Addre",
+                "source_name": "Proj_addre",
                 "sql_name": "proj_addre",
                 "type": "text"
             },
