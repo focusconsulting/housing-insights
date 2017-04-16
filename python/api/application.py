@@ -9,12 +9,13 @@ This is a simple Flask applicationlication that creates SQL query endpoints.
 
 from flask import Flask, jsonify, request, Response, abort, json
 
-import psycopg2
+#import psycopg2
 from sqlalchemy import create_engine
 
 import logging
 from flask_cors import CORS, cross_origin
 
+import math
 
 #######################
 # Setup
@@ -253,6 +254,110 @@ def unique_transit_routes(stop_ids):
         routes = routes.split(':')
         unique = list(set(routes))
         return unique
+
+
+@application.route('/api/building_permits/<dist>?latitude=<latitude>&longitude=<longitude>')
+def nearby_building_permits(dist, latitude, longitude):
+
+    latitude_tolerance, longitude_tolerance = bounding_box(dist, latitude, longitude)
+
+    q = '''
+        SELECT
+        (latitude - {latitude} } ) AS lat_diff
+        ,(longitude - {longitude} } ) AS lon_diff
+        ,to_date(issue_date, 'YYYY-MM-DD') AS issue_date_asdate
+        ,*
+        FROM building_permits
+
+        WHERE latitude < ({latitude} + {latitude_tolerance})::DECIMAL
+        AND   latitude > ({latitude} - {latitude_tolerance})::DECIMAL
+        AND   longitude < ({longitude} + {longitude_tolerance})::DECIMAL
+        AND   longitude > ({longitude} - {longitude_tolerance})::DECIMAL
+
+        AND to_date(issue_date, 'YYYY-MM-DD') > CURRENT_DATE - INTERVAL '3 months'
+    '''.format(
+        latitude=latitude,
+        longitude=longitude,
+        latitude_tolerance=latitude_tolerance,
+        longitude_tolerance=longitude_tolerance
+    )
+
+    proxy = conn.execute(q)
+    results = proxy.fetchall()
+
+    return jsonify({
+        'items': [
+            r for r in results if haversine(latitude, r.latitude, longitude, r.longitude) <= dist 
+        ]
+    })
+
+
+@application.route('/api/projects/<dist>?latitude=<latitude>&longitude=<longitude>')
+def nearby_projects(dist, latitude, longitude):
+
+    latitude_tolerance, longitude_tolerance = bounding_box(dist, latitude, longitude)
+
+    q = '''
+        SELECT
+        (proj_lat - {latitude} } ) AS lat_diff
+        ,(proj_lon - {longitude} } ) AS lon_diff
+        ,*
+        FROM projects
+
+        WHERE proj_lat < ({latitude} + {latitude_tolerance})::DECIMAL
+        AND   proj_lat > ({latitude} - {latitude_tolerance})::DECIMAL
+        AND   proj_lon < ({longitude} + {longitude_tolerance})::DECIMAL
+        AND   proj_lon > ({longitude} - {longitude_tolerance})::DECIMAL
+
+        AND status = 'Active'
+
+    '''.format(
+        latitude=latitude,
+        longitude=longitude,
+        latitude_tolerance=latitude_tolerance,
+        longitude_tolerance=longitude_tolerance
+    )
+
+    proxy = conn.execute(q)
+    results = proxy.fetchall()
+
+    good_results = [r for r in results if haversine(latitude, r.latitude, longitude, r.longitude) <= dist]
+
+    return jsonify({
+        'items': good_results,
+        'tot_units': sum(r['proj_units_assist_max'] for r in good_results)
+    })
+
+
+def haversine(lat1, long1, lat2, long2):
+    """ Cribbed from https://news.ycombinator.com/item?id=9282102 , can't vouch for accuracy."""
+
+    radius = 3959 # miles, from google
+
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(long2 - long1)
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
+          * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = radius * c
+
+    return d
+
+
+def bounding_box(dist, latitude, longitude):
+    """ Cribbed from https://gis.stackexchange.com/questions/142326/calculating-longitude-length-in-miles """
+
+    radius = 3959 # miles, from google
+
+    dlat_rad = 69 * dist / radius  # google again
+
+    latitude_tolerance = dist / 69
+    longitude_tolerance = dist / (math.cos(latitude) * 69.172)
+
+    return (latitude_tolerance, longitude_tolerance)
+
+
+
 ##########################################
 # Start the app
 ##########################################
