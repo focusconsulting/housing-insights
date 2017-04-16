@@ -110,28 +110,36 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
                                         manifest_row=manifest_row, 
                                         name= cleaner_class_name)
 
+            # Identify fields that exist in metadata but not CSV
+            # so we can add them to the row as it is cleaned and loaded.
+            meta_only_fields = {}
+            for field in meta[tablename]['fields']:
+                if field['source_name'] not in csv_reader.keys:
+                    missing_fields[field['sql_name']] = None
+
             #clean the file and save the output to a local pipe-delimited file
             if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
                 print("  Cleaning...")
                 for idx, data_row in enumerate(csv_reader):
+                    data_row.update(missing_fields)
                     clean_data_row = cleaner.clean(data_row, idx)
                     if clean_data_row != None:
                         csv_writer.write(clean_data_row)
 
                 csv_writer.close()
                 print("  Loading...")
-                
+
                 #Decide whether to append or replace the table
                 if meta[tablename]["replace_table"] == True:
                     logging.info("  replacing existing table")
                     sql_interface.drop_table()
-                
+
                 #Appends to table; if dropped, it recreates
-                sql_interface.create_table()
+                sql_interface.create_table_if_necessary()
                 try:
                     sql_interface.write_file_to_sql()
                 except TableWritingError:
-                    #TODO tell user total count of errors. 
+                    #TODO tell user total count of errors.
                     #currently write_file_to_sql() just writes in log that file failed
                     pass
                 if keep_temp_files == False:
@@ -144,7 +152,7 @@ if __name__ == '__main__':
     database_choice = 'local_database'
     meta_path = 'meta.json'
     manifest_path = 'manifest.csv'
-    
+
     if 'sample' in sys.argv:
         meta_path = 'meta_sample.json'
         manifest_path = 'manifest_sample.csv'
