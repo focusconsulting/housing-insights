@@ -263,8 +263,8 @@ function prepareMaps(){
       },
     });
   
-  var categoryLegendEl = document.getElementById('category-legend');
-  categoryLegendEl.style.display = 'block';
+    var categoryLegendEl = document.getElementById('category-legend');
+    categoryLegendEl.style.display = 'block';
 	
     var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
 
