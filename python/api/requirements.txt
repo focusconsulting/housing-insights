@@ -7,3 +7,4 @@ MarkupSafe==1.0
 psycopg2==2.7.1
 SQLAlchemy==1.1.9
 Werkzeug==0.12.1
+simplejson==3.10.0

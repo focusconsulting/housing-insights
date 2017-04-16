@@ -890,14 +890,14 @@
                 "display_text": "",
                 "source_name": "Proj_Units_Assist_Min",
                 "sql_name": "proj_units_assist_min",
-                "type": "text"
+                "type": "integer"
             },
             {
                 "display_name": "proj_units_assist_max",
                 "display_text": "",
                 "source_name": "Proj_Units_Assist_Max",
                 "sql_name": "proj_units_assist_max",
-                "type": "text"
+                "type": "integer"
             },
             {
                 "display_name": "hud_own_effect_dt",

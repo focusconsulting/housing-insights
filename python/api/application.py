@@ -7,7 +7,7 @@ This is a simple Flask applicationlication that creates SQL query endpoints.
 
 """
 
-from flask import Flask, jsonify, request, Response, abort, json
+from flask import Flask, request, Response, abort, json
 
 import psycopg2
 from sqlalchemy import create_engine
@@ -17,11 +17,41 @@ from flask_cors import CORS, cross_origin
 
 import math
 
+#Different json output methods.
+# Currently looks like best pick is jsonify, but with the simplejson package pip-installed so that
+# jsonify will uitilize simplejson's decimal conversion ability. 
+import json
+import simplejson
+from flask import jsonify
+from flask.json import JSONEncoder
+import calendar
+from datetime import datetime, date
+
 #######################
 # Setup
 #######################
 logging.basicConfig(level=logging.DEBUG)
 application = Flask(__name__)
+
+
+class CustomJSONEncoder(JSONEncoder):
+# uses datetime override http://flask.pocoo.org/snippets/119/
+    def default(self, obj):
+        try:
+            if isinstance(obj,date):
+                return datetime.strftime(obj,'%Y-%m-%d')
+            if isinstance(obj, datetime):
+                return datetime.strftime(obj,'%Y-%m-%d')
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        return JSONEncoder.default(self, obj)
+
+#apply the custom encoder to the app. All jsonify calls will use this method
+application.json_encoder = CustomJSONEncoder
+
 
 #Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
 CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
@@ -125,7 +155,7 @@ def count_all(data_source,grouping):
         #conn.close()
         return "Query failed: {}".format(e)
 
-@application.route('/api/wmata/<nlihc_id>')
+@application.route('/api/wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
     '''
     Returns the nearby bus and metro routes and stops. 
@@ -256,17 +286,38 @@ def unique_transit_routes(stop_ids):
         return unique
 
 
-@application.route('/api/building_permits/<dist>?latitude=<latitude>&longitude=<longitude>')
-def nearby_building_permits(dist, latitude, longitude):
+@application.route('/api/building_permits/<dist>', methods=['GET'])
+def nearby_building_permits(dist):
+
+    #Get our params
+    dist = float(dist)
+    latitude = request.args.get('latitude',None)
+    longitude = request.args.get('longitude',None)
+    if latitude == None or longitude==None:
+        return "Please supply latitude and longitude"
+    else: 
+        latitude=float(latitude)
+        longitude=float(longitude)
 
     latitude_tolerance, longitude_tolerance = bounding_box(dist, latitude, longitude)
 
+    #Return just a subset of columns to lighten the data load. TODO do we want user option for short/all?
     q = '''
         SELECT
-        (latitude - {latitude} } ) AS lat_diff
-        ,(longitude - {longitude} } ) AS lon_diff
-        ,to_date(issue_date, 'YYYY-MM-DD') AS issue_date_asdate
-        ,*
+        (latitude - {latitude} ) AS lat_diff
+        ,(longitude - {longitude} ) AS lon_diff
+        ,latitude
+        ,longitude
+        ,ward
+        ,neighborhood_cluster
+        ,anc
+        --,census_tract --not yet available
+        ,zipcode
+        ,permit_type_name
+        ,permit_subtype_name
+        ,full_address
+        ,objectid
+
         FROM building_permits
 
         WHERE latitude < ({latitude} + {latitude_tolerance})::DECIMAL
@@ -274,7 +325,8 @@ def nearby_building_permits(dist, latitude, longitude):
         AND   longitude < ({longitude} + {longitude_tolerance})::DECIMAL
         AND   longitude > ({longitude} - {longitude_tolerance})::DECIMAL
 
-        AND to_date(issue_date, 'YYYY-MM-DD') > CURRENT_DATE - INTERVAL '3 months'
+        AND issue_date BETWEEN (now()::TIMESTAMP - INTERVAL '1 year') AND now()::TIMESTAMP
+
     '''.format(
         latitude=latitude,
         longitude=longitude,
@@ -284,25 +336,42 @@ def nearby_building_permits(dist, latitude, longitude):
 
     proxy = conn.execute(q)
     results = proxy.fetchall()
+    print(len(results))
+    good_results = [dict(r) for r in results if haversine(latitude, longitude, float(r.latitude), float(r.longitude)) <= dist]
 
-    return jsonify({
-        'items': [
-            r for r in results if haversine(latitude, r.latitude, longitude, r.longitude) <= dist 
-        ]
-    })
+    tot_permits = len(good_results)
+
+    output = {
+        'items': good_results
+        , 'tot_permits':tot_permits
+        , 'distance': dist
+    }
+
+    output_json = jsonify(output)
+    return output_json
 
 
-@application.route('/api/projects/<dist>?latitude=<latitude>&longitude=<longitude>')
-def nearby_projects(dist, latitude, longitude):
+
+@application.route('/api/projects/<dist>', methods=['GET'])
+def nearby_projects(dist):
+    dist = float(dist)
+    #Get our params
+    latitude = request.args.get('latitude',None)
+    longitude = request.args.get('longitude',None)
+    if latitude == None or longitude==None:
+        return "Please supply latitude and longitude"
+    else: 
+        latitude=float(latitude)
+        longitude=float(longitude)
 
     latitude_tolerance, longitude_tolerance = bounding_box(dist, latitude, longitude)
 
     q = '''
         SELECT
-        (proj_lat - {latitude} } ) AS lat_diff
-        ,(proj_lon - {longitude} } ) AS lon_diff
+        (proj_lat - {latitude} ) AS lat_diff
+        ,(proj_lon - {longitude} ) AS lon_diff
         ,*
-        FROM projects
+        FROM project
 
         WHERE proj_lat < ({latitude} + {latitude_tolerance})::DECIMAL
         AND   proj_lat > ({latitude} - {latitude_tolerance})::DECIMAL
@@ -321,27 +390,46 @@ def nearby_projects(dist, latitude, longitude):
     proxy = conn.execute(q)
     results = proxy.fetchall()
 
-    good_results = [r for r in results if haversine(latitude, r.latitude, longitude, r.longitude) <= dist]
+    good_results = [dict(r) for r in results if haversine(latitude, longitude, float(r.proj_lat), float(r.proj_lon)) <= dist]
 
-    return jsonify({
-        'items': good_results,
-        'tot_units': sum(r['proj_units_assist_max'] for r in good_results)
-    })
+    unit_counts = [r['proj_units_assist_max'] for r in good_results]
+    unit_counts = filter(None,unit_counts) #can't sum None
+    unit_counts = [int(u) for u in unit_counts] #temporarily needed b/c accidentally stored as text
+    tot_units = sum(unit_counts)
+    tot_buildings = len(good_results)
+
+    output = {
+        'items': good_results
+        ,'tot_units': tot_units
+        , 'tot_buildings':tot_buildings
+        , 'distance': dist
+    }
+
+    output_json = jsonify(output)
+    return output_json
 
 
-def haversine(lat1, long1, lat2, long2):
-    """ Cribbed from https://news.ycombinator.com/item?id=9282102 , can't vouch for accuracy."""
+#def haversine(lat1, long1, lat2, long2):
+from math import radians, cos, sin, asin, sqrt
 
-    radius = 3959 # miles, from google
+def haversine(lat1, lon1, lat2,lon2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees)
+    """
+    # convert decimal degrees to radians 
+    original_coords = (lat1,lon1,lat2,lon2) #for debugging
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
-    dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(long2 - long1)
-    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
-          * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    d = radius * c
-
-    return d
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 3956 # Radius of earth in miles
+    d = c * r
+    #print("Haversine for {} = {}".format(original_coords,d))
+    return c * r
 
 
 def bounding_box(dist, latitude, longitude):
