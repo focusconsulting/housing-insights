@@ -187,21 +187,28 @@ def nearby_transit(nlihc_id):
                     if float(dist) < float(rail_routes[route]['shortest_dist']):
                         rail_routes[route]['shortest_dist'] = dist
 
+        #TODO - might be easier to approach this by using separate variables and then repackaging into the desired output format at the end?
         #Rearrange the bus routes into a groups of shortest distance for easier display on front end
-        bus_routes_grouped = {}
+        bus_routes_grouped = []
         for key in bus_routes:
             dist = bus_routes[key]['shortest_dist']
-            if dist not in bus_routes_grouped:
-                bus_routes_grouped[dist] = []
-            bus_routes_grouped[dist].append(key)
+            idx = idx_from_ld(bus_routes_grouped,'shortest_dist',dist)
+            if idx == None:
+                bus_routes_grouped.append({"shortest_dist":dist, "routes":[]})
+                idx = idx_from_ld(bus_routes_grouped,'shortest_dist',dist)
+            bus_routes_grouped[idx]['routes'].append(key)
 
         #Rearrange rail
-        rail_routes_grouped = {}
+        rail_routes_grouped = []
         for key in rail_routes:
             dist = rail_routes[key]['shortest_dist']
-            if dist not in rail_routes_grouped:
-                rail_routes_grouped[dist] = []
-            rail_routes_grouped[dist].append(key)
+            idx = idx_from_ld(rail_routes_grouped,'shortest_dist',dist)
+            if idx == None:
+                rail_routes_grouped.append({"shortest_dist":dist, "routes":[]})
+                idx = idx_from_ld(rail_routes_grouped,'shortest_dist',dist)
+            rail_routes_grouped[idx]['routes'].append(key)
+        
+        #TODO would be good to sort rail_routes_grouped and bus_routes_grouped before delivery (currently sorting on the front end)
         
         return jsonify({'stops':stops,
                         'bus_routes':bus_routes,
@@ -211,6 +218,7 @@ def nearby_transit(nlihc_id):
                         })
 
     except Exception as e:
+        raise e
         return "Query failed: {}".format(e)
 
 

@@ -231,11 +231,11 @@ function prepareMaps(){
       'type': 'circle',
       'source': 'project',
       'paint': {
-        // make circles larger as the user zooms from z12 to z22
+        // make circles larger as the user zoom. [[smallzoom,px],[bigzoom,px]]
         'circle-radius': {
-          'base': 1.75,
-          'stops': [[12, 3], [22, 180]]
-        },
+                'base': 1.75,
+                'stops': [[10, 3], [18, 32]]
+            },
         // color circles by ethnicity, using data-driven styles
         'circle-color': {
           property: 'category_code',
@@ -311,9 +311,9 @@ function prepareMaps(){
 
     map.on('click', function (e) {
       var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
-      var projAddressId = building['properties']['proj_address_id'];
+      var buildingId = building['properties']['nlihc_id'];
       var projectName = building['properties']['proj_name'];
-      var queryString = '?building=' + encodeURIComponent(projAddressId);
+      var queryString = '?building=' + encodeURIComponent(buildingId);
     
       document.getElementById('pd').innerHTML = "<h3><strong>" + building.properties.proj_addre +"</strong><br>"+building.properties.proj_name + "<br><br>" + "</h3><p>" + "Owner: " + building.properties.hud_own_name +"<br>"+"Cluster Name: "+ building.properties.cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building.properties.hud_own_name+"<br>"+"HUD Owner Type: " + building.properties.hud_own_type +"<br>"+"HUD Manager Name: " + building.properties.hud_mgr_name+"<br>"+"HUD Manager Type: " + building.properties.hud_mgr_type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.cat_at_risk+"<br>"+building.properties.category_Code +"</p>";
         
