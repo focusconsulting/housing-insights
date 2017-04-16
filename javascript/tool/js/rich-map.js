@@ -262,7 +262,10 @@ function prepareMaps(){
         'text-anchor': "bottom-left"
       },
     });
-
+  
+  var categoryLegendEl = document.getElementById('category-legend');
+  categoryLegendEl.style.display = 'block';
+	
     var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
 
     map.clickedLayer = toggleableLayerIds[0];
