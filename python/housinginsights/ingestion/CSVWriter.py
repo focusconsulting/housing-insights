@@ -36,8 +36,6 @@ class CSVWriter(object):
 
         #We always want to append this to every table. write() should also append this to provided data
         self.dictwriter_fields = copy.copy(self.csv_fields)
-        self.dictwriter_fields.append('unique_data_id')
-        self.sql_fields.append('unique_data_id')
 
 
         #By default, creates a temp csv file wherever the calling module was located

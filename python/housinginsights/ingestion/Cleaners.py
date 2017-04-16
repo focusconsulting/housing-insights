@@ -32,10 +32,11 @@ class CleanerBase(object, metaclass=ABCMeta):
             return None
 
     def replace_nulls(self, row, null_values =  ['NA', '-', '+','', None]):
-        for key in row:
-            if row[key] in null_values:
+        for key, value in row.items():
+            if value in null_values:
                 row[key] = self.null_value
         return row
+
     def remove_line_breaks(self,row):
         #TODO see if it's possible to not do this by getting the copy_from to be ok with breaks
         for key in row:
