@@ -143,7 +143,10 @@ map.on('load', function() {
       'text-anchor': "bottom-left"
     },
   });
-
+  
+  var categoryLegendEl = document.getElementById('category-legend');
+  categoryLegendEl.style.display = 'block';
+	
   var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
   map.clickedLayer = toggleableLayerIds[0];
   var previousLayer; // keeping track of previously selected layer so it can be turned off
