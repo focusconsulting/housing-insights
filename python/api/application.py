@@ -445,6 +445,20 @@ def bounding_box(dist, latitude, longitude):
     return (latitude_tolerance, longitude_tolerance)
 
 
+@application.route('/api/project/<nlihc_id>/subsidies/', methods=['GET'])
+def project_subsidies(nlihc_id):
+    q = """
+        SELECT * FROM subsidy
+        WHERE nlihc_id = '{}'
+        """.format(nlihc_id)
+
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    results = [dict(x) for x in proxy.fetchall()]
+    conn.close()
+    output = {'items':results}
+    return jsonify(output)
+    
 
 ##########################################
 # Start the app
