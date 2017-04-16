@@ -9,7 +9,7 @@ This is a simple Flask applicationlication that creates SQL query endpoints.
 
 from flask import Flask, jsonify, request, Response, abort, json
 
-#import psycopg2
+import psycopg2
 from sqlalchemy import create_engine
 
 import logging
