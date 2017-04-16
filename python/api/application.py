@@ -91,6 +91,7 @@ def count_all(data_source,grouping):
     fallback = "'Unknown'"
 
     try:
+        #TODO verify if this is auto-closed if the transaction errors out. Or does it matter?
         conn = engine.connect()
 
         q = """
@@ -123,8 +124,135 @@ def count_all(data_source,grouping):
         #conn.close()
         return "Query failed: {}".format(e)
 
+@application.route('/api/wmata/<nlihc_id>')
+def nearby_transit(nlihc_id):
+    '''
+    Returns the nearby bus and metro routes and stops. 
+    Currently this assumes that all entries in the wmata_dist
+    table are those that have a walking distance of 0.5 miles 
+    or less. We may later want to implement functionality to
+    filter this to those with less distance. 
+    '''
+
+    conn = engine.connect()
+    try:
+        q = """
+            SELECT dist_in_miles, type, stop_id_or_station_code
+            FROM wmata_dist
+            WHERE nlihc_id = '{}'
+            """.format(nlihc_id)
+
+        proxy = conn.execute(q)
+        results = proxy.fetchall()
+
+        #transform the results.
+        stops = {'bus':[],'rail':[]};
+        rail_stops = []; bus_stops = [];
+        bus_routes = {}; rail_routes = {};
+
+        for x in results:
+            #reformat the data into appropriate json
+            dist = str(x[0])
+            typ = x[1]
+            stop_id = x[2]
+            routes = unique_transit_routes([stop_id])
+
+            stop_dict = dict({'dist_in_miles':dist,
+                            'type':typ, 
+                            'stop_id_or_station_code':stop_id,
+                            'routes':routes
+                            })
+            
+            #Calculate summary statistics for ease of use
+            if typ == 'bus':
+                stops['bus'].append(stop_dict)
+                bus_stops.append(stop_id)
+                
+                #Add all unique routes to a master list, with the shortest walking distance to that route
+                for route in routes:
+                    if route not in bus_routes:
+                        bus_routes[route] = {'route':route,'shortest_dist':10000}
+                    if float(dist) < float(bus_routes[route]['shortest_dist']):
+                        bus_routes[route]['shortest_dist'] = dist
+
+            if typ == 'rail':
+                stops['rail'].append(stop_dict)
+                rail_stops.append(stop_id)
+
+                #Add all unique routes to a master list, with the shortest walking distance to that route
+                #TODO refactor this into reusable function
+                for route in routes:
+                    if route not in rail_routes:
+                        rail_routes[route] = {'route':route,'shortest_dist':10000}
+                    if float(dist) < float(rail_routes[route]['shortest_dist']):
+                        rail_routes[route]['shortest_dist'] = dist
+
+        #TODO - might be easier to approach this by using separate variables and then repackaging into the desired output format at the end?
+        #Rearrange the bus routes into a groups of shortest distance for easier display on front end
+        bus_routes_grouped = []
+        for key in bus_routes:
+            dist = bus_routes[key]['shortest_dist']
+            idx = idx_from_ld(bus_routes_grouped,'shortest_dist',dist)
+            if idx == None:
+                bus_routes_grouped.append({"shortest_dist":dist, "routes":[]})
+                idx = idx_from_ld(bus_routes_grouped,'shortest_dist',dist)
+            bus_routes_grouped[idx]['routes'].append(key)
+
+        #Rearrange rail
+        rail_routes_grouped = []
+        for key in rail_routes:
+            dist = rail_routes[key]['shortest_dist']
+            idx = idx_from_ld(rail_routes_grouped,'shortest_dist',dist)
+            if idx == None:
+                rail_routes_grouped.append({"shortest_dist":dist, "routes":[]})
+                idx = idx_from_ld(rail_routes_grouped,'shortest_dist',dist)
+            rail_routes_grouped[idx]['routes'].append(key)
+        
+        #TODO would be good to sort rail_routes_grouped and bus_routes_grouped before delivery (currently sorting on the front end)
+        
+        return jsonify({'stops':stops,
+                        'bus_routes':bus_routes,
+                        'rail_routes':rail_routes,
+                        'bus_routes_grouped':bus_routes_grouped,
+                        'rail_routes_grouped':rail_routes_grouped
+                        })
+
+    except Exception as e:
+        raise e
+        return "Query failed: {}".format(e)
 
 
+def idx_from_ld(lst,key,value):
+    '''
+    Takes a list of dictionaries and returns the dictionary 
+    entry matching the key and value supplied
+    Used for data forms like this: [{'foo':'bar'},{'foo':'asdf'}]
+    '''
+    for idx, dic in enumerate(lst):
+        if dic[key] == value:
+            return idx
+    return None
+
+def unique_transit_routes(stop_ids):
+    if len(stop_ids) == 0:
+        return []
+    else:
+        #Second query to get the unique transit lines
+        q_list = str(stop_ids).replace('[','(').replace(']',')')
+        q = """
+            SELECT lines FROM wmata_info
+            WHERE stop_id_or_station_code in {}
+            """.format(q_list)
+        conn = engine.connect()
+        proxy = conn.execute(q)
+        routes = [x[0] for x in proxy.fetchall()]
+        conn.close()
+
+        #Parse the : separated items
+        routes = ':'.join(routes)
+        routes = routes.split(':')
+        unique = list(set(routes))
+        return unique
 ##########################################
 # Start the app
 ##########################################
