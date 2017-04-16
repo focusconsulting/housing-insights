@@ -121,7 +121,7 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
             if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
                 print("  Cleaning...")
                 for idx, data_row in enumerate(csv_reader):
-                    data_row.update(missing_fields)
+                    data_row.update(meta_only_fields)
                     clean_data_row = cleaner.clean(data_row, idx)
                     if clean_data_row != None:
                         csv_writer.write(clean_data_row)
