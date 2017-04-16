@@ -77,14 +77,12 @@ class HISql(object):
         for field in self.metafields:
             self.sql_fields.append(field['sql_name'])
             self.sql_field_types.append(field['type'])
-        self.sql_fields.append('unique_data_id')
-        self.sql_field_types.append('text')
 
 
     def write_file_to_sql(self):
         #TODO let this use existing session/connection/engine instead?
         #engine = dbtools.get_database_engine("local_database")
-        
+
         conn = self.engine.connect()
         trans = conn.begin()
 
@@ -92,19 +90,18 @@ class HISql(object):
 
             print("  opening {}".format(self.filename))
             with open(self.filename, 'r', encoding='utf-8') as f:
-
                 #copy_from is only available on the psycopg2 object, we need to dig in to get it
                 dbapi_conn = conn.connection
                 dbapi_conn.set_client_encoding("UTF8")
                 dbapi_cur = dbapi_conn.cursor()
 
                 dbapi_cur.copy_from(f, self.tablename, sep='|', null='Null', columns=None)
-                
+
                 self.update_manifest_row(conn=conn, status="loaded")
 
                 #used for debugging, keep commented in real usage
                 #raise ProgrammingError(statement="test", params="test", orig="test")
-                
+
                 dbapi_conn.commit()
             trans.commit()
             logging.info("  data file loaded into database")
@@ -113,13 +110,13 @@ class HISql(object):
         #For now, assume that SQLAlchemy will raise a programmingerror
         except (ProgrammingError, DataError) as e:
             trans.rollback()
-            
+
             logging.warning("  FAIL: something went wrong loading {}".format(self.unique_data_id))
             logging.warning("  exception: {}".format(e))
             raise TableWritingError
 
         conn.close()
-
+            
     def update_manifest_row(self, conn, status="unknown"):
         '''
         Adds self.manifest_row associated with this table to the SQL manifest
@@ -138,7 +135,7 @@ class HISql(object):
             logging.info("  deleting existing manifest row for {}".format(self.unique_data_id))
             delete_command = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(self.unique_data_id)
             conn.execute(delete_command)
-        
+
         columns = []
         values = []
         for key in manifest_row:
@@ -147,37 +144,46 @@ class HISql(object):
 
         columns_string = "(" + ",".join(columns) + ")"
         values_string = "('" + "','".join(values) + "')"
-                
+
         insert_command = "INSERT INTO manifest {} VALUES {};".format(columns_string,values_string)
         #print(insert_command)
         conn.execute(insert_command)
 
-    def create_table(self, table=None):
+    def create_table_if_necessary(self, table=None):
         '''
         Creates the table associated with this data file if it doesn't already exist
         table = string representing the tablename
         '''
         #TODO - a better long-term solution to this might be SQLAlchemy metadata: http://www.mapfish.org/doc/tutorials/sqlalchemy.html
-        
+        if table is None:
+            table = self.tablename
         db_conn = self.engine.connect()
-        table = self.tablename if table==None else table
+        if self.does_table_exist(db_conn, table):
+            logging.info("  Did not create table because it already exists")
+        else:
+            self.create_table(db_conn, table)
+        db_conn.close()
+
+    def does_table_exist(self, db_conn, table):
 
         try:
             db_conn.execute("SELECT * FROM {}".format(table))
-            logging.info("  Did not create table because it already exists")
+            return True
         except ProgrammingError:
-            field_statements = []
-            for idx, field in enumerate(self.sql_fields):
-                field_statements.append(field + " " + self.sql_field_types[idx])
-            field_command = ",".join(field_statements)
-            create_command = "CREATE TABLE {}({});".format(table, field_command)
-            db_conn.execute(create_command)
-            logging.info("  Table created: {}".format(table))
+            return False
 
-        db_conn.close()
+    def create_table(self, db_conn, table):
+
+        field_statements = []
+        for idx, field in enumerate(self.sql_fields):
+            field_statements.append(field + " " + self.sql_field_types[idx])
+        field_command = ",".join(field_statements)
+        create_command = "CREATE TABLE {}({});".format(table, field_command)
+        db_conn.execute(create_command)
+        logging.info("  Table created: {}".format(table))
 
     def drop_table(self, table=None):
-        
+
         db_conn = self.engine.connect()
         table = self.tablename if table==None else table
 
@@ -194,7 +200,7 @@ class HISql(object):
 
         if db_conn == None:
             db_conn = self.engine.connect()
-        
+
         query_result = db_conn.execute(sql_query)
 
         # convert the sqlAlchemy ResultProxy object into a list of dictionaries
@@ -212,4 +218,3 @@ class HISql(object):
 
         if len(results) == 0:
             return None
-
