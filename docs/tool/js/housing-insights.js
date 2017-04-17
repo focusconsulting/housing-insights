@@ -113,7 +113,7 @@ var app = {
     // from. 'doAfter' is a callback where we can specify all the specific constructors to call with the 
     // data
     getInitialData: function(urlsObjArray, doAfter){
-      var MAX_INTERVALS = 10,
+      var MAX_INTERVALS = 60,
           ajaxRequests = {},
           currentInterval = 0,
           checkRequestsInterval,
@@ -193,6 +193,7 @@ var Chart = function(DATA_FILE, el, field, sortField, asc, readableField) { // C
 // the section on constructors in https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch4.md
 Chart.prototype = {
     data: [],
+    
     initialize: function(DATA_FILE, el, field, sortField, asc, readableField) { // parameters will be passed by the call to
                                                                                     // the specific chart type         
         

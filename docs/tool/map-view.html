@@ -33,40 +33,51 @@
 </head>
 <body>
 	<div id='map'></div>
-	<!-- New Legend Code Begin -->
-		<div id='category-legend' class='legend'>
-		    <h4>Category</h4>
-		    	<div><span style='background-color: #bd0026'></span>Lost Rental</div>
-			    <div><span style='background-color: #f03b20'></span>At-Risk or Flagged for Follow-up</div>
-			    <div><span style='background-color: #fd8d3c'></span>Recent Failing REAC Score</div>
-			    <div><span style='background-color: #8B4225'></span>Expiring Subsidy</div>			    
-			    <div><span style='background-color: #A9A9A9'></span>Other Subsidized Property or More Info Needed</div>					
-		</div>
-		<!-- New Legend Code End -->
-		<!--might not be needed-->
+
     <nav id="menu" class="map-menu"></nav>
     <div id="data-menu" class="map-menu"></div>
 	<div class='map-overlay' id='features'>
-		<div id='zone'>
-			<h2 class='text-center'>{{zone}} Details</h2>
-			<p class='text-center'>Select a {{zone}} to Zoom to Area</p>
-			<div class='text-center row'>
-				<select id="zone-selector" role="group" aria-label="Filter">
-				</select>
+		<div id='points-sidebar'>
+            <!--Legend for points on map-->
+            <div class="col-lg-12">
+                <div id='category-legend' class='legend'>
+                    <h4>Subsidized Affordable Buildings</h4>
+                    <div><span style='background-color: #f03b20'></span>At-Risk or Flagged for Follow-up</div>
+                    <div><span style='background-color: #bd0026'></span>Recent Failing REAC Score</div>
+                    <div><span style='background-color: #8B4225'></span>Expiring Subsidy</div>              
+                    <div><span style='background-color: #fd8d3c'></span>Other Subsidized Property or More Info Needed</div>  
+                    <div><span style='background-color: #A9A9A9'></span>Lost Rental</div>    
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <div id='zone-sidebar'>
+			<div class="col-lg-12">
+                <h2 id='zone-details-heading'>Affordable Building Statistics</h2>
+    			<p>Select a zone type on the left to change drilldown options</p>
+                <p id='zone-drilldown-instructions'>Choose a zone:</p>
+    			<select id="zone-selector" role="group" aria-label="Filter">
+    			</select>
 			</div>
 
 			<div class='text-center row'>
-				<div class="col-lg-3" id="pie" style="float: left"></div>
-				<div class="col-lg-3" id="pie-1" style="float: left"></div>
-				<div class="col-lg-3" id="pie-2" style="float: left"></div>
-				<div class="col-lg-3" id="pie-3" style="float: left"></div>
+                <div class="col-lg-12 pie-box">
+    				<div class="col-lg-3 pie" id="pie" style="float: left"></div>
+    				<div class="col-lg-3 pie" id="pie-1" style="float: left"></div>
+    				<div class="col-lg-3 pie" id="pie-2" style="float: left"></div>
+    				<div class="col-lg-3 pie" id="pie-3" style="float: left"></div>
+                    <div class="clearfix"></div>
+                </div>
 			</div>
+            <div class="clearfix"></div>
 		</div>
-		<div id='building'>
-			<h2 class='text-center'>Building Details</h2>
-			<div id="pd"></div>
-			<div id="chart-0"></div>    
-		</div>
+		<div id='building-sidebar'>
+            <div class="col-lg-12">
+    			<h2 class=''>Selected Building</h2>
+    			<div id="selected-building-info"></div>
+    			<div id="chart-0">No Building Selected</div>    
+		    </div>
+        </div>
 	</div>
 	<script src="js/rich-map.js"></script>
 	<script src="js/building-chart.js"></script>

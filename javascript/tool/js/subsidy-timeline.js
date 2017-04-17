@@ -2,7 +2,6 @@
 
 
 // I added the building variable to take the NLIHC id. This should be changed to our standard way of accepting that.
-
 var SubsidyTimelineChart = function(DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height, building) { 
     Chart.call(this, DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height, building); 
                                                                                      // First step of inheriting from Chart.
@@ -24,7 +23,7 @@ var SubsidyTimelineChart = function(DATA_FILE, dataName, el, field, sortField, a
 
         
     
-  }
+  };
 
 SubsidyTimelineChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart. I can't remember why you
                                                              // have to use Object.create instead of just assignment (=), but
@@ -32,12 +31,14 @@ SubsidyTimelineChart.prototype = Object.create(Chart.prototype); // Second step 
 
 var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
                              // as called in this.extendPrototype(...) above 
-    setup: function(el, field, sortField, asc, readableField){
+    setup: function(dataName, el, field, sortField, asc, readableField) {
+
         var chart = this,
             data = chart.data.filter(function(d){ return d['nlihc_id'] === chart.building}),
                               // the filter here removes data for all other buildings using the building parameter
             groups; // the groups variable is used to draw a multi-part figure for each datum
         console.log(this.width, this.margin.left, this.margin.right);
+        console.log(el);
         chart.svg = d3.select(el) // select elem (div#chart-0)
               .append('svg')        // append svg element 
                 .attr('width', this.width + this.margin.left + this.margin.right)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
@@ -45,6 +46,8 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               .append("g")
                 .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
+        console.log(chart['data']);
+        console.log(data);
 
 
         chart.minTime = d3.min(data, function(d){
@@ -65,15 +68,15 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
         groups = chart.svg.selectAll('g')
               .data(data)
               .enter()
-              .append('g')
+              .append('g');
 
      
         groups.append('line')
               .attr('x1', function(d){
-                return chart.xScale(new Date(chart.timeParser.UTC(d['poa_start'])));
+                return chart.xScale(new Date(chart.timeParser.toUTC(d['poa_start'])));
               })
               .attr('x2', function(d){
-                return chart.xScale(new Date(chart.timeParser.UTC(d['poa_end'])));
+                return chart.xScale(new Date(chart.timeParser.toUTC(d['poa_end'])));
               })
               .attr('y1', function(d, i){
                 return chart.yScale(i);
@@ -81,7 +84,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               .attr('y2', function(d, i){
                 return chart.yScale(i);
               })
-              .style('stroke', 'black')
+              .style('stroke', 'black');
 
         groups.append('text')
               .attr('x', function(d){
@@ -93,29 +96,32 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               .text(function(d){
                 return chart.timeParser.year(d['poa_end']);
               })
-              .style('fill', '#999999')
+              .style('fill', '#999999');
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) - 100;
+                return chart.xScale(chart.timeParser.parsedDate(d['poa_end']))-15;
               })
               .attr('y', function(d,i){
-                return chart.yScale(i) - 8;
+                return chart.yScale(i) - 4;
               })
               .text(function(d){
-                return d['program'].split(' ')[0] + ' ' + d['program'].split(' ')[1];
+                return d['program'];
               })
+              .attr('text-anchor','end');
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) - 100;
+                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) - 15;
               })
               .attr('y', function(d,i){
-                return chart.yScale(i) + 20;
+                return chart.yScale(i) + 16;
               })
               .text(function(d){
-                return "more data!";
-              })          
+                return "Subsidized units: " + d['units_assist'];
+              })
+              .attr('fill','gray')
+              .attr('text-anchor','end');        
 
         // the following three sections are decorative
 
@@ -127,7 +133,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 return chart.yScale(i);
               })
               .attr('r', 3)
-              .style('fill', 'black')
+              .style('fill', 'black');
 
         groups.append('polygon')
               .attr('points', function(d, i){
@@ -139,7 +145,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 return `${x1},${y1} ${x2},${y2} ${x1},${y3}`
               })
               .style('stroke', 'black')
-              .style('fill', 'black')
+              .style('fill', 'black');
 
         groups.append('line')
               .attr('x1', function(d){
@@ -154,12 +160,12 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               .attr('y2', function(d,i){
                 return chart.yScale(i) + 7;
               })
-              .style('stroke', 'black')
+              .style('stroke', 'black');
 
         chart.svg.append('g')
                   .attr("transform", "translate(0," + this.height + ")")
                   .call(d3.axisBottom(chart.xScale))
-                  .style('stroke', 'black')
+                  .style('stroke', 'black');
 
         chart.svg.append('line')
                   .attr('x1', chart.xScale(new Date()))
@@ -167,38 +173,44 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                   .attr('y1', 0)
                   .attr('y2', this.height + 20)
                   .style('stroke', 'rgba(0,0,0,.4)')
-                  .style('stroke-width', 4)
+                  .style('stroke-width', 4);
 
         chart.svg.append('text')
                   .attr('x', chart.xScale(new Date()) - 15)
                   .attr('y', this.height + 35)
-                  .text('Today')
+                  .text('Today');
       }, // end setup
 
       timeParser: {   // This is very data format dependent, and will need to be replaced when we have
                       // a final data format
     
         month: function(string) {
-          return string.split('/')[0];
+          return +string.substr(5, 2);
         },
         day: function(string){
-          return string.split('/')[1];
+          return +string.substr(8, 2);
         },
         year: function(string){
-          if(typeof(string) === 'string'){
-            return ('20' + string.split('/')[2].slice(0,2));
+          //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
+          if(string === 'N' || string === '' || string === 0){
+            return '2017'
           };
+         return +string.substr(0, 4);
         },
         toUTC: function(string){
+          //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
+          console.log(string);
+          if(string === 'N' || string === '' || string === 0){
+            return Date.UTC('2017','04','17')
+          };
           if(typeof(string) === 'string'){
             return Date.UTC(this.year(string), this.month(string), this.day(string));
           };
         },
         parsedDate: function(string){
-          return new Date(this.UTC(string));
+          return new Date(this.toUTC(string));
         }
         
-
 
       } // end timeParser
 
@@ -209,10 +221,12 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
  * Constructor calls below. First done inline; second only when the data from the first is available, using PubSub module 
  */
 
-var DATA_FILE = './project_sample_subsidy.csv';
+var DATA_FILE = './data/Subsidy.csv';
+console.log(subsidyTimelineExtension);
 
+buildingID =  app.getParameterByName('building') 
 // first Chart loads new data
-new SubsidyTimelineChart(DATA_FILE,'projectCSV','#chart-0','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,'NL000103'); 
+new SubsidyTimelineChart(DATA_FILE,'projectCSV','#subsidy-timeline-chart','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,buildingID); 
 
 // second chart uses the same data as first. its constructor is wrapped in a function subscribed
 // to the publishing of the data being loaded. using this pattern, we can have several charts on a 
