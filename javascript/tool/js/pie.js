@@ -32,10 +32,20 @@ Array.prototype.move = function (old_index, new_index) { // HT http://stackoverf
         },
         zip: {
           name: 'Zip'
+        },
+        neighborhood: {
+          name: 'Cluster_tr2000_name'
         }
     };
 
-var currentZoneType; // 
+var readable = { // cheap fix for human readable labels. should later come from API data or manifest JO
+  Subsidized: 'Subsidized',
+  Cat_Expiring: 'Expiring',
+  Cat_Failing_Insp: 'Fails Inspect.',
+  Cat_At_Risk: 'At Risk'
+};
+
+var currentZoneType;
 
 
 var PieChart = function(DATA_FILE, dataName, el, field, width, height) { 
@@ -55,9 +65,8 @@ var PieExtension = {
     if (zoneType === undefined) {
         zoneType = 'ward';
     }
-
-    
-    this.nested = d3.nest()    //aggregate data by unique values in [field] defined for each pie at bottom
+console.log(chart.data);
+   this.nested = d3.nest()    //aggregate data by unique values in [field] defined for each pie at bottom
       .key(function(d) { return d[mapZones[zoneType].name]; }) 
       .key(function(d) { return d[field]; })
       .rollup(function(v) { return v.length; })
@@ -90,7 +99,7 @@ var PieExtension = {
     });
     this.nested.push(allObject);
     this.nested.move(-1,0); // uses array.prototype.move defined above to move last item ("All") to be first.
-    console.log(this.nested);
+    
     if ( zoneType !== currentZoneType ) {
       setOptions(chart.nested);
      }
@@ -104,11 +113,20 @@ var PieExtension = {
         });
     }
     this.nested = this.checkForEmpties();
-    console.log(this.nested);
-    return this.nested[zoneIndex].values.sort(function(a,b){ // need to sort so that 'yes' is always in index 0
+    var stagePieVariable = this.nested[zoneIndex].values.sort(function(a,b){ // need to sort so that 'yes' is always in index 0
         return d3.descending(a.key,b.key);
     });
-
+    return this.addPercentYes(stagePieVariable);
+  },
+  addPercentYes: function(stagePieVariable){ // adds a third key/value to each chart's object for the percent yes
+                                             // now plotting only one arc bound to data, the percent yes, on top of
+                                             // static backdground. much of the preceding data manipulation is no longer
+                                             // necessary, but I'm leaving it in for now. It's more extensible, if we ever need
+                                             // to plot more than 2 variables in a pie. JO
+    var total = stagePieVariable[0].value + stagePieVariable[1].value;
+    var percentYes = stagePieVariable[0].value / total;
+    stagePieVariable.push({'key':'percentYes','value': percentYes});
+    return stagePieVariable;
   },
   checkForEmpties: function(){ // when the sum is zero, the nesting fails to create an object. this method
                                // creates a dummy object such as {key:'Yes',value:0}
@@ -120,23 +138,18 @@ var PieExtension = {
                 zone.values.push({key: missingKey, value: 0});
             }
         });
-        return this.nested; 
+       return this.nested; 
   },  
   setup: function(el, field, width, height){
     this.field = field;
-   
     this.width = width;
     this.height = height;
-    
-    
     var chart = this;
     this.pieVariable = this.returnPieVariable(field); // order of yes and no objects in the array cannot be guaranteed, so JO is programmatically finding the index of yes
-    console.log(this.pieVariable);
+    
     chart.radius=Math.min(width, height)/2;
 
-    chart.color = d3.scaleOrdinal()
-      .domain(['No','Yes'])
-      .range(["#b3cde3","#fbb4ae"]);
+   
 
    chart.svg = d3.select(el)
     .append("svg")
@@ -147,18 +160,46 @@ var PieExtension = {
 
     chart.arc = d3.arc()
         .outerRadius(chart.radius - width/20)
-        .innerRadius(chart.radius - width/4);
+        .innerRadius(chart.radius - width/4)
+        .startAngle(0);
 
-    chart.pie = d3.pie()
+    chart.background = chart.svg  // appends full-circle backgroud arc. will bind only "yes" arc over this one
+                                  // to simplfy animation (always same start angle) JO
+      .append('path')
+      .datum({endAngle: 2 * Math.PI})
+      .style("fill", "#ddd")
+      .attr("d", chart.arc);
+
+      // no longer need to invoke d3.pie because the angle of one arc is easy to calculate
+    /*chart.pie = d3.pie()
         .sort(null)
         .value(function(d) { return d.value; });
+    */
+    chart.foreground = chart.svg.append('path')
+      .style("fill", '#4285f4')
+      .datum({endAngle: 0});
 
-   
+    chart.percentage = chart.svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr('class','pie_number')
+        .attr('y',5);
 
-    // old colors "#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f","#2C93E8","#F56C4E"]);
+     chart.label = chart.svg.append("text")
+        .attr("y", chart.height / 2 + 10)
+        .attr('class','pie_text')
+        .attr('text-anchor','middle');
 
-    //d3 pie layout, which calculates the section angles for you
     this.update();
+  },
+  arcTween: function(newAngle) { // HT: http://bl.ocks.org/mbostock/5100636
+    var chart = this;
+    return function(d){
+      var interpolate = d3.interpolate(d.endAngle, newAngle);
+      return function(t) {
+        d.endAngle = interpolate(t);
+        return chart.arc(d);
+      };
+    };    
   },
   returnTextPercent: function(){
     var chart = this;
@@ -173,38 +214,22 @@ var PieExtension = {
 
     var chart = this;
 
-    chart.g = chart.svg.selectAll("arc")
-
-        .data(chart.pie(chart.pieVariable))
-        .enter().append("g")
-        .attr("class", "arc");
+    
+    
+    chart.foreground
+        
+        
+        .transition().duration(750)
+        .attrTween("d", chart.arcTween(chart.pieVariable[2].value * Math.PI * 2));
+        
         
 
-
-    chart.paths = chart.g.append('path')
-
-          .attr("d", function(d,i){ // same as chart.arc without function, passes in d
-             
-             console.log(i,d.data.key)
-            return chart.arc(d);
-        })
-          .style("fill", function(d) { return chart.color(d.data.key); });
-
-
-
-    chart.percentage = chart.g.append("text")
-        .attr("text-anchor", "middle")
-        .attr('class','pie_number')
-        .attr('y',5)
+    chart.percentage
         .text(this.returnTextPercent());
 
-    //this is bad. 
-    chart.g.append("text")
-        
-        .attr("y", chart.height / 2 + 10)
-        .attr('class','pie_text')
-        .attr('text-anchor','middle')
-        .text(chart.field);
+
+    chart.label 
+        .text(readable[chart.field]);
   }
 };
 
@@ -234,18 +259,18 @@ function changeZoneType() {
     
     map.pieCharts.forEach(function(chart){
 
-        chart.pieVariable = chart.returnPieVariable(chart.field,zType,zName); 
+    chart.pieVariable = chart.returnPieVariable(chart.field,zType,zName); 
+
+    chart.update();
+      
     
-    chart.paths
+    /*chart.paths
       .data(chart.pie(chart.pieVariable))
 
       .attr("d", function(d,i){ // same as chart.arc without function, passes in d
             console.log(i,d.data.key)
             return chart.arc(d);
-        });
-
-      chart.percentage
-        .text(chart.returnTextPercent())
+        });*/
 
      });
   };
