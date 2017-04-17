@@ -1,8 +1,9 @@
-(function prepareBuildingMaps(){
+var prepareBuildingMaps = function(buildingLat,buildingLon){
   'use strict'
   
   //TODO this should be shared by building-header.js instead of copied over
   var buildingID = app.getParameterByName('building');
+
   
   var datasets,
       prepareSource,
@@ -28,6 +29,9 @@
         transitStats: {
           url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + buildingID
           //url: "http://127.0.0.1:5000/api/wmata/" + buildingID
+        },
+        nearbyHousing: {
+          url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + buildingLat + "&longitude=" + buildingLon
         }
       }
   
@@ -219,6 +223,10 @@ addCurrentBuilding = function(map,source){
       });  
 }
   prepareSidebar = function(){
+    
+    ///////////////////
+    //Transit sidebar
+    ///////////////////
     var numBusRoutes = Object.keys(datasets['transitStats']['data']['bus_routes']).length
     var numRailRoutes = Object.keys(datasets['transitStats']['data']['rail_routes']).length
     d3.select("#num_bus_routes").html(numBusRoutes)
@@ -249,6 +257,12 @@ addCurrentBuilding = function(map,source){
     addRoutes('#bus_routes_by_dist',brgSorted);
     addRoutes('#rail_routes_by_dist',rrgSorted);
 
+    ///////////////
+    //Nearby Housing sidebar
+    ///////////////
+    d3.select("#tot_buildings").html(datasets['nearbyHousing']['data']['tot_buildings'])
+    d3.select("#tot_units").html(datasets['nearbyHousing']['data']['tot_units'])
+    d3.select("#nearby_housing_distance").html(datasets['nearbyHousing']['data']['distance'])
   };
 
   addRoutes = function(id,data){
@@ -305,4 +319,4 @@ addCurrentBuilding = function(map,source){
 
   })();
 
-})();
+};

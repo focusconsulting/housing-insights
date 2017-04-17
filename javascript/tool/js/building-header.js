@@ -22,6 +22,7 @@ var DataOnly = function(DATA_FILE){  // set up kind of dummy constructor that in
     document.getElementById('owner-phone').innerText = 'for placement only (need join other data)';
     document.getElementById('tax-assessment-amount').innerText = 'for placement only (need join other data)';
 
+    prepareBuildingMaps(d.Proj_lat,d.Proj_lon)
 
  };
 
