@@ -191,9 +191,18 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
           return +string.substr(8, 2);
         },
         year: function(string){
-           return +string.substr(0, 4)
+          //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
+          if(string === 'N' || string === '' || string === 0){
+            return '2017'
+          };
+         return +string.substr(0, 4);
         },
         toUTC: function(string){
+          //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
+          console.log(string);
+          if(string === 'N' || string === '' || string === 0){
+            return Date.UTC('2017','04','17')
+          };
           if(typeof(string) === 'string'){
             return Date.UTC(this.year(string), this.month(string), this.day(string));
           };
@@ -212,11 +221,12 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
  * Constructor calls below. First done inline; second only when the data from the first is available, using PubSub module 
  */
 
-var DATA_FILE = './data/proj_subsidy_sample.csv';
+var DATA_FILE = './data/Subsidy.csv';
 console.log(subsidyTimelineExtension);
 
+buildingID =  app.getParameterByName('building') 
 // first Chart loads new data
-new SubsidyTimelineChart(DATA_FILE,'projectCSV','#subsidy-timeline-chart','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,'NL000001'); 
+new SubsidyTimelineChart(DATA_FILE,'projectCSV','#subsidy-timeline-chart','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,buildingID); 
 
 // second chart uses the same data as first. its constructor is wrapped in a function subscribed
 // to the publishing of the data being loaded. using this pattern, we can have several charts on a 
