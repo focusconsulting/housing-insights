@@ -17,7 +17,7 @@
 
       datasets = {
         projects: {
-          url: '/javascript/tool/data/project.geojson'
+          url: '/tool/data/project.geojson'
         },
         metroStations: {
           url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson"
