@@ -193,6 +193,7 @@ var Chart = function(DATA_FILE, el, field, sortField, asc, readableField) { // C
 // the section on constructors in https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch4.md
 Chart.prototype = {
     data: [],
+    
     initialize: function(DATA_FILE, el, field, sortField, asc, readableField) { // parameters will be passed by the call to
                                                                                     // the specific chart type         
         
