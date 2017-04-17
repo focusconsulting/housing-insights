@@ -113,7 +113,7 @@ var app = {
     // from. 'doAfter' is a callback where we can specify all the specific constructors to call with the 
     // data
     getInitialData: function(urlsObjArray, doAfter){
-      var MAX_INTERVALS = 10,
+      var MAX_INTERVALS = 60,
           ajaxRequests = {},
           currentInterval = 0,
           checkRequestsInterval,

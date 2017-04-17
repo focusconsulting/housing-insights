@@ -176,7 +176,7 @@ console.log(chart.data);
         .value(function(d) { return d.value; });
     */
     chart.foreground = chart.svg.append('path')
-      .style("fill", '#4285f4')
+      .style("fill", '#fd8d3c')
       .datum({endAngle: 0});
 
     chart.percentage = chart.svg.append("text")
