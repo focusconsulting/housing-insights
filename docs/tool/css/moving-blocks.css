@@ -1,0 +1,46 @@
+.d3-tip {
+      line-height: 1;
+      padding: 6px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+
+    }
+  
+    /* Style northward tooltips specifically */
+    .d3-tip.n:after {
+      margin: -2px 0 0 0;
+      top: 100%;
+      left: 0;
+    }
+
+
+.d3-chart rect {
+  fill: #325d88; 
+}
+
+.d3-chart {
+  max-width: 400px;
+}
+
+.d3-chart rect.under-threshold {
+  fill: gray;
+  fill-opacity:0.2; 
+}
+
+.d3-chart rect:hover {
+    fill: #bada33;
+    fill-opacity: 1;
+}
+
+rect.null-value {
+  stroke: #ccc;
+  stroke-width: 1px;
+  shape-rendering: crispEdges;
+}
+
+.d3-chart button {
+  margin-right: 10px;
+}
+

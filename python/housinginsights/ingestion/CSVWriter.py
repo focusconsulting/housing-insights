@@ -53,7 +53,7 @@ class CSVWriter(object):
             #self.file.close()
             #print("header written")
 
-        self.file = open(self.filename, 'a', newline='')
+        self.file = open(self.filename, 'a', newline='', encoding='utf-8')
         self.writer = DictWriter(self.file, fieldnames=self.dictwriter_fields, delimiter="|")
 
 
