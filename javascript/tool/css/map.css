@@ -198,3 +198,7 @@ p {
     margin-right: 5px;
     width: 10px;
 }
+
+#zone-selector {
+  max-width: 300px;
+}

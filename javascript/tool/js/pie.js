@@ -32,8 +32,18 @@ Array.prototype.move = function (old_index, new_index) { // HT http://stackoverf
         },
         zip: {
           name: 'Zip'
+        },
+        neighborhood: {
+          name: 'Cluster_tr2000_name'
         }
     };
+
+var readable = { // cheap fix for human readable labels. should later come from API data or manifest JO
+  Subsidized: 'Subsidized',
+  Cat_Expiring: 'Expiring',
+  Cat_Failing_Insp: 'Fails Inspect.',
+  Cat_At_Risk: 'At Risk'
+};
 
 var currentZoneType;
 
@@ -55,7 +65,7 @@ var PieExtension = {
     if (zoneType === undefined) {
         zoneType = 'ward';
     }
-
+console.log(chart.data);
    this.nested = d3.nest()    //aggregate data by unique values in [field] defined for each pie at bottom
       .key(function(d) { return d[mapZones[zoneType].name]; }) 
       .key(function(d) { return d[field]; })
@@ -219,7 +229,7 @@ var PieExtension = {
 
 
     chart.label 
-        .text(chart.field);
+        .text(readable[chart.field]);
   }
 };
 
