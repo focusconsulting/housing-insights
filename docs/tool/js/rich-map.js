@@ -388,7 +388,7 @@ function prepareMaps(){
         
       var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
         .setLngLat(e.lngLat)
-        .setHTML("<a href = '/javascript/tool/building.html" + queryString + "' >See more about " + projectName + "</a>" )
+        .setHTML("<a href = '/tool/building.html" + queryString + "' >See more about " + projectName + "</a>" )
         .addTo(map);
     });
 
