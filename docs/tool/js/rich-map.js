@@ -242,11 +242,11 @@ function prepareMaps(){
           type: 'categorical',
           stops: [
             ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-            ['2 - Expiring Subsidy', '#fecc5c'],
-            ['3 - Recent Failing REAC Score', '#fd8d3c'],
+            ['2 - Expiring Subsidy', '#8B4225'],
+            ['3 - Recent Failing REAC Score', '#bd0026'],
             ['4 - More Info Needed', '#A9A9A9'],
-            ['5 - Other Subsidized Property', '#A9A9A9'],
-            ['6 - Lost Rental', '#bd0026']
+            ['5 - Other Subsidized Property', ' #fd8d3c'],
+            ['6 - Lost Rental', '#A9A9A9']
           ]
         }
       }
@@ -384,8 +384,19 @@ function prepareMaps(){
       var projectName = building['properties']['proj_name'];
       var queryString = '?building=' + encodeURIComponent(buildingId);
     
-      document.getElementById('pd').innerHTML = "<h3><strong>" + building.properties.proj_addre +"</strong><br>"+building.properties.proj_name + "<br><br>" + "</h3><p>" + "Owner: " + building.properties.hud_own_name +"<br>"+"Cluster Name: "+ building.properties.cluster_tr2000_name+"<br>"+"HUD Owner Name: " + building.properties.hud_own_name+"<br>"+"HUD Owner Type: " + building.properties.hud_own_type +"<br>"+"HUD Manager Name: " + building.properties.hud_mgr_name+"<br>"+"HUD Manager Type: " + building.properties.hud_mgr_type +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.cat_at_risk+"<br>"+building.properties.category_Code +"</p>";
+      document.getElementById('selected-building-info').innerHTML = "<h3><strong>" +
+                   building.properties.proj_addre +"</strong><br>"
+                   +building.properties.proj_name + "<br><br>" 
+                   + "</h3><p>" + "Owner: " + building.properties.hud_own_name +"<br>"
+                   +"Cluster Name: "+ building.properties.cluster_tr2000_name+"<br>"
+                   +"HUD Owner Name: " + building.properties.hud_own_name+"<br>"
+                   +"HUD Owner Type: " + building.properties.hud_own_type +"<br>"
+                   +"HUD Manager Name: " + building.properties.hud_mgr_name+"<br>"
+                   +"HUD Manager Type: " + building.properties.hud_mgr_type 
+                   +"<br><br><strong>"+"At Risk: "+"</strong>"+ building.properties.cat_at_risk+"<br>"
+                   +building.properties.category_Code +"</p>";
         
+
       var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
         .setLngLat(e.lngLat)
         .setHTML("<a href = '/tool/building.html" + queryString + "' >See more about " + projectName + "</a>" )
@@ -416,8 +427,8 @@ function setHeader(){ // sets the text in the sidebar header according to the se
 
 
 
-    document.querySelector('div#zone h2').innerText = map.clickedLayer.capitalizeFirstLetter() + ' Details';
-    document.querySelector('div#zone p:first-of-type').innerText = 'Select a ' + map.clickedLayer + ' to drill down';
+    //document.querySelector('#zone-details-heading').innerText = map.clickedLayer.capitalizeFirstLetter() + ' Details';
+    document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + map.clickedLayer ;
     document.getElementById('zone-selector').onchange = changeZone;
 
   }
