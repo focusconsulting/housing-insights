@@ -112,14 +112,14 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
 
             #clean the file and save the output to a local pipe-delimited file
             if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
-                print("  Ready to clean {}".format(csv_reader.destination_table))
+                print("  Cleaning...")
                 for idx, data_row in enumerate(csv_reader):
                     clean_data_row = cleaner.clean(data_row, idx)
                     if clean_data_row != None:
                         csv_writer.write(clean_data_row)
 
                 csv_writer.close()
-                print("  Ready to load")
+                print("  Loading...")
                 
                 #Decide whether to append or replace the table
                 if meta[tablename]["replace_table"] == True:
