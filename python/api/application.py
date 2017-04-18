@@ -159,22 +159,10 @@ def count_all(data_source,grouping):
 def nearby_transit(nlihc_id):
     '''
     Returns the nearby bus and metro routes and stops. 
-    Currently this assumes that all entries in the wmata_dist
-    table are those that have a walking distance of 0.5 miles 
-    or less. We may later want to implement functionality to
-    filter this to those with less distance. 
     '''
 
-    conn = engine.connect()
     try:
-        q = """
-            SELECT dist_in_miles, type, stop_id_or_station_code
-            FROM wmata_dist
-            WHERE nlihc_id = '{}'
-            """.format(nlihc_id)
-
-        proxy = conn.execute(q)
-        results = proxy.fetchall()
+        results = transit_stops_for_project(nlihc_id)
 
         #transform the results.
         stops = {'bus':[],'rail':[]};
@@ -249,9 +237,58 @@ def nearby_transit(nlihc_id):
                         })
 
     except Exception as e:
-        raise e
         return "Query failed: {}".format(e)
 
+@application.route('/api/wmata/<transit_type>/all',  methods=['GET'])
+def nearby_transit_all_projects(transit_type):
+    '''
+    Returns the nearby bus and metro routes and stops. .
+    transit_type == 'rail' or 'bus'
+    '''
+
+    try:
+        projects = all_nlihc_ids()#["NL000001","NL000008"]
+        output = []
+        for nlihc_id in projects:
+            results = transit_stops_for_project(nlihc_id)
+
+            #extract relevant values from the results
+            # x[1]: type, x[2]: stop id
+            stops = [x[2] for x in results if x[1]==transit_type]
+
+            routes = unique_transit_routes(stops)
+            output.append({ 'nlihc_id': nlihc_id
+                            , 'stops': stops
+                            , 'routes':routes
+                            , 'num_stops': len(stops)
+                            , 'num_routes': len(routes)
+                          })
+        return jsonify({'items':output})
+
+    except Exception as e:
+        return "Query failed: {}".format(e)
+
+
+
+
+def transit_stops_for_project(nlihc_id):
+    '''
+    Queries the database for a list of stops within 0.5 miles of a given nlihc_id
+    Currently this assumes that all entries in the wmata_dist
+    table are those that have a walking distance of 0.5 miles 
+    or less. We may later want to implement functionality to
+    filter this to those with less distance. 
+    '''
+    conn = engine.connect()
+    q = """
+        SELECT dist_in_miles, type, stop_id_or_station_code
+        FROM wmata_dist
+        WHERE nlihc_id = '{}'
+        """.format(nlihc_id)
+
+    proxy = conn.execute(q)
+    results = proxy.fetchall()
+    return results
 
 def idx_from_ld(lst,key,value):
     '''
@@ -274,6 +311,7 @@ def unique_transit_routes(stop_ids):
             SELECT lines FROM wmata_info
             WHERE stop_id_or_station_code in {}
             """.format(q_list)
+        print(q)
         conn = engine.connect()
         proxy = conn.execute(q)
         routes = [x[0] for x in proxy.fetchall()]
@@ -284,6 +322,16 @@ def unique_transit_routes(stop_ids):
         routes = routes.split(':')
         unique = list(set(routes))
         return unique
+
+def all_nlihc_ids():
+    q = """
+        SELECT nlihc_id FROM  project
+        """
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    results = proxy.fetchall()
+    ids = [x[0] for x in results]
+    return ids
 
 
 @application.route('/api/building_permits/<dist>', methods=['GET'])
