@@ -395,7 +395,6 @@ class ACSRentCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
-
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
@@ -417,4 +416,9 @@ class WmataDistCleaner(CleanerBase):
 
 class WmataInfoCleaner(CleanerBase):
     def clean(self,row,row_num=None):
+        return row
+
+class reac_score_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row, null_values=['', None])
         return row
