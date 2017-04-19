@@ -418,3 +418,7 @@ class WmataInfoCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         return row
 
+class reac_score_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row, null_values=['', None])
+        return row
