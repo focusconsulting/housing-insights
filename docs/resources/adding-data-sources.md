@@ -39,7 +39,7 @@ Store the raw data file on your local hard drive.
     `housing-insights/data/raw/preservation_catalog/20170315/Project.csv`  
     `housing-insights/data/raw/preservation_catalog/20160401/Project.csv`
 
-## 2) Add a new table to `table_info.json`
+## 2) Add a new table to `table_info.json` (renaming in progress - previously `meta.json`)
 
 If this is a new data source that can't go into an existing table in SQL, you'll need to add a new table so our code knows where to put it. 
 
@@ -71,6 +71,8 @@ If this is a new data source that can't go into an existing table in SQL, you'll
 	    }
 
     Note that the { } for the last object doesn't have a comma but the earlier ones do. 
+
+Note, we previously called this `meta.json` and so many parts of the code refer to it this way (meta). But 'meta' and 'manifest' were getting confused a lot so we have renamed it. 
 
 ## 3) Add the file to `manifest.csv`
 

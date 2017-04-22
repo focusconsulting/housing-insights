@@ -23,7 +23,7 @@ from unittest import skip
 import sys, os
 sys.path.append(os.path.abspath('./'))
 
-from housinginsights.ingestion import load_meta_data
+from housinginsights.ingestion.functions import load_meta_data
 from housinginsights.tools import dbtools
 from housinginsights.ingestion import DataReader, ManifestReader
 from housinginsights.ingestion import CSVWriter
@@ -62,14 +62,24 @@ class IngestionTests(unittest.TestCase):
             print(manifest_row)
             csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
             assert(csv_reader.do_fields_match())
-            sql_manifest_row = manifest_row #assume they exactly match
+            
+             #assume they exactly match for the purpose of this test, expect as modified below
+            sql_manifest_row = manifest_row
+            #sql_manifest_row has an extra field to indicate whether it has been successfully loaded in previous runs or not
+            sql_manifest_row['status'] = 'failed'
+
             if manifest_row['include_flag'] == "skip":
                 self.assertFalse(csv_reader.check_include_flag(sql_manifest_row))
                 self.assertFalse(csv_reader.should_file_be_loaded(sql_manifest_row))
             elif manifest_row['include_flag'] == "use":
                 self.assertTrue(csv_reader.check_include_flag(sql_manifest_row))
                 self.assertTrue(csv_reader.should_file_be_loaded(sql_manifest_row))
-            #all previous fields
+
+            #If the file is already in the SQL manifest, skip it when manifest says 'use' (i.e. it's already loaded)
+            sql_manifest_row['status'] = 'loaded'
+            if manifest_row['include_flag'] == "use":
+                self.assertFalse(csv_reader.check_include_flag(sql_manifest_row))
+            
 
 
 

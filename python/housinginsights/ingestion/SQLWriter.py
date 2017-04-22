@@ -52,6 +52,7 @@ from psycopg2 import DataError
 import copy
 import datetime
 
+
 class TableWritingError(Exception):
     pass
 
@@ -86,11 +87,15 @@ class HISql(object):
         
         conn = self.engine.connect()
         trans = conn.begin()
+
         try:
+
             print("  opening {}".format(self.filename))
-            with open(self.filename, 'r') as f:
+            with open(self.filename, 'r', encoding='utf-8') as f:
+
                 #copy_from is only available on the psycopg2 object, we need to dig in to get it
                 dbapi_conn = conn.connection
+                dbapi_conn.set_client_encoding("UTF8")
                 dbapi_cur = dbapi_conn.cursor()
 
                 dbapi_cur.copy_from(f, self.tablename, sep='|', null='Null', columns=None)
