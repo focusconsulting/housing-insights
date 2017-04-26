@@ -20,20 +20,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = connect_str
 
 db = SQLAlchemy(app)
 
-class CensusMapping(db.Model):
-	__tablename__ = 'census_mapping'
 
-	acs_code = db.Column('acs_code', db.Text, primary_key=True)
-	tract_code = db.Column('tract_code', db.Text)
-
-	#median_rent = db.relationship("MedianRent", uselist=False, back_populates='tract')
-	#projects = db.relationship("Project", uselist=True, back_populates='tract')
 
 class MedianRent(db.Model):
 	__tablename__ = 'acs_rent_median'
 
-	tract_id = db.Column('geo_id2', db.Text, primary_key=True)
+	tract_id = db.Column('geo_id2', db.Text, db.ForeignKey('census_mapping.acs_code'), primary_key=True)
 	median_rent = db.Column('median_rent', db.Integer)
+
+	tract = db.relationship("CensusMapping", uselist=False, backref='median_rent')
 
 class Project(db.Model):
 	__tablename__ = 'project'
@@ -43,6 +38,15 @@ class Project(db.Model):
 	min_assisted_units = db.Column('proj_units_assist_min', db.Integer)
 	latitude = db.Column('proj_lat', db.Float)
 	longitude = db.Column('proj_lon', db.Float)	
+
+class CensusMapping(db.Model):
+	__tablename__ = 'census_mapping'
+
+	acs_code = db.Column('acs_code', db.Text, primary_key=True)
+	tract_code = db.Column('tract_code', db.Text)
+
+	# median_rent = db.relationship(MedianRent, backref='tract')
+	#projects = db.relationship("Project", uselist=True, back_populates='tract')
 
 manager = APIManager(app, flask_sqlalchemy_db=db)
 
