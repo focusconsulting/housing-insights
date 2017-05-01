@@ -8,7 +8,7 @@ FIELDS = ['OBJECTID', 'MAR_WARD', 'ADDRESS', 'PROJECT_NAME', 'STATUS_PUBLIC',
           'GIS_LAST_MOD_DTTM']
 
 
-class HousingResult(object):
+class DCHousingResult(object):
     def __init__(self, result):
         self.data = []
         for attr in FIELDS:
