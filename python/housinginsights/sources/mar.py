@@ -2,8 +2,8 @@
 import csv
 from pprint import pprint
 
-from housinginsights.sources.base import BaseApiConn
-from housinginsights.sources.models.mar import MarResult, FIELDS
+from python.housinginsights.sources.base import BaseApiConn
+from python.housinginsights.sources.models.mar import MarResult, FIELDS
 
 
 class MarApiConn(object):
