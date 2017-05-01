@@ -1,0 +1,57 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+ #main-view {
+    width: 100%;
+}
+
+#sidebar {
+    width: 640px;
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    right: 10px;
+    background-color: #fff;
+    padding: 10px;
+}
+
+/*
+ * MAPBOX
+ */
+ 
+ #map {
+  position: absolute;
+  width: 100%;
+  top:0;
+  bottom:0;
+ }
+
+#layer-menu {
+    background: #fff;
+    position: absolute;
+    z-index: 1;
+    bottom: 10px;
+    left: 10px;
+    border-radius: 3px;
+    width: 120px;
+    border: 1px solid rgba(0,0,0,0.4);    
+}
+
+#layer-menu a {
+    font-size: 13px;
+    color: #404040;
+    display: block;
+    margin: 0;
+    padding: 0;
+    padding: 10px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+a.active {
+    background-color: #b3cde3;
+}
