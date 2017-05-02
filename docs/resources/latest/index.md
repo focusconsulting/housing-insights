@@ -11,57 +11,7 @@ title: H.I. Latest Updates
 # Upcoming events
 
 
-* **Mon. Apr 17:** Code for DC Hacknight ([Meetup invitation w/ agenda](https://www.meetup.com/Code-for-DC/events/237433482/), 6:30 - 9:00 pm. Social Tables, 1325 G St. NW, Washington, DC., 3rd floor.
-<span class="addtocalendar atc-style-menu-wb calendar-link">
-    <var class="atc_event">
-        <var class="atc_date_start">2017-04-17 18:30:00</var>
-        <var class="atc_date_end">2017-04-17 21:00:00</var>
-        <var class="atc_timezone">America/New_York</var>
-        <var class="atc_title">Code for DC Hacknight</var>
-        <var class="atc_description">Meetup link: https://www.meetup.com/Code-for-DC/events/237433482/</var>
-        <var class="atc_location">Social Tables, 1325 G St. NW, Washington, DC., 3rd floor</var>
-    </var>
-</span>
-
-
-* **Tues. April 18:** HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
-<span class="addtocalendar atc-style-menu-wb calendar-link">
-    <var class="atc_event">
-        <var class="atc_date_start">2017-04-18 18:30:00</var>
-        <var class="atc_date_end">2017-04-18 21:00:00</var>
-        <var class="atc_timezone">America/New_York</var>
-        <var class="atc_title">Housing Insights / Code for DC Session</var>
-        <var class="atc_description">See more info at http://www.housinginsights.org/resources/latest/</var>
-        <var class="atc_location">NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).</var>
-    </var>
-</span>
-
-* **Tues. April 25:** <span style="color:red">New Member Onboarding</span> + HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
-<span class="addtocalendar atc-style-menu-wb calendar-link">
-    <var class="atc_event">
-        <var class="atc_date_start">2017-04-25 18:30:00</var>
-        <var class="atc_date_end">2017-04-25 21:00:00</var>
-        <var class="atc_timezone">America/New_York</var>
-        <var class="atc_title">Housing Insights / Code for DC Session</var>
-        <var class="atc_description">See more info at http://www.housinginsights.org/resources/latest/</var>
-        <var class="atc_location">NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).</var>
-    </var>
-</span>
-
-* **Mon. May 1:** Code for DC Hacknight ([Meetup invitation w/ agenda](https://www.meetup.com/Code-for-DC/events/237433500/), 6:30 - 9:00 pm. Social Tables, 1325 G St. NW, Washington, DC., 3rd floor.
-<span class="addtocalendar atc-style-menu-wb calendar-link">
-    <var class="atc_event">
-        <var class="atc_date_start">2017-05-01 18:30:00</var>
-        <var class="atc_date_end">2017-05-01 21:00:00</var>
-        <var class="atc_timezone">America/New_York</var>
-        <var class="atc_title">Code for DC Hacknight</var>
-        <var class="atc_description">Meetup link: https://www.meetup.com/Code-for-DC/events/237433500/</var>
-        <var class="atc_location">Social Tables, 1325 G St. NW, Washington, DC., 3rd floor</var>
-    </var>
-</span>
-
-
-* **Tues. May 2:** HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+* **Tues. May 2:**  <span style="color:red">Sprint Planning Session</span> HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
 <span class="addtocalendar atc-style-menu-wb calendar-link">
     <var class="atc_event">
         <var class="atc_date_start">2017-05-02 18:30:00</var>
@@ -293,5 +243,56 @@ All our weekly email updates will be cross-posted to the [Housing Insights Slack
         <var class="atc_title">Housing Insights / Code for DC Session</var>
         <var class="atc_description">See more info at http://www.housinginsights.org/resources/latest/</var>
         <var class="atc_location">NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).</var>
+    </var>
+</span>
+
+
+
+* **Mon. Apr 17:** Code for DC Hacknight ([Meetup invitation w/ agenda](https://www.meetup.com/Code-for-DC/events/237433482/), 6:30 - 9:00 pm. Social Tables, 1325 G St. NW, Washington, DC., 3rd floor.
+<span class="addtocalendar atc-style-menu-wb calendar-link">
+    <var class="atc_event">
+        <var class="atc_date_start">2017-04-17 18:30:00</var>
+        <var class="atc_date_end">2017-04-17 21:00:00</var>
+        <var class="atc_timezone">America/New_York</var>
+        <var class="atc_title">Code for DC Hacknight</var>
+        <var class="atc_description">Meetup link: https://www.meetup.com/Code-for-DC/events/237433482/</var>
+        <var class="atc_location">Social Tables, 1325 G St. NW, Washington, DC., 3rd floor</var>
+    </var>
+</span>
+
+
+* **Tues. April 18:** HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+<span class="addtocalendar atc-style-menu-wb calendar-link">
+    <var class="atc_event">
+        <var class="atc_date_start">2017-04-18 18:30:00</var>
+        <var class="atc_date_end">2017-04-18 21:00:00</var>
+        <var class="atc_timezone">America/New_York</var>
+        <var class="atc_title">Housing Insights / Code for DC Session</var>
+        <var class="atc_description">See more info at http://www.housinginsights.org/resources/latest/</var>
+        <var class="atc_location">NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).</var>
+    </var>
+</span>
+
+* **Tues. April 25:** <span style="color:red">New Member Onboarding</span> + HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+<span class="addtocalendar atc-style-menu-wb calendar-link">
+    <var class="atc_event">
+        <var class="atc_date_start">2017-04-25 18:30:00</var>
+        <var class="atc_date_end">2017-04-25 21:00:00</var>
+        <var class="atc_timezone">America/New_York</var>
+        <var class="atc_title">Housing Insights / Code for DC Session</var>
+        <var class="atc_description">See more info at http://www.housinginsights.org/resources/latest/</var>
+        <var class="atc_location">NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).</var>
+    </var>
+</span>
+
+* **Mon. May 1:** Code for DC Hacknight ([Meetup invitation w/ agenda](https://www.meetup.com/Code-for-DC/events/237433500/), 6:30 - 9:00 pm. Social Tables, 1325 G St. NW, Washington, DC., 3rd floor.
+<span class="addtocalendar atc-style-menu-wb calendar-link">
+    <var class="atc_event">
+        <var class="atc_date_start">2017-05-01 18:30:00</var>
+        <var class="atc_date_end">2017-05-01 21:00:00</var>
+        <var class="atc_timezone">America/New_York</var>
+        <var class="atc_title">Code for DC Hacknight</var>
+        <var class="atc_description">Meetup link: https://www.meetup.com/Code-for-DC/events/237433500/</var>
+        <var class="atc_location">Social Tables, 1325 G St. NW, Washington, DC., 3rd floor</var>
     </var>
 </span>
