@@ -1,7 +1,5 @@
 import csv
 from pprint import pprint
-from datetime import datetime
-import os
 
 
 from python.housinginsights.sources.base import BaseApiConn
@@ -27,17 +25,14 @@ class DCHousingApiConn(object):
         """
         Returns JSON object of the entire data set
         """
-        print("DCHousingApiConn.get_json()")
         result = self.conn.get(DCHousingApiConn.QUERY)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
 
         if output_type == 'stdout':
-            print("DCHousingApiConn.get_json() - outtype = stdout")
             pprint(result.json())
         elif output_type == 'csv':
-            print("DCHousingApiConn.get_json() - outtype = csv")
             data = result.json()['features']
             results = [DCHousingResult(address['attributes']) for address in
                        data]
@@ -49,9 +44,7 @@ class DCHousingApiConn(object):
         """
         Write the data to a csv file.
         """
-        print("DCHousingApiConn._result_to_csv()")
         with open(csvfile, 'w', encoding='utf-8') as f:
-            print("DCHousingApiConn._result_to_csv() - write to csv")
             writer = csv.writer(f, delimiter=',')
             writer.writerow(FIELDS)
             for result in results:
