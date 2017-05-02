@@ -1,4 +1,5 @@
 "use strict";
+
 /* 
  * MODEL **********************************
  */
@@ -22,11 +23,48 @@ var model = {
                 type:'json'
             }
         ]
-    },
-    state: {
-        mapLayer: null
     }
+    
 };
+
+/*
+ * State module keeps state private; only access is through module-scoped functions with closure over state. We have access
+ * to those functions, and thus to state, by returning them to controller.controlState.
+ */
+
+function StateModule() {
+        
+        var state = {};
+
+        function logState(){
+            console.log(state);
+        }
+
+        function getState(){
+            return state;
+        }
+
+        function setState(key,value) { // making all state properties arrays so that previous value is held on to
+                                       // current state to be accessed as state[key][0].
+            if ( state[key] === undefined ) {
+                state[key] = [value];
+                PubSub.publish(key, value);
+            } else if ( state[key][0] !== value ) {
+                state[key].unshift(value);
+                PubSub.publish(key, value);
+                if ( state[key].length > 2 ) {
+                    state[key].length = 2;
+                }
+            }
+        }
+
+        return {
+            logState: logState,
+            getState: getState,
+            setState: setState
+        }
+
+    }
 
 
 /*
@@ -34,6 +72,7 @@ var model = {
  */
 
 var controller = {
+    controlState: StateModule(),
     init: function(){
         this.setInitialSubscriptions(); // set initital PubSub subscriptions
         mapView.init();
@@ -76,7 +115,7 @@ var controller = {
     },
     subscriptions: {},
     setInitialSubscriptions: function() {
-        this.subscriptions.mapLoaded = PubSub.subscribe( 'mapBox', mapView.addInitialLayers );
+        this.subscriptions.mapLoaded = PubSub.subscribe( 'mapLoaded', mapView.addInitialLayers );
     },
     appendPartial: function(partial, elemID){
         d3.html('partials/' + partial + '.html', function(fragment){
@@ -103,10 +142,9 @@ var mapView = {
           preserveDrawingBuffer: true
         });
         this.map.addControl(new mapboxgl.NavigationControl());
-        controller.subscriptions.layerMenu = PubSub.subscribe( 'layer-menu', mapView.showLayer);
+        controller.subscriptions.mapLayer = PubSub.subscribe( 'mapLayer', mapView.showLayer);
         this.map.on('load', function(){
-            PubSub.publish( 'mapBox', 'style_loaded' ); // announce style loaded when map is ready. addInitialLayers subscribes
-                                                        // to this announcement, so will only fire when the announcement is made
+            setState('mapLoaded',true);
         });        
     },
     initialLayers: [
@@ -138,16 +176,18 @@ var mapView = {
         }
 
     ],
-    addInitialLayers: function(){
-        controller.appendPartial('layer-menu','main-view');
-        mapView.initialLayers.forEach(function(layer){  // refers to mapView instead of this bc being called form PubSub
-                                                        //  context. `this` causes error
-            mapView.addLayer(layer);
-        });
+    addInitialLayers: function(msg,data){
+        if ( data === true ) {
+            controller.appendPartial('layer-menu','main-view');
+            mapView.initialLayers.forEach(function(layer){  // refers to mapView instead of this bc being called form PubSub
+                                                            //  context. `this` causes error
+                mapView.addLayer(layer);
+            });            
+        } 
     },
     addLayer: function(layer){
         if ( layer.visibility === 'visible' ) {
-            model.state.mapLayer = layer.source;
+            setState('mapLayer', layer.source);
         }
         var name = layer.source + 'Layer';
         controller.getData(layer.source, null, function (data) {
@@ -188,15 +228,12 @@ var mapView = {
             })
             .text(layer.source.toUpperCase())
             .on('click', function(){
-
-                PubSub.publish( 'layer-menu', layer.source);
+                setState('mapLayer',layer.source);                
             });
     },
     showLayer: function(msg,data) {
-        if ( data === model.state.mapLayer ) {
-            return
-        }
-        mapView.map.setLayoutProperty(model.state.mapLayer + 'Layer', 'visibility', 'none');
+        
+        mapView.map.setLayoutProperty(getState.mapLayer[1] + 'Layer', 'visibility', 'none');
         mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
         model.state.mapLayer = data;
         d3.selectAll('#layer-menu a')
@@ -220,5 +257,13 @@ var detailView = {
     }
     //rest of detailView here
 }
+
+/* Aliases */
+
+var setState = controller.controlState.setState,
+    getState = controller.controlState.getState,
+    logState = controller.controlState.logState;
+
+/* Go! */
 
 controller.init(); 
