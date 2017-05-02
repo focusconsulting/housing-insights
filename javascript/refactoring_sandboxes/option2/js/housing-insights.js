@@ -27,7 +27,8 @@ var model = {
     
 };
 
-/*
+/* STATE ********************************
+ *
  * State module keeps state private; only access is through module-scoped functions with closure over state. We have access
  * to those functions, and thus to state, by returning them to controller.controlState.
  */
@@ -74,7 +75,7 @@ function StateModule() {
 var controller = {
     controlState: StateModule(),
     init: function(){
-        this.setInitialSubscriptions(); // set initital PubSub subscriptions
+        
         mapView.init();
         //sibeBar.init()  to come
     },
@@ -113,10 +114,6 @@ var controller = {
             extension: patternMatch.extension
         };
     },
-    subscriptions: {},
-    setInitialSubscriptions: function() {
-        this.subscriptions.mapLoaded = PubSub.subscribe( 'mapLoaded', mapView.addInitialLayers );
-    },
     appendPartial: function(partial, elemID){
         d3.html('partials/' + partial + '.html', function(fragment){
             document.getElementById(elemID).appendChild(fragment);
@@ -131,7 +128,10 @@ var controller = {
 
 
 var mapView = {
-    init: function() {        
+    init: function() {  
+
+        this.setSubscriptions();
+        
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
         this.map = new mapboxgl.Map({
           container: 'map', // container id
@@ -141,11 +141,18 @@ var mapView = {
           minZoom: 3,
           preserveDrawingBuffer: true
         });
+        
         this.map.addControl(new mapboxgl.NavigationControl());
-        controller.subscriptions.mapLayer = PubSub.subscribe( 'mapLayer', mapView.showLayer);
+        
+        
         this.map.on('load', function(){
             setState('mapLoaded',true);
         });        
+    },
+    subscriptions: {},
+    setSubscriptions: function() { // TODO helper function to make more DRY
+        this.subscriptions.mapLoaded = PubSub.subscribe( 'mapLoaded', mapView.addInitialLayers );
+        this.subscriptions.mapLayer = PubSub.subscribe( 'mapLayer', mapView.showLayer);
     },
     initialLayers: [
         {
@@ -191,7 +198,7 @@ var mapView = {
         }
         var name = layer.source + 'Layer';
         controller.getData(layer.source, null, function (data) {
-            console.log(data);
+            
             if ( mapView.map.getSource( name ) === undefined ) {
                 mapView.map.addSource(layer.source + 'Layer', {
                     type:'geojson',
@@ -232,10 +239,11 @@ var mapView = {
             });
     },
     showLayer: function(msg,data) {
-        
-        mapView.map.setLayoutProperty(getState.mapLayer[1] + 'Layer', 'visibility', 'none');
+        var previousLayer = getState().mapLayer[1];
+        if (previousLayer !== undefined ) {
+            mapView.map.setLayoutProperty(previousLayer + 'Layer', 'visibility', 'none');            
+        }
         mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
-        model.state.mapLayer = data;
         d3.selectAll('#layer-menu a')
             .attr('class','');
         d3.select('#' + data + '-menu-item')
