@@ -19,8 +19,6 @@ class DCHousingApiConn(object):
               'Property_and_Land_WebMercator/MapServer/62'
     # default query to get all data as json output
     QUERY = '/query?where=1%3D1&outFields=*&outSR=4326&f=json'
-    # default path assuming calling this from './python/cmd' path
-    DEFAULT_OUTPUT_PATH = '../../data/raw/tax_assessment/opendata'
 
     def __init__(self):
         self.conn = BaseApiConn(DCHousingApiConn.BASEURL)
@@ -29,14 +27,17 @@ class DCHousingApiConn(object):
         """
         Returns JSON object of the entire data set
         """
+        print("DCHousingApiConn.get_json()")
         result = self.conn.get(DCHousingApiConn.QUERY)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
 
         if output_type == 'stdout':
+            print("DCHousingApiConn.get_json() - outtype = stdout")
             pprint(result.json())
         elif output_type == 'csv':
+            print("DCHousingApiConn.get_json() - outtype = csv")
             data = result.json()['features']
             results = [DCHousingResult(address['attributes']) for address in
                        data]
@@ -48,17 +49,9 @@ class DCHousingApiConn(object):
         """
         Write the data to a csv file.
         """
-        # write to default path if none given
-        if csvfile is None or csvfile == "":
-            temp_path = "%s/%s" %(DCHousingApiConn.DEFAULT_OUTPUT_PATH,
-                                  datetime.now().strftime('%Y%m%d'))
-
-            # recursively make default directory if doesn't exist
-            if not os.path.isdir(temp_path):
-                os.makedirs(temp_path)
-            csvfile = "%s/DCHousing.csv" % temp_path
-
+        print("DCHousingApiConn._result_to_csv()")
         with open(csvfile, 'w', encoding='utf-8') as f:
+            print("DCHousingApiConn._result_to_csv() - write to csv")
             writer = csv.writer(f, delimiter=',')
             writer.writerow(FIELDS)
             for result in results:

@@ -42,9 +42,12 @@ Thus, each public function compatible with data.sh needs to have as a minimum th
 from argparse import ArgumentParser
 import importlib
 
-from housinginsights.config.base import HousingInsightsConfig
+import sys, os
+sys.path.append(os.path.abspath('../'))
 
-API_MODULE = 'housinginsights.sources'
+from python.housinginsights.config.base import HousingInsightsConfig
+
+API_MODULE = 'python.housinginsights.sources'
 
 def main():
     description = "Get csv data from api(s)."
