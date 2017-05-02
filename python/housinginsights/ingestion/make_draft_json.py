@@ -44,12 +44,10 @@ def pandas_to_sql_data_type(pandas_type_string):
     return sql_type
 
 
-def make_draft_json(filename, tablename): #use the name from constants as default
+def make_draft_json(filename, tablename, encoding): #use the name from constants as default
 
-
-
-    # Reads the initial CSV and sets up the basic output structure. 
-    dataframe_file = pandas.read_csv(filename, encoding='latin1')
+    # Reads the initial CSV and sets up the basic output structure.
+    dataframe_file = pandas.read_csv(filename, encoding=encoding)
     dataframe_iterator = dataframe_file.columns
     output = {
         tablename: {
@@ -88,13 +86,14 @@ def make_all_json(manifest_path):
     if manifest.has_unique_ids():
         for manifest_row in manifest:
             tablename = manifest_row['destination_table']
+            encoding = manifest_row.get('encoding')
             if tablename not in completed_tables:
                 if manifest_row['include_flag'] == 'use':
                     filepath = os.path.abspath(
                             os.path.join(manifest_row['local_folder'],
                                         manifest_row['filepath']
                                         ))
-                    make_draft_json(filepath, tablename)
+                    make_draft_json(filepath, tablename, encoding)
                     completed_tables[tablename] = filepath
                     print("completed {}".format(tablename))
             else:
@@ -106,12 +105,12 @@ def make_all_json(manifest_path):
 if __name__ == '__main__':
 
     if 'single' in sys.argv:
-        #Edit this filepaths before running
-        csv_filename = os.path.abspath("C:/Users/humph/Documents/Github/housing-insights/data/raw/crime/mpd-crime-map/20170403/2016-all.csv")
-        table_name = "crime"
-        make_draft_json(csv_filename, table_name)
+        # Edit these values before running!
+        csv_filename = os.path.abspath("/Users/williammcmonagle/GitHub/housing-insights/data/raw/acs/B25058_median_rent_by_tract/2009_5year/ACS_09_5YR_B25058_with_ann.csv")
+        table_name = "foobar"
+        encoding = "latin1" #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
+        make_draft_json(csv_filename, table_name, encoding)
+        
     if 'multi' in sys.argv:
         manifest_path = os.path.abspath('../../scripts/manifest.csv')
         make_all_json(manifest_path)
-
-

@@ -1,18 +1,6 @@
-/* function to get parameter value from query string in url */
 
-function getParameterByName(name, url) { // HT http://stackoverflow.com/a/901144/5701184
-    if (!url) {
-      url = window.location.href;
-    }
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
 
-var buildingID = getParameterByName('building');
+var buildingID = app.getParameterByName('building');
 
 var DATA_FILE ='data/Project.csv';
 
@@ -23,7 +11,7 @@ var DataOnly = function(DATA_FILE){  // set up kind of dummy constructor that in
     var data = this.data;
     var d = data.filter(function(obj){
         
-        return obj.Proj_address_id === parseInt(buildingID);
+        return obj.Nlihc_id === buildingID;
     });
     d = d[0];
     document.getElementById('building-name').innerText = d.Proj_Name;
@@ -34,6 +22,7 @@ var DataOnly = function(DATA_FILE){  // set up kind of dummy constructor that in
     document.getElementById('owner-phone').innerText = 'for placement only (need join other data)';
     document.getElementById('tax-assessment-amount').innerText = 'for placement only (need join other data)';
 
+    prepareBuildingMaps(d.Proj_lat,d.Proj_lon)
 
  };
 
