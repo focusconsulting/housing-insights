@@ -4,7 +4,7 @@ Base Api Connection classes.
 
 from urllib.parse import urljoin
 
-from python.housinginsights.config.base import HousingInsightsConfig
+from housinginsights.config.base import HousingInsightsConfig
 
 import requests
 

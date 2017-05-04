@@ -42,12 +42,26 @@ Thus, each public function compatible with data.sh needs to have as a minimum th
 from argparse import ArgumentParser
 import importlib
 
+# Cleaner way to handle module import paths irrespective of current working
+# dir in the housing-insights project folder
 import sys, os
-sys.path.append(os.path.abspath('../'))
+path = ""
 
-from python.housinginsights.config.base import HousingInsightsConfig
+# get absolute path for housing-insights or housing-insights/python
+# which ever is closest
+while os.path.basename(os.path.abspath(path)) not in ["housing-insights",
+                                                      "python"]:
+    path += "../"
 
-API_MODULE = 'python.housinginsights.sources'
+# if at housing-insights folder, move down to housing-insights/python
+if os.path.basename(os.path.abspath(path)) == "housing-insights":
+    path += "python/"
+
+sys.path.append(os.path.abspath(path))
+
+from housinginsights.config.base import HousingInsightsConfig
+
+API_MODULE = 'housinginsights.sources'
 
 def main():
     description = "Get csv data from api(s)."

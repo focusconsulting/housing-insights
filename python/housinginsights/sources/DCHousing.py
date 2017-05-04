@@ -2,8 +2,8 @@ import csv
 from pprint import pprint
 
 
-from python.housinginsights.sources.base import BaseApiConn
-from python.housinginsights.sources.models.DCHousing import FIELDS,\
+from housinginsights.sources.base import BaseApiConn
+from housinginsights.sources.models.DCHousing import FIELDS,\
     DCHousingResult
 
 
