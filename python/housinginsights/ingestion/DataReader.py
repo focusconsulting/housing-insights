@@ -206,12 +206,10 @@ class DataReader(HIReader):
         '''
         Runs all the checks that the file is OK to use
         '''
-        if self.do_fields_match() == False:
+        if self.do_fields_match() and self.check_include_flag(sql_manifest_row):
+            return True
+        else:
             return False
-        if self.check_include_flag(sql_manifest_row) == False:
-            return False
-        return True
-
 
     def check_include_flag(self, sql_manifest_row):
         '''
@@ -248,28 +246,35 @@ class DataReader(HIReader):
             logging.info('  table "{}" not found in meta data'.format(self.destination_table))
             return False
 
-        included = {}
-
-        #Initialize values - start out assuming all is OK until we identify problems.
-        return_value = True
         self.not_found = []
+        actual_exist = self.verify_actual_columns_exist_in_metadata(field_list)
+        required_exist = self.verify_required_metadata_columns_exist_in_actual(field_list)
 
-        #Check that all of the data columns are in the meta.json
+        # Success if both actual and required exist, else false.
+        success = True if actual_exist and required_exist else False
+
+        #Log our errors if any
+        if not success:
+            logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, self.not_found))
+        else:
+            logging.info("  do_fields_match: {}. meta.json and csv field lists match completely for '{}'".format(success, self.destination_table))
+
+        return success
+
+    def verify_actual_columns_exist_in_metadata(self, field_list):
+        # Check that all of the data columns are in the meta.json
+        success = True
         for field in self.keys:
             if not any(d.get('source_name', None) == field for d in field_list):
                 self.not_found.append('"{}" in CSV not found in meta'.format(field))
-                return_value = False
+                success = False
+        return success
 
-        #Check that all the meta.json columns are in the data
+    def verify_required_metadata_columns_exist_in_actual(self, field_list):
+        # Check that all REQUIRED the meta.json columns are in the data
+        success = True
         for field in field_list:
-            if field['source_name'] not in self.keys:
+            if (field['required_in_source']) and (field['source_name'] not in self.keys):
                 self.not_found.append('  "{}" in meta.json not found in data'.format(field['source_name']))
-                return_value = False
-
-        #Log our errors if any
-        if return_value == False:
-            logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, self.not_found))
-        else:
-            logging.info("  do_fields_match: {}. meta.json and csv field lists match completely for '{}'".format(return_value, self.destination_table))
-
-        return return_value
+                success = False
+        return success

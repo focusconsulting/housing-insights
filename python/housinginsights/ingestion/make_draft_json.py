@@ -67,7 +67,8 @@ def make_draft_json(filename, tablename, encoding): #use the name from constants
                 "source_name": field, 
                 "sql_name": sql_name_clean(field),
                 "display_name": sql_name_clean(field),
-                "display_text":""
+                "display_text":"",
+                "required_in_source": False
             }
         output[tablename]["fields"].append(data)
 
