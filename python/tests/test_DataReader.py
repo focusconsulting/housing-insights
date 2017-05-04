@@ -11,8 +11,11 @@ from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 
 # SETUP - Mostly taken from load_data.py
-meta_path = 'test_data/meta.json' # TODO Update when meta.json is updated.
-manifest_path = 'test_data/manifest_unique.csv' # TODO Consider updating manifest_sample
+this_file = os.path.realpath(__file__)
+this_dir = os.path.dirname(this_file)
+
+meta_path = os.path.abspath(this_dir + '/test_data/meta_sample.json') # TODO Update when meta.json is updated.
+manifest_path = os.path.abspath(this_dir + '/test_data/manifest_sample.csv') # TODO Consider updating manifest_sample
 database_choice = 'docker_database'
 logging_path = os.path.abspath("../logs")
 

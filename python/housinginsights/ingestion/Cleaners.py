@@ -374,9 +374,12 @@ class ACSRentCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         row = self.high_low_rent(row)
         #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
-        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-',''])
+        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
         row = self.remove_non_dc_tracts(row,column_name='GEO.id2')
+
         if row_num == 0:
+            return None
+        if row is None:
             return None
         return row
 

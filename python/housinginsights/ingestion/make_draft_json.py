@@ -68,13 +68,13 @@ def make_draft_json(filename, tablename, encoding): #use the name from constants
                 "sql_name": sql_name_clean(field),
                 "display_name": sql_name_clean(field),
                 "display_text":"",
-                "required_in_source": False
+                "required_in_source": True
             }
         output[tablename]["fields"].append(data)
 
     output_path = os.path.join(logging_path,(tablename+".json"))
     with open(output_path, "w") as results:
-        json.dump(output, results, sort_keys=True, indent=4)
+        json.dump(output, results, sort_keys=True, indent=2)
 
     print(tablename + " JSON table file created.")
 

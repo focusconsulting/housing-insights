@@ -115,7 +115,7 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files = True):
             meta_only_fields = {}
             for field in meta[tablename]['fields']:
                 if field['source_name'] not in csv_reader.keys:
-                    missing_fields[field['sql_name']] = None
+                    meta_only_fields[field['sql_name']] = None
 
             #clean the file and save the output to a local pipe-delimited file
             if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):

@@ -255,7 +255,7 @@ class DataReader(HIReader):
 
         #Log our errors if any
         if not success:
-            logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(return_value, self.destination_table, self.not_found))
+            logging.warning("  do_fields_match: {}. '{}' had missing items:\n{}".format(success, self.destination_table, self.not_found))
         else:
             logging.info("  do_fields_match: {}. meta.json and csv field lists match completely for '{}'".format(success, self.destination_table))
 
