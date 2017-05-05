@@ -16,6 +16,20 @@
     right: 10px;
     background-color: #fff;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content:             
+}
+
+#sidebar > div {
+    border: 1px solid magenta;
+    flex-grow: 1;
+    padding: 10px 0;
+}
+
+#pie-charts {
+    display: flex;
+    justify-content: space-between;
 }
 
 /*
