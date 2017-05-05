@@ -3,6 +3,12 @@ from datetime import datetime
 import dateutil.parser as dateparser
 import logging
 
+from housinginsights.ingestion.DataReader import HIReader
+import os
+
+
+package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+
 '''
 Usage:
 Dynamically import based on name of class in meta.json:
@@ -19,6 +25,17 @@ class CleanerBase(object, metaclass=ABCMeta):
         self.fields = meta[self.tablename]['fields'] #a list of dicts
 
         self.null_value = 'Null' #what the SQLwriter expects in the temp csv
+
+
+
+        
+        #Flatten the census mapping file so that every potential name of a census tract can be translated to its standard format
+        self.census_mapping = {}
+        census_reader = HIReader(os.path.join(package_dir,'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
+        for row in census_reader:
+            for key, value in row.items():
+                self.census_mapping[value] = row['census_tract']
+
 
     @abstractmethod
     def clean(self, row, row_num):
@@ -87,7 +104,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
     def remove_non_dc_tracts(self,row,column_name):
         '''
-        TODO switch this to not be hardcoded, and to be consistentwith replace_tracts code
+        TODO change to use self.census_mapping
         '''
         dc_tracts=["11001000100","11001000201","11001000202","11001000300","11001000400","11001000501","11001000502","11001000600",
         "11001000701","11001000702","11001000801","11001000802","11001000901","11001000902","11001001001","11001001002","11001001100",
@@ -114,10 +131,24 @@ class CleanerBase(object, metaclass=ABCMeta):
         else:
             return None
 
+
+    def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
+            '''
+            Make all census tract names follow a consistent format. 
+            column_name corresponds to the key of the row, which depends on 
+            the source file column name which may be different from the final consistent name of census_tract
+            '''
+            row[column_name] = self.census_mapping[row[column_name]]
+            return row
+
+
+
     def replace_tracts(self,row,row_num,column_name='census_tract'):
         '''
         Converts the raw census tract code to the more readable format used by PresCat
         TODO should read these mappings from file instead of having them hardcoded. 
+
+        TODO should use self.census_mapping instead
         '''
         census_tract_mapping = { "000100":"Tract 1"
                                 ,"000201":"Tract 2.01"
@@ -343,6 +374,7 @@ class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['N','', None])
         row = self.parse_dates(row)
+        row = self.rename_census_tract(row,row_num,column_name='Geo2010')
         return row
 
 class SubsidyCleaner(CleanerBase):
@@ -370,17 +402,24 @@ class BuildingPermitsCleaner(CleanerBase):
             row['NEIGHBORHOODCLUSTER'] = 'Cluster ' + str(row['NEIGHBORHOODCLUSTER'])
             return row
 
-class ACSRentCleaner(CleanerBase):
+class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
-        row = self.high_low_rent(row)
-        #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
-        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
-        row = self.remove_non_dc_tracts(row,column_name='GEO.id2')
-
+        #Handle the first row which is a descriptive row, not data. 
         if row_num == 0:
             return None
+
+        row = self.remove_non_dc_tracts(row,column_name='GEO.id2')
         if row is None:
             return None
+
+        #Clean up the ones we keep
+        row = self.high_low_rent(row)
+        row['lower_quartile_rent'] = None #waiting on ACS to come from API instead
+
+        #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
+        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
+        row = self.rename_census_tract(row,column_name='GEO.id2')
+
         return row
 
     def high_low_rent(self,row):

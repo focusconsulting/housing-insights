@@ -1,6 +1,7 @@
 {
-  "acs_rent_lower": {
-    "cleaner": "ACSRentCleaner",
+    
+  "census": {
+    "cleaner": "CensusCleaner",
     "fields": [
       {
         "display_name": "geo_id",
@@ -11,143 +12,44 @@
         "type": "text"
       },
       {
-        "display_name": "geo_id2",
-        "display_text": "",
+        "display_name": "Census tract code",
+        "display_text": "GEO.id2 in the source data, the code for the census tract including the state (11) and county (001) codes.",
         "required_in_source": true,
         "source_name": "GEO.id2",
-        "sql_name": "geo_id2",
+        "sql_name": "census_tract",
         "type": "text"
       },
       {
-        "display_name": "geo_display_label",
+        "display_name": "Census tract description",
         "display_text": "",
         "required_in_source": true,
         "source_name": "GEO.display-label",
-        "sql_name": "geo_display_label",
-        "type": "text"
-      },
-      {
-        "display_name": "Lower quartile rent (ACS)",
-        "display_text": "Lower quartile rent from the American Community Survey table B25057",
-        "required_in_source": true,
-        "source_name": "HD01_VD01",
-        "sql_name": "lower_quartile_rent",
-        "type": "integer"
-      },
-      {
-        "display_name": "Margin of error",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "HD02_VD01",
-        "sql_name": "lower_quartile_rent_moe",
-        "type": "integer"
-      },
-      {
-        "display_name": "Unique data ID",
-        "display_text": "Identifies which source file this record came from",
-        "required_in_source": false,
-        "source_name": "unique_data_id",
-        "sql_name": "unique_data_id",
-        "type": "text"
-      }
-    ],
-    "replace_table": false
-  },
-  "acs_rent_median": {
-    "cleaner": "ACSRentCleaner",
-    "fields": [
-      {
-        "display_name": "geo_id",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.id",
-        "sql_name": "geo_id",
-        "type": "text"
-      },
-      {
-        "display_name": "geo_id2",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.id2",
-        "sql_name": "geo_id2",
-        "type": "text"
-      },
-      {
-        "display_name": "geo_display_label",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.display-label",
-        "sql_name": "geo_display_label",
+        "sql_name": "census_tract_desc",
         "type": "text"
       },
       {
         "display_name": "Median Rent (ACS)",
-        "display_text": "Median rent from the American Community Survey table B25058",
+        "display_text": "Median rent paid by all residents in this area, per the American Community Survey Table B25058",
         "required_in_source": true,
         "source_name": "HD01_VD01",
-        "sql_name": "median_rent",
+        "sql_name": "acs_median_rent",
         "type": "integer"
       },
       {
-        "display_name": "Margin of error",
-        "display_text": "",
+        "display_name": "MOE: Median Rent (ACS)",
+        "display_text": "Margin of error of the Median Rent in the American Community Survey Table B25058",
         "required_in_source": true,
         "source_name": "HD02_VD01",
-        "sql_name": "median_rent_moe",
+        "sql_name": "acs_median_rent_moe",
         "type": "integer"
       },
       {
-        "display_name": "Unique data ID",
-        "display_text": "Identifies which source file this record came from",
+        "_comment": "This will be added back in when the Census API tool is done",
+        "display_name": "Lower quartile rent (ACS)",
+        "display_text": "Lower quartile rent from the American Community Survey table B25057",
         "required_in_source": false,
-        "source_name": "unique_data_id",
-        "sql_name": "unique_data_id",
-        "type": "text"
-      }
-    ],
-    "replace_table": false
-  },
-  "acs_rent_upper": {
-    "cleaner": "ACSRentCleaner",
-    "fields": [
-      {
-        "display_name": "geo_id",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.id",
-        "sql_name": "geo_id",
-        "type": "text"
-      },
-      {
-        "display_name": "geo_id2",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.id2",
-        "sql_name": "geo_id2",
-        "type": "text"
-      },
-      {
-        "display_name": "geo_display_label",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.display-label",
-        "sql_name": "geo_display_label",
-        "type": "text"
-      },
-      {
-        "display_name": "Upper quartile rent (ACS)",
-        "display_text": "Upper quartile rent from the American Community Survey table B25059",
-        "required_in_source": true,
-        "source_name": "HD01_VD01",
-        "sql_name": "upper_quartile_rent",
-        "type": "integer"
-      },
-      {
-        "display_name": "Margin of error",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "HD02_VD01",
-        "sql_name": "upper_quartile_rent_moe",
+        "source_name": "lower_quartile_rent",
+        "sql_name": "lower_quartile_rent",
         "type": "integer"
       },
       {
@@ -474,52 +376,6 @@
         "required_in_source": true,
         "source_name": "BUSINESSIMPROVEMENTDISTRICT",
         "sql_name": "businessimprovementdistrict",
-        "type": "text"
-      },
-      {
-        "display_name": "Unique data ID",
-        "display_text": "Identifies which source file this record came from",
-        "required_in_source": false,
-        "source_name": "unique_data_id",
-        "sql_name": "unique_data_id",
-        "type": "text"
-      }
-    ],
-    "replace_table": true
-  },
-  "census_mapping": {
-    "cleaner": "GenericCleaner",
-    "fields": [
-      {
-        "display_name": "acs_code",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "acs_code",
-        "sql_name": "acs_code",
-        "type": "text"
-      },
-      {
-        "display_name": "acs_remove_state_county",
-        "display_text": "acs_code stripped of its duplicative state and county codes",
-        "required_in_source": true,
-        "source_name": "acs_remove_state_county",
-        "sql_name": "acs_remove_state_county",
-        "type": "text"
-      },
-      {
-        "display_name": "tract_code",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "tract_code",
-        "sql_name": "tract_code",
-        "type": "text"
-      },
-      {
-        "display_name": "prescat_code",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "prescat_code",
-        "sql_name": "prescat_code",
         "type": "text"
       },
       {
@@ -1833,11 +1689,11 @@
         "type": "text"
       },
       {
-        "display_name": "proj_zip",
+        "display_name": "Zip code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Zip",
-        "sql_name": "proj_zip",
+        "sql_name": "zip",
         "type": "text"
       },
       {
@@ -1937,11 +1793,11 @@
         "type": "date"
       },
       {
-        "display_name": "ward2012",
+        "display_name": "Ward",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Ward2012",
-        "sql_name": "ward2012",
+        "sql_name": "ward",
         "type": "text"
       },
       {
@@ -1953,11 +1809,11 @@
         "type": "text"
       },
       {
-        "display_name": "anc2012",
+        "display_name": "ANC",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Anc2012",
-        "sql_name": "anc2012",
+        "sql_name": "anc",
         "type": "text"
       },
       {
@@ -1969,35 +1825,35 @@
         "type": "text"
       },
       {
-        "display_name": "geo2010",
+        "display_name": "Census tract",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Geo2010",
-        "sql_name": "geo2010",
+        "sql_name": "census_tract",
         "type": "text"
       },
       {
-        "display_name": "cluster_tr2000",
+        "display_name": "Neighborhood Cluster",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
-        "sql_name": "cluster_tr2000",
+        "sql_name": "neighborhood_cluster",
         "type": "text"
       },
       {
-        "display_name": "cluster_tr2000_name",
+        "display_name": "Neighborhood Cluster Description",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cluster_tr2000_name",
-        "sql_name": "cluster_tr2000_name",
+        "sql_name": "neighborhood_cluster_desc",
         "type": "text"
       },
       {
-        "display_name": "zip",
-        "display_text": "",
+        "display_name": "Zipcode String",
+        "display_text": "This is a duplicate column in the Preservation Catalog source which has the word ZIP appended to the zipcode.",
         "required_in_source": true,
         "source_name": "Zip",
-        "sql_name": "zip",
+        "sql_name": "zip_string",
         "type": "text"
       },
       {
@@ -2041,19 +1897,19 @@
         "type": "decimal"
       },
       {
-        "display_name": "proj_lat",
+        "display_name": "Latitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_lat",
-        "sql_name": "proj_lat",
+        "sql_name": "latitude",
         "type": "decimal"
       },
       {
-        "display_name": "proj_lon",
+        "display_name": "Longitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_lon",
-        "sql_name": "proj_lon",
+        "sql_name": "longitude",
         "type": "decimal"
       },
       {
@@ -2065,6 +1921,7 @@
         "type": "integer"
       },
       {
+        "_comment": "TODO This needs to be parsed and converted to date format (need to write appropriate parser)",
         "display_name": "update_dtm",
         "display_text": "",
         "required_in_source": true,
