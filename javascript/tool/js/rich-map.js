@@ -1,13 +1,35 @@
-mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+var map;
 
-var map = new mapboxgl.Map({
-  container: 'map', // container id
-  style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
-  zoom: 11,
-  center: [-76.92, 38.9072],
-  minZoom: 3,
-  preserveDrawingBuffer: true
-});
+(function getMenuData(){
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET','../datasets_for_browse.json');
+  xhr.send();
+  xhr.onreadystatechange = function(){
+    if(xhr.readyState === 4){
+      var json = JSON.parse(xhr.responseText);
+      specifyMap();
+      populateMenus(json);
+      prepareMaps();
+    }
+  }
+})();
+
+function populateMenus(jsonString){
+  
+}
+
+function specifyMap(){
+  mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+
+  var map = new mapboxgl.Map({
+    container: 'map', // container id
+    style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
+    zoom: 11,
+    center: [-76.92, 38.9072],
+    minZoom: 3,
+    preserveDrawingBuffer: true
+  });
+}
 
 function prepareMaps(){
 
@@ -425,46 +447,11 @@ function prepareMaps(){
 function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
   if (currentZoneType !== map.clickedLayer) {
 
-
-
     //document.querySelector('#zone-details-heading').innerText = map.clickedLayer.capitalizeFirstLetter() + ' Details';
     document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + map.clickedLayer ;
     document.getElementById('zone-selector').onchange = changeZone;
 
   }
-  }
+}
 
-app.getInitialData([{
-  dataName: 'project', 
-  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/project'
-},{
-  dataName: 'crime_ward',
-  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/ward'
-},{
-  dataName: 'crime_anc',
-  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/anc'
-},{
-  dataName: 'crime_neighborhood',
-  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/neighborhood_cluster'
-},{
-  dataName: 'building_permits_ward',
-  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/ward'
-},{
-  dataName: 'building_permits_neighborhood',
-  dataURL: 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/neighborhood_cluster'
-},{
-  dataName: 'ward_polygons',
-  dataURL: 'data/ward.geojson'
-}, {
-  dataName: 'tract_polygons',
-  dataURL: 'data/tract.geojson'
-}, {
-  dataName: 'neighborhood_polygons',
-  dataURL: 'data/neighborhood.geojson'
-},{
-  dataName: 'zip_polygons',
-  dataURL: 'data/zip.geojson'
-},{
-  dataName: 'zillow_polygons',
-  dataURL: 'data/zillow.geojson'
-}], prepareMaps);
+
