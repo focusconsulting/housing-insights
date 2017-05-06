@@ -30,7 +30,7 @@ def load_meta_data(filename='meta.json'):
         for table in meta:
             for field in meta[table]['fields']:
                 for key in field:
-                    if key not in ('display_name', 'display_text', 'source_name', 'sql_name', 'type'):
+                    if key not in ('display_name', 'display_text', 'source_name', 'sql_name', 'type', 'required_in_source', '_comment'):
                         json_is_valid = False
                         first_json_error = "Location: table: {}, section: {}, attribute: {}".format(table, field, key)
                         raise ValueError("Error found in JSON, check expected format. {}".format(first_json_error))

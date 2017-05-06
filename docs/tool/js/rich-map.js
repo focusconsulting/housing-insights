@@ -223,7 +223,7 @@ function prepareMaps(){
       
     map.addSource("project", {
       "type": "geojson",
-      "data": app.dataCollection.project.toGeoJSON('proj_lon', 'proj_lat')
+      "data": app.dataCollection.project.toGeoJSON('longitude', 'latitude')
     });
     
     map.addLayer({

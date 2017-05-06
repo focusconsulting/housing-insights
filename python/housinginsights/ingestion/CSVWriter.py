@@ -36,9 +36,6 @@ class CSVWriter(object):
 
         #We always want to append this to every table. write() should also append this to provided data
         self.dictwriter_fields = copy.copy(self.csv_fields)
-        self.dictwriter_fields.append('unique_data_id')
-        self.sql_fields.append('unique_data_id')
-
 
         #By default, creates a temp csv file wherever the calling module was located
         self.filename = 'temp_{}.psv'.format(self.unique_data_id) if filename == None else filename
@@ -59,7 +56,10 @@ class CSVWriter(object):
 
     def write(self, row):
         row['unique_data_id'] = self.manifest_row['unique_data_id']
+        #Note to developers - if this row returns a key error due to an optional column, it means you need
+        #  to have your cleaner add a 'null' value for that optional column. 
         self.writer.writerow(row)
+
 
     def open(self):
         '''
