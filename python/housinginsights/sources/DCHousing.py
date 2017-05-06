@@ -7,7 +7,7 @@ from housinginsights.sources.models.DCHousing import FIELDS,\
     DCHousingResult
 
 
-class DCHousingApiConn(object):
+class DCHousingApiConn(BaseApiConn):
     """
     API Interface to the Affordable Housing data set on opendata.dc.gov.
     Use public method to retrieve data.
@@ -19,13 +19,13 @@ class DCHousingApiConn(object):
     QUERY = '/query?where=1%3D1&outFields=*&outSR=4326&f=json'
 
     def __init__(self):
-        self.conn = BaseApiConn(DCHousingApiConn.BASEURL)
+        super().__init__(DCHousingApiConn.BASEURL, None)
 
     def get_json(self, output_type=None, output_file=None):
         """
         Returns JSON object of the entire data set
         """
-        result = self.conn.get(DCHousingApiConn.QUERY)
+        result = self.get(DCHousingApiConn.QUERY)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
