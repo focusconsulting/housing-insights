@@ -1,5 +1,9 @@
 {
-  "project": ['point'],
-  "crime": ['ward', 'anc', 'neighborhood'],
-  "building_permits": ['ward', 'neighborhood']
+  "point_api_base": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/",
+  "zone_api_base": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/",
+  "datasets": {
+    "project": ['point'],
+    "crime": ['ward', 'anc', 'neighborhood'],
+    "building_permits": ['ward', 'neighborhood']
+  }
 }
