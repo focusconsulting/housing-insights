@@ -47,8 +47,15 @@ String.prototype.hashCode = function() {
 };
 
 String.prototype.capitalizeFirstLetter = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+  return this.charAt(0).toUpperCase() + this.slice(1);
 };
+
+String.prototype.toTitle = function() {
+  return this.split('_').map(function(word){
+    return word.capitalizeFirstLetter();
+  }).join(' ');
+}
+
 // This constructor stores json data fetched from AWS so that we can do various things with it,
 // like convert it to geoJSON or grab its display name and other information 
 // (regardless of the data source) using conventions from meta.json.

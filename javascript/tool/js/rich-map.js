@@ -1,4 +1,10 @@
+// Here are some global variables.
+// As we refactor the app, let's think about a more appropriate place to put them.  
 var map;
+var mapMenuData;
+var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
+var dataSourceIds = ['building_permits', 'crime'];
+// End global variables
 
 (function getMenuData(){
   var xhr = new XMLHttpRequest();
@@ -8,10 +14,9 @@ var map;
   xhr.onreadystatechange = function(){
     if(xhr.readyState === 4){
       console.log(xhr.responseText);
-      var json = JSON.parse(xhr.responseText);
-      console.log(json);
+      mapMenuData = JSON.parse(xhr.responseText);
       specifyMap();
-      // populateMenus(json);
+      populateMenus();
       // prepareMaps();
     }
   }
@@ -30,8 +35,46 @@ function specifyMap(){
   });
 }
 
-function populateMenus(jsonString){
+function populateMenus(){
+  for (var i = 0; i < toggleableLayerIds.length; i++) {
+    var id = toggleableLayerIds[i];
 
+    var link = document.createElement('a');
+    link.href = '#';
+    link.textContent = id.toTitle();
+    link.dataset.id = id;
+
+    link.onclick = function (e) {
+      map.clickedLayer = this.dataset.id;
+      e.preventDefault();
+      e.stopPropagation();
+      showLayer(this); // call reusable function with current `this` (element) as context -JO
+      setHeader();
+      changeZoneType(); // defined in pie.js
+      updateDataSourceMenu();
+    };
+
+    var layers = document.getElementById('menu');
+    layers.appendChild(link);
+  }
+
+  for (var i = 0, datasets = Object.keys(mapMenuData.optional_datasets); i < datasets.length; i++) {
+    var id = datasets[i];
+    var link = document.createElement('a');
+    link.href = '#';
+    link.className = 'inactive';
+    link.textContent = id.toTitle();
+    link.dataset.id = id;
+
+    link.onclick = function (e) {
+      var id = this.dataset.id;
+      e.preventDefault();
+      e.stopPropagation();
+      showDataLayer.call(this, id); // call reusable function with current `this` (element) as context -JO
+    };
+    var data_sources = document.getElementById('data-menu');
+    data_sources.appendChild(link);
+  }
 }
 
 
@@ -293,56 +336,49 @@ function prepareMaps(){
     var categoryLegendEl = document.getElementById('category-legend');
     categoryLegendEl.style.display = 'block';
 	
-    var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
-
     map.clickedLayer = toggleableLayerIds[0];
-    var previousLayer; // keeping track of previously selected layer so it can be turned off
+    map.previousLayer; // keeping track of previously selected layer so it can be turned off
 
-    var dataSourceIds = ['building_permits', 'crime'];
-    var dataSourcesByLayer = {
-      ward: ['building_permits', 'crime'],
-      neighborhood: ['building_permits', 'crime']
-    };
-    var selectedDataLayer = null;
+    map.selectedDataLayer = null;
 
-    function showLayer() { // JO putting this bit in a reusable function
+    function showLayer(selector) { // JO putting this bit in a reusable function
 
       var visibility = map.getLayoutProperty(map.clickedLayer, 'visibility');
 
-      if (previousLayer !== undefined) {
-        map.setLayoutProperty(previousLayer, 'visibility', 'none');
+      if (map.previousLayer !== undefined) {
+        map.setLayoutProperty(map.previousLayer, 'visibility', 'none');
       }
       document.querySelectorAll('nav#menu a').forEach(function(item){
         item.className = '';
       });
-      this.className = 'active';
+      selector.className = 'active';
       map.setLayoutProperty(map.clickedLayer, 'visibility', 'visible');
     
-      previousLayer = map.clickedLayer;
+      map.previousLayer = map.clickedLayer;
       updateDataSourceMenu();
     };
 
     function showDataLayer(dataSourceId){
-      hideDataLayer();
-      selectedDataLayer = dataSourceId + '_' + map.clickedLayer;
-      map.setLayoutProperty(selectedDataLayer, 'visibility', 'visible');
+      hideDataLayers();
+      map.selectedDataLayer = dataSourceId + '_' + map.clickedLayer;
+      map.setLayoutProperty(map.selectedDataLayer, 'visibility', 'visible');
       this.className = 'active';
     }
 
-    function hideDataLayer(){
+    function hideDataLayers(){
       document.querySelectorAll('#data-menu a').forEach(function(item){
         item.className = '';
       });
-      if (selectedDataLayer !== null) {
-        map.setLayoutProperty(selectedDataLayer, 'visibility', 'none');
-        selectedDataLayer = null;
+      if (map.selectedDataLayer !== null) {
+        map.setLayoutProperty(map.selectedDataLayer, 'visibility', 'none');
+        map.selectedDataLayer = null;
       }
     }
 
     function updateDataSourceMenu() {
-      hideDataLayer();
-      var availableDataSources = map.clickedLayer in dataSourcesByLayer ?
-        dataSourcesByLayer[map.clickedLayer]:
+      hideDataLayers();
+      var availableDataSources = map.clickedLayer in Object.keys(mapMenuData['optional_datasets']) ?
+        mapMenuData['optional_datasets'][map.clickedLayer]:
         [];
       document.querySelectorAll('#data-menu a').forEach(function(item){
         if (!(item.dataset.id in availableDataSources)){
@@ -354,56 +390,8 @@ function prepareMaps(){
       });
     }
 
-    function titleString(string) {
-      function capFirst(string){
-        return string.charAt(0).toUpperCase() + string.slice(1);
-      }
-      return string.split('_').map(capFirst).join(' ');
-    }
-
-    for (var i = 0; i < toggleableLayerIds.length; i++) {
-      var id = toggleableLayerIds[i];
-
-      var link = document.createElement('a');
-      link.href = '#';
-      link.textContent = titleString(id);
-      link.dataset.id = id;
-
-      link.onclick = function (e) {
-        map.clickedLayer = this.dataset.id;
-        e.preventDefault();
-        e.stopPropagation();
-        showLayer.call(this); // call reusable function with current `this` (element) as context -JO
-        setHeader();
-        changeZoneType(); // defined in pie.js
-        updateDataSourceMenu();
-      };
-
-      var layers = document.getElementById('menu');
-      layers.appendChild(link);
-    }
-
-    showLayer.call(document.querySelector('nav#menu a:first-of-type')); // this call happens once on load, sets up initial
+    showLayer(document.querySelector('nav#menu a:first-of-type')); // this call happens once on load, sets up initial
                                                                      // condition of having first option active.
-
-    for (var i = 0; i < dataSourceIds.length; i++) {
-      var id = dataSourceIds[i];
-
-      var link = document.createElement('a');
-      link.href = '#';
-      link.className = 'inactive';
-      link.textContent = titleString(id);
-      link.dataset.id = id;
-
-      link.onclick = function (e) {
-        var id = this.dataset.id;
-        e.preventDefault();
-        e.stopPropagation();
-        showDataLayer.call(this, id); // call reusable function with current `this` (element) as context -JO
-      };
-      var data_sources = document.getElementById('data-menu');
-      data_sources.appendChild(link);
-    }
 
     map.on('click', function (e) {
       var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
