@@ -1,0 +1,5 @@
+{
+  "project": ['point'],
+  "crime": ['ward', 'anc', 'neighborhood'],
+  "building_permits": ['ward', 'neighborhood']
+}
