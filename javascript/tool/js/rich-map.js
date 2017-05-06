@@ -24,7 +24,7 @@ function hideAllOptionalLayers(){
       mapMenuData = JSON.parse(xhr.responseText);
       specifyMap();
       dataMenu = new DataMenu();
-      // prepareMaps();
+      prepareMaps();
     }
   }
 })();
@@ -227,48 +227,62 @@ function prepareMaps(){
   }
 
   function mapLoadedCallback() {
-      
-    map.addSource("project", {
-      "type": "geojson",
-      "data": app.dataCollection.project.toGeoJSON('proj_lon', 'proj_lat')
-    });
-    
-    map.addLayer({
-      'id': 'project',
-      'type': 'circle',
-      'source': 'project',
-      'paint': {
-        // make circles larger as the user zoom. [[smallzoom,px],[bigzoom,px]]
-        'circle-radius': {
-                'base': 1.75,
-                'stops': [[10, 3], [18, 32]]
-            },
-        // color circles by ethnicity, using data-driven styles
-        'circle-color': {
-          property: 'category_code',
-          type: 'categorical',
-          stops: [
-            ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-            ['2 - Expiring Subsidy', '#8B4225'],
-            ['3 - Recent Failing REAC Score', '#bd0026'],
-            ['4 - More Info Needed', '#A9A9A9'],
-            ['5 - Other Subsidized Property', ' #fd8d3c'],
-            ['6 - Lost Rental', '#A9A9A9']
-          ]
-        }
-      }
-    });
   
-    map.addLayer({
-      'id': 'projecttext',
-      'source': 'project',
-      'type': 'symbol',
-      'minzoom': 14,
-      layout: {
-        'text-field': "{proj_name}",
-        'text-anchor': "bottom-left"
-      },
-    });
+    // TO DO - there's a bit of ugly callback nesting in the code below, which loads the initial
+    // 'project' data into the map. Let's make this neater!
+    var projectXHR = new XMLHttpRequest();
+    projectXHR.open('GET', 'http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/project');
+    projectXHR.send();
+    projectXHR.onreadystatechange = function(){
+      if(projectXHR.readyState === 4){
+        app.dataCollection.project = JSON.parse(projectXHR.responseText);
+        addProjectToMap();
+      }
+    }
+
+    function addProjectToMap(){
+      
+      map.addSource("project", {
+        "type": "geojson",
+        "data": app.dataCollection.project.toGeoJSON('proj_lon', 'proj_lat')
+      });
+      
+      map.addLayer({
+        'id': 'project',
+        'type': 'circle',
+        'source': 'project',
+        'paint': {
+          // make circles larger as the user zoom. [[smallzoom,px],[bigzoom,px]]
+          'circle-radius': {
+                  'base': 1.75,
+                  'stops': [[10, 3], [18, 32]]
+              },
+          'circle-color': {
+            property: 'category_code',
+            type: 'categorical',
+            stops: [
+              ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+              ['2 - Expiring Subsidy', '#8B4225'],
+              ['3 - Recent Failing REAC Score', '#bd0026'],
+              ['4 - More Info Needed', '#A9A9A9'],
+              ['5 - Other Subsidized Property', ' #fd8d3c'],
+              ['6 - Lost Rental', '#A9A9A9']
+            ]
+          }
+        }
+      });
+    
+      map.addLayer({
+        'id': 'projecttext',
+        'source': 'project',
+        'type': 'symbol',
+        'minzoom': 14,
+        layout: {
+          'text-field': "{proj_name}",
+          'text-anchor': "bottom-left"
+        },
+      });
+    }
   
     var categoryLegendEl = document.getElementById('category-legend');
     categoryLegendEl.style.display = 'block';
