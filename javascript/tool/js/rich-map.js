@@ -117,7 +117,6 @@ function LayerOption(dataName, zoneName){
   this.sourceName = dataName + "_" + zoneName + "_source";
   this.layerName = dataName + "_" + zoneName + "_layer";
 
-  this.loaded = false;
   this.sourceData;
 
   (function queryData(){
@@ -127,31 +126,42 @@ function LayerOption(dataName, zoneName){
     xhr.onreadystatechange = function(){
       if(xhr.readyState === 4){
         var json = JSON.parse(xhr.responseText);
-        this.loaded = true;
         this.sourceData = json;
+        queryShape();
       }  
     }
   })();
 
-  this.mapboxSource = function(){
+  function queryShape(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/javascript/tool/data/' + this.zoneName + ".geojson");
+      xhr.send();
+      xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4){
+          var json = JSON.parse(xhr.responseText);
+          this.sourceShapes = json;
+          this.addMapboxSource();
+          this.addMapboxLayer();
+        }  
+      }
+
+  }
+
+  this.addMapboxSource = function(){
     // Check whether the source already exists and if it does, use it.
     if(map.getSource(this.sourceName)){
       this.mapboxSource = map.getSource(this.sourceName);
     }
+    var sourcePlusShapes = addDataToPolygons(this.sourceShapes, this.sourceData);
 
-    // DON'T FORGET TO BIND THE DATA TO THE GEOJSON! THIS WILL INVOLVE
-    // A SEPARATE XHR AND A CALL TO THAT FUNCTION I WROTE A WHILE BACK!
     map.addSource(this.sourceName, {
       "type": "geojson",
-      "data": this.sourceData
+      "data": sourcePlusShapes
     });
 
-    // The below line is so this.mapboxSource becomes a property
-    // after the first call.
-    this.mapboxSource = map.getSource(this.sourceName);
   }
 
-  this.mapboxLayer = function(){
+  this.addMapboxLayer = function(){
     // Check whether the layer already exists and if it does, use it.
     if(map.getLayer(this.layerName)){
       this.mapboxLayer = map.getLayer(this.layerName);
@@ -187,15 +197,8 @@ function LayerOption(dataName, zoneName){
         "fill-opacity": .5
       }
     });
-
-    // The line below is so this shows up as a property after the first call
-    this.mapboxLayer =  map.getLayer(this.layerName);
   }
 
-  // The show methods are still freshly pasted in.
-
-  // OVERHAULING 'SHOW' so that you need to select both a dataset and a 
-  // zone.
   this.show = function() {
     var selector = document.getElementById(this.dataName);
     hideAllOptionalLayers();
@@ -216,38 +219,6 @@ function LayerOption(dataName, zoneName){
 
 function prepareMaps(){
 
-  app.dataCollection.neighborhood_data_polygons = addDataToPolygons(
-    app.dataCollection.neighborhood_polygons.json,
-    app.dataCollection.crime_neighborhood.json,
-    function(aggregateEl, feature){
-      return aggregateEl.group == feature.properties["NAME"];
-    } 
-  );
-
-  app.dataCollection.neighborhood_data_polygons = addDataToPolygons(
-    app.dataCollection.neighborhood_polygons.json,
-    app.dataCollection.building_permits_neighborhood.json,
-    function(aggregateEl, feature){
-      return aggregateEl.group == feature.properties["NAME"];
-    } 
-  );
-
-  app.dataCollection.ward_data_polygons = addDataToPolygons(
-    app.dataCollection.ward_polygons.json,
-    app.dataCollection.crime_ward.json,
-    function(aggregateEl, feature){
-      return aggregateEl.group == feature.properties["NAME"];
-    } 
-  );
-
-  app.dataCollection.ward_data_polygons = addDataToPolygons(
-    app.dataCollection.ward_polygons.json,
-    app.dataCollection.building_permits_ward.json,
-    function(aggregateEl, feature){
-      return aggregateEl.group == feature.properties["NAME"];
-    } 
-  );
-
   if (map.loaded()) {
     mapLoadedCallback();
   }
@@ -256,175 +227,6 @@ function prepareMaps(){
   }
 
   function mapLoadedCallback() {
-
-    map.addSource("neighborhood_data",{
-      "type": "geojson",
-      "data": app.dataCollection.neighborhood_data_polygons
-    });
-
-    map.addLayer({
-      "id": "crime_neighborhood", 
-      "type": "fill",
-      "source": "neighborhood_data",
-      "layout": {
-        "visibility": "none"
-      },
-      "paint": {
-        "fill-color": {
-          "property": 'crime',
-      // So far the stops are defined arbitrarily. We may want to define them using d3.
-          "stops": [[0, '#fff'], [2000, '#ec3d18']]
-        },
-        "fill-opacity": .5
-      }
-    });
-
-    map.addLayer({
-      "id": "building_permits_neighborhood", 
-      "type": "fill",
-      "source": "neighborhood_data",
-      "layout": {
-        "visibility": "none"
-      },
-      "paint": {
-        "fill-color": {
-          "property": 'building_permits',
-      // So far the stops are defined arbitrarily. We may want to define them using d3.
-          "stops": [[0, '#fff'], [4000, '#1e5cdf']]
-        },
-        "fill-opacity": .5
-      }
-    });
-
-    map.addSource("ward_data",{
-      "type": "geojson",
-      "data": app.dataCollection.ward_data_polygons
-    });
-
-    map.addLayer({
-      "id": "crime_ward", 
-      "type": "fill",
-      "source": "ward_data",
-      "layout": {
-        "visibility": "none"
-      },
-      "paint": {
-        "fill-color": {
-          "property": 'crime',
-      // So far the stops are defined arbitrarily. We may want to define them using d3.
-          "stops": [[0, '#fff'], [6000, '#ec3d18']]
-        },
-        "fill-opacity": .5
-      }
-    });
-
-    map.addLayer({
-      "id": "building_permits_ward", 
-      "type": "fill",
-      "source": "ward_data",
-      "layout": {
-        "visibility": "none"
-      },
-      "paint": {
-        "fill-color": {
-          "property": 'building_permits',
-      // So far the stops are defined arbitrarily. We may want to define them using d3.
-          "stops": [[0, '#fff'], [11000, '#1e5cdf']]
-        },
-        "fill-opacity": .5
-      }
-    });
-    
-    map.addSource("zip", {
-      "type": "geojson",
-      "data": app.dataCollection.zip_polygons.json
-    });
-
-    map.addLayer({
-      "id": "zip",
-      "type": "line",
-      "source": "zip",
-      layout: {
-        visibility: 'none'
-      },
-      paint: {
-        "line-color": "#0D7B8A",
-        "line-width": 1
-      }
-    });
-
-    map.addSource("tract", {
-      "type": "geojson",
-      "data": app.dataCollection.tract_polygons.json
-    });
-
-    map.addLayer({
-      "id": "tract",
-      "type": "line",
-      "source": "tract",
-        layout: {
-          visibility: 'none'
-        },
-        paint: {
-          "line-color": "#8DE2B8",
-          "line-width": 1
-        }
-    });
-  
-    map.addSource("neighborhood", {
-      "type": "geojson",
-      "data": app.dataCollection.neighborhood_polygons.json
-    });
-
-    map.addLayer({
-      "id": "neighborhood",
-      "type": "line",
-      "source": "neighborhood",
-      layout: {
-        visibility: 'none'
-      },
-      paint: {
-        "line-color": "#0D5C7D",
-        "line-width": 1
-      }
-    });
-
-    map.addSource("ward", {
-      "type": "geojson",
-      "data": app.dataCollection.ward_polygons.json
-    });
-
-    map.addLayer({
-      "id": "ward",
-      "type": "line",
-      "source": "ward",
-      layout: {
-        visibility: 'none'
-      },
-      paint: {
-        "line-color": "#002D61",
-        "line-width": 1
-      }
-    });
-
-    map.addSource("zillow", {
-      "type": "geojson",
-      "data": app.dataCollection.zillow_polygons.json
-    });
-
-    map.addLayer({
-      "id": "zillow",
-      "type": "line",
-      "source": "zillow",
-      layout: {
-        visibility: 'none'
-      },
-      paint: {
-        "line-color": "#57CABD",
-        "line-width": 1
-      }
-    });
-    //zillow color 57CABD
       
     map.addSource("project", {
       "type": "geojson",
