@@ -6,7 +6,7 @@ from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.mar import MarResult, FIELDS
 
 
-class MarApiConn(object):
+class MarApiConn(BaseApiConn):
     """
     API Interface to the Master Address Record (MAR) database.
     Use public methods to retrieve data.
@@ -15,7 +15,7 @@ class MarApiConn(object):
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
     def __init__(self):
-        self.conn = BaseApiConn(MarApiConn.BASEURL)
+        super().__init__(MarApiConn.BASEURL)
 
     def find_location(self, location, output_type=None,
                       output_file=None):
@@ -47,7 +47,7 @@ class MarApiConn(object):
         elif output_type == 'csv':
             data = result.json()['returnDataset']['Table1']
             results = [MarResult(address) for address in data]
-            self._result_to_csv(results, output_file)
+            self.result_to_csv(FIELDS, results, output_file)
         return result.json()
 
     def reverse_geocode(self, xcoord, ycoord, output_type=None,
@@ -86,7 +86,7 @@ class MarApiConn(object):
         elif output_type == 'csv':
             data = result.json()['Table1']
             results = [MarResult(address) for address in data]
-            self._result_to_csv(results, output_file)
+            self.result_to_csv(FIELDS, results, output_file)
         return result.json()
 
     def get_condo_count(self, location, output_type=None,
@@ -153,12 +153,3 @@ class MarApiConn(object):
         address_id = result['returnDataset']['Table1'][0]['ADDRESS_ID']
         return address_id
 
-    def _result_to_csv(self, result, csvfile):
-        """
-        Write the results to a csv file.
-        """
-        with open(csvfile, 'w', encoding='utf-8') as f:
-            writer = csv.writer(f, delimiter=',')
-            writer.writerow(FIELDS)
-            for result in result:
-                writer.writerow(result.data)

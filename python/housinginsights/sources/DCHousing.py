@@ -10,7 +10,8 @@ from housinginsights.sources.models.DCHousing import FIELDS,\
 class DCHousingApiConn(BaseApiConn):
     """
     API Interface to the Affordable Housing data set on opendata.dc.gov.
-    Use public method to retrieve data.
+
+    Inherits from BaseApiConn class.
     """
 
     BASEURL = 'http://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/' \
@@ -19,21 +20,20 @@ class DCHousingApiConn(BaseApiConn):
     QUERY = '/query?where=1%3D1&outFields=*&outSR=4326&f=json'
 
     def __init__(self):
-        super().__init__(DCHousingApiConn.BASEURL, None)
-
-    def _result_to_csv(self, results, csvfile):
-        """
-        Write the data to a csv file.
-        """
-        with open(csvfile, 'w', encoding='utf-8') as f:
-            writer = csv.writer(f, delimiter=',')
-            writer.writerow(FIELDS)
-            for result in results:
-                writer.writerow(result.data)
+        super().__init__(DCHousingApiConn.BASEURL)
 
     def get_json(self, output_type=None, output_file=None):
         """
-        Returns JSON object of the entire data set
+        Returns JSON object of the entire data set.
+
+        :param output_type: Output type specified by user.
+        :type  output_type: String.
+
+        :param output_file: Output file specified by user.
+        :type  output_file: String
+
+        :returns: Json output from the api.
+        :rtype: String
         """
         result = self.get(DCHousingApiConn.QUERY)
         if result.status_code != 200:
@@ -46,6 +46,6 @@ class DCHousingApiConn(BaseApiConn):
             data = result.json()['features']
             results = [DCHousingResult(address['attributes']) for address in
                        data]
-            self._result_to_csv(results, output_file)
+            self.result_to_csv(FIELDS, results, output_file)
 
         return result.json()  # is this necessary - mimicking mar.py
