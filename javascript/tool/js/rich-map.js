@@ -2,21 +2,20 @@ var map;
 
 (function getMenuData(){
   var xhr = new XMLHttpRequest();
-  xhr.open('GET','../datasets_for_browse.json');
+  // Currently assumes a server running in the project root directory.
+  xhr.open('GET','/javascript/tool/data/datasets_for_browse.json');
   xhr.send();
   xhr.onreadystatechange = function(){
     if(xhr.readyState === 4){
+      console.log(xhr.responseText);
       var json = JSON.parse(xhr.responseText);
+      console.log(json);
       specifyMap();
-      populateMenus(json);
-      prepareMaps();
+      // populateMenus(json);
+      // prepareMaps();
     }
   }
 })();
-
-function populateMenus(jsonString){
-  
-}
 
 function specifyMap(){
   mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
@@ -30,6 +29,12 @@ function specifyMap(){
     preserveDrawingBuffer: true
   });
 }
+
+function populateMenus(jsonString){
+
+}
+
+
 
 function prepareMaps(){
 
