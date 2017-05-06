@@ -21,6 +21,16 @@ class DCHousingApiConn(BaseApiConn):
     def __init__(self):
         super().__init__(DCHousingApiConn.BASEURL, None)
 
+    def _result_to_csv(self, results, csvfile):
+        """
+        Write the data to a csv file.
+        """
+        with open(csvfile, 'w', encoding='utf-8') as f:
+            writer = csv.writer(f, delimiter=',')
+            writer.writerow(FIELDS)
+            for result in results:
+                writer.writerow(result.data)
+
     def get_json(self, output_type=None, output_file=None):
         """
         Returns JSON object of the entire data set
@@ -39,13 +49,3 @@ class DCHousingApiConn(BaseApiConn):
             self._result_to_csv(results, output_file)
 
         return result.json()  # is this necessary - mimicking mar.py
-
-    def _result_to_csv(self, results, csvfile):
-        """
-        Write the data to a csv file.
-        """
-        with open(csvfile, 'w', encoding='utf-8') as f:
-            writer = csv.writer(f, delimiter=',')
-            writer.writerow(FIELDS)
-            for result in results:
-                writer.writerow(result.data)
