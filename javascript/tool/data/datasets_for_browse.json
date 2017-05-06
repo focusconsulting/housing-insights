@@ -6,7 +6,6 @@
   },
   "optional_datasets": {
     "crime": ["ward", "anc", "neighborhood"],
-    "building_permits": ["ward", "neighborhood"],
-    "boundaries": ["neighborhood", "tract", "ward", "zillow", "zip"]
+    "building_permits": ["ward", "neighborhood"]
   }
 }

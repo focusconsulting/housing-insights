@@ -3,8 +3,15 @@
 var map;
 var mapMenuData;
 var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
-var dataSourceIds = ['building_permits', 'crime'];
+var layerOptions = [];
+var dataMenu;
 // End global variables
+
+function hideAllOptionalLayers(){
+  for(var i = 0; i < layerOptions.length; i++){
+    layerOptions[i].hide();
+  }
+}
 
 (function getMenuData(){
   var xhr = new XMLHttpRequest();
@@ -16,7 +23,7 @@ var dataSourceIds = ['building_permits', 'crime'];
       console.log(xhr.responseText);
       mapMenuData = JSON.parse(xhr.responseText);
       specifyMap();
-      populateMenus();
+      dataMenu = new DataMenu();
       // prepareMaps();
     }
   }
@@ -33,31 +40,10 @@ function specifyMap(){
     minZoom: 3,
     preserveDrawingBuffer: true
   });
+
 }
 
-function populateMenus(){
-  for (var i = 0; i < toggleableLayerIds.length; i++) {
-    var id = toggleableLayerIds[i];
-
-    var link = document.createElement('a');
-    link.href = '#';
-    link.textContent = id.toTitle();
-    link.dataset.id = id;
-
-    link.onclick = function (e) {
-      map.clickedLayer = this.dataset.id;
-      e.preventDefault();
-      e.stopPropagation();
-      showLayer(this); // call reusable function with current `this` (element) as context -JO
-      setHeader();
-      changeZoneType(); // defined in pie.js
-      updateDataSourceMenu();
-    };
-
-    var layers = document.getElementById('menu');
-    layers.appendChild(link);
-  }
-
+function DataMenu(){
   for (var i = 0, datasets = Object.keys(mapMenuData.optional_datasets); i < datasets.length; i++) {
     var id = datasets[i];
     var link = document.createElement('a');
@@ -70,14 +56,163 @@ function populateMenus(){
       var id = this.dataset.id;
       e.preventDefault();
       e.stopPropagation();
-      showDataLayer.call(this, id); // call reusable function with current `this` (element) as context -JO
+      this.emptyZoneOptions();
+      this.makeZoneOptions(id);
     };
     var data_sources = document.getElementById('data-menu');
     data_sources.appendChild(link);
   }
+
+  this.makeZoneOptions = function(tableName){
+    var eligibleZoneIds = toggleableLayerIds.filter(function(zone){
+      return mapMenuData.optional_datasets[tableName].indexOf(zone) != -1;
+    })
+    for (var i = 0; i < eligibleZoneIds.length; i++) {
+      var id = eligibleZoneIds[i];
+
+      var link = document.createElement('a');
+      link.href = '#';
+      link.textContent = id.toTitle();
+      link.dataset.id = id;
+
+      link.onclick = function (e) {
+        map.clickedLayer = this.dataset.id;
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var possibleLayerOptions = layerOptions.filter(function(opt){
+          return opt.layerName == id && opt.dataName == tableName;
+        })
+
+        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(dataName, id);
+
+        selectedLayerOption.show();
+
+        setHeader();
+        changeZoneType(); // defined in pie.js
+      };
+
+      var layers = document.getElementById('menu');
+      layers.appendChild(link);
+    }
+  }
+
+  this.emptyZoneOptions = function(){
+    var layers = document.getElementById('menu');
+    while(layers.children.length > 0 ){
+      layers.removeChild(layers.children[0]);
+    }
+  }
 }
 
+// LayerOption assumes that there is one zones menu and one data menu. 
+// It also assumes that the id attribute for each link in the data layers menu 
+// corresponds to a table name, and the id attribute for each link in the 
+// zones menu corresponds to a zone layer.
+function LayerOption(dataName, zoneName){
+  var _this = this;
+  layerOptions.push(this);
+  this.dataName = dataName;
+  this.zoneName = zoneName;
+  this.sourceName = dataName + "_" + zoneName + "_source";
+  this.layerName = dataName + "_" + zoneName + "_layer";
 
+  this.loaded = false;
+  this.sourceData;
+
+  (function queryData(){
+    var xhr = new XMLHttpRequest();
+    xhr.open(mapMenuData.zone_api_base + dataName + "/all/" + zoneName);
+    xhr.send();
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState === 4){
+        var json = JSON.parse(xhr.responseText);
+        this.loaded = true;
+        this.sourceData = json;
+      }  
+    }
+  })();
+
+  this.mapboxSource = function(){
+    // Check whether the source already exists and if it does, use it.
+    if(map.getSource(this.sourceName)){
+      this.mapboxSource = map.getSource(this.sourceName);
+    }
+
+    // DON'T FORGET TO BIND THE DATA TO THE GEOJSON! THIS WILL INVOLVE
+    // A SEPARATE XHR AND A CALL TO THAT FUNCTION I WROTE A WHILE BACK!
+    map.addSource(this.sourceName, {
+      "type": "geojson",
+      "data": this.sourceData
+    });
+
+    // The below line is so this.mapboxSource becomes a property
+    // after the first call.
+    this.mapboxSource = map.getSource(this.sourceName);
+  }
+
+  this.mapboxLayer = function(){
+    // Check whether the layer already exists and if it does, use it.
+    if(map.getLayer(this.layerName)){
+      this.mapboxLayer = map.getLayer(this.layerName);
+    }
+
+    // for determining upper bound of the data
+    var counts = this.sourceData.items.map(function(item){
+      return item.count;
+    })
+
+    // assigns a random color
+    var RGB_RANGE = 75;
+    var highestColor = 'rgb' + ([0,0,0].map(function(el){
+      return Math.random() * (255 - RGB_RANGE);
+    })).join("");
+
+    var lowestColor = 'rgb' + (lowestColor.map(function(el){
+      return el + RGB_RANGE;
+    })).join("");
+
+    map.addLayer({
+      "id": this.layerName,
+      "type": "fill",
+      "source": this.sourceName,
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-color": {
+          "property": this.dataName,
+          "stops": [[0, lowestColor], [Math.max(counts), highestColor]]
+        },
+        "fill-opacity": .5
+      }
+    });
+
+    // The line below is so this shows up as a property after the first call
+    this.mapboxLayer =  map.getLayer(this.layerName);
+  }
+
+  // The show methods are still freshly pasted in.
+
+  // OVERHAULING 'SHOW' so that you need to select both a dataset and a 
+  // zone.
+  this.show = function() {
+    var selector = document.getElementById(this.dataName);
+    hideAllOptionalLayers();
+
+    document.querySelectorAll('nav#menu a').forEach(function(item){
+      item.className = '';
+    });
+    selector.className = 'active';
+    map.setLayoutProperty(this.layerName, 'visibility', 'visible');
+  
+  };
+
+  this.hide = function(){
+    map.setLayoutProperty(this.layerName, 'visibility', 'none');
+  }
+
+}
 
 function prepareMaps(){
 
@@ -335,63 +470,6 @@ function prepareMaps(){
   
     var categoryLegendEl = document.getElementById('category-legend');
     categoryLegendEl.style.display = 'block';
-	
-    map.clickedLayer = toggleableLayerIds[0];
-    map.previousLayer; // keeping track of previously selected layer so it can be turned off
-
-    map.selectedDataLayer = null;
-
-    function showLayer(selector) { // JO putting this bit in a reusable function
-
-      var visibility = map.getLayoutProperty(map.clickedLayer, 'visibility');
-
-      if (map.previousLayer !== undefined) {
-        map.setLayoutProperty(map.previousLayer, 'visibility', 'none');
-      }
-      document.querySelectorAll('nav#menu a').forEach(function(item){
-        item.className = '';
-      });
-      selector.className = 'active';
-      map.setLayoutProperty(map.clickedLayer, 'visibility', 'visible');
-    
-      map.previousLayer = map.clickedLayer;
-      updateDataSourceMenu();
-    };
-
-    function showDataLayer(dataSourceId){
-      hideDataLayers();
-      map.selectedDataLayer = dataSourceId + '_' + map.clickedLayer;
-      map.setLayoutProperty(map.selectedDataLayer, 'visibility', 'visible');
-      this.className = 'active';
-    }
-
-    function hideDataLayers(){
-      document.querySelectorAll('#data-menu a').forEach(function(item){
-        item.className = '';
-      });
-      if (map.selectedDataLayer !== null) {
-        map.setLayoutProperty(map.selectedDataLayer, 'visibility', 'none');
-        map.selectedDataLayer = null;
-      }
-    }
-
-    function updateDataSourceMenu() {
-      hideDataLayers();
-      var availableDataSources = map.clickedLayer in Object.keys(mapMenuData['optional_datasets']) ?
-        mapMenuData['optional_datasets'][map.clickedLayer]:
-        [];
-      document.querySelectorAll('#data-menu a').forEach(function(item){
-        if (!(item.dataset.id in availableDataSources)){
-          // disable link
-        }
-        else {
-          // enable link
-        }
-      });
-    }
-
-    showLayer(document.querySelector('nav#menu a:first-of-type')); // this call happens once on load, sets up initial
-                                                                     // condition of having first option active.
 
     map.on('click', function (e) {
       var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
