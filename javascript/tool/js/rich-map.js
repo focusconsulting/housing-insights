@@ -20,30 +20,15 @@ function hideAllOptionalLayers(){
   xhr.send();
   xhr.onreadystatechange = function(){
     if(xhr.readyState === 4){
-      console.log(xhr.responseText);
       mapMenuData = JSON.parse(xhr.responseText);
-      specifyMap();
-      dataMenu = new DataMenu();
       prepareMaps();
+      dataMenu = new DataMenu();
     }
   }
 })();
 
-function specifyMap(){
-  mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
-
-  var map = new mapboxgl.Map({
-    container: 'map', // container id
-    style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
-    zoom: 11,
-    center: [-76.92, 38.9072],
-    minZoom: 3,
-    preserveDrawingBuffer: true
-  });
-
-}
-
 function DataMenu(){
+  var _this = this;
   for (var i = 0, datasets = Object.keys(mapMenuData.optional_datasets); i < datasets.length; i++) {
     var id = datasets[i];
     var link = document.createElement('a');
@@ -53,11 +38,10 @@ function DataMenu(){
     link.dataset.id = id;
 
     link.onclick = function (e) {
-      var id = this.dataset.id;
       e.preventDefault();
       e.stopPropagation();
-      this.emptyZoneOptions();
-      this.makeZoneOptions(id);
+      _this.emptyZoneOptions();
+      _this.makeZoneOptions(id);
     };
     var data_sources = document.getElementById('data-menu');
     data_sources.appendChild(link);
@@ -76,7 +60,6 @@ function DataMenu(){
       link.dataset.id = id;
 
       link.onclick = function (e) {
-        map.clickedLayer = this.dataset.id;
         e.preventDefault();
         e.stopPropagation();
         
@@ -84,7 +67,7 @@ function DataMenu(){
           return opt.layerName == id && opt.dataName == tableName;
         })
 
-        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(dataName, id);
+        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(tableName, id);
 
         selectedLayerOption.show();
 
@@ -121,7 +104,7 @@ function LayerOption(dataName, zoneName){
 
   (function queryData(){
     var xhr = new XMLHttpRequest();
-    xhr.open(mapMenuData.zone_api_base + dataName + "/all/" + zoneName);
+    xhr.open('GET', mapMenuData.zone_api_base + dataName + "/all/" + zoneName);
     xhr.send();
     xhr.onreadystatechange = function(){
       if(xhr.readyState === 4){
@@ -200,6 +183,7 @@ function LayerOption(dataName, zoneName){
   }
 
   this.show = function() {
+    map.clickedZone = this.zoneName;
     var selector = document.getElementById(this.dataName);
     hideAllOptionalLayers();
 
@@ -219,6 +203,17 @@ function LayerOption(dataName, zoneName){
 
 function prepareMaps(){
 
+  mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+
+  var map = new mapboxgl.Map({
+    container: 'map', // container id
+    style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
+    zoom: 11,
+    center: [-76.92, 38.9072],
+    minZoom: 3,
+    preserveDrawingBuffer: true
+  });
+
   if (map.loaded()) {
     mapLoadedCallback();
   }
@@ -235,7 +230,8 @@ function prepareMaps(){
     projectXHR.send();
     projectXHR.onreadystatechange = function(){
       if(projectXHR.readyState === 4){
-        app.dataCollection.project = JSON.parse(projectXHR.responseText);
+        app.dataCollection.project = new APIDataObj(JSON.parse(projectXHR.responseText));
+        console.log(app.dataCollection.project);
         addProjectToMap();
       }
     }
@@ -329,16 +325,17 @@ function prepareMaps(){
     //  new PieChart(DATA_FILE,'#pie-4','PBCA',75,75)
     ];
   }
-}
+  
+  function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
+    if (currentZoneType !== map.clickedZone) {
 
-function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
-  if (currentZoneType !== map.clickedLayer) {
+      document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + map.clickedZone;
+      document.getElementById('zone-selector').onchange = changeZone;
 
-    //document.querySelector('#zone-details-heading').innerText = map.clickedLayer.capitalizeFirstLetter() + ' Details';
-    document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + map.clickedLayer ;
-    document.getElementById('zone-selector').onchange = changeZone;
-
+    }
   }
 }
+
+
 
 
