@@ -98,6 +98,7 @@ def make_draft_json(filename, tablename, encoding):
     # basic structure of the draft JSON output
     output = {
         tablename: {
+            # TODO: change cleaner naming scheme to CamelCase
             "cleaner": tablename + "{}".format("_cleaner"),
             "replace_table": True,
             "fields": []
@@ -105,6 +106,15 @@ def make_draft_json(filename, tablename, encoding):
     }
 
     # TODO: insert 'unique_data_id' automatically into draft JSON?
+    unique_data_id_field = {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text",
+        "required_in_source": False
+    }
+    output[tablename]["fields"].append(unique_data_id_field)
 
     # read csv file as pandas data frame and column headers
     dataframe_file = pandas.read_csv(filename, encoding=encoding)

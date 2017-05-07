@@ -1,21 +1,30 @@
-'''
-After the print(" Ready to load") statement in the main() function of load_data.py, we want to send the data stored in the newly-created clean.csv file to the database. Then, we want to update/add the appropriate row of the Postgres 'manifest' table to reflect the status of that file in the database.
+"""
+Module for getting the clean and validated csv data into the database.
+
+After the print(" Ready to load") statement in the main() function of
+load_data.py, we want to send the data stored in the newly-created clean.csv
+file to the database. Then, we want to update/add the appropriate row of the
+Postgres 'manifest' table to reflect the status of that file in the database.
 
 Things the object will need passed to it:
     'manifest_row',
     'meta' (memory version of meta.json)
     'csv_filename' (the path to the clean.csv file created by Cleaner)
-    'overwrite' (a boolean indicating whether preexisting entries of the manifest_row['unique_data_id'] should be deleted if they exist)
-'''
+    'overwrite' (a boolean indicating whether preexisting entries of the
+    manifest_row['unique_data_id'] should be deleted if they exist)
+"""
 
-'''
-We start with a manifest row dictionary. Each row represents a CSV. Multiple rows may correspond to one SQL table.
+"""Overview of steps & Things to thing about
+
+We start with a manifest row dictionary. Each row represents a CSV. Multiple
+rows may correspond to one SQL table.
 
 1. Taking a clean csv file path from the manifest dictionary - DataSql
 
 2. Database connection is passed through load_data.py.
 
-3. Check JSON meta file for how the fields should be updated in the database - insert & update vs. dropping and overwriting? - DataSql
+3. Check JSON meta file for how the fields should be updated in the database -
+    insert & update vs. dropping and overwriting? - DataSql
 
 4. Creating a SQL table if it doesn't exist - DataSql and ManifestSql
 
@@ -28,23 +37,26 @@ DATASQL
     need to know data load type
     going to do batch update
 
-THINK ABOUT - Has table schema changed? Column names, number of columns, column data types
+THINK ABOUT - Has table schema changed? Column names, number of columns, column
+    data types
 
-    if we have ten rows and five already exist, does database know how to update or is that on us?
+    if we have ten rows and five already exist, does database know how to update
+    or is that on us?
 
 
 
 are we overriding or appending?
     if overriding - prep and write
-    if update - need to define unique key for each row in each table - maybe something for DataReader class? JSON file?
+    if update - need to define unique key for each row in each table - maybe
+    something for DataReader class? JSON file?
+"""
 
-
-
-'''
 import logging
 import os
 import sys
-sys.path.append("../../")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             os.pardir, os.pardir)))
+# TODO: clean up unused imports
 from housinginsights.tools import dbtools
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import ProgrammingError
@@ -53,11 +65,22 @@ import copy
 import datetime
 
 
+# TODO: is this incomplete - do we want to define a specific error output
 class TableWritingError(Exception):
     pass
 
+
 class HISql(object):
     def __init__(self, meta, manifest_row, engine, filename=None):
+        """
+        Initialize object that will send the data stored in the newly-created
+        clean.csv file to the database.
+
+        :param meta: meta data as json data
+        :param manifest_row: a given row in manifest.csv file
+        :param engine: the database the database that will be updated
+        :param filename: the clean data file that will be loaded into database
+        """
 
         self.meta = meta
         self.manifest_row = manifest_row
@@ -69,15 +92,15 @@ class HISql(object):
         self.metafields = meta[self.tablename]['fields']
 
         #assign defaults
-        self.filename = 'temp_{}.psv'.format(manifest_row['unique_data_id']) if filename == None else filename
+        self.filename = 'temp_{}.psv'.format(manifest_row['unique_data_id']) \
+            if filename is None else filename
 
-        #convert fields dictionary to lists
+        # get list of 'sql_name' and 'type' from fields for database updating
         self.sql_fields = []
         self.sql_field_types = []
         for field in self.metafields:
             self.sql_fields.append(field['sql_name'])
             self.sql_field_types.append(field['type'])
-
 
     def write_file_to_sql(self):
         #TODO let this use existing session/connection/engine instead?
@@ -196,21 +219,36 @@ class HISql(object):
         db_conn.close()
 
     def get_sql_manifest_row(self, db_conn=None, close_conn=True):
-        sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format(self.unique_data_id)
+        """
+        Connect to the database, perform sql query for the given
+        'unique_data_id' for the given manifest row, and then return the
+        equivalent sql manifest row.
 
-        if db_conn == None:
+        :param db_conn: the connection object for the database
+        :param close_conn: boolean flag dictating whether to close connection
+        after work is complete
+        :return: the resulting sql manifest row as a dict object
+        """
+        sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format(
+            self.unique_data_id)
+
+        if db_conn is None:
             db_conn = self.engine.connect()
 
         query_result = db_conn.execute(sql_query)
 
         # convert the sqlAlchemy ResultProxy object into a list of dictionaries
         results = [dict(row.items()) for row in query_result]
-        if close_conn == True:
+
+        if close_conn:
             db_conn.close()
 
-        # We expect there to be exactly one row matching the query if the csv_row is already in the database
+        # We expect there to be exactly one row matching the query if
+        # the csv_row is already in the database
+        # TODO: change this to if, elif, else statement is mutually exclusive
         if len(results) > 1:
-            raise ValueError('Found multiple rows in database for data id {}'.format(self.unique_data_id))
+            raise ValueError('Found multiple rows in database for data'
+                             ' id {}'.format(self.unique_data_id))
 
         # Return just the dictionary of results, not the list of dictionaries
         if len(results) == 1:

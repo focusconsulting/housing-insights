@@ -3067,6 +3067,14 @@
     "cleaner": "dchousing_cleaner",
     "fields": [
       {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      },
+      {
         "display_name": "objectid",
         "display_text": "",
         "required_in_source": true,
@@ -3176,7 +3184,7 @@
         "required_in_source": true,
         "source_name": "GIS_LAST_MOD_DTTM",
         "sql_name": "gis_last_mod_dttm",
-        "type": "integer"
+        "type": "date"
       }
     ],
     "replace_table": true

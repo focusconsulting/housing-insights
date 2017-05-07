@@ -486,7 +486,7 @@ class dchousing_cleaner(CleanerBase):
 
         # convert milliseconds to m/d/Y date format
         source_name = "GIS_LAST_MOD_DTTM"
-        milli_sec = row[source_name]
+        milli_sec = int(row[source_name])
         row[source_name] = \
             datetime.fromtimestamp(milli_sec / 1000.0).strftime('%m/%d/%Y')
 

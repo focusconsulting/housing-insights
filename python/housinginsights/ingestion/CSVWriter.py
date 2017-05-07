@@ -53,13 +53,19 @@ class CSVWriter(object):
         self.file = open(self.filename, 'a', newline='', encoding='utf-8')
         self.writer = DictWriter(self.file, fieldnames=self.dictwriter_fields, delimiter="|")
 
-
     def write(self, row):
-        row['unique_data_id'] = self.manifest_row['unique_data_id']
-        #Note to developers - if this row returns a key error due to an optional column, it means you need
-        #  to have your cleaner add a 'null' value for that optional column. 
-        self.writer.writerow(row)
+        """
+        Writes the given row into the clean pipe-delimited file that will be
+        loaded into the database.
 
+        :param row: the given data row
+        :return: None
+        """
+        row['unique_data_id'] = self.manifest_row['unique_data_id']
+        #Note to developers - if this row returns a key error due to an optional
+        #  column, it means you need to have your cleaner add a 'null' value
+        # for that optional column.
+        self.writer.writerow(row)
 
     def open(self):
         '''
