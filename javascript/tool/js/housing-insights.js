@@ -98,7 +98,7 @@ function addDataToPolygons(geoJSONPolygons, aggregateData){
   var modifiedPolygons = geoJSONPolygons;
   for(var i = 0, features = modifiedPolygons.features; i < features.length; i++){
     var matchingAggregateZone = (aggregateData['items'].filter(function(el){
-      return el.group == feature.properties["NAME"];
+      return el.group == features[i].properties["NAME"];
     }))[0];
 
     features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){

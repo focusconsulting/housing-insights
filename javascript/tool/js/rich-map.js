@@ -42,19 +42,15 @@ function DataMenu(map){
     var data_sources = document.getElementById('data-menu');
     data_sources.appendChild(link);
     link.addEventListener('click', function(e) {
-      console.log("clicked link", this);
       e.preventDefault();
       e.stopPropagation();
-      console.log("link.getAttribute('data-id') before emptyZoneOptions", this.getAttribute('data-id'));
       _this.emptyZoneOptions();
-      console.log("link.getAttribute('data-id')", this.getAttribute('data-id'));
       _this.makeZoneOptions(this.getAttribute('data-id'));
     });
   }
 
   this.makeZoneOptions = function(tableName){
     var eligibleZoneIds = mapMenuData['optional_datasets'][tableName];
-    console.log("mapMenuData['optional_datasets'][tableName]", mapMenuData['optional_datasets'][tableName]);
     for (var i = 0; i < eligibleZoneIds.length; i++) {
       var id = eligibleZoneIds[i];
 
@@ -68,12 +64,12 @@ function DataMenu(map){
         e.stopPropagation();
         
         var possibleLayerOptions = layerOptions.filter(function(opt){
-          return opt.layerName == id && opt.dataName == tableName;
-        })
+          return opt.layerName == link.getAttribute('data-id') && opt.dataName == tableName;
+        });
 
-        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(tableName, id, map);
+        hideAllOptionalLayers();
 
-        selectedLayerOption.show();
+        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(tableName, this.getAttribute('data-id'), map);
 
         setHeader(map);
         changeZoneType(); // defined in pie.js
@@ -140,9 +136,9 @@ function LayerOption(dataName, zoneName, map){
   }
 
   this.addMapboxSource = function(){
-    // Check whether the source already exists and if it does, use it.
+    // Check whether the source already exists
     if(map.getSource(this.sourceName)){
-      this.mapboxSource = map.getSource(this.sourceName);
+      return;
     }
     var sourcePlusShapes = addDataToPolygons(this.sourceShapes, this.sourceData);
 
@@ -154,9 +150,10 @@ function LayerOption(dataName, zoneName, map){
   }
 
   this.addMapboxLayer = function(){
-    // Check whether the layer already exists and if it does, use it.
+    // Check whether the layer already exists
     if(map.getLayer(this.layerName)){
-      this.mapboxLayer = map.getLayer(this.layerName);
+      this.show();
+      return;
     }
 
     // for determining upper bound of the data
@@ -166,25 +163,32 @@ function LayerOption(dataName, zoneName, map){
 
     // assigns a random color
     var RGB_RANGE = 75;
-    var highestColor = 'rgb' + ([0,0,0].map(function(el){
-      return Math.random() * (255 - RGB_RANGE);
-    })).join("");
 
-    var lowestColor = 'rgb' + (lowestColor.map(function(el){
+    // if we need random colors elsewhere in this app, we could extract a RandomColor constructor and
+    // turn 'makeRGB' into a method. For now it's a quick and diryt function.
+    function makeRGB(colorValsArray){
+      return "rgb(" + colorValsArray.join(",") + ")";
+    }
+
+    var highestColorVals = [0,0,0].map(function(el){
+      return Math.floor(Math.random() * (255 - RGB_RANGE));
+    });
+
+    var lowestColorVals = highestColorVals.map(function(el){
       return el + RGB_RANGE;
-    })).join("");
+    });
 
     map.addLayer({
       "id": this.layerName,
       "type": "fill",
       "source": this.sourceName,
       "layout": {
-        "visibility": "none"
+        "visibility": "visible"
       },
       "paint": {
         "fill-color": {
           "property": this.dataName,
-          "stops": [[0, lowestColor], [Math.max(counts), highestColor]]
+          "stops": [[0, makeRGB(lowestColorVals)], [Math.max(counts), makeRGB(highestColorVals)]]
         },
         "fill-opacity": .5
       }
