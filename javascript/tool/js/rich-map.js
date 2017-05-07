@@ -162,7 +162,7 @@ function LayerOption(dataName, zoneName, map){
     })
 
     // assigns a random color
-    var RGB_RANGE = 75;
+    var RGB_RANGE = 200;
 
     // if we need random colors elsewhere in this app, we could extract a RandomColor constructor and
     // turn 'makeRGB' into a method. For now it's a quick and diryt function.
@@ -188,7 +188,7 @@ function LayerOption(dataName, zoneName, map){
       "paint": {
         "fill-color": {
           "property": this.dataName,
-          "stops": [[0, makeRGB(lowestColorVals)], [Math.max(counts), makeRGB(highestColorVals)]]
+          "stops": [[0, makeRGB(lowestColorVals)], [Math.max.apply(null, counts), makeRGB(highestColorVals)]]
         },
         "fill-opacity": .5
       }
