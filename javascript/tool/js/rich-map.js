@@ -2,7 +2,6 @@
 // As we refactor the app, let's think about a more appropriate place to put them.  
 var map;
 var mapMenuData;
-var toggleableLayerIds = [ 'ward', 'tract','neighborhood','zip','zillow' ];
 var layerOptions = [];
 var dataMenu;
 // End global variables
@@ -21,13 +20,16 @@ function hideAllOptionalLayers(){
   xhr.onreadystatechange = function(){
     if(xhr.readyState === 4){
       mapMenuData = JSON.parse(xhr.responseText);
-      prepareMaps();
-      dataMenu = new DataMenu();
+      prepareInitialMapData();
     }
   }
 })();
 
-function DataMenu(){
+// DataMenu includes the 'map' argument to avoid a scoping/closure issue
+// that caused 'map' to be undefined. Let's find a more elegant way to make 
+// map available to LayerOption, so we don't have to use an argument for something
+// that should be kind of global.
+function DataMenu(map){
   var _this = this;
   for (var i = 0, datasets = Object.keys(mapMenuData.optional_datasets); i < datasets.length; i++) {
     var id = datasets[i];
@@ -37,20 +39,22 @@ function DataMenu(){
     link.textContent = id.toTitle();
     link.dataset.id = id;
 
-    link.onclick = function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      _this.emptyZoneOptions();
-      _this.makeZoneOptions(id);
-    };
     var data_sources = document.getElementById('data-menu');
     data_sources.appendChild(link);
+    link.addEventListener('click', function(e) {
+      console.log("clicked link", this);
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("link.getAttribute('data-id') before emptyZoneOptions", this.getAttribute('data-id'));
+      _this.emptyZoneOptions();
+      console.log("link.getAttribute('data-id')", this.getAttribute('data-id'));
+      _this.makeZoneOptions(this.getAttribute('data-id'));
+    });
   }
 
   this.makeZoneOptions = function(tableName){
-    var eligibleZoneIds = toggleableLayerIds.filter(function(zone){
-      return mapMenuData.optional_datasets[tableName].indexOf(zone) != -1;
-    })
+    var eligibleZoneIds = mapMenuData['optional_datasets'][tableName];
+    console.log("mapMenuData['optional_datasets'][tableName]", mapMenuData['optional_datasets'][tableName]);
     for (var i = 0; i < eligibleZoneIds.length; i++) {
       var id = eligibleZoneIds[i];
 
@@ -67,11 +71,11 @@ function DataMenu(){
           return opt.layerName == id && opt.dataName == tableName;
         })
 
-        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(tableName, id);
+        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(tableName, id, map);
 
         selectedLayerOption.show();
 
-        setHeader();
+        setHeader(map);
         changeZoneType(); // defined in pie.js
       };
 
@@ -92,7 +96,12 @@ function DataMenu(){
 // It also assumes that the id attribute for each link in the data layers menu 
 // corresponds to a table name, and the id attribute for each link in the 
 // zones menu corresponds to a zone layer.
-function LayerOption(dataName, zoneName){
+
+// LayerOption includes the third 'map' argument to avoid a scoping/closure issue
+// that caused 'map' to be undefined. Let's find a more elegant way to make 
+// map available to LayerOption, so we don't have to use an argument for something
+// that should be kind of global.
+function LayerOption(dataName, zoneName, map){
   var _this = this;
   layerOptions.push(this);
   this.dataName = dataName;
@@ -109,7 +118,7 @@ function LayerOption(dataName, zoneName){
     xhr.onreadystatechange = function(){
       if(xhr.readyState === 4){
         var json = JSON.parse(xhr.responseText);
-        this.sourceData = json;
+        _this.sourceData = json;
         queryShape();
       }  
     }
@@ -117,14 +126,14 @@ function LayerOption(dataName, zoneName){
 
   function queryShape(){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/javascript/tool/data/' + this.zoneName + ".geojson");
+    xhr.open('GET', '/javascript/tool/data/' + _this.zoneName + ".geojson");
       xhr.send();
       xhr.onreadystatechange = function(){
         if(xhr.readyState === 4){
           var json = JSON.parse(xhr.responseText);
-          this.sourceShapes = json;
-          this.addMapboxSource();
-          this.addMapboxLayer();
+          _this.sourceShapes = json;
+          _this.addMapboxSource();
+          _this.addMapboxLayer();
         }  
       }
 
@@ -184,7 +193,7 @@ function LayerOption(dataName, zoneName){
 
   this.show = function() {
     map.clickedZone = this.zoneName;
-    var selector = document.getElementById(this.dataName);
+    var selector = document.querySelectorAll('[data-id=' + this.dataName + ']')[0];
     hideAllOptionalLayers();
 
     document.querySelectorAll('nav#menu a').forEach(function(item){
@@ -201,7 +210,7 @@ function LayerOption(dataName, zoneName){
 
 }
 
-function prepareMaps(){
+function prepareInitialMapData(){
 
   mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
 
@@ -221,8 +230,7 @@ function prepareMaps(){
     map.on('load', mapLoadedCallback);
   }
 
-  function mapLoadedCallback() {
-  
+  function mapLoadedCallback() {  
     // TO DO - there's a bit of ugly callback nesting in the code below, which loads the initial
     // 'project' data into the map. Let's make this neater!
     var projectXHR = new XMLHttpRequest();
@@ -231,7 +239,6 @@ function prepareMaps(){
     projectXHR.onreadystatechange = function(){
       if(projectXHR.readyState === 4){
         app.dataCollection.project = new APIDataObj(JSON.parse(projectXHR.responseText));
-        console.log(app.dataCollection.project);
         addProjectToMap();
       }
     }
@@ -283,6 +290,9 @@ function prepareMaps(){
     var categoryLegendEl = document.getElementById('category-legend');
     categoryLegendEl.style.display = 'block';
 
+    // HERE'S WHERE THE PAGE LOADS THE DATA MENU AND MAKES IT POSSIBLE TO LOAD OPTIONAL DATA SOURCES.
+    new DataMenu(map);
+
     map.on('click', function (e) {
       var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
       var buildingId = building['properties']['nlihc_id'];
@@ -310,7 +320,7 @@ function prepareMaps(){
 
     map.getCanvas().style.cursor = 'default';
 
-    setHeader();
+    setHeader(map);
 
                                                         // putting maps here so they are not called until
                                                         // the map renders, so that the zone (ward, neighborhood) can
@@ -326,13 +336,17 @@ function prepareMaps(){
     ];
   }
   
-  function setHeader(){ // sets the text in the sidebar header according to the selected mapLayer
-    if (currentZoneType !== map.clickedZone) {
+  
+}
 
-      document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + map.clickedZone;
-      document.getElementById('zone-selector').onchange = changeZone;
+// extracting this from the map-related callback and making 'map' an argument. Otherwise 
+// 'setHeader' is not defined within the scope of DataMenu.
+function setHeader(map){ // sets the text in the sidebar header according to the selected mapLayer
+  if (currentZoneType !== map.clickedZone) {
 
-    }
+    document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + map.clickedZone;
+    document.getElementById('zone-selector').onchange = changeZone;
+
   }
 }
 

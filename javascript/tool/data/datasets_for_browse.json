@@ -5,7 +5,7 @@
     "project": ["point"]
   },
   "optional_datasets": {
-    "crime": ["ward", "anc", "neighborhood"],
-    "building_permits": ["ward", "neighborhood"]
+    "crime": ["ward", "anc", "neighborhood_cluster"],
+    "building_permits": ["ward", "neighborhood_cluster"]
   }
 }
