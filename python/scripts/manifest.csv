@@ -1,4 +1,5 @@
 include_flag,destination_table,unique_data_id,data_date,encoding,local_folder,s3_folder,filepath,notes
+use,dchousing,dchousing_20170505,05/05/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/tax_assessment/opendata/20170505/DCHousing.csv,intial load of DCHousing data set
 ____City Development Data__,,,,,,,,
 superseded,building_permits,building_permits_2016_old,1/1/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits_2016.csv,
 use,building_permits,building_permits_2016,2/2/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits__2016_updated.csv,
