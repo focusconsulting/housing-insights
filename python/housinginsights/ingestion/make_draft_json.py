@@ -13,11 +13,11 @@ import os
 
 import pandas as pandas
 
-from python.housinginsights.ingestion.DataReader import ManifestReader
-
 # if __name__ == '__main__': # TODO: why two of these statements?
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir, os.pardir)))
+
+from housinginsights.ingestion.DataReader import ManifestReader
 
 
 #configuration
