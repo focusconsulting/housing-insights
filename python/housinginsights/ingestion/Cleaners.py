@@ -1,3 +1,9 @@
+"""
+Module implements any changes needed to the data before it arrives in our
+database - replacing null, parsing dates, parsing boolean, and handling weird
+values.
+"""
+
 from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
@@ -7,7 +13,8 @@ from housinginsights.ingestion.DataReader import HIReader
 import os
 
 
-package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
+                                           os.pardir))
 
 '''
 Usage:
@@ -26,9 +33,6 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         self.null_value = 'Null' #what the SQLwriter expects in the temp csv
 
-
-
-        
         #Flatten the census mapping file so that every potential name of a census tract can be translated to its standard format
         self.census_mapping = {}
         census_reader = HIReader(os.path.join(package_dir,'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
@@ -39,16 +43,17 @@ class CleanerBase(object, metaclass=ABCMeta):
 
     @abstractmethod
     def clean(self, row, row_num):
+        # TODO: add replace_null method as required for an implementation (#176)
         pass
 
-
-    def field_meta(self,field):
+    # TODO: figure out what is the point of this method...it looks incomplete
+    def field_meta(self, field):
         for field_meta in self.fields:
             if f['source_name'] == field:
                 return field_meta
             return None
 
-    def replace_nulls(self, row, null_values =  ['NA', '-', '+','', None]):
+    def replace_nulls(self, row, null_values=['NA', '-', '+','', None]):
         for key, value in row.items():
             if value in null_values:
                 row[key] = self.null_value
@@ -64,7 +69,7 @@ class CleanerBase(object, metaclass=ABCMeta):
     def format_date(self, value):
         date = None
         try:
-            _date = dateparser.parse(value,dayfirst=False, yearfirst=False)
+            _date = dateparser.parse(value, dayfirst=False, yearfirst=False)
             #_date = datetime.strptime(value, '%m/%d/%Y')
             date = datetime.strftime(_date, '%Y-%m-%d')
         except Exception as e:
@@ -72,20 +77,20 @@ class CleanerBase(object, metaclass=ABCMeta):
                 date = self.null_value
             else:
                 logging.warning("    Unable to format date properly: {}".format(value))
-                date=self.null_value
+                date = self.null_value
 
         return date
 
     def convert_boolean(self,value):
         mapping = {
-            'Yes':True,
-            'No':False,
+            'Yes': True,
+            'No': False,
             'Y': True,
-            'N':False,
-            'TRUE':True,
-            'FALSE':False,
-            '1':True,
-            '0':False
+            'N': False,
+            'TRUE': True,
+            'FALSE': False,
+            '1': True,
+            '0': False
             }
         return mapping[value]
 
@@ -131,7 +136,6 @@ class CleanerBase(object, metaclass=ABCMeta):
         else:
             return None
 
-
     def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
             '''
             Make all census tract names follow a consistent format. 
@@ -140,8 +144,6 @@ class CleanerBase(object, metaclass=ABCMeta):
             '''
             row[column_name] = self.census_mapping[row[column_name]]
             return row
-
-
 
     def replace_tracts(self,row,row_num,column_name='census_tract'):
         '''
@@ -339,8 +341,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             #this prints error for many rows with nulls. 
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
-        
-        
+
     def append_tract_label(self,row,row_num,column_name='census_tract_number'):
         '''
         Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value 
@@ -366,9 +367,13 @@ class CleanerBase(object, metaclass=ABCMeta):
 # Custom Cleaners
 #############################################
 
+# TODO: automate this so by passing simple list of keys that map to specific
+# TODO: cleaner methods including option to pass custom methods
+
 class GenericCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
+
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
@@ -377,6 +382,7 @@ class ProjectCleaner(CleanerBase):
         row = self.rename_census_tract(row,row_num,column_name='Geo2010')
         return row
 
+
 class SubsidyCleaner(CleanerBase):
     def clean(self, row, row_nume=None):
         row['Subsidy_Active'] = self.convert_boolean(row['Subsidy_Active'])
@@ -384,6 +390,7 @@ class SubsidyCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values = ['N','',None])
         row = self.parse_dates(row)
         return row
+
 
 class BuildingPermitsCleaner(CleanerBase):
     def clean(self, row, row_num = None):
@@ -401,6 +408,7 @@ class BuildingPermitsCleaner(CleanerBase):
         else:
             row['NEIGHBORHOODCLUSTER'] = 'Cluster ' + str(row['NEIGHBORHOODCLUSTER'])
             return row
+
 
 class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
@@ -438,6 +446,7 @@ class CensusCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
+
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
@@ -445,7 +454,8 @@ class CrimeCleaner(CleanerBase):
         row = self.replace_tracts(row,row_num,column_name='CENSUS_TRACT')
         row = self.rename_ward(row)
         return row
-        
+
+
 class hmda_cleaner(CleanerBase):    
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
@@ -453,15 +463,31 @@ class hmda_cleaner(CleanerBase):
         row = self.append_tract_label(row,row_num,column_name='census_tract_number')
         return row
 
+
 class WmataDistCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         return row
+
 
 class WmataInfoCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         return row
 
+
 class reac_score_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row, null_values=['', None])
+        return row
+
+
+class dchousing_cleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        row = self.replace_nulls(row, null_values=['', None])
+
+        # convert milliseconds to m/d/Y date format
+        source_name = "GIS_LAST_MOD_DTTM"
+        milli_sec = row[source_name]
+        row[source_name] = \
+            datetime.fromtimestamp(milli_sec / 1000.0).strftime('%m/%d/%Y')
+
         return row
