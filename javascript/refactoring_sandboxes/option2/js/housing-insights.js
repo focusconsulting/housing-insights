@@ -200,7 +200,8 @@ var mapView = {
         setSubs([
             ['mapLoaded',mapView.addInitialLayers],
             ['mapLayer', mapView.showLayer],
-            ['mapLoaded', sideBar.init]
+            ['mapLoaded', sideBar.init],
+            ['mapLoaded',mapView.addInitialOverlays]
         ]);
         
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
@@ -219,7 +220,21 @@ var mapView = {
         this.map.on('load', function(){
             setState('mapLoaded',true);
         });        
-    },   
+    },
+    initialOverlays: ['crime','building_permits'],
+    addInitialOverlays: function(){
+        mapView.initialOverlays.forEach(function(overlay){
+            mapView.addOverlay(overlay);
+        });      
+    },
+    addOverlay: function(overlay){
+        var grouping = getState().mapLayer[0];
+        var dataRequest = {
+            name:overlay,
+            params: ['all',grouping]
+        };
+        controller.getData(dataRequest);
+    },
     initialLayers: [
         {
             source: 'ward', 
@@ -335,18 +350,24 @@ var sideBar = {
         sideBar.charts = [];
         var instances = ['subsidized','cat_expiring','cat_failing_insp','cat_at_risk'];
         instances.forEach(function(instance, i){
-            sideBar.charts[i] = new PieChart({
+            sideBar.charts[i] = new DonutChart({
                 dataRequest: {
                     name: 'raw',
                     params: ['project']
                 },
                 field: instance,
                 container: '#pie-' + i,
-                width: 75,
-                height: 75,
+                width: 95,
+                height: 115,
                 zoneType: 'ward',
                 zoneName: 'All',
-                index: i
+                index: i,
+                margin: {
+                    top:0,
+                    right:0,
+                    bottom:20,
+                    left:0
+                }
             })
         });
     },
@@ -354,21 +375,22 @@ var sideBar = {
                   // later code adds an array of all the values for each type to the objects
                   // for populating the dropdown list
         ward: {
-          name: 'ward2012'
+          name: 'ward'
           
         },
         tract: {
-          name: 'geo2010'
+          name: 'census_tract'
           
         },
         zip: {
           name: 'zip'
         },
         neighborhood: {
-          name: 'cluster_tr2000_name'
+          name: 'neighborhood_cluster_desc'
         }
     },
     setDropdownOptions: function() {
+               
             var activeLayer = getState().mapLayer[0];            
             if ( sideBar.zoneMapping[activeLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
                                                                        // enumerated yet
