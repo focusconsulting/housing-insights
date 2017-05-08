@@ -11,7 +11,6 @@ var DonutChartExtension = {
   returnPieVariable: function(field,zoneType,zoneName) {
     var chart = this,
     zoneIndex;
-    console.log(chart.data);    
     this.nested = d3.nest()    //aggregate data by unique values in [field] defined for each pie at bottom
       .key(function(d) { return d[sideBar.zoneMapping[zoneType].name]; }) 
       .key(function(d) { return d[field]; })
@@ -96,36 +95,23 @@ var DonutChartExtension = {
         .value(function(d) { return d.value; });
     */
     
-    chart.foreground = chart.svg.append('path')
+    chart.foreground = chart.svgCentered.append('path')
       .style("fill", '#fd8d3c')
       .datum({endAngle: 0});
 
-    chart.percentage = chart.svg.append("text")
+    chart.percentage = chart.svgCentered.append("text")
         .attr("text-anchor", "middle")
         .attr('class','pie_number')
         .attr('y',5);
 
-     chart.label = chart.svg.append("text")
-        .attr("y", chart.height / 2 + 10)
-        .attr('class','pie_text')
-        .attr('text-anchor','middle');
-    
+     
     if (chartOptions.index === 0){
       setState('firstPieReady', true);
     }
     
     this.update();
   },
-  arcTween: function(newAngle) { // HT: http://bl.ocks.org/mbostock/5100636
-    var chart = this;
-    return function(d){
-      var interpolate = d3.interpolate(d.endAngle, newAngle);
-      return function(t) {
-        d.endAngle = interpolate(t);
-        return chart.arc(d);
-      };
-    };    
-  },
+  
   returnTextPercent: function(){
     var chart = this;    
     var textPercent;

@@ -342,11 +342,17 @@ var sideBar = {
                 },
                 field: instance,
                 container: '#pie-' + i,
-                width: 75,
-                height: 75,
+                width: 95,
+                height: 115,
                 zoneType: 'ward',
                 zoneName: 'All',
-                index: i
+                index: i,
+                margin: {
+                    top:0,
+                    right:0,
+                    bottom:20,
+                    left:0
+                }
             })
         });
     },
@@ -369,14 +375,11 @@ var sideBar = {
         }
     },
     setDropdownOptions: function() {
-        console.log('setDropdownOptions');
-        console.log('activeLayer', getState().mapLayer[0])
+               
             var activeLayer = getState().mapLayer[0];            
             if ( sideBar.zoneMapping[activeLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
                                                                        // enumerated yet
-                console.log('not yet defined');
                 sideBar.zoneMapping[activeLayer].values = [];
-                console.log(sideBar.charts[0].nested);
                 sideBar.charts[0].nested.forEach(function(obj) {
                     sideBar.zoneMapping[activeLayer].values.push(obj.key)
                 });                                    
