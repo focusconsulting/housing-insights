@@ -335,7 +335,7 @@ var sideBar = {
         sideBar.charts = [];
         var instances = ['subsidized','cat_expiring','cat_failing_insp','cat_at_risk'];
         instances.forEach(function(instance, i){
-            sideBar.charts[i] = new PieChart({
+            sideBar.charts[i] = new DonutChart({
                 dataRequest: {
                     name: 'raw',
                     params: ['project']

@@ -1,13 +1,13 @@
 "use strict";
 
-var PieChart = function(chartOptions) { //
-    Chart.call(this, chartOptions); 
-    this.extendPrototype(PieChart.prototype, PieExtension);
+var DonutChart = function(chartOptions) { //
+    PieChartProto.call(this, chartOptions); 
+    this.extendPrototype(DonutChart.prototype, DonutChartExtension);
 }
 
-PieChart.prototype = Object.create(Chart.prototype);
+DonutChart.prototype = Object.create(PieChartProto.prototype);
 
-var PieExtension = { 
+var DonutChartExtension = { 
   returnPieVariable: function(field,zoneType,zoneName) {
     var chart = this,
     zoneIndex;    
@@ -46,8 +46,7 @@ var PieExtension = {
    /* if ( zoneType !== currentZoneType ) {
       setOptions(chart.nested);
     }*/
-    zoneIndex = this.nested.findIndex(function(obj){ // ATTN: array.findIndex is ECMAScript 2016; may need
-                                                     // different method or polyfill for older browsers
+    zoneIndex = this.nested.findIndex(function(obj){ 
         return obj.key === zoneName;
     });
     this.nested = this.checkForEmpties();
@@ -80,34 +79,15 @@ var PieExtension = {
   },  
   setup: function(chartOptions){
     
-    this.field = chartOptions.field;
-    this.width = chartOptions.width;
-    this.height = chartOptions.height;
     this.zoneType = chartOptions.zoneType;
     this.zoneName = chartOptions.zoneName;
     var chart = this;
     
     this.pieVariable = this.returnPieVariable(this.field, this.zoneType, this.zoneName); // order of yes and no objects in the array cannot be guaranteed, so JO is programmatically finding the index of yes
-    chart.radius = Math.min(this.width, this.height) / 2;
     
-    chart.svg = d3.select(chartOptions.container)
-      .append("svg")
-      .attr('width', this.width+10)
-      .attr('height', this.height+20) // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
-      .append("g")
-      .attr("transform","translate(" + this.width /2 + "," + this.height /2 + ")");
+    
 
-    chart.arc = d3.arc()
-      .outerRadius(chart.radius - this.width/20)
-      .innerRadius(chart.radius - this.width/4)
-      .startAngle(0);
-
-    chart.background = chart.svg  // appends full-circle backgroud arc. will bind only "yes" arc over this one
-                                  // to simplfy animation (always same start angle) JO
-      .append('path')
-      .datum({endAngle: 2 * Math.PI})
-      .style("fill", "#ddd")
-      .attr("d", chart.arc);
+    
 
       // no longer need to invoke d3.pie because the angle of one arc is easy to calculate
     /*chart.pie = d3.pie()
