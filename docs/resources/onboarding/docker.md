@@ -36,9 +36,19 @@ This version only includes connection information for a local copy of the databa
 
 ### 1a) One time setup
 
-Start by installing [Docker Toolbox](https://www.docker.com/products/docker-toolbox). If you've used Docker before and already have any version of Docker working, you can use that - Docker Toolbox is the easiest to use the first time (especially on Windows). 
+Start by installing [Docker Toolbox](https://www.docker.com/products/docker-toolbox). If you've used Docker before and already have any version of Docker working, you can use that - Docker Toolbox is the easiest to use the first time (especially on Windows). If you have a Mac, you are better off using [Docker for Mac](https://docs.docker.com/docker-for-mac/install/).
 
-After it's installed, run the Docker Quickstart Terminal. Once this is open and running, you'll have a command prompt. Run this command:
+There are different ways to run our setup, depending on your preference.  Depending on how you chose to run the code, the connection string to the `docker_database` changes.  The easiest method is to run using the "Full Docker Compose" option, but the others will work as well.
+
+**Full Docker Compose (docker Python)**
+
+```
+    "docker_database": {
+        "connect_str": "postgresql://codefordc:codefordc@postgres:5432/housinginsights_docker"
+    },
+```
+
+**Docker Machine (local Python)**
 
 ```
 $docker-machine ip
@@ -53,6 +63,14 @@ This will print the IP address of your local Docker instance. Open up `/python/h
 ```
 
 Substitute your IP address for the one that says `192.168.99.100` in this example (but keep `:5432` at the end).
+
+**Docker for Mac (local Python)**
+
+```
+    "docker_database": {
+        "connect_str": "postgresql://codefordc:codefordc@localhost:5432/housinginsights_docker"
+    },
+```
 
 **Troubleshooting note**: If you already have Postgres installed on your machine, it may be using the 5432 port. If you get an error message saying something related to a port in use, you'll need to change the port both here AND in the docker-compose.yml file. 
 
@@ -87,6 +105,30 @@ If you've got Docker running, you should be able to see your database in the web
 
 ### 2a) One time setup
 
+Here again there is the option to run python inside the `docker-compose` environment or using your local python setup.  The easiest method is to run using the first option below, but the others will work as well.
+
+**Full Docker Compose (docker Python)**
+
+1)  `docker-compose ps` to see the containers that are running.  One of them should be **housinginsights_sandbox_1**.  This is the container that is running the miniconda3 python environment.  There is no need to activate or deactivate an virtualenv since it is already sourced.
+
+2) `docker-compose exec sandbox bash` to get inside the container.
+
+3) `cd /code` to get into the base directory.  The /code directory is a direct mount of the repo.  You can make changes locally on your machine and they will be available in the docker container.
+
+4) `cd /code/python/scripts` to get to the scripts directory.
+
+5) `python load_data.py docker rebuild sample` to load up the sample data.
+
+6) `python load_data.py docker rebuild` to load in the real data.
+
+Alternatively, you can use this one liner to load in the data:
+
+```
+docker-compose exec sandbox bash -c 'cd /code/python/scripts && source activate /opt/conda/envs/housing-insights/ && python load_data.py docker rebuild'
+```
+
+**Using your local Conda Python installation**
+
 1) Make sure you have Python installed (we're currently using Python 3.5). We recommend [Miniconda](https://conda.io/miniconda.html). Select the Python 3.6 version - you can use Miniconda to install any other Python version. 
 
 2) Open a regular command line (not Docker) and navigate to `path\to\housing-insights\python`. 
@@ -95,7 +137,16 @@ If you've got Docker running, you should be able to see your database in the web
 
 
 ### 2b) Regular use
-**Open a regular command prompt in a new window/tab** (the command prompt from 1b) should still be running in the background).
+
+**Full Docker Compose (docker Python)**
+
+1)  `docker-compose exec sandbox bash` to get into the sandbox.
+
+2)  `cd /code` to get into the base directory.  You can run your code from here.
+
+**Using your local Conda Python installation**
+
+Open a regular command prompt in a new window/tab (the command prompt from 1b) should still be running in the background).
 
 Any time you need to recreate the database:
 
