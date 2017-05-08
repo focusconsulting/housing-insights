@@ -12,8 +12,7 @@ var PieProtoExtension = {
     var chart = this;
     this.radius =  Math.min( this.width - this.margin.right - this.margin.left, this.height - this.margin.top - this.margin.bottom ) / 2;
     this.svgCentered = this.svg.append('g')
-       //.attr('transform','translate(' + Math.max( this.width / 2, this.radius + this.margin.left )  + ',' + Math.min( this.height / 2, this.radius + this.margin.top ) + ')');
-       .attr('transform', function(){
+      .attr('transform', function(){
         if ( chart.width - chart.margin.left - chart.margin.right < chart.height - chart.margin.top - chart.margin.bottom ) {
           return 'translate(' + ( chart.margin.left + chart.radius ) + ',' + ( chart.margin.top + chart.radius ) + ')';
         }

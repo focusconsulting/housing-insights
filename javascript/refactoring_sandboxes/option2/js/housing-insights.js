@@ -200,7 +200,8 @@ var mapView = {
         setSubs([
             ['mapLoaded',mapView.addInitialLayers],
             ['mapLayer', mapView.showLayer],
-            ['mapLoaded', sideBar.init]
+            ['mapLoaded', sideBar.init],
+            ['mapLoaded',mapView.addInitialOverlays]
         ]);
         
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
@@ -219,7 +220,21 @@ var mapView = {
         this.map.on('load', function(){
             setState('mapLoaded',true);
         });        
-    },   
+    },
+    initialOverlays: ['crime','building_permits'],
+    addInitialOverlays: function(){
+        mapView.initialOverlays.forEach(function(overlay){
+            mapView.addOverlay(overlay);
+        });      
+    },
+    addOverlay: function(overlay){
+        var grouping = getState().mapLayer[0];
+        var dataRequest = {
+            name:overlay,
+            params: ['all',grouping]
+        };
+        controller.getData(dataRequest);
+    },
     initialLayers: [
         {
             source: 'ward', 
