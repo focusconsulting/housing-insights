@@ -13,7 +13,6 @@ import os
 
 import pandas as pandas
 
-# if __name__ == '__main__': # TODO: why two of these statements?
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir, os.pardir)))
 
@@ -31,7 +30,6 @@ logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 
-# TODO: flag this as an internal method
 def _sql_name_clean(name):
     """
     Internal function to clean column names for the sql_name JSON field.
@@ -73,7 +71,6 @@ def _pandas_to_sql_data_type(pandas_type_string):
 
 
 def make_draft_json(filename, tablename, encoding):
-    #use the name from constants as default # TODO: remove this statement?
     """
     Create a draft JSON file for the new table that will be reviewed and
     cleaned up before inserted into meta.json (soon to be called
