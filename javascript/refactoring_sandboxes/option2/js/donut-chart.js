@@ -10,7 +10,8 @@ DonutChart.prototype = Object.create(PieChartProto.prototype);
 var DonutChartExtension = { 
   returnPieVariable: function(field,zoneType,zoneName) {
     var chart = this,
-    zoneIndex;    
+    zoneIndex;
+    console.log(chart.data);    
     this.nested = d3.nest()    //aggregate data by unique values in [field] defined for each pie at bottom
       .key(function(d) { return d[sideBar.zoneMapping[zoneType].name]; }) 
       .key(function(d) { return d[field]; })

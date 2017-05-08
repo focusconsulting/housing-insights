@@ -354,25 +354,29 @@ var sideBar = {
                   // later code adds an array of all the values for each type to the objects
                   // for populating the dropdown list
         ward: {
-          name: 'ward2012'
+          name: 'ward'
           
         },
         tract: {
-          name: 'geo2010'
+          name: 'census_tract'
           
         },
         zip: {
           name: 'zip'
         },
         neighborhood: {
-          name: 'cluster_tr2000_name'
+          name: 'neighborhood_cluster_desc'
         }
     },
     setDropdownOptions: function() {
+        console.log('setDropdownOptions');
+        console.log('activeLayer', getState().mapLayer[0])
             var activeLayer = getState().mapLayer[0];            
             if ( sideBar.zoneMapping[activeLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
                                                                        // enumerated yet
+                console.log('not yet defined');
                 sideBar.zoneMapping[activeLayer].values = [];
+                console.log(sideBar.charts[0].nested);
                 sideBar.charts[0].nested.forEach(function(obj) {
                     sideBar.zoneMapping[activeLayer].values.push(obj.key)
                 });                                    
