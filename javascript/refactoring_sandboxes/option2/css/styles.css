@@ -43,18 +43,25 @@
   bottom:0;
  }
 
-#layer-menu {
+#layer-menu, #overlay-menu {
     background: #fff;
     position: absolute;
-    z-index: 1;
-    bottom: 10px;
-    left: 10px;
+    z-index: 1;    
     border-radius: 3px;
-    width: 120px;
-    border: 1px solid rgba(0,0,0,0.4);    
+    border: 1px solid rgba(0,0,0,0.4); 
+    left:10px;   
 }
 
-#layer-menu a {
+#layer-menu {
+    width: 120px;
+    bottom: 10px;    
+}
+#overlay-menu {
+    width: 150px;
+    top: 10px;
+}
+
+#layer-menu a, #overlay-menu a {
     font-size: 13px;
     color: #404040;
     display: block;

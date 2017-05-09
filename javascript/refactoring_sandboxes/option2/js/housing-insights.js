@@ -158,15 +158,15 @@ var controller = {
                 if ( error ) { console.log(error); }
                 model.dataCollection[dataRequest.name + paramsUnderscore] = data;
                 setState('dataLoaded.' + dataRequest.name + paramsUnderscore, true );
-                if ( dataRequest.callback !== undefined) { // if callback has been passed in 
+                if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
                     dataRequest.callback(data);
                 }                               
             });
                
         } else {
             // TODO publish that data is available
-            if ( fn !== undefined) { // if callback has been passed in 
-                fn(model.dataCollection[dataRequest.name + paramsUnderscore]);
+            if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                dataRequest.callback(model.dataCollection[dataRequest.name + paramsUnderscore]);
             }              
         }
     },
@@ -182,11 +182,11 @@ var controller = {
     },
     appendPartial: function(partial, elemID){
         d3.html('partials/' + partial + '.html', function(fragment){
-            document.getElementById(elemID).appendChild(fragment);
+            document.getElementById(elemID).appendChild(fragment);            
         });
     },
-    joinToGeoJSON: function(overlay,grouping){
-        model.dataCollection[grouping].features.forEach(function(feature){
+    joinToGeoJSON: function(overlay,grouping,activeLayer){
+        model.dataCollection[activeLayer].features.forEach(function(feature){
             var zone = feature.properties.NAME;
             console.log(zone);
             var dataKey = overlay + '_all_' + grouping;
@@ -208,10 +208,11 @@ var mapView = {
     init: function() {  
 
         setSubs([
-            ['mapLoaded',mapView.addInitialLayers],
+            ['mapLoaded', mapView.addInitialLayers],
             ['mapLayer', mapView.showLayer],
             ['mapLoaded', sideBar.init],
-            ['mapLoaded',mapView.addInitialOverlays]
+            ['mapLoaded', mapView.overlayMenu],
+            ['overlay', mapView.addOverlay]
         ]);
         
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
@@ -231,21 +232,41 @@ var mapView = {
             setState('mapLoaded',true);
         });        
     },
-    initialOverlays: ['crime','building_permits'],
-    addInitialOverlays: function(){
+    overlayMenu: function(){
+        
         mapView.initialOverlays.forEach(function(overlay){
-            mapView.addOverlay(overlay);
-        });      
+            var link = document.createElement('a');
+            link.href = '#';
+            link.id = overlay + '-overlay-item';
+            link.innerHTML = overlay.toUpperCase().replace('_',' ');
+            link.onclick = function(e){
+                e.preventDefault();
+                setState('overlay',overlay);
+            };
+            document.getElementById('overlay-menu').appendChild(link);
+        });
+
     },
-    addOverlay: function(overlay){
-        function dataCallback() {            
-            console.log(overlay,grouping);
-            controller.joinToGeoJSON(overlay,grouping);
+    initialOverlays: ['crime','building_permits'],
+    overlayMapping: {
+        neighborhood: {
+            group:'neighborhood_cluster', // including key-values here if the overlay grouping name is not the same
+                                             // as the name of the mapLayer
+            
         }
-        var grouping = getState().mapLayer[0];
+    },   
+    addOverlay: function(){
+        function dataCallback() {            
+            
+            controller.joinToGeoJSON(overlay,grouping,activeLayer);
+        }
+        var activeLayer = getState().mapLayer[0];        
+        var grouping = mapView.overlayMapping[activeLayer] !== undefined ? mapView.overlayMapping[getState().mapLayer[0]].group || activeLayer : activeLayer;
+        console.log(grouping);
+        var overlay = getState().overlay[0];
         var dataRequest = {
-            name:overlay,
-            params: ['all',grouping], //TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
+            name:overlay, //e.g. crime
+            params: ['all',grouping], // e.g. TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
             callback: dataCallback
         };
         controller.getData(dataRequest);
@@ -259,7 +280,8 @@ var mapView = {
         {
             source: 'neighborhood',
             color: '#0D5C7D',
-            visibility: 'none'
+            visibility: 'none',
+            grouping: 'neighborhood_cluster' // ie the corresponding grouping name in the overlay data, such as crime or building_permits
     
         },
         {
@@ -281,7 +303,7 @@ var mapView = {
     ],
     addInitialLayers: function(msg,data){
         if ( data === true ) {
-            controller.appendPartial('layer-menu','main-view');
+            //controller.appendPartial('layer-menu','main-view');
             mapView.initialLayers.forEach(function(layer){  // refers to mapView instead of this bc being called form PubSub
                                                             //  context. `this` causes error
                 mapView.addLayer(layer);
@@ -338,6 +360,7 @@ var mapView = {
             })
             .text(layer.source.toUpperCase())
             .on('click', function(){
+                d3.event.preventDefault();
                 setState('mapLayer',layer.source);                
             });
     },
