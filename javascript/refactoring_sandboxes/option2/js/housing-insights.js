@@ -158,15 +158,15 @@ var controller = {
                 if ( error ) { console.log(error); }
                 model.dataCollection[dataRequest.name + paramsUnderscore] = data;
                 setState('dataLoaded.' + dataRequest.name + paramsUnderscore, true );
-                if ( dataRequest.callback !== undefined) { // if callback has been passed in 
+                if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
                     dataRequest.callback(data);
                 }                               
             });
                
         } else {
             // TODO publish that data is available
-            if ( fn !== undefined) { // if callback has been passed in 
-                fn(model.dataCollection[dataRequest.name + paramsUnderscore]);
+            if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                dataRequest.callback(model.dataCollection[dataRequest.name + paramsUnderscore]);
             }              
         }
     },
@@ -182,8 +182,19 @@ var controller = {
     },
     appendPartial: function(partial, elemID){
         d3.html('partials/' + partial + '.html', function(fragment){
-            document.getElementById(elemID).appendChild(fragment);
+            document.getElementById(elemID).appendChild(fragment);            
         });
+    },
+    joinToGeoJSON: function(overlay,grouping,activeLayer){
+        model.dataCollection[activeLayer].features.forEach(function(feature){
+            var zone = feature.properties.NAME;
+            console.log(zone);
+            var dataKey = overlay + '_all_' + grouping;
+            feature.properties[overlay] = model.dataCollection[dataKey].items.find(function(obj){
+                return obj.group === zone;
+            }).count;
+        });
+        setState('joinedToGeo', [overlay, grouping, activeLayer]);
     }
 };
 
@@ -198,10 +209,12 @@ var mapView = {
     init: function() {  
 
         setSubs([
-            ['mapLoaded',mapView.addInitialLayers],
+            ['mapLoaded', mapView.addInitialLayers],
             ['mapLayer', mapView.showLayer],
             ['mapLoaded', sideBar.init],
-            ['mapLoaded',mapView.addInitialOverlays]
+            ['mapLoaded', mapView.overlayMenu],
+            ['overlay', mapView.addOverlayData],
+            ['joinedToGeo', mapView.addOverlayLayer]
         ]);
         
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
@@ -221,19 +234,81 @@ var mapView = {
             setState('mapLoaded',true);
         });        
     },
-    initialOverlays: ['crime','building_permits'],
-    addInitialOverlays: function(){
+    overlayMenu: function(){
+        
         mapView.initialOverlays.forEach(function(overlay){
-            mapView.addOverlay(overlay);
-        });      
+            var link = document.createElement('a');
+            link.href = '#';
+            link.id = overlay + '-overlay-item';
+            link.innerHTML = overlay.toUpperCase().replace('_',' ');
+            link.onclick = function(e){
+                e.preventDefault();
+                setState('overlay', overlay);
+            };
+            document.getElementById('overlay-menu').appendChild(link);
+        });
+
     },
-    addOverlay: function(overlay){
-        var grouping = getState().mapLayer[0];
+    initialOverlays: ['crime','building_permits'],
+    overlayMapping: {
+        neighborhood: {
+            group:'neighborhood_cluster', // including key-values here if the overlay grouping name is not the same
+                                             // as the name of the mapLayer
+            
+        }
+    },
+    clearOverlay: function(i, layer){
+        var overlay = getState().overlay !== undefined ? getState().overlay[i] : undefined;
+        console.log(overlay);
+        if ( overlay !== undefined ) {
+            mapView.map.setLayoutProperty(overlay + '_' + layer, 'visibility', 'none');            
+        }
+    },   
+    addOverlayData: function(){
+        mapView.clearOverlay(1, getState().mapLayer[0]);// 1 being previous (zero-indexed)
+        function dataCallback() {
+            if ( getState()[overlay + '-' + activeLayer + '-joined'] === undefined ) { // ie if the join hasn't been made already
+                controller.joinToGeoJSON(overlay,grouping,activeLayer);
+            }
+            mapView.map.getSource(activeLayer + 'Layer').setData(model.dataCollection[activeLayer]); // necessary to update the map layer's data
+                                                                                                     // it is not dynamically connected to the
+                                                                                                     // dataCollection
+            
+        }
+        var activeLayer = getState().mapLayer[0];        
+        var grouping = mapView.overlayMapping[activeLayer] !== undefined ? mapView.overlayMapping[getState().mapLayer[0]].group || activeLayer : activeLayer;
+        console.log(grouping);
+        var overlay = getState().overlay[0];
         var dataRequest = {
-            name:overlay,
-            params: ['all',grouping]
+            name:overlay, //e.g. crime
+            params: ['all',grouping], // TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
+            callback: dataCallback
         };
         controller.getData(dataRequest);
+    },
+    addOverlayLayer: function(msg,data){ // e.g. data = ['crime', 'neighborhood_cluster', 'neighborhood']
+        var minValue = d3.min(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
+            return d.count;
+        });
+        var maxValue = d3.max(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
+            return d.count;
+        });
+        console.log(minValue,maxValue);
+        mapView.map.addLayer({
+          'id': data[0] + '_' + data[2], 
+          'type': 'fill',
+          'source': data[2] + 'Layer',
+          'layout': {
+            'visibility': 'visible'
+          },
+          'paint': {
+            'fill-color': {
+              'property': data[0],          
+              'stops': [[0, "#fff"], [maxValue, "#1e5cdf"]]
+            },
+            'fill-opacity': .5
+          }
+        });      
     },
     initialLayers: [
         {
@@ -244,7 +319,8 @@ var mapView = {
         {
             source: 'neighborhood',
             color: '#0D5C7D',
-            visibility: 'none'
+            visibility: 'none',
+            grouping: 'neighborhood_cluster' // ie the corresponding grouping name in the overlay data, such as crime or building_permits
     
         },
         {
@@ -266,7 +342,7 @@ var mapView = {
     ],
     addInitialLayers: function(msg,data){
         if ( data === true ) {
-            controller.appendPartial('layer-menu','main-view');
+            //controller.appendPartial('layer-menu','main-view');
             mapView.initialLayers.forEach(function(layer){  // refers to mapView instead of this bc being called form PubSub
                                                             //  context. `this` causes error
                 mapView.addLayer(layer);
@@ -299,6 +375,7 @@ var mapView = {
               'paint': {
                 'line-color': layer.color,
                 'line-width': 1
+                
               },
               'layout': {
                 'visibility': layer.visibility
@@ -323,11 +400,13 @@ var mapView = {
             })
             .text(layer.source.toUpperCase())
             .on('click', function(){
+                d3.event.preventDefault();
                 setState('mapLayer',layer.source);                
             });
     },
     showLayer: function(msg,data) {
         var previousLayer = getState().mapLayer[1];
+        mapView.clearOverlay(0,previousLayer);
         if (previousLayer !== undefined ) {
             mapView.map.setLayoutProperty(previousLayer + 'Layer', 'visibility', 'none');            
         }
