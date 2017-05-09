@@ -22,8 +22,6 @@ from housinginsights.ingestion.DataReader import ManifestReader
 
 #configuration
 #See /logs/example-logging.py for usage examples
-# TODO: replace hard code rel paths so this doesn't fail if called from outside
-# TODO: the folder for this file
 logging_path = os.path.abspath(os.path.join(python_filepath, "logs"))
 logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
