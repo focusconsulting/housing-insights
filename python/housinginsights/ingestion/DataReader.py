@@ -73,7 +73,6 @@ class HIReader(object):
     #TODO add __next__ method for more general purpose use
     #https://www.ibm.com/developerworks/library/l-pycon/
 
-    # TODO: verify that this is functional
     def __len__(self):
         if self._length is None:
             for row in self:
@@ -100,10 +99,10 @@ class HIReader(object):
 
 
 class ManifestReader(HIReader):
-    '''
+    """
     Adds extra functions specific to manifest.csv. This is the class that
     should be used to read the manifest and return it row-by-row. 
-    '''
+    """
 
     _include_flags_positive = ['use']
     _include_flags_negative = ['pending', 'exclude', 'superseded']
@@ -121,7 +120,7 @@ class ManifestReader(HIReader):
             for row in reader:
                 self._length += 1
 
-                #parse the date into proper format for sql 
+                #parse the date into proper format for sql
                 try:
                     _date = dateparser.parse(row['data_date'],dayfirst=False,
                                              yearfirst=False)
@@ -132,7 +131,6 @@ class ManifestReader(HIReader):
                 #return the row
                 yield row
 
-    # TODO: verify that test created
     def has_unique_ids(self):
         """
         Verifies that every value in the manifest column 'unique_data_id' is
@@ -287,7 +285,7 @@ class DataReader(HIReader):
         if self.manifest_row['include_flag'] == 'use':
             if sql_manifest_row is None:  # okay if data isn't already in db
                 return True
-            # TODO: make this into if/else statement
+            # TODO: make this into if/else statement?
             if sql_manifest_row['status'] != 'loaded':
                 return True
             if sql_manifest_row['status'] == 'loaded':

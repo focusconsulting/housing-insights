@@ -86,12 +86,12 @@ class HISql(object):
         self.manifest_row = manifest_row
         self.engine = engine
 
-        #extract some values for convenience
+        # extract some values for convenience
         self.unique_data_id = self.manifest_row["unique_data_id"]
         self.tablename = self.manifest_row["destination_table"]
         self.metafields = meta[self.tablename]['fields']
 
-        #assign defaults
+        # assign defaults
         self.filename = 'temp_{}.psv'.format(manifest_row['unique_data_id']) \
             if filename is None else filename
 
@@ -141,18 +141,18 @@ class HISql(object):
         conn.close()
             
     def update_manifest_row(self, conn, status="unknown"):
-        '''
+        """
         Adds self.manifest_row associated with this table to the SQL manifest
-        conn = the connection to use (won't be closed so calling function can rollback)
-        status = the value to put in the "status" field
-        '''
-        #Add the status
+        conn = the connection to use (won't be closed so calling function can
+        rollback) status = the value to put in the "status" field
+        """
+        # Add the status
         manifest_row = copy.copy(self.manifest_row)
         manifest_row['status'] = status
         manifest_row['load_date'] = datetime.datetime.now().isoformat()
 
-        #Remove the row if it exists
-        #TODO make sure data is synced or appended properly
+        # Remove the row if it exists
+        # TODO make sure data is synced or appended properly
         sql_manifest_row = self.get_sql_manifest_row(db_conn=conn,close_conn=False)
         if sql_manifest_row != None:
             logging.info("  deleting existing manifest row for {}".format(self.unique_data_id))
@@ -168,15 +168,16 @@ class HISql(object):
         columns_string = "(" + ",".join(columns) + ")"
         values_string = "('" + "','".join(values) + "')"
 
-        insert_command = "INSERT INTO manifest {} VALUES {};".format(columns_string,values_string)
+        insert_command = "INSERT INTO manifest {} VALUES {};".format(
+            columns_string, values_string)
         #print(insert_command)
         conn.execute(insert_command)
 
     def create_table_if_necessary(self, table=None):
-        '''
-        Creates the table associated with this data file if it doesn't already exist
-        table = string representing the tablename
-        '''
+        """
+        Creates the table associated with this data file if it doesn't already
+        exist table = string representing the tablename
+        """
         #TODO - a better long-term solution to this might be SQLAlchemy metadata: http://www.mapfish.org/doc/tutorials/sqlalchemy.html
         if table is None:
             table = self.tablename

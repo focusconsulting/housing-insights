@@ -1,4 +1,8 @@
-import csv
+"""
+Module provides the api connection class for DCHousing data in opendata.dc.gov
+web site.
+"""
+
 from pprint import pprint
 
 
@@ -48,4 +52,4 @@ class DCHousingApiConn(BaseApiConn):
                        data]
             self.result_to_csv(FIELDS, results, output_file)
 
-        return result.json()  # is this necessary - mimicking mar.py
+        return result.json()

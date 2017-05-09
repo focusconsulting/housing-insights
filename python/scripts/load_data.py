@@ -1,5 +1,5 @@
 """
-ModulelLoads our flat file data into the Postgres database. It will rebuild the
+Modulel loads our flat file data into the Postgres database. It will rebuild the
 database of choice with sample or real data by first deleting any data in the
 repository, and then re-load the data into the repository.
 
@@ -27,8 +27,9 @@ import csv
 #Needed to make relative package imports when running this file as a script (i.e. for testing purposes).
 #Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             os.pardir)))
+python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               os.pardir))
+sys.path.append(python_filepath)
 
 # TODO: remove redundant imports
 from housinginsights.ingestion.DataReader import DataReader
@@ -41,9 +42,8 @@ from housinginsights.ingestion import functions as ingestionfunctions
 
 # configuration
 # See /logs/example-logging.py for usage examples
-# TODO: update to avoid hard coded relative paths
-logging_filename = "../logs/ingestion.log"
-logging_path = os.path.abspath("../logs")
+logging_path = os.path.abspath(os.path.join(python_filepath, "logs"))
+logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 
 # Pushes everything from the logger to the command line output as well.
@@ -179,12 +179,15 @@ if __name__ == '__main__':
 
     #local, real data is the default
     database_choice = 'local_database'
-    meta_path = 'meta.json'
-    manifest_path = 'manifest.csv'
+    scripts_path = os.path.abspath(os.path.join(python_filepath, 'scripts'))
+    meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
+    manifest_path = os.path.abspath(os.path.join(scripts_path, 'manifest.csv'))
 
     if 'sample' in sys.argv:
-        meta_path = 'meta_sample.json'
-        manifest_path = 'manifest_sample.csv'
+        meta_path = os.path.abspath(os.path.join(scripts_path,
+                                                 'meta_sample.json'))
+        manifest_path = os.path.abspath(
+            os.path.join(scripts_path, 'manifest_sample.csv'))
 
     if 'docker' in sys.argv:
         database_choice = 'docker_database'
@@ -192,8 +195,9 @@ if __name__ == '__main__':
     if 'remote' in sys.argv:
         database_choice = 'remote_database'
         #Don't want sample data in the remote database
-        meta_path = 'meta.json'
-        manifest_path = 'manifest.csv'
+        meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
+        manifest_path = os.path.abspath(
+            os.path.join(scripts_path, 'manifest.csv'))
 
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)

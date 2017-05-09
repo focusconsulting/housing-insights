@@ -367,8 +367,8 @@ class CleanerBase(object, metaclass=ABCMeta):
 # Custom Cleaners
 #############################################
 
-# TODO: automate this so by passing simple list of keys that map to specific
-# TODO: cleaner methods including option to pass custom methods
+# TODO: maybe automate this via cmd line by passing simple list of keys that
+# TODO: map to specific cleaner methods including option to pass custom methods
 
 class GenericCleaner(CleanerBase):
     def clean(self,row, row_num = None):

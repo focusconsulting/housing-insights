@@ -102,7 +102,7 @@ def make_draft_json(filename, tablename, encoding):
         }
     }
 
-    # TODO: insert 'unique_data_id' automatically into draft JSON?
+    # TODO: insert 'unique_data_id' field into draft JSON
     unique_data_id_field = {
         "display_name": "Unique data ID",
         "display_text": "Identifies which source file this record came from",
@@ -141,7 +141,6 @@ def make_draft_json(filename, tablename, encoding):
     print(tablename + " JSON table file created.")
 
 
-# TODO: review and refactor as necessary - see issue 196
 def make_all_json(manifest_path):
 
     completed_tables = {}
