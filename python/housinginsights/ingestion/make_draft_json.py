@@ -13,8 +13,9 @@ import os
 
 import pandas as pandas
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             os.pardir, os.pardir)))
+python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               os.pardir, os.pardir))
+sys.path.append(python_filepath)
 
 from housinginsights.ingestion.DataReader import ManifestReader
 
@@ -23,8 +24,8 @@ from housinginsights.ingestion.DataReader import ManifestReader
 #See /logs/example-logging.py for usage examples
 # TODO: replace hard code rel paths so this doesn't fail if called from outside
 # TODO: the folder for this file
-logging_filename = "../../logs/ingestion.log"
-logging_path = os.path.abspath("../../logs")
+logging_path = os.path.abspath(os.path.join(python_filepath, "logs"))
+logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 #Pushes everything from the logger to the command line output as well
 logging.getLogger().addHandler(logging.StreamHandler())
@@ -179,5 +180,6 @@ if __name__ == '__main__':
         make_draft_json(csv_filename, table_name, encoding)
         
     if 'multi' in sys.argv:
-        manifest_path = os.path.abspath('../../scripts/manifest.csv')
+        manifest_path = os.path.abspath(
+            os.path.join(python_filepath, 'scripts', 'manifest.csv'))
         make_all_json(manifest_path)
