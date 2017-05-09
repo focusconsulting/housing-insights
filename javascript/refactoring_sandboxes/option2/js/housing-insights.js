@@ -184,6 +184,16 @@ var controller = {
         d3.html('partials/' + partial + '.html', function(fragment){
             document.getElementById(elemID).appendChild(fragment);
         });
+    },
+    joinToGeoJSON: function(overlay,grouping){
+        model.dataCollection[grouping].features.forEach(function(feature){
+            var zone = feature.properties.NAME;
+            console.log(zone);
+            var dataKey = overlay + '_all_' + grouping;
+            feature.properties.overlayData = model.dataCollection[dataKey].items.find(function(obj){
+                return obj.group === zone;
+            }).count;            
+        });
     }
 };
 
@@ -228,10 +238,15 @@ var mapView = {
         });      
     },
     addOverlay: function(overlay){
+        function dataCallback() {            
+            console.log(overlay,grouping);
+            controller.joinToGeoJSON(overlay,grouping);
+        }
         var grouping = getState().mapLayer[0];
         var dataRequest = {
             name:overlay,
-            params: ['all',grouping]
+            params: ['all',grouping], //TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
+            callback: dataCallback
         };
         controller.getData(dataRequest);
     },
