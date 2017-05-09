@@ -35,15 +35,15 @@ class TestVerifyRequiredMetadata(unittest.TestCase):
         field_list = csv_reader.meta[csv_reader.destination_table]['fields']
 
         # Baseline assertions
-        self.assertTrue(csv_reader.verify_required_metadata_columns_exist_in_actual(field_list))
+        self.assertTrue(csv_reader._verify_required_metadata_columns_exist_in_actual(field_list))
 
         # Test that if an optional column does not exist in actual dataset, verify_required_metadata_columns_exist_in_actual still returns True.
         field_list.append(FAKE_OPTIONAL_FIELD)
-        self.assertTrue(csv_reader.verify_required_metadata_columns_exist_in_actual(field_list)) # Assert True!
+        self.assertTrue(csv_reader._verify_required_metadata_columns_exist_in_actual(field_list)) # Assert True!
 
         # Test that if a mandatory column does not exist in actual dataset, verify_required_metadata_columns_exist_in_actual returns False.
         field_list.append(FAKE_REQUIRED_FIELD)
-        self.assertFalse(csv_reader.verify_required_metadata_columns_exist_in_actual(field_list)) # Assert False!
+        self.assertFalse(csv_reader._verify_required_metadata_columns_exist_in_actual(field_list)) # Assert False!
 
         # TODO Test that if an actual csv column does not exist in metadata, verify_actual_columns_exist_in_metadata returns False.
         # Not sure how to write this one, since modifying keys property doesn't seem to work
