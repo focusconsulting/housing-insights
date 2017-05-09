@@ -7,6 +7,8 @@ title: Adding Data Sources
 
 <i><strong>NOTE</strong>: There's a good chance these instructions will get outdated as we improve our data ingestion process! The fundamental principles will stay roughly the same - syncing data from your local machine to S3, creating json for each SQL table and a manifest row for each raw file, and creating a Cleaner. If you run into any problems ask a data team member for help.</i>
 
+For some background orientation, it is useful to first check out our [ingestion code structure flowchart](https://docs.google.com/drawings/u/1/d/1jVsE5cKm9O8n9HBZ-dCY8PO48R6L6VQFFhnIsKASgHY/edit?usp=drive_web)
+
 ## 0) Setup
 
 ### Docker
