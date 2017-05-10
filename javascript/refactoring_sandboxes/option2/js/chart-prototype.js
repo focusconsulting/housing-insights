@@ -1,3 +1,5 @@
+"use strict";
+
 var ChartProto = function(chartOptions) {    //chartOptions is an object, was DATA_FILE, el, field, sortField, asc, readableField                                                              
     
     this.initialize(chartOptions); 
