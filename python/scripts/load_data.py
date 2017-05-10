@@ -20,19 +20,17 @@ Notes:
 import sys
 import os
 import logging
-import json
-import csv
 
 
-#Needed to make relative package imports when running this file as a script (i.e. for testing purposes).
-#Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all-about-imports/
+# Needed to make relative package imports when running this file as a script
+# (i.e. for testing purposes).
+# Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all
+# -about-imports/
 
 python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir))
 sys.path.append(python_filepath)
 
-# TODO: remove redundant imports
-from housinginsights.ingestion.DataReader import DataReader
 from housinginsights.tools import dbtools
 
 from housinginsights.ingestion import DataReader, ManifestReader
@@ -40,8 +38,7 @@ from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 
-# configuration
-# See /logs/example-logging.py for usage examples
+# configuration: see /logs/example-logging.py for usage examples
 logging_path = os.path.abspath(os.path.join(python_filepath, "logs"))
 logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
@@ -50,20 +47,92 @@ logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 
+# TODO: Class refactoring
+class LoadData(object):
+
+    def __init__(self, database_choice=None, meta_path=None,
+                 manifest_path=None, keep_temp_files=True):
+        """
+        Initializes the class with optional arguments. The default behaviour 
+        is to load the local database with data tracked from meta.json 
+        and manifest.csv within the 'python/scripts' folder.
+        
+        :param database_choice: choice of 'local_database', 
+        'docker_database', and 'remote_database'
+        :param meta_path: the path of the meta.json to be used
+        :param manifest_path: the path of the manifest_path.csv to be used
+        :param keep_temp_files: if True, temp clean pipe-delimited files will be
+        archived in the 'python/logs' folder
+        """
+
+        # load defaults in no arguments passed
+        scripts_path = os.path.abspath(os.path.join(python_filepath, 'scripts'))
+        if database_choice is None:
+            database_choice = 'local_database'
+        if meta_path is None:
+            meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
+        if manifest_path is None:
+            manifest_path = os.path.abspath(os.path.join(scripts_path,
+                                                      'manifest.csv'))
+        self.keep_temp_files = keep_temp_files
+
+        # load given meta.json and manifest.csv files into memory
+        self.meta = ingestionfunctions.load_meta_data(meta_path)
+        self.manifest = ManifestReader(manifest_path)
+
+        # load given database choice and check/create sql manifest
+        self.engine = dbtools.get_database_engine(database_choice)
+        # sql_manifest_exists = \
+        #     ingestionfunctions.check_or_create_sql_manifest(engine=engine)
+        # logging.info("sql_manifest_exists: {}".format(sql_manifest_exists))
+
+    def drop_tables(self):
+        """
+        Returns the outcome of dropping all the tables from the 
+        database_choice and then rebuilding.
+        """
+        db_conn = self.engine.connect()
+        return db_conn.execute(
+            "DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+
+    def load_data(self):
+        """
+        Start the process for loading the data into the database.
+        
+        :return: None
+        """
+
+        # TODO: should this be moved into the __init__ of ManifestReader? Do we
+        # TODO: ever want to use ManifestReader if it has duplicate rows?
+        if not self.manifest.has_unique_ids():
+            raise ValueError('Manifest has duplicate unique_data_id!')
+
+
+
+    # - Use manifest.csv to find out all the files we want to load
+    def _
+    # - Compare current manifest.csv to the sql database manifest table, which
+    #  reflects manifest.csv as of the last time this script was run, and
+    #  tells us whether or not the file has already been loaded in this
+    #  database.
+    # - Use meta.json to make sure the CSV file has all the fields we expect
+    # it to, and to decide the data type of each field.
+    # - Load the csv into the database
+
 #############################
 # FUNCTIONS
 #############################
 
 
-# complete, tests not written
-def drop_tables(database_choice):
-    """
-    Used to rebuild the database by first dropping all tables before running
-    main()
-    """
-    engine = dbtools.get_database_engine(database_choice)
-    db_conn = engine.connect()
-    query_result = db_conn.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+# # complete, tests not written
+# def drop_tables(database_choice):
+#     """
+#     Used to rebuild the database by first dropping all tables before running
+#     main()
+#     """
+#     engine = dbtools.get_database_engine(database_choice)
+#     db_conn = engine.connect()
+#     query_result = db_conn.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
 
 
 def main(database_choice, meta_path, manifest_path, keep_temp_files=True):
@@ -89,17 +158,18 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files=True):
     - at the end of loading print an error message to the console
     """
 
-    # load given meta.json and manifest.csv files into memory
-    meta = ingestionfunctions.load_meta_data(meta_path)
-    manifest = ManifestReader(manifest_path)
-
-    # load given database choice and check/create sql manifest
-    engine = dbtools.get_database_engine(database_choice)
+    # # load given meta.json and manifest.csv files into memory
+    # meta = ingestionfunctions.load_meta_data(meta_path)
+    # manifest = ManifestReader(manifest_path)
+    #
+    # # load given database choice and check/create sql manifest
+    # engine = dbtools.get_database_engine(database_choice)
     sql_manifest_exists = \
         ingestionfunctions.check_or_create_sql_manifest(engine=engine)
     logging.info("sql_manifest_exists: {}".format(sql_manifest_exists))
 
-    #TODO should this be moved into the __init__ of ManifestReader? Do we ever want to use ManifestReader if it has duplicate rows?
+    # TODO: should this be moved into the __init__ of ManifestReader? Do we
+    # TODO: ever want to use ManifestReader if it has duplicate rows?
     if not manifest.has_unique_ids():
         raise ValueError('Manifest has duplicate unique_data_id!')
 
@@ -176,8 +246,8 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files=True):
 
 if __name__ == '__main__':
 
-
-    #local, real data is the default
+    # TODO: Refactor next 3 if statements if possible
+    # local, real data is the default
     database_choice = 'local_database'
     scripts_path = os.path.abspath(os.path.join(python_filepath, 'scripts'))
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
@@ -194,12 +264,15 @@ if __name__ == '__main__':
 
     if 'remote' in sys.argv:
         database_choice = 'remote_database'
-        #Don't want sample data in the remote database
+        # Don't want sample data in the remote database
         meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
         manifest_path = os.path.abspath(
             os.path.join(scripts_path, 'manifest.csv'))
 
-    if 'rebuild' in sys.argv:
-        drop_tables(database_choice)
+    loader = LoadData(database_choice=database_choice, meta_path=meta_path,
+                      manifest_path=manifest_path, keep_temp_files=True)
 
-    main(database_choice, meta_path, manifest_path, keep_temp_files = True)
+    if 'rebuild' in sys.argv:
+        loader.drop_tables()
+
+    loader.load_data()
