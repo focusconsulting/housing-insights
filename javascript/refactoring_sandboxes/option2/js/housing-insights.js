@@ -62,10 +62,16 @@ function StateModule() {
         }
         
     }
+    function clearState(key) {
+        delete state[key];
+         PubSub.publish('clearState', key);
+         console.log('CLEAR STATE', key);
+    }
     return {
         logState: logState,
         getState: getState,
-        setState: setState
+        setState: setState,
+        clearState: clearState
     }
 }
 
@@ -263,11 +269,19 @@ var mapView = {
         var i = layer === 'previous' ? 1 : 0;
         console.log(i);
         var layerObj = getState().overlay !== undefined ? getState().overlay[i] : undefined;
-        if ( layerObj !== undefined ) {
-            mapView.map.setLayoutProperty(layerObj.activeLayer + '_' + layerObj.overlay, 'visibility', 'none');            
+        if ( layerObj !== undefined) {
+            mapView.map.setLayoutProperty(layerObj.activeLayer + '_' + layerObj.overlay, 'visibility', 'none');
+            mapView.toggleActive('#' + layerObj.overlay + '-overlay-item');
+            console.log('toggleActive ' + layerObj.overlay + '-overlay-item');
+        }
+        if ( i === 0 ) { // i.e. clearing the existing current overlay, with result that none will be visible         
+          clearState('overlay');
         }
     },   
     addOverlayData: function(msg,data){ // data e.g. { overlay: 'building_permits', activeLayer: 'ward'}]
+        if ( data == null) { // ie if the overlays have been cleared
+            return;
+        }
         var grouping = mapView.overlayMapping[data.activeLayer] !== undefined ? mapView.overlayMapping[data.activeLayer].group || data.activeLayer : data.activeLayer;
         if ( getState()['joinedToGeo.' + data.overlay + '-' + data.activeLayer] === undefined ) {
             function dataCallback() {           
@@ -298,14 +312,12 @@ var mapView = {
             var maxValue = d3.max(model.dataCollection[data.overlay + '_all_' + data.grouping].items, function(d){
                 return d.count;
             });
-            console.log(minValue,maxValue);
-            mapView.clearOverlay('previous');
             mapView.map.addLayer({
               'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
               'type': 'fill',
               'source': data.activeLayer + 'Layer',
               'layout': {
-                'visibility': 'visible'
+                'visibility': 'none'
               },
               'paint': {
                 'fill-color': {
@@ -315,11 +327,23 @@ var mapView = {
                 'fill-opacity': .5
               }
             });      
-        } 
+        }
+        mapView.showOverlayLayer(data.overlay,data.activeLayer);
+
     },
     showOverlayLayer: function(overlay, activeLayer){
       mapView.clearOverlay('previous');
-      mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');              
+      mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
+      mapView.toggleActive('#' + overlay + '-overlay-item')               
+    },
+    toggleActive: function(selector){
+        d3.select(selector)
+        .attr('class', function(){
+            if ( d3.select(this).attr('class') === 'active' ){
+                return '';
+            }
+            return 'active';
+        });
     },
     initialLayers: [
         {
@@ -417,8 +441,8 @@ var mapView = {
     },
     showLayer: function(msg,data) {
         var previousLayer = getState().mapLayer[1];
-        mapView.clearOverlay(0,previousLayer);
         if (previousLayer !== undefined ) {
+            mapView.clearOverlay();
             mapView.map.setLayoutProperty(previousLayer + 'Layer', 'visibility', 'none');            
         }
         mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
@@ -542,7 +566,8 @@ var detailView = {
 
 var setState = controller.controlState.setState,
     getState = controller.controlState.getState,
-    logState = controller.controlState.logState;
+    logState = controller.controlState.logState,
+    clearState = controller.controlState.clearState;
 
 var setSubs = controller.controlSubs.setSubs,
     logSubs = controller.controlSubs.logSubs,
