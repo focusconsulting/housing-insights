@@ -194,7 +194,9 @@ var controller = {
                 return obj.group === zone;
             }).count;
         });
-        setState('joinedToGeo', [overlay, grouping, activeLayer]);
+        console.log(overlay,grouping,activeLayer);
+        setState('joinedToGeo.' +  overlay + '-' + activeLayer, [overlay, grouping, activeLayer]);
+        // e.g. joinedToGeo.crime-neighborhood, ['crime','neighborhood_cluster','neighborhood']
     }
 };
 
@@ -243,7 +245,7 @@ var mapView = {
             link.innerHTML = overlay.toUpperCase().replace('_',' ');
             link.onclick = function(e){
                 e.preventDefault();
-                setState('overlay', overlay);
+                setState('overlay', [getState().mapLayer[0], overlay]); // e.g. 'overlay', 'neighborhood_building_permits'
             };
             document.getElementById('overlay-menu').appendChild(link);
         });
@@ -257,58 +259,70 @@ var mapView = {
             
         }
     },
-    clearOverlay: function(i, layer){
+    clearOverlay: function(layer){
+        var i = layer === 'previous' ? 1 : 0;
         var overlay = getState().overlay !== undefined ? getState().overlay[i] : undefined;
         console.log(overlay);
         if ( overlay !== undefined ) {
-            mapView.map.setLayoutProperty(overlay + '_' + layer, 'visibility', 'none');            
+            mapView.map.setLayoutProperty(overlay[0] + '_' + overlay[1], 'visibility', 'none');            
         }
     },   
-    addOverlayData: function(){
-        mapView.clearOverlay(1, getState().mapLayer[0]);// 1 being previous (zero-indexed)
-        function dataCallback() {
-            if ( getState()[overlay + '-' + activeLayer + '-joined'] === undefined ) { // ie if the join hasn't been made already
-                controller.joinToGeoJSON(overlay,grouping,activeLayer);
+    addOverlayData: function(msg,data){ // data e.g. ['ward','building_permits]
+        var activeLayer = data[0];           
+        var overlay = data[1];
+        var grouping = mapView.overlayMapping[activeLayer] !== undefined ? mapView.overlayMapping[activeLayer].group || activeLayer : activeLayer;
+        if ( getState()['joinedToGeo.' + overlay + '-' + activeLayer] === undefined ) {
+            function dataCallback() {           
+                controller.joinToGeoJSON(overlay,grouping,activeLayer); // joins the overlay data to the geoJSON *in the dataCollections* not in the mapBox instance
             }
-            mapView.map.getSource(activeLayer + 'Layer').setData(model.dataCollection[activeLayer]); // necessary to update the map layer's data
-                                                                                                     // it is not dynamically connected to the
-                                                                                                     // dataCollection
-            
+            console.log(grouping);
+            var dataRequest = {
+                name:overlay, //e.g. crime
+                params: ['all',grouping], // TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
+                callback: dataCallback
+            };
+            controller.getData(dataRequest);
+        } else {
+            mapView.showOverlayLayer([overlay,grouping,activeLayer]);
         }
-        var activeLayer = getState().mapLayer[0];        
-        var grouping = mapView.overlayMapping[activeLayer] !== undefined ? mapView.overlayMapping[getState().mapLayer[0]].group || activeLayer : activeLayer;
-        console.log(grouping);
-        var overlay = getState().overlay[0];
-        var dataRequest = {
-            name:overlay, //e.g. crime
-            params: ['all',grouping], // TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
-            callback: dataCallback
-        };
-        controller.getData(dataRequest);
     },
     addOverlayLayer: function(msg,data){ // e.g. data = ['crime', 'neighborhood_cluster', 'neighborhood']
-        var minValue = d3.min(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
-            return d.count;
-        });
-        var maxValue = d3.max(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
-            return d.count;
-        });
-        console.log(minValue,maxValue);
-        mapView.map.addLayer({
-          'id': data[0] + '_' + data[2], 
-          'type': 'fill',
-          'source': data[2] + 'Layer',
-          'layout': {
-            'visibility': 'visible'
-          },
-          'paint': {
-            'fill-color': {
-              'property': data[0],          
-              'stops': [[0, "#fff"], [maxValue, "#1e5cdf"]]
-            },
-            'fill-opacity': .5
-          }
-        });      
+        console.log(mapView.map.getLayer(data[2] + '_' + data[0]));
+        if (mapView.map.getLayer( data[2] + '_' + data[0] ) === undefined) {
+        
+            mapView.map.getSource(data[2] + 'Layer').setData(model.dataCollection[data[2]]); // necessary to update the map layer's data
+                                                                                                     // it is not dynamically connected to the
+                                                                                                     // dataCollection           
+
+            var minValue = d3.min(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
+                return d.count;
+            });
+            var maxValue = d3.max(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
+                return d.count;
+            });
+            console.log(minValue,maxValue);
+            mapView.clearOverlay('previous');
+            mapView.map.addLayer({
+              'id': data[2] + '_' + data[0], //e.g. neighboorhood_crime
+              'type': 'fill',
+              'source': data[2] + 'Layer',
+              'layout': {
+                'visibility': 'visible'
+              },
+              'paint': {
+                'fill-color': {
+                  'property': data[0],          
+                  'stops': [[minValue, "#fff"], [maxValue, "#1e5cdf"]]
+                },
+                'fill-opacity': .5
+              }
+            });      
+        } 
+    },
+    showOverlayLayer: function(data){
+        console.log(data);
+      mapView.clearOverlay('previous');
+      mapView.map.setLayoutProperty(data[2] + '_' + data[0], 'visibility', 'visible');              
     },
     initialLayers: [
         {
