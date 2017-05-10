@@ -52,7 +52,10 @@ function StateModule() {
             state[key] = [value];
             PubSub.publish(key, value);
             console.log('STATE CHANGE', key, value);
-        } else if ( state[key][0] !== value ) {
+        } else if ( state[key][0] !== value ) { // only for when `value` is a string or number. doesn't seem
+                                                // to cause an issue when value is an object, but it does duplicate
+                                                // the state. i.e. key[0] and key[1] will be equivalent. avoid that
+                                                // with logic before making the setState call.
             state[key].unshift(value);
             PubSub.publish(key, value);
             console.log('STATE CHANGE', key, value);
@@ -242,8 +245,7 @@ var mapView = {
             setState('mapLoaded',true);
         });        
     },
-    overlayMenu: function(){
-        
+    overlayMenu: function(){        
         mapView.initialOverlays.forEach(function(overlay){
             var link = document.createElement('a');
             link.href = '#';
@@ -251,7 +253,12 @@ var mapView = {
             link.innerHTML = overlay.toUpperCase().replace('_',' ');
             link.onclick = function(e){
                 e.preventDefault();
-                setState('overlay', {overlay: overlay, activeLayer: getState().mapLayer[0]}); 
+                var existingOverlayType = getState().overlay !== undefined ? getState().overlay[0].overlay : null;
+                if ( existingOverlayType !== overlay ) {
+                    setState('overlay', {overlay: overlay, activeLayer: getState().mapLayer[0]});                     
+                } else {
+                    mapView.clearOverlay();
+                }
             };
             document.getElementById('overlay-menu').appendChild(link);
         });
