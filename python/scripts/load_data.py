@@ -336,10 +336,12 @@ class LoadData(object):
 #                     csv_writer.remove_file()
 
 if __name__ == '__main__':
+    """
+    Continue to honor command line feature after refactoring to encapsulate 
+    the module as a class. 
+    """
 
-    # TODO: Refactor next 3 if statements if possible
-    # local, real data is the default
-    database_choice = 'local_database'
+    # use real data as default
     scripts_path = os.path.abspath(os.path.join(python_filepath, 'scripts'))
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
     manifest_path = os.path.abspath(os.path.join(scripts_path, 'manifest.csv'))
@@ -350,18 +352,24 @@ if __name__ == '__main__':
         manifest_path = os.path.abspath(
             os.path.join(scripts_path, 'manifest_sample.csv'))
 
+    # for case of more than one database choice default to the option with
+    # the lowest risk if database is updated
     if 'docker' in sys.argv:
         database_choice = 'docker_database'
-
-    if 'remote' in sys.argv:
+        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
+                          manifest_path=manifest_path, keep_temp_files=True)
+    elif 'remote' in sys.argv:
         database_choice = 'remote_database'
         # Don't want sample data in the remote database
         meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
         manifest_path = os.path.abspath(
             os.path.join(scripts_path, 'manifest.csv'))
-
-    loader = LoadData(database_choice=database_choice, meta_path=meta_path,
-                      manifest_path=manifest_path, keep_temp_files=True)
+        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
+                          manifest_path=manifest_path, keep_temp_files=True)
+    else:
+        database_choice = 'local_database'
+        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
+                          manifest_path=manifest_path, keep_temp_files=True)
 
     if 'rebuild' in sys.argv:
         loader.drop_tables()
