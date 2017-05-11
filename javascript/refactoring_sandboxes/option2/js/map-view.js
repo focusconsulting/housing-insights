@@ -10,7 +10,8 @@ var mapView = {
             ['mapLoaded', sideBar.init],
             ['mapLoaded', mapView.overlayMenu],
             ['overlay', mapView.addOverlayData],
-            ['joinedToGeo', mapView.addOverlayLayer]
+            ['joinedToGeo', mapView.addOverlayLayer],
+            ['dataLoaded.raw_project', mapView.placeProjects]
         ]);
         
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
@@ -243,5 +244,34 @@ var mapView = {
         d3.select('#' + data + '-menu-item')
             .attr('class','active');
 
+    },
+    placeProjects: function(){
+        mapView.map.addSource('project', {
+          'type': 'geojson',
+          'data': controller.convertToGeoJSON(model.dataCollection.raw_project)
+        });
+        mapView.map.addLayer({
+            'id': 'project',
+            'type': 'circle',
+            'source': 'project',
+            'paint': {
+                'circle-radius': { // make circles larger as the user zoom. [[smallzoom,px],[bigzoom,px]]
+                    'base': 1.75,
+                    'stops': [[10, 3], [18, 32]]
+                },            
+                'circle-color': {
+                      property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
+                      type: 'categorical',
+                      stops: [
+                        ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                        ['2 - Expiring Subsidy', '#8B4225'],
+                        ['3 - Recent Failing REAC Score', '#bd0026'],
+                        ['4 - More Info Needed', '#A9A9A9'],
+                        ['5 - Other Subsidized Property', ' #fd8d3c'],
+                        ['6 - Lost Rental', '#A9A9A9']
+                      ]
+                }
+            }
+        }); 
     }
 };

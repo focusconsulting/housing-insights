@@ -206,6 +206,25 @@ var controller = {
         console.log(overlay,grouping,activeLayer);
         setState('joinedToGeo.' +  overlay + '-' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
         // e.g. joinedToGeo.crime-neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
+    },
+    convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
+                                      // and returns geoJSON with the original data in the properties field
+        console.log(data);
+        var features = data.items.map(function(element){ 
+          return {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [+element.longitude, +element.latitude]
+            },
+            'properties': element        
+          }
+        });
+        console.log(features);
+        return {
+          'type': 'FeatureCollection',
+          'features': features
+        }
     }
 }
 
