@@ -11,7 +11,8 @@ var mapView = {
             ['mapLoaded', mapView.overlayMenu],
             ['overlay', mapView.addOverlayData],
             ['joinedToGeo', mapView.addOverlayLayer],
-            ['dataLoaded.raw_project', mapView.placeProjects]
+            ['dataLoaded.raw_project', mapView.placeProjects],
+            ['previewBuilding', mapView.showPreview]
         ]);
         
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
@@ -262,7 +263,7 @@ var mapView = {
                 'circle-color': {
                       property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
                       type: 'categorical',
-                      stops: [
+                      stops: [ // hard-code for now. should be set programmatically
                         ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
                         ['2 - Expiring Subsidy', '#8B4225'],
                         ['3 - Recent Failing REAC Score', '#bd0026'],
@@ -272,6 +273,38 @@ var mapView = {
                       ]
                 }
             }
-        }); 
+        });
+        mapView.map.on('mousemove', function(e) {
+             //get the province feature underneath the mouse
+             var features = mapView.map.queryRenderedFeatures(e.point, {
+                 layers: ['project']
+             });
+             //if there's a point under our mouse, then do the following.
+             if (features.length > 0) {
+                 //use the following code to change the 
+                 //cursor to a pointer ('pointer') instead of the default ('')
+                 mapView.map.getCanvas().style.cursor = (features[0].properties.proj_addre != null) ? 'pointer' : '';
+             }
+             //if there are no points under our mouse, 
+             //then change the cursor back to the default
+             else {
+                 mapView.map.getCanvas().style.cursor = '';
+             }
+        });
+        mapView.map.on('click', function (e) {
+            var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
+            if ( building === undefined ) return;
+            setState('previewBuilding',{
+                proj_addre: building.properties.proj_addre,
+                proj_name: building.properties.proj_name,
+                hud_own_name: building.properties.hud_own_name
+            });               
+        });
+    },
+    showPreview: function(msg,data){
+        document.getElementById('preview-address').innerHTML = data.proj_addre;
+        document.getElementById('preview-name').innerHTML = data.proj_name;
+        document.getElementById('preview-owner').innerHTML = data.hud_own_name ? 'Owner: ' + data.hud_own_name : '';
+
     }
 };
