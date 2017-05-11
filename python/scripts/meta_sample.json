@@ -1,6 +1,6 @@
 {
-  "acs_rent_median_temp": {
-    "cleaner": "ACSRentCleaner",
+  "census_temp": {
+    "cleaner": "CensusCleaner",
     "fields": [
       {
         "display_name": "Full Census Tract ID",
@@ -57,6 +57,15 @@
         "source_name": "example_optional_column",
         "sql_name": "example_optional_column",
         "type": "text"
+      },
+      {
+        "_comment": "This will be added back in when the Census API tool is done",
+        "display_name": "Lower quartile rent (ACS)",
+        "display_text": "Lower quartile rent from the American Community Survey table B25057",
+        "required_in_source": false,
+        "source_name": "lower_quartile_rent",
+        "sql_name": "lower_quartile_rent",
+        "type": "integer"
       }
     ],
     "replace_table": false

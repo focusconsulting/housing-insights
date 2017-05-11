@@ -1,5 +1,4 @@
 {
-    
   "census": {
     "cleaner": "CensusCleaner",
     "fields": [
@@ -3060,6 +3059,132 @@
         "source_name": "unique_data_id",
         "sql_name": "unique_data_id",
         "type": "text"
+      }
+    ],
+    "replace_table": true
+  },
+  "dchousing": {
+    "cleaner": "dchousing_cleaner",
+    "fields": [
+      {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      },
+      {
+        "display_name": "objectid",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "OBJECTID",
+        "sql_name": "objectid",
+        "type": "text"
+      },
+      {
+        "display_name": "mar_ward",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "MAR_WARD",
+        "sql_name": "mar_ward",
+        "type": "text"
+      },
+      {
+        "display_name": "address",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "ADDRESS",
+        "sql_name": "address",
+        "type": "text"
+      },
+      {
+        "display_name": "project_name",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "PROJECT_NAME",
+        "sql_name": "project_name",
+        "type": "text"
+      },
+      {
+        "display_name": "status_public",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "STATUS_PUBLIC",
+        "sql_name": "status_public",
+        "type": "text"
+      },
+      {
+        "display_name": "agency_calculated",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "AGENCY_CALCULATED",
+        "sql_name": "agency_calculated",
+        "type": "text"
+      },
+      {
+        "display_name": "report_units_affordable",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "REPORT_UNITS_AFFORDABLE",
+        "sql_name": "report_units_affordable",
+        "type": "integer"
+      },
+      {
+        "display_name": "latitude",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "LATITUDE",
+        "sql_name": "latitude",
+        "type": "decimal"
+      },
+      {
+        "display_name": "longitude",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "LONGITUDE",
+        "sql_name": "longitude",
+        "type": "decimal"
+      },
+      {
+        "display_name": "address_id",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "ADDRESS_ID",
+        "sql_name": "address_id",
+        "type": "decimal"
+      },
+      {
+        "display_name": "xcoord",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "XCOORD",
+        "sql_name": "xcoord",
+        "type": "decimal"
+      },
+      {
+        "display_name": "ycoord",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "YCOORD",
+        "sql_name": "ycoord",
+        "type": "decimal"
+      },
+      {
+        "display_name": "fulladdress",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "FULLADDRESS",
+        "sql_name": "fulladdress",
+        "type": "text"
+      },
+      {
+        "display_name": "gis_last_mod_dttm",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "GIS_LAST_MOD_DTTM",
+        "sql_name": "gis_last_mod_dttm",
+        "type": "date"
       }
     ],
     "replace_table": true
