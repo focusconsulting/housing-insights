@@ -1,9 +1,23 @@
 import csv
 from datetime import datetime
+from pprint import pprint
 
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.tax import TaxResult, FIELDS
 
+
+
+
+
+'''
+TODO:
+
+This is currently returning an exceededTransferLimit property, which limits the results to 1,000 records. 
+
+Bulk csv download is available from this endpoint, which should be substituted:
+https://opendata.arcgis.com/datasets/014f4b4f94ea461498bfeba877d92319_56.geojson
+
+'''
 
 class TaxApiConn(BaseApiConn):
     """
@@ -39,10 +53,13 @@ class TaxApiConn(BaseApiConn):
             'outSR': '4326'
         }
         result = self.get('/query', params=params)
+        print(result)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
         if output_type == 'stdout':
+            pprint(result.json())
+        elif output_type == 'csv':
             data = result.json()['features']
             results = [TaxResult(section['attributes']) for section in data]
             output_file = "../../data/raw/tax_assessment/opendata/{0}.csv".format(cur_date)

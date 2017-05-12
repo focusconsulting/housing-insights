@@ -88,6 +88,7 @@ def call_module(ns):
         result = apifunc(**kwargs)
     except Exception as e:
         print('Your request failed. {0}'.format(e))
+        raise e
 
 def parse_params(params):
     kwargs = {}
