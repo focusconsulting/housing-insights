@@ -131,8 +131,7 @@ class LoadData(object):
             os.path.join(logging_path, 'temp_{}.psv'.format(
                 manifest_row['unique_data_id'])))
 
-        # clean the file and save the output to a local
-        # pipe-delimited file
+        # validate and clean
         self._create_clean_psv(table_name=manifest_row['destination_table'],
                                manifest_row=manifest_row,
                                csv_reader=csv_reader,
@@ -145,7 +144,7 @@ class LoadData(object):
         
         :param table_name: the table name for that data being processed
         :param manifest_row: the row representing the data being loaded
-        :return: 
+        :return: instance of custom cleaner class
         """
         cleaner_class_name = self.meta[table_name]['cleaner']
         return ingestionfunctions.get_cleaner_from_name(
