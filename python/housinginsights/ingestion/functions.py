@@ -1,15 +1,26 @@
+"""
+Module contains helper functions used in loading data into database
+"""
+
 import logging
 import json
 from sqlalchemy.exc import ProgrammingError
 import sys, os
 
 from importlib import import_module
-sys.path.append(os.path.abspath('../../'))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             os.pardir, os.pardir)))
 
 import housinginsights.ingestion.Cleaners as Cleaners
 
 # Completed, tests not written.
 def load_meta_data(filename='meta.json'):
+    """
+    Helper function validates the format of the JSON data in meta.json.
+
+    :param filename: meta.json filepath
+    :return: the validated JSON data of meta.json file
+    """
     """
     Expected meta data format:
         { tablename: {fields:[
@@ -25,12 +36,13 @@ def load_meta_data(filename='meta.json'):
     with open(filename) as fh:
         meta = json.load(fh)
 
+    # validate that meta.json meets the expected data format
     json_is_valid = True
     try:
         for table in meta:
             for field in meta[table]['fields']:
                 for key in field:
-                    if key not in ('display_name', 'display_text', 'source_name', 'sql_name', 'type'):
+                    if key not in ('display_name', 'display_text', 'source_name', 'sql_name', 'type', 'required_in_source', '_comment'):
                         json_is_valid = False
                         first_json_error = "Location: table: {}, section: {}, attribute: {}".format(table, field, key)
                         raise ValueError("Error found in JSON, check expected format. {}".format(first_json_error))
@@ -79,6 +91,7 @@ def check_or_create_sql_manifest(engine, rebuild=False):
                 ("destination_table","text"),
                 ("unique_data_id","text"),
                 ("data_date","date"),
+                ("encoding", "text"),
                 ("local_folder","text"),
                 ("s3_folder","text"),
                 ("filepath","text"),
@@ -98,7 +111,16 @@ def check_or_create_sql_manifest(engine, rebuild=False):
             raise e
 
 
-def get_cleaner_from_name(meta, manifest_row, name = "GenericCleaner"):
+def get_cleaner_from_name(meta, manifest_row, name="GenericCleaner"):
+    """
+    Returns the instance of the cleaner class matching the given cleaner class
+    name.
+
+    :param meta: in memory JSON object representing meta.json
+    :param manifest_row: the given row in manifest.csv
+    :param name: the referenced cleaner class in meta.json for the table as str
+    :return: a class object of the given cleaner class
+    """
 
     #Import
     #module = import_module("module.submodule")

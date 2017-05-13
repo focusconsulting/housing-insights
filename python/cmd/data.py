@@ -42,6 +42,12 @@ Thus, each public function compatible with data.sh needs to have as a minimum th
 from argparse import ArgumentParser
 import importlib
 
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             os.pardir)))
+
 from housinginsights.config.base import HousingInsightsConfig
 
 API_MODULE = 'housinginsights.sources'

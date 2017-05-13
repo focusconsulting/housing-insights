@@ -12,20 +12,18 @@ html, body {
   font-family: 'Open Sans', sans-serif;
 }
 
-h2, h3 {
-  margin: 10px;
-  font-size: 1.2em;
+h2 {
+  font-size: 1.4em;
   font-family: 'Open Sans', sans-serif;
 }
     
 h3 {
-  font-size: 1em;
+  font-size: 1.2em;
   font-family: 'Open Sans', sans-serif;
 }
     
 p {
-  font-size: 0.85em;
-  margin: 10px;
+  font-size: 1em;
   text-align: left;
   font-family: 'Open Sans', sans-serif;
 }
@@ -42,7 +40,9 @@ p {
 
 .pie {
 	height:150px;
+  padding: 15px 0px 10px 0px;
 }
+
 
 .pie_text {
 	font-size: 0.85em;
@@ -100,6 +100,64 @@ p {
   width: 45%;
 }
 
+
+
+#menu {
+  background: #fff;
+  position: absolute;
+  z-index: 1;
+  bottom: 10px;
+  left: 10px;
+  border-radius: 3px;
+  width: 120px;
+  border: 1px solid rgba(0,0,0,0.4);
+  font-family: 'Open Sans', sans-serif;
+}
+
+.map-menu a {
+  font-size: 13px;
+  color: #404040;
+  display: block;
+  margin: 0;
+  padding: 0;
+  padding: 10px;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0,0,0,0.25);
+  text-align: center;
+}
+
+.map-menu a:last-child {
+	border: none;
+}
+
+.map-menu a:hover {
+  background-color: #f8f8f8;
+  color: #404040;
+}
+
+.map-menu a.active {
+  background-color: #b3cde3;
+  color: #404040;
+}
+
+.map-menu a.active:hover {
+  background: #b3cde3;
+}
+
+#data-menu {
+  background: #fff;
+  position: absolute;
+  z-index: 1;
+  top: 20px;
+  left: 10px;
+  border-radius: 3px;
+  width: 140px;
+  border: 1px solid rgba(0,0,0,0.4);
+  font-family: 'Open Sans', sans-serif;
+  
+  }
+
+/*unused?
 #legend {
   padding: 10px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.10);
@@ -116,45 +174,45 @@ p {
   height: 10px;
   margin-right: 5px;
 }
+*/
 
-#menu {
-  background: #fff;
-  position: absolute;
-  z-index: 1;
-  bottom: 10px;
-  left: 10px;
-  border-radius: 3px;
-  width: 120px;
-  border: 1px solid rgba(0,0,0,0.4);
-  font-family: 'Open Sans', sans-serif;
+#points-sidebar{
+  margin:20px 0px 20px 0px;
+}
+#zone-sidebar{
+  margin:20px 0px 20px 0px;
+}
+#building-sidebar{
+  margin:20px 0px 20px 0px;
 }
 
-#menu a {
-  font-size: 13px;
-  color: #404040;
-  display: block;
-  margin: 0;
-  padding: 0;
-  padding: 10px;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(0,0,0,0.25);
-  text-align: center;
+.legend {
+    background-color: rgba(255,255,255,.01);
+    border-radius: 3px;
+    
+    box-shadow: 0 1px 2px rgba(0,0,0,0.30);
+    font: 12px/20px 'Open Sans', sans-serif;;
+    padding: 10px;
+    position: relative;
+    margin-bottom: 20px;
+    margin-top:20px;
+    /*right: 10px;
+    bottom: 30px;*/
+    z-index: 1;
 }
 
-#menu a:last-child {
-	border: none;
+.legend h4 {
+    margin: 0 0 10px;
 }
 
-#menu a:hover {
-  background-color: #f8f8f8;
-  color: #404040;
+.legend div span {
+    border-radius: 50%;
+    display: inline-block;
+    height: 10px;
+    margin-right: 5px;
+    width: 10px;
 }
 
-#menu a.active {
-  background-color: #b3cde3;
-  color: #404040;
-}
-
-#menu a.active:hover {
-  background: #b3cde3;
+#zone-selector {
+  max-width: 300px;
 }
