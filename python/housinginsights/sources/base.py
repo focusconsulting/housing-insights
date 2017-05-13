@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 from housinginsights.config.base import HousingInsightsConfig
 
 import requests
+import csv
 
 
 class BaseApiConn(object):
@@ -66,6 +67,27 @@ class BaseApiConn(object):
         """
         url = urljoin(self.baseurl, urlpath)
         return self.session.post(url, data=data, proxies=self.proxies, **kwargs)
+
+    def result_to_csv(self, fields, results, csvfile):
+        """
+        Write the data to a csv file.
+
+        :param fields: column headers for the data set
+        :type fields: list
+
+        :param results: field values for each row
+        :type results: list
+
+        :param csvfile: file path for where to write and save csv file
+        :type csvfile: string
+
+        :return: None
+        """
+        with open(csvfile, 'w', encoding='utf-8') as f:
+            writer = csv.writer(f, delimiter=',')
+            writer.writerow(fields)
+            for result in results:
+                writer.writerow(result.data)
 
 
 class BaseApiManager(object):
