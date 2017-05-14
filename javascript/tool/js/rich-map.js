@@ -1,9 +1,10 @@
 // Here are some global variables.
 // As we refactor the app, let's think about a more appropriate place to put them.  
-var map;
-var mapMenuData;
-var layerOptions = [];
-var dataMenu;
+var map,
+    mapMenuData,
+    dataMenu,
+    layerOptions = [];
+
 // End global variables
 
 function hideAllOptionalLayers(){
@@ -25,58 +26,73 @@ function hideAllOptionalLayers(){
   }
 })();
 
-// DataMenu includes the 'map' argument to avoid a scoping/closure issue
-// that caused 'map' to be undefined. Let's find a more elegant way to make 
-// map available to LayerOption, so we don't have to use an argument for something
-// that should be kind of global.
-function DataMenu(map){
+function OverlayMenuItem(idString){
   var _this = this;
-  for (var i = 0, datasets = Object.keys(mapMenuData.optional_datasets); i < datasets.length; i++) {
-    var id = datasets[i];
-    var link = document.createElement('a');
-    link.href = '#';
-    link.className = 'inactive';
-    link.textContent = id.toTitle();
-    link.dataset.id = id;
+  this.link = document.createElement('a');
+  this.link.href = '#';
+  this.link.className = 'inactive';
+  this.link.textContent = idString.toTitle();
+  this.link.dataset.id = idString;
+  this.link.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    for(var i = 0, kids = this.parentElement.children; i < kids.length; i++){
+      if(kids[i].classList.contains('active')){ kids[i].classList.remove('active');}
+      if(!kids[i].classList.contains('inactive')){ kids[i].classList.add('inactive');}
+    }
+    _this.link.classList.add('active');
+    _this.link.classList.remove('inactive');
+  });
+  
+}
 
-    var data_sources = document.getElementById('data-menu');
-    data_sources.appendChild(link);
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      _this.emptyZoneOptions();
-      _this.makeZoneOptions(this.getAttribute('data-id'));
+function DatasetItem(dataset){
+  OverlayMenuItem.call(this, dataset);
+  this.link.addEventListener('click', function(e){
+    hideAllOptionalLayers();
+    dataMenu.emptyZoneOptions();
+    dataMenu.makeZoneOptions(dataset);
+  })
+  this.toDOM = function(){
+    document.getElementById('data-menu').appendChild(this.link);
+  }
+}
+DatasetItem.prototype = Object.create(OverlayMenuItem.prototype);
+
+function ZoneItem(zone, dataset){
+  OverlayMenuItem.call(this, zone);
+  
+  this.link.addEventListener('click', function(e){
+    var existingLayerOption = layerOptions.find(function(opt){
+      return opt.layerName == zone && opt.dataName == dataset;
     });
+
+    hideAllOptionalLayers();
+
+    var selectedLayerOption = existingLayerOption || new LayerOption(dataset, zone, map);
+
+    map.setHeader();
+    changeZoneType(); // defined in pie.js
+
+  })
+  this.toDOM = function(){
+    document.getElementById('menu').appendChild(this.link);
+  }
+
+}
+ZoneItem.prototype = Object.create(OverlayMenuItem.prototype);
+
+function DataMenu(){
+  this.toDOM = function(){
+    for (var i = 0, datasets = Object.keys(mapMenuData.optional_datasets); i < datasets.length; i++) {
+      (new DatasetItem(datasets[i])).toDOM();
+    }
   }
 
   this.makeZoneOptions = function(tableName){
     var eligibleZoneIds = mapMenuData['optional_datasets'][tableName];
     for (var i = 0; i < eligibleZoneIds.length; i++) {
-      var id = eligibleZoneIds[i];
-
-      var link = document.createElement('a');
-      link.href = '#';
-      link.textContent = id.toTitle();
-      link.dataset.id = id;
-
-      link.onclick = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        var possibleLayerOptions = layerOptions.filter(function(opt){
-          return opt.layerName == link.getAttribute('data-id') && opt.dataName == tableName;
-        });
-
-        hideAllOptionalLayers();
-
-        var selectedLayerOption = possibleLayerOptions[0] || new LayerOption(tableName, this.getAttribute('data-id'), map);
-
-        setHeader(map);
-        changeZoneType(); // defined in pie.js
-      };
-
-      var layers = document.getElementById('menu');
-      layers.appendChild(link);
+      (new ZoneItem(eligibleZoneIds[i], tableName)).toDOM();
     }
   }
 
@@ -120,6 +136,8 @@ function LayerOption(dataName, zoneName, map){
     }
   })();
 
+  // This function exists to grab a geoJSON polygon object from the server. We won't need this if we
+  // put them in an API endpoint.
   function queryShape(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/javascript/tool/data/' + _this.zoneName + ".geojson");
@@ -198,12 +216,6 @@ function LayerOption(dataName, zoneName, map){
   this.show = function() {
     map.clickedZone = this.zoneName;
     var selector = document.querySelectorAll('[data-id=' + this.dataName + ']')[0];
-    hideAllOptionalLayers();
-
-    document.querySelectorAll('nav#menu a').forEach(function(item){
-      item.className = '';
-    });
-    selector.className = 'active';
     map.setLayoutProperty(this.layerName, 'visibility', 'visible');
   
   };
@@ -218,7 +230,7 @@ function prepareInitialMapData(){
 
   mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
 
-  var map = new mapboxgl.Map({
+  map = new mapboxgl.Map({
     container: 'map', // container id
     style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
     zoom: 11,
@@ -234,7 +246,20 @@ function prepareInitialMapData(){
     map.on('load', mapLoadedCallback);
   }
 
-  function mapLoadedCallback() {  
+  // There might be a better place to put this.
+  map.setHeader = function(){ // sets the text in the sidebar header according to the selected mapLayer
+    if (currentZoneType !== this.clickedZone) {
+
+      document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + this.clickedZone;
+      document.getElementById('zone-selector').onchange = changeZone;
+
+    }
+  }
+
+  function mapLoadedCallback() { 
+    dataMenu = new DataMenu;
+    dataMenu.toDOM();
+
     // TO DO - there's a bit of ugly callback nesting in the code below, which loads the initial
     // 'project' data into the map. Let's make this neater!
     var projectXHR = new XMLHttpRequest();
@@ -251,7 +276,7 @@ function prepareInitialMapData(){
       
       map.addSource("project", {
         "type": "geojson",
-        "data": app.dataCollection.project.toGeoJSON('proj_lon', 'proj_lat')
+        "data": app.dataCollection.project.toGeoJSON('longitude', 'latitude')
       });
       
       map.addLayer({
@@ -295,7 +320,6 @@ function prepareInitialMapData(){
     categoryLegendEl.style.display = 'block';
 
     // HERE'S WHERE THE PAGE LOADS THE DATA MENU AND MAKES IT POSSIBLE TO LOAD OPTIONAL DATA SOURCES.
-    new DataMenu(map);
 
     map.on('click', function (e) {
       var building = (map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
@@ -324,11 +348,7 @@ function prepareInitialMapData(){
 
     map.getCanvas().style.cursor = 'default';
 
-    setHeader(map);
-
-                                                        // putting maps here so they are not called until
-                                                        // the map renders, so that the zone (ward, neighborhood) can
-                                                        // be selected programmatically 
+    map.setHeader();                                             
                                                         
     // putting pie charts in an array property of map so we can access them later, for updating
     map.pieCharts = [
@@ -343,16 +363,7 @@ function prepareInitialMapData(){
   
 }
 
-// extracting this from the map-related callback and making 'map' an argument. Otherwise 
-// 'setHeader' is not defined within the scope of DataMenu.
-function setHeader(map){ // sets the text in the sidebar header according to the selected mapLayer
-  if (currentZoneType !== map.clickedZone) {
 
-    document.querySelector('#zone-drilldown-instructions').innerText = 'Choose a ' + map.clickedZone;
-    document.getElementById('zone-selector').onchange = changeZone;
-
-  }
-}
 
 
 
