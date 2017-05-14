@@ -72,6 +72,7 @@ proxy = conn.execute(q)
 results = proxy.fetchall()
 tables = [x[0] for x in results]
 application.logger.debug('Tables available: {}'.format(tables))
+conn.close()
 
 ##########################################
 # API Endpoints
@@ -81,7 +82,9 @@ application.logger.debug('Tables available: {}'.format(tables))
 def hello():
     return("The Housing Insights API Rules!")
 
+
 @application.route('/api/raw/<table>', methods=['GET'])
+@cross_origin()
 def list_all(table):
     """ Generate endpoint to list all data in the tables. """
 
@@ -96,6 +99,7 @@ def list_all(table):
     proxy = conn.execute(q)
     results = [x[0] for x in proxy.fetchmany(1000)] # Only fetching 1000 for now, need to implement scrolling
     #print(results)
+    conn.close()
 
     return jsonify(items=results)
 
@@ -241,6 +245,7 @@ def nearby_transit(nlihc_id):
         
         #TODO would be good to sort rail_routes_grouped and bus_routes_grouped before delivery (currently sorting on the front end)
         
+        conn.close()
         return jsonify({'stops':stops,
                         'bus_routes':bus_routes,
                         'rail_routes':rail_routes,
@@ -289,6 +294,7 @@ def unique_transit_routes(stop_ids):
 @application.route('/api/building_permits/<dist>', methods=['GET'])
 def nearby_building_permits(dist):
 
+    conn = engine.connect()
     #Get our params
     dist = float(dist)
     latitude = request.args.get('latitude',None)
@@ -336,7 +342,7 @@ def nearby_building_permits(dist):
 
     proxy = conn.execute(q)
     results = proxy.fetchall()
-    print(len(results))
+
     good_results = [dict(r) for r in results if haversine(latitude, longitude, float(r.latitude), float(r.longitude)) <= dist]
 
     tot_permits = len(good_results)
@@ -348,12 +354,16 @@ def nearby_building_permits(dist):
     }
 
     output_json = jsonify(output)
+
+    conn.close()
     return output_json
 
 
 
 @application.route('/api/projects/<dist>', methods=['GET'])
 def nearby_projects(dist):
+    
+    conn = engine.connect()
     dist = float(dist)
     #Get our params
     latitude = request.args.get('latitude',None)
@@ -368,15 +378,15 @@ def nearby_projects(dist):
 
     q = '''
         SELECT
-        (proj_lat - {latitude} ) AS lat_diff
-        ,(proj_lon - {longitude} ) AS lon_diff
+        (latitude - {latitude} ) AS lat_diff
+        ,(longitude - {longitude} ) AS lon_diff
         ,*
         FROM project
 
-        WHERE proj_lat < ({latitude} + {latitude_tolerance})::DECIMAL
-        AND   proj_lat > ({latitude} - {latitude_tolerance})::DECIMAL
-        AND   proj_lon < ({longitude} + {longitude_tolerance})::DECIMAL
-        AND   proj_lon > ({longitude} - {longitude_tolerance})::DECIMAL
+        WHERE latitude < ({latitude} + {latitude_tolerance})::DECIMAL
+        AND   latitude > ({latitude} - {latitude_tolerance})::DECIMAL
+        AND   longitude < ({longitude} + {longitude_tolerance})::DECIMAL
+        AND   longitude > ({longitude} - {longitude_tolerance})::DECIMAL
 
         AND status = 'Active'
 
@@ -390,7 +400,7 @@ def nearby_projects(dist):
     proxy = conn.execute(q)
     results = proxy.fetchall()
 
-    good_results = [dict(r) for r in results if haversine(latitude, longitude, float(r.proj_lat), float(r.proj_lon)) <= dist]
+    good_results = [dict(r) for r in results if haversine(latitude, longitude, float(r.latitude), float(r.longitude)) <= dist]
 
     unit_counts = [r['proj_units_assist_max'] for r in good_results]
     unit_counts = filter(None,unit_counts) #can't sum None
@@ -405,6 +415,7 @@ def nearby_projects(dist):
         , 'distance': dist
     }
 
+    conn.close()
     output_json = jsonify(output)
     return output_json
 
