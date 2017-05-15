@@ -30,3 +30,10 @@ services:
         ports:
             - "5432:5432"
         restart: "on-failure:3"
+
+    sandbox:
+        build:
+            context: python
+        volumes:
+            - .:/code
+        command: tail -f /dev/null
