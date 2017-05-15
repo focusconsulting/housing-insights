@@ -38,7 +38,7 @@ class MarApiConn(BaseApiConn):
             'f': 'json',
             'str': location
         }
-        result = self.conn.get('/findLocation2', params=params)
+        result = self.get('/findLocation2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -77,7 +77,7 @@ class MarApiConn(BaseApiConn):
             'x': xcoord,
             'y': ycoord
         }
-        result = self.conn.get('/reverseGeocoding2', params=params)
+        result = self.get('/reverseGeocoding2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -132,7 +132,7 @@ class MarApiConn(BaseApiConn):
             'f': 'json',
             'AID': address_id
         }
-        result = self.conn.get('/FindCondoUnitFromAID2', params=params)
+        result = self.get('/FindCondoUnitFromAID2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))

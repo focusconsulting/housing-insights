@@ -2,14 +2,14 @@ SOURCES DIRECTORY
 -----------------
 
 This directory is to be used to store modules to access various external APIs.
-To be compatible with data.sh, use the following conventions.
+To be compatible with get_api_data.py, use the following conventions.
 
 HOW DATA.SH WORKS
 -----------------
 
-data.sh expects the user to supplies at least 4
+get_api_data.py expects the user to supplies these
 things when it is run:
-1. Output Type [--outtype] 
+1. Output Type [--outtype]  
 2. Output File (optional) [--output, -o]
 3. Api Module name
 4. Api Method name
@@ -21,7 +21,7 @@ as a suffix. In this case it would be "MarApiConn". It then calls whatever metho
 from that ApiConn class. Whatever parameters specified by the user with the --params argument
 are split and passed as keyword arguments (**kwargs) to the function. The --outtype argument is added
 as output_type, and --o or --output is added as output_file. Thus, each public function compatible with
-data.sh needs to have as a minimum those two parameters (output_type and output_file). See the mar.py
+get_api_data.py needs to have as a minimum those two parameters (output_type and output_file). See the mar.py
 file for an example.
 
 
