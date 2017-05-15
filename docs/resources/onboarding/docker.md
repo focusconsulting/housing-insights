@@ -1,6 +1,6 @@
 ---
 layout: main
-title: H.I. Onboarding
+title: H.I. Onboarding - Docker
 ---
 
 # Running our website and database locally with Docker
@@ -15,9 +15,9 @@ If you are adding new data sources or writing code for our API, we want you to d
 
 * Python runs the code that adds data to our database and that powers our API. You need a virtual environment with both the right version (3.5) of Python installed as well as the necessary packages we use (Flask, others). 
 
-Since installing each of these pieces of software and configuring their settings to talk to each other can be difficult on different computers, Docker provides a way for us to do the configuration once and then you can run our pre-configured combination. Docker creates a virtual machine - this is a virtual computer running Linux, so any software you run in the virtual machine thinks it has been installed on a Linux computer that is configured exactly the same as the one we used to make the setup files. While there are sometimes issues setting up Docker, once you have it installed properly you can use a Docker image to set up any software you want. 
+Since installing each of these pieces of software and configuring their settings to talk to each other can be difficult on different computers, Docker provides a way for us to do the configuration once and then you can run our pre-configured combination. Docker creates a virtual machine - this is a virtual computer running Linux, so any software you run in the virtual machine thinks it has been installed on a Linux computer that is configured exactly the same as the one we used to make the setup files. While there are sometimes issues setting up Docker, once you have it installed properly it makes it much faster to start working with a new software stack.  
 
-We currently use Docker for the first 3 items - Postgres, pgWeb (a database client), and Jekyll. We would like to soon include Python inside Docker but [currently have a problem](https://github.com/codefordc/housing-insights/issues/183) with the setup (if you are good at Docker we'd love your help fixing this!). For Python, we use a virtual environment instead. 
+We have a Docker setup for all 4 of these components. Below the 'Full Docker' instructions describe how to use these 4 together. Optionally, you can also use your local installation of Python. 
 
 If you have problems installing or setting up Docker, you can also configure Postgres, Jekyll, and a database client independently - ask for help if this is the case. 
 
@@ -36,7 +36,7 @@ This version only includes connection information for a local copy of the databa
 
 ### 1a) One time setup
 
-Start by installing [Docker Toolbox](https://www.docker.com/products/docker-toolbox). If you've used Docker before and already have any version of Docker working, you can use that - Docker Toolbox is the easiest to use the first time (especially on Windows). If you have a Mac, you are better off using [Docker for Mac](https://docs.docker.com/docker-for-mac/install/).
+Start by installing Docker. If you're on Windows, [Docker Toolbox](https://www.docker.com/products/docker-toolbox) is best. Mac is better off using the native [Docker for Mac](https://docs.docker.com/docker-for-mac/install/) and Linux the [Docker for Linux](https://www.docker.com/community-edition)
 
 There are different ways to run our setup, depending on your preference.  Depending on how you chose to run the code, the connection string to the `docker_database` changes.  The easiest method is to run using the "Full Docker Compose" option, but the others will work as well.
 
@@ -87,9 +87,16 @@ ls            //lists all files and folders in your current directory
 In your housing-insights repository folder, run this command:
 
 ```
-docker-compose up
+docker-compose up -d
 ```
-Leave this window **open and running** while you're working
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Changes as of May 2017
+    </div>
+    <div class="panel-body">
+    Note the addition of the -d in the command above, which is different than previous instructions. This makes the output of docker-compose up happen in the background, so you can use the command line for other things (like running Python commands).
+    </div>
+</div>
 
 Once it starts up (might take a moment), you can go to these web addresses:
 
@@ -113,9 +120,9 @@ Here again there is the option to run python inside the `docker-compose` environ
 
 2) `docker-compose exec sandbox bash` to get inside the container.
 
-3) `cd /code` to get into the base directory.  The /code directory is a direct mount of the repo.  You can make changes locally on your machine and they will be available in the docker container.
+3) `cd /repo` to get into the base directory.  The /repo directory is a direct mount of the housing-insights repository on your local computer.  You can make changes locally on your machine and they will be available in the docker container.
 
-4) `cd /code/python/scripts` to get to the scripts directory.
+4) `cd /repo/python/scripts` to get to the scripts directory.
 
 5) `python load_data.py docker rebuild sample` to load up the sample data.
 
@@ -124,7 +131,7 @@ Here again there is the option to run python inside the `docker-compose` environ
 Alternatively, you can use this one liner to load in the data:
 
 ```
-docker-compose exec sandbox bash -c 'cd /code/python/scripts && source activate /opt/conda/envs/housing-insights/ && python load_data.py docker rebuild'
+docker-compose exec sandbox bash -c 'cd /repo/python/scripts && source activate /opt/conda/envs/housing-insights/ && python load_data.py docker rebuild'
 ```
 
 **Using your local Conda Python installation**
@@ -142,7 +149,7 @@ docker-compose exec sandbox bash -c 'cd /code/python/scripts && source activate 
 
 1)  `docker-compose exec sandbox bash` to get into the sandbox.
 
-2)  `cd /code` to get into the base directory.  You can run your code from here.
+2)  `cd /repo` to get into the base directory.  You can run your code from here.
 
 **Using your local Conda Python installation**
 
