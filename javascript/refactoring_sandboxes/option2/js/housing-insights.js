@@ -52,7 +52,10 @@ function StateModule() {
             state[key] = [value];
             PubSub.publish(key, value);
             console.log('STATE CHANGE', key, value);
-        } else if ( state[key][0] !== value ) {
+        } else if ( state[key][0] !== value ) { // only for when `value` is a string or number. doesn't seem
+                                                // to cause an issue when value is an object, but it does duplicate
+                                                // the state. i.e. key[0] and key[1] will be equivalent. avoid that
+                                                // with logic before making the setState call.
             state[key].unshift(value);
             PubSub.publish(key, value);
             console.log('STATE CHANGE', key, value);
@@ -62,10 +65,16 @@ function StateModule() {
         }
         
     }
+    function clearState(key) {
+        delete state[key];
+         PubSub.publish('clearState', key);
+         console.log('CLEAR STATE', key);
+    }
     return {
         logState: logState,
         getState: getState,
-        setState: setState
+        setState: setState,
+        clearState: clearState
     }
 }
 
@@ -155,16 +164,22 @@ var controller = {
             var paramsSlash = dataRequest.params ? '/' + dataRequest.params.join('/') : '';
             var extension = meta.extension || '';
             d3.json(meta.path + dataRequest.name + paramsSlash + extension, function(error, data){
+                console.log('get data', meta.path + dataRequest.name + paramsSlash + extension);
                 if ( error ) { console.log(error); }
-                model.dataCollection[dataRequest.name + paramsUnderscore] = data;
-                setState('dataLoaded.' + dataRequest.name + paramsUnderscore, true );
-                if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
-                    dataRequest.callback(data);
-                }                               
+                if ( data.items !== null ) {
+                    model.dataCollection[dataRequest.name + paramsUnderscore] = data;
+                    setState('dataLoaded.' + dataRequest.name + paramsUnderscore, true );
+                    if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                        dataRequest.callback(data);
+                    }                              
+                } else {
+                    alert('Data returned null'); // TODO think through what to do when data returns null. is not an error,
+                                                 // but { "items": null }
+                }
             });
                
         } else {
-            // TODO publish that data is available
+            // TODO publish that data is available every time it's requested or only on first load?
             if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
                 dataRequest.callback(model.dataCollection[dataRequest.name + paramsUnderscore]);
             }              
@@ -194,344 +209,37 @@ var controller = {
                 return obj.group === zone;
             }).count;
         });
-        setState('joinedToGeo', [overlay, grouping, activeLayer]);
-    }
-};
-
-/* 
- * Views **********************************
- */
-
-
-
-var mapView = {
-    
-    init: function() {  
-
-        setSubs([
-            ['mapLoaded', mapView.addInitialLayers],
-            ['mapLayer', mapView.showLayer],
-            ['mapLoaded', sideBar.init],
-            ['mapLoaded', mapView.overlayMenu],
-            ['overlay', mapView.addOverlayData],
-            ['joinedToGeo', mapView.addOverlayLayer]
-        ]);
-        
-        mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
-        this.map = new mapboxgl.Map({
-          container: 'map', // container id
-          style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
-          zoom: 11,
-          center: [-76.92, 38.9072],
-          minZoom: 3,
-          preserveDrawingBuffer: true
-        });
-        
-        this.map.addControl(new mapboxgl.NavigationControl());
-        
-        
-        this.map.on('load', function(){
-            setState('mapLoaded',true);
-        });        
+        console.log(overlay,grouping,activeLayer);
+        setState('joinedToGeo.' +  overlay + '-' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
+        // e.g. joinedToGeo.crime-neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
     },
-    overlayMenu: function(){
-        
-        mapView.initialOverlays.forEach(function(overlay){
-            var link = document.createElement('a');
-            link.href = '#';
-            link.id = overlay + '-overlay-item';
-            link.innerHTML = overlay.toUpperCase().replace('_',' ');
-            link.onclick = function(e){
-                e.preventDefault();
-                setState('overlay', overlay);
-            };
-            document.getElementById('overlay-menu').appendChild(link);
-        });
-
-    },
-    initialOverlays: ['crime','building_permits'],
-    overlayMapping: {
-        neighborhood: {
-            group:'neighborhood_cluster', // including key-values here if the overlay grouping name is not the same
-                                             // as the name of the mapLayer
-            
-        }
-    },
-    clearOverlay: function(i, layer){
-        var overlay = getState().overlay !== undefined ? getState().overlay[i] : undefined;
-        console.log(overlay);
-        if ( overlay !== undefined ) {
-            mapView.map.setLayoutProperty(overlay + '_' + layer, 'visibility', 'none');            
-        }
-    },   
-    addOverlayData: function(){
-        mapView.clearOverlay(1, getState().mapLayer[0]);// 1 being previous (zero-indexed)
-        function dataCallback() {
-            if ( getState()[overlay + '-' + activeLayer + '-joined'] === undefined ) { // ie if the join hasn't been made already
-                controller.joinToGeoJSON(overlay,grouping,activeLayer);
-            }
-            mapView.map.getSource(activeLayer + 'Layer').setData(model.dataCollection[activeLayer]); // necessary to update the map layer's data
-                                                                                                     // it is not dynamically connected to the
-                                                                                                     // dataCollection
-            
-        }
-        var activeLayer = getState().mapLayer[0];        
-        var grouping = mapView.overlayMapping[activeLayer] !== undefined ? mapView.overlayMapping[getState().mapLayer[0]].group || activeLayer : activeLayer;
-        console.log(grouping);
-        var overlay = getState().overlay[0];
-        var dataRequest = {
-            name:overlay, //e.g. crime
-            params: ['all',grouping], // TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
-            callback: dataCallback
-        };
-        controller.getData(dataRequest);
-    },
-    addOverlayLayer: function(msg,data){ // e.g. data = ['crime', 'neighborhood_cluster', 'neighborhood']
-        var minValue = d3.min(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
-            return d.count;
-        });
-        var maxValue = d3.max(model.dataCollection[data[0] + '_all_' + data[1]].items, function(d){
-            return d.count;
-        });
-        console.log(minValue,maxValue);
-        mapView.map.addLayer({
-          'id': data[0] + '_' + data[2], 
-          'type': 'fill',
-          'source': data[2] + 'Layer',
-          'layout': {
-            'visibility': 'visible'
-          },
-          'paint': {
-            'fill-color': {
-              'property': data[0],          
-              'stops': [[0, "#fff"], [maxValue, "#1e5cdf"]]
+    convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
+                                      // and returns geoJSON with the original data in the properties field
+        console.log(data);
+        var features = data.items.map(function(element){ 
+          return {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [+element.longitude, +element.latitude]
             },
-            'fill-opacity': .5
+            'properties': element        
           }
-        });      
-    },
-    initialLayers: [
-        {
-            source: 'ward', 
-            color: "#002D61",
-            visibility: 'visible'            
-        },
-        {
-            source: 'neighborhood',
-            color: '#0D5C7D',
-            visibility: 'none',
-            grouping: 'neighborhood_cluster' // ie the corresponding grouping name in the overlay data, such as crime or building_permits
-    
-        },
-        {
-            source: 'tract',
-            color: '#8DE2B8',
-            visibility: 'none'            
-        },
-        {
-            source: 'zip',
-            color: '#0D7B8A',
-            visibility: 'none'            
-        },
-        {
-            source: 'zillow',
-            color: '#57CABD',
-            visibility: 'none'            
-        }
-
-    ],
-    addInitialLayers: function(msg,data){
-        if ( data === true ) {
-            //controller.appendPartial('layer-menu','main-view');
-            mapView.initialLayers.forEach(function(layer){  // refers to mapView instead of this bc being called form PubSub
-                                                            //  context. `this` causes error
-                mapView.addLayer(layer);
-            });            
-        } 
-    },
-    addLayer: function(layer){
-        if ( layer.visibility === 'visible' ) {
-            setState('mapLayer', layer.source);
-        }
-        var layerName = layer.source + 'Layer'; // e.g. 'wardLayer'
-        var dataRequest = {
-            name: layer.source,  // e.g. ward
-            params: null,
-            callback: addLayerCallback
-        };
-        controller.getData(dataRequest);
-
-        function addLayerCallback(data) {            
-            if ( mapView.map.getSource( layerName ) === undefined ) {
-                mapView.map.addSource( layerName, {
-                    type:'geojson',
-                    data: data
-                });
-            }
-            mapView.map.addLayer({
-              'id': layerName,
-              'type': 'line',
-              'source': layerName,
-              'paint': {
-                'line-color': layer.color,
-                'line-width': 1
-                
-              },
-              'layout': {
-                'visibility': layer.visibility
-              }
-            });
-            mapView.addToLayerMenu(layer);
-        }               
-    },
-    
-    addToLayerMenu: function(layer) {
-        d3.select('#layer-menu')
-            .append('a')
-            .attr('href','#')
-            .attr('id',function(){
-                return layer.source + '-menu-item';
-            })
-            .attr('class',function(){
-                if ( layer.visibility === 'visible' ){
-                    return 'active';
-                }
-                return '';
-            })
-            .text(layer.source.toUpperCase())
-            .on('click', function(){
-                d3.event.preventDefault();
-                setState('mapLayer',layer.source);                
-            });
-    },
-    showLayer: function(msg,data) {
-        var previousLayer = getState().mapLayer[1];
-        mapView.clearOverlay(0,previousLayer);
-        if (previousLayer !== undefined ) {
-            mapView.map.setLayoutProperty(previousLayer + 'Layer', 'visibility', 'none');            
-        }
-        mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
-        d3.selectAll('#layer-menu a')
-            .attr('class','');
-        d3.select('#' + data + '-menu-item')
-            .attr('class','active');
-
-    }
-};
-
-var sideBar = {
-    init: function() {
-        setSubs([
-            ['firstPieReady', sideBar.setDropdownOptions],
-            ['mapLayer',sideBar.changeZoneType],
-            ['pieZone', sideBar.changeZoneType]
-        ]);
-        sideBar.charts = [];
-        var instances = ['subsidized','cat_expiring','cat_failing_insp','cat_at_risk'];
-        instances.forEach(function(instance, i){
-            sideBar.charts[i] = new DonutChart({
-                dataRequest: {
-                    name: 'raw',
-                    params: ['project']
-                },
-                field: instance,
-                container: '#pie-' + i,
-                width: 95,
-                height: 115,
-                zoneType: 'ward',
-                zoneName: 'All',
-                index: i,
-                margin: {
-                    top:0,
-                    right:0,
-                    bottom:20,
-                    left:0
-                }
-            })
         });
-    },
-    zoneMapping: { // object to map mapLayer names (the keys) to the field in the data
-                  // later code adds an array of all the values for each type to the objects
-                  // for populating the dropdown list
-        ward: {
-          name: 'ward'
-          
-        },
-        tract: {
-          name: 'census_tract'
-          
-        },
-        zip: {
-          name: 'zip'
-        },
-        neighborhood: {
-          name: 'neighborhood_cluster_desc'
-        }
-    },
-    setDropdownOptions: function() {
-               
-            var activeLayer = getState().mapLayer[0];            
-            if ( sideBar.zoneMapping[activeLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
-                                                                       // enumerated yet
-                sideBar.zoneMapping[activeLayer].values = [];
-                sideBar.charts[0].nested.forEach(function(obj) {
-                    sideBar.zoneMapping[activeLayer].values.push(obj.key)
-                });                                    
-            }
-            var selector = document.getElementById('zone-selector');
-            selector.onchange = function(e){
-                setState('pieZone', e.target.selectedOptions[0].value);                 
-            };
-            selector.innerHTML = '';
-            sideBar.zoneMapping[activeLayer].values.forEach(function(zone,i){
-                var option = document.createElement('option');
-                if ( i === 0 ) { option.setAttribute('selected','selected'); }
-                option.setAttribute('class',activeLayer);
-                option.setAttribute('value',zone);
-                option.id = zone.toLowerCase().replace(/ /g,'-');
-                option.innerHTML = zone;
-                selector.appendChild(option);
-            });
-        
-    },
-    changeZoneType: function(msg){
-        var zoneType = getState().mapLayer[0];
-        document.getElementById('zone-drilldown-instructions').innerHTML = 'Choose a ' + zoneType;
-        if (getState().firstPieReady) { 
-            if (msg === 'mapLayer') {
-                setState('pieZone', 'All');
-            }
-            var zoneName = getState().pieZone[0];                
-            sideBar.charts.forEach(function(chart){
-                chart.pieVariable = chart.returnPieVariable(chart.field,zoneType,zoneName);
-                chart.update();
-            });
-            if ( msg === 'mapLayer' ) { // if fn was called by changing mapLayer state. if not, leave dropdown
-                                        // menu alone
-                sideBar.setDropdownOptions();
-            }
-        } else { // if this function was called suring initial setup, before pies were ready
-            setState('pieZone', 'All');
+        console.log(features);
+        return {
+          'type': 'FeatureCollection',
+          'features': features
         }
     }
-
-};
-
-var detailView = {
-    init: function() {
-        setSubs([
-
-        ]);
-        //TODO
-    }
-    //rest of detailView here
 }
 
 /* Aliases */
 
 var setState = controller.controlState.setState,
     getState = controller.controlState.getState,
-    logState = controller.controlState.logState;
+    logState = controller.controlState.logState,
+    clearState = controller.controlState.clearState;
 
 var setSubs = controller.controlSubs.setSubs,
     logSubs = controller.controlSubs.logSubs,
@@ -628,8 +336,6 @@ if (!Array.prototype.findIndex) {
     }
   });
 }
-
-
 
 /* Go! */
 
