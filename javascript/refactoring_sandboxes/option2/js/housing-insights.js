@@ -164,7 +164,6 @@ var controller = {
             var paramsSlash = dataRequest.params ? '/' + dataRequest.params.join('/') : '';
             var extension = meta.extension || '';
             d3.json(meta.path + dataRequest.name + paramsSlash + extension, function(error, data){
-                console.log('get data', meta.path + dataRequest.name + paramsSlash + extension);
                 if ( error ) { console.log(error); }
                 if ( data.items !== null ) {
                     model.dataCollection[dataRequest.name + paramsUnderscore] = data;
@@ -203,19 +202,16 @@ var controller = {
     joinToGeoJSON: function(overlay,grouping,activeLayer){
         model.dataCollection[activeLayer].features.forEach(function(feature){
             var zone = feature.properties.NAME;
-            console.log(zone);
             var dataKey = overlay + '_all_' + grouping;
             feature.properties[overlay] = model.dataCollection[dataKey].items.find(function(obj){
                 return obj.group === zone;
             }).count;
         });
-        console.log(overlay,grouping,activeLayer);
         setState('joinedToGeo.' +  overlay + '-' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
         // e.g. joinedToGeo.crime-neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
     },
     convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
                                       // and returns geoJSON with the original data in the properties field
-        console.log(data);
         var features = data.items.map(function(element){ 
           return {
             'type': 'Feature',
@@ -226,8 +222,7 @@ var controller = {
             'properties': element        
           }
         });
-        console.log(features);
-        return {
+          return {
           'type': 'FeatureCollection',
           'features': features
         }
