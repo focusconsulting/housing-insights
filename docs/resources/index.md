@@ -36,6 +36,9 @@ Yes! We're glad you're interested in helping out on this project.
 
     * [Day-to-day checklist](http://nhumphrey.com/git/practical-git-checklist.html) for keeping your local code up to date and adding new features. Use the 'Triangular workflow' instructions, and be sure you've already [added both remote repositories]({{site.baseurl}}/resources/onboarding/triangular-git.html)
 
+* [Command line cheatsheet]({{site.baseurl}}/resources/command-line-cheatsheet.html)
+
+
 ## Project Background
 
 * [Project summary and mission]({{site.baseurl}}/resources/summary.html)
