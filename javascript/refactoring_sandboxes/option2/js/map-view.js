@@ -304,8 +304,19 @@ var mapView = {
                 proj_addre: building.properties.proj_addre,
                 proj_name: building.properties.proj_name,
                 hud_own_name: building.properties.hud_own_name
-            });               
-        });
+            });
+
+            var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
+                .setLngLat(e.lngLat)
+                .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
+                .addTo(mapView.map);
+
+            popup._container.querySelector('a').onclick = function(e){
+                e.preventDefault();
+                setState('switchView','building');
+            };
+           });               
+        
     },
     showPreview: function(msg,data){
         document.getElementById('preview-address').innerHTML = data.proj_addre;
