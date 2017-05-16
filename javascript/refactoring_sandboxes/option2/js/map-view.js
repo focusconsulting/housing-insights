@@ -61,13 +61,13 @@ var mapView = {
     },
     clearOverlay: function(layer){
         var i = layer === 'previous' ? 1 : 0;
-        console.log(i);
+        
         var layerObj = getState().overlaySet !== undefined ? getState().overlaySet[i] : undefined;
-        console.log(layerObj);
+        
         if ( layerObj !== undefined) {
             mapView.map.setLayoutProperty(layerObj.activeLayer + '_' + layerObj.overlay, 'visibility', 'none');
             mapView.toggleActive('#' + layerObj.overlay + '-overlay-item');
-            console.log('toggleActive ' + layerObj.overlay + '-overlay-item');
+            
         }
         if ( i === 0 ) { // i.e. clearing the existing current overlay, with result that none will be visible         
           clearState('overlaySet');
@@ -82,7 +82,7 @@ var mapView = {
             function dataCallback() {           
                 controller.joinToGeoJSON(data.overlay,grouping,data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
             }
-            console.log(data.grouping);
+            
             var dataRequest = {
                 name: data.overlay, //e.g. crime
                 params: ['all',grouping], // TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
@@ -94,7 +94,7 @@ var mapView = {
         }
     },
     addOverlayLayer: function(msg,data){ // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
-        console.log(mapView.map.getLayer(data.activeLayer + '_' + data.overlay));
+        
         if (mapView.map.getLayer( data.activeLayer + '_' + data.overlay ) === undefined) {
         
             mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
@@ -237,7 +237,7 @@ var mapView = {
             });
     },
     showLayer: function(msg,data) {
-        console.log('showLayer');
+        
         var previousLayer = getState().mapLayer[1];
         if (previousLayer !== undefined ) {
             mapView.clearOverlay();
