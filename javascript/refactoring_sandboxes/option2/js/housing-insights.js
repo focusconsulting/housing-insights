@@ -164,16 +164,22 @@ var controller = {
             var paramsSlash = dataRequest.params ? '/' + dataRequest.params.join('/') : '';
             var extension = meta.extension || '';
             d3.json(meta.path + dataRequest.name + paramsSlash + extension, function(error, data){
+                console.log('get data', meta.path + dataRequest.name + paramsSlash + extension);
                 if ( error ) { console.log(error); }
-                model.dataCollection[dataRequest.name + paramsUnderscore] = data;
-                setState('dataLoaded.' + dataRequest.name + paramsUnderscore, true );
-                if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
-                    dataRequest.callback(data);
-                }                               
+                if ( data.items !== null ) {
+                    model.dataCollection[dataRequest.name + paramsUnderscore] = data;
+                    setState('dataLoaded.' + dataRequest.name + paramsUnderscore, true );
+                    if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                        dataRequest.callback(data);
+                    }                              
+                } else {
+                    alert('Data returned null'); // TODO think through what to do when data returns null. is not an error,
+                                                 // but { "items": null }
+                }
             });
                
         } else {
-            // TODO publish that data is available
+            // TODO publish that data is available every time it's requested or only on first load?
             if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
                 dataRequest.callback(model.dataCollection[dataRequest.name + paramsUnderscore]);
             }              

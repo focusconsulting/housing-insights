@@ -9,7 +9,7 @@ var mapView = {
             ['mapLayer', mapView.showLayer],
             ['mapLoaded', sideBar.init],
             ['mapLoaded', mapView.overlayMenu],
-            ['overlay', mapView.addOverlayData],
+            ['overlayRequest', mapView.addOverlayData],
             ['joinedToGeo', mapView.addOverlayLayer],
             ['dataLoaded.raw_project', mapView.placeProjects],
             ['previewBuilding', mapView.showPreview]
@@ -40,9 +40,9 @@ var mapView = {
             link.innerHTML = overlay.toUpperCase().replace('_',' ');
             link.onclick = function(e){
                 e.preventDefault();
-                var existingOverlayType = getState().overlay !== undefined ? getState().overlay[0].overlay : null;
+                var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
                 if ( existingOverlayType !== overlay ) {
-                    setState('overlay', {overlay: overlay, activeLayer: getState().mapLayer[0]});                     
+                    setState('overlayRequest', {overlay: overlay, activeLayer: getState().mapLayer[0]});                     
                 } else {
                     mapView.clearOverlay();
                 }
@@ -62,14 +62,15 @@ var mapView = {
     clearOverlay: function(layer){
         var i = layer === 'previous' ? 1 : 0;
         console.log(i);
-        var layerObj = getState().overlay !== undefined ? getState().overlay[i] : undefined;
+        var layerObj = getState().overlaySet !== undefined ? getState().overlaySet[i] : undefined;
+        console.log(layerObj);
         if ( layerObj !== undefined) {
             mapView.map.setLayoutProperty(layerObj.activeLayer + '_' + layerObj.overlay, 'visibility', 'none');
             mapView.toggleActive('#' + layerObj.overlay + '-overlay-item');
             console.log('toggleActive ' + layerObj.overlay + '-overlay-item');
         }
         if ( i === 0 ) { // i.e. clearing the existing current overlay, with result that none will be visible         
-          clearState('overlay');
+          clearState('overlaySet');
         }
     },   
     addOverlayData: function(msg,data){ // data e.g. { overlay: 'building_permits', activeLayer: 'ward'}]
@@ -79,7 +80,7 @@ var mapView = {
         var grouping = mapView.overlayMapping[data.activeLayer] !== undefined ? mapView.overlayMapping[data.activeLayer].group || data.activeLayer : data.activeLayer;
         if ( getState()['joinedToGeo.' + data.overlay + '-' + data.activeLayer] === undefined ) {
             function dataCallback() {           
-                controller.joinToGeoJSON(data.overlay,grouping,data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollections* not in the mapBox instance
+                controller.joinToGeoJSON(data.overlay,grouping,data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
             }
             console.log(data.grouping);
             var dataRequest = {
@@ -126,9 +127,10 @@ var mapView = {
 
     },
     showOverlayLayer: function(overlay, activeLayer){
-      mapView.clearOverlay('previous');
       mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
       mapView.toggleActive('#' + overlay + '-overlay-item')               
+      setState('overlaySet', {overlay: overlay, activeLayer: activeLayer});  
+      mapView.clearOverlay('previous');
     },
     toggleActive: function(selector){
         d3.select(selector)
@@ -234,6 +236,7 @@ var mapView = {
             });
     },
     showLayer: function(msg,data) {
+        console.log('showLayer');
         var previousLayer = getState().mapLayer[1];
         if (previousLayer !== undefined ) {
             mapView.clearOverlay();
