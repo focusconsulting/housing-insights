@@ -131,6 +131,7 @@ var mapView = {
       mapView.toggleActive('#' + overlay + '-overlay-item')               
       setState('overlaySet', {overlay: overlay, activeLayer: activeLayer});  
       mapView.clearOverlay('previous');
+      // TODO: make / show legend
     },
     toggleActive: function(selector){
         d3.select(selector)
@@ -249,7 +250,8 @@ var mapView = {
             .attr('class','active');
 
     },
-    placeProjects: function(){
+    placeProjects: function(){ // some repetition here with the addLayer function used for zone layers. could be DRYer if combines
+                               // or if used constructor with prototypical inheritance
         mapView.map.addSource('project', {
           'type': 'geojson',
           'data': controller.convertToGeoJSON(model.dataCollection.raw_project)
@@ -266,7 +268,7 @@ var mapView = {
                 'circle-color': {
                       property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
                       type: 'categorical',
-                      stops: [ // hard-code for now. should be set programmatically
+                      stops: [ 
                         ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
                         ['2 - Expiring Subsidy', '#8B4225'],
                         ['3 - Recent Failing REAC Score', '#bd0026'],
@@ -277,6 +279,7 @@ var mapView = {
                 }
             }
         });
+       // TODO: MAKE LEGEND
         mapView.map.on('mousemove', function(e) {
              //get the province feature underneath the mouse
              var features = mapView.map.queryRenderedFeatures(e.point, {
