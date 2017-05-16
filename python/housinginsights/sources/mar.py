@@ -1,5 +1,4 @@
 
-import csv
 from pprint import pprint
 
 from housinginsights.sources.base import BaseApiConn
@@ -38,7 +37,7 @@ class MarApiConn(BaseApiConn):
             'f': 'json',
             'str': location
         }
-        result = self.conn.get('/findLocation2', params=params)
+        result = self.get('/findLocation2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -77,7 +76,7 @@ class MarApiConn(BaseApiConn):
             'x': xcoord,
             'y': ycoord
         }
-        result = self.conn.get('/reverseGeocoding2', params=params)
+        result = self.get('/reverseGeocoding2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -132,7 +131,7 @@ class MarApiConn(BaseApiConn):
             'f': 'json',
             'AID': address_id
         }
-        result = self.conn.get('/FindCondoUnitFromAID2', params=params)
+        result = self.get('/FindCondoUnitFromAID2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -152,4 +151,42 @@ class MarApiConn(BaseApiConn):
         # Return the first result.
         address_id = result['returnDataset']['Table1'][0]['ADDRESS_ID']
         return address_id
+
+    def reverse_lat_lng_geocode(self, latitude, longitude, output_type=None,
+                                output_file=None):
+        """
+        Do a reverse geocode lookup for MAR address/alias points within 200 
+        meters from the given Latitude and Longitude coordinates and returns 
+        the nearest five. The returned distance unit is meter.
+        
+        :param latitude: Latitude
+        :type latitude: str
+        
+        :param longitude: Longitude
+        :type longitude: str
+        :param output_type: Output type specified by user.
+        :type  output_type: str
+        
+        :param output_file: Output file specified by user.
+        :type  output_file: str
+
+        :returns: Json output from the api.
+        :rtype: json
+        """
+        params = {
+            'f': 'json',
+            'lat': latitude,
+            'lng': longitude
+        }
+        result = self.get('/reverseLatLngGeocoding2', params=params)
+        if result.status_code != 200:
+            err = "An error occurred during request: status {0}"
+            raise Exception(err.format(result.status_code))
+        if output_type == 'stdout':
+            pprint(result.json())
+        elif output_type == 'csv':
+            data = result.json()['Table1']
+            results = [MarResult(address) for address in data]
+            self.result_to_csv(FIELDS, results, output_file)
+        return result.json()
 
