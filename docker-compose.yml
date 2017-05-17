@@ -25,7 +25,7 @@ services:
         restart: "on-failure:10"
 
     postgres:
-        image: codefordc2/housing-insights-postgres
+        image: mdillon/postgis
         environment:
             - POSTGRES_PASSWORD=codefordc
             - POSTGRES_USER=codefordc
