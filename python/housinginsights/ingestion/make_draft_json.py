@@ -163,6 +163,35 @@ def make_all_json(manifest_path):
     print("Finished! Used these files to generate json:")
     print(completed_tables)
 
+
+def checkTable(table_name, table_info):
+    """
+    Check whether the new table is in table_info.json file
+
+    :param: table_name - the new data to be added table_info.json
+    :param type: string
+
+    :param: table_info - path to the table_info.json file (currently called meta.json)
+    :param type: string
+
+    :return: boolean value
+    : True - table_name found in table_info.json
+    : False - table_name NOT found
+    """
+    if not(os.path.isfile(table_info)):
+        raise ValueError("Path to table_info.json is invalid")
+
+    # read the data from current json file
+    with open(table_info, "r") as json_file:
+        current_data = json_file.read()
+
+    # decode the json file, result is a "dict", cast the result as a "set"
+    current_tables = json.loads(current_data)
+    table_set = set(current_tables.keys())
+
+    return table_name in table_set
+
+
 if __name__ == '__main__':
     # TODO: refactor to take in cmd line arguments for csv_filename, table_name,
     # TODO: and encoding
@@ -181,3 +210,33 @@ if __name__ == '__main__':
         manifest_path = os.path.abspath(
             os.path.join(python_filepath, 'scripts', 'manifest.csv'))
         make_all_json(manifest_path)
+
+    if 'single-add' in sys.argv:
+        """
+        An option to add a new data source to both create a table JSON file
+        then check if the table has been already to the master JSON file, table_info.json
+
+        It performs the same procedure as 'single', then performs the additional
+        checks before appending the new table to table_info.json
+        """
+        # development case
+        #json_filepath = python_filepath + "/scripts/meta.json"
+        #print(os.path.isfile(json_filepath))
+
+        #new_table = "building_permits"
+        #print(checkTable(new_table, json_filepath))
+
+        # Edit the follow parameters before running
+
+        # Change csv_filename to the file path of the raw data file
+        csv_filename = os.path.abspath("/Users/KweningJ/Documents/Computer "
+                                       "Programming/housing-insights/data/raw/"
+                                       "tax_assessment/opendata/20170505/"
+                                       "DCHousing.csv")
+
+        # Change table_name to the table being added
+        table_name = "dchousing"
+        #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
+        encoding = "latin1"
+
+        make_draft_json(csv_filename, table_name, encoding)
