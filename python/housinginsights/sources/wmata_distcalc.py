@@ -20,21 +20,28 @@ class WmataApiConn(BaseApiConn):
         secretsFileName = "../secrets.json"
 
         now = time.strftime("%Y%m%d")
-        outputDir = "../../../data/raw/wmata/" + now
+        self.outputDir = "../../../data/raw/wmata/" + now
 
-        if not os.path.exists(outputDir):
-            os.makedirs(outputDir)
-
-        self.distOutputFileName = outputDir + "/dist.csv"
-        self.infoOutputFileName = outputDir + "/wmatainfo.csv"
-
-        print("Will write WMATA_DIST table to {}".format(self.distOutputFileName))
-        print("Will write WMATA_INFO table to {}".format(self.infoOutputFileName))
+        if not os.path.exists(self.outputDir):
+            os.makedirs(self.outputDir)
 
         #pull API keys
         self.api_keys = json.loads(open(secretsFileName).read())
         self.wmata_api_key = self.api_keys['wmata']['api_key']
         self.mapbox_api_key = {'access_token':self.api_keys['mapbox']['public-token']}
+
+    # def get_data(self):
+    #     self.get_rail_stations
+    #     self.get_bus_stations
+    #     self.get_station_walking_distances
+
+    def get_data(self):
+
+        self.distOutputFileName = self.outputDir + "/dist.csv"
+        self.infoOutputFileName = self.outputDir + "/wmatainfo.csv"
+
+        print("Will write WMATA_DIST table to {}".format(self.distOutputFileName))
+        print("Will write WMATA_INFO table to {}".format(self.infoOutputFileName))
 
         #write out the wmata info csv
         self.infoOutputFile = open(self.infoOutputFileName, 'wt')
@@ -47,18 +54,19 @@ class WmataApiConn(BaseApiConn):
         self.distCsvWriter = csv.writer(self.distOutputFile)
         self.distHeader = ('Nlihc_id','type','stop_id_or_station_code','dist_in_miles')
         self.distCsvWriter.writerow(('Nlihc_id','type','stop_id_or_station_code','dist_in_miles'))
-        
-        #Creat railStation object
-        self.railStations = self.writeRailInfo(self.infoCsvWriter)
-        self.writeBusInfo(self.infoCsvWriter)
 
-    def getData(self):
+        #Creat railStation object
+        self.railStations = self._get_all_rail_stations(self.infoCsvWriter)
+        self._get_all_bus_stations(self.infoCsvWriter)
+
         try:
-            engine = dbtools.get_database_engine('docker_database')
-            conn = dbtools.get_database_connection('docker_database') 
+            engine = dbtools.get_database_engine('local_database')
+            conn = dbtools.get_database_connection('local_database') 
             print("Connected to Housing Insights database")
             columnset = conn.execute('select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=\'project\'')
-            rows = conn.execute('select * from project')
+            rows = conn.execute('select * from project limit 1')
+            conn.close()
+            engine.dispose()
         except Exception as e:
             print(e)
             print("I am unable to connect to the database")
@@ -68,40 +76,41 @@ class WmataApiConn(BaseApiConn):
             columns.append(c)
 
         numrow = 0
+        total_rows = rows.rowcount
 
         for row in rows: #reader:
-            radius = self.getMeters(0.5)
-            self.setProjectInfo(row,columns)
+            radius = self._get_meters(0.5)
+            self._set_project_info(row,columns)
 
             numrow = numrow+1
 
-            print("Processing project {} of 400ish".format(numrow))
+            print("Processing project {} of {}".format(numrow,total_rows))
 
             # find all metro stations within 0.5 miles
             print("Starting processing rail stations for {}".format(numrow))
-            self.findRailStations(self.railStations,row,radius,self.distCsvWriter)
+            self._find_rail_stations(self.railStations,row,radius,self.distCsvWriter)
             print("Completed processing rail stations for {}".format(numrow))
 
             # find all bus stops within 0.5 miles
             print("Starting processing bus stations for {}".format(numrow))
-            self.findBusStations(row, radius, self.distCsvWriter)
+            self._find_bus_stations(row, radius, self.distCsvWriter)
             print("Completed processing bus stations for {}".format(numrow))
 
-    def getMeters(self,miles):
+    def _get_meters(self,miles):
         self.miles = miles
         self.meters = miles*1609.344
         return self.meters
 
-    def setWmataApiKey(self,wmata_api_key):
+    def _set_wmata_api_key(self,wmata_api_key):
         self.wmata_api_key = wmata_api_key
 
-    def getWmataHeaders(self):
+    def _get_wmata_headers(self):
         return { 'api_key': self.wmata_api_key}
 
-    def setMapBoxApiKey(self, mapbox_api_key):
+    def _set_mapbox_api_key(self, mapbox_api_key):
         self.mapbox_api_key = {'access_token':mapbox_api_key}
 
-    def getWalkingDistance(self, srcLat, srcLon, destLat, destLon):
+    def _get_walking_distance(self, srcLat, srcLon, destLat, destLon):
         """Returns the walking distance in meters between two locations
 
            Parameters:
@@ -123,12 +132,13 @@ class WmataApiConn(BaseApiConn):
                 while "Too Many Requests" in str(walkDistResponse.json()) and i < 10:
                     walkDistResponse = requests.get("https://api.mapbox.com/directions/v5/mapbox/walking/" + distReqCoords,params=mapbox_params)
                     i = i + 1
+                    time.sleep(0.8)
                     if i == 10:
                         raise Exception('This is some exception to be defined later')
         return walkDistResponse.json()['routes'][0]['legs'][0]['distance']
 
 
-    def setProjectInfo(self,project,columns):
+    def _set_project_info(self,project,columns):
         for column_name in columns:
             if 'proj_lat' == column_name[0]:
                 self.lat = project[columns.index(column_name)]
@@ -137,7 +147,7 @@ class WmataApiConn(BaseApiConn):
             elif 'nlihc_id' == column_name[0]:
                 self.nlihcid = project[columns.index(column_name)]
 
-    def findRailStations(self, railStations,project,radiusinmeters,distCsvWriter):
+    def _find_rail_stations(self, railStations,project,radiusinmeters,distCsvWriter):
         """Finds all the rail stations within a given distance from a given project.  Writes to the given CSV file.
 
         Parameters:
@@ -153,7 +163,7 @@ class WmataApiConn(BaseApiConn):
         Nlihc_id = self.nlihcid
 
         for station in railStations:
-            walkDist = self.getWalkingDistance(lat, lon, str(station['Lat']), str(station['Lon']))
+            walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']))
 
             if walkDist <=radiusinmeters:
                 #railData.append([Nlihc_id, 'rail', station['Code'], "{0:.2f}".format(self.miles)])
@@ -161,12 +171,12 @@ class WmataApiConn(BaseApiConn):
 
         #self.result_to_csv(distHeader,railData,self.distOutputFileName)
 
-    def findBusStations(self, project,radiusinmeters, distCsvWriter):
+    def _find_bus_stations(self, project,radiusinmeters, distCsvWriter):
         lat = self.lat
         lon = self.lon
         Nlihc_id = self.nlihcid
 
-        wmata_headers = self.getWmataHeaders()
+        wmata_headers = self._get_wmata_headers()
 
         params = {'Lat': lat,
                   'Lon' : lon,
@@ -175,11 +185,12 @@ class WmataApiConn(BaseApiConn):
         data = response.json()
 
         for stop in data['Stops']:
-            walkDist = self.getWalkingDistance(lat, lon, str(stop['Lat']), str(stop['Lon']))
+            walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']))
+
             if walkDist <= radiusinmeters: #within 0.5 miles walking
                 distCsvWriter.writerow([Nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(self.miles)])
 
-    def writeRailInfo(self, infoCsvWriter):
+    def _get_all_rail_stations(self, infoCsvWriter):
         """Writes all rail station data to a given CSV writer. Returns the railStations json for future processing
 
            Parameters:
@@ -188,7 +199,7 @@ class WmataApiConn(BaseApiConn):
            """
         print("Writing RAIL INFO")
 
-        wmata_headers = self.getWmataHeaders()
+        wmata_headers = self._get_wmata_headers()
 
         railResponse = requests.get("https://api.wmata.com/Rail.svc/json/jStations", headers=wmata_headers)
         railStations = railResponse.json()['Stations']
@@ -203,7 +214,7 @@ class WmataApiConn(BaseApiConn):
 
         return railStations
 
-    def writeBusInfo(self, infoCsvWriter):
+    def _get_all_bus_stations(self, infoCsvWriter):
         """Writes all bus station data to a given CSV writer.
 
             Parameters:
@@ -213,12 +224,12 @@ class WmataApiConn(BaseApiConn):
 
         print("Writing BUS INFO")
 
-        wmata_headers = self.getWmataHeaders()
+        wmata_headers = self._get_wmata_headers()
 
         response = requests.get('https://api.wmata.com/Bus.svc/json/jStops', headers=wmata_headers)
-        data = response.json()
+        busStops = response.json()['Stops']
 
-        for stop in data['Stops']:
+        for stop in busStops:
 
             lines = ""
             for route in stop['Routes']:
@@ -227,8 +238,10 @@ class WmataApiConn(BaseApiConn):
 
             infoCsvWriter.writerow((stop['StopID'], 'bus', stop['Name'], stop['Lat'],stop['Lon'], lines))
 
-#if __name__ == '__main__':
+        return busStops
 
-#    testClass = WmataApiConn()
-#    testClass.getData()
+if __name__ == '__main__':
+
+    testClass = WmataApiConn()
+    testClass.get_data()
     
