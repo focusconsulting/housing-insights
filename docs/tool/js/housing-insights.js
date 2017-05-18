@@ -1,39 +1,256 @@
-'use strict';
+"use strict";
 
-/*
- *  This file contains the methods and variables common to all d3 charts for housing insights. Specific charts
- *  are built in separate files with constructors that prototypically inherit from the Chart constructor. If prototypical
- *  inheritance is new to you, check out https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch5.md.
- *  (among other sources). 
- *
- *  Contributors can refer to moving-block.js for an example of how to inherit from Chart in this file and call specific
- *  charts to be rendered.
- *
- *  Pages loading this script will have available an `app` object which itself has a `dataCollection` object. When a chart
- *  is constructed from a data file, the json object resulting from loading that data is added to the `dataCollection` object.
- *  Subsequent charts that use the same data file will use the existing data object instead of fetching the data again. A 
- *  chart that is called quickly after the first may still fetch the data because the the data from the first hasn't returned
- *  yet. That doesn't seem to cause any problems: the object just gets assigned again.
- *
- *  Other things to note:
- *
- *  1. The PubSub (publish/subscribe) module can simplify how we can connect events and the actions we want to occur as a result
- *  of that action. The module is provided by PubSub.js (MIT licence: https://github.com/mroderick/PubSubJS). Any function can
- *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. T
- *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. The app.getData method below,
- *  for instance, publishes an event when a data object is loaded (when the d3.csv function in complete). Any function subscribed
- *  to that event will then fire. In moving-blocks.js, the second MovingBlockChart constructor is in a function subscribed to the
- *  that event and so only fires after the data object it needs exists.
- *
- *  2. The extendPrototype method of the Chart constructor is basically a helper function that allows us to easily and cleanly add
- *  methods to specfic chart types in addition to the shared prototype from Chart. It's defined here in the shared Chart "class"
- *  but called in the specific constructors.
+/* 
+ * MODEL **********************************
  */
 
-// I'm not using ES6 syntax (e.g. const, let). Happy to do so if we determine it has enough browser support for the project.
+var model = {  // TODO (?) change to a module similar to State and Subscribe so that dataCollection can only be accessed
+               // through functions that the module returns to the handlers
+    dataCollection: {
+  
+    },
+    loadMetaData: function(){
+        var metaDataRequest = {
+            url: model.URLS.metaData,
+            name: "metaData"
+        }
+        controller.getData(metaDataRequest);
+    },
+    // Here's where we keep hardcoded URLs. The aim is to make this as short as possible.
+    URLS: {
+      geoJSONPolygonsBase: "/tool/data/",
+      metaData: "/tool/data/meta.json"
+    }
+    
+};
 
-// add hashing function to String.prototype to hash data file names so that it can use to identify data objects
-// instead of the long string of the DATA_FILE. from http://stackoverflow.com/a/7616484/5701184 modified to prepend 'd' to the return value
+/* STATE ********************************
+ *
+ * State module keeps the state object private; only access is through module-scoped functions with closure over state. We have access
+ * to those functions, and thus to state, by returning them to controller.controlState.
+ */
+
+function StateModule() {
+        
+    var state = {};
+
+    function logState(){
+        console.log(state);
+    }
+
+    function getState(){
+        return state;
+    }
+
+    function setState(key,value) { // making all state properties arrays so that previous value is held on to
+                                   // current state to be accessed as state[key][0].
+        if ( state[key] === undefined ) {
+            state[key] = [value];
+            PubSub.publish(key, value);
+            console.log('STATE CHANGE', key, value);
+        } else if ( state[key][0] !== value ) { // only for when `value` is a string or number. doesn't seem
+                                                // to cause an issue when value is an object, but it does duplicate
+                                                // the state. i.e. key[0] and key[1] will be equivalent. avoid that
+                                                // with logic before making the setState call.
+            state[key].unshift(value);
+            PubSub.publish(key, value);
+            console.log('STATE CHANGE', key, value);
+            if ( state[key].length > 2 ) {
+                state[key].length = 2;
+            }
+        }
+        
+    }
+    function clearState(key) {
+        delete state[key];
+         PubSub.publish('clearState', key);
+         console.log('CLEAR STATE', key);
+    }
+    return {
+        logState: logState,
+        getState: getState,
+        setState: setState,
+        clearState: clearState
+    }
+}
+
+/*
+ * Subscriptions module for setting, canceling, and logging all PubSub subscriptions. Automatically creates token for each unique
+ * plus function (string) combination so that we don't have to remember them and so that duplicate topic-function pairs
+ * cannot be made.
+ */
+
+ function SubscribeModule() {
+    var subscriptions = {};
+
+    function logSubs() {
+        console.log(subscriptions);
+    }
+
+    function createToken(topic, fnRef){
+        var functionHash = 'f' + fnRef.toString().hashCode();
+        var str = topic + fnRef;
+        var token = 'sub' + str.hashCode();
+        return {
+            token: token,
+            fn: functionHash
+        }
+    }
+
+    function setSubs(subsArray) { // subsArray is array of topic/function pair arrays
+        subsArray.forEach(function(pair){
+            var topic = pair[0],
+                fnRef = pair[1],
+                tokenObj = createToken(topic,fnRef);
+            
+            if ( subscriptions[tokenObj.fn] === undefined ) {
+                subscriptions[tokenObj.fn] = {};
+            }
+            if ( subscriptions[tokenObj['fn']][topic] === undefined ) {
+                subscriptions[tokenObj['fn']][topic] = PubSub.subscribe(topic,fnRef);  
+            } else {
+                throw 'Subscription token is already in use.';
+            }
+        });
+    }
+
+    function cancelSub(topic,fnRef) { // for canceling single subscription
+        var tokenObj = createToken(topic,fnRef);
+        if ( subscriptions[tokenObj.fn] !== undefined && subscriptions[tokenObj['fn']][topic] !== undefined ) {
+            PubSub.unsubscribe( subscriptions[tokenObj['fn']][topic] );
+            delete subscriptions[tokenObj['fn']][topic];
+            if ( Object.keys(subscriptions[tokenObj['fn']]).length === 0 ) {
+                delete subscriptions[tokenObj['fn']];
+            }
+        } else {
+            throw 'Subscription does not exist.';
+        }
+    }
+
+    function cancelFunction(fnRef) {
+        var tokenObj = createToken('',fnRef);
+        PubSub.unsubscribe(fnRef);
+        delete subscriptions[tokenObj['fn']];
+    }
+
+    return {
+        logSubs:logSubs,
+        setSubs:setSubs,
+        cancelSub:cancelSub,
+        cancelFunction: cancelFunction
+    };
+
+ }
+
+ 
+/*
+ * CONTROLLER ******************************
+ */
+
+var controller = {
+    controlState: StateModule(),
+    controlSubs: SubscribeModule(),
+    init: function(){        
+        mapView.init();        
+    },
+    // dataRequest is an object with the properties 'name', 'url' and 'callback'. The 'callback' is a function
+    // that takes as an argument the data returned from getData.                             
+    getData: function(dataRequest){
+        if (model.dataCollection[dataRequest.name] === undefined) { // if data not in collection
+            d3.json(dataRequest.url, function(error, data){
+                if ( error ) { console.log(error); }
+                if ( data.items !== null ) {
+                    model.dataCollection[dataRequest.name] = data;
+                    setState('dataLoaded.' + dataRequest.name, true );
+                    if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                        dataRequest.callback(data);
+                    }                              
+                } else {
+                    alert('Data returned null'); // TODO think through what to do when data returns null. is not an error,
+                                                 // but { "items": null }
+                }
+            });
+               
+        } else {
+            // TODO publish that data is available every time it's requested or only on first load?
+            if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                dataRequest.callback(model.dataCollection[dataRequest.name]);
+            }              
+        }
+    },
+    appendPartial: function(partial, elemID){
+        d3.html('partials/' + partial + '.html', function(fragment){
+            document.getElementById(elemID).appendChild(fragment);            
+        });
+    },
+    joinToGeoJSON: function(overlay,grouping,activeLayer){
+        model.dataCollection[activeLayer].features.forEach(function(feature){
+            var zone = feature.properties.NAME;
+            var dataKey = overlay + '_all_' + grouping;
+            feature.properties[overlay] = model.dataCollection[dataKey].items.find(function(obj){
+                return obj.group === zone;
+            }).count;
+        });
+        setState('joinedToGeo.' +  overlay + '-' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
+        // e.g. joinedToGeo.crime-neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
+    },
+    convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
+                                      // and returns geoJSON with the original data in the properties field
+        var features = data.items.map(function(element){ 
+          return {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'Point',
+              'coordinates': [+element.longitude, +element.latitude]
+            },
+            'properties': element        
+          }
+        });
+          return {
+          'type': 'FeatureCollection',
+          'features': features
+        }
+    }
+}
+
+/* Aliases */
+
+var setState = controller.controlState.setState,
+    getState = controller.controlState.getState,
+    logState = controller.controlState.logState,
+    clearState = controller.controlState.clearState;
+
+var setSubs = controller.controlSubs.setSubs,
+    logSubs = controller.controlSubs.logSubs,
+    cancelSub = controller.controlSubs.cancelSub,
+    cancelFunction = controller.controlSubs.cancelFunction;
+
+/*
+ * POLYFILLS AND HELPERS ***********************
+ */
+
+ // HELPER array.move()
+
+ Array.prototype.move = function (old_index, new_index) { // HT http://stackoverflow.com/questions/5306680/move-an-array-element-from-one-array-position-to-another
+                                                          // native JS for moving around array items
+                                                          // used e.g. in pie-chart.js to always move the all-zone option to the top 
+    while (old_index < 0) {
+        old_index += this.length;
+    }
+    while (new_index < 0) {
+        new_index += this.length;
+    }
+    if (new_index >= this.length) {
+        var k = new_index - this.length;
+        while ((k--) + 1) {
+            this.push(undefined);
+        }
+    }
+    this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+    return this; // for testing purposes
+};
+
+// HELPER String.hashCode()
 
 String.prototype.hashCode = function() {
   var hash = 0, i, chr, len;
@@ -43,193 +260,62 @@ String.prototype.hashCode = function() {
     hash  = ((hash << 5) - hash) + chr;
     hash |= 0; // Convert to 32bit integer
   }
-  return 'd' + hash;
+  return hash;
 };
 
-String.prototype.capitalizeFirstLetter = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+// HELPER String.cleanString()
+
+String.prototype.cleanString = function() { // lowercase and remove punctuation and replace spaces with hyphens; delete punctuation
+    return this.replace(/[ \\\/]/g,'-').replace(/['"”’“‘,\.!\?;\(\)&]/g,'').toLowerCase();
 };
-// This constructor stores json data fetched from AWS so that we can do various things with it,
-// like convert it to geoJSON or grab its display name and other information 
-// (regardless of the data source) using conventions from meta.json.
-// This assumes that 'json' is an array of objects.
-function APIDataObj(json){
-  this.json = json;
-  
-  // this.geoJSON assumes that we'll be producing a FeatureCollection with Features
-  // that are points. For shapes, we may want to add an argument and code that responds to it.
-  // Currently this method requires us to specify the latitude and longitude fields
-  // of the data within the json. If we standardize the json to always call its geospatial
-  // fields 'longitude' and 'latitude', this may not be necessary.
-  this.toGeoJSON = function(longitudeField, latitudeField){
-    var features = json.items.map(function(element){
-      return {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'Point',
-          'coordinates': [+element[longitudeField], +element[latitudeField]]
-        },
-        'properties': element        
+
+// Polyfill for Array.findIndex()
+
+// https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+if (!Array.prototype.findIndex) {
+  Object.defineProperty(Array.prototype, 'findIndex', {
+    value: function(predicate) {
+     // 1. Let O be ? ToObject(this value).
+      if (this == null) {
+        throw new TypeError('"this" is null or not defined');
       }
-    });
-    console.log('json', json);
-    return {
-      'type': 'FeatureCollection',
-      'features': features
-    }
-  }
-  
-}
 
-// geoJSONPolygons = a geoJSON FeatureCollection where the Features have a 'geometry'
-// object of type 'Polygon'.
-// aggregateData = a json object resulting from a query for aggregate data from the 
-// project's Flask API.
-// zoneNamesMatch = a callback with two arguments: (a) an element within the array of 
-// objects returned from an API call. and (b) a geoJSON polygon feature. The callback
-// returns true if the zone name within (a) matches the zone name within (b). 
-function addDataToPolygons(geoJSONPolygons, aggregateData, zoneNamesMatch){
-  var modifiedPolygons = geoJSONPolygons;
-  for(var i = 0; i < modifiedPolygons.features.length;i++){
-    var matchingAggregateZone = (aggregateData['items'].filter(function(el){
-      return zoneNamesMatch(el,modifiedPolygons.features[i]);
-    }))[0];
+      var o = Object(this);
 
-    modifiedPolygons.features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){
-      return el.group == matchingAggregateZone.group;
-    }))[0].count;
-  }
-  return modifiedPolygons;
-}
+      // 2. Let len be ? ToLength(? Get(O, "length")).
+      var len = o.length >>> 0;
 
-
-var app = {
-    dataCollection: {}, // empty object to house potentially shared data called by specific charts, see above
-    
-    // getInitialData exists to fetch data that we need to use as soon as possible after the DOM loads.
-    
-    // 'urlsObjArray' is an array of object literals, each with two keys: 'dataName' is a string that we
-    // will later use as a key within app.dataCollection; and 'dataURL' is where we fetch the data
-    // from. 'doAfter' is a callback where we can specify all the specific constructors to call with the 
-    // data
-    getInitialData: function(urlsObjArray, doAfter){
-      var MAX_INTERVALS = 60,
-          ajaxRequests = {},
-          currentInterval = 0,
-          checkRequestsInterval,
-          REQUEST_TIME = 500,
-          _this = this; // To resolve scoping issues
-                
-       function checkRequests(){
-         var completedRequests = Object.keys(ajaxRequests).filter(function(key){
-           return ajaxRequests[key].readyState == 4;
-         });
-            
-         if(completedRequests.length == Object.keys(ajaxRequests).length){
-         
-           clearInterval(checkRequestsInterval);
-        
-           for(var tableName in ajaxRequests){
-             var response = ajaxRequests[tableName].responseText;
-             _this.dataCollection[tableName] = new APIDataObj(JSON.parse(response));
-           }
-           doAfter();
-         }
-         if(MAX_INTERVALS == currentInterval){
-           clearInterval(checkRequestsInterval);
-         }
-         currentInterval++;
-       }
-       
-       for(var i = 0; i < urlsObjArray.length; i++){
-         ajaxRequests[urlsObjArray[i].dataName] = new XMLHttpRequest();
-         ajaxRequests[urlsObjArray[i].dataName].open('GET', urlsObjArray[i].dataURL);
-         ajaxRequests[urlsObjArray[i].dataName].send();
-       }
-       checkRequestsInterval = setInterval(checkRequests, REQUEST_TIME);
-
-    },
-    
-    getData: function(DATA_FILE, el, field, sortField, asc, readableField, chart){
-        d3.csv(DATA_FILE, function(json) {
-            json.forEach(function(obj) { 
-                for (var key in obj) {   
-                    if (obj.hasOwnProperty(key)) {  // hasOwnProperty limits to own, nonprototypical properties.
-                                                    
-                        obj[key] = isNaN(+obj[key]) ? obj[key] : +obj[key]; // + operator converts to number unless result would be NaN
-                    }
-                }
-            });
-            var dataName = DATA_FILE.hashCode();
-            app.dataCollection[dataName] = json; // adds result of fetching data to the dataCollection
-            chart.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
-        });
-    },
-
-    /* function to get parameter value from query string in url */
-
-    getParameterByName: function(name, url) { // HT http://stackoverflow.com/a/901144/5701184
-      if (!url) {
-        url = window.location.href;
+      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
       }
-      name = name.replace(/[\[\]]/g, "\\$&");
-      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-          results = regex.exec(url);
-      if (!results) return null;
-      if (!results[2]) return '';
-      return decodeURIComponent(results[2].replace(/\+/g, " "));
-  }
 
-};
-              
-var Chart = function(DATA_FILE, el, field, sortField, asc, readableField) { // Chart is called by specific chart constructors
-                                                                                // in other files through Chart.call(...) method
-    this.initialize(DATA_FILE, el, field, sortField, asc, readableField); 
-};
-// calling a new Constructor creates an object with the properties defined in the <object>.prototype such as 
+      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      var thisArg = arguments[1];
 
-// the one defined below and runs the function literally defined in the constructor. for more info see, among other sources,
+      // 5. Let k be 0.
+      var k = 0;
 
-// the section on constructors in https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch4.md
-Chart.prototype = {
-    data: [],
-    
-    initialize: function(DATA_FILE, el, field, sortField, asc, readableField) { // parameters will be passed by the call to
-                                                                                    // the specific chart type         
-        
-        var chart = this; // so that `this` can be passed as parameter to app.getData
-        if (!app.dataCollection[DATA_FILE.hashCode()]) { // if dataCollection object assoc. with the data file
-                                                        // does not exist  fetch new data
-                                                        // and assign it to the app.dataCollection 
-            app.getData(DATA_FILE, el, field, sortField, asc, readableField, chart);
-        } else {  
-            this.initialSetup(DATA_FILE, el, field, sortField, asc, readableField);
+      // 6. Repeat, while k < len
+      while (k < len) {
+        // a. Let Pk be ! ToString(k).
+        // b. Let kValue be ? Get(O, Pk).
+        // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+        // d. If testResult is true, return k.
+        var kValue = o[k];
+        if (predicate.call(thisArg, kValue, k, o)) {
+          return k;
         }
-    },
-    initialSetup: function(DATA_FILE,el,field,sortField,asc, readableField){
-       this.data = app.dataCollection[DATA_FILE.hashCode()]; 
-       var data = this.data;
-       
-       data.sort(function(a, b) { // sorting data array with JS prototype sort function
-            if (asc) return a[sortField] - b[sortField];
-            return b[sortField] - a[sortField]; 
-          });  
-       this.minValue = d3.min(data, function(d) { 
-            return d[field]
-        });
+        // e. Increase k by 1.
+        k++;
+      }
 
-       this.maxValue = d3.max(data, function(d) { 
-            return d[field]
-        });
-       this.setup(el, field, sortField, asc, readableField); 
-    },
-                      
-    extendPrototype: function(destinationPrototype, obj){ // using this function for inheritance. 
-                                                          // extend a constructor's prototype with the keys/values in obj.
-                                                          // specific chart constructors call this method 
+      // 7. Return -1.
+      return -1;
+    }
+  });
+}
 
-       for(var i in obj){
-          destinationPrototype[i] = obj[i];
-      } 
-    } 
-}; 
+/* Go! */
+
+controller.init(); 

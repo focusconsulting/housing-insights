@@ -126,6 +126,6 @@ var DonutChartExtension = {
     chart.percentage
         .text(this.returnTextPercent());
     chart.label 
-        .text(chart.field); // TODO: use data manifest to provide readable field names, or arrange for API to return them
+        .text(chart.field); // TODO: use meta.json to provide readable field names, or arrange for API to return them
   }
 };

@@ -25,7 +25,7 @@ ChartProto.prototype = {
         
        
       chartOptions.dataRequest.callback = chartCallback;         
-      controller.getData(chartOptions.dataRequest) // dataRequest is an object {name:<String>[, params:<Array>[,callback:<Function>]]}
+      controller.getData(chartOptions.dataRequest) // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
       
       function chartCallback(data){
         chart.data = data.items;

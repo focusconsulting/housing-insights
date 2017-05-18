@@ -13,7 +13,7 @@ var sideBar = {
             sideBar.charts[i] = new DonutChart({
                 dataRequest: {
                     name: 'raw',
-                    params: ['project']
+                    url: model.dataCollection.metaData.project.api.raw_endpoint
                 },
                 field: instance,
                 container: '#pie-' + i,

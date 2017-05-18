@@ -1,14 +1,26 @@
 "use strict";
 
 var mapView = {
-    
+    buildOverlayOptions: function(){
+        var tablesWithOverlays = Object.keys(model.dataCollection.metaData).filter(function(key){
+            var tableProperties = model.dataCollection.metaData[key];
+            return tableProperties.api && tableProperties.api.available_aggregates.length > 0;
+        });
+        mapView.initialOverlays = tablesWithOverlays.map(function(tableName){
+            return {
+                "name": tableName,
+                "zones": model.dataCollection.metaData[tableName]['available_aggregates']
+            }
+        });
+    },
     init: function() {  
 
         setSubs([
-            ['mapLoaded', mapView.addInitialLayers],
             ['mapLayer', mapView.showLayer],
-            ['mapLoaded', sideBar.init],
-            ['mapLoaded', mapView.overlayMenu],
+            ['mapLoaded', model.loadMetaData],
+            ['dataLoaded.metaData', mapView.addInitialLayers],
+            ['dataLoaded.metaData', sideBar.init],
+            ['dataLoaded.metaData', mapView.overlayMenu],
             ['overlayRequest', mapView.addOverlayData],
             ['joinedToGeo', mapView.addOverlayLayer],
             ['dataLoaded.raw_project', mapView.placeProjects],
@@ -32,17 +44,18 @@ var mapView = {
             setState('mapLoaded',true);
         });        
     },
-    overlayMenu: function(){        
+    overlayMenu: function(){    
+        mapView.buildOverlayOptions();    
         mapView.initialOverlays.forEach(function(overlay){
             var link = document.createElement('a');
             link.href = '#';
-            link.id = overlay + '-overlay-item';
-            link.innerHTML = overlay.toUpperCase().replace('_',' ');
+            link.id = overlay.name + '-overlay-item';
+            link.innerHTML = overlay.name.toUpperCase().replace('_',' ');
             link.onclick = function(e){
                 e.preventDefault();
                 var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
                 if ( existingOverlayType !== overlay ) {
-                    setState('overlayRequest', {overlay: overlay, activeLayer: getState().mapLayer[0]});                     
+                    setState('overlayRequest', {overlay: overlay.name, activeLayer: getState().mapLayer[0]});                     
                 } else {
                     mapView.clearOverlay();
                 }
@@ -51,7 +64,7 @@ var mapView = {
         });
 
     },
-    initialOverlays: ['crime','building_permits'],
+    initialOverlays: [],
     overlayMapping: {
         neighborhood: {
             group:'neighborhood_cluster', // including key-values here if the overlay grouping name is not the same
@@ -82,10 +95,14 @@ var mapView = {
             function dataCallback() {           
                 controller.joinToGeoJSON(data.overlay,grouping,data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
             }
+
+            var dataURLInfo = model.dataCollection.metaData['data.overlay'].api;
+
+            var dataURL = dataURLInfo.aggregate_endpoint_base + data.activeLayer;
             
             var dataRequest = {
                 name: data.overlay, //e.g. crime
-                params: ['all',grouping], // TODO: if first parameter will / could ever be anything other than 'all', will have to set programmaticaly
+                url: dataURL, 
                 callback: dataCallback
             };
             controller.getData(dataRequest);
@@ -149,11 +166,9 @@ var mapView = {
             visibility: 'visible'            
         },
         {
-            source: 'neighborhood',
+            source: 'neighborhood_cluster',
             color: '#0D5C7D',
             visibility: 'none',
-            grouping: 'neighborhood_cluster' // ie the corresponding grouping name in the overlay data, such as crime or building_permits
-    
         },
         {
             source: 'tract',
@@ -182,13 +197,10 @@ var mapView = {
         } 
     },
     addLayer: function(layer){
-        if ( layer.visibility === 'visible' ) {
-            setState('mapLayer', layer.source);
-        }
         var layerName = layer.source + 'Layer'; // e.g. 'wardLayer'
         var dataRequest = {
             name: layer.source,  // e.g. ward
-            params: null,
+            url: model.URLS.geoJSONPolygonsBase + layer.source + '.geojson',
             callback: addLayerCallback
         };
         controller.getData(dataRequest);
@@ -199,6 +211,9 @@ var mapView = {
                     type:'geojson',
                     data: data
                 });
+            }
+            if ( layer.visibility === 'visible' ) {
+                setState('mapLayer', layer.source);
             }
             mapView.map.addLayer({
               'id': layerName,
