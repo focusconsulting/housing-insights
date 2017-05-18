@@ -1,3 +1,5 @@
+# Note this should be synced with the environment.yml so that we can also run ingestion code on the server. 
+
 click==6.7
 Flask==0.12.1
 Flask-Cors==3.0.2

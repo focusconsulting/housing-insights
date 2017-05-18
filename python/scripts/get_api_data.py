@@ -1,5 +1,5 @@
 """
-Data.py provides command line convenience access to the modules in the housinginsights.sources
+get_api_data.py provides command line convenience access to the modules in the housinginsights.sources
 directory. Here is a brief explanation.
 
 BRIEF EXPLANATION
@@ -16,12 +16,12 @@ bin/data.sh -o ~/csvfile --params "location:641 S St NW" mar find_location
 
 Calling from this folder using Python directly (with your virtual environment activated):
 
-python data.py mar find_location --output ../../data/interim/out.csv --params "location:617 Morton Street NW"
+python get_api_data.py mar find_location --output ../../data/interim/out.csv --params "location:617 Morton Street NW"
 
 
 DETAILED EXPLANATION:
 --------------------
-data.py expects the user to supplies at least 4
+get_api_data.py expects the user to supplies at least 4
 things when it is run:
 1. Output Type [--outtype]
 2. Output File (optional) [--output, -o]
