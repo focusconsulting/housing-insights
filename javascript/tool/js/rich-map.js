@@ -262,6 +262,20 @@ function prepareMaps(){
         'text-anchor': "bottom-left"
       },
     });
+	  
+    // map tilt slider functionality
+    d3.select(".mapboxgl-ctrl-compass").on("click", function() {
+    d3.select("#tiltSlider").property("value", 0)
+  	})
+
+    // map pitch handlers
+    d3.select("#tiltSlider").on("change", function() { tiltSlider.call(this) });
+    d3.select("#tiltSlider").on("input",  function() { tiltSlider.call(this) });
+    function tiltSlider() {
+      var elem = d3.select(this)
+      var value = +elem.property("value");
+      map.setPitch(value)
+    }
   
     var categoryLegendEl = document.getElementById('category-legend');
     categoryLegendEl.style.display = 'block';
