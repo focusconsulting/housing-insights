@@ -1,39 +1,15 @@
 'use strict';
 
 /*
- *  This file contains the methods and variables common to all d3 charts for housing insights. Specific charts
- *  are built in separate files with constructors that prototypically inherit from the Chart constructor. If prototypical
- *  inheritance is new to you, check out https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch5.md.
- *  (among other sources). 
- *
- *  Contributors can refer to moving-block.js for an example of how to inherit from Chart in this file and call specific
- *  charts to be rendered.
- *
- *  Pages loading this script will have available an `app` object which itself has a `dataCollection` object. When a chart
- *  is constructed from a data file, the json object resulting from loading that data is added to the `dataCollection` object.
- *  Subsequent charts that use the same data file will use the existing data object instead of fetching the data again. A 
- *  chart that is called quickly after the first may still fetch the data because the the data from the first hasn't returned
- *  yet. That doesn't seem to cause any problems: the object just gets assigned again.
- *
- *  Other things to note:
- *
- *  1. The PubSub (publish/subscribe) module can simplify how we can connect events and the actions we want to occur as a result
- *  of that action. The module is provided by PubSub.js (MIT licence: https://github.com/mroderick/PubSubJS). Any function can
- *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. T
- *  publish an event (aka topic, aka msg), and any other function can be subscribed to that event. The app.getData method below,
- *  for instance, publishes an event when a data object is loaded (when the d3.csv function in complete). Any function subscribed
- *  to that event will then fire. In moving-blocks.js, the second MovingBlockChart constructor is in a function subscribed to the
- *  that event and so only fires after the data object it needs exists.
- *
- *  2. The extendPrototype method of the Chart constructor is basically a helper function that allows us to easily and cleanly add
- *  methods to specfic chart types in addition to the shared prototype from Chart. It's defined here in the shared Chart "class"
- *  but called in the specific constructors.
- */
 
-// I'm not using ES6 syntax (e.g. const, let). Happy to do so if we determine it has enough browser support for the project.
+************ NOTE *************
+*******************************
 
-// add hashing function to String.prototype to hash data file names so that it can use to identify data objects
-// instead of the long string of the DATA_FILE. from http://stackoverflow.com/a/7616484/5701184 modified to prepend 'd' to the return value
+This file  is here to keep building.html functioning as it was before the javascript refactor.
+It will be deprecated once the building view is rebuilt according to the refactor. 
+
+
+*/
 
 String.prototype.hashCode = function() {
   var hash = 0, i, chr, len;
@@ -47,15 +23,8 @@ String.prototype.hashCode = function() {
 };
 
 String.prototype.capitalizeFirstLetter = function() {
-  return this.charAt(0).toUpperCase() + this.slice(1);
+    return this.charAt(0).toUpperCase() + this.slice(1);
 };
-
-String.prototype.toTitle = function() {
-  return this.split('_').map(function(word){
-    return word.capitalizeFirstLetter();
-  }).join(' ');
-}
-
 // This constructor stores json data fetched from AWS so that we can do various things with it,
 // like convert it to geoJSON or grab its display name and other information 
 // (regardless of the data source) using conventions from meta.json.
@@ -93,15 +62,16 @@ function APIDataObj(json){
 // aggregateData = a json object resulting from a query for aggregate data from the 
 // project's Flask API.
 // zoneNamesMatch = a callback with two arguments: (a) an element within the array of 
-// objects returned from an API call. and (b) a geoJSON polygon feature.
-function addDataToPolygons(geoJSONPolygons, aggregateData){
+// objects returned from an API call. and (b) a geoJSON polygon feature. The callback
+// returns true if the zone name within (a) matches the zone name within (b). 
+function addDataToPolygons(geoJSONPolygons, aggregateData, zoneNamesMatch){
   var modifiedPolygons = geoJSONPolygons;
-  for(var i = 0, features = modifiedPolygons.features; i < features.length; i++){
+  for(var i = 0; i < modifiedPolygons.features.length;i++){
     var matchingAggregateZone = (aggregateData['items'].filter(function(el){
-      return el.group == features[i].properties["NAME"];
+      return zoneNamesMatch(el,modifiedPolygons.features[i]);
     }))[0];
 
-    features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){
+    modifiedPolygons.features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){
       return el.group == matchingAggregateZone.group;
     }))[0].count;
   }
