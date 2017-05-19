@@ -72,6 +72,11 @@
     text-align: center;
 }
 
+a.unavailable {
+    background-color: rgb(220,220,220);
+    color: rgb(200, 200, 200);
+}
+
 a.active {
     background-color: #b3cde3;
 }
