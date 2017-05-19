@@ -4,8 +4,22 @@
     box-sizing: border-box;
 }
 
- #main-view {
+.main-view {
     width: 100%;
+    transition: opacity 0.5s linear, transform 0.5s ease-in;
+    opacity: 1;
+}
+
+.main-view.fade {
+    opacity: 0;
+}
+
+.main-view.inactive {
+    visibility: hidden;
+}
+
+.main-view.transition {
+    transform: translate(100%,0);
 }
 
 #sidebar {

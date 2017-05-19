@@ -150,7 +150,11 @@ function StateModule() {
 var controller = {
     controlState: StateModule(),
     controlSubs: SubscribeModule(),
-    init: function(){        
+    init: function(){
+        setSubs([
+            ['switchView', controller.switchView]
+        ]);
+        setState('activeView',mapView);        
         mapView.init();        
     },
     // dataRequest is an object with the properties 'name', 'url' and 'callback'. The 'callback' is a function
@@ -177,10 +181,16 @@ var controller = {
                 dataRequest.callback(model.dataCollection[dataRequest.name]);
             }              
         }
-    },
-    appendPartial: function(partial, elemID){
+    },                                         // bool
+    appendPartial: function(partial, elemID, transition){ 
         d3.html('partials/' + partial + '.html', function(fragment){
-            document.getElementById(elemID).appendChild(fragment);            
+            if ( transition ) {
+                fragment.querySelector('.main-view').className += ' transition';
+            }
+            document.getElementById(elemID).appendChild(fragment);
+            setTimeout(function(){
+                document.querySelector('.transition').className = document.querySelector('.transition').className.replace(' transition','');
+            }, 200);
         });
     },
     joinToGeoJSON: function(overlay,grouping,activeLayer){
@@ -210,6 +220,15 @@ var controller = {
           'type': 'FeatureCollection',
           'features': features
         }
+    },
+    switchView: function(msg,data) {
+
+        var container = document.getElementById(getState().activeView[0].el);
+        container.className += ' fade';
+        setTimeout(function(){
+            container.className = container.className.replace(' fade', ' inactive');
+            data.init();
+        }, 500);
     }
 }
 
