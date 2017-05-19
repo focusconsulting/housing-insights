@@ -186,12 +186,12 @@ var controller = {
     joinToGeoJSON: function(overlay,grouping,activeLayer){
         model.dataCollection[activeLayer].features.forEach(function(feature){
             var zone = feature.properties.NAME;
-            var dataKey = overlay + '_all_' + grouping;
+            var dataKey = overlay + '_' + grouping;
             feature.properties[overlay] = model.dataCollection[dataKey].items.find(function(obj){
                 return obj.group === zone;
             }).count;
         });
-        setState('joinedToGeo.' +  overlay + '-' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
+        setState('joinedToGeo.' +  overlay + '_' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
         // e.g. joinedToGeo.crime-neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
     },
     convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields

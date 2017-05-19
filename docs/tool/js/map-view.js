@@ -96,12 +96,12 @@ var mapView = {
                 controller.joinToGeoJSON(data.overlay,grouping,data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
             }
 
-            var dataURLInfo = model.dataCollection.metaData['data.overlay'].api;
+            var dataURLInfo = model.dataCollection.metaData[data.overlay].api;
 
             var dataURL = dataURLInfo.aggregate_endpoint_base + data.activeLayer;
             
             var dataRequest = {
-                name: data.overlay, //e.g. crime
+                name: data.overlay + "_" + data.activeLayer, //e.g. crime
                 url: dataURL, 
                 callback: dataCallback
             };
@@ -118,10 +118,10 @@ var mapView = {
                                                                                                      // it is not dynamically connected to the
                                                                                                      // dataCollection           
 
-            var minValue = d3.min(model.dataCollection[data.overlay + '_all_' + data.grouping].items, function(d){
+            var minValue = d3.min(model.dataCollection[data.overlay + '_' + data.grouping].items, function(d){
                 return d.count;
             });
-            var maxValue = d3.max(model.dataCollection[data.overlay + '_all_' + data.grouping].items, function(d){
+            var maxValue = d3.max(model.dataCollection[data.overlay + '_' + data.grouping].items, function(d){
                 return d.count;
             });
             mapView.map.addLayer({

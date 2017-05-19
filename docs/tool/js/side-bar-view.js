@@ -12,7 +12,7 @@ var sideBar = {
         instances.forEach(function(instance, i){
             sideBar.charts[i] = new DonutChart({
                 dataRequest: {
-                    name: 'raw',
+                    name: 'raw_project',
                     url: model.dataCollection.metaData.project.api.raw_endpoint
                 },
                 field: instance,
@@ -45,7 +45,7 @@ var sideBar = {
         zip: {
           name: 'zip'
         },
-        neighborhood: {
+        neighborhood_cluster: {
           name: 'neighborhood_cluster_desc'
         }
     },
