@@ -1,6 +1,7 @@
 "use strict";
 
 var mapView = {
+    el: 'mapView',
     buildOverlayOptions: function(){
         var tablesWithOverlays = Object.keys(model.dataCollection.metaData).filter(function(key){
             var tableProperties = model.dataCollection.metaData[key];
@@ -378,15 +379,22 @@ var mapView = {
                 hud_own_name: building.properties.hud_own_name
             });
 
-            var popup = new mapboxgl.Popup({ 'anchor': 'top-right' })
+            var popup = new mapboxgl.Popup({ 'anchor': 'top-right' }) // the lines commented out below would handle loading
+                                                                      // the building view from a partial html file
+                                                                      // and appending it to the already loaded page, in a
+                                                                      // single-page-app fashion. commented out here because it
+                                                                      // is not ready. defering now to the old method of loading
+                                                                      // a the building.html page with a query parameter for the 
+                                                                      // building id. uncomment the lines to see how it would work
                 .setLngLat(e.lngLat)
-                .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
+                .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
+        //      .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
                 .addTo(mapView.map);
 
-            popup._container.querySelector('a').onclick = function(e){
+      /*      popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
-                setState('switchView','building');
-            };
+                setState('switchView', buildingView);
+            };*/
            });               
         
     },
