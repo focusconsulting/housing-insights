@@ -4,8 +4,22 @@
     box-sizing: border-box;
 }
 
- #main-view {
+.main-view {
     width: 100%;
+    transition: opacity 0.5s linear, transform 0.5s ease-in;
+    opacity: 1;
+}
+
+.main-view.fade {
+    opacity: 0;
+}
+
+.main-view.inactive {
+    visibility: hidden;
+}
+
+.main-view.transition {
+    transform: translate(100%,0);
 }
 
 #sidebar {
@@ -18,7 +32,6 @@
     padding: 10px;
     display: flex;
     flex-direction: column;
-    justify-content:             
 }
 
 #sidebar > div {
@@ -43,18 +56,25 @@
   bottom:0;
  }
 
-#layer-menu {
+#layer-menu, #overlay-menu {
     background: #fff;
     position: absolute;
-    z-index: 1;
-    bottom: 10px;
-    left: 10px;
+    z-index: 1;    
     border-radius: 3px;
-    width: 120px;
-    border: 1px solid rgba(0,0,0,0.4);    
+    border: 1px solid rgba(0,0,0,0.4); 
+    left:10px;   
 }
 
-#layer-menu a {
+#layer-menu {
+    width: 120px;
+    bottom: 10px;    
+}
+#overlay-menu {
+    width: 150px;
+    top: 10px;
+}
+
+#layer-menu a, #overlay-menu a {
     font-size: 13px;
     color: #404040;
     display: block;
@@ -64,6 +84,11 @@
     text-decoration: none;
     border-bottom: 1px solid rgba(0,0,0,0.25);
     text-align: center;
+}
+
+a.unavailable {
+    background-color: rgb(220,220,220);
+    color: rgb(200, 200, 200);
 }
 
 a.active {

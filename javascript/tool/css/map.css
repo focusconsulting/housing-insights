@@ -135,7 +135,7 @@ p {
   color: #404040;
 }
 
-.map-menu a.active {
+.map-menu a.active, .menu a.active {
   background-color: #b3cde3;
   color: #404040;
 }

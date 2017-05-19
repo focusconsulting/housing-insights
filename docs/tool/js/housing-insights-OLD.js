@@ -47,15 +47,8 @@ String.prototype.hashCode = function() {
 };
 
 String.prototype.capitalizeFirstLetter = function() {
-  return this.charAt(0).toUpperCase() + this.slice(1);
+    return this.charAt(0).toUpperCase() + this.slice(1);
 };
-
-String.prototype.toTitle = function() {
-  return this.split('_').map(function(word){
-    return word.capitalizeFirstLetter();
-  }).join(' ');
-}
-
 // This constructor stores json data fetched from AWS so that we can do various things with it,
 // like convert it to geoJSON or grab its display name and other information 
 // (regardless of the data source) using conventions from meta.json.
@@ -93,15 +86,16 @@ function APIDataObj(json){
 // aggregateData = a json object resulting from a query for aggregate data from the 
 // project's Flask API.
 // zoneNamesMatch = a callback with two arguments: (a) an element within the array of 
-// objects returned from an API call. and (b) a geoJSON polygon feature.
-function addDataToPolygons(geoJSONPolygons, aggregateData){
+// objects returned from an API call. and (b) a geoJSON polygon feature. The callback
+// returns true if the zone name within (a) matches the zone name within (b). 
+function addDataToPolygons(geoJSONPolygons, aggregateData, zoneNamesMatch){
   var modifiedPolygons = geoJSONPolygons;
-  for(var i = 0, features = modifiedPolygons.features; i < features.length; i++){
+  for(var i = 0; i < modifiedPolygons.features.length;i++){
     var matchingAggregateZone = (aggregateData['items'].filter(function(el){
-      return el.group == features[i].properties["NAME"];
+      return zoneNamesMatch(el,modifiedPolygons.features[i]);
     }))[0];
 
-    features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){
+    modifiedPolygons.features[i].properties[aggregateData.table] = (aggregateData.items.filter(function(el){
       return el.group == matchingAggregateZone.group;
     }))[0].count;
   }

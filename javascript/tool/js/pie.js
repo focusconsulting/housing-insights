@@ -241,19 +241,29 @@ var DATA_FILE ='data/Project.csv';
  */
 
 function changeZoneType() {
-  if ( map.clickedLayer !== currentZoneType ) {
+  // The 'if' block below is a quick, inelegant fix to an issue with the map not loading in time for pie.js.
+  // Find something more elegant!
+  if(!map){
+      return;
+  }
+  if ( map.clickedZone !== currentZoneType ) {
     changeZone();
   }
 }
 
  function changeZone(e){
+  // The 'if' block below is a quick, inelegant fix to an issue with the map not loading in time for pie.js.
+  // Find something more elegant!
+  if(!map){
+     return;
+  }
     var zType,
         zName;
     if ( e !== undefined ) { // i.e. function call comes from selecting option in drop-down
       zType = e.target.selectedOptions[0].className;
       zName = e.target.selectedOptions[0].value; 
     } else { // i.e. function call comes from selecting different map layer
-      zType = map.clickedLayer;
+      zType = map.clickedZone;
       zName = 'All';
     }
     
@@ -277,25 +287,30 @@ function changeZoneType() {
 
 
 function setOptions(nested) {
+  // The 'if' block below is a quick, inelegant fix to an issue with the map not loading in time for pie.js.
+  // Find something more elegant!
+  if(!map){
+     return;
+  }
   
-  if ( mapZones[map.clickedLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
+  if ( mapZones[map.clickedZone].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
                                                            // enumerated yet
-        mapZones[map.clickedLayer].values = [];
+        mapZones[map.clickedZone].values = [];
         nested.forEach(function(obj) {
-          mapZones[map.clickedLayer].values.push(obj.key)
+          mapZones[map.clickedZone].values.push(obj.key)
         });
         
   }
   var selector = document.getElementById('zone-selector');
   selector.innerHTML = '';
-  mapZones[map.clickedLayer].values.forEach(function(zone,i){
+  mapZones[map.clickedZone].values.forEach(function(zone,i){
     var option = document.createElement('option');
     if ( i === 0 ) { option.setAttribute('selected','selected'); }
-    option.setAttribute('class',map.clickedLayer);
+    option.setAttribute('class',map.clickedZone);
     option.setAttribute('value',zone);
     option.id = zone.toLowerCase().replace(/ /g,'-');
     option.innerHTML = zone;
     selector.appendChild(option);
   });  
-currentZoneType = map.clickedLayer;
+currentZoneType = map.clickedZone;
 }

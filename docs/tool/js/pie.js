@@ -38,7 +38,7 @@ Array.prototype.move = function (old_index, new_index) { // HT http://stackoverf
         }
     };
 
-var readable = { // cheap fix for human readable labels. should later come from API data or manifest JO
+var readable = { // cheap fix for human readable labels. should later come from API data or meta.json
   Subsidized: 'Subsidized',
   Cat_Expiring: 'Expiring',
   Cat_Failing_Insp: 'Fails Inspect.',
