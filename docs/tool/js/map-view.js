@@ -180,12 +180,12 @@ var mapView = {
             source: 'zip',
             color: '#0D7B8A',
             visibility: 'none'            
-        },
+        }/*,
         {
             source: 'zillow',
             color: '#57CABD',
             visibility: 'none'            
-        }
+        }*/
 
     ],
     addInitialLayers: function(msg,data){
