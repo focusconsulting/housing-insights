@@ -55,7 +55,8 @@ var mapView = {
             link.onclick = function(e){
                 e.preventDefault();
                 var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-                if ( existingOverlayType !== overlay ) {
+                console.log(existingOverlayType, overlay.name);
+                if ( existingOverlayType !== overlay.proj_name ) {
                     setState('overlayRequest', {overlay: overlay.name, activeLayer: getState().mapLayer[0]});                     
                 } else {
                     mapView.clearOverlay();
@@ -246,7 +247,9 @@ var mapView = {
                 }
                 return '';
             })
-            .text(layer.source.toUpperCase())
+            .text(function(){
+                return layer.source.split('_')[0].toUpperCase();
+            })
             .on('click', function(){
                 d3.event.preventDefault();
                 setState('mapLayer',layer.source);                
