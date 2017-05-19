@@ -547,7 +547,7 @@
     "replace_table": false
   },
   "dc_tax": {
-    "cleaner": "dc_tax_cleaner",
+    "cleaner": "DCTaxCleaner",
     "fields": [
       {
         "display_name": "objectid",
