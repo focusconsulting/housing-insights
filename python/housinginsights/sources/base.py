@@ -8,6 +8,7 @@ from housinginsights.config.base import HousingInsightsConfig
 
 import requests
 import csv
+import os
 
 
 class BaseApiConn(object):
@@ -88,6 +89,21 @@ class BaseApiConn(object):
             writer.writerow(fields)
             for result in results:
                 writer.writerow(result.data)
+
+    def add_file(self, outdir, outfile):
+        """
+        Create an output directory if it doesn't already exist.
+
+        :param outfile: file path for where to write and save csv file
+        :type outfile: string
+
+        :return: None
+        """
+        if not os.path.isdir(outdir):
+            os.mkdir(outdir)
+
+        if not os.path.exists(outdir+outfile):
+            open(outdir+outfile, 'w').close()
 
 
 class BaseApiManager(object):
