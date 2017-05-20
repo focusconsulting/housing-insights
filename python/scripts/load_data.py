@@ -99,6 +99,9 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files=True):
         ingestionfunctions.check_or_create_sql_manifest(engine=engine)
     logging.info("sql_manifest_exists: {}".format(sql_manifest_exists))
 
+    #update the meta.json to the database
+    ingestionfunctions.meta_json_to_database(engine, meta)
+
     #TODO should this be moved into the __init__ of ManifestReader? Do we ever want to use ManifestReader if it has duplicate rows?
     if not manifest.has_unique_ids():
         raise ValueError('Manifest has duplicate unique_data_id!')
