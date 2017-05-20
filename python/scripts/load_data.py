@@ -70,12 +70,14 @@ def drop_tables(database_choice):
     query_result = db_conn.execute('''
         DROP SCHEMA public CASCADE;
         CREATE SCHEMA public;
+        ''')
+    if database_choice == 'remote_database' or database_choice == 'remote_database_master':
+        query_result = db_conn.execute('''
         GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
         GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
         GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;
         GRANT ALL ON SCHEMA public TO public;
         ''')
-
 
 def main(database_choice, meta_path, manifest_path, keep_temp_files=True):
     """
