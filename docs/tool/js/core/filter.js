@@ -1,7 +1,8 @@
 var filter = {
 	init: function(){
 		setSubs([
-			['filterChange', filter.publishFilteredData]
+			['filterChange', filter.publishFilteredData],
+			// need to subscribe to data load and run a save the data
 		]);
 	},
 	options: { // TODO replace with a function that populates this according
@@ -22,8 +23,10 @@ var filter = {
 		subsidyEndAfter: ''
 	},
 	filteredData: [],
-	filterData: function(data){
-		this.filteredData = data.filter(function(d){ 
+	filterData: function(data){ // TODO finish, obviously, and replace 
+								// some single entry checks (eg, ward) and
+								// replace them with loops to handle arrays
+		filter.filteredData = data.filter(function(d){ 
 			return (
 				( //geography
 					(this.options.ward ? d['ward'] === this.options.ward : true) &&
@@ -60,12 +63,12 @@ var filter = {
 				result.push(this.filteredData[i]);
 			}
 		}
-		this.filteredData = result;
+		filter.filteredData = result;
 	},
 	publishFilteredData: function(msg,options){
-		this.options[options.key] = options.value;
-		this.filterData();
-		this.deduplicate();
-		setState('filteredData', this.filteredData);
+		filter.options[options.key] = options.value;
+		filter.filterData();  // needs a data argument
+		filter.deduplicate();
+		setState('filteredData', filter.filteredData);
 	}
 }
