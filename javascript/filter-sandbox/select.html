@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+<script src="semantic/dist/semantic.min.js"></script>
+
+  </head>
+  <body>
+      <h1>Multi-select</h1>
+      <select class="ui fluid search dropdown" multiple=""id="select">
+      <option value="">Ward</option>
+      <option value="1">Ward 1</option>
+      <option value="2">Ward 2</option>
+      <option value="3">Ward 3</option>
+      <option value="4">Ward 4</option>
+      <option value="5">Ward 5</option>
+      <option value="6">Ward 6</option>
+      <option value="7">Ward 7</option>
+      <option value="8">Ward 8</option>
+    </select>
+    <script>
+    $('.ui.dropdown')
+      .dropdown()
+    ;
+    $('#select')
+  .dropdown()
+;
+$("select").change(function(){
+    var selectedValues = [];
+    $("option:selected").each(function(){
+        selectedValues.push($(this).val());
+    });
+    console.log(selectedValues);
+    return false;
+  })
+    </script>
+  </body>
+</html>

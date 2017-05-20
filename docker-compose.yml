@@ -1,6 +1,44 @@
-version: "2"
+version: '2'
+
 services:
-  db:
-    image: postgres:9.4.5
-    ports:
-      - 5432:5432
+
+
+    jekyll:
+        #image: codefordc2/housing-insights-jekyll
+        build:
+            context: docs
+        command:
+            - jekyll serve --watch --incremental --force_polling
+        volumes:
+            - ./docs:/srv/jekyll
+        ports:
+            - "4000:4000"
+
+    web:
+        image: sosedoff/pgweb
+        environment:
+            - DATABASE_URL=postgres://codefordc:codefordc@postgres:5432/housinginsights_docker?sslmode=disable
+        links:
+            - postgres
+        ports:
+            - "8081:8081"
+        restart: "on-failure:10"
+
+    postgres:
+        image: codefordc2/housing-insights-postgres
+        environment:
+            - POSTGRES_PASSWORD=codefordc
+            - POSTGRES_USER=codefordc
+            - POSTGRES_DB=housinginsights_docker
+        ports:
+            - "5432:5432"
+        restart: "on-failure:3"
+
+    sandbox:
+        build:
+            context: python
+        volumes:
+            - .:/repo
+        command: tail -f /dev/null
+        ports:
+            - "5000:5000"

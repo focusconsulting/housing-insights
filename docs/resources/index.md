@@ -4,40 +4,48 @@ title: H.I. Resources
 ---
 
 # Resources for Coders and Contributors
-
-<div class="well well-sm">
-  <p><strong>Current Contributors:</strong> We now have a list of all our upcoming meetings, events and ways to get involved on our <a href="{{site.baseurl}}/resources/latest">Latest Updates page</a>.</p>
-</div>
-
 Yes! We're glad you're interested in helping out on this project.
 
-If you're new to the project, read each of the resources below. In about 10 minutes you'll be up and running and ready to start contributing!
-
-## 1) Project Purpose and Approach
-[Read the full project summary]({{site.baseurl}}/resources/summary.html)
-
-<!--Then take a quick look at our planned [project phases]({{site.baseurl}}/resources/phases.html)-->
-
-## 2) Find an issue you're interested in
-Issues are tagged with the language or technology needed to do them, and their category of issue. If you're a beginner or just have a little bit of time, look for issues marked 'easy.' When you start working on an issue, leave a note in the comments so others know you're going to start tackling it.
-
-[Our issues list](https://github.com/codefordc/housing-insights/issues?q=is%3Aissue+is%3Aopen+sort%3Acreated-asc) (Github)
-
-## 3) Installation
-We use Python, Javascript, and Jekyll. Follow the instructions for [setting up your dev environment](https://github.com/codefordc/housing-preservation) to make sure you have everything you need installed.
+<div class="well">
+  <p><strong>Are you new to this project?</strong> Check out our <a href="{{site.baseurl}}/resources/onboarding">onboarding instructions</a> for getting set up. 
+  </p>
+</div>
 
 
-## 4) Coding and workflow conventions
-Our [CONTRIBUTING](https://github.com/codefordc/housing-insights/blob/master/CONTRIBUTING.md) document in our Github repo has important information on code conventions.
+## Resources:
+
+* [Upcoming work sessions]({{site.baseurl}}/resources/latest) with add to calendar links and locations.
+
+* [Our Github repository](https://github.com/codefordc/housing-insights)
+
+    * [Directly view issues on Github](https://github.com/codefordc/housing-insights/issues)
+
+    * [View the same issues in a Kanban board on Waffle.io](https://waffle.io/codefordc/housing-insights)
+
+    * [How to use labels and issues](TODO)
+
+* [Our Google Drive folder](https://drive.google.com/drive/folders/0B6iVubS2zjk4V2dLWXkzemVFbnc?usp=sharing): Miscellaneous coordination and non-code resources.
+
+* [Instructions on adding a new data source]({{site.baseurl}}/resources/adding-data-sources.html)
+
+* Follow the instructions [on our onboarding page]({{site.baseurl}}/resources/onboarding) to set up your system with Docker and forking our repository. 
+
+* Our [CONTRIBUTING](https://github.com/codefordc/housing-insights/blob/master/CONTRIBUTING.md) document in our Github repo has important information on code conventions.
+
+* Help on using Git:
+
+    * [Day-to-day checklist](http://nhumphrey.com/git/practical-git-checklist.html) for keeping your local code up to date and adding new features. Use the 'Triangular workflow' instructions, and be sure you've already [added both remote repositories]({{site.baseurl}}/resources/onboarding/triangular-git.html)
+
+* [Command line cheatsheet]({{site.baseurl}}/resources/command-line-cheatsheet.html)
 
 
-# Additional Resources
+## Project Background
 
-## Data sources
-TBD
+* [Project summary and mission]({{site.baseurl}}/resources/summary.html)
 
-## Understanding the problem
+* [list of reports and background resources]({{site.baseurl}}/resources/external).
 
-* [Affordable housing program guide]({{ site.baseurl }}/resources/programs-guide.html)
-* [Database Schema]({{ site.baseurl }}/resources/database-schema.html)
-<!--* [Roadmap]({{ site.baseurl }}/resources/roadmap.html)-->
+* (in development) User profiles describing our potential tool users. [Current drafts in Drive](https://drive.google.com/drive/u/1/folders/0B-7k7TLmdLTaTXhnckpJeWoybk0) under 'Personas', with interview transcripts under 'User Interviews'
+
+
+{% include modal_email.html %}
