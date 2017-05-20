@@ -19,7 +19,7 @@ filterOptions = {
 	neighborhoodCluster: '',
 	zip: '',
 	totalUnitsMin: '',
-	totalUnitsMax: 5000,
+	totalUnitsMax: '',
 	totalSubsidizedUnits: '',
 	ownershipType: '',
 	subsidyType: '',
@@ -43,8 +43,12 @@ filter = function(){
 				(filterOptions.zip ? d['zip_code'] === filterOptions.zip : true)
 			) && 
 			( //subsidy start/end
-				(filterOptions.subsidyStartBefore ? d['subsidy_start_date'] <= filterOptions.subsidyStartBefore : true) &&
-				(filterOptions.subsidyStartafter ? d['subsidy_start_date'] >= filterOptions.subsidyStartafter : true) &&
+				(filterOptions.subsidyStartBefore ? 
+					(d['subsidy_start_date'] ? Date.UTC(d['subsidy_start_date'].split('-')[0],d['subsidy_start_date'].split('-')[1],d['subsidy_start_date'].split('-')[2]) <= Date.UTC(filterOptions.subsidyStartBefore.split('-')[0],filterOptions.subsidyStartBefore.split('-')[1],filterOptions.subsidyStartBefore.split('-')[2]) : false)
+					: true) &&
+				(filterOptions.subsidyEndBefore ? 
+					(d['subsidy_end_date'] ? Date.UTC(d['subsidy_end_date'].split('-')[0],d['subsidy_end_date'].split('-')[1],d['subsidy_end_date'].split('-')[2]) >= Date.UTC(filterOptions.subsidyEndBefore.split('-')[0],filterOptions.subsidyEndBefore.split('-')[1],filterOptions.subsidyEndBefore.split('-')[2]) : false)
+					: true) &&
 				(filterOptions.subsidyendBefore ? d['subsidy_end_date'] <= filterOptions.subsidyendBefore : true) &&
 				(filterOptions.subsidyendAfter ? d['subsidy_end_date'] >= filterOptions.subsidyendAfter : true)
 			) && 
@@ -70,11 +74,14 @@ document.getElementById('filter').addEventListener('click', function(){
 	console.log('blah')
 	filterOptions.totalUnitsMin = document.getElementById('min').value;
 	filterOptions.totalUnitsMax = document.getElementById('max').value;
+	filterOptions.subsidyStartBefore = document.getElementById('date-start').value;
+	filterOptions.subsidyEndBefore = document.getElementById('date-end').value;
 	filter();
 	filtered.forEach(function(arg){
+		// console.log(Date.UTC(arg['subsidy_start_date'].split('-')[0],arg['subsidy_start_date'].split('-')[1],arg['subsidy_start_date'].split('-')[2]))
+		// console.log(Date.UTC(filterOptions.subsidyStartBefore.split('-')[0],filterOptions.subsidyStartBefore.split('-')[1],filterOptions.subsidyStartBefore.split('-')[2]))
 		document.getElementById('result').textContent += arg['nlihc_id'] + ', '
 	})
-	console.log(filterOptions)
-	console.log(filtered)
+	console.log(filtered.length)
 
 })
