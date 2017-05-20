@@ -17,11 +17,16 @@ Thanks for joining our project! First we'll do some quick setup to bring you int
 
 4) **Clone your fork of the repository** to your computer, and add additional remotes so that you can pull from Code for DC and push to your fork. [Detailed instructions]({{site.baseurl}}/resources/onboarding/triangular-git.html). 
 
-5) **Install [Docker Toolbox](https://www.docker.com/products/docker-toolbox)**. If you've used Docker before and already have any version of Docker working, you can use that - Docker Toolbox is the easiest to use the first time (especially on Windows). 
+5) **System setup:** Choose your setup based on what you will be working on:
 
-6) **Configure the `secrets.json` file**. In the project repository, navigate to `/housing-insights/python/housinginsights` and make a copy of the file `secrets.example.json`. Rename this copy to `secrets.json`. You can use the copy with the example keys for now. Later you may need the real version - ask a project lead when you run into issues. 
+* Just analyzing data: [Connect to our RDS database]({{site.baseurl}}/resources/onboarding/connect-to-rds.html)
 
-7) **Run Docker Compose on our code** to get a local copy of our database and our website. [Detailed instructions]({{site.baseurl}}/resources/onboarding/docker.html). 
+* Adding data, documenting data, and Python coding: [Setup Docker]({{site.baseurl}}/resources/onboarding/docker.html)
+
+* Front end development: [Run a local server]({{site.baseurl}}/resources/onboarding/front-end.html)
+
+
+<hr/>
 
 
 ## How we work

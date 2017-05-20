@@ -2,10 +2,13 @@ version: '2'
 
 services:
 
+
     jekyll:
-        image: codefordc2/housing-insights-jekyll
+        #image: codefordc2/housing-insights-jekyll
+        build:
+            context: docs
         command:
-            - jekyll serve --watch --incremental
+            - jekyll serve --watch --incremental --force_polling
         volumes:
             - ./docs:/srv/jekyll
         ports:
@@ -30,3 +33,12 @@ services:
         ports:
             - "5432:5432"
         restart: "on-failure:3"
+
+    sandbox:
+        build:
+            context: python
+        volumes:
+            - .:/repo
+        command: tail -f /dev/null
+        ports:
+            - "5000:5000"

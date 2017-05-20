@@ -21,13 +21,14 @@ import unittest
 from unittest import skip
 
 import sys, os
-sys.path.append(os.path.abspath('./'))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             os.pardir)))
 
 from housinginsights.ingestion.functions import load_meta_data
 from housinginsights.tools import dbtools
 from housinginsights.ingestion import DataReader, ManifestReader
 from housinginsights.ingestion import CSVWriter
-from housinginsights.ingestion import GenericCleaner
+from housinginsights.ingestion.Cleaners import GenericCleaner
 
 
 ##########################################################################
@@ -61,7 +62,7 @@ class IngestionTests(unittest.TestCase):
         for manifest_row in manifest:
             print(manifest_row)
             csv_reader = DataReader(meta = meta, manifest_row=manifest_row)
-            assert(csv_reader.do_fields_match())
+            assert(csv_reader._do_fields_match())
             
              #assume they exactly match for the purpose of this test, expect as modified below
             sql_manifest_row = manifest_row
@@ -69,16 +70,16 @@ class IngestionTests(unittest.TestCase):
             sql_manifest_row['status'] = 'failed'
 
             if manifest_row['include_flag'] == "skip":
-                self.assertFalse(csv_reader.check_include_flag(sql_manifest_row))
+                self.assertFalse(csv_reader._check_include_flag(sql_manifest_row))
                 self.assertFalse(csv_reader.should_file_be_loaded(sql_manifest_row))
             elif manifest_row['include_flag'] == "use":
-                self.assertTrue(csv_reader.check_include_flag(sql_manifest_row))
+                self.assertTrue(csv_reader._check_include_flag(sql_manifest_row))
                 self.assertTrue(csv_reader.should_file_be_loaded(sql_manifest_row))
 
             #If the file is already in the SQL manifest, skip it when manifest says 'use' (i.e. it's already loaded)
             sql_manifest_row['status'] = 'loaded'
             if manifest_row['include_flag'] == "use":
-                self.assertFalse(csv_reader.check_include_flag(sql_manifest_row))
+                self.assertFalse(csv_reader._check_include_flag(sql_manifest_row))
             
 
 
