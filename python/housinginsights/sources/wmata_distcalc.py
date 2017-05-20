@@ -288,8 +288,8 @@ class WmataApiConn(BaseApiConn):
             for result in results:
                 writer.writerow(result)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    testClass = WmataApiConn()
-    testClass.get_info()
+#     testClass = WmataApiConn()
+#     testClass.get_info()
     
