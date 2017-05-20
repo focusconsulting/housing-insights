@@ -187,9 +187,8 @@ def checkTable(table_name, table_info):
 
     # decode the json file, result is a "dict", cast the result as a "set"
     current_tables = json.loads(current_data)
-    table_set = set(current_tables.keys())
 
-    return table_name in table_set
+    return table_name in current_tables.keys()
 
 
 def appendJSON(new_json, master_json):
@@ -204,6 +203,7 @@ def appendJSON(new_json, master_json):
 
     :return: void
     """
+    #TODO: version control of table_info.json (meta.json), create backup making changes to master JSON
     if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
         raise ValueError("Path to one of the JSON files is invalid")
 
@@ -212,12 +212,14 @@ def appendJSON(new_json, master_json):
         json_data = new_file.read()
     new_data = json.loads(json_data)
 
-
+    # read the current master JSON table
     with open(master_json, "r") as json_file:
         master_data = json_file.read()
     masterJ_data = json.loads(master_data)
 
+    # add the new table to the master JSON
     masterJ_data.update(new_data)
+    # write the new JSON list to the master JSON file
     json.dump(masterJ_data, open(master_json, 'w'), indent=2)
     print("%s appended to table_info.json file" % new_json)
 
