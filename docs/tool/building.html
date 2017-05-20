@@ -18,14 +18,18 @@
        page-specific calls that require ready DOM elements called at end of <body>.
        may change that practice later. for now we can avoid listening for window.load, document.ready, etc  -->
 
-	<script src="js/aux/d3-tip.js">
+	<script src="js/util/d3-tip.js">
 	</script>
-	<script src="js/aux/PubSub.js">
+	<script src="js/util/PubSub.js">
 	</script>
+
+
 	<!--  ***** NOTE ***** LINKING TO OLD DEPRECATED FILE BECAUSE THE BUILDING VIEW HAS NOT BEEN REBUILT YET 
 	     FOLLWING THE JS REFACTOR -->
 	<script src="js/core/housing-insights-OLD.js">
 	</script>
+
+
 	<link href="css/tool.css" rel="stylesheet" type="text/css">
 	<link href="css/building.css" rel="stylesheet" type="text/css"><!-- end project-specific asset calls -->
 </head>
@@ -186,14 +190,14 @@
 
 	<!-- page-specific asset calls that require ready DOM elements -->
 	 
-  <script src="js/aux/geo-distance.js">
+  <script src="js/util/geo-distance.js">
 	</script>
 	<script src="js/views/building-map.js">
 	</script> 
 	<script src="js/views/building-header.js">
 	</script> 
 	<script src="js/charts/subsidy-timeline.js"></script>
-	<script src="js/aux/accordion.js" type="text/javascript">
+	<script src="js/util/accordion.js" type="text/javascript">
 	</script>
 </body>
 </html>
