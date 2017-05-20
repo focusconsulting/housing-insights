@@ -2,7 +2,7 @@ from pprint import pprint
 import os
 import sys
 import requests
-
+import datetime
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 sys.path.append(PYTHON_PATH)
@@ -22,8 +22,7 @@ class CamaApiConn(BaseApiConn):
     def __init__(self):
         super().__init__(CamaApiConn.BASEURL)
 
-    def get_data(self, square, lot, suffix, output_type=None,
-                      output_file=None):
+    def get_data(self, square, lot, suffix, objectid):
         """
         Get information on a location based on a simple query string.
 
@@ -48,38 +47,50 @@ class CamaApiConn(BaseApiConn):
             'Lot': lot,
             'Suffix': suffix
         }
+
         result = self.get('/findAddFromSSL2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
-        if output_type == 'stdout':
-            pprint(result.json())
-        elif output_type == 'csv':
-            data = result.json()['returnDataset']['Table1']
-            results = [MarResult(address) for address in data]
-            self.result_to_csv(FIELDS, results, output_file)
+        # if output_type == 'stdout':
+        #     pprint(result.json())
+        # elif output_type == 'csv':
+        #     data = result.json()['returnDataset']['Table1']
+        #     results = [MarResult(address) for address in data]
+        #     self.result_to_csv(FIELDS, results, output_file)
         mar_data = result.json()
-        
+        if mar_data['returnDataset'] == {}:
+            mar_returns = {'Warning': 'No MAR data availble - property under construction - see AYB year'}
+        else:
+            entry = mar_data['returnDataset']['Table1'][0]
+            mar_returns = {'ANC': entry['ANC'],
+                           'CENSUS_TRACT': entry['CENSUS_TRACT'],
+                           'CLUSTER_': entry['CLUSTER_'],
+                           'WARD': entry['WARD'],
+                           'ZIPCODE': entry['ZIPCODE']
+            }
+
+        return mar_returns
 
 def cama_data():
 
-    my_api = CamaApiConn()
+    my_api = CamaApiConn() # instantiating class to make callable
 
     residential = 'https://opendata.arcgis.com/datasets/c5fb3fbe4c694a59a6eef7bf5f8bc49a_25.geojson'
     r = requests.get(residential)
-    residential_data = r.json()
+    residential_data = r.json() # pull all cama data to loop through an dappend mar ward, etc data below
 
     dict_res = {}  # creates dict of residential data with SSL as primary key
     for row in residential_data['features']:
-        dict_res.setdefault(row['properties']['SSL'], {})
+        objectid = row['properties']['OBJECTID']
         square, lot = row['properties']['SSL'].split()
         suffix = ' '
         if len(square) > 4:
             square = square[:4]
             suffix = square[-1]
-        data_return = my_api.get_data(square, lot, suffix)
-        #dict_res[row['properties']['SSL']] = row['properties']
+        mar_return = my_api.get_data(square, lot, suffix, objectid)
+        row['properties'].update(mar_return)
+        dict_res[row['properties']['OBJECTID']] = row['properties']
 
 cama_data()
 
-#data = my_api.get_data('findAddFromSSL2')
