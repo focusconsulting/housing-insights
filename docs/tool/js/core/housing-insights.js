@@ -18,10 +18,8 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
     },
     // Here's where we keep hardcoded URLs. The aim is to make this as short as possible.
     URLS: {
-      // geoJSONPolygonsBase: "/tool/data/",
-      // metaData: "/tool/data/meta.json"
-      geoJSONPolygonsBase: "/data/",
-      metaData: "/data/meta.json"
+      geoJSONPolygonsBase: "/tool/data/",
+      metaData: "/tool/data/meta.json"
     }
     
 };
