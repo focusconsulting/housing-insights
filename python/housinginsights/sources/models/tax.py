@@ -1,0 +1,27 @@
+'''
+Model for tax api
+'''
+from datetime import datetime
+
+FIELDS = ['OBJECTID', 'SSL', 'ASSESSOR_NAME', 'LAND_USE_CODE', 'LAND_USE_DESCRIPTION',
+          'LANDAREA', 'PROPERTY_ADDRESS', 'OTR_NEIGHBORHOOD_CODE', 'OTR_NEIGHBORHOOD_NAME',
+          'OWNER_NAME_PRIMARY', 'CAREOF_NAME', 'OWNER_ADDRESS_LINE1', 'OWNER_ADDRESS_LINE2',
+          'OWNER_ADDRESS_CITYSTZIP', 'APPRAISED_VALUE_BASEYEAR_LAND', 'APPRAISED_VALUE_BASEYEAR_BLDG',
+          'APPRAISED_VALUE_PRIOR_LAND', 'APPRAISED_VALUE_PRIOR_IMPR', 'APPRAISED_VALUE_PRIOR_TOTAL',
+          'APPRAISED_VALUE_CURRENT_LAND', 'APPRAISED_VALUE_CURRENT_IMPR', 'APPRAISED_VALUE_CURRENT_TOTAL',
+          'PHASEIN_VALUE_CURRENT_LAND', 'PHASEIN_VALUE_CURRENT_BLDG', 'VACANT_USE',
+          'HOMESTEAD_DESCRIPTION', 'TAX_TYPE_DESCRIPTION', 'TAXRATE', 'MIXED_USE',
+          'OWNER_OCCUPIED_COOP_UNITS', 'LAST_SALE_PRICE', 'LAST_SALE_DATE', 'DEED_DATE',
+          'CURRENT_ASSESSMENT_CAP', 'PROPOSED_ASSESSMENT_CAP', 'OWNER_NAME_SECONDARY',
+          'ADDRESS_ID', 'LASTMODIFIEDDATE', 'EXTRACTDATE']
+
+
+class TaxResult(object):
+    def __init__(self, result):
+        self.data = []
+        for attr in FIELDS:
+            value = result.get(attr) or ''
+            if attr == 'EXTRACTDATE':
+                value = int(datetime.now().timestamp())
+            self.data.append(value)
+
