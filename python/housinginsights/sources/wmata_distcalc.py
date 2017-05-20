@@ -39,7 +39,7 @@ class WmataApiConn(BaseApiConn):
     def get_info(self,output='STANDARD'):
         self.infoOutput = []
         #create wmata info header
-        self.infoHeader = ('code_or_id','type','name','lat','lon','lines','stop_id_or_station_code')
+        self.infoHeader = ('stop_id_or_station_code','type','name','latitude','longitude','lines')
         if ( output == 'STANDARD' ):
             self.infoOutputFileName = self.outputDir + "/wmatainfo.csv"
             print("Will write WMATA_INFO table to {}".format(self.infoOutputFileName))
@@ -61,7 +61,7 @@ class WmataApiConn(BaseApiConn):
     def get_dist(self,output='STANDARD',db='local_database'):
         self.distOutput = []
         #create wmata info header
-        self.distHeader = ('Nlihc_id','type','stop_id_or_station_code','dist_in_miles')
+        self.distHeader = ('nlihc_id','type','stop_id_or_station_code','dist_in_miles')
         if ( output == 'STANDARD' ):
             self.distOutputFileName = self.outputDir + "/dist.csv"
             print("Will write WMATA_INFO table to {}".format(self.distOutputFileName))
@@ -288,8 +288,8 @@ class WmataApiConn(BaseApiConn):
             for result in results:
                 writer.writerow(result)
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-#     testClass = WmataApiConn()
-#     testClass.get_data()
+    testClass = WmataApiConn()
+    testClass.get_info()
     
