@@ -122,8 +122,8 @@ def make_draft_json(filename, tablename, encoding):
         sql_type = _pandas_to_sql_data_type(pandas_type)
 
         field_attributes = {
-                "type": sql_type, 
-                "source_name": field, 
+                "type": sql_type,
+                "source_name": field,
                 "sql_name": _sql_name_clean(field),
                 "display_name": _sql_name_clean(field),
                 "display_text":"",
@@ -179,7 +179,7 @@ def checkTable(table_name, table_info):
     : False - table_name NOT found
     """
     if not(os.path.isfile(table_info)):
-        raise ValueError("Path to table_info.json is invalid")
+        raise ValueError("Unable to access JSON file")
 
     # read the data from current json file
     with open(table_info, "r") as json_file:
@@ -208,12 +208,69 @@ def appendJSON(new_json, master_json):
         raise ValueError("Path to one of the JSON files is invalid")
 
     # Update the master JSON file, table_info.json
-    new_data = json.loads(new_json)
-    table_name = new_data.keys()[0]
-    master_data = json.loads(master_json)
-    master_json.update(new_data)
-    json.dump(master_json, open(master_json, 'w'))
-    print("%s appended to table_info.json file")
+    with open(new_json, "r") as new_file:
+        json_data = new_file.read()
+    new_data = json.loads(json_data)
+
+
+    with open(master_json, "r") as json_file:
+        master_data = json_file.read()
+    masterJ_data = json.loads(master_data)
+
+    masterJ_data.update(new_data)
+    json.dump(masterJ_data, open(master_json, 'w'), indent=2)
+    print("%s appended to table_info.json file" % new_json)
+
+
+def duplicateTable(new_table, new_json, master_json):
+    """
+    Ask the user for decision on table that is found in the table_info.json file.
+    The user can decide to either overwrite current master json or cancel copying.
+
+    :param:  new_table - new table being added
+    :param type: string
+
+    :param:  new_json - path to the new json file
+    :param type: string
+
+    :param:  master_json - path to the table_info.json file
+    :param type: string
+
+    :return: void
+    """
+    if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
+        raise ValueError("Path to one of the JSON files is invalid")
+
+    time_out = 0
+
+    while time_out < 3:
+        usr_decide = input("\nPress: [O] to overwrite current value in table_info.json; [C] to cancel: ")
+
+        if ('O' in usr_decide or 'o' in usr_decide):
+            # Overwrite current table in master json
+            # remove the entry table_info.json
+            with open(master_json, "r") as json_file:
+                master_data = json_file.read()
+            masterJ_data = json.loads(master_data)
+
+            masterJ_data.pop(new_table, 0)	# 0 as fail-safe parameter
+            json.dump(masterJ_data, open(master_json, 'w'), indent=2)
+			
+            appendJSON(new_json, master_json)
+            return
+
+        elif ('C' in usr_decide or 'c' in usr_decide):
+            # cancel copying
+            print("Copying new JSON cancelled")
+            return
+
+        else:
+            print("Option not recognised\n")
+
+        time_out += 1
+
+    # incorrect selection exceeds limit
+    print("Copying JSON aborted")
 
 
 if __name__ == '__main__':
@@ -245,36 +302,44 @@ if __name__ == '__main__':
         """
         # Edit the follow parameters before running
         # TODO: refactor to take in cmd line arguments for csv_filename, table_name, encoding
+        # TODO: optimisation to make it more efficient
 
-        # Change csv_filename to the file path of the raw data file
-        csv_filename = os.path.abspath("C:/Devs/SongDev.csv")
+        # Change production
+        # production = True for adding new data
+        # production = False for dev
+        production = False
 
-        # Change table_name to the table being added
-        table_name = "project_stemp"
-        #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
-        encoding = "latin1"
+        if production:
+            # Change csv_filename to the file path of the raw data file
+            csv_filename = os.path.abspath("C:/Devs/manifest.csv")
+
+            # Change table_name to the table being added
+            table_name = "wmata_dist"
+            #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
+            encoding = "latin1"
+            json_filepath = python_filepath + "/scripts/meta.json"
+        else:
+            # development use
+            csv_filename = os.path.abspath("C:/Devs/manifest.csv")
+            table_name = "song_dev"
+            encoding = "latin1"
+            json_filepath = "C:/Devs/meta.json"
 
         make_draft_json(csv_filename, table_name, encoding)
 
         new_json_path = os.path.join(logging_path, (table_name+".json"))
 
-        #json_filepath = python_filepath + "/scripts/meta.json"
-        json_filepath = python_filepath + "/scripts/meta_sample.json"
-
-        #print(new_json_path)
-        #print(os.path.isfile(json_filepath))
-
         try:
             if checkTable(table_name, json_filepath):
                 # the new table is already in table_info.json
                 print("table already in master json")
+                duplicateTable(table_name, new_json_path, json_filepath)
 
             else:
                 # the new table will be appended
                 print("adding new table")
                 appendJSON(new_json_path, json_filepath)
-                #pass
 
         except ValueError:
-            pass
+            print("Path to table_info.json is invalid")
 
