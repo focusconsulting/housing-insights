@@ -22,6 +22,10 @@ import os
 import logging
 import json
 import csv
+import time
+
+
+import sqlalchemy
 
 
 #Needed to make relative package imports when running this file as a script (i.e. for testing purposes).
@@ -63,7 +67,14 @@ def drop_tables(database_choice):
     """
     engine = dbtools.get_database_engine(database_choice)
     db_conn = engine.connect()
-    query_result = db_conn.execute("DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+    query_result = db_conn.execute('''
+        DROP SCHEMA public CASCADE;
+        CREATE SCHEMA public;
+        GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
+        GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;
+        GRANT ALL ON SCHEMA public TO public;
+        ''')
 
 
 def main(database_choice, meta_path, manifest_path, keep_temp_files=True):
@@ -179,7 +190,6 @@ def main(database_choice, meta_path, manifest_path, keep_temp_files=True):
 
 if __name__ == '__main__':
 
-
     #local, real data is the default
     database_choice = 'local_database'
     scripts_path = os.path.abspath(os.path.join(python_filepath, 'scripts'))
@@ -194,6 +204,8 @@ if __name__ == '__main__':
 
     if 'docker' in sys.argv:
         database_choice = 'docker_database'
+    if 'docker_local' in sys.argv:
+        database_choice = 'docker_with_local_python'
 
     if 'remote' in sys.argv:
         database_choice = 'remote_database'
@@ -201,6 +213,11 @@ if __name__ == '__main__':
         meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
         manifest_path = os.path.abspath(
             os.path.join(scripts_path, 'manifest.csv'))
+
+        #Only users with additional admin priviledges can rebuild the remote database
+        if 'rebuild' in sys.argv:
+            database_choice = 'remote_database_master'
+    
 
     if 'rebuild' in sys.argv:
         drop_tables(database_choice)
