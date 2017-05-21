@@ -13,7 +13,7 @@ if the find_location method requires a location, you would specify that location
 Example usage:
 Calling from this folder using Python directly (with your virtual environment activated):
 * python get_api_data.py mar find_location --output ../../data/interim/out.csv --params "location:617 Morton Street NW"
-* python get_api_data.py opendata get_crime --output ../../data/raw/crime/2016.csv --params "year:2017"
+* python get_api_data.py opendata get_crime --output ../../data/raw/crime/2017.csv --params "year:2017"
 
 DETAILED EXPLANATION:
 --------------------
