@@ -27,16 +27,10 @@ class InsertionFuncTests(unittest.TestCase):
                                             '20170315', 'Project.csv')
         self.raw_dchousing_csv = os.path.join(DATA_RAW_PATH, 'dc_housing',
                                               '20170509', 'DCHousing.csv')
-        self.fields_map = ""
-        self.lat, self.long = ADDRESS_FIELDS['lat_lon']
-        self.xcoord, self.ycoord = ADDRESS_FIELDS['xy_coords']
-        self.address = ADDRESS_FIELDS['address'][0]
-
-    def test_append_raw_data(self):
-        result = ins_fun.append_raw_data(from_this=self.raw_dchousing_csv,
-                                 to_this=self.raw_project_csv,
-                                 field_dict_map=self.fields_map)
-        self.assertEqual(True, result)
+        self.mar_address_fields = ['ADDRESS_ID', 'ADDRNUM', 'ANC',
+                                   'CENSUS_TRACT', 'FULLADDRESS', 'LATITUDE',
+                                   'LONGITUDE', 'MARID', 'SSL', 'WARD',
+                                   'XCOORD', 'YCOORD', 'ZIPCODE']
 
     def test_project_csv_fix_empty_address_id(self):
         df = ins_fun.project_csv_fix_empty_address_id()
@@ -283,10 +277,34 @@ class InsertionFuncTests(unittest.TestCase):
         #         self.assertEqual(table[idx][key], expected_table[idx][key])
 
     def test_create_mar_csv(self):
-        df = ins_fun.project_csv_fix_empty_address_id()
-        mar_df = ins_fun.create_mar_csv()
-        print(mar_df)
+        proj_df = ins_fun.project_csv_fix_empty_address_id()
+        mar_df = ins_fun.create_mar_csv(proj_df)
 
+        # check to make sure there are no null values
+        for field in self.mar_address_fields:
+            self.assertFalse(mar_df[field].isnull().any())
+
+        # use nlihc_id = NL000338 and aid = 904238 as first benchmark
+        # inconsistent data between mar and proj for this row
+        nlihc_id, proj_aid = 'NL000338', 904238
+
+        # nlihc_id is in both tables
+        proj_subset = proj_df[proj_df.Nlihc_id == nlihc_id]
+        mar_subset = mar_df[mar_df.Nlihc_id == nlihc_id]
+        self.assertTrue((proj_subset.Nlihc_id == 'NL000338').all())
+        self.assertTrue((mar_subset.Nlihc_id == proj_subset.Nlihc_id).all())
+
+        # aid 904238 in proj but not in mar - has different aid
+        self.assertTrue((proj_subset.Proj_address_id == 904238).all())
+        self.assertFalse((mar_subset.ADDRESS_ID ==
+                          proj_subset.Proj_address_id).all())
+
+        # use aid = 238401 for consistency validation
+        nlihc_id, proj_aid = 'NL000001', 238401
+        proj_subset = proj_df[proj_df.Nlihc_id == nlihc_id]
+        mar_subset = mar_df[mar_df.Nlihc_id == nlihc_id]
+        self.assertTrue((mar_subset.ADDRESS_ID ==
+                          proj_subset.Proj_address_id).all())
 
 
 if __name__ == '__main__':

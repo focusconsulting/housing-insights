@@ -6,6 +6,7 @@ one file into another file.
 import os
 import sys
 import pandas as pd
+from datetime import datetime
 import numpy as np
 
 # setup some useful absolute paths
@@ -20,31 +21,6 @@ from python.housinginsights.sources.mar import MarApiConn
 from python.housinginsights.sources.models.mar import FIELDS
 
 
-def append_raw_data(from_this, to_this, field_dict_map, unique_only=False):
-    """
-    Adds data from one raw csv file into another raw csv file by using a 
-    given fields mapping based on two options.
-
-    :param from_this: the file path of the data to be added from
-    :type from_this: str
-    :param to_this: the file path of the data to be added to
-    :param field_dict_map: a dict mapping the fields int he to data with the 
-    respective fields in the from data
-    :param unique_only: bool flag for adding only unique rows
-    :return: object representing the resulting appended data
-    """
-    result = False
-
-    # throw errors if same files or if either is not a csv files
-    if (not from_this.endswith('.csv')) or (not to_this.endswith('.csv')):
-        raise RuntimeError('Not CSV file - check you file paths!')
-
-    if os.path.samefile(from_this, to_this):
-        raise RuntimeError('Same file - check your file paths!')
-
-    return result
-
-
 def project_csv_fix_empty_address_id():
     """
     Identifies any rows in the project.csv file with missing 
@@ -54,7 +30,7 @@ def project_csv_fix_empty_address_id():
     :return: 
     """
     proj_df = pd.read_csv(os.path.join(DATA_RAW_PATH, 'preservation_catalog',
-                                '20170315', 'Project.csv'))
+                                       '20170315', 'Project.csv'))
 
     # get all indices with empty related address fields
     aid_empty_idx = proj_df[proj_df.Proj_address_id.isnull()].index
@@ -72,7 +48,7 @@ def project_csv_fix_empty_address_id():
             result = mar_api.reverse_lat_lng_geocode(proj_df.ix[idx,
                                                                 'Proj_lat'],
                                                      proj_df.ix[idx,
-            'Proj_lon'])
+                                                                'Proj_lon'])
         elif idx not in x_empty_idx and idx not in y_empty_idx:
             result = mar_api.reverse_geocode(proj_df.ix[idx, 'Proj_x'],
                                              proj_df.ix[idx, 'Proj_y'])
@@ -95,12 +71,12 @@ def project_csv_fix_empty_address_id():
 
 def create_mar_csv(project_df):
     """
-    Given a pandas dataframe object of project.csv, this function returns a 
-    new dataframe for each row in the project.csv and its respective mar data
+    Given a pandas data frame object of project.csv, this function returns a 
+    new data frame for each row in the project.csv and its respective mar data
     using either AID or latitude/longitude reverse lookup.
     
-    :param project_df: project.csv as a pandas dataframe object
-    :return: a pandas dataframe object of the mar lookup result of each 
+    :param project_df: project.csv as a pandas data frame object
+    :return: a pandas data frame object of the mar lookup result of each 
     corresponding row in project.csv
     """
 
@@ -141,5 +117,44 @@ def create_mar_csv(project_df):
         for key in result_keys:
             mar_df.ix[idx, key] = result[key]
 
+    # convert certain columns from float to int
+    mar_df.ADDRESS_ID = mar_df.ADDRESS_ID.astype(np.int64)
+    mar_df.ADDRNUM = mar_df.ADDRNUM.astype(np.int64)
+    mar_df.MARID = mar_df.MARID.astype(np.int64)
+    mar_df.ROADWAYSEGID = mar_df.ROADWAYSEGID.astype(np.int64)
+    mar_df.ZIPCODE = mar_df.ZIPCODE.astype(np.int64)
+
     return mar_df
+
+
+def save_to_csv(data_frame, save_to, file_name, timestamp_folder=True,
+                timestamp_filename=False):
+    """
+    Saves a given pandas data frame object to csv file per parameters given.
+    
+    :param data_frame: the data to be saved
+    :param save_to: the path where the data should be saved
+    :param file_name: the file name the data should be saved as
+    :param timestamp_folder: boolean flag to determine whether the file 
+    should be saved under a time stamped folder
+    :param timestamp_filename: boolean flag to determine whether the file 
+    name should be appended with a time stamp.
+    :return: Returns True if the expected file exists
+    """
+    path = os.path.abspath(save_to)
+    time_stamp = datetime.today().strftime('%Y%m%d')
+
+    if timestamp_folder:
+        path = os.path.join(path, time_stamp)
+        if not os.path.isdir(path):
+            os.mkdir(path=path)
+
+    if timestamp_filename:
+        file_name += '-' + time_stamp
+
+    path = os.path.join(path, file_name)
+
+    data_frame.to_csv(path, columns=data_frame.columns, index=False)
+
+    return os.path.isfile(path)
 
