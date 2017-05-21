@@ -8,6 +8,7 @@ from housinginsights.config.base import HousingInsightsConfig
 
 import requests
 import csv
+import os
 
 
 class BaseApiConn(object):
@@ -68,7 +69,20 @@ class BaseApiConn(object):
         url = urljoin(self.baseurl, urlpath)
         return self.session.post(url, data=data, proxies=self.proxies, **kwargs)
 
-    def result_to_csv(self, fields, results, csvfile):
+    def create_directory_if_missing(self, filepath):
+        """
+        Ensure there is a directory for given filepath, if doesn't exists it creates ones.
+
+        :param filepath: file path for where to write and save csv file
+        :type filepath: string
+
+        :return: None
+        """
+        directory=os.path.dirname(filepath)
+        if not os.path.isdir(directory):
+            os.mkdir(directory)
+
+    def result_to_csv(self, fields, results, filepath):
         """
         Write the data to a csv file.
 
@@ -78,16 +92,33 @@ class BaseApiConn(object):
         :param results: field values for each row
         :type results: list
 
-        :param csvfile: file path for where to write and save csv file
-        :type csvfile: string
+        :param filepath: file path for where to write and save csv file
+        :type filepath: string
 
         :return: None
         """
-        with open(csvfile, 'w', encoding='utf-8') as f:
+        self.create_directory_if_missing(filepath)
+        with open(filepath, 'w', encoding='utf-8') as f:
             writer = csv.writer(f, delimiter=',')
             writer.writerow(fields)
             for result in results:
                 writer.writerow(result.data)
+
+    def result_to_file(self, data, filepath):
+        """
+        Write the data to a file
+
+        :param data: raw data to write to file
+        :type data: string
+
+        :param filepath: file path for where to write and save csv file
+        :type filepath: string
+
+        :return: None
+        """
+        self.create_directory_if_missing(filepath)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(data)
 
 
 class BaseApiManager(object):
