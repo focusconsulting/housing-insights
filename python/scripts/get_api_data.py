@@ -11,13 +11,9 @@ if the find_location method requires a location, you would specify that location
     --params "location: some street somewhere in dc".
 
 Example usage:
-
-bin/data.sh -o ~/csvfile --params "location:641 S St NW" mar find_location
-
 Calling from this folder using Python directly (with your virtual environment activated):
-
-python get_api_data.py mar find_location --output ../../data/interim/out.csv --params "location:617 Morton Street NW"
-
+* python get_api_data.py mar find_location --output ../../data/interim/out.csv --params "location:617 Morton Street NW"
+* python get_api_data.py opendata get_crime --output ../../data/raw/crime/2017.csv --params "year:2017"
 
 DETAILED EXPLANATION:
 --------------------
@@ -35,7 +31,7 @@ as a suffix. In this case it would be "MarApiConn". It then calls whatever metho
 from that ApiConn class. Whatever parameters specified by the user with the --params argument
 are split and passed as keyword arguments (**kwargs) to the function.
 The --outtype argument is added as output_type, and --o or --output is added as output_file.
-Thus, each public function compatible with data.sh needs to have as a minimum those two parameters
+Thus, each public function compatible with this file needs to have as a minimum those two parameters
 (output_type and output_file). See the mar.py file for an example.
 """
 

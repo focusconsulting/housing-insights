@@ -2,28 +2,8 @@ SOURCES DIRECTORY
 -----------------
 
 This directory is to be used to store modules to access various external APIs.
-To be compatible with get_api_data.py, use the following conventions.
-
-HOW DATA.SH WORKS
------------------
-
-get_api_data.py expects the user to supplies these
-things when it is run:
-1. Output Type [--outtype]  
-2. Output File (optional) [--output, -o]
-3. Api Module name
-4. Api Method name
-
-It then tries to import housinginsights.sources + whatever module you specified. 
-For example if the api module name supplied by the user is "mar", then it tries to import
-"housinginsights.sources.mar". It then looks for a class with the module name + "ApiConn"
-as a suffix. In this case it would be "MarApiConn". It then calls whatever method the user specied
-from that ApiConn class. Whatever parameters specified by the user with the --params argument
-are split and passed as keyword arguments (**kwargs) to the function. The --outtype argument is added
-as output_type, and --o or --output is added as output_file. Thus, each public function compatible with
-get_api_data.py needs to have as a minimum those two parameters (output_type and output_file). See the mar.py
-file for an example.
-
+To be compatible with get_api_data.py, use the following conventions. See get_api_data.py for detailed 
+instructions on how to run and parameters. 
 
 STRUCTURE:
 ---------
