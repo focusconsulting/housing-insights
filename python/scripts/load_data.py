@@ -21,7 +21,6 @@ import sys
 import os
 import logging
 
-
 # Needed to make relative package imports when running this file as a script
 # (i.e. for testing purposes).
 # Read why here: https://www.blog.pythonlibrary.org/2016/03/01/python-101-all
@@ -89,8 +88,15 @@ class LoadData(object):
         database_choice and then rebuilding.
         """
         db_conn = self.engine.connect()
-        return db_conn.execute(
+        query_result = db_conn.execute(
             "DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+        
+        if database_choice == 'remote_database' or database_choice == 'remote_database_master':
+            query_result = db_conn.execute("\
+            GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;\
+            GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO housingcrud;\
+            GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;\
+            GRANT ALL ON SCHEMA public TO public;")
 
     def load_all_data(self):
         """
@@ -246,7 +252,7 @@ class LoadData(object):
             # TODO: tell user total count of errors.
             # currently write_file_to_sql() just writes in log that file failed
             pass
-
+          
 if __name__ == '__main__':
     """
     Continue to honor command line feature after refactoring to encapsulate 
@@ -255,6 +261,7 @@ if __name__ == '__main__':
 
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
+
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
     manifest_path = os.path.abspath(os.path.join(scripts_path, 'manifest.csv'))
 
@@ -282,6 +289,11 @@ if __name__ == '__main__':
         database_choice = 'local_database'
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
+
+        #Only users with additional admin priviledges can rebuild the remote database
+        if 'rebuild' in sys.argv:
+            database_choice = 'remote_database_master'
+    
 
     if 'rebuild' in sys.argv:
         loader.drop_tables()

@@ -10,22 +10,7 @@ title: H.I. Latest Updates
 
 # Upcoming events
 
-
-* **Tues. May 2:**  <span style="color:red">Sprint Planning Session</span> HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
-<span class="addtocalendar atc-style-menu-wb calendar-link">
-    <var class="atc_event">
-        <var class="atc_date_start">2017-05-02 18:30:00</var>
-        <var class="atc_date_end">2017-05-02 21:00:00</var>
-        <var class="atc_timezone">America/New_York</var>
-        <var class="atc_title">Housing Insights / Code for DC Session</var>
-        <var class="atc_description">See more info at http://www.housinginsights.org/resources/latest/</var>
-        <var class="atc_location">NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).</var>
-    </var>
-</span>
-
-
-
-* **Tues. May 9:** HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+* **Tues. May 9:** HI: <span style="color:orange">Team Coordination Night</span>, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
 <span class="addtocalendar atc-style-menu-wb calendar-link">
     <var class="atc_event">
         <var class="atc_date_start">2017-05-09 18:30:00</var>
@@ -37,7 +22,7 @@ title: H.I. Latest Updates
     </var>
 </span>
 
-* **Tues. May 16:** HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+* **Tues. May 16:** HI: <span style="color:blue">Work Night</span>, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
 <span class="addtocalendar atc-style-menu-wb calendar-link">
     <var class="atc_event">
         <var class="atc_date_start">2017-05-16 18:30:00</var>
@@ -62,19 +47,23 @@ title: H.I. Latest Updates
     </var>
 </span>
 
-* **TENTATIVE Sat. May 20:** innoMAYtion Hackathon, 9:30am to 5:00pm. Pending coordination w/ hackathon organizers. 
-<span class="addtocalendar atc-style-menu-wb calendar-link">
-    <var class="atc_event">
-        <var class="atc_date_start">2017-05-20 09:30:00</var>
-        <var class="atc_date_end">2017-05-20 17:00:00</var>
-        <var class="atc_timezone">America/New_York</var>
-        <var class="atc_title">TENTATIVE innoMAYtion Housing Insights Hackathon</var>
-        <var class="atc_description">innoMAYtion info link: http://innomaytion.com/event/innomaytion-hackathon/</var>
-        <var class="atc_location">TBD</var>
-    </var>
-</span>
+* **CONFIRMED Sat. May 20:** <span style="color:red">innoMAYtion Hackathon</span>, 9:30am to 4:00pm. 
+    - [Register to attend](http://nvite.co/4wy9dv)
+    - Washington Post Offices, 1301 K St NW
+    - Light breakfast and lunch will be provided.
+    - <span class="addtocalendar atc-style-menu-wb calendar-link">
+            <var class="atc_event">
+                <var class="atc_date_start">2017-05-20 09:30:00</var>
+                <var class="atc_date_end">2017-05-20 17:00:00</var>
+                <var class="atc_timezone">America/New_York</var>
+                <var class="atc_title">TENTATIVE innoMAYtion Housing Insights Hackathon</var>
+                <var class="atc_description">innoMAYtion info link: http://innomaytion.com/event/innomaytion-hackathon/</var>
+                <var class="atc_location">TBD</var>
+            </var>
+        </span>
 
-* **Tues. May 23:** HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+
+* **Tues. May 23:** HI: <span style="color:orange">Team Coordination Night</span>, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
 <span class="addtocalendar atc-style-menu-wb calendar-link">
     <var class="atc_event">
         <var class="atc_date_start">2017-05-23 18:30:00</var>
@@ -86,7 +75,7 @@ title: H.I. Latest Updates
     </var>
 </span>
 
-* **Tues. May 30:** HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+* **Tues. May 30:** HI: <span style="color:blue">Work Night</span>, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
 <span class="addtocalendar atc-style-menu-wb calendar-link">
     <var class="atc_event">
         <var class="atc_date_start">2017-05-30 18:30:00</var>
@@ -296,3 +285,16 @@ All our weekly email updates will be cross-posted to the [Housing Insights Slack
         <var class="atc_location">Social Tables, 1325 G St. NW, Washington, DC., 3rd floor</var>
     </var>
 </span>
+
+* **Tues. May 2:**  <span style="color:red">Sprint Planning Session</span> HI Work Session, 6:30 - 9:00 pm. NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).
+<span class="addtocalendar atc-style-menu-wb calendar-link">
+    <var class="atc_event">
+        <var class="atc_date_start">2017-05-02 18:30:00</var>
+        <var class="atc_date_end">2017-05-02 21:00:00</var>
+        <var class="atc_timezone">America/New_York</var>
+        <var class="atc_title">Housing Insights / Code for DC Session</var>
+        <var class="atc_description">See more info at http://www.housinginsights.org/resources/latest/</var>
+        <var class="atc_location">NYCDA, 1133 15th St NW, 1st Floor (door labeled Strayer University, last classroom end of hall).</var>
+    </var>
+</span>
+

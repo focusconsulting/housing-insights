@@ -16,6 +16,7 @@ import logging
 from flask_cors import CORS, cross_origin
 
 import math
+import sys
 
 #Different json output methods.
 # Currently looks like best pick is jsonify, but with the simplejson package pip-installed so that
@@ -56,9 +57,15 @@ application.json_encoder = CustomJSONEncoder
 #Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
 CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
 
+#Allow us to test locally if desired
+if 'docker' in sys.argv:
+    database_choice = 'docker_database'
+else:
+    database_choice = 'remote_database'
+
 with open('secrets.json') as f:
     secrets = json.load(f)
-    connect_str = secrets['remote_database']['connect_str']
+    connect_str = secrets[database_choice]['connect_str']
 
 
 #Should create a new connection each time a separate query is needed so that API can recover from bad queries
@@ -103,6 +110,17 @@ def list_all(table):
 
     return jsonify(items=results)
 
+@application.route('/api/meta', methods=['GET'])
+def get_meta():
+    '''
+    Outputs the meta.json to the front end
+    '''
+
+    conn = engine.connect()
+    result = conn.execute("SELECT meta FROM meta")
+    row = result.fetchone()
+    return row[0]
+    
 
 @application.route('/api/<data_source>/all/<grouping>', methods=['GET'])
 def count_all(data_source,grouping):
