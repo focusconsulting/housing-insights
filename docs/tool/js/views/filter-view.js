@@ -75,7 +75,7 @@ var filterView = {
                     // positions: Left offset of the handles in relation to the slider
 
                     //TODO we need a whole filter state module-thing that stores values separately for individual sliders, just demoing here.
-                    setState('filterMax',unencoded); 
+                    setState('filterValues',unencoded); 
                 }
 
                 //Using 'set' only updates on release. Probably better to use the 'change' method for continuous updates. 
