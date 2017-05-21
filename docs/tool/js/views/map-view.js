@@ -22,12 +22,23 @@ var mapView = {
             ['dataLoaded.metaData', mapView.addInitialLayers],
             ['dataLoaded.metaData', sideBar.init],
             ['dataLoaded.metaData', mapView.overlayMenu],
+            ['dataLoaded.metaData', filterView.init],
             ['overlayRequest', mapView.addOverlayData],
             ['joinedToGeo', mapView.addOverlayLayer],
             ['dataLoaded.raw_project', mapView.placeProjects],
             ['previewBuilding', mapView.showPreview]
         ]);
         
+        //Initial page layout stuff
+        /*
+        Split(['#filter-panel', '#map-wrapper'], {
+            sizes: [25, 75],
+            minSize: 200
+        });
+        */
+
+
+        //Add the map
         mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
         this.map = new mapboxgl.Map({
           container: 'map', // container id
@@ -40,10 +51,14 @@ var mapView = {
         
         this.map.addControl(new mapboxgl.NavigationControl());
         
-        
         this.map.on('load', function(){
             setState('mapLoaded',true);
-        });        
+        });
+
+
+
+
+
     },
     overlayMenu: function(){    
         mapView.buildOverlayOptions();    
