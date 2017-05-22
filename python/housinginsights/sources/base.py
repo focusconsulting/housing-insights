@@ -14,9 +14,21 @@ import os
 
 class BaseApiConn(object):
     """
-    Base API Connection to inherit from. Proxy support is built in,
-    because if you do enough scraping, I promise you you're gonna get
-    your IP blocked at some point.
+    Base API Connection to inherit from. Proxy support built in.
+
+    Every XXXApiConn class that inherits from this class should have a few key features:
+
+    If the class downloads whole data files for ingestion into our database:
+    - get_data() method should be a one-call method that downloads all the files that class
+      is capable of downloading. It should have 0 mandatory arguments, and at a minimum 
+      the following optional arguments:
+        - unique_data_ids
+        - sample (Boolean). If possible, return just a few rows of data instead of the whole thing
+        - output_type ('csv' or 'stdout'). 'csv' should write the file to disk, 'stdout' prints to console
+    - __init__ should have _available_unique_data_ids, a list of ids that the class can output. 
+
+
+
     """
     def __init__(self, baseurl, proxies=None):
         """

@@ -26,30 +26,30 @@ class DCHousingApiConn(BaseApiConn):
     def __init__(self):
         super().__init__(DCHousingApiConn.BASEURL)
 
-    def get_json(self, output_type=None, output_file=None):
+        self._available_unique_data_ids = ['dchousing']
+
+    def get_data(self, unique_data_ids=None, sample=False, output_type = 'csv'):
         """
         Returns JSON object of the entire data set.
 
-        :param output_type: Output type specified by user.
-        :type  output_type: String.
-
-        :param output_file: Output file specified by user.
-        :type  output_file: String
-
-        :returns: Json output from the api.
-        :rtype: String
         """
-        result = self.get(DCHousingApiConn.QUERY)
-        if result.status_code != 200:
-            err = "An error occurred during request: status {0}"
-            raise Exception(err.format(result.status_code))
+        if unique_data_ids == None:
+            unique_data_ids = self._available_unique_data_ids
 
-        if output_type == 'stdout':
-            pprint(result.json())
-        elif output_type == 'csv':
-            data = result.json()['features']
-            results = [DCHousingResult(address['attributes']) for address in
-                       data]
-            self.result_to_csv(FIELDS, results, output_file)
+        for u in unique_data_ids:
 
+            result = self.get(DCHousingApiConn.QUERY)
+            if result.status_code != 200:
+                err = "An error occurred during request: status {0}"
+                raise Exception(err.format(result.status_code))
+
+            if output_type == 'stdout':
+                pprint(result.json())
+            elif output_type == 'csv':
+                data = result.json()['features']
+                results = [DCHousingResult(address['attributes']) for address in
+                           data]
+                self.result_to_csv(FIELDS, results, self.output_paths[u])
+
+        #Only returns the last one, which is the same in this case
         return result.json()
