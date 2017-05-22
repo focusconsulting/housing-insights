@@ -22,7 +22,7 @@ class OpenDataApiConn(BaseApiConn):
 
     # This function is used as a decorator
     def opendatas(self,get_data_func):
-        get_datas.append(get_opendata_func)
+        get_opendatas.append(get_opendata_func)
         return get_opendata_func
     
     @opendatas
