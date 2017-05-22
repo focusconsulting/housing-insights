@@ -72,7 +72,8 @@ var mapView = {
             this.link.onclick = function(e){
                 e.preventDefault();
                 var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-                if ( existingOverlayType !== overlay ) {
+                console.log(existingOverlayType, overlay.name);
+                if ( existingOverlayType !== overlay.proj_name ) {
                     setState('overlayRequest', {overlay: overlay.name, activeLayer: getState().mapLayer[0]});                     
                 } else {
                     mapView.clearOverlay();
@@ -213,12 +214,12 @@ var mapView = {
             source: 'zip',
             color: '#0D7B8A',
             visibility: 'none'            
-        },
+        }/*,
         {
             source: 'zillow',
             color: '#57CABD',
             visibility: 'none'            
-        }
+        }*/
 
     ],
     addInitialLayers: function(msg,data){
@@ -267,46 +268,27 @@ var mapView = {
     },
     
     addToLayerMenu: function(layer) {
-        new mapView.layerMenuOption(layer);
-    },
-    layerMenuOption: function(layer){
-        var thisOption = this;
-        this.name = layer.source;
-        mapView.layerMenuOptions.push(this);
 
-        this.link = document.createElement('a');
-        this.link.href = '#';
-        this.link.id = this.name + '-menu-item';
-        this.link.textContent = layer.source.toUpperCase();
-        document.getElementById('layer-menu').appendChild(this.link);
-        
-        this.availableOverlayNames = (mapView.initialOverlays.filter(function(ovly){
-            return ovly.zones.indexOf(thisOption.name) !== -1;
-        })).map(function(ovly){
-            return ovly.name;
-        });
+        d3.select('#layer-menu')
+            .append('a')
+            .attr('href','#')
+            .attr('id',function(){
+                return layer.source + '-menu-item';
+            })
+            .attr('class',function(){
+                if ( layer.visibility === 'visible' ){
+                    return 'active';
+                }
+                return '';
+            })
+            .text(function(){
+                return layer.source.split('_')[0].toUpperCase();
+            })
+            .on('click', function(){
+                d3.event.preventDefault();
+                setState('mapLayer',layer.source);                
+            });
 
-        this.makeAvailable = function(){
-            this.link.className = layer.visibility === 'visible' ? 'active' : '';
-            this.link.onclick = function(e){
-                e.preventDefault();
-                setState('mapLayer',layer.source);   
-                mapView.overlayMenuOptions.forEach(function(opt){
-                    if(thisOption.availableOverlayNames.indexOf(opt.name) === -1){
-                        opt.makeUnavailable();
-                    }
-                    else{
-                        opt.makeAvailable();
-                    }
-                });           
-            }
-        }
-        this.makeUnavailable = function(){
-            this.link.className = 'unavailable';
-            this.link.onclick = function(e){
-                e.preventDefault();
-            }
-        }
     },
     layerMenuOptions: [],
     showLayer: function(msg,data) {
