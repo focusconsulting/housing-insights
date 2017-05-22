@@ -1,27 +1,9 @@
-'''
-this is the copy of the file that was there before the latest merge. 
-
-Let's make it look really different. 
-
-Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium 
-doloremque laudantium, totam rem aperiam eaque ipsa, quae ab illo inventore veritatis et quasi
- architecto beatae vitae dicta sunt, explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernat
- ur aut odit aut fugit, sed quia consequuntur magni dolores eos, qui ratione voluptatem sequi
-  nesciunt, neque porro quisquam est, qui dolorem ipsum, quia dolor sit amet, consectetur
-  , adipisci[ng] velit, sed quia non numquam [do] eius modi tempora inci[di]dunt, ut lab
-  ore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum 
-  exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatu
-  r? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nih
-  il molestiae
-   consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur?
-'''
-
-
 """
 Base Api Connection classes.
 """
 
 from urllib.parse import urljoin
+from datetime import datetime
 
 from housinginsights.config.base import HousingInsightsConfig
 
@@ -50,25 +32,55 @@ class BaseApiConn(object):
         self.baseurl = baseurl
         self.proxies = proxies
 
+
+        #A list of strings; this should be defined in the child class 
+        self._available_unique_data_ids = None
+
+    @property
+    def output_paths(self):
+        if self._available_unique_data_ids is None:
+            raise NotImplementedError("You need to add self._available_unique_data_ids to your class before using it")
+
+        paths = {}
+        for u in self._available_unique_data_ids:
+            base = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               os.pardir,os.pardir,os.pardir))
+            api_location = 'data/raw/apis'
+            filename = u + ".csv"
+            d = datetime.now().strftime('%Y%m%d')
+            path = os.path.join(base,api_location,d,filename)
+            paths[u] = path
+
+        return paths
+
+
     def get(self, urlpath, params=None, **kwargs):
         """
         Thin wrapper around requests.get() that adds in proxy value
         and relative url joining.
 
         :param urlpath: URL path to be joined to the baseurl.
+
                         Example: if baseurl is https://www.somesite.com/api,
                                  and urlpath is /v2, the end result
                                  is https://www.somesite.com/api/v2.
+
+                        If baseurl == None, the urlpath is used directly. 
+
         :type  urlpath: String.
 
         :param params: Dictionary of request parameters.
         :type  params: dict of String.
         """
-        if self.baseurl[-1] == '/':
-            self.baseurl = self.baseurl[:-1]
-        if urlpath[0] != '/':
-            urlpath = '/' + urlpath
-        url = self.baseurl + urlpath
+        if self.baseurl != None:
+            if self.baseurl[-1] == '/':
+                self.baseurl = self.baseurl[:-1]
+            if urlpath[0] != '/':
+                urlpath = '/' + urlpath
+            url = self.baseurl + urlpath
+        else:
+            url = urlpath
+
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):
@@ -98,23 +110,7 @@ class BaseApiConn(object):
         :return: None
         """
         directory=os.path.dirname(filepath)
-        if not os.path.isdir(directory):
-            os.mkdir(directory)
-
-
-
-'''
-  , adipisci[ng] velit, sed quia non numquam [do] eius modi tempora inci[di]dunt, ut lab
-  ore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum 
-  exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatu
-  r? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nih
-  il molestiae
-   consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur?
-'''
-
-
-
-
+        os.makedirs(directory, exist_ok=True)
 
 
     def result_to_csv(self, fields, results, filepath):
@@ -139,7 +135,8 @@ class BaseApiConn(object):
             for result in results:
                 writer.writerow(result.data)
 
-    def result_to_file(self, data, filepath):
+
+    def directly_to_file(self, data, filepath):
         """
         Write the data to a file
 
@@ -155,14 +152,6 @@ class BaseApiConn(object):
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(data)
 
-'''
-  , adipisci[ng] velit, sed quia non numquam [do] eius modi tempora inci[di]dunt, ut lab
-  ore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum 
-  exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatu
-  r? Quis autem vel eum iure reprehenderit, qui in ea voluptate velit esse, quam nih
-  il molestiae
-   consequatur, vel illum, qui dolorem eum fugiat, quo voluptas nulla pariatur?
-'''
 
 
 class BaseApiManager(object):
