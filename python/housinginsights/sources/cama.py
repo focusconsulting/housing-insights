@@ -11,7 +11,7 @@ from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.mar import MarResult, FIELDS
 
 
-class CamaApiConn(BaseApiConn):
+class MarApiConn(BaseApiConn):
     """
     API Interface to the Master Address Record (MAR) database.
     Use public methods to retrieve data.
@@ -20,9 +20,9 @@ class CamaApiConn(BaseApiConn):
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
     def __init__(self):
-        super().__init__(CamaApiConn.BASEURL)
+        super().__init__(MarApiConn.BASEURL)
 
-    def get_data(self, square, lot, suffix, objectid):
+    def get_data(self, square, lot, suffix):
         """
         Get information on a location based on a simple query string.
 
@@ -72,25 +72,39 @@ class CamaApiConn(BaseApiConn):
 
         return mar_returns
 
-def cama_data():
+class CamaApiConn(BaseApiConn):
+    """
+    API Interface to the Master Address Record (MAR) database.
+    Use public methods to retrieve data.
+    """
 
-    my_api = CamaApiConn() # instantiating class to make callable
+    BASEURL = 'https://opendata.arcgis.com/datasets/c5fb3fbe4c694a59a6eef7bf5f8bc49a_25.geojson'
 
-    residential = 'https://opendata.arcgis.com/datasets/c5fb3fbe4c694a59a6eef7bf5f8bc49a_25.geojson'
-    r = requests.get(residential)
-    residential_data = r.json() # pull all cama data to loop through an dappend mar ward, etc data below
+    def __init__(self):
+        super().__init__(CamaApiConn.BASEURL)
 
-    dict_res = {}  # creates dict of residential data with SSL as primary key
-    for row in residential_data['features']:
-        objectid = row['properties']['OBJECTID']
-        square, lot = row['properties']['SSL'].split()
-        suffix = ' '
-        if len(square) > 4:
-            square = square[:4]
-            suffix = square[-1]
-        mar_return = my_api.get_data(square, lot, suffix, objectid)
-        row['properties'].update(mar_return)
-        dict_res[row['properties']['OBJECTID']] = row['properties']
+    def get_data(self):
+        result = self.get(urlpath=None, params=None)
+        if result.status_code != 200:
+            err = "An error occurred during request: status {0}"
+            raise Exception(err.format(result.status_code))
+        cama_data = result.json()
 
-cama_data()
+        dict_res = {}  # creates dict of residential data with SSL as primary key
+        for row in cama_data['features']:
+            if len(dict_res) > 5:
+                pass
+            objectid = row['properties']['OBJECTID']
+            square, lot = row['properties']['SSL'].split()
+            suffix = ' '
+            if len(square) > 4:
+                square = square[:4]
+                suffix = square[-1]
+            mar_return = my_api.get_data(square, lot, suffix)
+            row['properties'].update(mar_return)
+            dict_res[row['properties']['OBJECTID']] = row['properties']
+
+my_api = CamaApiConn()
+cama_return = my_api.get_data()
+
 
