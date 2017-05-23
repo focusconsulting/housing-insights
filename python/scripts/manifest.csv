@@ -31,6 +31,9 @@ needs cleaner,dc_tax,dc_tax_20170315,3/15/2017,latin-1,../../../data,https://s3.
 _____Other DC Affordable Housing Data_____,,,,,,,,
 pending,,,,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Real_property_rpt_20161110.xls,provided directly by CNHED. Still need to investigate
 skip,hmda,hmda_all_dc,4/6/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
+use,topa,topa_rcasd_2017,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2016,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2015,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2015.csv,Parsed from DCHD data by Urban Institute staff.
 _____Market Rate Rent_____,,,,,,,,
 superseded,zillow_zrisqft_zip,zillow_zrisqft_zip_Sept2016,1/11/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/zillow/20160901/Zip_ZriPerSqft_AllHomes.csv,Excludes multifamily
 superseded,zillow_zri_zip,zillow_zri_zip_Sept2016,1/11/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/zillow/20160901/Zip_Zri_AllHomes.csv,Excludes multifamily
