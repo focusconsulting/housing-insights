@@ -1,3 +1,29 @@
+'''
+
+
+INCOMPLETE APPROACH
+
+
+
+See this issue: https://github.com/codefordc/housing-insights/issues/152
+for some comments on latest status and next steps. 
+
+
+The core method will need to be renamed to `get_data` and should have the same
+method signature as others. the current opendata.py file is a good model to 
+look at to provide consistent approach. 
+
+
+'''
+
+
+
+
+
+
+
+
+
 import os
 import sys
 
