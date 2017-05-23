@@ -47,7 +47,7 @@ class OpenDataApiConn(BaseApiConn):
                         'crime_2017' : '6af5cb8dc38e4bcbac8168b27ee104aa_8.csv'
                     }
 
-    def get_data(self, unique_data_ids=None, sample=False, output_type = 'csv'):
+    def get_data(self, unique_data_ids=None, sample=False, output_type = 'csv', **kwargs):
         '''
         Gets all data sources associated with this ApiConn class. 
 
@@ -57,31 +57,29 @@ class OpenDataApiConn(BaseApiConn):
             unique_data_ids = self._available_unique_data_ids
 
         for u in unique_data_ids:
-            logging.info("  Requesting {} from API".format(u))
-
             if (u not in self._available_unique_data_ids):
                 #TODO Change this error type to a more specific one that should be handled by calling function inproduction
                 #We will want the calling function to continue with other data sources instead of erroring out. 
-                raise ValueError("The unique_data_id '{}' is not supported".format(u))
-            
-            result = self.get(self._urls[u], params=None)
-            
-            if result.status_code != 200:
-                err = "An error occurred during request: status {0}"
-                #TODO change this error type to be handleable by caller
-                raise Exception(err.format(result.status_code))
-            
-            content = result.text
+                logging.info("  The unique_data_id '{}' is not supported by the OpenDataApiConn".format(u))
+            else:
+                result = self.get(self._urls[u], params=None)
+                
+                if result.status_code != 200:
+                    err = "An error occurred during request: status {0}"
+                    #TODO change this error type to be handleable by caller
+                    raise Exception(err.format(result.status_code))
+                
+                content = result.text
 
-            if output_type == 'stdout':
-                print(content)
+                if output_type == 'stdout':
+                    print(content)
 
-            elif output_type == 'csv':
-                self.directly_to_file(content, self.output_paths[u])
-            
-            #Can't yield content if we get multiple sources at once
-            if len(unique_data_ids) == 1:
-                return content
+                elif output_type == 'csv':
+                    self.directly_to_file(content, self.output_paths[u])
+                
+                #Can't yield content if we get multiple sources at once
+                if len(unique_data_ids) == 1:
+                    return content
 
 
 

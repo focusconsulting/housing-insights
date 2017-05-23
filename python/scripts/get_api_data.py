@@ -23,17 +23,18 @@ logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
 
 
-#TODO is this necessary?
+#TODO is this import necessary?
 from housinginsights.config.base import HousingInsightsConfig
 
 
-def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 'csv', debug=False, module_list = None):
+def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 'csv', db=None, debug=False, module_list = None):
     API_FOLDER = 'housinginsights.sources'
     
     #All possible source modules and classes as key:value of module:classname
     modules = {
             "opendata":"OpenDataApiConn",
-            "DCHousing":"DCHousingApiConn"
+            "DCHousing":"DCHousingApiConn",
+            "wmata_distcalc":"WmataApiConn"
     }
 
     #If no module list is provided, use them all
@@ -52,7 +53,7 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
             api_method = getattr(api_instance, 'get_data') #Every class should have a get_data method! 
 
             #Get the data
-            api_method(unique_data_ids, sample, output_type)
+            api_method(unique_data_ids, sample, output_type, db=db)
 
         except Exception as e:
             logging.warning('The request for "{0}" failed. Error: {1}'.format(m,e))
@@ -62,10 +63,10 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
 
 if __name__ == '__main__':
     debug = True            #Errors are raised when they occur instead of only logged.
-    unique_data_ids = None  #Alternatively, pass a list of only the data sources you want to download
+    unique_data_ids = ['wmata_dist', 'wmata_stops']  #Alternatively, pass a list of only the data sources you want to download
     sample = False          #Some ApiConn classes can just grab a sample of the data for use during development / testing
     output_type = 'csv'     #Other option is stdout which just prints to console
+    db = 'docker_with_local_python'  #Only used by connections that need to read from the database to get their job done (example: wmata)
 
-
-    get_multiple_api_sources(unique_data_ids,sample,output_type,debug)
+    get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug)
 
