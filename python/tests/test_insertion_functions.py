@@ -25,6 +25,9 @@ class InsertionFuncTests(unittest.TestCase):
         self.raw_project_csv = os.path.join(DATA_RAW_PATH,
                                             'preservation_catalog',
                                             '20170315', 'Project.csv')
+        self.pres_cat_path = os.path.join(DATA_RAW_PATH,
+                                            'preservation_catalog',
+                                            '20170315')
         self.raw_dchousing_csv = os.path.join(DATA_RAW_PATH, 'dc_housing',
                                               '20170509', 'DCHousing.csv')
         self.mar_address_fields = ['ADDRESS_ID', 'ADDRNUM', 'ANC',
@@ -305,6 +308,39 @@ class InsertionFuncTests(unittest.TestCase):
         mar_subset = mar_df[mar_df.Nlihc_id == nlihc_id]
         self.assertTrue((mar_subset.ADDRESS_ID ==
                           proj_subset.Proj_address_id).all())
+
+    def test_add_dchousing_to_project_and_subsidy(self):
+        # get csv file paths and open as data frame objects
+        mar_csv = os.path.join(DATA_RAW_PATH, 'preservation_catalog',
+                               '20170315',
+                               'mar_project.csv')
+        dchousing_csv = os.path.join(DATA_RAW_PATH, 'dc_housing', '20170509',
+                                     'DCHousing.csv')
+        dchousing_df = pd.read_csv(dchousing_csv)
+
+        subsidy_df, proj_df = ins_fun.add_dchousing_to_project_and_subsidy()
+
+        # expect to append all to subsidy but less to project table
+        self.assertEqual(len(subsidy_df), len(dchousing_df))
+        self.assertNotEqual(len(proj_df), len(dchousing_df))
+        self.assertLess(len(proj_df), len(dchousing_df))
+
+        # if above tests pass, let's write to raw folder
+        result = ins_fun.save_to_csv(data_frame=subsidy_df,
+                            save_to=self.pres_cat_path,
+                            file_name='dchousing_append_subsidy.csv',
+                            timestamp_folder=False)
+        self.assertTrue(result)
+        result = ins_fun.save_to_csv(data_frame=proj_df,
+                                     save_to=self.pres_cat_path,
+                                     file_name='dchousing_append_project.csv',
+                                     timestamp_folder=False)
+        self.assertTrue(result)
+
+    def test_fill_empty_address_id(self):
+        df = ins_fun.fill_empty_address_id(csv_file=self.raw_project_csv)
+        self.assertEqual(df.ix[358, 'Proj_address_id'], 68416)
+        self.assertEqual(df.ix[358, 'Nlihc_id'], 'NL001032')
 
 
 if __name__ == '__main__':
