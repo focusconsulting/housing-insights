@@ -10,6 +10,7 @@ import logging
 import json
 import sys
 import os
+from optparse import OptionParser
 
 import pandas as pandas
 
@@ -164,20 +165,35 @@ def make_all_json(manifest_path):
     print(completed_tables)
 
 if __name__ == '__main__':
-    # TODO: refactor to take in cmd line arguments for csv_filename, table_name,
-    # TODO: and encoding
+    # configure option parsing
+    usage = 'usage: %prog [options]'
+    opt_parser = OptionParser(usage=usage)
+    opt_parser.add_option('-m', '--mode', dest='mode', default='single',
+                          help='processing mode: single or multi ['
+                               'default: %default]')
+    opt_parser.add_option('-f', '--filename', dest='filename',
+                          help='path for the raw data csv to be processed '
+                               '(REQUIRED for single mode)',
+                          metavar='CSV_FILE')
+    opt_parser.add_option('-t', '--table-name', dest='table_name',
+                          help='the database table name this data will go in '
+                               '- must match what is entered in manifest.csv '
+                               '(REQUIRED for single mode')
+    opt_parser.add_option('-e', '--encoding', dest='encoding',
+                          help="used for opening pandas - try utf-8 if latin1"
+                               " doesn't work [default: %default]",
+                          default='latin1')
+    options, args = opt_parser.parse_args()
 
-    if 'single' in sys.argv:
-        # Edit these values before running!
-        csv_filename = os.path.abspath("/Users/KweningJ/Documents/Computer "
-                                       "Programming/housing-insights/data/raw/"
-                                       "tax_assessment/opendata/20170505/"
-                                       "DCHousing.csv")
-        table_name = "dchousing"
-        encoding = "latin1" #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
-        make_draft_json(csv_filename, table_name, encoding)
-        
-    if 'multi' in sys.argv:
+    # handle passed options
+    if options.mode == 'multi':
         manifest_path = os.path.abspath(
             os.path.join(python_filepath, 'scripts', 'manifest.csv'))
         make_all_json(manifest_path)
+    else:
+        if None in (options.filename, options.table_name, options.encoding):
+            opt_parser.error('missing required arguments for single mode')
+        else:
+            make_draft_json(filename=options.filename,
+                            tablename=options.table_name,
+                            encoding=options.encoding)
