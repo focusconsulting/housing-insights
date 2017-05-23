@@ -128,4 +128,6 @@ var DonutChartExtension = {
     chart.label 
         .text(chart.field); // TODO: use meta.json to provide readable field names, or arrange for API to return them
   }
+
 };
+

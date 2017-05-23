@@ -1,24 +1,43 @@
+---
+---
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8"> 
+
     <title>Housing Insights Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.8.0/d3.min.js"></script>
     <script src='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
-    <script src="js/util/d3-tip.js"></script>
-    <script src="js/util/PubSub.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.2.0/split.min.js"></script>
+    <script src="js/external/d3-tip.js"></script>
+    <script src="js/external/PubSub.js"></script>
+    <script src="js/external/nouislider.js"></script>
+    <script src="js/external/wNumb.js"></script>
     <script src="js/charts/chart-prototype.js"></script>
     <script src="js/views/map-view.js"></script>
     <script src="js/views/building-view.js"></script>
     <script src="js/views/sidebar-view.js"></script>
+    <script src="js/views/filter-view.js"></script>
     <script src="js/charts/pie-chart-proto.js"></script>
     <script src="js/charts/donut-chart.js"></script>
+    <link href="css/nouislider.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
+    <link href="css/filters.css" rel="stylesheet" />
+
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
 </head>
 <body>
     <div id="body-wrapper">
         <div id="mapView" class="main-view">
-            <div id="map"></div>
+            
+            <div id="filter-panel">
+                <p>This is for potential use by Split.js - currently not working</p>
+            </div>
+            <div id="map-wrapper">
+                <div id="map"></div>
+            </div>
+
+            <!--absolute positioned overlays-->
             <sidebar id="sidebar">
                 <div id="category-legend" class="legend" style="display: block;">
                     <h4>Subsidized Affordable Buildings</h4>
@@ -52,6 +71,12 @@
             <div id="layer-menu">
             </div>
             <div id="overlay-menu">
+            </div>
+            <div id="temp-filter-menu">
+                <h3>Temp Filter Menu</h3>
+                <div id="filter-components">
+                </div>
+
             </div>
         </div>
     </div>    
