@@ -4,6 +4,14 @@
     box-sizing: border-box;
 }
 
+
+html, body { 
+  margin:0; 
+  padding:0; 
+  height:100%; 
+}
+
+
 .main-view {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
@@ -43,7 +51,7 @@
 
 
 #sidebar {
-    width: 640px;
+    width: 300px;
     position: absolute;
     top: 10px;
     bottom: 10px;
@@ -76,13 +84,19 @@
   bottom:0;
  }
 
-#layer-menu, #overlay-menu {
+#layer-menu, #overlay-menu, #temp-filter-menu {
     background: #fff;
     position: absolute;
     z-index: 1;    
     border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.4); 
     left:10px;   
+}
+
+#temp-filter-menu {
+    width: 200px;
+    height: 300px;
+    top: 100px;
 }
 
 #layer-menu {

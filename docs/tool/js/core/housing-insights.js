@@ -185,11 +185,11 @@ var controller = {
     appendPartial: function(partial, elemID, transition){ 
         d3.html('partials/' + partial + '.html', function(fragment){
             if ( transition ) {
-                fragment.querySelector('.main-view').className += ' transition';
+                fragment.querySelector('.main-view').classList.add('transition');
             }
             document.getElementById(elemID).appendChild(fragment);
             setTimeout(function(){
-                document.querySelector('.transition').className = document.querySelector('.transition').className.replace(' transition','');
+                document.querySelector('.transition').classList.remove('transition');
             }, 200);
         });
     },
@@ -224,7 +224,7 @@ var controller = {
     switchView: function(msg,data) {
 
         var container = document.getElementById(getState().activeView[0].el);
-        container.className += ' fade';
+        container.classList.add('fade');
         setTimeout(function(){
             container.className = container.className.replace(' fade', ' inactive');
             data.init();
