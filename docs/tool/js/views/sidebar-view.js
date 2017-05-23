@@ -73,7 +73,7 @@ var sideBar = {
                 option.innerHTML = zone;
                 selector.appendChild(option);
             });
-        
+
     },
     changeZoneType: function(msg){
         var zoneType = getState().mapLayer[0];

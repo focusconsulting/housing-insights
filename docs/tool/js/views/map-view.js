@@ -15,7 +15,6 @@ var mapView = {
         });
     },
     init: function() {  
-
         setSubs([
             ['mapLayer', mapView.showLayer],
             ['mapLoaded', model.loadMetaData],
