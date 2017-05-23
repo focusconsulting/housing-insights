@@ -12,6 +12,13 @@ var filterView = {
             max: 200,
             num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
         },
+        {   source: 'proj_units_assist_max',
+            display_name: 'Subsidized units',
+            component_type: 'continuous',
+            min: 0,
+            max: 150,
+            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
+        },
         {   source:'poa_start',
             component_type: 'date',
             min: '1950-01-01', //just example, TODO change to date format
@@ -32,10 +39,12 @@ var filterView = {
 
             //Set up sliders
             if (filterView.components[i].component_type == 'continuous'){
-                //local scope alias. c is for component
-                var c = filterView.components[i]
                 
-                console.log("found a continuous source!");
+                //TODO ES6 only, see comment in sliderMove for discussion
+                //local scope alias. c is for component
+                let c = filterView.components[i]
+                
+                console.log("Found a continuous source!");
 
                 var parent = d3.select('#filter-components')
                     .append("div")
@@ -74,11 +83,17 @@ var filterView = {
                     // tap: Event was caused by the user tapping the slider (boolean);
                     // positions: Left offset of the handles in relation to the slider
 
-                    //TODO we need a whole filter state module-thing that stores values separately for individual sliders, just demoing here.
-                    setState('filterValues',unencoded); 
+                    //TODO the challenge here is how do we get the property of which slider was actually called inside
+                    //this sliderMove function itself?? We can't change method signature because it is defined
+                    //by noUiSlider. Maybe we need a constructor to produce a copy of this function for each slider?
+                    //If we go with ES6, using 'let' on the for loop will make the slider variable locally scoped 
+                    //which solves the problem. Currently using this approach
+                    //TODO are we doing only ES6 compatibility???
+                    var specific_state_code = 'filterValues.' + c.source //ES6 only.... 
+                    setState(specific_state_code,unencoded); 
                 }
 
-                //Using 'set' only updates on release. Probably better to use the 'change' method for continuous updates. 
+                //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates. 
                 //using 'set' for now for easier development (less console logging of state changes)
                 slider.noUiSlider.on('set', sliderMove);
 

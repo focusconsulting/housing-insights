@@ -71,7 +71,7 @@ var mapView = {
                 e.preventDefault();
                 var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
                 console.log(existingOverlayType, overlay.name);
-                if ( existingOverlayType !== overlay.proj_name ) {
+                if ( existingOverlayType !== overlay.name ) {
                     setState('overlayRequest', {overlay: overlay.name, activeLayer: getState().mapLayer[0]});                     
                 } else {
                     mapView.clearOverlay();
@@ -366,3 +366,4 @@ var mapView = {
 
     }
 };
+
