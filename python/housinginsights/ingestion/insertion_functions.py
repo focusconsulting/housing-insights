@@ -22,7 +22,7 @@ from python.housinginsights.sources.mar import MarApiConn
 from python.housinginsights.sources.models.mar import FIELDS as MAR_FIELDS
 from python.housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
     SUBSIDY_FIELDS_MAP
-from python.housinginsights.sources.models.project import PROJ_FIELDS, \
+from python.housinginsights.sources.models.pres_cat import PROJ_FIELDS, \
     SUBSIDY_FIELDS
 
 

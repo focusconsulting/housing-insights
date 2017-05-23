@@ -17,7 +17,7 @@ DATA_RAW_PATH = os.path.join(HOUSING_INSIGHTS_ROOT_PATH, 'data', 'raw')
 sys.path.append(PYTHON_PATH)
 
 from python.housinginsights.ingestion import insertion_functions as ins_fun
-from python.housinginsights.sources.models.project import ADDRESS_FIELDS
+from python.housinginsights.sources.models.pres_cat import ADDRESS_FIELDS
 
 
 class InsertionFuncTests(unittest.TestCase):
