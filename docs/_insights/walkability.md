@@ -1,8 +1,10 @@
 ---
-layout: main
+layout: insight
 title: Walkability
+author: Neal Humphrey
 ---
 
+<div class="embed-tableau">
 
 <div class='tableauPlaceholder' id='viz1493143840889' style='position: relative'>
     <noscript><a href='#'>
@@ -31,3 +33,5 @@ title: Walkability
     scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
     vizElement.parentNode.insertBefore(scriptElement, vizElement);
 </script>
+
+</div>
