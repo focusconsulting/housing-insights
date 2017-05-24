@@ -20,3 +20,8 @@ partners: [{name: 'CNHED', logo: '/assets/CNHED-logo.jpg',  url: 'https://www.cn
 # Build settings
 markdown: kramdown
 encoding: UTF-8
+
+collections:
+  insights:
+    output: true
+    permalink: /:collection/:path
