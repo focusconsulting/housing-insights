@@ -14,7 +14,10 @@ var mapView = {
             }
         });
     },
-    init: function() {
+    init: function() { // as single page app, view init() functions should include only what should happen the first time
+                       // the view is loaded. things that need to happen every time the view is made active should be in 
+                       // the onReturn methods. nothing needs to be there so far for mapView, but buildingView for instance 
+                       // should load the specific building info every time it's made active.
         console.log(this);
         var partialRequest = {
             partial: this.el,
@@ -22,7 +25,7 @@ var mapView = {
             transition: false,
             callback: appendCallback
         };
-        controller.appendPartial(partialRequest);
+        controller.appendPartial(partialRequest, this);
         function appendCallback() {
             console.log(this);
             setSubs([
@@ -69,6 +72,9 @@ var mapView = {
 
 
 
+    },
+    onReturn: function(){
+        console.log('nothing to do');
     },
     overlayMenu: function(){    
         mapView.buildOverlayOptions();    
@@ -394,14 +400,14 @@ var mapView = {
                                                                       // a the building.html page with a query parameter for the 
                                                                       // building id. uncomment the lines to see how it would work
                 .setLngLat(e.lngLat)
-                .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
-        //      .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
+        //      .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
+                .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
                 .addTo(mapView.map);
 
-      /*      popup._container.querySelector('a').onclick = function(e){
+            popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
                 setState('switchView', buildingView);
-            };*/
+            };
            });               
         
     },

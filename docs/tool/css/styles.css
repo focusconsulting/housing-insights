@@ -26,8 +26,12 @@ html, body {
     visibility: hidden;
 }
 
-.main-view.transition {
+.main-view.transition-right {
     transform: translate(100%,0);
+}
+
+.main-view.transition-left {
+    transform: translate(-100%,0);
 }
 
 .legend {

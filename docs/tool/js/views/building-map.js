@@ -282,7 +282,7 @@ addCurrentBuilding = function(map,source){
   };
 
   
-  (function grabData(){
+/*  (function grabData(){
     var ajaxRequests = {};
     var maxIntervals = 10;
     var currentInterval = 0;
@@ -317,6 +317,6 @@ addCurrentBuilding = function(map,source){
     }
     checkRequestsInterval = setInterval(checkRequests, 500);
 
-  })();
+  })(); */
 
 };

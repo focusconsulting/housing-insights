@@ -182,18 +182,18 @@ var controller = {
             }              
         }
     },                                         // bool
-    appendPartial: function(partialRequest){
+    appendPartial: function(partialRequest,context){
         partialRequest.container = partialRequest.container || 'body-wrapper'; 
         d3.html('partials/' + partialRequest.partial + '.html', function(fragment){
             if ( partialRequest.transition ) {
-                fragment.querySelector('.main-view').classList.add('transition');
+                fragment.querySelector('.main-view').classList.add('transition-right');
                 setTimeout(function(){
-                    document.querySelector('.transition').classList.remove('transition');
+                    document.querySelector('.transition-right').classList.remove('transition-right');
                 }, 200);
             }
             document.getElementById(partialRequest.container).appendChild(fragment);
             if ( partialRequest.callback ) {
-                partialRequest.callback.call(mapView); // call the callbBack with mapView as the context (the `this`) 
+                partialRequest.callback.call(context); // call the callbBack with mapView as the context (the `this`) 
             }
         });
     },
@@ -225,15 +225,41 @@ var controller = {
           'features': features
         }
     },
+    // ** NOTE re: classList: not supported in IE9; partial support in IE 10
     switchView: function(msg,data) {
 
         var container = document.getElementById(getState().activeView[0].el);
         container.classList.add('fade');
+        console.log( data === getState().activeView[1]);
         setTimeout(function(){
-            container.className = container.className.replace(' fade', ' inactive');
-            data.init();
+            container.classList.remove('fade');
+            container.classList.add('inactive');
+           
+            if ( data !== getState().activeView[1] ){   // if not going back             
+                container.classList.add('transition-left');
+                data.init();
+                controller.backToggle = 0;                
+            } else {
+                if ( controller.backToggle === 0 ) {
+                    container.classList.add('transition-right');
+                } else {
+                    container.classList.add('transition-left');
+                }
+                controller.backToggle = 1 - controller.backToggle;
+                document.getElementById(data.el).classList.remove('inactive');
+                document.getElementById(data.el).classList.remove('transition-left');
+                document.getElementById(data.el).classList.remove('transition-right');
+                
+                data.onReturn();
+            }
+            setState('activeView',data);
         }, 500);
+    },
+    backToggle: 0,
+    goBack: function(){
+        setState('switchView', getState().activeView[1])
     }
+
 }
 
 /* Aliases */
