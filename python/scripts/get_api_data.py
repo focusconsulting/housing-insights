@@ -63,10 +63,10 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
 
 if __name__ == '__main__':
     debug = True            #Errors are raised when they occur instead of only logged.
-    unique_data_ids = ['wmata_dist', 'wmata_stops']  #Alternatively, pass a list of only the data sources you want to download
+    unique_data_ids = ['crime_2016']  #Alternatively, pass a list of only the data sources you want to download
     sample = False          #Some ApiConn classes can just grab a sample of the data for use during development / testing
     output_type = 'csv'     #Other option is stdout which just prints to console
-    db = 'docker_with_local_python'  #Only used by connections that need to read from the database to get their job done (example: wmata)
+    db = 'docker_database'  #Only used by connections that need to read from the database to get their job done (example: wmata)
 
     get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug)
 
