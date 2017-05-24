@@ -1,7 +1,7 @@
-"use strict";
+    "use strict";
 
 var mapView = {
-    el: 'mapView',
+    el: 'map-view',
     buildOverlayOptions: function(){
         var tablesWithOverlays = Object.keys(model.dataCollection.metaData).filter(function(key){
             var tableProperties = model.dataCollection.metaData[key];
@@ -14,45 +14,56 @@ var mapView = {
             }
         });
     },
-    init: function() {  
-        setSubs([
-            ['mapLayer', mapView.showLayer],
-            ['mapLoaded', model.loadMetaData],
-            ['dataLoaded.metaData', mapView.addInitialLayers],
-            ['dataLoaded.metaData', sideBar.init],
-            ['dataLoaded.metaData', mapView.overlayMenu],
-            ['dataLoaded.metaData', filterView.init],
-            ['overlayRequest', mapView.addOverlayData],
-            ['joinedToGeo', mapView.addOverlayLayer],
-            ['dataLoaded.raw_project', mapView.placeProjects],
-            ['previewBuilding', mapView.showPreview]
-        ]);
-        
-        //Initial page layout stuff
-        /*
-        Split(['#filter-panel', '#map-wrapper'], {
-            sizes: [25, 75],
-            minSize: 200
-        });
-        */
+    init: function() {
+        console.log(this);
+        var partialRequest = {
+            partial: this.el,
+            container: null, // will default to '#body-wrapper'
+            transition: false,
+            callback: appendCallback
+        };
+        controller.appendPartial(partialRequest);
+        function appendCallback() {
+            console.log(this);
+            setSubs([
+                ['mapLayer', mapView.showLayer],
+                ['mapLoaded', model.loadMetaData],
+                ['dataLoaded.metaData', mapView.addInitialLayers],
+                ['dataLoaded.metaData', sideBar.init],
+                ['dataLoaded.metaData', mapView.overlayMenu],
+                ['dataLoaded.metaData', filterView.init],
+                ['overlayRequest', mapView.addOverlayData],
+                ['joinedToGeo', mapView.addOverlayLayer],
+                ['dataLoaded.raw_project', mapView.placeProjects],
+                ['previewBuilding', mapView.showPreview]
+            ]);
+            
+            //Initial page layout stuff
+            /*
+            Split(['#filter-panel', '#map-wrapper'], {
+                sizes: [25, 75],
+                minSize: 200
+            });
+            */
 
 
-        //Add the map
-        mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
-        this.map = new mapboxgl.Map({
-          container: 'map', // container id
-          style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
-          zoom: 11,
-          center: [-76.92, 38.9072],
-          minZoom: 3,
-          preserveDrawingBuffer: true
-        });
-        
-        this.map.addControl(new mapboxgl.NavigationControl());
-        
-        this.map.on('load', function(){
-            setState('mapLoaded',true);
-        });
+            //Add the map
+            mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+            this.map = new mapboxgl.Map({
+              container: 'map', // container id
+              style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
+              zoom: 11,
+              center: [-76.92, 38.9072],
+              minZoom: 3,
+              preserveDrawingBuffer: true
+            });
+            
+            this.map.addControl(new mapboxgl.NavigationControl());
+            
+            this.map.on('load', function(){
+                setState('mapLoaded',true);
+            });
+        }
 
 
 

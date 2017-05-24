@@ -182,15 +182,19 @@ var controller = {
             }              
         }
     },                                         // bool
-    appendPartial: function(partial, elemID, transition){ 
-        d3.html('partials/' + partial + '.html', function(fragment){
-            if ( transition ) {
+    appendPartial: function(partialRequest){
+        partialRequest.container = partialRequest.container || 'body-wrapper'; 
+        d3.html('partials/' + partialRequest.partial + '.html', function(fragment){
+            if ( partialRequest.transition ) {
                 fragment.querySelector('.main-view').classList.add('transition');
+                setTimeout(function(){
+                    document.querySelector('.transition').classList.remove('transition');
+                }, 200);
             }
-            document.getElementById(elemID).appendChild(fragment);
-            setTimeout(function(){
-                document.querySelector('.transition').classList.remove('transition');
-            }, 200);
+            document.getElementById(partialRequest.container).appendChild(fragment);
+            if ( partialRequest.callback ) {
+                partialRequest.callback.call(mapView); // call the callbBack with mapView as the context (the `this`) 
+            }
         });
     },
     joinToGeoJSON: function(overlay,grouping,activeLayer){
