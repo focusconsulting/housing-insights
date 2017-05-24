@@ -50,8 +50,8 @@ class BaseApiConn(object):
             return self.session.get(self.baseurl, params=params, proxies=self.proxies, **kwargs)
         if urlpath[0] != '/':
             urlpath = '/' + urlpath
-            url = self.baseurl + urlpath
-            return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
+        url = self.baseurl + urlpath
+        return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):
         """

@@ -84,6 +84,9 @@ class CamaApiConn(BaseApiConn):
         super().__init__(CamaApiConn.BASEURL)
 
     def get_data(self):
+
+        mar_api = MarApiConn()
+
         result = self.get(urlpath=None, params=None)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
@@ -92,19 +95,46 @@ class CamaApiConn(BaseApiConn):
 
         dict_res = {}  # creates dict of residential data with SSL as primary key
         for row in cama_data['features']:
-            if len(dict_res) > 5:
-                pass
             objectid = row['properties']['OBJECTID']
             square, lot = row['properties']['SSL'].split()
             suffix = ' '
             if len(square) > 4:
                 square = square[:4]
                 suffix = square[-1]
-            mar_return = my_api.get_data(square, lot, suffix)
+            mar_return = mar_api.get_data(square, lot, suffix)
             row['properties'].update(mar_return)
             dict_res[row['properties']['OBJECTID']] = row['properties']
+            if len(dict_res) == 50:
+                zoneCount(dict_res)
+
+def zoneCount(dict):
+
+    zone_types = ['ANC', 'CENSUS_TRACT', 'CLUSTER_', 'WARD', 'ZIPCODE']
+
+
+    count_dict = {
+
+    }
+
+    for zone in zone_types:
+        for property in dict:
+            if 'Warning' not in dict[property].keys():
+                count_dict.setdefault(dict[property][zone], {})
+                count_dict[dict[property][zone]].setdefault(zone + '_count', 0)
+                count_dict[dict[property][zone]][zone + '_count'] += 1
+
+                count_dict[dict[property][zone]].setdefault('unit_count', 0)
+                if dict[property]['NUM_UNITS'] == 0:
+                    dict[property]['NUM_UNITS'] = 1
+                count_dict[dict[property][zone]]['unit_count'] += dict[property]['NUM_UNITS']
+
+                count_dict[dict[property][zone]].setdefault('bedroom_count', 0)
+                if dict[property]['BEDRM'] == 0:
+                    dict[property]['BEDRM'] = 1
+                count_dict[dict[property][zone]]['bedroom_count'] += dict[property]['BEDRM']
+
+    print('test')
 
 my_api = CamaApiConn()
 cama_return = my_api.get_data()
-
 
