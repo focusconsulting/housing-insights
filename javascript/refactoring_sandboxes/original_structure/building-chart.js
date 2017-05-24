@@ -1,1 +1,0 @@
-// building-chart.js is not used in this refactoring option.

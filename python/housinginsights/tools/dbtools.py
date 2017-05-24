@@ -14,6 +14,8 @@ from subprocess import check_output
 import csv
 import json
 import os
+import logging
+import time
 #import docker
 
 secrets_filepath = os.path.join(os.path.dirname(__file__), '../secrets.json')
@@ -32,6 +34,12 @@ def get_connect_str(database_choice):
 
 
 def get_database_connection(database_choice):
+    '''
+    Deprecated - it is better to use get_database_engine 
+    and then use engine.connect() within your code so that
+    closing the connection is more safely handled. 
+    '''
+
     # Connect to the database
     connection_string = get_connect_str(database_choice)
     engine = create_engine(connection_string)
@@ -39,9 +47,32 @@ def get_database_connection(database_choice):
     return database_connection
 
 def get_database_engine(database_choice):
+    '''
+    engines are the way to connect to the database. 
+
+    To use, follow this pattern:
+
+    engine = get_database_engine('docker_database')
+    conn = engine.connect()
+    conn.execute('SELECT * from manifest')
+    conn.close()
+    '''
+    
     # Connect to the database
     connection_string = get_connect_str(database_choice)
-    engine = create_engine(connection_string)
+    try:
+        engine = create_engine(connection_string)
+
+        #test out the engine to make sure it is valid
+        conn = engine.connect()
+        conn.close()
+
+    except Exception as e:
+        print(e)
+        logging.warning("Error - are you trying to use the wrong Docker connect string?")
+        time.sleep(5)
+        raise e
+
     return engine
     
 def get_database_session(database_choice):
