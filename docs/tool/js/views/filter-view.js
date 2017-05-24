@@ -33,7 +33,7 @@ var filterView = {
         },
         {   source:'ward',
             component_type: 'categorical',
-            data_type: 'text'
+            data_type: 'text',
             other: 'feel free to add other needed properties if they make sense'
         }
     ],
