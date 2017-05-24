@@ -1,10 +1,13 @@
-var filter = {
+var filterUtil = {
+	
 	init: function(){
 		setSubs([
-			['filterChange', filter.publishFilteredData],
+			['filterValues', filterUtil.publishFilteredData],
 			// need to subscribe to data load and run a save the data
 		]);
 	},
+
+
 	options: { // TODO replace with a function that populates this according
 				// to data from the API
 		ward: '',
@@ -22,11 +25,22 @@ var filter = {
 		subsidyEndBefore: '',
 		subsidyEndAfter: ''
 	},
+
 	filteredData: [],
+	
 	filterData: function(data){ // TODO finish, obviously, and replace 
 								// some single entry checks (eg, ward) and
 								// replace them with loops to handle arrays
-		filter.filteredData = data.filter(function(d){ 
+
+		//TODO dummy list with one duplicate to demonstrate publication of a list of filtered IDs
+		filterUtil.filteredData = ['NL000001','NL000368','NL000008','NL000001']
+
+		//TODO This will need to be rewritten using a structure based on the logic we used to create the filter elements in filter-view.js
+		//For example, filter columns need to be named based on the 'source' name, and the logic structure should not be hard coded
+		//in for the column names but rather be based on the 'component_type' i.e. continuous, date, etc. and 'data_type' (for example, 'integer' should
+		//automatically round to 0 decimals and 'decimal' should round to 2 decimals)
+		
+		/*data.filter(function(d){ 
 			return (
 				( //geography
 					(this.options.ward ? d['ward'] === this.options.ward : true) &&
@@ -55,7 +69,9 @@ var filter = {
 				(this.options.subsidyType ? d['subsidy_program'] === this.options.subsidyType : true)
 			)
 		});
+		*/
 	},
+	
 	deduplicate: function(){
 		var result = [];
 		for (var i = 0; i < this.filteredData.length; i++) {
@@ -63,12 +79,14 @@ var filter = {
 				result.push(this.filteredData[i]);
 			}
 		}
-		filter.filteredData = result;
+		filterUtil.filteredData = result;
 	},
+	
 	publishFilteredData: function(msg,options){
-		filter.options[options.key] = options.value;
-		filter.filterData();  // needs a data argument
-		filter.deduplicate();
-		setState('filteredData', filter.filteredData);
+		filterUtil.options[options.key] = options.value;
+		filterUtil.filterData();  // needs a data argument
+		filterUtil.deduplicate();
+		setState('filteredData', filterUtil.filteredData);
 	}
-}
+
+};
