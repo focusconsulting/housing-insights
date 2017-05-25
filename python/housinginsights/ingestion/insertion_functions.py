@@ -287,5 +287,13 @@ def add_dchousing_to_project_and_subsidy():
         temp = pd.DataFrame(data=data, columns=SUBSIDY_FIELDS)
         subsidy_dc_df = subsidy_dc_df.append(other=temp, ignore_index=True)
 
+    # convert certain columns from float to int
+    proj_dc_df.Proj_address_id = proj_dc_df.Proj_address_id.astype(np.int64)
+    proj_dc_df.Proj_Units_Assist_Min = \
+        proj_dc_df.Proj_Units_Assist_Min.astype(np.int64)
+    proj_dc_df.Proj_Units_Assist_Max = \
+        proj_dc_df.Proj_Units_Assist_Max.astype(np.int64)
+    subsidy_dc_df.Units_Assist = subsidy_dc_df.Units_Assist.astype(np.int64)
+
     return subsidy_dc_df, proj_dc_df
 

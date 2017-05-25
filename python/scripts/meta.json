@@ -1993,7 +1993,7 @@
         "type": "text"
       }
     ],
-    "replace_table": true
+    "replace_table": false
   },
   "reac_score": {
     "cleaner": "reac_score_cleaner",
@@ -2283,7 +2283,7 @@
         "type": "text"
       }
     ],
-    "replace_table": true
+    "replace_table": false
   },
   "wmata_dist": {
     "cleaner": "WmataDistCleaner",

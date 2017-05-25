@@ -90,7 +90,8 @@ class CleanerBase(object, metaclass=ABCMeta):
             'TRUE': True,
             'FALSE': False,
             '1': True,
-            '0': False
+            '0': False,
+            '': ''
             }
         return mapping[value]
 
@@ -142,8 +143,12 @@ class CleanerBase(object, metaclass=ABCMeta):
             column_name corresponds to the key of the row, which depends on 
             the source file column name which may be different from the final consistent name of census_tract
             '''
-            row[column_name] = self.census_mapping[row[column_name]]
-            return row
+            # deal with null values TODO - check with Neal what this is doing
+            if row[column_name] == 'Null':
+                return row
+            else:
+                row[column_name] = self.census_mapping[row[column_name]]
+                return row
 
     def replace_tracts(self,row,row_num,column_name='census_tract'):
         '''

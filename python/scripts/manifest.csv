@@ -1,5 +1,4 @@
 include_flag,destination_table,unique_data_id,data_date,encoding,local_folder,s3_folder,filepath,notes
-use,dchousing,dchousing_20170505,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/dc_housing/20170509/DCHousing.csv,intial load of DCHousing data set
 ____City Development Data__,,,,,,,,
 superseded,building_permits,building_permits_2016_old,1/1/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits_2016.csv,
 use,building_permits,building_permits_2016,2/2/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits__2016_updated.csv,
@@ -70,3 +69,6 @@ use,crime,crime_2017,4/3/2017,latin-1,../../../data,https://s3.amazonaws.com/hou
 ____WMATA Data____,,,,,,,,
 use,wmata_dist,wmata_dist_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist.csv,
 use,wmata_info,wmata_info_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,
+____DATA FOR APPENDING____,,,,,,,,
+use,project,dchousing_project,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_project.csv,append to 20170315/project.csv
+use,subsidy,dchousing_subsidy,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_subsidy.csv,append to 20170315/Subsidy.csv
