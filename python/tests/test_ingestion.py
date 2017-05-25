@@ -28,7 +28,7 @@ from housinginsights.ingestion.functions import load_meta_data
 from housinginsights.tools import dbtools
 from housinginsights.ingestion import DataReader, ManifestReader
 from housinginsights.ingestion import CSVWriter
-from housinginsights.ingestion import GenericCleaner
+from housinginsights.ingestion.Cleaners import GenericCleaner
 
 
 ##########################################################################

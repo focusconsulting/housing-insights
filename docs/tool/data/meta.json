@@ -63,6 +63,11 @@
     "replace_table": false
   },
   "building_permits": {
+    "api": {
+      "raw_endpoint": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/building_permits",
+      "aggregate_endpoint_base": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
+      "available_aggregates": ["ward", "neighborhood_cluster"]
+    },
     "cleaner": "BuildingPermitsCleaner",
     "fields": [
       {
@@ -389,6 +394,11 @@
     "replace_table": true
   },
   "crime": {
+    "api": {
+      "raw_endpoint": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/crime/",
+      "aggregate_endpoint_base": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/",
+      "available_aggregates": ["ward", "neighborhood_cluster"]
+    },
     "cleaner": "CrimeCleaner",
     "fields": [
       {
@@ -547,7 +557,7 @@
     "replace_table": false
   },
   "dc_tax": {
-    "cleaner": "DCTaxCleaner",
+    "cleaner": "dc_tax_cleaner",
     "fields": [
       {
         "display_name": "objectid",
@@ -1613,6 +1623,11 @@
     "replace_table": true
   },
   "project": {
+    "api": {
+      "raw_endpoint": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/project",
+      "aggregate_endpoint_base": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/all/",
+      "available_aggregates": []
+    },
     "cleaner": "ProjectCleaner",
     "fields": [
       {
@@ -2292,7 +2307,7 @@
         "display_name": "Nlihc ID",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "nlihc_id",
+        "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
         "type": "text"
       },
@@ -2338,7 +2353,7 @@
         "display_name": "Metro Stop ID or Bus Station Code",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "stop_id_or_station_code",
+        "source_name": "code_or_id",
         "sql_name": "stop_id_or_station_code",
         "type": "text"
       },
@@ -2362,7 +2377,7 @@
         "display_name": "Latitude",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "latitude",
+        "source_name": "lat",
         "sql_name": "latitude",
         "type": "decimal"
       },
@@ -2370,7 +2385,7 @@
         "display_name": "Longitude",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "longitude",
+        "source_name": "lon",
         "sql_name": "longitude",
         "type": "decimal"
       },
