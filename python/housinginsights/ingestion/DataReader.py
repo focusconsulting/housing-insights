@@ -202,21 +202,30 @@ class DataReader(HIReader):
         self.encoding = manifest_row.get('encoding', 'latin-1')
 
         self.load_from = load_from
-        self.s3_path = os.path.join( manifest_row['s3_folder'],
-                                     manifest_row['filepath'].strip("\/")
-                                        ).replace("\\","/")
+        self.s3_path = os.path.join(manifest_row['s3_folder'],
+                                    manifest_row['filepath'].strip("\/")
+                                    ).replace("\\","/")
         self._error_reporting_overhead = {}
-        # Test connection to s3 URL
-        if self.manifest_row['include_flag'] == 'use':
-            self._suppress_verbose_error_reporting()
-            content_type_header = self._test_connection_to_URL(self.s3_path)
-            self._restore_verbose_error_reporting()
-            if content_type_header is not None:
-                logging.info("  Content (MIME) type: {}".format(content_type_header))
+        # # Test connection to s3 URL
+        # if self.manifest_row['include_flag'] == 'use':
+        #     self._suppress_verbose_error_reporting()
+        #     content_type_header = self._test_connection_to_URL(self.s3_path)
+        #     self._restore_verbose_error_reporting()
+        #     if content_type_header is not None:
+        #         logging.info("  Content (MIME) type: {}".format(content_type_header))
 
         self._keys = None
         # Load data file from given file system - S3 or local
         if load_from == "s3":
+            # Test connection to s3 URL
+            if self.manifest_row['include_flag'] == 'use':
+                self._suppress_verbose_error_reporting()
+                content_type_header = self._test_connection_to_URL(self.s3_path)
+                self._restore_verbose_error_reporting()
+                if content_type_header is not None:
+                    logging.info(
+                        "  Content (MIME) type: {}".format(content_type_header))
+
             self.path = self.s3_path
             self.path_type = "url"
         else:
