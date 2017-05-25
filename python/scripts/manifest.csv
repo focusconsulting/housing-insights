@@ -26,9 +26,7 @@ superseded,pud_test,pud_test_jan2017,1/1/2017,latin-1,../../../data,https://s3.a
 _____Property Tax_____,,,,,,,,
 superseded,dc_tax_alternate,dc_tax_alternate,1/1/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/tax_assessment/opendata_dc_2016/Integrated_Tax_System_Public_Extract.csv,Full export from opendata.dc.gov. Unclear if it is a complete data set. It looks like the other tax data set provides the same data but better format
 superseded,dc_tax,dc_tax_opendata_2016,1/1/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/tax_assessment/opendata_dc_2016/Integrated_Tax_System_Public_Extract_Facts.csv,Same (?) as above with better names. Unclear which is authoritative
-needs cleaner,dc_tax,dc_tax_20170315,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/tax_assessment/IntTaxSysPubExtFacts/20170317/Integrated_Tax_System_Public_Extract_Facts.csv,Downloaded from: http://opendata.dc.gov/datasets/014f4b4f94ea461498bfeba877d92319_56
 _____Other DC Affordable Housing Data_____,,,,,,,,
-pending,,,,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Real_property_rpt_20161110.xls,provided directly by CNHED. Still need to investigate
 skip,hmda,hmda_all_dc,4/6/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
 _____Market Rate Rent_____,,,,,,,,
 superseded,zillow_zrisqft_zip,zillow_zrisqft_zip_Sept2016,1/11/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/zillow/20160901/Zip_ZriPerSqft_AllHomes.csv,Excludes multifamily
@@ -67,8 +65,10 @@ use,crime,crime_2015,12/31/2015,latin-1,../../../data,https://s3.amazonaws.com/h
 use,crime,crime_2016,12/31/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2016-all.csv,
 use,crime,crime_2017,4/3/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2017-to-date.csv,
 ____WMATA Data____,,,,,,,,
-use,wmata_dist,wmata_dist_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist.csv,
-use,wmata_info,wmata_info_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,
+superseded,wmata_dist,wmata_dist_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist.csv,
+superseded,wmata_info,wmata_info_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,
+use,wmata_dist,wmata_dist_20170215,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist_updated_headers.csv,
+use,wmata_info,wmata_info_20170215,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/wmata_stops.csv,
 ____DATA FOR APPENDING____,,,,,,,,
 use,project,dchousing_project,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_project.csv,append to 20170315/project.csv
 use,subsidy,dchousing_subsidy,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_subsidy.csv,append to 20170315/Subsidy.csv

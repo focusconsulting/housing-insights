@@ -83,14 +83,27 @@ class LoadData(object):
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(database_choice)
 
+        # update the meta.json to the database
+        ingestionfunctions.meta_json_to_database(self.engine, self.meta)
+
     def drop_tables(self):
         """
         Returns the outcome of dropping all the tables from the 
         database_choice and then rebuilding.
         """
         db_conn = self.engine.connect()
-        return db_conn.execute(
-            "DROP SCHEMA public CASCADE;CREATE SCHEMA public;")
+        query_result = list()
+        query_result.append(db_conn.execute(
+            "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
+
+        if database_choice == 'remote_database' or database_choice == 'remote_database_master':
+            query_result.append(db_conn.execute('''
+            GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
+            GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
+            GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;
+            GRANT ALL ON SCHEMA public TO public;
+            '''))
+        return query_result
 
     def load_all_data(self):
         """
@@ -270,12 +283,22 @@ if __name__ == '__main__':
         database_choice = 'docker_database'
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
+    elif 'docker_local' in sys.argv:
+        database_choice = 'docker_with_local_python'
+        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
+                          manifest_path=manifest_path, keep_temp_files=True)
     elif 'remote' in sys.argv:
         database_choice = 'remote_database'
         # Don't want sample data in the remote database
         meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
         manifest_path = os.path.abspath(
             os.path.join(scripts_path, 'manifest.csv'))
+
+        # Only users with additional admin priviledges can rebuild the
+        # remote database
+        if 'rebuild' in sys.argv:
+            database_choice = 'remote_database_master'
+
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
     else:

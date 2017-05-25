@@ -547,7 +547,7 @@
     "replace_table": false
   },
   "dc_tax": {
-    "cleaner": "dc_tax_cleaner",
+    "cleaner": "DCTaxCleaner",
     "fields": [
       {
         "display_name": "objectid",
@@ -2292,7 +2292,7 @@
         "display_name": "Nlihc ID",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "Nlihc_id",
+        "source_name": "nlihc_id",
         "sql_name": "nlihc_id",
         "type": "text"
       },
@@ -2338,7 +2338,7 @@
         "display_name": "Metro Stop ID or Bus Station Code",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "code_or_id",
+        "source_name": "stop_id_or_station_code",
         "sql_name": "stop_id_or_station_code",
         "type": "text"
       },
@@ -2362,7 +2362,7 @@
         "display_name": "Latitude",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "lat",
+        "source_name": "latitude",
         "sql_name": "latitude",
         "type": "decimal"
       },
@@ -2370,7 +2370,7 @@
         "display_name": "Longitude",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "lon",
+        "source_name": "longitude",
         "sql_name": "longitude",
         "type": "decimal"
       },

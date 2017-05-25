@@ -7,7 +7,10 @@ import unittest
 from unittest import skip
 
 import sys, os
-sys.path.append(os.path.abspath('./'))
+
+python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               os.pardir))
+sys.path.append(python_filepath)
 
 class InitializationTests(unittest.TestCase):
 

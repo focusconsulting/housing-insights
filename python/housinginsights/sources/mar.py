@@ -118,7 +118,7 @@ class MarApiConn(BaseApiConn):
 
     def get_condo_info(self, location, output_type=None,
                        output_file=None):
-        pass #TODO
+        pass  # TODO
 
     def _find_condo_unit(self, address_id):
         """

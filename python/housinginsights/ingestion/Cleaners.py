@@ -461,6 +461,17 @@ class CrimeCleaner(CleanerBase):
         return row
 
 
+class DCTaxCleaner(CleanerBase):
+    def clean(self, row, row_num = None):
+        row = self.replace_nulls(row, null_values=['', '\\', None])
+        row['OWNER_ADDRESS_CITYSTZIP'] = self.null_value                            \
+                                            if row['OWNER_ADDRESS_CITYSTZIP']==','  \
+                                            else row['OWNER_ADDRESS_CITYSTZIP']
+        row['VACANT_USE'] = self.convert_boolean(row['VACANT_USE'].capitalize())
+        row = self.parse_dates(row)
+        return row
+
+
 class hmda_cleaner(CleanerBase):    
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
