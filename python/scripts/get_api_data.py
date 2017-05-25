@@ -28,6 +28,20 @@ from housinginsights.config.base import HousingInsightsConfig
 
 
 def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 'csv', db=None, debug=False, module_list = None):
+    '''
+    This method takes a list of unique_data_ids and calls the 'get_data' method on each ApiConn class in the /sources folder
+    By passing a list with one id, you can download (or test) just one API at a time. 
+    Passing 'None' to unique_data_ids will run all get_data methods. 
+
+    sample: when possible, download just a few lines (for faster testing)
+    output_type: either 'csv' or 'stdout'
+    db: the database choice, such as 'docker_database', as identified in the secrets.json. 
+    debug: if True exceptions will be raised. if False, they will be printed but processing will continue. 
+    module_list: in addition to the unique_data_ids (which are passed directly to the ApiConn.get_data() method), you can choose to 
+                 only run listed modules. 
+
+    '''
+
     API_FOLDER = 'housinginsights.sources'
     
     #All possible source modules and classes as key:value of module:classname
@@ -62,11 +76,21 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
                 raise e
 
 if __name__ == '__main__':
+
+    #Set up the appropriate settings for what you want to download
+
     debug = True            #Errors are raised when they occur instead of only logged.
-    unique_data_ids = ['wmata_dist', 'wmata_stops']  #Alternatively, pass a list of only the data sources you want to download
+    unique_data_ids = None   #Alternatively, pass a list of only the data sources you want to download
+                            #Available ids:
+                            #[ 'dchousing',"tax", "wmata_stops","wmata_dist"
+                            #  "building_permits_2013","building_permits_2014","building_permits_2015","building_permits_2016","building_permits_2017"
+                            #  "crime_2013","crime_2014","crime_2015","crime_2016","crime_2017"
+                            #  ]
+
     sample = False          #Some ApiConn classes can just grab a sample of the data for use during development / testing
     output_type = 'csv'     #Other option is stdout which just prints to console
-    db = 'docker_with_local_python'  #Only used by connections that need to read from the database to get their job done (example: wmata)
+    db = 'docker_database'  #Only used by connections that need to read from the database to get their job done (example: wmata)
+    module_list = ["opendata","DCHousing"]
 
-    get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug)
+    get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
 
