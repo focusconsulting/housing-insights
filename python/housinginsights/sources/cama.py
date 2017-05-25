@@ -2,7 +2,7 @@ from pprint import pprint
 import os
 import sys
 import requests
-import datetime
+
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 sys.path.append(PYTHON_PATH)
@@ -52,12 +52,7 @@ class MarApiConn(BaseApiConn):
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
-        # if output_type == 'stdout':
-        #     pprint(result.json())
-        # elif output_type == 'csv':
-        #     data = result.json()['returnDataset']['Table1']
-        #     results = [MarResult(address) for address in data]
-        #     self.result_to_csv(FIELDS, results, output_file)
+
         mar_data = result.json()
         if mar_data['returnDataset'] == {}:
             mar_returns = {'Warning': 'No MAR data availble - property under construction - see AYB year'}
