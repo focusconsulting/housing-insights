@@ -48,6 +48,10 @@ var filterView = {
         document.querySelectorAll('.sidebar-tab').forEach(function(tab){
             tab.onclick = filterView.toggleSidebar;
         });
+
+        document.querySelectorAll('.sub-nav-button').forEach(function(button){
+            button.onclick = filterView.subNavSelect;
+        });
         //Add components to the navigation using the appropriate component type
         //TODO later we'll need to make sure this uses the appropriate order
         for (var i = 0; i < filterView.components.length; i++) {
@@ -138,6 +142,9 @@ var filterView = {
         var sBar = e.currentTarget.parentElement;
         sBar.classList.toggle('active'); // not supported in lte ie9
         sBar.querySelector('.triangle-left').classList.toggle('right');
+    },
+    subNavSelect: function(e){
+        e.currentTarget.classList.toggle('active'); // will work only if keep to two options per group
     }
 };
 

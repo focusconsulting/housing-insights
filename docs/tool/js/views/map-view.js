@@ -43,12 +43,12 @@ var mapView = {
           container: 'map', // container id
           style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
           zoom: 11,
-          center: [-76.92, 38.9072],
+          center: [-77, 38.9072],
           minZoom: 3,
           preserveDrawingBuffer: true
         });
         
-        this.map.addControl(new mapboxgl.NavigationControl());
+        this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
         
         this.map.on('load', function(){
             setState('mapLoaded',true);
