@@ -45,7 +45,9 @@ var filterView = {
             ['filterViewLoaded', filterUtil.init]
         ]);
 
-
+        document.querySelectorAll('.sidebar-tab').forEach(function(tab){
+            tab.onclick = filterView.toggleSidebar;
+        });
         //Add components to the navigation using the appropriate component type
         //TODO later we'll need to make sure this uses the appropriate order
         for (var i = 0; i < filterView.components.length; i++) {
@@ -131,6 +133,11 @@ var filterView = {
         //After all filter components are loaded, user is allowed to filter data
         setState('filterViewLoaded',true);
 
-    } //end init
+    }, //end init
+    toggleSidebar: function(e){
+        var sBar = e.currentTarget.parentElement;
+        sBar.classList.toggle('active'); // not supported in lte ie9
+        sBar.querySelector('.triangle-left').classList.toggle('right');
+    }
 };
 

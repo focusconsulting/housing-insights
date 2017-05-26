@@ -19,7 +19,7 @@ var mapView = {
             ['mapLayer', mapView.showLayer],
             ['mapLoaded', model.loadMetaData],
             ['dataLoaded.metaData', mapView.addInitialLayers],
-            ['dataLoaded.metaData', sideBar.init],
+            ['dataLoaded.metaData', resultsView.init],
             ['dataLoaded.metaData', mapView.overlayMenu],
             ['dataLoaded.metaData', filterView.init],
             ['overlayRequest', mapView.addOverlayData],

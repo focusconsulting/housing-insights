@@ -17,7 +17,7 @@
     <script src="js/charts/chart-prototype.js"></script>
     <script src="js/views/map-view.js"></script>
     <script src="js/views/building-view.js"></script>
-    <script src="js/views/sidebar-view.js"></script>
+    <script src="js/views/results-view.js"></script>
     <script src="js/views/filter-view.js"></script>
     <script src="js/charts/pie-chart-proto.js"></script>
     <script src="js/charts/donut-chart.js"></script>
@@ -28,17 +28,27 @@
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
 </head>
 <body>
+<div id="main-nav">
+placeholder header
+<div id="sub-nav"></div>
+</div>
     <div id="body-wrapper">
         <div id="mapView" class="main-view">
-            
-            <div id="filter-panel">
-                <p>This is for potential use by Split.js - currently not working</p>
+        <div id="sidebar-left" class="sidebar">
+            <button class="sidebar-tab"><div class="triangle-left right"></div></button>
+            <div id="layer-menu">
             </div>
-            <div id="map-wrapper">
-                <div id="map"></div>
+            <div id="overlay-menu">
             </div>
+            <div id="temp-filter-menu">
+                <h3>Temp Filter Menu</h3>
+                <div id="filter-components">
+                </div>
 
-            <!--absolute positioned overlays-->
+            </div>
+        </div>
+        <div id="sidebar-right" class="sidebar">
+        <button class="sidebar-tab"><div class="triangle-left"></div></button>
             <sidebar id="sidebar">
                 <div id="category-legend" class="legend" style="display: block;">
                     <h4>Subsidized Affordable Buildings</h4>
@@ -69,16 +79,18 @@
                     <p id="preview-owner"></p>
                 </div>
             </sidebar>
-            <div id="layer-menu">
+        </div>
+            
+            <div id="filter-panel">
+                <p>This is for potential use by Split.js - currently not working</p>
             </div>
-            <div id="overlay-menu">
+            <div id="map-wrapper">
+                <div id="map"></div>
             </div>
-            <div id="temp-filter-menu">
-                <h3>Temp Filter Menu</h3>
-                <div id="filter-components">
-                </div>
 
-            </div>
+            <!--absolute positioned overlays-->
+            
+            
         </div>
     </div>    
 <script src="js/core/housing-insights.js"></script>
