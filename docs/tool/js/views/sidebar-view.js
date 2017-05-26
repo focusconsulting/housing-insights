@@ -17,8 +17,8 @@ var sideBar = {
                 },
                 field: instance,
                 container: '#pie-' + i,
-                width: 95,
-                height: 115,
+                width: 75,
+                height: 95,
                 zoneType: 'ward',
                 zoneName: 'All',
                 index: i,
@@ -73,7 +73,7 @@ var sideBar = {
                 option.innerHTML = zone;
                 selector.appendChild(option);
             });
-        
+
     },
     changeZoneType: function(msg){
         var zoneType = getState().mapLayer[0];

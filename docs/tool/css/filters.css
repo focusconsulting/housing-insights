@@ -1,0 +1,50 @@
+
+/*Stuff for all filter components*/
+.filter-group {
+    margin-left:20px;
+    margin-right:20px;
+}
+
+.filter-label {
+    font-weight: bold;
+}
+
+#temp-filter-menu h3 {
+    margin-bottom:20px;
+}
+/*------------------------------*/
+/*Override the nouiSlider styles*/
+
+/*add enough space for tool tips*/
+.noUi-target {
+    margin-top:45px;
+    margin-bottom:10px;
+}
+
+/*Make handles smaller*/
+.noUi-horizontal {
+  height: 18px;
+}
+.noUi-horizontal .noUi-handle {
+  width: 20px;
+  height: 28px;
+  left: -10px;
+  top: -6px;
+}
+.noUi-handle:before,
+.noUi-handle:after {
+  content: "";
+  display: block;
+  position: absolute;
+  height: 14px;
+  width: 1px;
+  background: #E8E7E6;
+  left: 6px;
+  top: 6px;
+}
+.noUi-handle:after {
+  left: 10px;
+}
+
+
+/**/
