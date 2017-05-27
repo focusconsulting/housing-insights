@@ -61,9 +61,10 @@ class WmataApiConn(BaseApiConn):
 
             elif ( output_type == 'stdout'):
                 logging.info("==========================================================================\n")
-                logging.info(self.stopsHeader,'\n')
+                logging.info(self.stopsHeader)
                 logging.info("--------------------------------------------------------------------------\n")
-                logging.info(self.stopsOutput,'\n')
+                for line in self.stopsOutput:
+                    logging.info(line)
         else:
             #Not an id supported by this method
             pass
@@ -134,9 +135,10 @@ class WmataApiConn(BaseApiConn):
 
             elif ( output_type == 'stdout'):
                 print("==========================================================================\n")
-                print(self.distHeader,'\n')
+                print(self.distHeader)
                 print("==========================================================================\n")
-                print(self.distOutput,'\n')
+                for line in self.distOutput:
+                    logging.info(line)
         else:
             #not a unique data id supported by this class
             pass
