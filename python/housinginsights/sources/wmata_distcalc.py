@@ -83,7 +83,7 @@ class WmataApiConn(BaseApiConn):
                 #Configure the connection
                 engine = dbtools.get_database_engine(db)
                 conn = dbtools.get_database_connection(db) 
-                print("  Connected to Housing Insights database")
+                logging.info("  Connected to Housing Insights database")
                 columnset = conn.execute('select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=\'project\'')
                 
                 #Get the rows
@@ -134,9 +134,9 @@ class WmataApiConn(BaseApiConn):
                 self._array_to_csv(self.distHeader, self.distOutput, self.output_paths[u])
 
             elif ( output_type == 'stdout'):
-                print("==========================================================================\n")
-                print(self.distHeader)
-                print("==========================================================================\n")
+                logging.info("==========================================================================\n")
+                logging.info(self.distHeader)
+                logging.info("==========================================================================\n")
                 for line in self.distOutput:
                     logging.info(line)
         else:
