@@ -22,6 +22,8 @@ class DCHousingApiConn(BaseApiConn):
               'Property_and_Land_WebMercator/MapServer/62'
     # default query to get all data as json output
     QUERY = '/query?where=1%3D1&outFields=*&outSR=4326&f=json'
+    FULL_DATA_URL = 'https://opendata.arcgis.com/datasets/' \
+                '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
 
     def __init__(self):
         super().__init__(DCHousingApiConn.BASEURL)
