@@ -26,8 +26,12 @@ html, body {
     visibility: hidden;
 }
 
-.main-view.transition {
+.main-view.transition-right {
     transform: translate(100%,0);
+}
+
+.main-view.transition-left {
+    transform: translate(-100%,0);
 }
 
 .legend {
@@ -118,6 +122,11 @@ html, body {
     text-decoration: none;
     border-bottom: 1px solid rgba(0,0,0,0.25);
     text-align: center;
+}
+
+a.unavailable {
+    background-color: rgb(220,220,220);
+    color: rgb(200, 200, 200);
 }
 
 a.active {

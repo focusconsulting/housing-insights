@@ -21,65 +21,19 @@
     <script src="js/views/filter-view.js"></script>
     <script src="js/charts/pie-chart-proto.js"></script>
     <script src="js/charts/donut-chart.js"></script>
+    <!--  ***** NOTE ***** LINKING TO OLD DEPRECATED FILE BECAUSE THE BUILDING VIEW HAS NOT BEEN REBUILT YET 
+         FOLLWING THE JS REFACTOR -->
+    <script src="js/core/housing-insights-OLD.js">
+    </script>
     <link href="css/nouislider.css" rel="stylesheet" />
     <link href="css/styles.css" rel="stylesheet" />
     <link href="css/filters.css" rel="stylesheet" />
-
+    <link href="css/building.css" rel="stylesheet" type="text/css">
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
 </head>
 <body>
     <div id="body-wrapper">
-        <div id="mapView" class="main-view">
-            
-            <div id="filter-panel">
-                <p>This is for potential use by Split.js - currently not working</p>
-            </div>
-            <div id="map-wrapper">
-                <div id="map"></div>
-            </div>
-
-            <!--absolute positioned overlays-->
-            <sidebar id="sidebar">
-                <div id="category-legend" class="legend" style="display: block;">
-                    <h4>Subsidized Affordable Buildings</h4>
-                    <div><span style="background-color: #f03b20"></span>At-Risk or Flagged for Follow-up</div>
-                    <div><span style="background-color: #bd0026"></span>Recent Failing REAC Score</div>
-                    <div><span style="background-color: #8B4225"></span>Expiring Subsidy</div>              
-                    <div><span style="background-color: #fd8d3c"></span>Other Subsidized Property or More Info Needed</div>  
-                    <div><span style="background-color: #A9A9A9"></span>Lost Rental</div>    
-                </div>
-                <div id="stats">
-                    <h2>Affordable building statistics</h2>
-                    <p>Select a zone type on the left to change drilldown options</p>
-                    <p id="zone-drilldown-instructions">Choose a ward</p>
-                    <select id="zone-selector" role="group" aria-label="Filter">
-                    </select>
-                    <div id="pie-charts">
-                        <div id="pie-0"></div>
-                        <div id="pie-1"></div>
-                        <div id="pie-2"></div>
-                        <div id="pie-3"></div>
-                    </div>
-                </div>
-                <div id="preview">
-                    <h2>Building preview</h2>
-                    <p id="preview-instruct">Select a building from the map</p>
-                    <p id="preview-address"></p>
-                    <p id="preview-name"></p>
-                    <p id="preview-owner"></p>
-                </div>
-            </sidebar>
-            <div id="layer-menu">
-            </div>
-            <div id="overlay-menu">
-            </div>
-            <div id="temp-filter-menu">
-                <h3>Temp Filter Menu</h3>
-                <div id="filter-components">
-                </div>
-
-            </div>
-        </div>
+        
     </div>    
 <script src="js/core/housing-insights.js"></script>
 </body>

@@ -1,7 +1,7 @@
-"use strict";
+    "use strict";
 
 var mapView = {
-    el: 'mapView',
+    el: 'map-view',
     buildOverlayOptions: function(){
         var tablesWithOverlays = Object.keys(model.dataCollection.metaData).filter(function(key){
             var tableProperties = model.dataCollection.metaData[key];
@@ -10,63 +10,97 @@ var mapView = {
         mapView.initialOverlays = tablesWithOverlays.map(function(tableName){
             return {
                 "name": tableName,
-                "zones": model.dataCollection.metaData[tableName]['available_aggregates']
+                "zones": model.dataCollection.metaData[tableName]['api']['available_aggregates']
             }
         });
     },
-    init: function() {  
-        setSubs([
-            ['mapLayer', mapView.showLayer],
-            ['mapLoaded', model.loadMetaData],
-            ['dataLoaded.metaData', mapView.addInitialLayers],
-            ['dataLoaded.metaData', sideBar.init],
-            ['dataLoaded.metaData', mapView.overlayMenu],
-            ['dataLoaded.metaData', filterView.init],
-            ['overlayRequest', mapView.addOverlayData],
-            ['joinedToGeo', mapView.addOverlayLayer],
-            ['dataLoaded.raw_project', mapView.placeProjects],
-            ['previewBuilding', mapView.showPreview]
-        ]);
-        
-        //Initial page layout stuff
-        /*
-        Split(['#filter-panel', '#map-wrapper'], {
-            sizes: [25, 75],
-            minSize: 200
-        });
-        */
+    init: function() { // as single page app, view init() functions should include only what should happen the first time
+                       // the view is loaded. things that need to happen every time the view is made active should be in 
+                       // the onReturn methods. nothing needs to be there so far for mapView, but buildingView for instance 
+                       // should load the specific building info every time it's made active.
+        console.log(this);
+        var partialRequest = {
+            partial: this.el,
+            container: null, // will default to '#body-wrapper'
+            transition: false,
+            callback: appendCallback
+        };
+        controller.appendPartial(partialRequest, this);
+        function appendCallback() {
+            console.log(this);
+            setSubs([
+                ['mapLayer', mapView.showLayer],
+                ['mapLoaded', model.loadMetaData],
+                ['dataLoaded.metaData', mapView.addInitialLayers],
+                ['dataLoaded.metaData', sideBar.init],
+                ['dataLoaded.metaData', mapView.overlayMenu],
+                ['dataLoaded.metaData', filterView.init],
+                ['overlayRequest', mapView.addOverlayData],
+                ['joinedToGeo', mapView.addOverlayLayer],
+                ['dataLoaded.raw_project', mapView.placeProjects],
+                ['previewBuilding', mapView.showPreview]
+            ]);
+            
+            //Initial page layout stuff
+            /*
+            Split(['#filter-panel', '#map-wrapper'], {
+                sizes: [25, 75],
+                minSize: 200
+            });
+            */
 
 
-        //Add the map
-        mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
-        this.map = new mapboxgl.Map({
-          container: 'map', // container id
-          style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
-          zoom: 11,
-          center: [-76.92, 38.9072],
-          minZoom: 3,
-          preserveDrawingBuffer: true
-        });
-        
-        this.map.addControl(new mapboxgl.NavigationControl());
-        
-        this.map.on('load', function(){
-            setState('mapLoaded',true);
-        });
+            //Add the map
+            mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+            this.map = new mapboxgl.Map({
+              container: 'map', // container id
+              style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
+              zoom: 11,
+              center: [-76.92, 38.9072],
+              minZoom: 3,
+              preserveDrawingBuffer: true
+            });
+            
+            this.map.addControl(new mapboxgl.NavigationControl());
+            
+            this.map.on('load', function(){
+                setState('mapLoaded',true);
+            });
+        }
 
 
 
 
 
+    },
+    onReturn: function(){
+        console.log('nothing to do');
     },
     overlayMenu: function(){    
         mapView.buildOverlayOptions();    
         mapView.initialOverlays.forEach(function(overlay){
-            var link = document.createElement('a');
-            link.href = '#';
-            link.id = overlay.name + '-overlay-item';
-            link.innerHTML = overlay.name.toUpperCase().replace('_',' ');
-            link.onclick = function(e){
+            new mapView.overlayMenuOption(overlay);
+        });
+
+    },
+    overlayMenuOption: function(overlay){
+        var thisOption = this;
+        this.name = overlay.name;
+        mapView.overlayMenuOptions.push(this);
+
+        this.link = document.createElement('a');
+        this.link.href = '#';
+        this.link.id = overlay.name + '-overlay-item';
+        this.link.innerHTML = overlay.name.toUpperCase().replace('_',' ');
+        document.getElementById('overlay-menu').appendChild(this.link);
+
+        this.availableLayerNames = (mapView.initialOverlays.find(function(ovly){
+            return ovly.name === thisOption.name;
+        })).zones;
+
+        this.makeAvailable = function(){
+            this.link.className = '';
+            this.link.onclick = function(e){
                 e.preventDefault();
                 var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
                 console.log(existingOverlayType, overlay.name);
@@ -75,11 +109,27 @@ var mapView = {
                 } else {
                     mapView.clearOverlay();
                 }
+                mapView.layerMenuOptions.forEach(function(opt){
+                    if(thisOption.availableLayerNames.indexOf(opt.name) === -1){
+                        opt.makeUnavailable();
+                    }
+                    else{
+                        opt.makeAvailable();
+                    }
+                });
             };
-            document.getElementById('overlay-menu').appendChild(link);
-        });
+        }
+        this.makeUnavailable = function(){
+            this.link.className = 'unavailable';
+            this.link.onclick = function(e){
+                e.preventDefault();
+            }
 
+        }
+        // makes the link available by default.
+        this.makeAvailable();
     },
+    overlayMenuOptions: [],
     initialOverlays: [],
     overlayMapping: {
         neighborhood: {
@@ -249,6 +299,7 @@ var mapView = {
     },
     
     addToLayerMenu: function(layer) {
+
         d3.select('#layer-menu')
             .append('a')
             .attr('href','#')
@@ -268,7 +319,9 @@ var mapView = {
                 d3.event.preventDefault();
                 setState('mapLayer',layer.source);                
             });
+
     },
+    layerMenuOptions: [],
     showLayer: function(msg,data) {
         
         var previousLayer = getState().mapLayer[1];
@@ -347,14 +400,14 @@ var mapView = {
                                                                       // a the building.html page with a query parameter for the 
                                                                       // building id. uncomment the lines to see how it would work
                 .setLngLat(e.lngLat)
-                .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
-        //      .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
+        //      .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
+                .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
                 .addTo(mapView.map);
 
-      /*      popup._container.querySelector('a').onclick = function(e){
+            popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
                 setState('switchView', buildingView);
-            };*/
+            };
            });               
         
     },
