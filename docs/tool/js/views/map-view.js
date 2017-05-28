@@ -32,7 +32,7 @@ var mapView = {
                 ['mapLayer', mapView.showLayer],
                 ['mapLoaded', model.loadMetaData],
                 ['dataLoaded.metaData', mapView.addInitialLayers],
-                ['dataLoaded.metaData', sideBar.init],
+                ['dataLoaded.metaData', resultsView.init],
                 ['dataLoaded.metaData', mapView.overlayMenu],
                 ['dataLoaded.metaData', filterView.init],
                 ['overlayRequest', mapView.addOverlayData],
@@ -49,14 +49,13 @@ var mapView = {
             });
             */
 
-
             //Add the map
             mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
             this.map = new mapboxgl.Map({
               container: 'map', // container id
               style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
               zoom: 11,
-              center: [-76.92, 38.9072],
+              center: [-77, 38.9072],
               minZoom: 3,
               preserveDrawingBuffer: true
             });
@@ -67,10 +66,6 @@ var mapView = {
                 setState('mapLoaded',true);
             });
         }
-
-
-
-
 
     },
     onReturn: function(){

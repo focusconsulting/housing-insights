@@ -1,5 +1,3 @@
----
----
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,7 +15,7 @@
     <script src="js/charts/chart-prototype.js"></script>
     <script src="js/views/map-view.js"></script>
     <script src="js/views/building-view.js"></script>
-    <script src="js/views/sidebar-view.js"></script>
+    <script src="js/views/results-view.js"></script>
     <script src="js/views/filter-view.js"></script>
     <script src="js/charts/pie-chart-proto.js"></script>
     <script src="js/charts/donut-chart.js"></script>
@@ -32,8 +30,22 @@
     <link href='https://api.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
 </head>
 <body>
+<div id="main-nav">
+Housing Insights (banner content / menu to come) <div id="sub-nav">
+    <div id="left-options">
+        <button class="sub-nav-button" id="button-layers">Layers</button>
+        <button class="sub-nav-button" id="button-filters">Filters</button>
+    </div>
+    <div id="options-spacer"></div>
+    <div id="right-options">
+        <button class="sub-nav-button" id="button-charts">Charts</button>
+        <button class="sub-nav-button" id="button-buildings">Buildings</button>
+    </div>
+</div>
+</div>
     <div id="body-wrapper">
-        
+
+
     </div>    
 <script src="js/core/housing-insights.js"></script>
 </body>
