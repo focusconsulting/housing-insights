@@ -1,9 +1,7 @@
 "use strict"; 
 
-
-// I added the building variable to take the NLIHC id. This should be changed to our standard way of accepting that.
-var SubsidyTimelineChart = function(DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height, building) { 
-    Chart.call(this, DATA_FILE, dataName, el, field, sortField, asc, readableField, width, height, building); 
+var SubsidyTimelineChart = function(chartOptions) { 
+    Chart.call(this, chartOptions); 
                                                                                      // First step of inheriting from Chart.
                                                                                      // Call() calls a function. first param is
                                                                                      // the owner / context of the function
@@ -16,12 +14,10 @@ var SubsidyTimelineChart = function(DATA_FILE, dataName, el, field, sortField, a
                               // param1 = what to extend      param2 = with what
         this.extendPrototype(SubsidyTimelineChart.prototype, subsidyTimelineExtension);
         this.margin = {top: 20, right: 10, bottom: 40, left: 10};         // Since this chart uses axes, I implemented the D3 margin
-        this.width = width - this.margin.left - this.margin.right;     // convention, which you may reference at https://bl.ocks.org/mbostock/3019563
-        this.height = height - this.margin.top - this.margin.bottom; 
-        this.building = building;
- 
+        this.width = chartOptions.width - this.margin.left - this.margin.right;     // convention, which you may reference at https://bl.ocks.org/mbostock/3019563
+        this.height = chartOptions.height - this.margin.top - this.margin.bottom; 
 
-        
+        this.building = getState()['selectedBuilding'];
     
   };
 
@@ -31,24 +27,17 @@ SubsidyTimelineChart.prototype = Object.create(Chart.prototype); // Second step 
 
 var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
                              // as called in this.extendPrototype(...) above 
-    setup: function(dataName, el, field, sortField, asc, readableField) {
+    setup: function(chartOptions) {
 
         var chart = this,
-            data = chart.data.filter(function(d){ return d['nlihc_id'] === chart.building}),
-                              // the filter here removes data for all other buildings using the building parameter
+            data = model.dataCollection[chartOptions.dataRequest.name],
             groups; // the groups variable is used to draw a multi-part figure for each datum
-        console.log(this.width, this.margin.left, this.margin.right);
-        console.log(el);
         chart.svg = d3.select(el) // select elem (div#chart-0)
               .append('svg')        // append svg element 
                 .attr('width', this.width + this.margin.left + this.margin.right)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
                 .attr('height', this.height + this.margin.top + this.margin.bottom) // continuation of d3 margin convention
               .append("g")
                 .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
-
-        console.log(chart['data']);
-        console.log(data);
-
 
         chart.minTime = d3.min(data, function(d){
           return chart.timeParser.toUTC(d['poa_start']);
@@ -64,12 +53,10 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               // that I didn't want to spend the time to dig through the docs. You are welcome to
               // find it and replace this.
 
-
         groups = chart.svg.selectAll('g')
               .data(data)
               .enter()
               .append('g');
-
      
         groups.append('line')
               .attr('x1', function(d){
@@ -216,40 +203,3 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
 
 }; // end prototype
-
-/*
- * Constructor calls below. First done inline; second only when the data from the first is available, using PubSub module 
- */
-
-var DATA_FILE = './data/Subsidy.csv';
-console.log(subsidyTimelineExtension);
-
-buildingID =  app.getParameterByName('building') 
-// first Chart loads new data
-new SubsidyTimelineChart(DATA_FILE,'projectCSV','#subsidy-timeline-chart','Proj_Units_Tot','Proj_Zip',false,'Total Units',1000,300,buildingID); 
-
-// second chart uses the same data as first. its constructor is wrapped in a function subscribed
-// to the publishing of the data being loaded. using this pattern, we can have several charts on a 
-// page based on the same data
-
-
-/* EXAMPLE OF HOW TO CALL SUBSEQUENT CHART BASED ON SAME DATE AS ANOTHER */
-
-// wrapper function.the name doesn't matter; it just needs to be echoed below in the PubSu.subscribe method
-
-// function subscriber1( msg, data ){ // for now the subscribed function directly calls the Chart constructor but
-//                                           // in future we could have it look for all constructors waiting to be called,
-//                                           // defined elsewhere
-//     console.log( msg, data );
-//     new MovingBlockChart(null,'projectCSV','#chart-1','Proj_Units_Tot','Proj_Units_Tot',true,'Total Units','100%',200);
-//                                                                                              // second Chart uses same data 
-//                                                                                              // as first. Needs to wait until
-//                                                                                              // that data is loaded before being
-//                                                                                              // initiated.
-
-// };
-
-// add the function to the list of subscribers for a particular topic (projectCSV/load in this case)
-// we're keeping the returned token, in order to be able to unsubscribe
-// from the topic later on (probably not necessary for us, not yet at least)
-// var token = PubSub.subscribe( 'projectCSV/load', subscriber1 );
