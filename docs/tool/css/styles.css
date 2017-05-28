@@ -30,7 +30,7 @@ html, body {
     height: 40px;
     display: flex;
     justify-content: space-between;
-    opacity: 0.85;
+    
 }
 
 .sub-nav-button {
@@ -38,6 +38,26 @@ html, body {
     background-color: inherit;
     border: none;
     border-bottom: 2px solid rgb(189, 54, 33);
+    transition: background-color 0.2s linear;
+    cursor: pointer;
+}
+
+.sub-nav-container {
+    position: relative; 
+    margin-top: 40px;  
+    border-bottom: 1px solid black;
+    display: none; 
+}
+
+.sub-nav-container.active {
+    display: block;
+}
+
+.sub-nav-container p {
+    border-top: 1px solid black;
+    padding: 5px;
+
+
 }
 
 #left-options .sub-nav-button {
@@ -137,7 +157,7 @@ html, body {
     top: 80px;
     bottom: 0;
     z-index: 9999;
-    background-color: rgba(255,255,255,0.85);
+    background-color: rgba(255,255,255,0.95 );
     transform: translate(-100%,0);
     transition: transform 0.2s linear;
     border-right: 1px solid rgb(189, 54, 33);
@@ -169,6 +189,7 @@ html, body {
     align-items: center;
     cursor: pointer;
     transition: transform 0.2s linear;
+    z-index: 9999;
 
 }
 
@@ -186,17 +207,24 @@ html, body {
     transform: translate(0,0) !important;
 }
 
-.triangle-left {
+.sidebar.active .triangle {
+    transform: rotate(180deg);
+}
+
+.triangle {
     width: 0;
     height: 0;
-    border-top: 6px solid transparent;
-    border-right: 12px solid #fff;
+    border-top: 6px solid transparent;   
     border-bottom: 6px solid transparent;
     transition: transform 0.2s linear;
 }
 
-.triangle-left.right {
-    transform: rotate(180deg);
+.triangle.right {
+    border-left: 12px solid #fff;    
+}
+
+.triangle.left {
+    border-right: 12px solid #fff;    
 }
 
 /*
@@ -211,12 +239,7 @@ html, body {
  }
 
 #layer-menu, #overlay-menu, #temp-filter-menu {
-    background: #fff;
-    position: absolute;
-    z-index: 1;    
-    border-radius: 3px;
-    border: 1px solid rgba(0,0,0,0.4); 
-    left:10px;   
+    background: inherit;
 }
 
 #temp-filter-menu {
@@ -225,15 +248,9 @@ html, body {
     top: 100px;
 }
 
-#layer-menu {
-    width: 120px;
-    bottom: 10px;    
-}
-#overlay-menu {
-    width: 150px;
-    top: 10px;
-}
-
+#layer-menu,#overlay-menu {
+    width: 100%;
+    }
 #layer-menu a, #overlay-menu a {
     font-size: 13px;
     color: #404040;
@@ -241,10 +258,10 @@ html, body {
     margin: 0;
     padding: 0;
     padding: 10px;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(0,0,0,0.25);
+    text-decoration: none;    
     text-align: center;
 }
+
 
 a.unavailable {
     background-color: rgb(220,220,220);

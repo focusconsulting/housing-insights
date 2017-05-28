@@ -42,15 +42,52 @@ var filterView = {
         
         //Make sure other functionality is hooked up
         setSubs([
-            ['filterViewLoaded', filterUtil.init]
+            ['filterViewLoaded', filterUtil.init],
+            ['sidebar', filterView.toggleSidebar],
+            ['subNav', filterView.toggleSubNavButtons]
+
+            
+
         ]);
 
+        setState('subNav.left','layers');
+        setState('subNav.right','buildings');
+
         document.querySelectorAll('.sidebar-tab').forEach(function(tab){
-            tab.onclick = filterView.toggleSidebar;
+            tab.onclick = function(e){
+                var sideBarMsg = e.currentTarget.parentElement.id.replace('-','.');
+                filterView.toggleSidebarState(sideBarMsg);
+            }
         });
 
         document.querySelectorAll('.sub-nav-button').forEach(function(button){
-            button.onclick = filterView.subNavSelect;
+            button.onclick = function(e){
+                var leftRight = e.currentTarget.parentElement.id.replace('-options','');
+                var subNavType = e.currentTarget.id.replace('button-','');
+                if ( getState()['sidebar.' + leftRight] && getState()['sidebar.' + leftRight][0] ) { // if the accociated sidebar is open
+                    if (getState()['subNav.' + leftRight][0] === subNavType) { // if the clicked subNav button is already active
+                        setState('sidebar.' + leftRight, false); // close the sidebar
+                    } 
+                } else {
+                    setState('sidebar.' + leftRight, true); // open the sidebar
+                }              
+                setState('subNav.' + leftRight, subNavType);
+               /* console.log('click');
+                var leftRight = e.currentTarget.parentElement.id.replace('-options','');
+                console.log(leftRight);
+                var sideBarMsg = 'sidebar.' + leftRight;
+                var subButton = e.currentTarget.id.replace('button-','');
+                console.log(subButton);
+                if (getState()[sideBarMsg] && getState()[sideBarMsg][0])  { // if the associated sidebar is open 
+                    if (getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][0] === e.currentTarget.id){
+                        filterView.toggleSidebarState(sideBarMsg);
+                        setState('subNav.' + leftRight, e.currentTarget.id);
+                    } else {
+                        setState('subNav.' + leftRight, 'none');
+                    }
+                
+                }*/
+            }
         });
         //Add components to the navigation using the appropriate component type
         //TODO later we'll need to make sure this uses the appropriate order
@@ -138,13 +175,41 @@ var filterView = {
         setState('filterViewLoaded',true);
 
     }, //end init
-    toggleSidebar: function(e){
-        var sBar = e.currentTarget.parentElement;
-        sBar.classList.toggle('active'); // not supported in lte ie9
-        sBar.querySelector('.triangle-left').classList.toggle('right');
+    toggleSidebar: function(msg,data){
+        console.log('toggleSidebar');
+        var sBar = document.getElementById(msg.replace('.','-'));
+        var leftRight = msg.indexOf('left') !== -1 ? 'left' : 'right';
+        console.log(leftRight);
+        if ( data === true ) {
+            sBar.classList.add('active'); // not supported in lte ie9 
+            document.getElementById('button-' + getState()['subNav.' + leftRight][0]).classList.add('active');           
+        } else {
+            sBar.classList.remove('active'); // not supported in lte ie9
+            document.getElementById('button-' + getState()['subNav.' + leftRight][0]).classList.remove('active');           
+            
+        }
     },
-    subNavSelect: function(e){
-        e.currentTarget.classList.toggle('active'); // will work only if keep to two options per group
+    toggleSidebarState(sideBarMsg){
+        if (getState()[sideBarMsg] && getState()[sideBarMsg][0]) {
+            setState(sideBarMsg, false);
+        } else {
+            setState(sideBarMsg, true);
+        }
+    },
+    toggleSubNavButtons(msg, data) {
+        console.log(data);
+        var leftRight = msg.indexOf('left') !== -1 ? 'left' : 'right';
+        if ( getState()['sidebar.' + leftRight] && getState()['sidebar.' + leftRight][0] ) {
+            document.querySelectorAll('#' + leftRight + '-options .sub-nav-button').forEach(function(button){
+               button.classList.remove('active'); 
+            });
+            document.querySelector('#' + leftRight + '-options #button-' + data).classList.add('active');
+        }
+        document.querySelector('#' + data).classList.add('active');
+        if ( getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][1] ){            
+            document.querySelector('#' + getState()['subNav.' + leftRight][1]).classList.remove('active');
+        }
     }
+   
 };
 
