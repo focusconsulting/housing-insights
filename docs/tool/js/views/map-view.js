@@ -60,7 +60,7 @@ var mapView = {
               preserveDrawingBuffer: true
             });
             
-            this.map.addControl(new mapboxgl.NavigationControl());
+            this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
             
             this.map.on('load', function(){
                 setState('mapLoaded',true);
