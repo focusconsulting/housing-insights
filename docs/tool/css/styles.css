@@ -15,7 +15,7 @@ html, body {
     background-color: rgb(189, 54, 33);
     color:#fff;
     width: 100%;
-    height: 80px;
+    height: 40px;
     z-index: 9999;
     position: fixed;
 
@@ -24,7 +24,7 @@ html, body {
 #sub-nav {
     width: 100%;
     position:absolute;
-    bottom: 0;
+    top: 40px;
     color: inherit;
     background-color: #d69c93;
     height: 40px;
@@ -93,6 +93,11 @@ html, body {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
     opacity: 1;
+}
+
+.main-view:not(#map-view){
+    position: relative;
+    top:40px;
 }
 
 .main-view.fade {
