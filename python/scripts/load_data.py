@@ -20,6 +20,7 @@ Notes:
 import sys
 import os
 import logging
+import argparse
 
 
 # Needed to make relative package imports when running this file as a script
@@ -67,7 +68,9 @@ class LoadData(object):
         # load defaults if no arguments passed
         _scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
         if database_choice is None:
-            database_choice = 'local_database'
+            self.database_choice = 'local_database'
+        else:
+            self.database_choice = database_choice
         if meta_path is None:
             meta_path = os.path.abspath(os.path.join(_scripts_path,
                                                      'meta.json'))
@@ -81,7 +84,7 @@ class LoadData(object):
         self.manifest = ManifestReader(manifest_path)
 
         # setup engine for database_choice
-        self.engine = dbtools.get_database_engine(database_choice)
+        self.engine = dbtools.get_database_engine(self.database_choice)
 
         # update the meta.json to the database
         ingestionfunctions.meta_json_to_database(self.engine, self.meta)
@@ -96,7 +99,8 @@ class LoadData(object):
         query_result.append(db_conn.execute(
             "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
 
-        if database_choice == 'remote_database' or database_choice == 'remote_database_master':
+        if self.database_choice == 'remote_database' or self.database_choice \
+                == 'remote_database_master':
             query_result.append(db_conn.execute('''
             GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
             GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
@@ -220,6 +224,7 @@ class LoadData(object):
                                filename=temp_filepath)
 
         # clean the file and save the output to a local pipe-delimited file
+        # if it doesn't it have a 'loaded' status in the database manifest
         if csv_reader.should_file_be_loaded(
                 sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
@@ -234,24 +239,30 @@ class LoadData(object):
             csv_writer.close()
 
             # write the data to the database
+            unique_data_id = manifest_row['unique_data_id']
             self._update_database(table_name=table_name,
+                                  unique_data_id=unique_data_id,
                                   sql_interface=sql_interface)
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
 
-    def _update_database(self, table_name, sql_interface):
+    def _update_database(self, table_name, unique_data_id, sql_interface):
         """
         Load the clean PSV file into the database
         """
         print("  Loading...")
 
-        # Decide whether to append or replace the table
+        # Decide whether to append or replace the data in table
         if self.meta[table_name]["replace_table"]:
             logging.info("  replacing existing table")
+
+            # result = self.engine.execute(
+            #     "DELETE FROM {} WHERE unique_data_id = {}".format(
+            #         table_name, unique_data_id))
             sql_interface.drop_table()
 
-        # Appends to table; if dropped, it recreates
+        # create table if it doesn't exist
         sql_interface.create_table_if_necessary()
         try:
             sql_interface.write_file_to_sql()
@@ -260,18 +271,18 @@ class LoadData(object):
             # currently write_file_to_sql() just writes in log that file failed
             pass
 
-if __name__ == '__main__':
-    """
-    Continue to honor command line feature after refactoring to encapsulate 
-    the module as a class. 
-    """
 
+def main(passed_arguments):
+    """
+    Initializes load procedure based on passed command line arguments and
+    options.
+    """
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
     manifest_path = os.path.abspath(os.path.join(scripts_path, 'manifest.csv'))
 
-    if 'sample' in sys.argv:
+    if passed_arguments.sample:
         meta_path = os.path.abspath(os.path.join(scripts_path,
                                                  'meta_sample.json'))
         manifest_path = os.path.abspath(
@@ -279,34 +290,64 @@ if __name__ == '__main__':
 
     # for case of more than one database choice default to the option with
     # the lowest risk if database is updated
-    if 'docker' in sys.argv:
+    if passed_arguments.database == 'docker':
         database_choice = 'docker_database'
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
-    elif 'docker_local' in sys.argv:
+    elif passed_arguments.database == 'docker_local':
         database_choice = 'docker_with_local_python'
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
-    elif 'remote' in sys.argv:
+    elif passed_arguments.database == 'remote':
         database_choice = 'remote_database'
         # Don't want sample data in the remote database
         meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
         manifest_path = os.path.abspath(
             os.path.join(scripts_path, 'manifest.csv'))
 
-        # Only users with additional admin priviledges can rebuild the
+        # Only users with additional admin privileges can rebuild the
         # remote database
-        if 'rebuild' in sys.argv:
+        if passed_arguments.rebuild:
             database_choice = 'remote_database_master'
 
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
-    else:
+    # TODO: do we want to default to local or docker?
+    elif passed_arguments.database == 'local':
         database_choice = 'local_database'
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
 
-    if 'rebuild' in sys.argv:
+    if passed_arguments.rebuild:
         loader.drop_tables()
 
-    loader.load_all_data()
+    if passed_arguments.update_only:
+        pass
+    else:
+        loader.load_all_data()
+
+if __name__ == '__main__':
+    """
+    Continue to honor command line feature after refactoring to encapsulate 
+    the module as a class. 
+    """
+    description = 'Loads our flat file data into the database of choice. You ' \
+                  'can load sample or real data and/or rebuild or update only '\
+                  'specific flat files based on unique_data_id values.'
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("database", help='which database the data should be '
+                                         'loaded to',
+                        choices=['docker', 'docker-local', 'local', 'remote'])
+    parser.add_argument('-s', '--sample', help='load with sample data',
+                        action='store_true')
+    # mutually exclusive options
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-r', '--rebuild', help='drop all tables in the '
+                                               'database and reload all',
+                       action='store_true')
+    group.add_argument('--update-only', nargs='+',
+                       help='only update tables with these unique_data_id '
+                            'values')
+
+    # handle passed arguments and options
+    main(parser.parse_args())
