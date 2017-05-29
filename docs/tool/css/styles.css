@@ -1,0 +1,134 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+
+html, body { 
+  margin:0; 
+  padding:0; 
+  height:100%; 
+}
+
+
+.main-view {
+    width: 100%;
+    transition: opacity 0.5s linear, transform 0.5s ease-in;
+    opacity: 1;
+}
+
+.main-view.fade {
+    opacity: 0;
+}
+
+.main-view.inactive {
+    visibility: hidden;
+}
+
+.main-view.transition-right {
+    transform: translate(100%,0);
+}
+
+.main-view.transition-left {
+    transform: translate(-100%,0);
+}
+
+.legend {
+    background-color: rgba(255,255,255,.01);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.30);
+    padding: 10px;
+    position: relative;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    z-index: 1;
+}
+
+.legend div span {
+    border-radius: 50%;
+    display: inline-block;
+    height: 10px;
+    margin-right: 5px;
+    width: 10px;
+    }
+
+
+#sidebar {
+    width: 300px;
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    right: 10px;
+    background-color: #fff;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar > div {
+    border: 1px solid magenta;
+    flex-grow: 1;
+    padding: 10px 0;
+}
+
+#pie-charts {
+    display: flex;
+    justify-content: space-between;
+}
+
+/*
+ * MAPBOX
+ */
+ 
+ #map {
+  position: absolute;
+  width: 100%;
+  top:0;
+  bottom:0;
+ }
+
+#layer-menu, #overlay-menu, #temp-filter-menu {
+    background: #fff;
+    position: absolute;
+    z-index: 1;    
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.4); 
+    left:10px;   
+}
+
+#temp-filter-menu {
+    width: 200px;
+    height: 300px;
+    top: 100px;
+}
+
+#layer-menu {
+    width: 120px;
+    bottom: 10px;    
+}
+#overlay-menu {
+    width: 150px;
+    top: 10px;
+}
+
+#layer-menu a, #overlay-menu a {
+    font-size: 13px;
+    color: #404040;
+    display: block;
+    margin: 0;
+    padding: 0;
+    padding: 10px;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,0,0,0.25);
+    text-align: center;
+}
+
+a.unavailable {
+    background-color: rgb(220,220,220);
+    color: rgb(200, 200, 200);
+}
+
+a.active {
+    background-color: #b3cde3;
+}
