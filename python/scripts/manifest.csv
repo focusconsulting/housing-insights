@@ -62,9 +62,9 @@ skip,crime,crime_2011,12/31/2011,latin-1,../../../data,https://s3.amazonaws.com/
 skip,crime,crime_2012,12/31/2012,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2012-all.csv,skipping for now until we are able to display older data
 skip,crime,crime_2013,12/31/2013,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2013-all.csv,skipping for now until we are able to display older data
 skip,crime,crime_2014,12/31/2014,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2014-all.csv,skipping for now until we are able to display older data
-use,crime,crime_2015,12/31/2015,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2015-all.csv,
-use,crime,crime_2016,12/31/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2016-all.csv,
-use,crime,crime_2017,4/3/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2017-to-date.csv,
+use,crime,crime_2015,12/31/2015,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/crime_2015.csv,
+use,crime,crime_2016,12/31/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/crime_2016.csv,
+use,crime,crime_2017,4/3/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/crime_2017.csv,
 ____WMATA Data____,,,,,,,,
 superseded,wmata_dist,wmata_dist_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist.csv,
 superseded,wmata_info,wmata_info_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,
