@@ -65,6 +65,9 @@ class WmataApiConn(BaseApiConn):
                 logging.info("--------------------------------------------------------------------------\n")
                 for line in self.stopsOutput:
                     logging.info(line)
+
+            else:
+                self._array_to_csv(self.stopsHeader,self.stopsOutput,output_type)
         else:
             #Not an id supported by this method
             pass
@@ -139,6 +142,9 @@ class WmataApiConn(BaseApiConn):
                 logging.info("==========================================================================\n")
                 for line in self.distOutput:
                     logging.info(line)
+
+            else:
+                self._array_to_csv(self.distHeader, self.distOutput,output_type)
         else:
             #not a unique data id supported by this class
             pass
