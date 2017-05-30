@@ -144,7 +144,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             the source file column name which may be different from the final consistent name of census_tract
             '''
             # deal with null values TODO - check with Neal what this is doing
-            if row[column_name] == 'Null':
+            if row[column_name] == self.null_value:
                 return row
             else:
                 row[column_name] = self.census_mapping[row[column_name]]
