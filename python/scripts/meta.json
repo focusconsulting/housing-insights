@@ -3188,5 +3188,307 @@
       }
     ],
     "replace_table": true
+  },
+  "topa": {
+    "cleaner": "topa_cleaner",
+    "fields": [
+      {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      },
+      {
+        "display_name": "nidc_rcasd_id",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "Nidc_rcasd_id",
+        "sql_name": "nidc_rcasd_id",
+        "type": "text"
+      },
+      {
+        "display_name": "notice_type",
+        "display_text": "Category of TOPA notice recorded.",
+        "required_in_source": true,
+        "source_name": "Notice_type",
+        "sql_name": "notice_type",
+        "type": "text"
+      },
+      {
+        "display_name": "orig_address",
+        "display_text": "The original address associated with TOPA noticed as received before cleaning.",
+        "required_in_source": true,
+        "source_name": "Orig_address",
+        "sql_name": "orig_address",
+        "type": "text"
+      },
+      {
+        "display_name": "notes",
+        "display_text": "Urban Institute notes on the nature of this TOPA notice.",
+        "required_in_source": true,
+        "source_name": "Notes",
+        "sql_name": "notes",
+        "type": "text"
+      },
+      {
+        "display_name": "source_file",
+        "display_text": "Original CSV file as used by Urban Institute in their ingestion process.",
+        "required_in_source": true,
+        "source_name": "Source_file",
+        "sql_name": "source_file",
+        "type": "text"
+      },
+      {
+        "display_name": "notice_date",
+        "display_text": "Date of the TOPA notice in question.",
+        "required_in_source": true,
+        "source_name": "Notice_date",
+        "sql_name": "notice_date",
+        "type": "text"
+      },
+      {
+        "display_name": "num_units",
+        "display_text": "Number of housing units associated with this TOPA notification.",
+        "required_in_source": true,
+        "source_name": "Num_units",
+        "sql_name": "num_units",
+        "type": "integer"
+      },
+      {
+        "display_name": "sale_price",
+        "display_text": "If TOPA notice advertises a sale, the sale price in US dollars (whole number and non-decimal)",
+        "required_in_source": true,
+        "source_name": "Sale_price",
+        "sql_name": "sale_price",
+        "type": "integer"
+      },
+      {
+        "display_name": "address",
+        "display_text": "The address cleaned and parsed by Urban Institute for their ingestion of raw TOPA notice distribution.",
+        "required_in_source": true,
+        "source_name": "Address",
+        "sql_name": "address",
+        "type": "text"
+      },
+      {
+        "display_name": "addr_num",
+        "display_text": "Number of housing units related to the address associated with the TOPA notice, when volunteered by property owner.",
+        "required_in_source": true,
+        "source_name": "Addr_num",
+        "sql_name": "addr_num",
+        "type": "integer"
+      },
+      {
+        "display_name": "address_std",
+        "display_text": "Normalized address after cleaning for data ingestion, confirmed by reverse geocoding.",
+        "required_in_source": true,
+        "source_name": "address_std",
+        "sql_name": "address_std",
+        "type": "text"
+      },
+      {
+        "display_name": "latitude",
+        "display_text": "Latitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
+        "required_in_source": true,
+        "source_name": "Y",
+        "sql_name": "latitude",
+        "type": "decimal"
+      },
+      {
+        "display_name": "longitude",
+        "display_text": "Longitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
+        "required_in_source": true,
+        "source_name": "X",
+        "sql_name": "longitude",
+        "type": "decimal"
+      },
+      {
+        "display_name": "address_id",
+        "display_text": "The DCGIS Master Address Record ID as confirmed by reverse geocoding",
+        "required_in_source": true,
+        "source_name": "ADDRESS_ID",
+        "sql_name": "address_id",
+        "type": "decimal"
+      },
+      {
+        "display_name": "anc2002",
+        "display_text": "The Advisory Neighborhood Committee of the address of TOPA notice as designated in 2002.",
+        "required_in_source": true,
+        "source_name": "Anc2002",
+        "sql_name": "anc2002",
+        "type": "text"
+      },
+      {
+        "display_name": "anc2012",
+        "display_text": "The Advisory Neighborhood Committee of the address of TOPA notice as designated in 2012.",
+        "required_in_source": true,
+        "source_name": "Anc2012",
+        "sql_name": "anc2012",
+        "type": "text"
+      },
+      {
+        "display_name": "cluster_tr2000",
+        "display_text": "Tract-based neighborhood cluster data from 2000 associated with address of TOPA notice.",
+        "required_in_source": true,
+        "source_name": "Cluster_tr2000",
+        "sql_name": "cluster_tr2000",
+        "type": "text"
+      },
+      {
+        "display_name": "geo2000",
+        "display_text": "Full census tract ID from 2000 associated with the address of the TOPA notice.",
+        "required_in_source": true,
+        "source_name": "Geo2000",
+        "sql_name": "geo2000",
+        "type": "text"
+      },
+      {
+        "display_name": "geo2010",
+          "display_text": "Full census tract ID from 2010 associated with the address of the TOPA notice.",
+        "required_in_source": true,
+        "source_name": "Geo2010",
+        "sql_name": "geo2010",
+        "type": "text"
+      },
+      {
+        "display_name": "geobg2010",
+        "display_text": "Full census block group ID from 2010 associated with the address of the TOPA notice.",
+        "required_in_source": true,
+        "source_name": "GeoBg2010",
+        "sql_name": "geobg2010",
+        "type": "text"
+      },
+      {
+        "display_name": "geoblk2010",
+        "display_text": "Full census block ID from 2010 associated with the address of the TOPA notice.",
+        "required_in_source": true,
+        "source_name": "GeoBlk2010",
+        "sql_name": "geoblk2010",
+        "type": "text"
+      },
+      {
+        "display_name": "psa2004",
+        "display_text": "Police service area assoicated with the address of the TOPA notice as of 2004",
+        "required_in_source": true,
+        "source_name": "Psa2004",
+        "sql_name": "psa2004",
+        "type": "text"
+      },
+      {
+        "display_name": "psa2012",
+        "display_text": "Police service area assoicated with the address of the TOPA notice as of 2004",
+        "required_in_source": true,
+        "source_name": "Psa2012",
+        "sql_name": "psa2012",
+        "type": "text"
+      },
+      {
+        "display_name": "ssl",
+        "display_text": "Square Suffix Lot ID for the address associated with the address of the TOPA notice.",
+        "required_in_source": true,
+        "source_name": "SSL",
+        "sql_name": "ssl",
+        "type": "text"
+      },
+      {
+        "display_name": "voterpre2012",
+        "display_text": "2012 voter precinct data associated with the address of the TOPA notice.",
+        "required_in_source": true,
+        "source_name": "VoterPre2012",
+        "sql_name": "voterpre2012",
+        "type": "text"
+      },
+      {
+        "display_name": "ward2002",
+        "display_text": "Ward of the address associated with the TOPA notice as of 2002.",
+        "required_in_source": true,
+        "source_name": "Ward2002",
+        "sql_name": "ward2002",
+        "type": "text"
+      },
+      {
+        "display_name": "ward",
+        "display_text": "Ward of the address associated with the TOPA notice as of 2012.",
+        "required_in_source": true,
+        "source_name": "Ward2012",
+        "sql_name": "ward",
+        "type": "text"
+      },
+      {
+        "display_name": "m_addr",
+        "display_text": "Geocoded address result.",
+        "required_in_source": true,
+        "source_name": "M_ADDR",
+        "sql_name": "m_addr",
+        "type": "text"
+      },
+      {
+        "display_name": "m_city",
+        "display_text": "Geocoded city result.",
+        "required_in_source": true,
+        "source_name": "M_CITY",
+        "sql_name": "m_city",
+        "type": "text"
+      },
+      {
+        "display_name": "m_state",
+        "display_text": "Geocoded state result.",
+        "required_in_source": true,
+        "source_name": "M_STATE",
+        "sql_name": "m_state",
+        "type": "text"
+      },
+      {
+        "display_name": "m_zip",
+        "display_text": "Geocoded ZIP code result.",
+        "required_in_source": true,
+        "source_name": "M_ZIP",
+        "sql_name": "m_zip",
+        "type": "decimal"
+      },
+      {
+        "display_name": "m_obs",
+        "display_text": "Geocoded OBS result from the address.",
+        "required_in_source": true,
+        "source_name": "M_OBS",
+        "sql_name": "m_obs",
+        "type": "decimal"
+      },
+      {
+        "display_name": "dc_mar_geocode_matched",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "_MATCHED_",
+        "sql_name": "dc_mar_geocode_matched",
+        "type": "text"
+      },
+      {
+        "display_name": "dc_mar_geocode_status",
+        "display_text": "Geocoding match level for the result.",
+        "required_in_source": true,
+        "source_name": "_STATUS_",
+        "sql_name": "dc_mar_geocode_status",
+        "type": "text"
+      },
+      {
+        "display_name": "dc_mar_geocode_notes",
+        "display_text": "Markings from the Urban Institute geocoding service results.",
+        "required_in_source": true,
+        "source_name": "_NOTES_",
+        "sql_name": "dc_mar_geocode_notes",
+        "type": "text"
+      },
+      {
+        "display_name": "dc_mar_geocode_score",
+        "display_text": "Confidence score attributed to geocoding result for Urban Institute geocoding service",
+        "required_in_source": true,
+        "source_name": "_SCORE_",
+        "sql_name": "dc_mar_geocode_score",
+        "type": "integer"
+      }
+    ],
+    "replace_table": false
   }
 }
