@@ -490,6 +490,10 @@ class reac_score_cleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', None])
         return row
 
+class real_property_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row, null_values=['', None])
+        return row
 
 class dchousing_cleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -509,4 +513,5 @@ class topa_cleaner(CleanerBase):
         # character in one or two columns.  Leave here for now.
         row = self.replace_nulls(row, null_values=['', '\\', None])
         return row
+
 
