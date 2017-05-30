@@ -1,7 +1,20 @@
+"""
+Module implements any changes needed to the data before it arrives in our
+database - replacing null, parsing dates, parsing boolean, and handling weird
+values.
+"""
+
 from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
 import logging
+
+from housinginsights.ingestion.DataReader import HIReader
+import os
+
+
+package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
+                                           os.pardir))
 
 '''
 Usage:
@@ -20,22 +33,32 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         self.null_value = 'Null' #what the SQLwriter expects in the temp csv
 
+        #Flatten the census mapping file so that every potential name of a census tract can be translated to its standard format
+        self.census_mapping = {}
+        census_reader = HIReader(os.path.join(package_dir,'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
+        for row in census_reader:
+            for key, value in row.items():
+                self.census_mapping[value] = row['census_tract']
+
+
     @abstractmethod
     def clean(self, row, row_num):
+        # TODO: add replace_null method as required for an implementation (#176)
         pass
 
-
-    def field_meta(self,field):
+    # TODO: figure out what is the point of this method...it looks incomplete
+    def field_meta(self, field):
         for field_meta in self.fields:
             if f['source_name'] == field:
                 return field_meta
             return None
 
-    def replace_nulls(self, row, null_values =  ['NA', '-', '+','', None]):
-        for key in row:
-            if row[key] in null_values:
+    def replace_nulls(self, row, null_values=['NA', '-', '+','', None]):
+        for key, value in row.items():
+            if value in null_values:
                 row[key] = self.null_value
         return row
+
     def remove_line_breaks(self,row):
         #TODO see if it's possible to not do this by getting the copy_from to be ok with breaks
         for key in row:
@@ -46,7 +69,7 @@ class CleanerBase(object, metaclass=ABCMeta):
     def format_date(self, value):
         date = None
         try:
-            _date = dateparser.parse(value,dayfirst=False, yearfirst=False)
+            _date = dateparser.parse(value, dayfirst=False, yearfirst=False)
             #_date = datetime.strptime(value, '%m/%d/%Y')
             date = datetime.strftime(_date, '%Y-%m-%d')
         except Exception as e:
@@ -54,20 +77,20 @@ class CleanerBase(object, metaclass=ABCMeta):
                 date = self.null_value
             else:
                 logging.warning("    Unable to format date properly: {}".format(value))
-                date=self.null_value
+                date = self.null_value
 
         return date
 
     def convert_boolean(self,value):
         mapping = {
-            'Yes':True,
-            'No':False,
+            'Yes': True,
+            'No': False,
             'Y': True,
-            'N':False,
-            'TRUE':True,
-            'FALSE':False,
-            '1':True,
-            '0':False
+            'N': False,
+            'TRUE': True,
+            'FALSE': False,
+            '1': True,
+            '0': False
             }
         return mapping[value]
 
@@ -86,7 +109,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
     def remove_non_dc_tracts(self,row,column_name):
         '''
-        TODO switch this to not be hardcoded, and to be consistentwith replace_tracts code
+        TODO change to use self.census_mapping
         '''
         dc_tracts=["11001000100","11001000201","11001000202","11001000300","11001000400","11001000501","11001000502","11001000600",
         "11001000701","11001000702","11001000801","11001000802","11001000901","11001000902","11001001001","11001001002","11001001100",
@@ -113,10 +136,21 @@ class CleanerBase(object, metaclass=ABCMeta):
         else:
             return None
 
+    def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
+            '''
+            Make all census tract names follow a consistent format. 
+            column_name corresponds to the key of the row, which depends on 
+            the source file column name which may be different from the final consistent name of census_tract
+            '''
+            row[column_name] = self.census_mapping[row[column_name]]
+            return row
+
     def replace_tracts(self,row,row_num,column_name='census_tract'):
         '''
         Converts the raw census tract code to the more readable format used by PresCat
         TODO should read these mappings from file instead of having them hardcoded. 
+
+        TODO should use self.census_mapping instead
         '''
         census_tract_mapping = { "000100":"Tract 1"
                                 ,"000201":"Tract 2.01"
@@ -307,8 +341,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             #this prints error for many rows with nulls. 
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
-        
-        
+
     def append_tract_label(self,row,row_num,column_name='census_tract_number'):
         '''
         Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value 
@@ -334,15 +367,21 @@ class CleanerBase(object, metaclass=ABCMeta):
 # Custom Cleaners
 #############################################
 
+# TODO: maybe automate this via cmd line by passing simple list of keys that
+# TODO: map to specific cleaner methods including option to pass custom methods
+
 class GenericCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
+
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['N','', None])
         row = self.parse_dates(row)
+        row = self.rename_census_tract(row,row_num,column_name='Geo2010')
         return row
+
 
 class SubsidyCleaner(CleanerBase):
     def clean(self, row, row_nume=None):
@@ -351,6 +390,7 @@ class SubsidyCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values = ['N','',None])
         row = self.parse_dates(row)
         return row
+
 
 class BuildingPermitsCleaner(CleanerBase):
     def clean(self, row, row_num = None):
@@ -369,14 +409,25 @@ class BuildingPermitsCleaner(CleanerBase):
             row['NEIGHBORHOODCLUSTER'] = 'Cluster ' + str(row['NEIGHBORHOODCLUSTER'])
             return row
 
-class ACSRentCleaner(CleanerBase):
+
+class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
-        row = self.high_low_rent(row)
-        #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
-        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-',''])
-        row = self.remove_non_dc_tracts(row,column_name='GEO.id2')
+        #Handle the first row which is a descriptive row, not data. 
         if row_num == 0:
             return None
+
+        row = self.remove_non_dc_tracts(row,column_name='GEO.id2')
+        if row is None:
+            return None
+
+        #Clean up the ones we keep
+        row = self.high_low_rent(row)
+        row['lower_quartile_rent'] = None #waiting on ACS to come from API instead
+
+        #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
+        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
+        row = self.rename_census_tract(row,column_name='GEO.id2')
+
         return row
 
     def high_low_rent(self,row):
@@ -395,6 +446,7 @@ class ACSRentCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
+
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
@@ -402,7 +454,19 @@ class CrimeCleaner(CleanerBase):
         row = self.replace_tracts(row,row_num,column_name='CENSUS_TRACT')
         row = self.rename_ward(row)
         return row
-        
+
+
+class DCTaxCleaner(CleanerBase):
+    def clean(self, row, row_num = None):
+        row = self.replace_nulls(row, null_values=['', '\\', None])
+        row['OWNER_ADDRESS_CITYSTZIP'] = self.null_value                            \
+                                            if row['OWNER_ADDRESS_CITYSTZIP']==','  \
+                                            else row['OWNER_ADDRESS_CITYSTZIP']
+        row['VACANT_USE'] = self.convert_boolean(row['VACANT_USE'].capitalize())
+        row = self.parse_dates(row)
+        return row
+
+
 class hmda_cleaner(CleanerBase):    
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
@@ -410,13 +474,16 @@ class hmda_cleaner(CleanerBase):
         row = self.append_tract_label(row,row_num,column_name='census_tract_number')
         return row
 
+
 class WmataDistCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         return row
 
+
 class WmataInfoCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         return row
+
 
 class reac_score_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
@@ -427,3 +494,24 @@ class real_property_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row, null_values=['', None])
         return row
+
+class dchousing_cleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        row = self.replace_nulls(row, null_values=['', None])
+
+        # convert milliseconds to m/d/Y date format
+        source_name = "GIS_LAST_MOD_DTTM"
+        milli_sec = int(row[source_name])
+        row[source_name] = \
+            datetime.fromtimestamp(milli_sec / 1000.0).strftime('%m/%d/%Y')
+
+        return row
+
+class topa_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
+        # character in one or two columns.  Leave here for now.
+        row = self.replace_nulls(row, null_values=['', '\\', None])
+        return row
+
+

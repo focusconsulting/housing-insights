@@ -1,12 +1,10 @@
-
-import csv
 from pprint import pprint
 
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.mar import MarResult, FIELDS
 
 
-class MarApiConn(object):
+class MarApiConn(BaseApiConn):
     """
     API Interface to the Master Address Record (MAR) database.
     Use public methods to retrieve data.
@@ -15,7 +13,7 @@ class MarApiConn(object):
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
     def __init__(self):
-        self.conn = BaseApiConn(MarApiConn.BASEURL)
+        super().__init__(MarApiConn.BASEURL)
 
     def find_location(self, location, output_type=None,
                       output_file=None):
@@ -38,7 +36,7 @@ class MarApiConn(object):
             'f': 'json',
             'str': location
         }
-        result = self.conn.get('/findLocation2', params=params)
+        result = self.get('/findLocation2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -47,7 +45,7 @@ class MarApiConn(object):
         elif output_type == 'csv':
             data = result.json()['returnDataset']['Table1']
             results = [MarResult(address) for address in data]
-            self._result_to_csv(results, output_file)
+            self.result_to_csv(FIELDS, results, output_file)
         return result.json()
 
     def reverse_geocode(self, xcoord, ycoord, output_type=None,
@@ -77,7 +75,7 @@ class MarApiConn(object):
             'x': xcoord,
             'y': ycoord
         }
-        result = self.conn.get('/reverseGeocoding2', params=params)
+        result = self.get('/reverseGeocoding2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -86,7 +84,7 @@ class MarApiConn(object):
         elif output_type == 'csv':
             data = result.json()['Table1']
             results = [MarResult(address) for address in data]
-            self._result_to_csv(results, output_file)
+            self.result_to_csv(FIELDS, results, output_file)
         return result.json()
 
     def get_condo_count(self, location, output_type=None,
@@ -119,7 +117,7 @@ class MarApiConn(object):
 
     def get_condo_info(self, location, output_type=None,
                        output_file=None):
-        pass #TODO
+        pass  # TODO
 
     def _find_condo_unit(self, address_id):
         """
@@ -132,7 +130,7 @@ class MarApiConn(object):
             'f': 'json',
             'AID': address_id
         }
-        result = self.conn.get('/FindCondoUnitFromAID2', params=params)
+        result = self.get('/FindCondoUnitFromAID2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
@@ -153,12 +151,40 @@ class MarApiConn(object):
         address_id = result['returnDataset']['Table1'][0]['ADDRESS_ID']
         return address_id
 
-    def _result_to_csv(self, result, csvfile):
+    def reverse_lat_lng_geocode(self, latitude, longitude, output_type=None,
+                                output_file=None):
         """
-        Write the results to a csv file.
+        Do a reverse geocode lookup for MAR address/alias points within 200 
+        meters from the given Latitude and Longitude coordinates and returns 
+        the nearest five. The returned distance unit is meter.
+
+        :param latitude: Latitude
+        :type latitude: str
+
+        :param longitude: Longitude
+        :type longitude: str
+        :param output_type: Output type specified by user.
+        :type  output_type: str
+
+        :param output_file: Output file specified by user.
+        :type  output_file: str
+
+        :returns: Json output from the api.
+        :rtype: json
         """
-        with open(csvfile, 'w', encoding='utf-8') as f:
-            writer = csv.writer(f, delimiter=',')
-            writer.writerow(FIELDS)
-            for result in result:
-                writer.writerow(result.data)
+        params = {
+            'f': 'json',
+            'lat': latitude,
+            'lng': longitude
+        }
+        result = self.get('/reverseLatLngGeocoding2', params=params)
+        if result.status_code != 200:
+            err = "An error occurred during request: status {0}"
+            raise Exception(err.format(result.status_code))
+        if output_type == 'stdout':
+            pprint(result.json())
+        elif output_type == 'csv':
+            data = result.json()['Table1']
+            results = [MarResult(address) for address in data]
+            self.result_to_csv(FIELDS, results, output_file)
+        return result.json()

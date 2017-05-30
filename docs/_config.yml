@@ -8,7 +8,7 @@
 
 # Site settings
 title: CTDC Project
-email: humphrey.neal@gmail.com
+email: neal@nhumphrey.com
 description: > # this means to ignore newlines until "baseurl:"
   This is the placeholder website for the CTDC project.
 baseurl:  # the subpath of your site, e.g. /blog
@@ -19,3 +19,9 @@ partners: [{name: 'CNHED', logo: '/assets/CNHED-logo.jpg',  url: 'https://www.cn
 
 # Build settings
 markdown: kramdown
+encoding: UTF-8
+
+collections:
+  insights:
+    output: true
+    permalink: /:collection/:path
