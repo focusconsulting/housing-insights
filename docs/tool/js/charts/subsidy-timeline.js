@@ -1,7 +1,6 @@
 "use strict"; 
 
 var SubsidyTimelineChart = function(chartOptions) { 
-    Chart.call(this, chartOptions); 
                                                                                      // First step of inheriting from Chart.
                                                                                      // Call() calls a function. first param is
                                                                                      // the owner / context of the function
@@ -10,29 +9,31 @@ var SubsidyTimelineChart = function(chartOptions) {
                                                                                      // invoke a function as a new method of
                                                                                      // an existing object."
                                                                                      // https://www.w3schools.com/js/js_function_invocation.asp
-        // extend prototype is a method of Chart, defined in housing-insights.js, which MovingBlockChart has inherited from
+        // extend prototype is a method of Chart, defined in housing-insights.js
                               // param1 = what to extend      param2 = with what
-        this.extendPrototype(SubsidyTimelineChart.prototype, subsidyTimelineExtension);
-        this.margin = {top: 20, right: 10, bottom: 40, left: 10};         // Since this chart uses axes, I implemented the D3 margin
-        this.width = chartOptions.width - this.margin.left - this.margin.right;     // convention, which you may reference at https://bl.ocks.org/mbostock/3019563
-        this.height = chartOptions.height - this.margin.top - this.margin.bottom; 
+    this.extendPrototype(SubsidyTimelineChart.prototype, subsidyTimelineExtension);
 
-        this.building = getState()['selectedBuilding'];
-    
-  };
+    this.margin = {top: 20, right: 10, bottom: 40, left: 10};         // Since this chart uses axes, I implemented the D3 margin
+    this.width = chartOptions.width - this.margin.left - this.margin.right;     // convention, which you may reference at https://bl.ocks.org/mbostock/3019563
+    this.height = chartOptions.height - this.margin.top - this.margin.bottom; 
 
-SubsidyTimelineChart.prototype = Object.create(Chart.prototype); // Second step of inheriting from Chart. I can't remember why you
+    this.building = getState()['selectedBuilding'][0]['properties'];
+    this.initialize(chartOptions);    
+};
+
+SubsidyTimelineChart.prototype = Object.create(ChartProto.prototype); // Second step of inheriting from Chart. I can't remember why you
                                                              // have to use Object.create instead of just assignment (=), but
                                                              // you do 
 
 var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
                              // as called in this.extendPrototype(...) above 
-    setup: function(chartOptions) {
+    initialize: function(chartOptions) {
 
         var chart = this,
-            data = model.dataCollection[chartOptions.dataRequest.name],
+            data = model.dataCollection[chartOptions.dataRequest.name]['items'],
             groups; // the groups variable is used to draw a multi-part figure for each datum
-        chart.svg = d3.select(el) // select elem (div#chart-0)
+            
+        chart.svg = d3.select(chartOptions.container) // select elem (div#chart-0)
               .append('svg')        // append svg element 
                 .attr('width', this.width + this.margin.left + this.margin.right)   // d3 v4 requires setting attributes one at a time. no native support for setting attr or style with objects as in v3. this library would make it possible: mini library D3-selection-mult
                 .attr('height', this.height + this.margin.top + this.margin.bottom) // continuation of d3 margin convention
@@ -40,10 +41,10 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
         chart.minTime = d3.min(data, function(d){
-          return chart.timeParser.toUTC(d['poa_start']);
+          return chart.timeParser.toUTC(d['subsidy_start_first']);
         });
         chart.maxTime = d3.max(data, function(d){
-          return chart.timeParser.toUTC(d['poa_end']);
+          return chart.timeParser.toUTC(d['subsidy_end_first']);
         });
         chart.xScale = d3.scaleTime()
                     .domain([new Date(chart.minTime), new Date(chart.maxTime)]).range([0, .9 * this.width]);
@@ -60,10 +61,10 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
      
         groups.append('line')
               .attr('x1', function(d){
-                return chart.xScale(new Date(chart.timeParser.toUTC(d['poa_start'])));
+                return chart.xScale(new Date(chart.timeParser.toUTC(d['subsidy_start_first'])));
               })
               .attr('x2', function(d){
-                return chart.xScale(new Date(chart.timeParser.toUTC(d['poa_end'])));
+                return chart.xScale(new Date(chart.timeParser.toUTC(d['subsidy_end_first'])));
               })
               .attr('y1', function(d, i){
                 return chart.yScale(i);
@@ -75,19 +76,19 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) + 3;
+                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first'])) + 3;
               })
               .attr('y', function(d,i){
                 return chart.yScale(i) + 5;
               })
               .text(function(d){
-                return chart.timeParser.year(d['poa_end']);
+                return chart.timeParser.year(d['subsidy_end_first']);
               })
               .style('fill', '#999999');
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end']))-15;
+                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first']))-15;
               })
               .attr('y', function(d,i){
                 return chart.yScale(i) - 4;
@@ -99,13 +100,13 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('text')
               .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) - 15;
+                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first'])) - 15;
               })
               .attr('y', function(d,i){
                 return chart.yScale(i) + 16;
               })
               .text(function(d){
-                return "Subsidized units: " + d['units_assist'];
+                return "Subsidized units: " + d['proj_units_assist_min'];
               })
               .attr('fill','gray')
               .attr('text-anchor','end');        
@@ -114,7 +115,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('circle')
               .attr('cx', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_start']));
+                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_start_first']));
               })
               .attr('cy', function(d,i){
                 return chart.yScale(i);
@@ -124,7 +125,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('polygon')
               .attr('points', function(d, i){
-                let x2 = chart.xScale(chart.timeParser.parsedDate(d['poa_end'])),
+                let x2 = chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first'])),
                     x1 = x2 - 7,
                     y2 = chart.yScale(i),
                     y1 = y2 + 5,
@@ -136,10 +137,10 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
 
         groups.append('line')
               .attr('x1', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end']));
+                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first']));
               })
               .attr('x2', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['poa_end']));
+                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first']));
               })
               .attr('y1', function(d,i){
                 return chart.yScale(i) - 7;
@@ -186,7 +187,6 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
         },
         toUTC: function(string){
           //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
-          console.log(string);
           if(string === 'N' || string === '' || string === 0){
             return Date.UTC('2017','04','17')
           };

@@ -1,4 +1,4 @@
-(function(){
+function Accordion(){
 
 	var expandCounter = 0,
 		expandArray = { height: "auto", button: "up-arrow-button", remove: expand, add: collapse, threshold: 4, call: expandAll },
@@ -52,4 +52,4 @@
 		})
 	};
 
-}())
+}

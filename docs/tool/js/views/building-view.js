@@ -5,7 +5,7 @@ var buildingView = {
       map.addSource(
         'currentBuilding', {
           'type': 'geojson',
-          'data': controller.convertToGeoJSON(model.getState()['selectedbuilding'])
+          'data': getState()['selectedBuilding'][0]
         }
       );
 
@@ -58,31 +58,46 @@ var buildingView = {
                 });
     },
     getRelevantData: function(){
+        var dataRequestCount = 0;
         var dataRequests = [
 
             {
                 name: "raw_metro_stations",
-                url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson"
+                url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
+                callback: dataBatchCallback
             },
             {
                 name: "transit_stats",
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + model.getState()['selectedBuilding']['Nlihc_id']
+                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + getState()['selectedBuilding']['Nlihc_id'],
+                callback: dataBatchCallback
             },
             {
                 name: "nearby_projects",
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + model.getState()['selectedBuilding'].latitude + "&longitude=" + model.getState()['selectedBuilding'].longitude
+                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
+                callback: dataBatchCallback
             },
             {
                 name: "raw_bus_stops",
-                url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson"
+                url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
+                callback: dataBatchCallback
             }
         ]
         for(var i = 0; i < dataRequests.length; i++){
             controller.getData(dataRequests[i]);
         }
+        function dataBatchCallback(){
+            dataRequestCount++;
+            if(dataRequestCount === dataRequests.length){
+                buildingView.onReturn();
+                new Accordion();
+                buildingView.prepareHeader();
+                buildingView.prepareMapsAndCharts();
+                buildingView.prepareSidebar();
+            }
+        }
     },
     el:'building-view',
-    init: function(){                                               
+    init: function(){    
         
         var partialRequest = {
             partial: this.el,
@@ -94,29 +109,28 @@ var buildingView = {
         controller.appendPartial(partialRequest, this);
         
         function appendCallback() {
-            this.onReturn();
+            buildingView.getRelevantData();
         }
     },
-     onReturn: function(){
-     },
-     prepareHeader: function(){
-        var d = model.getState()['selectedBuilding'];
-        document.getElementById('building-name').innerText = d.Proj_Name;
-        document.getElementById('building-street').innerText = d.Proj_Addre;
-        document.getElementById('building-ward').innerText = d.Ward2012;
-        document.getElementById('building-cluster').innerText = d.Cluster_tr2000;
-        document.getElementById('owner-name').innerText = d.Hud_Own_Name == 0 ? 'not in data file' : d.Hud_Own_Name;
-        document.getElementById('owner-phone').innerText = 'for placement only (need join other data)';
-        document.getElementById('tax-assessment-amount').innerText = 'for placement only (need join other data)';
-     },
-     prepareMapsAndCharts: function(){
+    onReturn: function(){
+    },
+    prepareHeader: function(){
+        var d = getState()['selectedBuilding'][0]['properties'];
+        document.getElementById('building-name').innerText = d.proj_name;
+        document.getElementById('building-street').innerText = d.proj_addre;
+        document.getElementById('building-ward').innerText = d.ward;
+        document.getElementById('building-cluster').innerText = d.neighborhood_cluster;
+        document.getElementById('owner-name').innerText = d.hud_own_name == 0 ? 'not in data file' : d.hud_own_name;
+    },
+    prepareMapsAndCharts: function(){
           
         var affordableHousingMap = new mapboxgl.Map({
             container: 'affordable-housing-map',
             style: 'mapbox://styles/mapbox/light-v9',
-            center: [model.getState()['selectedBuilding']['longitude'],model.getState()['selectedBuilding']['latitude']],
+            center: [getState()['selectedBuilding'][0]['properties']['longitude'],getState()['selectedBuilding'][0]['properties']['latitude']],
             zoom: 15
         });
+
             
         affordableHousingMap.on('load', function(){
             affordableHousingMap.addSource(
@@ -153,14 +167,14 @@ var buildingView = {
                 }
             });
 
-            addCurrentBuildingToMap(affordableHousingMap);
+            buildingView.addCurrentBuildingToMap(affordableHousingMap);
 
         });
         
         var metroStationsMap = new mapboxgl.Map({
             container: 'metro-stations-map',
             style: 'mapbox://styles/mapbox/light-v9',
-            center: [model.getState()['selectedBuilding']['longitude'],model.getState()['selectedBuilding']['latitude']],
+            center: [getState()['selectedBuilding'][0]['properties']['longitude'], getState()['selectedBuilding'][0]['properties']['latitude']],
             zoom: 15
         });
         
@@ -172,7 +186,7 @@ var buildingView = {
             metroStationsMap.addSource(
                 'metros', {
                     'type': 'geojson',
-                    'data': controller.convertToGeoJSON(model.dataCollection['raw_metro_stations'])
+                    'data': model.dataCollection['raw_metro_stations']
                 }
             );
 
@@ -214,7 +228,7 @@ var buildingView = {
             metroStationsMap.addSource(
                 'busStops', {
                 'type': 'geojson',
-                'data': controller.convertToGeoJSON(model.dataCollection['raw_bus_stops'])
+                'data': model.dataCollection['raw_bus_stops']
                 }
             );
             metroStationsMap.addLayer({
@@ -233,7 +247,7 @@ var buildingView = {
             });
             //No titles for now, as the geojson from OpenData does not include routes (what we want)
 
-            addCurrentBuildingToMap(metroStationsMap,'targetBuilding2');
+            buildingView.addCurrentBuildingToMap(metroStationsMap,'targetBuilding2');
             
         });     
 
@@ -252,8 +266,8 @@ var buildingView = {
         ///////////////////
         //Transit sidebar
         ///////////////////
-        var numBusRoutes = Object.keys(model.dataCollection['transit_stats']['data']['bus_routes']).length;
-        var numRailRoutes = Object.keys(model.dataCollection['transit_stats']['data']['rail_routes']).length;
+        var numBusRoutes = Object.keys(model.dataCollection['transit_stats']['bus_routes']).length;
+        var numRailRoutes = Object.keys(model.dataCollection['transit_stats']['rail_routes']).length;
         d3.select("#num_bus_routes").html(numBusRoutes);
         d3.select("#num_rail_routes").html(numRailRoutes);
 
@@ -274,20 +288,20 @@ var buildingView = {
         var brgSorted = d3.nest()
                 .key(function(d) { return d.shortest_dist })
                 .sortKeys(d3.ascending)
-                .entries(model.dataCollection['transit_stats']['data']['bus_routes_grouped']);
+                .entries(model.dataCollection['transit_stats']['bus_routes_grouped']);
         var rrgSorted = d3.nest()
                 .key(function(d) { return d.shortest_dist })
                 .sortKeys(d3.ascending)
-                .entries(model.dataCollection['transitStats']['data']['rail_routes_grouped']);
-        addRoutes('#bus_routes_by_dist', brgSorted);
-        addRoutes('#rail_routes_by_dist', rrgSorted);
+                .entries(model.dataCollection['transit_stats']['rail_routes_grouped']);
+        buildingView.addRoutes('#bus_routes_by_dist', brgSorted);
+        buildingView.addRoutes('#rail_routes_by_dist', rrgSorted);
 
         ///////////////
         //Nearby Housing sidebar
         ///////////////
-        d3.select("#tot_buildings").html(model.dataCollection['nearby_projects']['data']['tot_buildings']);
-        d3.select("#tot_units").html(model.dataCollection['nearby_projects']['data']['tot_units']);
-        d3.select("#nearby_housing_distance").html(model.dataCollection['nearby_projects']['data']['distance'])
+        d3.select("#tot_buildings").html(model.dataCollection['nearby_projects']['tot_buildings']);
+        d3.select("#tot_units").html(model.dataCollection['nearby_projects']['tot_units']);
+        d3.select("#nearby_housing_distance").html(model.dataCollection['nearby_projects']['distance'])
      }
 
 
