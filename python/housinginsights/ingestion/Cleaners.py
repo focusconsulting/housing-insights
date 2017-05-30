@@ -490,6 +490,10 @@ class reac_score_cleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', None])
         return row
 
+class real_property_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row, null_values=['', None])
+        return row
 
 class dchousing_cleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -502,3 +506,12 @@ class dchousing_cleaner(CleanerBase):
             datetime.fromtimestamp(milli_sec / 1000.0).strftime('%m/%d/%Y')
 
         return row
+
+class topa_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
+        # character in one or two columns.  Leave here for now.
+        row = self.replace_nulls(row, null_values=['', '\\', None])
+        return row
+
+
