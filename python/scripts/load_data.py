@@ -94,6 +94,7 @@ class LoadData(object):
         Returns the outcome of dropping all the tables from the 
         database_choice and then rebuilding.
         """
+        logging.info("Dropping all tables from the database!")
         db_conn = self.engine.connect()
         query_result = list()
         query_result.append(db_conn.execute(
@@ -109,6 +110,71 @@ class LoadData(object):
             '''))
         return query_result
 
+    def update_only(self, these_data):
+        """
+        Reloads only the flat file associated to the unique_data_id in the
+        list 'these_data'.
+        """
+        logging.info("update_only(): attempting to update {} data".format(
+            these_data))
+        processed_data_id = []
+
+        for manifest_row in self.manifest:
+            data_id = manifest_row['unique_data_id']
+            use = manifest_row['include_flag'] == 'use'
+
+            # process manifest row for requested data_id if flagged for use
+            if use and data_id in these_data:
+                logging.info("Manifest row found for {} - preparing to "
+                             "load data.".format(data_id))
+
+                temp_filepath = self._get_temp_filepath(
+                    manifest_row=manifest_row)
+
+                # get objects for interfacing with the database
+                sql_interface = self._configure_db_interface(
+                    manifest_row=manifest_row, temp_filepath=temp_filepath)
+                sql_manifest_row = sql_interface.get_sql_manifest_row()
+
+                # if data_id has status = loaded in sql_manifest
+                try:
+                    status = sql_manifest_row['status']
+                    if status == 'loaded':
+                        # 1. delete only rows with data_id in respective table
+                        table_name = sql_manifest_row['destination_table']
+                        query = "DELETE FROM {} WHERE unique_data_id =" \
+                                " '{}'".format(table_name, data_id)
+                        logging.info("Deleting {} data from {}!".format(
+                            data_id, table_name))
+                        self.engine.execute(query)
+                        # 2. change status = unloaded in sql_manifest
+                        sql_interface.update_manifest_row(conn=self.engine)
+                        logging.info("Resetting status in sql manifest row!")
+                        logging.info(
+                            "Reloading {} data into {}!".format(data_id,
+                                                                table_name))
+                except TypeError:
+                    logging.info("No sql_manifest exists! Proceed with adding"
+                                 " new data to the database!")
+
+                # follow normal workflow and load data_id - update sql_manifest
+                self._process_data_file(manifest_row=manifest_row)
+                processed_data_id.append(data_id)
+
+                # stop when all requested data have been updated
+                if len(processed_data_id) == len(these_data):
+                    break
+
+        return processed_data_id
+
+    def _get_temp_filepath(self, manifest_row):
+        """
+        Returns a file path where intermediary clean psv file will be saved.
+        """
+        return os.path.abspath(
+                    os.path.join(logging_path, 'temp_{}.psv'.format(
+                        manifest_row['unique_data_id'])))
+
     def load_all_data(self):
         """
         Using manifest.csv, meta.json, and respective cleaners, validate and
@@ -118,6 +184,8 @@ class LoadData(object):
         # TODO: ever want to use ManifestReader if it has duplicate rows?
         if not self.manifest.has_unique_ids():
             raise ValueError('Manifest has duplicate unique_data_id!')
+
+        processed_data_id = []
 
         # Iterate through each row in the manifest then clean and validate
         for manifest_row in self.manifest:
@@ -134,6 +202,10 @@ class LoadData(object):
 
                 self._process_data_file(manifest_row=manifest_row)
 
+            processed_data_id.append(manifest_row['unique_data_id'])
+
+        return processed_data_id
+
     def _process_data_file(self, manifest_row):
         """
         Processes the data file for the given manifest row.
@@ -144,9 +216,7 @@ class LoadData(object):
                                 load_from="file")
 
         # get file path for storing clean PSV files
-        temp_filepath = os.path.abspath(
-            os.path.join(logging_path, 'temp_{}.psv'.format(
-                manifest_row['unique_data_id'])))
+        temp_filepath = self._get_temp_filepath(manifest_row=manifest_row)
 
         # validate and clean
         self._create_clean_psv(table_name=manifest_row['destination_table'],
@@ -187,12 +257,10 @@ class LoadData(object):
 
     def _configure_db_interface(self, manifest_row, temp_filepath):
         """
-        Returns an interface object for the sql database and the equivalent 
-        manifest row in the database.
+        Returns an interface object for the sql database
         
         :param manifest_row: a given row in the manifest
         :param temp_filepath: the file path where PSV will be saved
-        :return: interface object and sql manifest row as a tuple
         """
         # check for database manifest - create it if it doesn't exist
         sql_manifest_exists = \
@@ -202,9 +270,7 @@ class LoadData(object):
         # configure database interface object and get matching manifest row
         interface = HISql(meta=self.meta, manifest_row=manifest_row,
                           engine=self.engine, filename=temp_filepath)
-        sql_manifest_row = interface.get_sql_manifest_row()
-
-        return interface, sql_manifest_row
+        return interface
 
     def _create_clean_psv(self, table_name, manifest_row, csv_reader,
                           temp_filepath):
@@ -214,8 +280,10 @@ class LoadData(object):
         the database can be updated accordingly.
         """
         # get database interface and it's equivalent manifest row
-        sql_interface, sql_manifest_row = self._configure_db_interface(
+        sql_interface = self._configure_db_interface(
             manifest_row=manifest_row, temp_filepath=temp_filepath)
+
+        sql_manifest_row = sql_interface.get_sql_manifest_row()
 
         cleaner = self._get_cleaner(table_name=table_name,
                                     manifest_row=manifest_row)
@@ -224,7 +292,7 @@ class LoadData(object):
                                filename=temp_filepath)
 
         # clean the file and save the output to a local pipe-delimited file
-        # if it doesn't it have a 'loaded' status in the database manifest
+        # if it doesn't have a 'loaded' status in the database manifest
         if csv_reader.should_file_be_loaded(
                 sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
@@ -241,26 +309,27 @@ class LoadData(object):
             # write the data to the database
             unique_data_id = manifest_row['unique_data_id']
             self._update_database(table_name=table_name,
-                                  unique_data_id=unique_data_id,
                                   sql_interface=sql_interface)
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
 
-    def _update_database(self, table_name, unique_data_id, sql_interface):
+    def _update_database(self, table_name, sql_interface):
         """
         Load the clean PSV file into the database
         """
         print("  Loading...")
 
-        # Decide whether to append or replace the data in table
-        if self.meta[table_name]["replace_table"]:
-            logging.info("  replacing existing table")
-
-            # result = self.engine.execute(
-            #     "DELETE FROM {} WHERE unique_data_id = {}".format(
-            #         table_name, unique_data_id))
-            sql_interface.drop_table()
+        # append new unique_data_id data instead of dropping entire table
+        # TODO: remove unnecessary code - relace table not needed?
+        # # Decide whether to append or replace the data in table
+        # if self.meta[table_name]["replace_table"]:
+        #     logging.info("  replacing existing table")
+        #
+        #     # result = self.engine.execute(
+        #     #     "DELETE FROM {} WHERE unique_data_id = {}".format(
+        #     #         table_name, unique_data_id))
+        #     sql_interface.drop_table()
 
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()
@@ -322,7 +391,7 @@ def main(passed_arguments):
         loader.drop_tables()
 
     if passed_arguments.update_only:
-        pass
+        loader.update_only(passed_arguments.update_only)
     else:
         loader.load_all_data()
 
