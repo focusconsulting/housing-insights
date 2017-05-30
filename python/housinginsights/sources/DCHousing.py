@@ -4,7 +4,7 @@ web site.
 """
 
 from pprint import pprint
-
+import logging
 
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.DCHousing import FIELDS,\
@@ -26,30 +26,31 @@ class DCHousingApiConn(BaseApiConn):
     def __init__(self):
         super().__init__(DCHousingApiConn.BASEURL)
 
-    def get_json(self, output_type=None, output_file=None):
+        self._available_unique_data_ids = ['dchousing']
+
+    def get_data(self, unique_data_ids=None, sample=False, output_type = 'csv', **kwargs):
         """
         Returns JSON object of the entire data set.
 
-        :param output_type: Output type specified by user.
-        :type  output_type: String.
-
-        :param output_file: Output file specified by user.
-        :type  output_file: String
-
-        :returns: Json output from the api.
-        :rtype: String
         """
-        result = self.get(DCHousingApiConn.QUERY)
-        if result.status_code != 200:
-            err = "An error occurred during request: status {0}"
-            raise Exception(err.format(result.status_code))
+        if unique_data_ids == None:
+            unique_data_ids = self._available_unique_data_ids
 
-        if output_type == 'stdout':
-            pprint(result.json())
-        elif output_type == 'csv':
-            data = result.json()['features']
-            results = [DCHousingResult(address['attributes']) for address in
-                       data]
-            self.result_to_csv(FIELDS, results, output_file)
+        for u in unique_data_ids:
+            if (u not in self._available_unique_data_ids):
+                #TODO this will always be raised when passing a list to get_multiple_api_sources method for those not in this class. 
+                logging.info("  The unique_data_id '{}' is not supported by the DCHousingApiConn".format(u))
 
-        return result.json()
+            else:
+                result = self.get(DCHousingApiConn.QUERY)
+                if result.status_code != 200:
+                    err = "An error occurred during request: status {0}"
+                    raise Exception(err.format(result.status_code))
+
+                if output_type == 'stdout':
+                    pprint(result.json())
+                elif output_type == 'csv':
+                    data = result.json()['features']
+                    results = [DCHousingResult(address['attributes']) for address in
+                               data]
+                    self.result_to_csv(FIELDS, results, self.output_paths[u])

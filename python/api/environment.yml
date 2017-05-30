@@ -1,0 +1,19 @@
+name: housing-insights-api
+channels:
+- defaults
+dependencies:
+- six=1.10.0=py35_0
+- pip=8.1.2=py35_0
+- psycopg2=2.7.1=py35_0
+- sqlalchemy=1.1.9=py35_0
+- python=3.5.2=0
+
+- pip:
+  - click==6.7
+  - Flask==0.12.1
+  - Flask-Cors==3.0.2
+  - itsdangerous==0.24
+  - Jinja2==2.9.6
+  - MarkupSafe==1.0
+  - Werkzeug==0.12.1
+  - simplejson==3.10.0
