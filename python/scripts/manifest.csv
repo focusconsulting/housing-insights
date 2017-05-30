@@ -73,3 +73,4 @@ superseded,wmata_dist,wmata_dist_20170215,2/15/2017,latin-1,../../../data,https:
 superseded,wmata_info,wmata_info_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,
 use,wmata_dist,wmata_dist_20170215,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist_updated_headers.csv,
 use,wmata_info,wmata_info_20170215,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/wmata_stops.csv,
+
