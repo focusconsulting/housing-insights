@@ -20,7 +20,7 @@ import sys
 
 #Different json output methods.
 # Currently looks like best pick is jsonify, but with the simplejson package pip-installed so that
-# jsonify will uitilize simplejson's decimal conversion ability. 
+# jsonify will uitilize simplejson's decimal conversion ability.
 import json
 import simplejson
 from flask import jsonify
@@ -89,6 +89,39 @@ conn.close()
 def hello():
     return("The Housing Insights API Rules!")
 
+@application.route('/api/filter/', methods=['GET'])
+def filter_data():
+    q = """
+        select p.nlihc_id
+          , p.proj_units_tot as total_units_in_building
+          , p.proj_units_assist_max as total_subsidized_units_in_building
+          , cast(p.proj_units_assist_max / p.proj_units_tot as decimal(3,2)) as percent_affordable_housing
+          , p.hud_own_type as building_ownership_type
+          , p.ward
+          , p.anc
+          , p.census_tract
+          , p.neighborhood_cluster as neighborhood_id
+          , p.neighborhood_cluster_desc as neighborhood_name
+          , p.zip as zip_code
+          , c.acs_median_rent as census_tract_median_rent
+          , s.portfolio as subsidy_program
+          , s.agency as subsidy_agency
+          , to_char(s.poa_start, 'YYYY-MM-DD') as subsidy_start_date
+          , to_char(s.poa_end, 'YYYY-MM-DD') as subsidy_end_date
+          , s.units_assist as subsidy_units_covered
+          , s.subsidy_id as subsidy_id
+        from project as p
+        left join census as c on c.census_tract = p.census_tract and c.unique_data_id = 'acs_rent_median_15_5YR'
+        left join subsidy as s on s.nlihc_id = p.nlihc_id
+        """
+
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    results = [dict(x) for x in proxy.fetchall()]
+    conn.close()
+    output = {'items':results}
+    return jsonify(output)
+
 
 @application.route('/api/raw/<table>', methods=['GET'])
 @cross_origin()
@@ -120,7 +153,7 @@ def get_meta():
     result = conn.execute("SELECT meta FROM meta")
     row = result.fetchone()
     return row[0]
-    
+
 
 @application.route('/api/<data_source>/all/<grouping>', methods=['GET'])
 def count_all(data_source,grouping):
@@ -153,7 +186,7 @@ def count_all(data_source,grouping):
             FROM {}
             where {} between '2016-01-01' and '2016-12-31'
             --WHERE report_date BETWEEN (now()::TIMESTAMP - INTERVAL '1 year') AND now()::TIMESTAMP
-            GROUP BY {} 
+            GROUP BY {}
             ORDER BY {}
             """.format(grouping,fallback,data_source,date_field,grouping,grouping)
 
@@ -162,7 +195,7 @@ def count_all(data_source,grouping):
 
         #transform the results.
         #TODO should come up with a better generic way to do this using column
-          #names for any arbitrary sql table results. 
+          #names for any arbitrary sql table results.
         formatted = []
         for x in results:
             dictionary = dict({'group':x[0], 'count':x[1]})
@@ -180,11 +213,11 @@ def count_all(data_source,grouping):
 @application.route('/api/wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
     '''
-    Returns the nearby bus and metro routes and stops. 
+    Returns the nearby bus and metro routes and stops.
     Currently this assumes that all entries in the wmata_dist
-    table are those that have a walking distance of 0.5 miles 
+    table are those that have a walking distance of 0.5 miles
     or less. We may later want to implement functionality to
-    filter this to those with less distance. 
+    filter this to those with less distance.
     '''
 
     conn = engine.connect()
@@ -211,16 +244,16 @@ def nearby_transit(nlihc_id):
             routes = unique_transit_routes([stop_id])
 
             stop_dict = dict({'dist_in_miles':dist,
-                            'type':typ, 
+                            'type':typ,
                             'stop_id_or_station_code':stop_id,
                             'routes':routes
                             })
-            
+
             #Calculate summary statistics for ease of use
             if typ == 'bus':
                 stops['bus'].append(stop_dict)
                 bus_stops.append(stop_id)
-                
+
                 #Add all unique routes to a master list, with the shortest walking distance to that route
                 for route in routes:
                     if route not in bus_routes:
@@ -260,9 +293,9 @@ def nearby_transit(nlihc_id):
                 rail_routes_grouped.append({"shortest_dist":dist, "routes":[]})
                 idx = idx_from_ld(rail_routes_grouped,'shortest_dist',dist)
             rail_routes_grouped[idx]['routes'].append(key)
-        
+
         #TODO would be good to sort rail_routes_grouped and bus_routes_grouped before delivery (currently sorting on the front end)
-        
+
         conn.close()
         return jsonify({'stops':stops,
                         'bus_routes':bus_routes,
@@ -278,7 +311,7 @@ def nearby_transit(nlihc_id):
 
 def idx_from_ld(lst,key,value):
     '''
-    Takes a list of dictionaries and returns the dictionary 
+    Takes a list of dictionaries and returns the dictionary
     entry matching the key and value supplied
     Used for data forms like this: [{'foo':'bar'},{'foo':'asdf'}]
     '''
@@ -319,7 +352,7 @@ def nearby_building_permits(dist):
     longitude = request.args.get('longitude',None)
     if latitude == None or longitude==None:
         return "Please supply latitude and longitude"
-    else: 
+    else:
         latitude=float(latitude)
         longitude=float(longitude)
 
@@ -380,7 +413,7 @@ def nearby_building_permits(dist):
 
 @application.route('/api/projects/<dist>', methods=['GET'])
 def nearby_projects(dist):
-    
+
     conn = engine.connect()
     dist = float(dist)
     #Get our params
@@ -388,7 +421,7 @@ def nearby_projects(dist):
     longitude = request.args.get('longitude',None)
     if latitude == None or longitude==None:
         return "Please supply latitude and longitude"
-    else: 
+    else:
         latitude=float(latitude)
         longitude=float(longitude)
 
@@ -443,18 +476,18 @@ from math import radians, cos, sin, asin, sqrt
 
 def haversine(lat1, lon1, lat2,lon2):
     """
-    Calculate the great circle distance between two points 
+    Calculate the great circle distance between two points
     on the earth (specified in decimal degrees)
     """
-    # convert decimal degrees to radians 
+    # convert decimal degrees to radians
     original_coords = (lat1,lon1,lat2,lon2) #for debugging
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
-    # haversine formula 
-    dlon = lon2 - lon1 
-    dlat = lat2 - lat1 
+    # haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a)) 
+    c = 2 * asin(sqrt(a))
     r = 3956 # Radius of earth in miles
     d = c * r
     #print("Haversine for {} = {}".format(original_coords,d))
@@ -487,7 +520,7 @@ def project_subsidies(nlihc_id):
     conn.close()
     output = {'items':results}
     return jsonify(output)
-    
+
 
 ##########################################
 # Start the app

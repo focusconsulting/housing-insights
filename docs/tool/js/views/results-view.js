@@ -1,24 +1,24 @@
 "use strict";
 
-var sideBar = {
+var resultsView = {
     init: function() {
         setSubs([
-            ['firstPieReady', sideBar.setDropdownOptions],
-            ['mapLayer',sideBar.changeZoneType],
-            ['pieZone', sideBar.changeZoneType]
+            ['firstPieReady', resultsView.setDropdownOptions],
+            ['mapLayer',resultsView.changeZoneType],
+            ['pieZone', resultsView.changeZoneType]
         ]);
-        sideBar.charts = [];
+        resultsView.charts = [];
         var instances = ['subsidized','cat_expiring','cat_failing_insp','cat_at_risk'];
         instances.forEach(function(instance, i){
-            sideBar.charts[i] = new DonutChart({
+            resultsView.charts[i] = new DonutChart({
                 dataRequest: {
                     name: 'raw_project',
                     url: model.dataCollection.metaData.project.api.raw_endpoint
                 },
                 field: instance,
                 container: '#pie-' + i,
-                width: 95,
-                height: 115,
+                width: 75,
+                height: 95,
                 zoneType: 'ward',
                 zoneName: 'All',
                 index: i,
@@ -52,11 +52,11 @@ var sideBar = {
     setDropdownOptions: function() {
                
             var activeLayer = getState().mapLayer[0];            
-            if ( sideBar.zoneMapping[activeLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
+            if ( resultsView.zoneMapping[activeLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
                                                                        // enumerated yet
-                sideBar.zoneMapping[activeLayer].values = [];
-                sideBar.charts[0].nested.forEach(function(obj) {
-                    sideBar.zoneMapping[activeLayer].values.push(obj.key)
+                resultsView.zoneMapping[activeLayer].values = [];
+                resultsView.charts[0].nested.forEach(function(obj) {
+                    resultsView.zoneMapping[activeLayer].values.push(obj.key)
                 });                                    
             }
             var selector = document.getElementById('zone-selector');
@@ -64,7 +64,7 @@ var sideBar = {
                 setState('pieZone', e.target.selectedOptions[0].value);                 
             };
             selector.innerHTML = '';
-            sideBar.zoneMapping[activeLayer].values.forEach(function(zone,i){
+            resultsView.zoneMapping[activeLayer].values.forEach(function(zone,i){
                 var option = document.createElement('option');
                 if ( i === 0 ) { option.setAttribute('selected','selected'); }
                 option.setAttribute('class',activeLayer);
@@ -83,13 +83,13 @@ var sideBar = {
                 setState('pieZone', 'All');
             }
             var zoneName = getState().pieZone[0];                
-            sideBar.charts.forEach(function(chart){
+            resultsView.charts.forEach(function(chart){
                 chart.pieVariable = chart.returnPieVariable(chart.field,zoneType,zoneName);
                 chart.update();
             });
             if ( msg === 'mapLayer' ) { // if fn was called by changing mapLayer state. if not, leave dropdown
                                         // menu alone
-                sideBar.setDropdownOptions();
+                resultsView.setDropdownOptions();
             }
         } else { // if this function was called suring initial setup, before pies were ready
             setState('pieZone', 'All');

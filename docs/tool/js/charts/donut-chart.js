@@ -12,7 +12,7 @@ var DonutChartExtension = {
     var chart = this,
     zoneIndex;
     this.nested = d3.nest()    //aggregate data by unique values in [field] defined for each pie at bottom
-      .key(function(d) { return d[sideBar.zoneMapping[zoneType].name]; }) 
+      .key(function(d) { return d[resultsView.zoneMapping[zoneType].name]; }) 
       .key(function(d) { return d[field]; })
       .rollup(function(v) { return v.length; })
       .entries(chart.data);
@@ -128,4 +128,6 @@ var DonutChartExtension = {
     chart.label 
         .text(chart.field); // TODO: use meta.json to provide readable field names, or arrange for API to return them
   }
+
 };
+
