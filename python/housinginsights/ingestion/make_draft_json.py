@@ -1,6 +1,6 @@
 """
 Module creates draft JSON file(s) from given csv data sources that after user
-review will be inserted into the meta.json (soon to be called table_info.json)
+review will be inserted into the meta.json 
 
 You can think of meta.json as the skeleton template for the data in tables
 loaded into the database.
@@ -72,8 +72,7 @@ def _pandas_to_sql_data_type(pandas_type_string):
 def make_draft_json(filename, tablename, encoding):
     """
     Create a draft JSON file for the new table that will be reviewed and
-    cleaned up before inserted into meta.json (soon to be called
-    table_info.json).
+    cleaned up before inserted into meta.json
 
     The draft output will be saved within '/housing-insights/python/logs'
     folder.
@@ -140,49 +139,25 @@ def make_draft_json(filename, tablename, encoding):
     print(tablename + " JSON table file created.")
 
 
-def make_all_json(manifest_path):
-
-    completed_tables = {}
-    manifest = ManifestReader(path=manifest_path)
-    if manifest.has_unique_ids():
-        for manifest_row in manifest:
-            tablename = manifest_row['destination_table']
-            encoding = manifest_row.get('encoding')
-            if tablename not in completed_tables:
-                if manifest_row['include_flag'] == 'use':
-                    filepath = os.path.abspath(
-                            os.path.join(manifest_row['local_folder'],
-                                        manifest_row['filepath']
-                                        ))
-                    make_draft_json(filepath, tablename, encoding)
-                    completed_tables[tablename] = filepath
-                    print("completed {}".format(tablename))
-            else:
-                print("skipping {}, already loaded".format(manifest_row['unique_data_id']))
-
-    print("Finished! Used these files to generate json:")
-    print(completed_tables)
-
-
-def checkTable(table_name, table_info):
+def checkTable(table_name, meta):
     """
-    Check whether the new table is in table_info.json file
+    Check whether the new table is in meta.json file
 
-    :param: table_name - the new data to be added table_info.json
+    :param: table_name - the new data to be added 
     :param type: string
 
-    :param: table_info - path to the table_info.json file (currently called meta.json)
+    :param: meta - path to the meta.json file (currently called meta.json)
     :param type: string
 
     :return: boolean value
-    : True - table_name found in table_info.json
+    : True - table_name found in meta.json
     : False - table_name NOT found
     """
-    if not(os.path.isfile(table_info)):
+    if not(os.path.isfile(meta)):
         raise ValueError("Unable to access JSON file")
 
     # read the data from current json file
-    with open(table_info, "r") as json_file:
+    with open(meta, "r") as json_file:
         current_data = json_file.read()
 
     # decode the json file, result is a "dict", cast the result as a "set"
@@ -198,16 +173,16 @@ def appendJSON(new_json, master_json):
     :param:  new_json - path to the new json file
     :param type: string
 
-    :param:  master_json - path to the table_info.json file
+    :param:  master_json - path to the meta.json file
     :param type: string
 
     :return: void
     """
-    #TODO: version control of table_info.json (meta.json), create backup making changes to master JSON
+    #TODO: version control of meta.json, create backup making changes to master JSON
     if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
         raise ValueError("Path to one of the JSON files is invalid")
 
-    # Update the master JSON file, table_info.json
+    # Update the master JSON file
     with open(new_json, "r") as new_file:
         json_data = new_file.read()
     new_data = json.loads(json_data)
@@ -221,12 +196,12 @@ def appendJSON(new_json, master_json):
     masterJ_data.update(new_data)
     # write the new JSON list to the master JSON file
     json.dump(masterJ_data, open(master_json, 'w'), indent=2)
-    print("%s appended to table_info.json file" % new_json)
+    print("%s appended to meta.json file" % new_json)
 
 
 def duplicateTable(new_table, new_json, master_json):
     """
-    Ask the user for decision on table that is found in the table_info.json file.
+    Ask the user for decision on table that is found in the meta.json file.
     The user can decide to either overwrite current master json or cancel copying.
 
     :param:  new_table - new table being added
@@ -235,7 +210,7 @@ def duplicateTable(new_table, new_json, master_json):
     :param:  new_json - path to the new json file
     :param type: string
 
-    :param:  master_json - path to the table_info.json file
+    :param:  master_json - path to the meta.json file
     :param type: string
 
     :return: void
@@ -245,12 +220,12 @@ def duplicateTable(new_table, new_json, master_json):
 
     time_out = 0
 
-    while time_out < 3:
-        usr_decide = input("\nPress: [O] to overwrite current value in table_info.json; [C] to cancel: ")
+    while time_out < 10:
+        usr_decide = input("\nPress: [O] to overwrite current value in meta.json; [C] to cancel: ")
 
         if ('O' in usr_decide or 'o' in usr_decide):
             # Overwrite current table in master json
-            # remove the entry table_info.json
+            # remove the entry meta.json
             with open(master_json, "r") as json_file:
                 master_data = json_file.read()
             masterJ_data = json.loads(master_data)
@@ -276,60 +251,19 @@ def duplicateTable(new_table, new_json, master_json):
 
 
 if __name__ == '__main__':
-    # TODO: refactor to take in cmd line arguments for csv_filename, table_name,
-    # TODO: and encoding
+    #
+    # Edit these values before running!
+    csv_filename = os.path.abspath("../../../data/sample/project_sample.csv")
+    table_name = "mytable_name"
+    encoding = "latin1" #Try utf-8 or latin1. Put the successful value into manifest.csv
 
-    if 'single' in sys.argv:
-        # Edit these values before running!
-        csv_filename = os.path.abspath("/Users/KweningJ/Documents/Computer "
-                                       "Programming/housing-insights/data/raw/"
-                                       "tax_assessment/opendata/20170505/"
-                                       "DCHousing.csv")
-        table_name = "dchousing"
-        encoding = "latin1" #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
+    #Make the table
+    if 'create' in sys.argv:
         make_draft_json(csv_filename, table_name, encoding)
         
-    if 'multi' in sys.argv:
-        manifest_path = os.path.abspath(
-            os.path.join(python_filepath, 'scripts', 'manifest.csv'))
-        make_all_json(manifest_path)
-
-    if 'single-add' in sys.argv:
-        """
-        An option to add a new data source to both create a table JSON file
-        then check if the table has been already to the master JSON file, table_info.json
-
-        It performs the same procedure as 'single', then performs the additional
-        checks before appending the new table to table_info.json
-        """
-        # Edit the follow parameters before running
-        # TODO: refactor to take in cmd line arguments for csv_filename, table_name, encoding
-        # TODO: optimisation to make it more efficient
-
-        # Change production
-        # production = True for adding new data
-        # production = False for dev
-        production = False
-
-        if production:
-            # Change csv_filename to the file path of the raw data file
-            csv_filename = os.path.abspath("C:/Devs/manifest.csv")
-
-            # Change table_name to the table being added
-            table_name = "wmata_dist"
-            #only used for opening w/ Pandas. Try utf-8 if latin1 doesn't work. Put the successful value into manifest.csv
-            encoding = "latin1"
-            json_filepath = python_filepath + "/scripts/meta.json"
-        else:
-            # development use
-            csv_filename = os.path.abspath("C:/Devs/manifest.csv")
-            table_name = "song_dev"
-            encoding = "latin1"
-            json_filepath = "C:/Devs/meta.json"
-
-        make_draft_json(csv_filename, table_name, encoding)
-
+    if 'add' in sys.argv:
         new_json_path = os.path.join(logging_path, (table_name+".json"))
+        json_filepath = python_filepath + "/scripts/meta.json"
 
         try:
             if checkTable(table_name, json_filepath):
@@ -343,5 +277,5 @@ if __name__ == '__main__':
                 appendJSON(new_json_path, json_filepath)
 
         except ValueError:
-            print("Path to table_info.json is invalid")
+            print("Path to meta.json is invalid")
 
