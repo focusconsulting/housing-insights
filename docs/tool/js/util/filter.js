@@ -8,32 +8,84 @@ var filterUtil = {
 	},
 
 
-	options: { // TODO replace with a function that populates this according
-				// to data from the API
-		ward: '',
-		anc: '',
-		censusTract: '',
-		neighborhoodCluster: '',
-		zip: '',
-		totalUnitsMin: '',
-		totalUnitsMax: '',
-		totalSubsidizedUnits: '',
-		ownershipType: '',
-		subsidyType: '',
-		subsidyStartBefore: '',
-		subsidyStartAfter: '',
-		subsidyEndBefore: '',
-		subsidyEndAfter: ''
-	},
+	components: [
+        //TODO this hard coded array of objects is just a temporary method. 
+        //This should be served from the API, probably from meta.json
+        //"source" is the column name from the filter table, which should match the table in the original database table. 
+        //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
+        //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
+
+        {   source: 'proj_units_tot',
+            display_name: 'Project unit count',
+            component_type: 'continuous',
+            data_type:'integer',
+            min: 5,
+            max: 200,
+            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
+        },
+        {   source: 'acs_rent_median',
+            display_name: 'Neighborhood Rent (ACS median)',
+            component_type: 'continuous',
+            data_type:'decimal',
+            min: 0,
+            max: 2500,
+            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
+        },
+        {   source:'poa_start',
+            component_type: 'date',
+            data_type: 'timestamp',
+            min: '1950-01-01', //just example, TODO change to date format
+            max: 'now'         //dummy example
+        },
+        {   source:'ward',
+            component_type: 'categorical',
+            data_type: 'text',
+            other: 'feel free to add other needed properties if they make sense'
+        }
+    ],
+
+    componentsKey: {
+    	'proj_units_tot': 0,
+		'acs_rent_median': 1,
+		'poa_start': 2,
+		'ward': 3
+    },
+
+
+	options: {}, //this object acts as a registry for filters
 
 	filteredData: [],
 	
-	filterData: function(data){ // TODO finish, obviously, and replace 
-								// some single entry checks (eg, ward) and
-								// replace them with loops to handle arrays
+	filterData: function(data){ 
 
 		//TODO dummy list with one duplicate to demonstrate publication of a list of filtered IDs
 		filterUtil.filteredData = ['NL000001','NL000368','NL000008','NL000001']
+		
+		var workingData = data; // TODO bring data in from somewhere
+		
+		for (option in filterUtil.options) { // iterate through registered filters
+			
+			var component = filterUtil.components[filterUtil.componentKey[option]];
+			
+			if (component.component_type == 'continuous') { //filter data for a 'continuous' filter
+				workingData = workingData.filter(function(d){
+					return (d[option] >= filterUtil.options[option][0] && d[option] <= filterUtil.options[option][1]);
+				})
+			}
+
+			if (component.component_type == 'date') {
+				//TODO determine whether dates will always be published as [start, end], or, if
+				// not, in what format
+			}
+
+			if (component.component_type == 'categorical') {
+				workingData = workingData.filter(function(d){
+					return filterUtil.options[option].includes(d[option]);
+				})
+			}
+		}
+
+		// filterUtil.filteredData = workingData;
 
 		//TODO This will need to be rewritten using a structure based on the logic we used to create the filter elements in filter-view.js
 		//For example, filter columns need to be named based on the 'source' name, and the logic structure should not be hard coded
@@ -83,7 +135,7 @@ var filterUtil = {
 	},
 	
 	publishFilteredData: function(msg,options){
-		filterUtil.options[options.key] = options.value;
+		filterUtil.options[msg.split('.')[1]] = options; // register filter in the options object
 		filterUtil.filterData();  // needs a data argument
 		filterUtil.deduplicate();
 		setState('filteredData', filterUtil.filteredData);
