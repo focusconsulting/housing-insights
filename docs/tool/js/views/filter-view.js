@@ -32,6 +32,7 @@ var filterView = {
             max: 'now'         //dummy example
         },
         {   source:'ward',
+            display_name: 'Ward',
             component_type: 'categorical',
             data_type: 'text',
             other: 'feel free to add other needed properties if they make sense',
@@ -156,6 +157,7 @@ var filterView = {
 
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
+
               var c = filterView.components[i];
               console.log(c)
                 console.log("Found a categorical filter! (need code to add this element)")
@@ -172,10 +174,29 @@ var filterView = {
                   .attr("id",c.source)
                   .attr("class","filter")
                   .attr("class","categorical");
+                var uiSelector = selector.append("select")
+                  .attr("class", "ui fluid search dropdown")
+                  .attr("multiple", " ")
+                  .attr("id", "select");
+
                 for(var i = 0; i < c.options.length; i++){
-                  selector.append("option").attr("value", c.options[i]).text(c.options[i])
+                  uiSelector.append("option").attr("value", c.options[i]).text(c.options[i])
                   var select = document.getElementById(c.source);
                 }
+                $('.ui.dropdown')
+                .dropdown()
+                ;
+                $('#select')
+                .dropdown()
+                ;
+                $("select").change(function(){
+                  var selectedValues = [];
+                  $("option:selected").each(function(){
+                    selectedValues.push($(this).val());
+                  });
+                  console.log(selectedValues);
+                  return false;
+  })
             };
 
 
