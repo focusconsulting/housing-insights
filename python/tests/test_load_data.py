@@ -1,6 +1,6 @@
 import unittest
 import os
-from python.scripts import load_data
+from python.housinginsights.ingestion import load_data
 from sqlalchemy.exc import ProgrammingError
 
 PYTHON_PATH = load_data.PYTHON_PATH
@@ -46,7 +46,7 @@ class MyTestCase(unittest.TestCase):
 
         for idx, data_id in enumerate(crime_data, start=1):
             these_data = [data_id]
-            result = loader.update_only(these_data=these_data)
+            result = loader.update_database(unique_data_id_list=these_data)
             self.assertTrue(data_id in result)
 
             # validate database contents
@@ -89,7 +89,7 @@ class MyTestCase(unittest.TestCase):
             result = self.query_db(loader_engine, query)
             data_id_row_counts.append(result[0]['count'])
 
-        processed_data_id = loader.update_only(these_data)
+        processed_data_id = loader.update_database(these_data)
 
         for data_id in these_data:
             self.assertTrue(data_id in processed_data_id)
@@ -105,6 +105,10 @@ class MyTestCase(unittest.TestCase):
                     "'{}'".format(table, these_data[idx])
             result = self.query_db(loader_engine, query)
             self.assertEqual(result[0]['count'], data_id_row_counts[idx])
+
+    # TODO - write test code
+    def test__remove_existing_data(self):
+        pass
 
 
 if __name__ == '__main__':

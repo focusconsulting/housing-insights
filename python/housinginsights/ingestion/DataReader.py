@@ -154,6 +154,17 @@ class ManifestReader(HIReader):
                     self.unique_ids[row['unique_data_id']] = 'found'
         return True
 
+    def get_manifest_row(self, unique_data_id):
+        """
+        Returns the row for the given unique_data_id else 'None' if not in
+        manifest.
+        """
+        for row in self:
+            use = row['include_flag'] == 'use'
+            if row['unique_data_id'] == unique_data_id and use:
+                return row
+        return None
+
 
 class DataReader(HIReader):
     """

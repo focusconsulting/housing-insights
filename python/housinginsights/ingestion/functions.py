@@ -54,6 +54,7 @@ def load_meta_data(filename='meta.json'):
     return meta
 
 
+# TODO: DELETE - moved into load_data.py
 def meta_json_to_database(engine, meta):
     '''
     Makes sure we have a manifest table in the database. 

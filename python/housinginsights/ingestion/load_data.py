@@ -21,7 +21,8 @@ import sys
 import os
 import logging
 import argparse
-
+import json
+from sqlalchemy import Table, Column, Integer, String, MetaData
 
 # Needed to make relative package imports when running this file as a script
 # (i.e. for testing purposes).
@@ -29,7 +30,7 @@ import argparse
 # -about-imports/
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                           os.pardir))
+                                           os.pardir, os.pardir))
 sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
@@ -86,8 +87,8 @@ class LoadData(object):
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
 
-        # update the meta.json to the database
-        ingestionfunctions.meta_json_to_database(self.engine, self.meta)
+        # write the meta.json to the database
+        self._meta_json_to_database()
 
     def drop_tables(self):
         """
@@ -110,62 +111,94 @@ class LoadData(object):
             '''))
         return query_result
 
-    def update_only(self, these_data):
+    def _meta_json_to_database(self):
         """
-        Reloads only the flat file associated to the unique_data_id in the
-        list 'these_data'.
+        Makes sure we have a meta table in the database.
+        If not, it creates it with appropriate fields.
+        """
+
+        sqlalchemy_metadata = MetaData()  # this is unrelated to our meta.json
+        meta_table = Table('meta', sqlalchemy_metadata,
+                           Column('meta', String))
+
+        sqlalchemy_metadata.create_all(self.engine)
+        json_string = json.dumps(self.meta)
+        ins = meta_table.insert().values(meta=json_string)
+        conn = self.engine.connect()
+        conn.execute("DELETE FROM meta;")
+        conn.execute(ins)
+
+    def _remove_existing_data(self, uid, manifest_row):
+        """
+        Removes all rows in the respective table for the given unique_data_id
+        then sets status = deleted for the unique_data_id in the
+        database manifest.
+
+        :param uid: unique_data_id for the data to be updated
+        :param manifest_row: the row for uid in the manifest
+        :return: result from executing delete query as
+        sqlalchemy result object if row exists in sql manifest - else
+        returns None
+        """
+        temp_filepath = self._get_temp_filepath(
+            manifest_row=manifest_row)
+
+        # get objects for interfacing with the database
+        sql_interface = self._configure_db_interface(
+            manifest_row=manifest_row, temp_filepath=temp_filepath)
+        sql_manifest_row = sql_interface.get_sql_manifest_row()
+
+        try:
+            # delete only rows with data_id in respective table
+            table_name = sql_manifest_row['destination_table']
+            query = "DELETE FROM {} WHERE unique_data_id =" \
+                    " '{}'".format(table_name, uid)
+            logging.info("\t\tDeleting {} data from {}!".format(
+                uid, table_name))
+            result = self.engine.execute(query)
+
+            # change status = unloaded in sql_manifest
+            logging.info("\t\tResetting status in sql manifest row!")
+            sql_interface.update_manifest_row(conn=self.engine,
+                                              status='deleted')
+
+            return result
+        except TypeError:
+            logging.info("\t\tNo sql_manifest exists! Proceed with adding"
+                         " new data to the database!")
+
+        return None
+
+    def update_database(self, unique_data_id_list):
+        """
+        Reloads only the flat file associated to the unique_data_id in
+        unique_data_id_list.
+
+        Returns a list of unique_data_ids that were successfully updated.
         """
         logging.info("update_only(): attempting to update {} data".format(
-            these_data))
-        processed_data_id = []
+            unique_data_id_list))
+        processed_data_ids = []
 
-        for manifest_row in self.manifest:
-            data_id = manifest_row['unique_data_id']
-            use = manifest_row['include_flag'] == 'use'
+        for uid in unique_data_id_list:
+            manifest_row = self.manifest.get_manifest_row(uid)
 
             # process manifest row for requested data_id if flagged for use
-            if use and data_id in these_data:
-                logging.info("Manifest row found for {} - preparing to "
-                             "load data.".format(data_id))
+            if manifest_row is None:
+                logging.info("\tSkipping: {} not found in manifest!".format(
+                    uid))
+            else:
+                logging.info("\tManifest row found for {} - preparing to "
+                             "remove data.".format(uid))
+                self._remove_existing_data(uid=uid, manifest_row=manifest_row)
 
-                temp_filepath = self._get_temp_filepath(
-                    manifest_row=manifest_row)
-
-                # get objects for interfacing with the database
-                sql_interface = self._configure_db_interface(
-                    manifest_row=manifest_row, temp_filepath=temp_filepath)
-                sql_manifest_row = sql_interface.get_sql_manifest_row()
-
-                # if data_id has status = loaded in sql_manifest
-                try:
-                    status = sql_manifest_row['status']
-                    if status == 'loaded':
-                        # 1. delete only rows with data_id in respective table
-                        table_name = sql_manifest_row['destination_table']
-                        query = "DELETE FROM {} WHERE unique_data_id =" \
-                                " '{}'".format(table_name, data_id)
-                        logging.info("Deleting {} data from {}!".format(
-                            data_id, table_name))
-                        self.engine.execute(query)
-                        # 2. change status = unloaded in sql_manifest
-                        sql_interface.update_manifest_row(conn=self.engine)
-                        logging.info("Resetting status in sql manifest row!")
-                        logging.info(
-                            "Reloading {} data into {}!".format(data_id,
-                                                                table_name))
-                except TypeError:
-                    logging.info("No sql_manifest exists! Proceed with adding"
-                                 " new data to the database!")
-
-                # follow normal workflow and load data_id - update sql_manifest
+                # follow normal workflow and load data_id
+                logging.info(
+                    "\tLoading {} data!".format(uid))
                 self._process_data_file(manifest_row=manifest_row)
-                processed_data_id.append(data_id)
+                processed_data_ids.append(uid)
 
-                # stop when all requested data have been updated
-                if len(processed_data_id) == len(these_data):
-                    break
-
-        return processed_data_id
+        return processed_data_ids
 
     def _get_temp_filepath(self, manifest_row):
         """
@@ -185,7 +218,7 @@ class LoadData(object):
         if not self.manifest.has_unique_ids():
             raise ValueError('Manifest has duplicate unique_data_id!')
 
-        processed_data_id = []
+        processed_data_ids = []
 
         # Iterate through each row in the manifest then clean and validate
         for manifest_row in self.manifest:
@@ -202,9 +235,9 @@ class LoadData(object):
 
                 self._process_data_file(manifest_row=manifest_row)
 
-            processed_data_id.append(manifest_row['unique_data_id'])
+            processed_data_ids.append(manifest_row['unique_data_id'])
 
-        return processed_data_id
+        return processed_data_ids
 
     def _process_data_file(self, manifest_row):
         """
@@ -390,8 +423,8 @@ def main(passed_arguments):
     if passed_arguments.rebuild:
         loader.drop_tables()
 
-    if passed_arguments.update_only:
-        loader.update_only(passed_arguments.update_only)
+    if passed_arguments.update_database:
+        loader.update_database(passed_arguments.update_database)
     else:
         loader.load_all_data()
 
