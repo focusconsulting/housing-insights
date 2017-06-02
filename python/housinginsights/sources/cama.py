@@ -183,6 +183,9 @@ class CamaApiConn(BaseApiConn):
         as zoneUnitCount_2017-05-30.csv.
 
         """
+        if not os.path.exists('../../../data/processed/zoneUnitCount'):
+            os.makedirs('../../../data/processed/zoneUnitCount')
+
 
         data_processed_zoneUnitCount = os.path.join(PYTHON_PATH, os.pardir, 'data', 'processed', 'zoneUnitCount')
 

@@ -164,7 +164,6 @@ class BaseApiConn(object):
             f.write(data)
 
 
-
 class BaseApiManager(object):
 
     classname = "base"
