@@ -2,7 +2,6 @@ from pprint import pprint
 import os
 import sys
 import requests
-
 from collections import OrderedDict
 import csv
 import datetime
@@ -82,6 +81,7 @@ class CamaApiConn(BaseApiConn):
         Return the count data (in dictionary form) to be processed into csv
         by get_csv() method.
         """
+
         mar_api = MarApiConn()
         result = self.get(urlpath='/c5fb3fbe4c694a59a6eef7bf5f8bc49a_25.geojson', params=None)
 
@@ -113,50 +113,7 @@ class CamaApiConn(BaseApiConn):
         """
 
         """ [:100] for the first 100 cama_data points """
-        for row in cama_data['features']:
-            objectid = row['properties']['OBJECTID']
-            square, lot = row['properties']['SSL'].split()
-            suffix = ' '
-            if len(square) > 4:
-                square = square[:4]
-                suffix = square[-1]
-            
-            mar_return = mar_api.get_data(square, lot, suffix)
-            row['properties'].update(mar_return)
-            dict_res[row['properties']['OBJECTID']] = row['properties']
-            
-            if len(dict_res)==3:
-                zoneCount(dict_res)
-                break
-
-def zoneCount(dict):
-
-    zone_types = ['ANC', 'CENSUS_TRACT', 'CLUSTER_', 'WARD', 'ZIPCODE']
-
-
-    count_dict = {
-
-    }
-
-    for zone in zone_types:
-        for property in dict:
-            if 'Warning' not in dict[property].keys():
-                count_dict.setdefault(dict[property][zone], {})
-                count_dict[dict[property][zone]].setdefault(zone + '_count', 0)
-                count_dict[dict[property][zone]][zone + '_count'] += 1
-
-                count_dict[dict[property][zone]].setdefault('unit_count', 0)
-                if dict[property]['NUM_UNITS'] == 0:
-                    dict[property]['NUM_UNITS'] = 1
-                count_dict[dict[property][zone]]['unit_count'] += dict[property]['NUM_UNITS']
-
-                count_dict[dict[property][zone]].setdefault('bedroom_count', 0)
-                if dict[property]['BEDRM'] == 0:
-                    dict[property]['BEDRM'] = 1
-                count_dict[dict[property][zone]]['bedroom_count'] += dict[property]['BEDRM']
-        
-    print(count_dict)
-
+        for row in cama_data['features'][:2]:
             try:
                 objectid = row['properties']['OBJECTID']
                 if len(row['properties']['SSL']) == 8:
@@ -224,7 +181,6 @@ def zoneCount(dict):
         into csv file and then save the csv file in
         housing-insights/data/processed/zoneUnitCount
         as zoneUnitCount_2017-05-30.csv.
->>>>>>> 9ee9cf66a366ec44aef09675b5c40e1b5a73bcab
 
         """
 
