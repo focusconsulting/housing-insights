@@ -115,6 +115,11 @@ class CamaApiConn(BaseApiConn):
         """ [:100] for the first 100 cama_data points """
         for row in cama_data['features']:
             try:
+                current_year = int(datetime.date.today().strftime('%Y'))
+                #Skipping none values for units under construction
+                if int(row['properties']['AYB']) > current_year: 
+                    continue
+               
                 objectid = row['properties']['OBJECTID']
                 if len(row['properties']['SSL']) == 8:
                     square = row['properties']['SSL'][:4]
@@ -166,7 +171,7 @@ class CamaApiConn(BaseApiConn):
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 print(exc_type, "line", exc_tb.tb_lineno)
-                print("Error! SSL: ", row['properties']['SSL'])
+                print("Error! SSL: ", row['properties']['SSL'], row['properties']['AYB'])
                 continue
 
 
