@@ -17,9 +17,11 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
         controller.getData(metaDataRequest);
     },
     // Here's where we keep hardcoded URLs. The aim is to make this as short as possible.
+    //NOTE raw data sources have their urls included in the metaData
     URLS: {
       geoJSONPolygonsBase: "/tool/data/",
-      metaData: "/tool/data/meta.json"
+      metaData: "/tool/data/meta.json",
+      filterData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/filter/"
     }
     
 };

@@ -9,15 +9,15 @@ var filterView = {
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
 
-        {   source: 'proj_units_tot',
+        {   source: 'total_units_in_building',
             display_name: 'Project unit count',
             component_type: 'continuous',
             data_type:'integer',
             min: 5,
-            max: 200,
-            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead.
+            max: 1000,
+            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
         },
-        {   source: 'acs_rent_median',
+        {   source: 'census_tract_median_rent',
             display_name: 'Neighborhood Rent (ACS median)',
             component_type: 'continuous',
             data_type:'decimal',
