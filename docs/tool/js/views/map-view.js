@@ -38,7 +38,8 @@ var mapView = {
                 ['overlayRequest', mapView.addOverlayData],
                 ['joinedToGeo', mapView.addOverlayLayer],
                 ['dataLoaded.raw_project', mapView.placeProjects],
-                ['previewBuilding', mapView.showPreview]
+                ['previewBuilding', mapView.showPreview],
+                ['filteredData', mapView.filterMap]
             ]);
             
             //Initial page layout stuff
@@ -333,9 +334,13 @@ var mapView = {
     },
     placeProjects: function(){ // some repetition here with the addLayer function used for zone layers. could be DRYer if combines
                                // or if used constructor with prototypical inheritance
+        mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
+        mapView.convertedProjects.features.forEach(function(feature){
+            feature.properties.matches_filters = true;
+        });
         mapView.map.addSource('project', {
           'type': 'geojson',
-          'data': controller.convertToGeoJSON(model.dataCollection.raw_project)
+          'data': mapView.convertedProjects
         });
         mapView.map.addLayer({
             'id': 'project',
@@ -411,6 +416,23 @@ var mapView = {
         document.getElementById('preview-name').innerHTML = data.proj_name;
         document.getElementById('preview-owner').innerHTML = data.hud_own_name ? 'Owner: ' + data.hud_own_name : '';
 
+    },
+    filterMap: function(msg, data){
+        
+        mapView.convertedProjects.features.forEach(function(feature){
+            if ( data.indexOf(feature.properties.nlihc_id) !== -1 ){
+                feature.properties.matches_filters = true;
+            } else {
+                feature.properties.matches_filters = false;
+            }
+        });
+        mapView.map.getSource('project').setData(mapView.convertedProjects);
+        mapView.map.setFilter('project',['==','matches_filters', true]);
+        /*
+        console.log(data.toString().replace(/([^,]+)/g,"'$1'"));
+        var idStr = data.toString().replace(/([^,]+)/g,"'$1'")
+        var str = "NL000001";
+        mapView.map.setFilter('project',['in','nlihc_id', data]);*/
     }
 };
 
