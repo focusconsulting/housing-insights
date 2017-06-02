@@ -20,12 +20,12 @@ class BaseApiConn(object):
 
     If the class downloads whole data files for ingestion into our database:
     - get_data() method should be a one-call method that downloads all the files that class
-      is capable of downloading. It should have 0 mandatory arguments, and at a minimum 
+      is capable of downloading. It should have 0 mandatory arguments, and at a minimum
       the following optional arguments:
         - unique_data_ids
         - sample (Boolean). If possible, return just a few rows of data instead of the whole thing
         - output_type ('csv' or 'stdout'). 'csv' should write the file to disk, 'stdout' prints to console
-    - __init__ should have _available_unique_data_ids, a list of ids that the class can output. 
+    - __init__ should have _available_unique_data_ids, a list of ids that the class can output.
 
 
 
@@ -44,6 +44,26 @@ class BaseApiConn(object):
         self.baseurl = baseurl
         self.proxies = proxies
 
+        #A list of strings; this should be defined in the child class
+        self._available_unique_data_ids = None
+
+    @property
+    def output_paths(self):
+        if self._available_unique_data_ids is None:
+            raise NotImplementedError("You need to add self._available_unique_data_ids to your class before using it")
+
+        paths = {}
+        for u in self._available_unique_data_ids:
+            base = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               os.pardir,os.pardir,os.pardir))
+            api_location = 'data/raw/apis'
+            filename = u + ".csv"
+            d = datetime.now().strftime('%Y%m%d')
+            path = os.path.join(base,api_location,d,filename)
+            paths[u] = path
+
+        return paths
+
 
     def get(self, urlpath, params=None, **kwargs):
         """
@@ -56,7 +76,7 @@ class BaseApiConn(object):
                                  and urlpath is /v2, the end result
                                  is https://www.somesite.com/api/v2.
 
-                        If baseurl == None, the urlpath is used directly. 
+                        If baseurl == None, the urlpath is used directly.
 
         :type  urlpath: String.
 
@@ -154,4 +174,3 @@ class BaseApiManager(object):
     def get_config(self, config_file):
         config = HousingInsightsConfig(config_file)
         return config.get_section(self.__class__.classname)
-

@@ -1,0 +1,8 @@
+web:
+    image: sosedoff/pgweb
+    environment:
+        - DATABASE_URL=postgres://codefordc:codefordc@postgres:5432/housinginsights_docker?sslmode=disable
+    links:
+        - postgres
+    ports:
+        - "8081:8081"
