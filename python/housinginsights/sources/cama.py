@@ -99,6 +99,9 @@ class CamaApiConn(BaseApiConn):
         cluster_count = []
         ward_count = []
         zipcode_count = []
+        units_zero_ssl = []
+        units_none_ssl = []
+
 
         """
         Take each CAMA property data and retrieve the MAR data.
@@ -106,43 +109,69 @@ class CamaApiConn(BaseApiConn):
         """
         Certain square values have four digits + a letter. (ex. 8888E)
         Square would be the first four digits and suffix would be the letter.
+        SSL sometimes comes as 8 digit string without spacing in the middle.
         """
 
         """ [:100] for the first 100 cama_data points """
         for row in cama_data['features']:
-            objectid = row['properties']['OBJECTID']
-            square, lot = row['properties']['SSL'].split()
-            suffix = ' '
-            if len(square) > 4:
-                square = square[:4]
-                suffix = square[-1]
+            try:
+                objectid = row['properties']['OBJECTID']
+                if len(row['properties']['SSL']) == 8:
+                    square = row['properties']['SSL'][:4]
+                    lot = row['properties']['SSL'][4:]
+                else:
+                    square, lot = row['properties']['SSL'].split()
+                suffix = ' '
+                if len(square) > 4:
+                    square = square[:4]
+                    suffix = square[-1]
 
-            mar_return = mar_api.get_data(square, lot, suffix)
+                mar_return = mar_api.get_data(square, lot, suffix)
 
-            ''' Count the housing units and bedrooms '''
-            num_units = row['properties']['NUM_UNITS']
-            if num_units == 0: num_units = 1
-            bedrm = row['properties']['BEDRM']
-            if bedrm == 0: bedrm = 1
+                ''' Count the housing units and bedrooms '''
+                num_units = 0
+                if row['properties']['NUM_UNITS']: num_units = row['properties']['NUM_UNITS']
+                if num_units == 0:
+                    num_units = 1
+                    units_zero_ssl.append(row['properties']['SSL']) #for recording
+                if num_units == None: units_none_ssl.append(row['properties']['SSL']) #for recording
+                # if num_units == None and 'Warning' not in mar_return.keys():
+                #     num_units == 1
+                #     print("num_units is None: ", row['properties']['SSL']) #for recording
 
-            for zone in zone_types:
-                if zone == 'anc': zone_count = anc_count
-                elif zone == 'census_tract': zone_count = census_count
-                elif zone == 'neighborhood_cluster': zone_count = cluster_count
-                elif zone == 'ward': zone_count = ward_count
-                elif zone == 'zip': zone_count = zipcode_count
+                bedrm = row['properties']['BEDRM']
+                if bedrm == 0: bedrm = 1
+                if bedrm == None and 'Warning' not in mar_return.keys():
+                    bedrm = 1
+                    print("bedrm is None:", row['properties']['SSL']) #for recording
 
-                if 'Warning' not in mar_return.keys():
-                    flag = False
-                    for dictionary in zone_count: #dictionary is {'zone_type': 'ANC', 'zone': 'ANC 8A', etc.}
-                        if dictionary['zone'] == mar_return[zone]: #mar_return[ANC] is 'ANC 8A'
-                            dictionary['housing_unit_count'] += num_units
-                            dictionary['bedroom_unit_count'] += bedrm
-                            flag = True
-                            break
-                    if not flag:
-                        zone_count.append( OrderedDict([('zone_type', zone), ('zone', mar_return[zone]), ('housing_unit_count', num_units), ('bedroom_unit_count', bedrm)]) )
+                for zone in zone_types:
+                    if zone == 'anc': zone_count = anc_count
+                    elif zone == 'census_tract': zone_count = census_count
+                    elif zone == 'neighborhood_cluster': zone_count = cluster_count
+                    elif zone == 'ward': zone_count = ward_count
+                    elif zone == 'zip': zone_count = zipcode_count
 
+                    if 'Warning' not in mar_return.keys():
+                        flag = False
+                        for dictionary in zone_count: #dictionary is {'zone_type': 'ANC', 'zone': 'ANC 8A', etc.}
+                            if dictionary['zone'] == mar_return[zone]: #mar_return[ANC] is 'ANC 8A'
+                                dictionary['housing_unit_count'] += num_units
+                                dictionary['bedroom_unit_count'] += bedrm
+                                flag = True
+                                break
+                        if not flag:
+                            zone_count.append( OrderedDict([('zone_type', zone), ('zone', mar_return[zone]), ('housing_unit_count', num_units), ('bedroom_unit_count', bedrm)]) )
+
+            except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print(exc_type, "line", exc_tb.tb_lineno)
+                print("Error! SSL: ", row['properties']['SSL'])
+                continue
+
+
+        print("units_zero_ssl:", units_zero_ssl)
+        print("units_none_ssl:", units_none_ssl)
         return {'anc': anc_count, 'census_tract': census_count, 'neighborhood_cluster': cluster_count, 'ward': ward_count, 'zip': zipcode_count}
 
 
