@@ -351,7 +351,7 @@ var mapView = {
             'paint': {
                 'circle-radius': {
                     'base': 1.75,
-                    'stops': [[10, 3], [18, 32]]
+                    'stops': [[12, 3], [15, 32]]
                 }, 
                 'circle-opacity': 0.3,      
                 'circle-color': {
@@ -474,7 +474,7 @@ var mapView = {
                 
                 mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);            
             }
-        }, (1000 / 15) );
+        }, (1000 / 20) );
     }
 };
 
