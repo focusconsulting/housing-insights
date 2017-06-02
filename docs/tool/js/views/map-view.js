@@ -342,17 +342,35 @@ var mapView = {
           'type': 'geojson',
           'data': mapView.convertedProjects
         });
+        mapView.circleStrokeWidth =  1;
+        mapView.circleStrokeOpacity =  1;
         mapView.map.addLayer({
             'id': 'project',
             'type': 'circle',
             'source': 'project',
             'paint': {
-                'circle-radius': { // make circles larger as the user zoom. [[smallzoom,px],[bigzoom,px]]
+                'circle-radius': {
                     'base': 1.75,
                     'stops': [[10, 3], [18, 32]]
-                },            
+                }, 
+                'circle-opacity': 0.3,      
                 'circle-color': {
                       property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
+                      type: 'categorical',
+                      stops: [ 
+                        ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                        ['2 - Expiring Subsidy', '#8B4225'],
+                        ['3 - Recent Failing REAC Score', '#bd0026'],
+                        ['4 - More Info Needed', '#A9A9A9'],
+                        ['5 - Other Subsidized Property', ' #fd8d3c'],
+                        ['6 - Lost Rental', '#A9A9A9']
+                      ]
+                },
+            'circle-stroke-width': mapView.circleStrokeWidth,
+            'circle-stroke-opacity': mapView.circleStrokeOpacity,
+            
+            'circle-stroke-color': {
+                property: 'category_code', 
                       type: 'categorical',
                       stops: [ 
                         ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
@@ -428,11 +446,35 @@ var mapView = {
         });
         mapView.map.getSource('project').setData(mapView.convertedProjects);
         mapView.map.setFilter('project',['==','matches_filters', true]);
+
+        setTimeout(function(){
+            mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
+        },20);
         /*
-        console.log(data.toString().replace(/([^,]+)/g,"'$1'"));
+        console.log(data.toString().replace(/([^,]+)/g,"'$1'"));    
         var idStr = data.toString().replace(/([^,]+)/g,"'$1'")
         var str = "NL000001";
         mapView.map.setFilter('project',['in','nlihc_id', data]);*/
+    },
+    animateSize: function(timestamp){
+        setTimeout(function(){
+            mapView.shrinkGrow = mapView.shrinkGrow || 'grow';
+            mapView.circleStrokeWidth = mapView.shrinkGrow === 'grow' ? mapView.circleStrokeWidth * 2 : mapView.circleStrokeWidth / 2;// ( 20 - mapView.circleStrokeWidth ) / ( 1000 / ( timestamp - mapView.lastTimestamp ));
+            mapView.circleStrokeOpacity = mapView.shrinkGrow === 'grow' ? mapView.circleStrokeOpacity / 1.2 : mapView.circleStrokeOpacity * 1.2;
+            mapView.map.setPaintProperty('project','circle-stroke-width',mapView.circleStrokeWidth);
+            mapView.map.setPaintProperty('project','circle-stroke-opacity',mapView.circleStrokeOpacity);
+            if (mapView.shrinkGrow === 'grow' && mapView.circleStrokeWidth >= 32){
+                
+                mapView.shrinkGrow = 'shrink';
+            } 
+            if (mapView.shrinkGrow === 'shrink' && mapView.circleStrokeWidth <= 1){
+                mapView.shrinkGrow = 'grow';
+                cancelAnimationFrame(mapView.growShrinkId);
+            } else {
+                
+                mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);            
+            }
+        }, (1000 / 15) );
     }
 };
 
