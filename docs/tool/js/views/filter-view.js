@@ -193,11 +193,15 @@ var filterView = {
 
                
                 //Set callback for when user makes a change
-                $("select").change(function(){
-                    var selectedValues = $('.ui.dropdown.'+'dropdown-'+c.source).dropdown('get value');
-                    var specific_state_code = 'filterValues.' + c.source
+                 function makeSelectCallback(component){
+                    return function(){
+                    var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
+                    var specific_state_code = 'filterValues.' + component.source
                     setState(specific_state_code,selectedValues);
-                });
+                }};
+                var currentSelectCallback = makeSelectCallback(c)
+                $("select").change(currentSelectCallback);
+                
             };
 
             if (filterView.components[i].component_type == 'date'){
