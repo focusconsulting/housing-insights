@@ -20,7 +20,6 @@ var filterUtil = {
         
 		var workingData = model.dataCollection['filterData'].items; 
 		var state = getState();
-        console.log(state);
 
         //Extract just the filterValues stuff from our state
         //state is stored as filterValues.dataid with period as part of the object's key. 
@@ -33,8 +32,6 @@ var filterUtil = {
                 filterValues[splitKey[1]] = state[key]
             };
         };
-
-        console.log(filterValues)
 
 		for (key in filterValues) { // iterate through registered filters
 			
@@ -63,6 +60,11 @@ var filterUtil = {
 
 			if (component['component_type'] == 'categorical') {
 				workingData = workingData.filter(function(d){
+                    //If all items are removed from filter list, assume they want all items
+                    if (filterValues[key][0].length == 0 ) {
+                        return true;
+                    }
+                    //otherwise use the list of chosen categories
 					return filterValues[key][0].includes(d[key]);
 				})
 			}

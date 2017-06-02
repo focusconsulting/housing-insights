@@ -1,3 +1,11 @@
+#temp-filter-menu {
+    width: 200px;
+    height: 100%;
+    top: 100px;
+    margin-bottom: 40px;
+}
+
+
 
 /*Stuff for all filter components*/
 .filter-group {

@@ -37,7 +37,12 @@ var filterView = {
             data_type: 'text',
             other: 'feel free to add other needed properties if they make sense',
             options: ["Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5", "Ward 6", "Ward 7", "Ward 8"]
-        }
+        },
+        {   source: 'subsidy_program',
+            display_name: 'Subsidy Program',
+            component_type:'categorical',
+            data_type: 'text',
+            options: ['LIHTC','Project-based section 8', 'Tax exempt bond']}
     ],
 
     init: function() {
@@ -158,9 +163,8 @@ var filterView = {
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
 
-              var c = filterView.components[i];
-              console.log(c)
-                console.log("Found a categorical filter! (need code to add this element)")
+                var c = filterView.components[i];
+                console.log("Found a categorical filter!")
                 //Add a div with label and select element
                 //Bind user changes to a setState function
 
@@ -171,36 +175,31 @@ var filterView = {
                   .attr("class","filter-label")
                   .text(c.display_name);
                 var selector = parent.append("div")
-                  .attr("id",c.source)
                   .attr("class","filter")
                   .attr("class","categorical");
                 var uiSelector = selector.append("select")
                   .attr("class", "ui fluid search dropdown")
+                  .attr("class", "dropdown-" + c.source)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
                   .attr("multiple", " ")
-                  .attr("id", "select");
+                  .attr("id", c.source);
 
-                for(var i = 0; i < c.options.length; i++){
-                  uiSelector.append("option").attr("value", c.options[i]).text(c.options[i])
+                for(var j = 0; j < c.options.length; j++){
+                  uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
                   var select = document.getElementById(c.source);
                 }
-                $('.ui.dropdown')
-                .dropdown()
-                ;
-                $('#select')
-                .dropdown()
-                ;
+
+                //$('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect
+                $('#'+c.source).dropdown();
+
+               
+                //Set callback for when user makes a change
                 $("select").change(function(){
-                  var selectedValues = [];
-                  $("option:selected").each(function(){
-                    selectedValues.push($(this).val());
-                  });
-                  console.log(selectedValues);
-                  return false;
-  })
+                    var selectedValues = $('.ui.dropdown.'+'dropdown-'+c.source).dropdown('get value');
+                    var specific_state_code = 'filterValues.' + c.source
+                    setState(specific_state_code,selectedValues);
+                });
             };
 
-
-            //set up date pickers
             if (filterView.components[i].component_type == 'date'){
                 console.log("Found a date filter! (need code to add this element)")
                 //Add a div with label and select element
@@ -215,10 +214,8 @@ var filterView = {
 
     }, //end init
     toggleSidebar: function(msg,data){
-        console.log('toggleSidebar');
         var sBar = document.getElementById(msg.replace('.','-'));
         var leftRight = msg.indexOf('left') !== -1 ? 'left' : 'right';
-        console.log(leftRight);
         if ( data === true ) {
             sBar.classList.add('active'); // not supported in lte ie9
             document.getElementById('button-' + getState()['subNav.' + leftRight][0]).classList.add('active');
@@ -236,7 +233,7 @@ var filterView = {
         }
     },
     toggleSubNavButtons(msg, data) {
-        console.log(data);
+        
         var leftRight = msg.indexOf('left') !== -1 ? 'left' : 'right';
         if ( getState()['sidebar.' + leftRight] && getState()['sidebar.' + leftRight][0] ) {
             document.querySelectorAll('#' + leftRight + '-options .sub-nav-button').forEach(function(button){

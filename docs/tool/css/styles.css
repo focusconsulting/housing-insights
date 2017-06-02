@@ -251,11 +251,6 @@ html, body {
     background: inherit;
 }
 
-#temp-filter-menu {
-    width: 200px;
-    height: 300px;
-    top: 100px;
-}
 
 #layer-menu,#overlay-menu {
     width: 100%;
