@@ -113,7 +113,7 @@ class CamaApiConn(BaseApiConn):
         """
 
         """ [:100] for the first 100 cama_data points """
-        for row in cama_data['features'][:2]:
+        for row in cama_data['features']:
             try:
                 objectid = row['properties']['OBJECTID']
                 if len(row['properties']['SSL']) == 8:
@@ -183,6 +183,9 @@ class CamaApiConn(BaseApiConn):
         as zoneUnitCount_2017-05-30.csv.
 
         """
+        if not os.path.exists('../../../data/processed/zoneUnitCount'):
+            os.makedirs('../../../data/processed/zoneUnitCount')
+
 
         data_processed_zoneUnitCount = os.path.join(PYTHON_PATH, os.pardir, 'data', 'processed', 'zoneUnitCount')
 
