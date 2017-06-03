@@ -87,8 +87,8 @@ var buildingView = {
         }
         function dataBatchCallback(){
             dataRequestCount++;
+            console.log("dataRequestCount", dataRequestCount);
             if(dataRequestCount === dataRequests.length){
-                buildingView.onReturn();
                 new Accordion();
                 buildingView.prepareHeader();
                 buildingView.prepareMapsAndCharts();
@@ -113,6 +113,9 @@ var buildingView = {
         }
     },
     onReturn: function(){
+        var wrapperElement = document.getElementById(this.el);
+        wrapperElement.parentElement.removeChild(wrapperElement);
+        this.init();
     },
     prepareHeader: function(){
         var d = getState()['selectedBuilding'][0]['properties'];
