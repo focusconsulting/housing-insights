@@ -15,6 +15,7 @@ var SubsidyTimelineChart = function(chartOptions) {
 
     this.margin = {top: 20, right: 10, bottom: 40, left: 10};         // Since this chart uses axes, I implemented the D3 margin
     this.width = chartOptions.width - this.margin.left - this.margin.right;     // convention, which you may reference at https://bl.ocks.org/mbostock/3019563
+    console.log("this.width", this.width);
     this.height = chartOptions.height - this.margin.top - this.margin.bottom; 
 
     this.building = getState()['selectedBuilding'][0]['properties'];
@@ -28,9 +29,11 @@ SubsidyTimelineChart.prototype = Object.create(ChartProto.prototype); // Second 
 var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
                              // as called in this.extendPrototype(...) above 
     initialize: function(chartOptions) {
+      
+        chartOptions.dataRequest.callback = doStuffWithData;
 
         var chart = this,
-            data = model.dataCollection[chartOptions.dataRequest.name]['items'],
+            data,
             groups; // the groups variable is used to draw a multi-part figure for each datum
             
         chart.svg = d3.select(chartOptions.container) // select elem (div#chart-0)
@@ -39,143 +42,158 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 .attr('height', this.height + this.margin.top + this.margin.bottom) // continuation of d3 margin convention
               .append("g")
                 .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+        
+        controller.getData(chartOptions.dataRequest);
+        function doStuffWithData(returnData){
+            data = returnData.items;
+            chart.minTime = d3.min(data, function(d){
+              return chart.timeParser.toUTC(d['poa_start']);
+            });
+            chart.maxTime = d3.max(data, function(d){
+              return chart.timeParser.toUTC(d['poa_end']);
+            });
 
-        chart.minTime = d3.min(data, function(d){
-          return chart.timeParser.toUTC(d['subsidy_start_first']);
-        });
-        chart.maxTime = d3.max(data, function(d){
-          return chart.timeParser.toUTC(d['subsidy_end_first']);
-        });
-        chart.xScale = d3.scaleTime()
-                    .domain([new Date(chart.minTime), new Date(chart.maxTime)]).range([0, .9 * this.width]);
-        chart.yScale = function(i){
-              return this.height/data.length * i + 10;
-          }; // There is probably a default d3 scale that accomplishes this, but it was simple enough
-              // that I didn't want to spend the time to dig through the docs. You are welcome to
-              // find it and replace this.
+            chart.xScale = d3.scaleTime()
+                        .domain([new Date(chart.minTime), new Date(chart.maxTime)]).range([0, .9 * chart.width]);
 
-        groups = chart.svg.selectAll('g')
-              .data(data)
-              .enter()
-              .append('g');
-     
-        groups.append('line')
-              .attr('x1', function(d){
-                return chart.xScale(new Date(chart.timeParser.toUTC(d['subsidy_start_first'])));
-              })
-              .attr('x2', function(d){
-                return chart.xScale(new Date(chart.timeParser.toUTC(d['subsidy_end_first'])));
-              })
-              .attr('y1', function(d, i){
-                return chart.yScale(i);
-              })
-              .attr('y2', function(d, i){
-                return chart.yScale(i);
-              })
-              .style('stroke', 'black');
+            console.log("chart", chart);
+            chart.yScale = function(i){
+                  return chart.height/data.length * i + 10;
+              }; // There is probably a default d3 scale that accomplishes this, but it was simple enough
+                  // that I didn't want to spend the time to dig through the docs. You are welcome to
+                  // find it and replace this.
 
-        groups.append('text')
-              .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first'])) + 3;
-              })
-              .attr('y', function(d,i){
-                return chart.yScale(i) + 5;
-              })
-              .text(function(d){
-                return chart.timeParser.year(d['subsidy_end_first']);
-              })
-              .style('fill', '#999999');
-
-        groups.append('text')
-              .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first']))-15;
-              })
-              .attr('y', function(d,i){
-                return chart.yScale(i) - 4;
-              })
-              .text(function(d){
-                return d['program'];
-              })
-              .attr('text-anchor','end');
-
-        groups.append('text')
-              .attr('x', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first'])) - 15;
-              })
-              .attr('y', function(d,i){
-                return chart.yScale(i) + 16;
-              })
-              .text(function(d){
-                return "Subsidized units: " + d['proj_units_assist_min'];
-              })
-              .attr('fill','gray')
-              .attr('text-anchor','end');        
-
-        // the following three sections are decorative
-
-        groups.append('circle')
-              .attr('cx', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_start_first']));
-              })
-              .attr('cy', function(d,i){
-                return chart.yScale(i);
-              })
-              .attr('r', 3)
-              .style('fill', 'black');
-
-        groups.append('polygon')
-              .attr('points', function(d, i){
-                let x2 = chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first'])),
-                    x1 = x2 - 7,
-                    y2 = chart.yScale(i),
-                    y1 = y2 + 5,
-                    y3 = y2 - 5;
-                return `${x1},${y1} ${x2},${y2} ${x1},${y3}`
-              })
-              .style('stroke', 'black')
-              .style('fill', 'black');
-
-        groups.append('line')
-              .attr('x1', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first']));
-              })
-              .attr('x2', function(d){
-                return chart.xScale(chart.timeParser.parsedDate(d['subsidy_end_first']));
-              })
-              .attr('y1', function(d,i){
-                return chart.yScale(i) - 7;
-              })
-              .attr('y2', function(d,i){
-                return chart.yScale(i) + 7;
-              })
-              .style('stroke', 'black');
-
-        chart.svg.append('g')
-                  .attr("transform", "translate(0," + this.height + ")")
-                  .call(d3.axisBottom(chart.xScale))
+            groups = chart.svg.selectAll('g')
+                  .data(data)
+                  .enter()
+                  .append('g');
+        
+            groups.append('line')
+                  .attr('x1', function(d){
+                    return chart.xScale(new Date(chart.timeParser.toUTC(d['poa_start'])));
+                  })
+                  .attr('x2', function(d){
+                    return chart.xScale(new Date(chart.timeParser.toUTC(d['poa_end'])));
+                  })
+                  .attr('y1', function(d, i){
+                    return chart.yScale(i);
+                  })
+                  .attr('y2', function(d, i){
+                    return chart.yScale(i);
+                  })
                   .style('stroke', 'black');
 
-        chart.svg.append('line')
-                  .attr('x1', chart.xScale(new Date()))
-                  .attr('x2', chart.xScale(new Date()))
-                  .attr('y1', 0)
-                  .attr('y2', this.height + 20)
-                  .style('stroke', 'rgba(0,0,0,.4)')
-                  .style('stroke-width', 4);
+            groups.append('text')
+                  .attr('x', function(d){
+                    return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) + 3;
+                  })
+                  .attr('y', function(d,i){
+                    return chart.yScale(i) + 5;
+                  })
+                  .text(function(d){
+                    return chart.timeParser.year(d['poa_end']);
+                  })
+                  .style('fill', '#999999');
 
-        chart.svg.append('text')
-                  .attr('x', chart.xScale(new Date()) - 15)
-                  .attr('y', this.height + 35)
-                  .text('Today');
+            groups.append('text')
+                  .attr('x', function(d){
+                    return chart.xScale(chart.timeParser.parsedDate(d['poa_end']))-15;
+                  })
+                  .attr('y', function(d,i){
+                    return chart.yScale(i) - 4;
+                  })
+                  .text(function(d){
+                    return d['program'];
+                  })
+                  .attr('text-anchor','end');
+
+            groups.append('text')
+                  .attr('x', function(d){
+                    return chart.xScale(chart.timeParser.parsedDate(d['poa_end'])) - 15;
+                  })
+                  .attr('y', function(d,i){
+                    return chart.yScale(i) + 16;
+                  })
+                  .text(function(d){
+                    return "Subsidized units: " + d['proj_units_assist_min'];
+                  })
+                  .attr('fill','gray')
+                  .attr('text-anchor','end');        
+
+            // the following three sections are decorative
+
+            groups.append('circle')
+                  .attr('cx', function(d){
+                    return chart.xScale(chart.timeParser.parsedDate(d['poa_start']));
+                  })
+                  .attr('cy', function(d,i){
+                    return chart.yScale(i);
+                  })
+                  .attr('r', 3)
+                  .style('fill', 'black');
+
+            groups.append('polygon')
+                  .attr('points', function(d, i){
+                    let x2 = chart.xScale(chart.timeParser.parsedDate(d['poa_end'])),
+                        x1 = x2 - 7,
+                        y2 = chart.yScale(i),
+                        y1 = y2 + 5,
+                        y3 = y2 - 5;
+                    return `${x1},${y1} ${x2},${y2} ${x1},${y3}`
+                  })
+                  .style('stroke', 'black')
+                  .style('fill', 'black');
+
+            groups.append('line')
+                  .attr('x1', function(d){
+                    return chart.xScale(chart.timeParser.parsedDate(d['poa_end']));
+                  })
+                  .attr('x2', function(d){
+                    return chart.xScale(chart.timeParser.parsedDate(d['poa_end']));
+                  })
+                  .attr('y1', function(d,i){
+                    return chart.yScale(i) - 7;
+                  })
+                  .attr('y2', function(d,i){
+                    return chart.yScale(i) + 7;
+                  })
+                  .style('stroke', 'black');
+
+            chart.svg.append('g')
+                      .attr("transform", "translate(0," + chart.height + ")")
+                      .call(d3.axisBottom(chart.xScale))
+                      .style('stroke', 'black');
+
+            chart.svg.append('line')
+                      .attr('x1', chart.xScale(new Date()))
+                      .attr('x2', chart.xScale(new Date()))
+                      .attr('y1', 0)
+                      .attr('y2', chart.height + 20)
+                      .style('stroke', 'rgba(0,0,0,.4)')
+                      .style('stroke-width', 4);
+
+            chart.svg.append('text')
+                      .attr('x', chart.xScale(new Date()) - 15)
+                      .attr('y', chart.height + 35)
+                      .text('Today');
+          }
       }, // end setup
 
       timeParser: {   // This is very data format dependent, and will need to be replaced when we have
                       // a final data format
     
         month: function(string) {
+          //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
+          if(string === null || string === 'N' || string === '' || string === 0){
+            return '04'
+          };
           return +string.substr(5, 2);
         },
         day: function(string){
+          //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
+          if(string === null || string === 'N' || string === '' || string === 0){
+            return '17'
+          };
           return +string.substr(8, 2);
         },
         year: function(string){
@@ -188,7 +206,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
         toUTC: function(string){
           //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
           if(string === null || string === 'N' || string === '' || string === 0){
-            return Date.UTC('2017','04','17')
+            return Date.UTC('2017','04','17');
           };
           if(typeof(string) === 'string'){
             return Date.UTC(this.year(string), this.month(string), this.day(string));

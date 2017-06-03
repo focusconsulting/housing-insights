@@ -249,12 +249,14 @@ var buildingView = {
 
             buildingView.addCurrentBuildingToMap(metroStationsMap,'targetBuilding2');
             
-        });     
+        });
+
+        var currentNlihc = getState()['selectedBuilding'][0]['properties']['nlihc_id'];
 
         new SubsidyTimelineChart({
             dataRequest: {
-                name: 'raw_project',
-                url: model.dataCollection.metaData.project.api.raw_endpoint
+                name: currentNlihc + '_subsidy',
+                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
             },
             container: '#subsidy-timeline-chart',
             width: 1000,
