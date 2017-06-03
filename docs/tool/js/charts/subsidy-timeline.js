@@ -39,15 +39,19 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 .attr('height', this.height + this.margin.top + this.margin.bottom) // continuation of d3 margin convention
               .append("g")
                 .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+        console.log("Just after chart.svg in subsidy-timeline.js");
 
         chart.minTime = d3.min(data, function(d){
           return chart.timeParser.toUTC(d['subsidy_start_first']);
         });
+        console.log("Just after chart.minTime in subsidy-timeline.js");
         chart.maxTime = d3.max(data, function(d){
           return chart.timeParser.toUTC(d['subsidy_end_first']);
         });
+        console.log("Just after chart.maxTime in subsidy-timeline.js");
         chart.xScale = d3.scaleTime()
                     .domain([new Date(chart.minTime), new Date(chart.maxTime)]).range([0, .9 * this.width]);
+        console.log("Just after chart.xScale in subsidy-timeline.js");
         chart.yScale = function(i){
               return this.height/data.length * i + 10;
           }; // There is probably a default d3 scale that accomplishes this, but it was simple enough
@@ -58,9 +62,11 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               .data(data)
               .enter()
               .append('g');
+        console.log("Just after chart.svg.selectAll('g') in subsidy-timeline.js");
      
         groups.append('line')
               .attr('x1', function(d){
+                console.log("d['subsidy_start_first']", d['subsidy_start_first']);
                 return chart.xScale(new Date(chart.timeParser.toUTC(d['subsidy_start_first'])));
               })
               .attr('x2', function(d){
@@ -73,6 +79,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 return chart.yScale(i);
               })
               .style('stroke', 'black');
+        console.log("Just after groups.append('line') in subsidy-timeline.js");
 
         groups.append('text')
               .attr('x', function(d){
@@ -85,6 +92,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 return chart.timeParser.year(d['subsidy_end_first']);
               })
               .style('fill', '#999999');
+        console.log("Just after groups.append('text'), first call, in subsidy-timeline.js");
 
         groups.append('text')
               .attr('x', function(d){
@@ -97,6 +105,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 return d['program'];
               })
               .attr('text-anchor','end');
+        console.log("Just after groups.append('text'), second call, in subsidy-timeline.js");
 
         groups.append('text')
               .attr('x', function(d){
@@ -110,6 +119,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               })
               .attr('fill','gray')
               .attr('text-anchor','end');        
+        console.log("Just after groups.append('text'), third call, in subsidy-timeline.js");
 
         // the following three sections are decorative
 
@@ -122,6 +132,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               })
               .attr('r', 3)
               .style('fill', 'black');
+        console.log("Just after groups.append('circle') in subsidy-timeline.js");
 
         groups.append('polygon')
               .attr('points', function(d, i){
@@ -134,6 +145,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               })
               .style('stroke', 'black')
               .style('fill', 'black');
+        console.log("Just after groups.append('polygon') in subsidy-timeline.js");
 
         groups.append('line')
               .attr('x1', function(d){
@@ -149,11 +161,13 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                 return chart.yScale(i) + 7;
               })
               .style('stroke', 'black');
+        console.log("Just after groups.append('line') in subsidy-timeline.js");
 
         chart.svg.append('g')
                   .attr("transform", "translate(0," + this.height + ")")
                   .call(d3.axisBottom(chart.xScale))
                   .style('stroke', 'black');
+        console.log("Just after chart.svg.append('g'), around line 169, in subsidy-timeline.js");
 
         chart.svg.append('line')
                   .attr('x1', chart.xScale(new Date()))
@@ -162,15 +176,19 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
                   .attr('y2', this.height + 20)
                   .style('stroke', 'rgba(0,0,0,.4)')
                   .style('stroke-width', 4);
+        console.log("Just after chart.svg.append('line'), around line 178, in subsidy-timeline.js");
 
         chart.svg.append('text')
                   .attr('x', chart.xScale(new Date()) - 15)
                   .attr('y', this.height + 35)
                   .text('Today');
+        console.log("Just after chart.svg.append('text'), around line 184, in subsidy-timeline.js");
       }, // end setup
 
       timeParser: {   // This is very data format dependent, and will need to be replaced when we have
                       // a final data format
+
+                      // PG: currently working with Strings of the format '0000-00-00'.
     
         month: function(string) {
           return +string.substr(5, 2);
@@ -180,12 +198,13 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
         },
         year: function(string){
           //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
-          if(string === 'N' || string === '' || string === 0){
+          if(string === null || string === 'N' || string === '' || string === 0){
             return '2017'
           };
          return +string.substr(0, 4);
         },
         toUTC: function(string){
+          console.log("Argument for toUTC", string);
           //TODO this is a super hacky way to deal with these null values that will need to change when we switch to API
           if(string === 'N' || string === '' || string === 0){
             return Date.UTC('2017','04','17')
