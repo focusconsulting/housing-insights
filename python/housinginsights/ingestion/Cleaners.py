@@ -10,17 +10,23 @@ import dateutil.parser as dateparser
 import logging
 
 from housinginsights.ingestion.DataReader import HIReader
+from housinginsights.sources.mar import MarApiConn
 import os
 
 
 package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
                                            os.pardir))
+# TODO - add in manifest but don't load in db so the path isn't hard coded?
+mar_path = os.path.join(package_dir, os.pardir, 'data', 'raw', 'apis',
+                        '20170528', 'mar.csv')
 
 '''
 Usage:
 Dynamically import based on name of class in meta.json:
 http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-string-name-of-a-class-in-dynamically-imported
 '''
+
+
 class CleanerBase(object, metaclass=ABCMeta):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
         self.cleaned_csv = cleaned_csv
@@ -91,7 +97,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             'FALSE': False,
             '1': True,
             '0': False,
-            '': ''
+            '': self.null_value
             }
         return mapping[value]
 
@@ -141,9 +147,10 @@ class CleanerBase(object, metaclass=ABCMeta):
             '''
             Make all census tract names follow a consistent format. 
             column_name corresponds to the key of the row, which depends on 
-            the source file column name which may be different from the final consistent name of census_tract
+            the source file column name which may be different from the final
+            consistent name of census_tract
             '''
-            # deal with null values TODO - check with Neal what this is doing
+            # deal with null values
             if row[column_name] == self.null_value:
                 return row
             else:
@@ -368,6 +375,44 @@ class CleanerBase(object, metaclass=ABCMeta):
             row['WARD'] = "Ward " + str(row['WARD'])
             return row
 
+    def rename_lat_lon(self, row):
+        pass
+
+    def add_mar_id(self, row, address_id_col_name='ADDRESS_ID'):
+        mar = HIReader(path=mar_path)
+        row_address_id = row[address_id_col_name]
+        mar_row = mar.get_row_by_column_name(col_header_name='ADDRESS_ID',
+                                             look_up_value=row_address_id)
+        if mar_row is not None:
+            row['mar_id'] = mar_row['ADDRESS_ID']
+            return row
+
+        # api lookup with lat/lon or x/y coords if address id is null or invalid
+        mar_api = MarApiConn()
+        lat = row['Proj_lat']
+        lon = row['Proj_lon']
+        x_coord = row['Proj_x']
+        y_coord = row['Proj_y']
+        address = row['Proj_addre']
+        if lat is not None and lon is not None:
+            result = mar_api.reverse_lat_lng_geocode(latitude=lat,
+                                                     longitude=lon)
+        elif x_coord is not None and y_coord is not None:
+            result = mar_api.reverse_geocode(xcoord=x_coord,
+                                             ycoord=y_coord)
+        elif address is not None:
+            # check whether address is valid - it has street number
+            try:
+                str_num = address.split(' ')[0]
+                int(str_num)
+                first_address = address.split(';')[0]
+                result = mar_api.find_location(first_address)
+            except ValueError:
+                result = None
+        row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+        return row
+
+
 #############################################
 # Custom Cleaners
 #############################################
@@ -385,6 +430,7 @@ class ProjectCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['N','', None])
         row = self.parse_dates(row)
         row = self.rename_census_tract(row,row_num,column_name='Geo2010')
+        row = self.add_mar_id(row, 'Proj_address_id')
         return row
 
 
