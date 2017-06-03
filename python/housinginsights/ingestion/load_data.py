@@ -169,6 +169,22 @@ class LoadData(object):
 
         return None
 
+    def create_list(self, folder_path):
+        """
+        Returns a list of potential unique_data_ids based on csv files in the
+        given folder path. The assumption is that all raw data a saved as csv
+        with filename that matches unique_data_id used in manifest.
+        """
+        unique_data_ids = list()
+        files_in_folder = os.listdir(folder_path)
+        for file in files_in_folder:
+            file_path = os.path.join(folder_path, file)
+            uid, file_ext = file.split(sep='.')
+            if os.path.isfile(file_path) and file_ext == 'csv':
+                unique_data_ids.append(uid)
+
+        return unique_data_ids
+
     def update_database(self, unique_data_id_list):
         """
         Reloads only the flat file associated to the unique_data_id in
@@ -326,8 +342,7 @@ class LoadData(object):
 
         # clean the file and save the output to a local pipe-delimited file
         # if it doesn't have a 'loaded' status in the database manifest
-        if csv_reader.should_file_be_loaded(
-                sql_manifest_row=sql_manifest_row):
+        if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
             meta_only_fields = self._get_meta_only_fields(
                 table_name=table_name, data_fields=csv_reader.keys)
@@ -340,7 +355,6 @@ class LoadData(object):
             csv_writer.close()
 
             # write the data to the database
-            unique_data_id = manifest_row['unique_data_id']
             self._update_database(table_name=table_name,
                                   sql_interface=sql_interface)
 
@@ -352,17 +366,6 @@ class LoadData(object):
         Load the clean PSV file into the database
         """
         print("  Loading...")
-
-        # append new unique_data_id data instead of dropping entire table
-        # TODO: remove unnecessary code - relace table not needed?
-        # # Decide whether to append or replace the data in table
-        # if self.meta[table_name]["replace_table"]:
-        #     logging.info("  replacing existing table")
-        #
-        #     # result = self.engine.execute(
-        #     #     "DELETE FROM {} WHERE unique_data_id = {}".format(
-        #     #         table_name, unique_data_id))
-        #     sql_interface.drop_table()
 
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()
@@ -423,8 +426,8 @@ def main(passed_arguments):
     if passed_arguments.rebuild:
         loader.drop_tables()
 
-    if passed_arguments.update_database:
-        loader.update_database(passed_arguments.update_database)
+    if passed_arguments.update_only:
+        loader.update_database(passed_arguments.update_only)
     else:
         loader.load_all_data()
 
