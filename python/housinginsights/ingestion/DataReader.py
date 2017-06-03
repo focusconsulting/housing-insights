@@ -100,6 +100,27 @@ class HIReader(object):
         """
         self._length = None
 
+    def get_row_by_column_name(self, col_header_name, look_up_value):
+        """
+        Returns the row for a given value in a given column in the data file.
+
+        :param col_header_name: a column header name in the data
+        :type col_header_name: str
+
+        :param look_up_value: the look up value to search for
+        :type look_up_value: str
+        :return: a dictionary representing the row that matches the search
+        criteria
+        """
+        # make sure column name is valid
+        if col_header_name not in self.keys:
+            return None
+
+        for row in self:
+            if row[col_header_name] == look_up_value:
+                return row
+        return None
+
 
 class ManifestReader(HIReader):
     """
