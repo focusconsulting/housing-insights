@@ -11,11 +11,93 @@ html, body {
   height:100%; 
 }
 
+#main-nav {
+    background-color: rgb(189, 54, 33);
+    color:#fff;
+    width: 100%;
+    height: 40px;
+    z-index: 9999;
+    position: fixed;
+
+}
+
+#sub-nav {
+    width: 100%;
+    position:absolute;
+    top: 40px;
+    color: inherit;
+    background-color: #d69c93;
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+    
+}
+
+.sub-nav-button {
+    flex-grow: 1;
+    background-color: inherit;
+    border: none;
+    border-bottom: 2px solid rgb(189, 54, 33);
+    transition: background-color 0.2s linear;
+    cursor: pointer;
+}
+
+.sub-nav-container {
+    position: relative; 
+    margin-top: 40px;  
+    border-bottom: 1px solid black;
+    display: none; 
+}
+
+.sub-nav-container.active {
+    display: block;
+}
+
+#sidebar-left p {
+    border-top: 1px solid black;
+    padding: 5px;
+
+
+}
+
+#left-options .sub-nav-button {
+    border-right: 2px solid rgb(189, 54, 33);
+}
+
+
+#right-options .sub-nav-button {
+    border-left: 2px solid rgb(189, 54, 33);
+}
+
+.sub-nav-button.active {
+    background-color: #fff;
+    border-bottom-width: 0;
+}
+
+#left-options {
+    width: 250px;
+    display: flex;
+}
+
+#right-options {
+    width: 350px;
+    display: flex;
+}
+
+#options-spacer {
+    flex-grow: 1;
+    border-bottom: 2px solid rgb(189, 54, 33);
+}
 
 .main-view {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
     opacity: 1;
+}
+
+.main-view:not(#map-view){
+    position: relative;
+    top:40px;
 }
 
 .main-view.fade {
@@ -77,6 +159,83 @@ html, body {
     justify-content: space-between;
 }
 
+.sidebar {
+    position: absolute;
+    width: 100%;
+    max-width: 250px;
+    top: 80px;
+    bottom: 0;
+    z-index: 9999;
+    background-color: rgba(255,255,255,0.95 );
+    transform: translate(-100%,0);
+    transition: transform 0.2s linear;
+    border-right: 1px solid rgb(189, 54, 33);
+
+}
+.sidebar.active {
+    transform: translate(0,0) !important;
+}
+
+#sidebar-right {
+    right:0;
+    max-width: 350px;
+    transform: translate(100%,0);
+    border-right-width: 0;
+    border-left: 1px solid rgb(189, 54, 33);
+}
+
+
+.sidebar-tab {
+    width: 20px;
+    height: 40px;
+    position: absolute;
+    border: none;
+    position: absolute;    
+    background-color: rgb(189, 54, 33);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s linear;
+    z-index: 9999;
+
+}
+
+#sidebar-left .sidebar-tab {
+    right: 0;
+    transform: translate(20px,0);
+}
+
+#sidebar-right .sidebar-tab {
+    left: 0;
+    transform: translate(-20px,0);
+}
+
+.sidebar.active .sidebar-tab {
+    transform: translate(0,0) !important;
+}
+
+.sidebar.active .triangle {
+    transform: rotate(180deg);
+}
+
+.triangle {
+    width: 0;
+    height: 0;
+    border-top: 6px solid transparent;   
+    border-bottom: 6px solid transparent;
+    transition: transform 0.2s linear;
+}
+
+.triangle.right {
+    border-left: 12px solid #fff;    
+}
+
+.triangle.left {
+    border-right: 12px solid #fff;    
+}
+
 /*
  * MAPBOX
  */
@@ -84,34 +243,18 @@ html, body {
  #map {
   position: absolute;
   width: 100%;
-  top:0;
+  top:80px;
   bottom:0;
  }
 
 #layer-menu, #overlay-menu, #temp-filter-menu {
-    background: #fff;
-    position: absolute;
-    z-index: 1;    
-    border-radius: 3px;
-    border: 1px solid rgba(0,0,0,0.4); 
-    left:10px;   
+    background: inherit;
 }
 
-#temp-filter-menu {
-    width: 200px;
-    height: 300px;
-    top: 100px;
-}
 
-#layer-menu {
-    width: 120px;
-    bottom: 10px;    
-}
-#overlay-menu {
-    width: 150px;
-    top: 10px;
-}
-
+#layer-menu,#overlay-menu {
+    width: 100%;
+    }
 #layer-menu a, #overlay-menu a {
     font-size: 13px;
     color: #404040;
@@ -119,10 +262,10 @@ html, body {
     margin: 0;
     padding: 0;
     padding: 10px;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(0,0,0,0.25);
+    text-decoration: none;    
     text-align: center;
 }
+
 
 a.unavailable {
     background-color: rgb(220,220,220);
