@@ -334,3 +334,12 @@ a.unavailable {
 a.active {
     background-color: #b3cde3;
 }
+#reset-zoom {
+    display: none;
+    position: absolute;
+    right: 350px;
+    top: 80px;
+    border: none;
+    background-color: rgba(0,0,0,0.3);
+    padding: 3px;
+}

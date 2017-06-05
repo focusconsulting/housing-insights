@@ -52,14 +52,15 @@ var mapView = {
                 minSize: 200
             });
             */
-
+            this.originalZoom = 11;
+            this.originalCenter = [-77, 38.9072];
             //Add the map
             mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
             this.map = new mapboxgl.Map({
               container: 'map', // container id
               style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
-              zoom: 11,
-              center: [-77, 38.9072],
+              zoom: mapView.originalZoom,
+              center: mapView.originalCenter,
               minZoom: 3,
               preserveDrawingBuffer: true
             });
@@ -69,6 +70,30 @@ var mapView = {
             this.map.on('load', function(){
                 setState('mapLoaded',true);
             });
+
+            this.map.on('zoomend', function(){
+                
+                d3.select('#reset-zoom')
+                    .style('display',function(){
+                        if ( Math.abs(mapView.map.getZoom() - mapView.originalZoom) < 0.001
+                             && Math.abs(mapView.map.getCenter().lng - mapView.originalCenter[0]) < 0.001
+                             && Math.abs(mapView.map.getCenter().lat - mapView.originalCenter[1]) < 0.001 ) {
+                                return 'none';
+                        } else { 
+                            return 'block';
+                        }
+                    })
+                    .on('click', function(){
+                        
+                        mapView.map.flyTo({
+                            center: mapView.originalCenter,
+                            zoom: mapView.originalZoom
+                        });
+                        
+                    });
+
+            });
+
         }
 
     },
@@ -521,6 +546,12 @@ var mapView = {
                     mapView.map.setFilter('project-highlight-' + d.properties.nlihc_id, ['==','nlihc_id', '']);
                     mapView.map.removeLayer('project-highlight-' + d.properties.nlihc_id);     
                 }
+            })
+            .on('click', function(d){
+                mapView.map.flyTo({
+                    center: [d.properties.longitude, d.properties.latitude],
+                    zoom: 15
+                })
             })
             
             .attr('tabIndex',0)
