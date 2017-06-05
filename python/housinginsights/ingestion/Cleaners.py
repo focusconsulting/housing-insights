@@ -415,19 +415,9 @@ class CensusCleaner(CleanerBase):
         #Handle the first row which is a descriptive row, not data. 
         if row_num == 0:
             return None
-
-        row = self.remove_non_dc_tracts(row,column_name='GEO.id2')
-        if row is None:
-            return None
-
-        #Clean up the ones we keep
-        row = self.high_low_rent(row)
-        row['lower_quartile_rent'] = None #waiting on ACS to come from API instead
-
+        row['census_tract'] = ""+row['state']+row['county']+row['tract']
         #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
         row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
-        row = self.rename_census_tract(row,column_name='GEO.id2')
-
         return row
 
     def high_low_rent(self,row):
