@@ -9,6 +9,8 @@ import logging
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.DCHousing import FIELDS,\
     DCHousingResult
+from housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
+    SUBSIDY_FIELDS_MAP
 
 
 class DCHousingApiConn(BaseApiConn):
@@ -22,6 +24,7 @@ class DCHousingApiConn(BaseApiConn):
               'Property_and_Land_WebMercator/MapServer/62'
     # default query to get all data as json output
     QUERY = '/query?where=1%3D1&outFields=*&outSR=4326&f=json'
+    # optional url for batch download as csv
     FULL_DATA_URL = 'https://opendata.arcgis.com/datasets/' \
                 '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
 
@@ -30,13 +33,16 @@ class DCHousingApiConn(BaseApiConn):
 
         self._available_unique_data_ids = ['dchousing']
 
-    def get_data(self, unique_data_ids=None, sample=False, output_type = 'csv', **kwargs):
+    def get_data(self, unique_data_ids=None, sample=False, output_type='csv',
+                 **kwargs):
         """
         Returns JSON object of the entire data set.
 
         """
-        if unique_data_ids == None:
+        if unique_data_ids is None:
             unique_data_ids = self._available_unique_data_ids
+
+        db = kwargs.get('db', None)
 
         for u in unique_data_ids:
             if (u not in self._available_unique_data_ids):
@@ -56,3 +62,7 @@ class DCHousingApiConn(BaseApiConn):
                     results = [DCHousingResult(address['attributes']) for address in
                                data]
                     self.result_to_csv(FIELDS, results, self.output_paths[u])
+                    self.create_project_subsidy_csv(
+                        self._available_unique_data_ids[0], PROJECT_FIELDS_MAP,
+                        SUBSIDY_FIELDS_MAP, db)
+
