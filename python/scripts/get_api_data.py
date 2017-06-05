@@ -48,7 +48,8 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
     modules = {
             "opendata":"OpenDataApiConn",
             "DCHousing":"DCHousingApiConn",
-            "wmata_distcalc":"WmataApiConn"
+            "wmata_distcalc":"WmataApiConn",
+            "census":"CensusApiConn"
     }
 
     #If no module list is provided, use them all
@@ -90,7 +91,7 @@ if __name__ == '__main__':
     sample = False          #Some ApiConn classes can just grab a sample of the data for use during development / testing
     output_type = 'csv'     #Other option is stdout which just prints to console
     db = 'docker_database'  #Only used by connections that need to read from the database to get their job done (example: wmata)
-    module_list = ["opendata","DCHousing"]
+    module_list = ['census']#["opendata","DCHousing", "census"]
 
     get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
 
