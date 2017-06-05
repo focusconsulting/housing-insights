@@ -110,6 +110,7 @@ def check_or_create_sql_manifest(engine, rebuild=False):
                 ("include_flag","text"),
                 ("destination_table","text"),
                 ("unique_data_id","text"),
+                ("update_method", "text"),
                 ("data_date","date"),
                 ("encoding", "text"),
                 ("local_folder","text"),
