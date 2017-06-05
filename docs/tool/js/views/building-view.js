@@ -112,6 +112,7 @@ var buildingView = {
             buildingView.getRelevantData();
         }
     },
+
     onReturn: function(){
         var wrapperElement = document.getElementById(this.el);
         wrapperElement.parentElement.removeChild(wrapperElement);
@@ -308,6 +309,5 @@ var buildingView = {
         d3.select("#tot_units").html(model.dataCollection['nearby_projects']['tot_units']);
         d3.select("#nearby_housing_distance").html(model.dataCollection['nearby_projects']['distance'])
      }
-
 
 }
