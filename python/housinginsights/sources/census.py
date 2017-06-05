@@ -119,5 +119,5 @@ if __name__ == '__main__':
     logging.getLogger().addHandler(logging.StreamHandler())
 
     api_conn = CensusApiConn()
-    unique_data_ids = None #['crime_2013']
+    unique_data_ids = None 
     api_conn.get_data(unique_data_ids)

@@ -44,7 +44,7 @@ class MarApiConn(BaseApiConn):
             pprint(result.json())
         elif output_type == 'csv':
             data = result.json()['returnDataset']['Table1']
-            results = [MarResult(address) for address in data]
+            results = [MarResult(address).data for address in data]
             self.result_to_csv(FIELDS, results, output_file)
         return result.json()
 
