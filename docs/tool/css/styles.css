@@ -95,6 +95,7 @@ html, body {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
     opacity: 1;
+    overflow: hidden;
 }
 
 .main-view:not(#map-view){

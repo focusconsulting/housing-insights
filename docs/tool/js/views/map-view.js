@@ -427,6 +427,7 @@ var mapView = {
         mapView.map.on('click', function (e) {
             console.log(e);
             var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
+            console.log(building);
             if ( building === undefined ) return;
             setState('previewBuilding', building);
 
@@ -440,10 +441,12 @@ var mapView = {
         
     },
     showPopup: function(msg,data){
+console.log(data);
 
-
-            d3.select('.mapboxgl-popup')
-                .remove();
+            if ( document.querySelector('.mapboxgl-popup') ){                
+                d3.select('.mapboxgl-popup')
+                    .remove();
+            }
                 
             var lngLat = {
                 lng: data.properties.longitude,
@@ -456,7 +459,7 @@ var mapView = {
 
             popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
-                setState('selectedBuilding', building);
+                setState('selectedBuilding', data);
                 setState('switchView', buildingView);
             };
 
@@ -545,16 +548,12 @@ var mapView = {
                 }
             })
             .on('click', function(d){
+
                 mapView.map.flyTo({
                     center: [d.properties.longitude, d.properties.latitude],
                     zoom: 15
                 });
-                setState('previewBuilding', { 
-                    id: d.properties.nlihc_id,
-                    lng: d.properties.longitude,
-                    lat: d.properties.latitude,
-                    name: d.properties.proj_name
-                });
+                setState('previewBuilding', d);
             })
             
             .attr('tabIndex',0)
