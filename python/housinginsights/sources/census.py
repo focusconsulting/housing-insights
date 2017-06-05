@@ -66,7 +66,8 @@ class CensusApiConn(BaseApiConn):
                     print(content)
 
                 elif output_type == 'csv':
-                    self.directly_to_file(content, self.output_paths[u])
+                    jsondata=json.loads(content)
+                    self.result_to_csv(jsondata[0], jsondata[1:],  self.output_paths[u])
                 
                 #Can't yield content if we get multiple sources at once
                 if len(unique_data_ids) == 1:
