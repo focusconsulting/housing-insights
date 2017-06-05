@@ -51,6 +51,7 @@ html, body {
 
 .sub-nav-container.active {
     display: flex;
+    flex-direction: column;
 }
 
 #sidebar-left p {
@@ -165,6 +166,10 @@ html, body {
 #pie-charts {
     display: flex;
     justify-content: space-between;
+}
+
+#zone-selector {
+    width: 120px;   
 }
 
 .sidebar {
