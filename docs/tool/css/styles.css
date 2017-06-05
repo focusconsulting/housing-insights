@@ -228,10 +228,13 @@ html, body {
     max-height: 0;
     margin-bottom: 0;
     opacity: 0;  
-    
+    cursor: pointer;
     
 }
 
+#buildings-list > div:hover p {
+    font-weight: bold;
+}
 #buildings-list > div.enter, #buildings-list > div.update {
      margin-bottom: 10px;
      max-height: 100px;

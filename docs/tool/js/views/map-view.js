@@ -39,9 +39,10 @@ var mapView = {
                 ['joinedToGeo', mapView.addOverlayLayer],
                 ['dataLoaded.raw_project', mapView.placeProjects],
                 ['previewBuilding', mapView.showPreview],
-                ['filteredData', mapView.filterMap]//,
-                //['filteredData', mapView.filterBuildingList],
-              //  ['dataLoaded.raw_project', mapView.listBuildings]
+                ['filteredData', mapView.filterMap],
+                ['hoverBuildingList', mapView.highlightBuilding]
+              
+                
             ]);
             
             //Initial page layout stuff
@@ -481,6 +482,8 @@ var mapView = {
     },
     listBuildings: function(){
 
+        
+        
             var data = mapView.convertedProjects.features.filter(function(feature){
                 return feature.properties.matches_filters === true;
             });
@@ -490,7 +493,8 @@ var mapView = {
 
             var t = d3.transition()
               .duration(750);
-            var preview = d3.select('#buildings-list');
+            var preview = d3.select('#buildings-list')
+              
             var listItems = preview.selectAll('div')
             .data(data, function(d){ return d.properties.nlihc_id; });
 
@@ -504,6 +508,22 @@ var mapView = {
                         d.properties.proj_addre + '<br />' +
                         'Owner: ' + d.properties.hud_own_name + '</p>';
             })
+            .on('mouseenter',function(d){
+                mapView['highlight-timer-' + d.properties.nlihc_id] = setTimeout(function(){
+                    setState('hoverBuildingList', d.properties.nlihc_id);
+                },500);  // timeout minimizes inadvertent highlighting and gives more assurance that quick user actions
+                         // won't trip up all the createLayers and remove layers.               
+            })
+            .on('mouseleave', function(d){
+                clearTimeout(mapView['highlight-timer-' + d.properties.nlihc_id]);
+                setState('hoverBuildingList', false);
+                if ( mapView.map.getLayer('project-highlight-' + d.properties.nlihc_id) ) {
+                    mapView.map.setFilter('project-highlight-' + d.properties.nlihc_id, ['==','nlihc_id', '']);
+                    mapView.map.removeLayer('project-highlight-' + d.properties.nlihc_id);     
+                }
+            })
+            
+            .attr('tabIndex',0)
             .transition().duration(100)
             .attr('class','enter');
 
@@ -512,6 +532,27 @@ var mapView = {
             .transition(t)
             .remove();
         
+    },
+    highlightBuilding(msg, data){
+        if (data){
+            mapView.map.addLayer({
+                'id': 'project-highlight-' + data,
+                'type': 'circle',
+                'source': 'project',
+                'paint': {
+                    'circle-blur': 0.2,
+                    'circle-color':'transparent',
+                    'circle-radius': {
+                        'base': 1.75,
+                        'stops': [[12, 10], [15, 40]]
+                    },
+                    'circle-stroke-width': 4,
+                    'circle-stroke-opacity': 1,                
+                    'circle-stroke-color': '#4D90FE'
+                },
+                'filter': ['==','nlihc_id', data]
+            });            
+        }
     }
 };
 
