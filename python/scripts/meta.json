@@ -1624,6 +1624,14 @@
         "type": "text"
       },
       {
+        "display_name": "mar_id",
+        "display_text": "The mar id for the building location",
+        "required_in_source": false,
+        "source_name": "mar_id",
+        "sql_name": "mar_id",
+        "type": "text"
+      },
+      {
         "display_name": "status",
         "display_text": "",
         "required_in_source": true,
