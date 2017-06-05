@@ -280,6 +280,19 @@ var setSubs = controller.controlSubs.setSubs,
  * POLYFILLS AND HELPERS ***********************
  */
 
+ // HELPER get parameter by name
+ var getParameterByName = function(name, url) { // HT http://stackoverflow.com/a/901144/5701184
+      if (!url) {
+        url = window.location.href;
+      }
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+  }
+
  // HELPER array.move()
 
  Array.prototype.move = function (old_index, new_index) { // HT http://stackoverflow.com/questions/5306680/move-an-array-element-from-one-array-position-to-another

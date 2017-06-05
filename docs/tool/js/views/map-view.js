@@ -269,13 +269,7 @@ var mapView = {
             source: 'zip',
             color: '#0D7B8A',
             visibility: 'none'            
-        }/*,
-        {
-            source: 'zillow',
-            color: '#57CABD',
-            visibility: 'none'            
-        }*/
-
+        }
     ],
     addInitialLayers: function(msg,data){
         if ( data === true ) {
@@ -434,40 +428,39 @@ var mapView = {
             console.log(e);
             var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
             if ( building === undefined ) return;
-            setState('previewBuilding', { 
+            setState('previewBuilding', building);
+
+                /*{ 
                 id: building.properties.nlihc_id,
                 lng: building.properties.longitude,
                 lat: building.properties.latitude,
                 name: building.properties.proj_name
-            });
+            }*/
            });               
         
     },
     showPopup: function(msg,data){
 
+
             d3.select('.mapboxgl-popup')
                 .remove();
                 
             var lngLat = {
-                lng: data.lng,
-                lat: data.lat
+                lng: data.properties.longitude,
+                lat: data.properties.latitude,
             }
             var popup = new mapboxgl.Popup({ 'anchor': 'top-right' }) 
                 .setLngLat(lngLat)        
-                .setHTML('<a href="#">See more about ' + data.name + '</a>' )
+                .setHTML('<a href="#">See more about ' + data.properties.proj_name + '</a>' )
                 .addTo(mapView.map);
 
             popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
+                setState('selectedBuilding', building);
                 setState('switchView', buildingView);
             };
-    },/*,
-    showPreview: function(msg,data){
-        document.getElementById('preview-address').innerHTML = data.proj_addre;
-        document.getElementById('preview-name').innerHTML = data.proj_name;
-        document.getElementById('preview-owner').innerHTML = data.hud_own_name ? 'Owner: ' + data.hud_own_name : '';
 
-    },*/
+    },
     filterMap: function(msg, data){
         
         mapView.convertedProjects.features.forEach(function(feature){

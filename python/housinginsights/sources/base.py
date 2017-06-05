@@ -145,7 +145,7 @@ class BaseApiConn(object):
             writer = csv.writer(f, delimiter=',')
             writer.writerow(fields)
             for result in results:
-                writer.writerow(result.data)
+                writer.writerow(result)
 
 
     def directly_to_file(self, data, filepath):

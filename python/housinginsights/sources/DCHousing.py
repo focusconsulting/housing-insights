@@ -2,6 +2,12 @@
 Module provides the api connection class for DCHousing data in opendata.dc.gov
 web site.
 """
+#This first if __name__ is needed if this file is test-run from the command line. 
+# path.append needs to happen before the first from import statement
+import sys, os
+if __name__ == '__main__':
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir)))
+
 
 from pprint import pprint
 import logging
@@ -51,6 +57,17 @@ class DCHousingApiConn(BaseApiConn):
                     pprint(result.json())
                 elif output_type == 'csv':
                     data = result.json()['features']
-                    results = [DCHousingResult(address['attributes']) for address in
+                    results = [DCHousingResult(address['attributes']).data for address in
                                data]
                     self.result_to_csv(FIELDS, results, self.output_paths[u])
+
+if __name__ == '__main__':
+    
+    # Pushes everything from the logger to the command line output as well.
+    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir,"logs","sources.log"))
+    logging.basicConfig(filename=log_path, level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    api_conn = DCHousingApiConn()
+    unique_data_ids = None #['crime_2013']
+    api_conn.get_data(unique_data_ids)

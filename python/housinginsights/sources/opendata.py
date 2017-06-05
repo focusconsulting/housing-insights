@@ -44,7 +44,7 @@ class OpenDataApiConn(BaseApiConn):
                         'crime_2014' : '6eaf3e9713de44d3aa103622d51053b5_9.csv',
                         'crime_2015' : '35034fcb3b36499c84c94c069ab1a966_27.csv',
                         'crime_2016' : 'bda20763840448b58f8383bae800a843_26.csv',
-                        'crime_2017' : '6af5cb8dc38e4bcbac8168b27ee104aa_8.csv'
+                        'crime_2017' : '6af5cb8dc38e4bcbac8168b27ee104aa_38.csv'
                     }
 
     def get_data(self, unique_data_ids=None, sample=False, output_type = 'csv', **kwargs):
