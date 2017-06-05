@@ -56,6 +56,7 @@ html, body {
 #sidebar-left p {
     border-top: 1px solid black;
     padding: 5px;
+    font-weight: bold;
 
 
 }
@@ -146,21 +147,19 @@ html, body {
 
 
 #sidebar {
-    width: 300px;
     position: absolute;
-    top: 10px;
-    bottom: 10px;
-    right: 10px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
     background-color: #fff;
-    padding: 10px;
     display: flex;
     flex-direction: column;
 }
 
 #sidebar > div {
-    border: 1px solid magenta;
+    
     flex-grow: 1;
-    padding: 10px 0;
+    
 }
 
 #pie-charts {
@@ -193,7 +192,41 @@ html, body {
     border-left: 1px solid rgb(189, 54, 33);
 }
 
+#buildings h2 {
+    box-shadow: 0 10px 17px #fff;
+    background-color: transparent;
+    border-top: 1px solid black;
+    position: relative;
+    padding: 5px 10px;
+    margin-bottom: 0;
+}
 
+#buildings {
+    display: flex;
+    flex-direction: column;
+}
+
+#buildings-list {
+    overflow-y: scroll;
+    padding: 9px 10px 0px 10px;
+}
+
+#buildings-list > div {
+    
+    overflow: hidden;
+    transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
+    max-height: 0;
+    margin-bottom: 0;
+    opacity: 0;  
+    
+    
+}
+
+#buildings-list > div.enter, #buildings-list > div.update {
+     margin-bottom: 10px;
+     max-height: 100px;
+     opacity: 1;
+}
 .sidebar-tab {
     width: 20px;
     height: 40px;

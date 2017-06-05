@@ -39,7 +39,9 @@ var mapView = {
                 ['joinedToGeo', mapView.addOverlayLayer],
                 ['dataLoaded.raw_project', mapView.placeProjects],
                 ['previewBuilding', mapView.showPreview],
-                ['filteredData', mapView.filterMap]
+                ['filteredData', mapView.filterMap]//,
+                //['filteredData', mapView.filterBuildingList],
+              //  ['dataLoaded.raw_project', mapView.listBuildings]
             ]);
             
             //Initial page layout stuff
@@ -338,6 +340,7 @@ var mapView = {
         mapView.convertedProjects.features.forEach(function(feature){
             feature.properties.matches_filters = true;
         });
+        mapView.listBuildings();
         mapView.map.addSource('project', {
           'type': 'geojson',
           'data': mapView.convertedProjects
@@ -446,7 +449,7 @@ var mapView = {
         });
         mapView.map.getSource('project').setData(mapView.convertedProjects);
         mapView.map.setFilter('project',['==','matches_filters', true]);
-
+        mapView.listBuildings();
         setTimeout(function(){
             mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
         },20);
@@ -475,6 +478,40 @@ var mapView = {
                 mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);            
             }
         }, (1000 / 20) );
+    },
+    listBuildings: function(){
+
+            var data = mapView.convertedProjects.features.filter(function(feature){
+                return feature.properties.matches_filters === true;
+            });
+
+            d3.select('#buildings.sub-nav-container h2')
+             .text(data.length + ' matching');
+
+            var t = d3.transition()
+              .duration(750);
+            var preview = d3.select('#buildings-list');
+            var listItems = preview.selectAll('div')
+            .data(data, function(d){ return d.properties.nlihc_id; });
+
+            listItems.attr('class','update');
+
+            listItems.enter().append('div')
+            //.attr('class','enter')
+            .merge(listItems)
+            .html(function(d){
+                return  '<p>' + d.properties.proj_name + '<br />' + 
+                        d.properties.proj_addre + '<br />' +
+                        'Owner: ' + d.properties.hud_own_name + '</p>';
+            })
+            .transition().duration(100)
+            .attr('class','enter');
+
+            listItems.exit()
+            .attr('class', 'exit')
+            .transition(t)
+            .remove();
+        
     }
 };
 
