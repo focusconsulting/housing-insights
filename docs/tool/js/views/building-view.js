@@ -18,7 +18,7 @@ var buildingView = {
         }
     },
      onReturn: function(){
-        alert('Would load ' + getState().previewBuilding[0].proj_name);
+        alert('Would load ' + getState().previewBuilding[0].id);
     }
 
 }

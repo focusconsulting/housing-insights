@@ -38,7 +38,7 @@ var mapView = {
                 ['overlayRequest', mapView.addOverlayData],
                 ['joinedToGeo', mapView.addOverlayLayer],
                 ['dataLoaded.raw_project', mapView.placeProjects],
-                ['previewBuilding', mapView.showPreview],
+                ['previewBuilding', mapView.showPopup],
                 ['filteredData', mapView.filterMap],
                 ['hoverBuildingList', mapView.highlightBuilding]
               
@@ -431,39 +431,43 @@ var mapView = {
              }
         });
         mapView.map.on('click', function (e) {
+            console.log(e);
             var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
             if ( building === undefined ) return;
-            setState('previewBuilding',{
-                proj_addre: building.properties.proj_addre,
-                proj_name: building.properties.proj_name,
-                hud_own_name: building.properties.hud_own_name
+            setState('previewBuilding', { 
+                id: building.properties.nlihc_id,
+                lng: building.properties.longitude,
+                lat: building.properties.latitude,
+                name: building.properties.proj_name
             });
+           });               
+        
+    },
+    showPopup: function(msg,data){
 
-            var popup = new mapboxgl.Popup({ 'anchor': 'top-right' }) // the lines commented out below would handle loading
-                                                                      // the building view from a partial html file
-                                                                      // and appending it to the already loaded page, in a
-                                                                      // single-page-app fashion. commented out here because it
-                                                                      // is not ready. defering now to the old method of loading
-                                                                      // a the building.html page with a query parameter for the 
-                                                                      // building id. uncomment the lines to see how it would work
-                .setLngLat(e.lngLat)
-        //      .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
-                .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
+            d3.select('.mapboxgl-popup')
+                .remove();
+                
+            var lngLat = {
+                lng: data.lng,
+                lat: data.lat
+            }
+            var popup = new mapboxgl.Popup({ 'anchor': 'top-right' }) 
+                .setLngLat(lngLat)        
+                .setHTML('<a href="#">See more about ' + data.name + '</a>' )
                 .addTo(mapView.map);
 
             popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
                 setState('switchView', buildingView);
             };
-           });               
-        
-    },
+    },/*,
     showPreview: function(msg,data){
         document.getElementById('preview-address').innerHTML = data.proj_addre;
         document.getElementById('preview-name').innerHTML = data.proj_name;
         document.getElementById('preview-owner').innerHTML = data.hud_own_name ? 'Owner: ' + data.hud_own_name : '';
 
-    },
+    },*/
     filterMap: function(msg, data){
         
         mapView.convertedProjects.features.forEach(function(feature){
@@ -551,7 +555,13 @@ var mapView = {
                 mapView.map.flyTo({
                     center: [d.properties.longitude, d.properties.latitude],
                     zoom: 15
-                })
+                });
+                setState('previewBuilding', { 
+                    id: d.properties.nlihc_id,
+                    lng: d.properties.longitude,
+                    lat: d.properties.latitude,
+                    name: d.properties.proj_name
+                });
             })
             
             .attr('tabIndex',0)
