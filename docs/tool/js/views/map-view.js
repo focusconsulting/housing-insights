@@ -241,13 +241,7 @@ var mapView = {
             source: 'zip',
             color: '#0D7B8A',
             visibility: 'none'            
-        }/*,
-        {
-            source: 'zillow',
-            color: '#57CABD',
-            visibility: 'none'            
-        }*/
-
+        }
     ],
     addInitialLayers: function(msg,data){
         if ( data === true ) {
@@ -418,15 +412,15 @@ var mapView = {
                                                                       // a the building.html page with a query parameter for the 
                                                                       // building id. uncomment the lines to see how it would work
                 .setLngLat(e.lngLat)
-        //      .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
                 .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
                 .addTo(mapView.map);
 
             popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
+                setState('selectedBuilding', building);
                 setState('switchView', buildingView);
             };
-           });               
+        });               
         
     },
     showPreview: function(msg,data){
