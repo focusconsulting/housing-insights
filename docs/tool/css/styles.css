@@ -50,7 +50,7 @@ html, body {
 }
 
 .sub-nav-container.active {
-    display: block;
+    display: flex;
 }
 
 #sidebar-left p {
@@ -192,23 +192,28 @@ html, body {
     border-left: 1px solid rgb(189, 54, 33);
 }
 
-#buildings h2 {
-    box-shadow: 0 10px 17px #fff;
+#sidebar h2 {
     background-color: transparent;
     border-top: 1px solid black;
     position: relative;
     padding: 5px 10px;
+    
+}
+
+#buildings h2 {
+    box-shadow: 0 10px 17px #fff;
     margin-bottom: 0;
 }
 
 #buildings {
-    display: flex;
+    
     flex-direction: column;
 }
 
 #buildings-list {
     overflow-y: scroll;
     padding: 9px 10px 0px 10px;
+    margin-bottom: 10px;
 }
 
 #buildings-list > div {
@@ -242,6 +247,10 @@ html, body {
     transition: transform 0.2s linear;
     z-index: 9999;
 
+}
+
+#stats-inner {
+    padding: 0 10px 10px;
 }
 
 #sidebar-left .sidebar-tab {
