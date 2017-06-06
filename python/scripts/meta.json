@@ -3,55 +3,164 @@
     "cleaner": "CensusCleaner",
     "fields": [
       {
-        "display_name": "geo_id",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.id",
-        "sql_name": "geo_id",
-        "type": "text"
-      },
-      {
-        "display_name": "Census tract code",
-        "display_text": "GEO.id2 in the source data, the code for the census tract including the state (11) and county (001) codes.",
-        "required_in_source": true,
-        "source_name": "GEO.id2",
-        "sql_name": "census_tract",
-        "type": "text"
-      },
-      {
         "display_name": "Census tract description",
-        "display_text": "",
+        "display_text": "Census tract description",
         "required_in_source": true,
-        "source_name": "GEO.display-label",
+        "source_name": "NAME",
         "sql_name": "census_tract_desc",
         "type": "text"
       },
       {
-        "display_name": "Median Rent (ACS)",
-        "display_text": "Median rent paid by all residents in this area, per the American Community Survey Table B25058",
+        "display_name": "Census tract",
+        "display_text": "Census tract - state+county+tract",
+        "required_in_source": false,
+        "source_name": "census_tract",
+        "sql_name": "census_tract",
+        "type": "text"
+      },
+      {
+        "display_name": "Total population",
+        "display_text": "Total population",
         "required_in_source": true,
-        "source_name": "HD01_VD01",
+        "source_name": "B01003_001E",
+        "sql_name": "total_population",
+        "type": "integer"
+      },
+      {
+        "display_name": "Lower contract rent quartile",
+        "display_text": "B25057.  LOWER CONTRACT RENT QUARTILE (DOLLARS)",
+        "required_in_source": true,
+        "source_name": "B25057_001E",
+        "sql_name": "acs_lower_rent_quartile",
+        "type": "integer"
+      },
+      {
+        "display_name": "Median contract rent",
+        "display_text": "B25058.  MEDIAN CONTRACT RENT (DOLLARS)",
+        "required_in_source": true,
+        "source_name": "B25058_001E",
         "sql_name": "acs_median_rent",
         "type": "integer"
       },
       {
-        "display_name": "MOE: Median Rent (ACS)",
-        "display_text": "Margin of error of the Median Rent in the American Community Survey Table B25058",
+        "display_name": "Upper contract rent quartile",
+        "display_text": "B25059.  UPPER CONTRACT RENT QUARTILE (DOLLARS)",
         "required_in_source": true,
-        "source_name": "HD02_VD01",
-        "sql_name": "acs_median_rent_moe",
+        "source_name": "B25059_001E",
+        "sql_name": "acs_upper_rent_quartile",
         "type": "integer"
       },
       {
-        "_comment": "This will be added back in when the Census API tool is done",
-        "display_name": "Lower quartile rent (ACS)",
-        "display_text": "Lower quartile rent from the American Community Survey table B25057",
+        "display_name": "state",
+        "display_text": "Census state ID",
+        "required_in_source": true,
+        "source_name": "state",
+        "sql_name": "state",
+        "type": "text"
+      },
+      {
+        "display_name": "county",
+        "display_text": "Census county ID",
+        "required_in_source": true,
+        "source_name": "county",
+        "sql_name": "county",
+        "type": "text"
+      },
+      {
+        "display_name": "tract",
+        "display_text": "Census tract ID - without state+county",
+        "required_in_source": true,
+        "source_name": "tract",
+        "sql_name": "tract",
+        "type": "text"
+      },
+       {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
-        "source_name": "lower_quartile_rent",
-        "sql_name": "lower_quartile_rent",
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      }
+    ],
+    "replace_table": false
+  },
+  "census_margin_of_error": {
+    "cleaner": "CensusCleaner",
+    "fields": [
+      {
+        "display_name": "Census tract description",
+        "display_text": "Census tract description",
+        "required_in_source": true,
+        "source_name": "NAME",
+        "sql_name": "census_tract_desc",
+        "type": "text"
+      },
+      {
+        "display_name": "Census tract",
+        "display_text": "Census tract - state+county+tract",
+        "required_in_source": false,
+        "source_name": "census_tract",
+        "sql_name": "census_tract",
+        "type": "text"
+      },
+      {
+        "display_name": "Margin Of Error For!!Total",
+        "display_text": "Total population",
+        "required_in_source": true,
+        "source_name": "B01003_001M",
+        "sql_name": "total_population",
         "type": "integer"
       },
       {
+        "display_name": "Margin Of Error For!!Lower contract rent quartile",
+        "display_text": "B25057.  LOWER CONTRACT RENT QUARTILE (DOLLARS)",
+        "required_in_source": true,
+        "source_name": "B25057_001M",
+        "sql_name": "acs_lower_rent_quartile",
+        "type": "integer"
+      },
+      {
+        "display_name": "Margin Of Error For!!Median contract rent",
+        "display_text": "B25058.  MEDIAN CONTRACT RENT (DOLLARS)",
+        "required_in_source": true,
+        "source_name": "B25058_001M",
+        "sql_name": "acs_median_rent",
+        "type": "integer"
+      },
+      {
+        "display_name": "Margin Of Error For!!Upper contract rent quartile",
+        "display_text": "B25059.  UPPER CONTRACT RENT QUARTILE (DOLLARS)",
+        "required_in_source": true,
+        "source_name": "B25059_001M",
+        "sql_name": "acs_upper_rent_quartile",
+        "type": "integer"
+      },
+      {
+        "display_name": "state",
+        "display_text": "Census state ID",
+        "required_in_source": true,
+        "source_name": "state",
+        "sql_name": "state",
+        "type": "text"
+      },
+      {
+        "display_name": "county",
+        "display_text": "Census county ID",
+        "required_in_source": true,
+        "source_name": "county",
+        "sql_name": "county",
+        "type": "text"
+      },
+      {
+        "display_name": "tract",
+        "display_text": "Census tract ID - without state+county",
+        "required_in_source": true,
+        "source_name": "tract",
+        "sql_name": "tract",
+        "type": "text"
+      },
+       {
         "display_name": "Unique data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
@@ -608,7 +717,7 @@
         "type": "text"
       }
     ],
-    "replace_table": false
+    "replace_table": true
   },
   "dc_tax": {
     "cleaner": "DCTaxCleaner",
@@ -1685,6 +1794,14 @@
         "required_in_source": true,
         "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
+        "type": "text"
+      },
+      {
+        "display_name": "mar_id",
+        "display_text": "The mar id for the building location",
+        "required_in_source": false,
+        "source_name": "mar_id",
+        "sql_name": "mar_id",
         "type": "text"
       },
       {

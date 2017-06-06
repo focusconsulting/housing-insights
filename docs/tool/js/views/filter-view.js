@@ -13,8 +13,8 @@ var filterView = {
             display_name: 'Project unit count',
             component_type: 'continuous',
             data_type:'integer',
-            min: 5,
-            max: 1000,
+            min: 4,
+            max: 717,
             num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
         },
         {   source: 'census_tract_median_rent',

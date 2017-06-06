@@ -1,0 +1,26 @@
+include_flag,destination_table,unique_data_id,update_method,data_date,encoding,local_folder,s3_folder,filepath,notes
+____City Development Data__,,,,,,,,,
+superseded,building_permits,building_permits_2016_old,manual,1/1/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits_2016.csv,
+skip,building_permits,building_permits_2014,manual,2/2/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits__2016_updated.csv,
+skip,building_permits,building_permits_2015,manual,5/28/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170528/building_permits_2015.csv,using files from opendata batch download
+skip,building_permits,building_permits_2016,manual,5/28/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170528/building_permits_2016.csv,using files from opendata batch download
+skip,building_permits,building_permits_2017,manual,5/28/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170528/building_permits_2017.csv,using files from opendata batch download
+_____Preservation Catalog_____,,,,,,,,,
+use,project,project,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Project.csv,
+use,subsidy,subsidy,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Subsidy.csv,
+____Crime Data____,,,,,,,,,
+skip,crime,crime_2011,manual,12/31/2011,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2011-all.csv,skipping for now until we are able to display older data
+skip,crime,crime_2012,manual,12/31/2012,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2012-all.csv,skipping for now until we are able to display older data
+skip,crime,crime_2013,manual,12/31/2013,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2013-all.csv,skipping for now until we are able to display older data
+skip,crime,crime_2014,manual,12/31/2014,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2014-all.csv,skipping for now until we are able to display older data
+use,crime,crime_2015,api,12/31/2015,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2015-all.csv,
+use,crime,crime_2016,api,12/31/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2016-all.csv,
+use,crime,crime_2017,api,4/3/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2017-to-date.csv,
+____WMATA Data____,,,,,,,,
+superseded,wmata_dist,wmata_dist_20170215,api,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist.csv,
+superseded,wmata_info,wmata_info_20170215,api,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,
+use,wmata_dist,wmata_dist_20170215,api,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist_updated_headers.csv,
+use,wmata_info,wmata_info_20170215,api,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/wmata_stops.csv,
+____DATA FOR APPENDING____,,,,,,,,
+use,project,dchousing_project,api,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_project.csv,append to 20170315/project.csv
+use,subsidy,dchousing_subsidy,api,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_subsidy.csv,append to 20170315/Subsidy.csv

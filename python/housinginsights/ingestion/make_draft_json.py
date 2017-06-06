@@ -1,6 +1,6 @@
 """
 Module creates draft JSON file(s) from given csv data sources that after user
-review will be inserted into the meta.json 
+review will be inserted into the meta.json
 
 You can think of meta.json as the skeleton template for the data in tables
 loaded into the database.
@@ -10,6 +10,7 @@ import logging
 import json
 import sys
 import os
+from optparse import OptionParser
 
 import pandas as pandas
 
@@ -100,7 +101,6 @@ def make_draft_json(filename, tablename, encoding):
         }
     }
 
-    # TODO: insert 'unique_data_id' field into draft JSON
     unique_data_id_field = {
         "display_name": "Unique data ID",
         "display_text": "Identifies which source file this record came from",
@@ -143,7 +143,7 @@ def checkTable(table_name, meta):
     """
     Check whether the new table is in meta.json file
 
-    :param: table_name - the new data to be added 
+    :param: table_name - the new data to be added
     :param type: string
 
     :param: meta - path to the meta.json file (currently called meta.json)
@@ -232,7 +232,7 @@ def duplicateTable(new_table, new_json, master_json):
 
             masterJ_data.pop(new_table, 0)	# 0 as fail-safe parameter
             json.dump(masterJ_data, open(master_json, 'w'), indent=2)
-			
+
             appendJSON(new_json, master_json)
             return
 
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     #Make the table
     if 'create' in sys.argv:
         make_draft_json(csv_filename, table_name, encoding)
-        
+
     if 'add' in sys.argv:
         new_json_path = os.path.join(logging_path, (table_name+".json"))
         json_filepath = python_filepath + "/scripts/meta.json"

@@ -50,12 +50,14 @@ html, body {
 }
 
 .sub-nav-container.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
 }
 
 #sidebar-left p {
     border-top: 1px solid black;
     padding: 5px;
+    font-weight: bold;
 
 
 }
@@ -93,6 +95,7 @@ html, body {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
     opacity: 1;
+    overflow: hidden;
 }
 
 .main-view:not(#map-view){
@@ -117,17 +120,26 @@ html, body {
 }
 
 .legend {
-    background-color: rgba(255,255,255,.01);
-    border-radius: 3px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.30);
+    background-color: rgba(255,255,255,.85);
     padding: 10px;
-    position: relative;
-    margin-bottom: 20px;
-    margin-top: 20px;
-    z-index: 1;
+    position: absolute;
+    bottom: 0;
+    left: 260px;
+    right: 360px;
+    min-width: 235px;
 }
 
-.legend div span {
+#legend-items {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+#legend-items div {
+    width: 310px;
+}
+
+#legend-items div span {
     border-radius: 50%;
     display: inline-block;
     height: 10px;
@@ -137,26 +149,28 @@ html, body {
 
 
 #sidebar {
-    width: 300px;
     position: absolute;
-    top: 10px;
-    bottom: 10px;
-    right: 10px;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
     background-color: #fff;
-    padding: 10px;
     display: flex;
     flex-direction: column;
 }
 
 #sidebar > div {
-    border: 1px solid magenta;
+    
     flex-grow: 1;
-    padding: 10px 0;
+    
 }
 
 #pie-charts {
     display: flex;
     justify-content: space-between;
+}
+
+#zone-selector {
+    width: 120px;   
 }
 
 .sidebar {
@@ -184,7 +198,49 @@ html, body {
     border-left: 1px solid rgb(189, 54, 33);
 }
 
+#sidebar h2 {
+    background-color: transparent;
+    border-top: 1px solid black;
+    position: relative;
+    padding: 5px 10px;
+    
+}
 
+#buildings h2 {
+    box-shadow: 0 10px 17px #fff;
+    margin-bottom: 0;
+}
+
+#buildings {
+    
+    flex-direction: column;
+}
+
+#buildings-list {
+    overflow-y: scroll;
+    padding: 9px 10px 0px 10px;
+    margin-bottom: 10px;
+}
+
+#buildings-list > div {
+    
+    overflow: hidden;
+    transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
+    max-height: 0;
+    margin-bottom: 0;
+    opacity: 0;  
+    cursor: pointer;
+    
+}
+
+#buildings-list > div:hover p {
+    font-weight: bold;
+}
+#buildings-list > div.enter, #buildings-list > div.update {
+     margin-bottom: 10px;
+     max-height: 100px;
+     opacity: 1;
+}
 .sidebar-tab {
     width: 20px;
     height: 40px;
@@ -200,6 +256,10 @@ html, body {
     transition: transform 0.2s linear;
     z-index: 9999;
 
+}
+
+#stats-inner {
+    padding: 0 10px 10px;
 }
 
 #sidebar-left .sidebar-tab {
@@ -274,4 +334,13 @@ a.unavailable {
 
 a.active {
     background-color: #b3cde3;
+}
+#reset-zoom {
+    display: none;
+    position: absolute;
+    right: 350px;
+    top: 80px;
+    border: none;
+    background-color: rgba(0,0,0,0.3);
+    padding: 3px;
 }

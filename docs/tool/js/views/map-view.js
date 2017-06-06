@@ -38,8 +38,11 @@ var mapView = {
                 ['overlayRequest', mapView.addOverlayData],
                 ['joinedToGeo', mapView.addOverlayLayer],
                 ['dataLoaded.raw_project', mapView.placeProjects],
-                ['previewBuilding', mapView.showPreview],
-                ['filteredData', mapView.filterMap]
+                ['previewBuilding', mapView.showPopup],
+                ['filteredData', mapView.filterMap],
+                ['hoverBuildingList', mapView.highlightBuilding]
+              
+                
             ]);
             
             //Initial page layout stuff
@@ -49,14 +52,15 @@ var mapView = {
                 minSize: 200
             });
             */
-
+            this.originalZoom = 11;
+            this.originalCenter = [-77, 38.9072];
             //Add the map
             mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
             this.map = new mapboxgl.Map({
               container: 'map', // container id
               style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
-              zoom: 11,
-              center: [-77, 38.9072],
+              zoom: mapView.originalZoom,
+              center: mapView.originalCenter,
               minZoom: 3,
               preserveDrawingBuffer: true
             });
@@ -66,6 +70,30 @@ var mapView = {
             this.map.on('load', function(){
                 setState('mapLoaded',true);
             });
+
+            this.map.on('zoomend', function(){
+                
+                d3.select('#reset-zoom')
+                    .style('display',function(){
+                        if ( Math.abs(mapView.map.getZoom() - mapView.originalZoom) < 0.001
+                             && Math.abs(mapView.map.getCenter().lng - mapView.originalCenter[0]) < 0.001
+                             && Math.abs(mapView.map.getCenter().lat - mapView.originalCenter[1]) < 0.001 ) {
+                                return 'none';
+                        } else { 
+                            return 'block';
+                        }
+                    })
+                    .on('click', function(){
+                        
+                        mapView.map.flyTo({
+                            center: mapView.originalCenter,
+                            zoom: mapView.originalZoom
+                        });
+                        
+                    });
+
+            });
+
         }
 
     },
@@ -241,13 +269,7 @@ var mapView = {
             source: 'zip',
             color: '#0D7B8A',
             visibility: 'none'            
-        }/*,
-        {
-            source: 'zillow',
-            color: '#57CABD',
-            visibility: 'none'            
-        }*/
-
+        }
     ],
     addInitialLayers: function(msg,data){
         if ( data === true ) {
@@ -338,6 +360,7 @@ var mapView = {
         mapView.convertedProjects.features.forEach(function(feature){
             feature.properties.matches_filters = true;
         });
+        mapView.listBuildings();
         mapView.map.addSource('project', {
           'type': 'geojson',
           'data': mapView.convertedProjects
@@ -402,37 +425,36 @@ var mapView = {
              }
         });
         mapView.map.on('click', function (e) {
+            console.log(e);
             var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
+            console.log(building);
             if ( building === undefined ) return;
-            setState('previewBuilding',{
-                proj_addre: building.properties.proj_addre,
-                proj_name: building.properties.proj_name,
-                hud_own_name: building.properties.hud_own_name
-            });
+            setState('previewBuilding', building);
+           });               
+        
+    },
+    showPopup: function(msg,data){
+console.log(data);
 
-            var popup = new mapboxgl.Popup({ 'anchor': 'top-right' }) // the lines commented out below would handle loading
-                                                                      // the building view from a partial html file
-                                                                      // and appending it to the already loaded page, in a
-                                                                      // single-page-app fashion. commented out here because it
-                                                                      // is not ready. defering now to the old method of loading
-                                                                      // a the building.html page with a query parameter for the 
-                                                                      // building id. uncomment the lines to see how it would work
-                .setLngLat(e.lngLat)
-        //      .setHTML('<a href="building.html?building=' + building.properties.nlihc_id + '">See more about ' + building.properties.proj_name + '</a>' )
-                .setHTML('<a href="#">See more about ' + building.properties.proj_name + '</a>' )
+            if ( document.querySelector('.mapboxgl-popup') ){                
+                d3.select('.mapboxgl-popup')
+                    .remove();
+            }
+                
+            var lngLat = {
+                lng: data.properties.longitude,
+                lat: data.properties.latitude,
+            }
+            var popup = new mapboxgl.Popup({ 'anchor': 'top-right' }) 
+                .setLngLat(lngLat)        
+                .setHTML('<a href="#">See more about ' + data.properties.proj_name + '</a>' )
                 .addTo(mapView.map);
 
             popup._container.querySelector('a').onclick = function(e){
                 e.preventDefault();
+                setState('selectedBuilding', data);
                 setState('switchView', buildingView);
             };
-           });               
-        
-    },
-    showPreview: function(msg,data){
-        document.getElementById('preview-address').innerHTML = data.proj_addre;
-        document.getElementById('preview-name').innerHTML = data.proj_name;
-        document.getElementById('preview-owner').innerHTML = data.hud_own_name ? 'Owner: ' + data.hud_own_name : '';
 
     },
     filterMap: function(msg, data){
@@ -446,7 +468,7 @@ var mapView = {
         });
         mapView.map.getSource('project').setData(mapView.convertedProjects);
         mapView.map.setFilter('project',['==','matches_filters', true]);
-
+        mapView.listBuildings();
         setTimeout(function(){
             mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
         },20);
@@ -475,6 +497,88 @@ var mapView = {
                 mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);            
             }
         }, (1000 / 20) );
+    },
+    listBuildings: function(){
+
+        
+        
+            var data = mapView.convertedProjects.features.filter(function(feature){
+                return feature.properties.matches_filters === true;
+            });
+
+            d3.select('#buildings.sub-nav-container h2')
+             .text(data.length + ' matching');
+
+            var t = d3.transition()
+              .duration(750);
+            var preview = d3.select('#buildings-list')
+              
+            var listItems = preview.selectAll('div')
+            .data(data, function(d){ return d.properties.nlihc_id; });
+
+            listItems.attr('class','update');
+
+            listItems.enter().append('div')
+            //.attr('class','enter')
+            .merge(listItems)
+            .html(function(d){
+                return  '<p>' + d.properties.proj_name + '<br />' + 
+                        d.properties.proj_addre + '<br />' +
+                        'Owner: ' + d.properties.hud_own_name + '</p>';
+            })
+            .on('mouseenter',function(d){
+                mapView['highlight-timer-' + d.properties.nlihc_id] = setTimeout(function(){
+                    setState('hoverBuildingList', d.properties.nlihc_id);
+                },500);  // timeout minimizes inadvertent highlighting and gives more assurance that quick user actions
+                         // won't trip up all the createLayers and remove layers.               
+            })
+            .on('mouseleave', function(d){
+                clearTimeout(mapView['highlight-timer-' + d.properties.nlihc_id]);
+                setState('hoverBuildingList', false);
+                if ( mapView.map.getLayer('project-highlight-' + d.properties.nlihc_id) ) {
+                    mapView.map.setFilter('project-highlight-' + d.properties.nlihc_id, ['==','nlihc_id', '']);
+                    mapView.map.removeLayer('project-highlight-' + d.properties.nlihc_id);     
+                }
+            })
+            .on('click', function(d){
+
+                mapView.map.flyTo({
+                    center: [d.properties.longitude, d.properties.latitude],
+                    zoom: 15
+                });
+                setState('previewBuilding', d);
+            })
+            
+            .attr('tabIndex',0)
+            .transition().duration(100)
+            .attr('class','enter');
+
+            listItems.exit()
+            .attr('class', 'exit')
+            .transition(t)
+            .remove();
+        
+    },
+    highlightBuilding(msg, data){
+        if (data){
+            mapView.map.addLayer({
+                'id': 'project-highlight-' + data,
+                'type': 'circle',
+                'source': 'project',
+                'paint': {
+                    'circle-blur': 0.2,
+                    'circle-color':'transparent',
+                    'circle-radius': {
+                        'base': 1.75,
+                        'stops': [[12, 10], [15, 40]]
+                    },
+                    'circle-stroke-width': 4,
+                    'circle-stroke-opacity': 1,                
+                    'circle-stroke-color': '#4D90FE'
+                },
+                'filter': ['==','nlihc_id', data]
+            });            
+        }
     }
 };
 
