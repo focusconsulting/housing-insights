@@ -430,13 +430,6 @@ var mapView = {
             console.log(building);
             if ( building === undefined ) return;
             setState('previewBuilding', building);
-
-                /*{ 
-                id: building.properties.nlihc_id,
-                lng: building.properties.longitude,
-                lat: building.properties.latitude,
-                name: building.properties.proj_name
-            }*/
            });               
         
     },
