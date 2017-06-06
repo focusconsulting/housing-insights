@@ -27,6 +27,7 @@ class MarApiConn(BaseApiConn):
     def get_data(self, square, lot, suffix):
         """
         Get information on a location based on a simple query string.
+        
         :param square: SSL first part
         :type  location: String.
         :param lot: SSL second part
@@ -38,6 +39,7 @@ class MarApiConn(BaseApiConn):
         :returns: Json output from the api.
         :rtype: String
         """
+
         params = {
             'f': 'json',
             'Square': square,
@@ -91,7 +93,8 @@ class CamaApiConn(BaseApiConn):
         cama_data = result.json()
 
         """
-        Example of: anc_count = [OrderedDict([('zone_type', 'anc'), ('zone', 'ANC 2B'), ('housing_unit_count', 10), ('bedroom_unit_count', 10)], etc)]
+        Example of: anc_count = [OrderedDict([('zone_type', 'anc'), ('zone', 'ANC 2B'), 
+                                ('housing_unit_count', 10), ('bedroom_unit_count', 10)], etc)]
         """
         zone_types = ['anc', 'census_tract', 'neighborhood_cluster', 'ward', 'zip']
         anc_count = []
@@ -180,8 +183,8 @@ class CamaApiConn(BaseApiConn):
         into csv file and then save the csv file in
         housing-insights/data/processed/zoneUnitCount
         as zoneUnitCount_2017-05-30.csv.
-
         """
+
         if not os.path.exists('../../../data/processed/zoneUnitCount'):
             os.makedirs('../../../data/processed/zoneUnitCount')
 
