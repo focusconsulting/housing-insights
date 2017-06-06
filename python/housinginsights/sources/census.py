@@ -1,61 +1,123 @@
-'''
+import sys, os
+import json
+
+#This first if __name__ is needed if this file is test-run from the command line. 
+# path.append needs to happen before the first from import statement
+if __name__ == '__main__':
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir)))
 
 
-INCOMPLETE APPROACH
-
-
-
-See this issue: https://github.com/codefordc/housing-insights/issues/152
-for some comments on latest status and next steps. 
-
-
-The core method will need to be renamed to `get_data` and should have the same
-method signature as others. the current opendata.py file is a good model to 
-look at to provide consistent approach. 
-
-
-'''
-
-
-
-
-
-
-
-
-
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             os.pardir,os.pardir)))
-
+import logging
 from housinginsights.sources.base import BaseApiConn
-
-# secrets.json, yo
-census_key = os.environ.get("CENSUS_KEY")
-
 
 class CensusApiConn(BaseApiConn):
     """
-    Census API connector, confined to ACS5 2015 for now.
-
+    
     """
-    BASEURL = 'http://api.census.gov/data'
+    def __init__(self, proxies=None):
+        #baseurl not actually used since we need the _urls property to hold many urls. 
+        #Needed to get call to super() to work correctly. TODO refactor so this is optional.
+        baseurl = 'http://api.census.gov/data/'
+        super(CensusApiConn, self).__init__(baseurl, proxies=None)
+        secretsFileName =  os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               os.pardir,"secrets.json"))    
+        self.api_keys = json.loads(open(secretsFileName).read())
+        self.census_api_key = self.api_keys['census']['api_key']
 
-    def __init__(self, arg):
-        super(CensusApiConn, self).__init__(CensusApiConn.BASEURL)
-        self.arg = arg
+        self._available_unique_data_ids = [
+                        "acs5_2009",
+                        "acs5_2010",
+                        "acs5_2011",
+                        "acs5_2012",
+                        "acs5_2013",
+                        "acs5_2014",
+                        "acs5_2015",
+                        "acs5_2009_moe",
+                        "acs5_2010_moe",
+                        "acs5_2011_moe",
+                        "acs5_2012_moe",
+                        "acs5_2013_moe",
+                        "acs5_2014_moe",
+                        "acs5_2015_moe"
+                        ]
 
-    def getacs5(self):
-        params = {'key': census_key, 'get': 'B01003_001E,B25057_001E,B25058_001E,B25059_001E', 'for': 'tract:*', 'in': 'state:11'}
-        result = self.get('/2015/acs5', params=params)
-        if result.status_code != 200:
-            err = "An error occurred during request: status {0}"
-            raise Exception(err.format(result.status_code))
-        else:
-            data = result
-            print(data.text)
+        self._urls =	{
+                        "acs5_2009"     :"2009/acs5",
+                        "acs5_2010"     :"2010/acs5",
+                        "acs5_2011"     :"2011/acs5",
+                        "acs5_2012"     :"2012/acs5",
+                        "acs5_2013"     :"2013/acs5",
+                        "acs5_2014"     :"2014/acs5",
+                        "acs5_2015"     :"2015/acs5",
+                        "acs5_2009_moe" :"2009/acs5",
+                        "acs5_2010_moe" :"2010/acs5",
+                        "acs5_2011_moe" :"2011/acs5",
+                        "acs5_2012_moe" :"2012/acs5",
+                        "acs5_2013_moe" :"2013/acs5",
+                        "acs5_2014_moe" :"2014/acs5",
+                        "acs5_2015_moe" :"2015/acs5"
+                    	}
+        self._fields = {
+                        "acs5_2009"     : "NAME,B01003_001E,B25057_001E,B25058_001E,B25059_001E",
+                        "acs5_2010"     : "NAME,B01003_001E,B25057_001E,B25058_001E,B25059_001E",
+                        "acs5_2011"     : "NAME,B01003_001E,B25057_001E,B25058_001E,B25059_001E",
+                        "acs5_2012"     : "NAME,B01003_001E,B25057_001E,B25058_001E,B25059_001E",
+                        "acs5_2013"     : "NAME,B01003_001E,B25057_001E,B25058_001E,B25059_001E",
+                        "acs5_2014"     : "NAME,B01003_001E,B25057_001E,B25058_001E,B25059_001E",
+                        "acs5_2015"     : "NAME,B01003_001E,B25057_001E,B25058_001E,B25059_001E",
+                        "acs5_2009_moe" : "NAME,B01003_001M,B25057_001M,B25058_001M,B25059_001M",
+                        "acs5_2010_moe" : "NAME,B01003_001M,B25057_001M,B25058_001M,B25059_001M",
+                        "acs5_2011_moe" : "NAME,B01003_001M,B25057_001M,B25058_001M,B25059_001M",
+                        "acs5_2012_moe" : "NAME,B01003_001M,B25057_001M,B25058_001M,B25059_001M",
+                        "acs5_2013_moe" : "NAME,B01003_001M,B25057_001M,B25058_001M,B25059_001M",
+                        "acs5_2014_moe" : "NAME,B01003_001M,B25057_001M,B25058_001M,B25059_001M",
+                        "acs5_2015_moe" : "NAME,B01003_001M,B25057_001M,B25058_001M,B25059_001M"
+                       }	
+
+    def get_data(self, unique_data_ids=None, sample=False, output_type = 'csv', **kwargs):
+        '''
+        Gets all data sources associated with this ApiConn class. 
+
+        sample does not apply to this apiconn object because api doesn't let us request only some data. 
+        '''
+        if unique_data_ids == None:
+            unique_data_ids = self._available_unique_data_ids
+
+        for u in unique_data_ids:
+            if (u not in self._available_unique_data_ids):
+                #TODO Change this error type to a more specific one that should be handled by calling function inproduction
+                #We will want the calling function to continue with other data sources instead of erroring out. 
+                logging.info("  The unique_data_id '{}' is not supported by the CensusApiConn".format(u))
+            else:
+                result = self.get(self._urls[u], params={'key':self.census_api_key, 'get':self._fields[u], 'for': 'tract:*', 'in': 'state:11'})
+                
+                if result.status_code != 200:
+                    err = "An error occurred during request: status {0}"
+                    #TODO change this error type to be handleable by caller
+                    raise Exception(err.format(result.status_code))
+                
+                content = result.text
+
+                if output_type == 'stdout':
+                    print(content)
+
+                elif output_type == 'csv':
+                    jsondata=json.loads(content)
+                    self.result_to_csv(jsondata[0], jsondata[1:],  self.output_paths[u])
+                
+                #Can't yield content if we get multiple sources at once
+                if len(unique_data_ids) == 1:
+                    return content
 
 
-CensusApiConn('fakearg').getacs5()
+
+if __name__ == '__main__':
+    
+    # Pushes everything from the logger to the command line output as well.
+    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir,"logs","sources.log"))
+    logging.basicConfig(filename=log_path, level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    api_conn = CensusApiConn()
+    unique_data_ids = None 
+    api_conn.get_data(unique_data_ids)

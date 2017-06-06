@@ -1,6 +1,6 @@
 """
 Module creates draft JSON file(s) from given csv data sources that after user
-review will be inserted into the meta.json (soon to be called table_info.json)
+review will be inserted into the meta.json
 
 You can think of meta.json as the skeleton template for the data in tables
 loaded into the database.
@@ -73,8 +73,7 @@ def _pandas_to_sql_data_type(pandas_type_string):
 def make_draft_json(filename, tablename, encoding):
     """
     Create a draft JSON file for the new table that will be reviewed and
-    cleaned up before inserted into meta.json (soon to be called
-    table_info.json).
+    cleaned up before inserted into meta.json
 
     The draft output will be saved within '/housing-insights/python/logs'
     folder.
@@ -102,7 +101,6 @@ def make_draft_json(filename, tablename, encoding):
         }
     }
 
-    # TODO: insert 'unique_data_id' field into draft JSON
     unique_data_id_field = {
         "display_name": "Unique data ID",
         "display_text": "Identifies which source file this record came from",
@@ -123,8 +121,8 @@ def make_draft_json(filename, tablename, encoding):
         sql_type = _pandas_to_sql_data_type(pandas_type)
 
         field_attributes = {
-                "type": sql_type, 
-                "source_name": field, 
+                "type": sql_type,
+                "source_name": field,
                 "sql_name": _sql_name_clean(field),
                 "display_name": _sql_name_clean(field),
                 "display_text":"",
@@ -141,59 +139,143 @@ def make_draft_json(filename, tablename, encoding):
     print(tablename + " JSON table file created.")
 
 
-def make_all_json(manifest_path):
+def checkTable(table_name, meta):
+    """
+    Check whether the new table is in meta.json file
 
-    completed_tables = {}
-    manifest = ManifestReader(path=manifest_path)
-    if manifest.has_unique_ids():
-        for manifest_row in manifest:
-            tablename = manifest_row['destination_table']
-            encoding = manifest_row.get('encoding')
-            if tablename not in completed_tables:
-                if manifest_row['include_flag'] == 'use':
-                    filepath = os.path.abspath(
-                            os.path.join(manifest_row['local_folder'],
-                                        manifest_row['filepath']
-                                        ))
-                    make_draft_json(filepath, tablename, encoding)
-                    completed_tables[tablename] = filepath
-                    print("completed {}".format(tablename))
-            else:
-                print("skipping {}, already loaded".format(manifest_row['unique_data_id']))
+    :param: table_name - the new data to be added
+    :param type: string
 
-    print("Finished! Used these files to generate json:")
-    print(completed_tables)
+    :param: meta - path to the meta.json file (currently called meta.json)
+    :param type: string
+
+    :return: boolean value
+    : True - table_name found in meta.json
+    : False - table_name NOT found
+    """
+    if not(os.path.isfile(meta)):
+        raise ValueError("Unable to access JSON file")
+
+    # read the data from current json file
+    with open(meta, "r") as json_file:
+        current_data = json_file.read()
+
+    # decode the json file, result is a "dict", cast the result as a "set"
+    current_tables = json.loads(current_data)
+
+    return table_name in current_tables.keys()
+
+
+def appendJSON(new_json, master_json):
+    """
+    Copy the file content of new_json and append to the file content in meta_json
+
+    :param:  new_json - path to the new json file
+    :param type: string
+
+    :param:  master_json - path to the meta.json file
+    :param type: string
+
+    :return: void
+    """
+    #TODO: version control of meta.json, create backup making changes to master JSON
+    if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
+        raise ValueError("Path to one of the JSON files is invalid")
+
+    # Update the master JSON file
+    with open(new_json, "r") as new_file:
+        json_data = new_file.read()
+    new_data = json.loads(json_data)
+
+    # read the current master JSON table
+    with open(master_json, "r") as json_file:
+        master_data = json_file.read()
+    masterJ_data = json.loads(master_data)
+
+    # add the new table to the master JSON
+    masterJ_data.update(new_data)
+    # write the new JSON list to the master JSON file
+    json.dump(masterJ_data, open(master_json, 'w'), indent=2)
+    print("%s appended to meta.json file" % new_json)
+
+
+def duplicateTable(new_table, new_json, master_json):
+    """
+    Ask the user for decision on table that is found in the meta.json file.
+    The user can decide to either overwrite current master json or cancel copying.
+
+    :param:  new_table - new table being added
+    :param type: string
+
+    :param:  new_json - path to the new json file
+    :param type: string
+
+    :param:  master_json - path to the meta.json file
+    :param type: string
+
+    :return: void
+    """
+    if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
+        raise ValueError("Path to one of the JSON files is invalid")
+
+    time_out = 0
+
+    while time_out < 10:
+        usr_decide = input("\nPress: [O] to overwrite current value in meta.json; [C] to cancel: ")
+
+        if ('O' in usr_decide or 'o' in usr_decide):
+            # Overwrite current table in master json
+            # remove the entry meta.json
+            with open(master_json, "r") as json_file:
+                master_data = json_file.read()
+            masterJ_data = json.loads(master_data)
+
+            masterJ_data.pop(new_table, 0)	# 0 as fail-safe parameter
+            json.dump(masterJ_data, open(master_json, 'w'), indent=2)
+
+            appendJSON(new_json, master_json)
+            return
+
+        elif ('C' in usr_decide or 'c' in usr_decide):
+            # cancel copying
+            print("Copying new JSON cancelled")
+            return
+
+        else:
+            print("Option not recognised\n")
+
+        time_out += 1
+
+    # incorrect selection exceeds limit
+    print("Copying JSON aborted")
+
 
 if __name__ == '__main__':
-    # configure option parsing
-    usage = 'usage: %prog [options]'
-    opt_parser = OptionParser(usage=usage)
-    opt_parser.add_option('-m', '--mode', dest='mode', default='single',
-                          help='processing mode: single or multi ['
-                               'default: %default]')
-    opt_parser.add_option('-f', '--filename', dest='filename',
-                          help='path for the raw data csv to be processed '
-                               '(REQUIRED for single mode)',
-                          metavar='CSV_FILE')
-    opt_parser.add_option('-t', '--table-name', dest='table_name',
-                          help='the database table name this data will go in '
-                               '- must match what is entered in manifest.csv '
-                               '(REQUIRED for single mode')
-    opt_parser.add_option('-e', '--encoding', dest='encoding',
-                          help="used for opening pandas - try utf-8 if latin1"
-                               " doesn't work [default: %default]",
-                          default='latin1')
-    options, args = opt_parser.parse_args()
+    #
+    # Edit these values before running!
+    csv_filename = os.path.abspath("../../../data/sample/project_sample.csv")
+    table_name = "mytable_name"
+    encoding = "latin1" #Try utf-8 or latin1. Put the successful value into manifest.csv
 
-    # handle passed options
-    if options.mode == 'multi':
-        manifest_path = os.path.abspath(
-            os.path.join(python_filepath, 'scripts', 'manifest.csv'))
-        make_all_json(manifest_path)
-    else:
-        if None in (options.filename, options.table_name, options.encoding):
-            opt_parser.error('missing required arguments for single mode')
-        else:
-            make_draft_json(filename=options.filename,
-                            tablename=options.table_name,
-                            encoding=options.encoding)
+    #Make the table
+    if 'create' in sys.argv:
+        make_draft_json(csv_filename, table_name, encoding)
+
+    if 'add' in sys.argv:
+        new_json_path = os.path.join(logging_path, (table_name+".json"))
+        json_filepath = python_filepath + "/scripts/meta.json"
+
+        try:
+            if checkTable(table_name, json_filepath):
+                # the new table is already in table_info.json
+                print("table already in master json")
+                duplicateTable(table_name, new_json_path, json_filepath)
+
+            else:
+                # the new table will be appended
+                print("adding new table")
+                appendJSON(new_json_path, json_filepath)
+
+        except ValueError:
+            print("Path to meta.json is invalid")
+

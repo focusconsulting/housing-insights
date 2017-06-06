@@ -59,7 +59,7 @@ class DCHousingApiConn(BaseApiConn):
                     pprint(result.json())
                 elif output_type == 'csv':
                     data = result.json()['features']
-                    results = [DCHousingResult(address['attributes']) for address in
+                    results = [DCHousingResult(address['attributes']).data for address in
                                data]
                     self.result_to_csv(FIELDS, results, self.output_paths[u])
                     self.create_project_subsidy_csv(
