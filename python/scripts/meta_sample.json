@@ -1,75 +1,4 @@
-{
-  "census_temp": {
-    "cleaner": "CensusCleaner",
-    "fields": [
-      {
-        "display_name": "Full Census Tract ID",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.id",
-        "sql_name": "census_tract_id_full",
-        "type": "text"
-      },
-      {
-        "display_name": "Census Tract ID",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.id2",
-        "sql_name": "census_tract_id",
-        "type": "text"
-      },
-      {
-        "display_name": "Census tract description",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "GEO.display-label",
-        "sql_name": "census_tract_desc",
-        "type": "text"
-      },
-      {
-        "display_name": "Median Quartile Rent, ACS",
-        "display_text": "Median quartile contract rent estimate from the American Community Survey",
-        "required_in_source": true,
-        "source_name": "HD01_VD01",
-        "sql_name": "median_rent",
-        "type": "integer"
-      },
-      {
-        "display_name": "Margin of Error, Median Rent",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "HD02_VD01",
-        "sql_name": "median_rent_moe",
-        "type": "text"
-      },
-      {
-        "display_name": "Unique data ID",
-        "display_text": "Identifies which source file this record came from",
-        "required_in_source": false,
-        "source_name": "unique_data_id",
-        "sql_name": "unique_data_id",
-        "type": "text"
-      },
-      {
-        "display_name": "example_optional_column",
-        "display_text": "By marking 'required_in_source' as false, the field does not need to be in the CSV file, and can be added by the cleaner instead.",
-        "required_in_source": false,
-        "source_name": "example_optional_column",
-        "sql_name": "example_optional_column",
-        "type": "text"
-      },
-      {
-        "_comment": "This will be added back in when the Census API tool is done",
-        "display_name": "Lower quartile rent (ACS)",
-        "display_text": "Lower quartile rent from the American Community Survey table B25057",
-        "required_in_source": false,
-        "source_name": "lower_quartile_rent",
-        "sql_name": "lower_quartile_rent",
-        "type": "integer"
-      }
-    ],
-    "replace_table": false
-  },
+{ 
   "project_temp": {
     "cleaner": "ProjectCleaner",
     "fields": [
@@ -79,6 +8,14 @@
         "required_in_source": true,
         "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
+        "type": "text"
+      },
+      {
+        "display_name": "mar_id",
+        "display_text": "The mar id for the building location",
+        "required_in_source": false,
+        "source_name": "mar_id",
+        "sql_name": "mar_id",
         "type": "text"
       },
       {
@@ -125,7 +62,7 @@
         "display_name": "proj_addre",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "Proj_Addre",
+        "source_name": "Proj_addre",
         "sql_name": "proj_addre",
         "type": "text"
       },
@@ -146,11 +83,11 @@
         "type": "text"
       },
       {
-        "display_name": "proj_zip",
+        "display_name": "Zip code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Zip",
-        "sql_name": "proj_zip",
+        "sql_name": "zip",
         "type": "text"
       },
       {
@@ -167,7 +104,7 @@
         "required_in_source": true,
         "source_name": "Proj_Units_Assist_Min",
         "sql_name": "proj_units_assist_min",
-        "type": "text"
+        "type": "integer"
       },
       {
         "display_name": "proj_units_assist_max",
@@ -175,7 +112,7 @@
         "required_in_source": true,
         "source_name": "Proj_Units_Assist_Max",
         "sql_name": "proj_units_assist_max",
-        "type": "text"
+        "type": "integer"
       },
       {
         "display_name": "hud_own_effect_dt",
@@ -183,7 +120,7 @@
         "required_in_source": true,
         "source_name": "Hud_Own_Effect_dt",
         "sql_name": "hud_own_effect_dt",
-        "type": "text"
+        "type": "date"
       },
       {
         "display_name": "hud_own_name",
@@ -250,11 +187,11 @@
         "type": "date"
       },
       {
-        "display_name": "ward2012",
+        "display_name": "Ward",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Ward2012",
-        "sql_name": "ward2012",
+        "sql_name": "ward",
         "type": "text"
       },
       {
@@ -266,11 +203,11 @@
         "type": "text"
       },
       {
-        "display_name": "anc2012",
+        "display_name": "ANC",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Anc2012",
-        "sql_name": "anc2012",
+        "sql_name": "anc",
         "type": "text"
       },
       {
@@ -282,35 +219,35 @@
         "type": "text"
       },
       {
-        "display_name": "geo2010",
+        "display_name": "Census tract",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Geo2010",
-        "sql_name": "geo2010",
+        "sql_name": "census_tract",
         "type": "text"
       },
       {
-        "display_name": "cluster_tr2000",
+        "display_name": "Neighborhood Cluster",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
-        "sql_name": "cluster_tr2000",
+        "sql_name": "neighborhood_cluster",
         "type": "text"
       },
       {
-        "display_name": "cluster_tr2000_name",
+        "display_name": "Neighborhood Cluster Description",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cluster_tr2000_name",
-        "sql_name": "cluster_tr2000_name",
+        "sql_name": "neighborhood_cluster_desc",
         "type": "text"
       },
       {
-        "display_name": "zip",
-        "display_text": "",
+        "display_name": "Zipcode String",
+        "display_text": "This is a duplicate column in the Preservation Catalog source which has the word ZIP appended to the zipcode.",
         "required_in_source": true,
         "source_name": "Zip",
-        "sql_name": "zip",
+        "sql_name": "zip_string",
         "type": "text"
       },
       {
@@ -354,19 +291,19 @@
         "type": "decimal"
       },
       {
-        "display_name": "proj_lat",
+        "display_name": "Latitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_lat",
-        "sql_name": "proj_lat",
+        "sql_name": "latitude",
         "type": "decimal"
       },
       {
-        "display_name": "proj_lon",
+        "display_name": "Longitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_lon",
-        "sql_name": "proj_lon",
+        "sql_name": "longitude",
         "type": "decimal"
       },
       {
@@ -378,6 +315,7 @@
         "type": "integer"
       },
       {
+        "_comment": "TODO This needs to be parsed and converted to date format (need to write appropriate parser)",
         "display_name": "update_dtm",
         "display_text": "",
         "required_in_source": true,

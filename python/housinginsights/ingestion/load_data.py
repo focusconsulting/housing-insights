@@ -92,6 +92,8 @@ class LoadData(object):
         # write the meta.json to the database
         self._meta_json_to_database()
 
+        self._failed_table_count = 0
+
     def _drop_tables(self):
         """
         Returns the outcome of dropping all the tables from the 
@@ -443,6 +445,7 @@ class LoadData(object):
         except TableWritingError:
             # TODO: tell user total count of errors.
             # currently write_file_to_sql() just writes in log that file failed
+            self._failed_table_count += 1
             pass
 
 
@@ -496,6 +499,8 @@ def main(passed_arguments):
         loader.update_database(passed_arguments.update_only)
     else:
         loader.rebuild()
+
+    #TODO add in failures report here e.g. _failed_table_count
 
 if __name__ == '__main__':
     """
