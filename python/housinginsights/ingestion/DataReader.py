@@ -135,6 +135,10 @@ class ManifestReader(HIReader):
         super().__init__(path)
         self.unique_ids = {}  # from the unique_id column in the manifest
 
+        # validate the manifest
+        if not self.manifest.has_unique_ids():
+            raise ValueError('Manifest has duplicate unique_data_id!')
+
     def __iter__(self):
         self._length = 0
         self._counter = Counter()

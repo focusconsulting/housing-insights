@@ -380,19 +380,12 @@ class CleanerBase(object, metaclass=ABCMeta):
 
     def add_mar_id(self, row, address_id_col_name='ADDRESS_ID'):
         """
-        Populates the mar_id column in the project table.
+        Returns the updated row after the mar_id column in the project table
+        has been populated with valid value.
+
+        The process involves using address id, lat/lon, or x/y-coords to
+        identify mar equivalent address id.
         """
-        # # TODO - discuss with Neal whether to add mar as table in db
-        # mar = HIReader(path=mar_path)
-        # row_address_id = row[address_id_col_name]
-        # mar_row = mar.get_row_by_column_name(col_header_name='ADDRESS_ID',
-        #                                      look_up_value=row_address_id)
-        # if mar_row is not None:
-        #     row['mar_id'] = mar_row['ADDRESS_ID']
-        #     return row
-
-
-
         # api lookup with lat/lon or x/y coords if address id is null or invalid
         mar_api = MarApiConn()
         lat = row['Proj_lat']

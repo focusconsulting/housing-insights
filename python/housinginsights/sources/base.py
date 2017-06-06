@@ -209,8 +209,8 @@ class BaseApiConn(object):
     def create_project_subsidy_csv(self, uid, project_fields_map,
                                    subsidy_fields_map, database_choice=None):
         """
-        Writes 'source_project' and 'source_subsidy' raw files from the
-        source csv file. It then deletes the source file so it
+        Writes 'new_proj_data_file' and 'new_subsidy_data_file' raw files
+        from the source csv file. It then deletes the source file so it
         doesn't get added to manifest and loaded into the database.
         """
         if database_choice is None:
@@ -221,39 +221,44 @@ class BaseApiConn(object):
         # create file path objects
         source_csv = self.output_paths[uid]
         folder = os.path.dirname(source_csv)
-        source_proj = os.path.join(folder, "{}_project.csv".format(uid))
-        source_subsidy = os.path.join(folder, "{}_subsidy.csv".format(uid))
+        new_proj_data_file = os.path.join(folder, "{}_project.csv".format(uid))
+        new_subsidy_data_file = os.path.join(folder, "{}_subsidy.csv".format(uid))
 
         # create dchousing_project/subsidy files from source
         with open(source_csv, encoding='utf-8') as f, \
-                open(source_proj, mode='w', encoding='utf-8') as proj, \
-                open(source_subsidy, mode='w', encoding='utf-8') as subsidy:
+                open(new_proj_data_file, mode='w', encoding='utf-8') as proj, \
+                open(new_subsidy_data_file, mode='w', encoding='utf-8') as subsidy:
 
-            reader = csv.DictReader(f)
+            source_csv_reader = csv.DictReader(f)
             proj_writer = csv.DictWriter(proj, fieldnames=PROJ_FIELDS)
             proj_writer.writeheader()
             subsidy_writer = csv.DictWriter(subsidy, fieldnames=SUBSIDY_FIELDS)
             subsidy_writer.writeheader()
 
-            for line in reader:
+            # If the project doesn't exists in the database, we want to add a
+            # new record to the project table.
+            #
+            # All projects need a new record added to the subsidy table. If that
+            # project already exists in the database, link it to the project
+            # using the nlihc_id; if not, link it to the record that was added
+            # to the proj_writer output file."
+            for building in source_csv_reader:
                 nlihc_id, in_proj_table = self._get_nlihc_id_from_db(
-                    db_conn=db_conn, address_id=line['ADDRESS_ID'])
+                    db_conn=db_conn, address_id=building['ADDRESS_ID'])
 
                 if not in_proj_table:
                     data = self._map_data_for_row(nlihc_id=nlihc_id,
                                                   fields=PROJ_FIELDS,
                                                   fields_map=project_fields_map,
-                                                  line=line)
+                                                  line=building)
                     proj_writer.writerow(data)
 
+                # add all to subsidy table
                 data = self._map_data_for_row(nlihc_id=nlihc_id,
                                               fields=SUBSIDY_FIELDS,
                                               fields_map=subsidy_fields_map,
-                                              line=line)
+                                              line=building)
                 subsidy_writer.writerow(data)
-
-        # remove source file so it doesn't get added to manifest hence database
-        os.remove(source_csv)
 
 class BaseApiManager(object):
 

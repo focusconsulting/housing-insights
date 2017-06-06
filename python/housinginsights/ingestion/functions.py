@@ -13,6 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
 
 import housinginsights.ingestion.Cleaners as Cleaners
 
+
 # Completed, tests not written.
 def load_meta_data(filename='meta.json'):
     """
@@ -52,26 +53,6 @@ def load_meta_data(filename='meta.json'):
     logging.info("{} imported. JSON format is valid: {}".format(filename, json_is_valid))
 
     return meta
-
-
-# TODO: DELETE - moved into load_data.py
-def meta_json_to_database(engine, meta):
-    '''
-    Makes sure we have a manifest table in the database. 
-    If not, it creates it with appropriate fields. 
-    '''
-   
-    from sqlalchemy import Table, Column, Integer, String, MetaData
-    sqlalchemy_metadata = MetaData() #this is unrelated to our meta.json
-    meta_table = Table('meta', sqlalchemy_metadata,
-                Column('meta', String))
-
-    sqlalchemy_metadata.create_all(engine)
-    json_string = json.dumps(meta)
-    ins = meta_table.insert().values(meta=json_string)
-    conn = engine.connect()
-    conn.execute("DELETE FROM meta;")
-    conn.execute(ins)
 
 
 def check_or_create_sql_manifest(engine, rebuild=False):

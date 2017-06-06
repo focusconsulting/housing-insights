@@ -159,7 +159,7 @@ class LoadData(object):
                 uid, table_name))
             result = self.engine.execute(query)
 
-            # change status = unloaded in sql_manifest
+            # change status = deleted in sql_manifest
             logging.info("\t\tResetting status in sql manifest row!")
             sql_interface.update_manifest_row(conn=self.engine,
                                               status='deleted')
@@ -301,11 +301,6 @@ class LoadData(object):
         process the data and then load all usable data into the database
         after dropping all tables.
         """
-        # TODO: should this be moved into the __init__ of ManifestReader? Do we
-        # TODO: ever want to use ManifestReader if it has duplicate rows?
-        if not self.manifest.has_unique_ids():
-            raise ValueError('Manifest has duplicate unique_data_id!')
-
         self._drop_tables()
 
         processed_data_ids = []
@@ -342,7 +337,7 @@ class LoadData(object):
         temp_filepath = self._get_temp_filepath(manifest_row=manifest_row)
 
         # validate and clean
-        self._create_clean_psv(table_name=manifest_row['destination_table'],
+        self._load_single_file(table_name=manifest_row['destination_table'],
                                manifest_row=manifest_row,
                                csv_reader=csv_reader,
                                temp_filepath=temp_filepath)
@@ -395,7 +390,7 @@ class LoadData(object):
                           engine=self.engine, filename=temp_filepath)
         return interface
 
-    def _create_clean_psv(self, table_name, manifest_row, csv_reader,
+    def _load_single_file(self, table_name, manifest_row, csv_reader,
                           temp_filepath):
         """
         Cleans the data for the table name in the given manifest row, writes 
