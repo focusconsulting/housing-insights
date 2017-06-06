@@ -1,6 +1,6 @@
 import unittest
 import os
-from python.housinginsights.ingestion import load_data
+from python.housinginsights.ingestion import LoadData as load_data
 from sqlalchemy.exc import ProgrammingError
 
 PYTHON_PATH = load_data.PYTHON_PATH

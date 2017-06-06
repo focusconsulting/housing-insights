@@ -33,7 +33,13 @@ from sqlalchemy import Table, Column, Integer, String, MetaData
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            os.pardir, os.pardir))
-sys.path.append(PYTHON_PATH)
+
+logging_path = os.path.abspath(os.path.join(PYTHON_PATH, "logs"))
+logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
+
+#append to path if running this file directly, otherwise assume it's already been appended. 
+if __name__ == "__main__":
+    sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
 
@@ -41,15 +47,6 @@ from housinginsights.ingestion import DataReader, ManifestReader
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
-
-# configuration: see /logs/example-logging.py for usage examples
-logging_path = os.path.abspath(os.path.join(PYTHON_PATH, "logs"))
-logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
-logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
-
-# Pushes everything from the logger to the command line output as well.
-logging.getLogger().addHandler(logging.StreamHandler())
-
 
 class LoadData(object):
 
@@ -507,6 +504,13 @@ if __name__ == '__main__':
     Continue to honor command line feature after refactoring to encapsulate 
     the module as a class. 
     """
+
+    # configuration: see /logs/example-logging.py for usage examples
+    logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
+    # Pushes everything from the logger to the command line output as well.
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+
     description = 'Loads our flat file data into the database of choice. You ' \
                   'can load sample or real data and/or rebuild or update only '\
                   'specific flat files based on unique_data_id values.'

@@ -46,9 +46,9 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
     
     #All possible source modules and classes as key:value of module:classname
     modules = {
+            "wmata_distcalc":"WmataApiConn",
             "opendata":"OpenDataApiConn",
             "DCHousing":"DCHousingApiConn",
-            "wmata_distcalc":"WmataApiConn",
             "census":"CensusApiConn"
     }
 
@@ -80,18 +80,19 @@ if __name__ == '__main__':
 
     #Set up the appropriate settings for what you want to download
 
-    debug = True            #Errors are raised when they occur instead of only logged.
-    unique_data_ids = None   #Alternatively, pass a list of only the data sources you want to download
-                            #Available ids:
-                            #[ 'dchousing',"tax", "wmata_stops","wmata_dist"
+    debug = True            # Errors are raised when they occur instead of only logged.
+    unique_data_ids = None   # Alternatively, pass a list of only the data sources you want to download
+                            # Available ids:
+                            # [ 'dchousing',"tax", "wmata_stops","wmata_dist"
                             #  "building_permits_2013","building_permits_2014","building_permits_2015","building_permits_2016","building_permits_2017"
-                            #  "crime_2013","crime_2014","crime_2015","crime_2016","crime_2017"
+                            #  "crime_2013","crime_2014","crime_2015","crime_2016","crime_2017", 
+                            #  "mar"
                             #  ]
 
-    sample = False          #Some ApiConn classes can just grab a sample of the data for use during development / testing
-    output_type = 'csv'     #Other option is stdout which just prints to console
-    db = 'docker_database'  #Only used by connections that need to read from the database to get their job done (example: wmata)
-    module_list = ["opendata","DCHousing", "census"]
+    sample = False          # Some ApiConn classes can just grab a sample of the data for use during development / testing
+    output_type = 'csv'     # Other option is stdout which just prints to console
+    db = 'docker_database'  # Only used by connections that need to read from the database to get their job done (example: wmata)
+    module_list = ["opendata","DCHousing", "census"] #"wmata_distcalc"
 
     get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
 
