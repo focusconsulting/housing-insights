@@ -117,9 +117,9 @@ class CamaApiConn(BaseApiConn):
             try:
                 current_year = int(datetime.date.today().strftime('%Y'))
                 #Skipping none values for units under construction
-                if int(row['properties']['AYB']) > current_year: 
+                if row['properties']['AYB'] is not None and int(row['properties']['AYB']) > current_year:
                     continue
-               
+
                 objectid = row['properties']['OBJECTID']
                 if len(row['properties']['SSL']) == 8:
                     square = row['properties']['SSL'][:4]
@@ -140,15 +140,10 @@ class CamaApiConn(BaseApiConn):
                     num_units = 1
                     units_zero_ssl.append(row['properties']['SSL']) #for recording
                 if num_units == None: units_none_ssl.append(row['properties']['SSL']) #for recording
-                # if num_units == None and 'Warning' not in mar_return.keys():
-                #     num_units == 1
-                #     print("num_units is None: ", row['properties']['SSL']) #for recording
 
                 bedrm = row['properties']['BEDRM']
                 if bedrm == 0: bedrm = 1
-                if bedrm == None and 'Warning' not in mar_return.keys():
-                    bedrm = 1
-                    print("bedrm is None:", row['properties']['SSL']) #for recording
+                if bedrm == None: bedrm = 0
 
                 for zone in zone_types:
                     if zone == 'anc': zone_count = anc_count
@@ -176,7 +171,6 @@ class CamaApiConn(BaseApiConn):
 
 
         print("units_zero_ssl:", units_zero_ssl)
-        print("units_none_ssl:", units_none_ssl)
         return {'anc': anc_count, 'census_tract': census_count, 'neighborhood_cluster': cluster_count, 'ward': ward_count, 'zip': zipcode_count}
 
 
