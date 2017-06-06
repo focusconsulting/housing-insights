@@ -17,8 +17,8 @@ class MyTestCase(unittest.TestCase):
             os.path.join(test_data_path, 'manifest_load_data.csv'))
         self.database_choice = 'docker_database'
         self.loader = load_data.LoadData(database_choice=self.database_choice,
-                                    meta_path=self.meta_path,
-                                    manifest_path=self.manifest_path)
+                                         meta_path=self.meta_path,
+                                         manifest_path=self.manifest_path)
 
     def query_db(self, engine, query):
         """
@@ -35,7 +35,7 @@ class MyTestCase(unittest.TestCase):
         loader_engine = self.loader.engine
 
         # start with empty database
-        self.loader.drop_tables()
+        self.loader._drop_tables()
         result = loader_engine.table_names()
         self.assertEqual(len(result), 0)
 
@@ -65,7 +65,7 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue('manifest' in result)
 
         # make sure database is not empty
-        self.loader.load_all_data()
+        self.loader.rebuild()
         result = loader_engine.table_names()
         self.assertTrue(len(result) > 0)
 
@@ -113,6 +113,15 @@ class MyTestCase(unittest.TestCase):
         result = self.loader.create_list(folder_path)
         print(result)
         self.assertEqual(len(result), 13)
+
+    def test_rebuild(self):
+        result = self.loader.rebuild()
+        self.assertTrue(result)
+
+    def test_make_manifest(self):
+        folder_path = os.path.join(PYTHON_PATH, os.pardir, 'data', 'raw',
+                                   'apis')
+        self.loader.make_manifest(folder_path, overwrite=False)
 
     # TODO - write test code
     def test__remove_existing_data(self):

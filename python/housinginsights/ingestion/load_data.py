@@ -22,6 +22,8 @@ import os
 import logging
 import argparse
 import json
+from datetime import datetime
+from csv import DictWriter
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 # Needed to make relative package imports when running this file as a script
@@ -90,7 +92,7 @@ class LoadData(object):
         # write the meta.json to the database
         self._meta_json_to_database()
 
-    def drop_tables(self):
+    def _drop_tables(self):
         """
         Returns the outcome of dropping all the tables from the 
         database_choice and then rebuilding.
@@ -185,6 +187,75 @@ class LoadData(object):
 
         return unique_data_ids
 
+    def _get_most_recent_timestamp_subfolder(self, root_folder_path):
+        """
+        Returns the most recent timestamp subfolder in a given folder path.
+
+        :param root_folder_path: the path for the directory containing
+        timestamp subfolders
+        :type root_folder_path: str
+
+        :return: most recent timestamp subfolder
+        :type: str
+        """
+        walk_gen = os.walk(root_folder_path)
+        root, dirs, files = walk_gen.__next__()
+        dirs.sort(reverse=True)
+        return dirs[0]
+
+    def make_manifest(self, all_folders_path, overwrite=True):
+        """
+        Creates a new manifest.csv with updated data date and filepath for
+        the raw data files within the most recent timestamp subfolder of the
+        given folder path.
+
+        A new instance of manifest object is created from the new
+        manifest.csv file.
+
+        :param all_folders_path: the folder that contains the timestamped
+        subfolders representing updated raw data files that should be loaded
+        into the database
+        :type all_folders_path: str
+
+        :param overwrite: should the current manifest.csv be overwritten?
+        :type overwrite: bool
+
+        :return: None
+        """
+        # get most recent subfolder, gather info for updating manifest
+        timestamp = self._get_most_recent_timestamp_subfolder(
+            all_folders_path)
+        most_recent_subfolder_path = os.path.join(all_folders_path,
+                                                  timestamp)
+        filepath_base = most_recent_subfolder_path.split('data/')[-1]
+
+        # get unique_data_ids for data files in recent subfolder
+        recent_uids = self.create_list(most_recent_subfolder_path)
+
+        # temp file for new manifest
+        temp_manifest_file = os.path.join(os.path.split(self.manifest.path)[0],
+                                          'temp_manifest.csv')
+
+        with open(temp_manifest_file, mode='w', encoding='utf-8') as f:
+            writer = DictWriter(f, fieldnames=self.manifest.keys)
+            writer.writeheader()
+
+            for row in self.manifest:
+                row_uid = row['unique_data_id']
+                if row_uid in recent_uids:
+                    row['data_date'] = datetime.strptime(
+                        timestamp, '%Y%m%d').strftime('%m/%d/%Y')
+                    filepath = os.path.join(filepath_base,
+                                            "{}.csv".format(row_uid))
+                    row['filepath'] = filepath
+
+                writer.writerow(row)
+
+        # rename temp file and then recreate instance of manifest
+        if overwrite:
+            os.rename(temp_manifest_file, self.manifest.path)
+            self.manifest = ManifestReader(self.manifest.path)
+
     def update_database(self, unique_data_id_list):
         """
         Reloads only the flat file associated to the unique_data_id in
@@ -224,15 +295,18 @@ class LoadData(object):
                     os.path.join(logging_path, 'temp_{}.psv'.format(
                         manifest_row['unique_data_id'])))
 
-    def load_all_data(self):
+    def rebuild(self):
         """
         Using manifest.csv, meta.json, and respective cleaners, validate and
-        process the data and then load all usable data into the database.
+        process the data and then load all usable data into the database
+        after dropping all tables.
         """
         # TODO: should this be moved into the __init__ of ManifestReader? Do we
         # TODO: ever want to use ManifestReader if it has duplicate rows?
         if not self.manifest.has_unique_ids():
             raise ValueError('Manifest has duplicate unique_data_id!')
+
+        self._drop_tables()
 
         processed_data_ids = []
 
@@ -412,7 +486,7 @@ def main(passed_arguments):
 
         # Only users with additional admin privileges can rebuild the
         # remote database
-        if passed_arguments.rebuild:
+        if not passed_arguments.update_only:
             database_choice = 'remote_database_master'
 
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
@@ -423,13 +497,10 @@ def main(passed_arguments):
         loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                           manifest_path=manifest_path, keep_temp_files=True)
 
-    if passed_arguments.rebuild:
-        loader.drop_tables()
-
     if passed_arguments.update_only:
         loader.update_database(passed_arguments.update_only)
     else:
-        loader.load_all_data()
+        loader.rebuild()
 
 if __name__ == '__main__':
     """
@@ -445,14 +516,9 @@ if __name__ == '__main__':
                         choices=['docker', 'docker-local', 'local', 'remote'])
     parser.add_argument('-s', '--sample', help='load with sample data',
                         action='store_true')
-    # mutually exclusive options
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument('-r', '--rebuild', help='drop all tables in the '
-                                               'database and reload all',
-                       action='store_true')
-    group.add_argument('--update-only', nargs='+',
-                       help='only update tables with these unique_data_id '
-                            'values')
+    parser.add_argument('--update-only', nargs='+',
+                        help='only update tables with these unique_data_id '
+                             'values')
 
     # handle passed arguments and options
     main(parser.parse_args())
