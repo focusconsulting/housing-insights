@@ -108,51 +108,53 @@ var mapView = {
 
     },
     overlayMenuOption: function(overlay){
-        var thisOption = this;
-        this.name = overlay.name;
-        mapView.overlayMenuOptions.push(this);
+        
 
-        this.link = document.createElement('a');
-        this.link.href = '#';
-        this.link.id = overlay.name + '-overlay-item';
-        this.link.innerHTML = overlay.name.toUpperCase().replace('_',' ');
-        document.getElementById('overlay-menu').appendChild(this.link);
+        var parent = d3.select('#overlay-menu')
+                .classed("ui styled fluid accordion",true)  //semantic UI styling
+            
+        var title = parent.append("div")
+                      .classed("title overlay-title",true);
+            title.append("i")
+                .classed("dropdown icon",true);
+            title.append("span")
+                .classed("title-text",true)
+                .text(overlay.name)
+            title.attr("id", "overlay-"+overlay.name); //TODO need to change this to different variable after changing meta logic structure
 
-        this.availableLayerNames = (mapView.initialOverlays.find(function(ovly){
-            return ovly.name === thisOption.name;
-        })).zones;
+        var content = parent.append("div")
+              .classed("content",true)
+              .text("This is a brief description")
 
-        this.makeAvailable = function(){
-            this.link.className = '';
-            this.link.onclick = function(e){
-                e.preventDefault();
-                var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-                console.log(existingOverlayType, overlay.name);
-                if ( existingOverlayType !== overlay.name ) {
+        $('.ui.accordion').accordion(); //alternately allow multiple to be open: .accordion({'exclusive':false})
+        
+        //Set it up to trigger the layer when title is clicked
+        document.getElementById("overlay-"+overlay.name).addEventListener("click", clickCallback);
+        function clickCallback(){
+            console.log("you clicked on the overlay title for " + overlay.name);
+            var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
+            console.log("changing from " + existingOverlayType + " to " + overlay.name);
+
+            if ( existingOverlayType !== overlay.name ) {
                     setState('overlayRequest', {overlay: overlay.name, activeLayer: getState().mapLayer[0]});                     
                 } else {
                     mapView.clearOverlay();
-                }
-                mapView.layerMenuOptions.forEach(function(opt){
-                    if(thisOption.availableLayerNames.indexOf(opt.name) === -1){
-                        opt.makeUnavailable();
-                    }
-                    else{
-                        opt.makeAvailable();
-                    }
-                });
-            };
-        }
-        this.makeUnavailable = function(){
-            this.link.className = 'unavailable';
-            this.link.onclick = function(e){
-                e.preventDefault();
-            }
+                };
 
-        }
-        // makes the link available by default.
-        this.makeAvailable();
+            //probably not currently working - disabling of layers
+            mapView.layerMenuOptions.forEach(function(opt){
+                if(thisOption.availableLayerNames.indexOf(opt.name) === -1){
+                    opt.makeUnavailable();
+                }
+                else{
+                    opt.makeAvailable();
+                }
+            });
+
+        }; //end clickCallback
     },
+
+
     overlayMenuOptions: [],
     initialOverlays: [],
     overlayMapping: {
@@ -339,7 +341,11 @@ var mapView = {
             });
 
     },
+
+
     layerMenuOptions: [],
+
+
     showLayer: function(msg,data) {
         
         var previousLayer = getState().mapLayer[1];
@@ -434,7 +440,7 @@ var mapView = {
         
     },
     showPopup: function(msg,data){
-console.log(data);
+            console.log(data);
 
             if ( document.querySelector('.mapboxgl-popup') ){                
                 d3.select('.mapboxgl-popup')
