@@ -65,7 +65,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             row[key] = row[key].replace('\r','__')
             row[key] = row[key].replace('\n','__')
         return row
-    
+
     def format_date(self, value):
         date = None
         try:
@@ -138,8 +138,8 @@ class CleanerBase(object, metaclass=ABCMeta):
 
     def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
             '''
-            Make all census tract names follow a consistent format. 
-            column_name corresponds to the key of the row, which depends on 
+            Make all census tract names follow a consistent format.
+            column_name corresponds to the key of the row, which depends on
             the source file column name which may be different from the final consistent name of census_tract
             '''
             row[column_name] = self.census_mapping[row[column_name]]
@@ -148,7 +148,7 @@ class CleanerBase(object, metaclass=ABCMeta):
     def replace_tracts(self,row,row_num,column_name='census_tract'):
         '''
         Converts the raw census tract code to the more readable format used by PresCat
-        TODO should read these mappings from file instead of having them hardcoded. 
+        TODO should read these mappings from file instead of having them hardcoded.
 
         TODO should use self.census_mapping instead
         '''
@@ -338,21 +338,21 @@ class CleanerBase(object, metaclass=ABCMeta):
             row[column_name] = census_tract_mapping[current]
         except KeyError:
             pass
-            #this prints error for many rows with nulls. 
+            #this prints error for many rows with nulls.
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
     def append_tract_label(self,row,row_num,column_name='census_tract_number'):
         '''
-        Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value 
-        consistent with the more readable format used by PresCat 
+        Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value
+        consistent with the more readable format used by PresCat
         '''
         current = row[column_name]
         try:
             row[column_name] = "Tract " + str(current)
         except KeyError:
             pass
-            #this prints error for many rows with nulls. 
+            #this prints error for many rows with nulls.
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
@@ -412,7 +412,7 @@ class BuildingPermitsCleaner(CleanerBase):
 
 class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
-        #Handle the first row which is a descriptive row, not data. 
+        #Handle the first row which is a descriptive row, not data.
         if row_num == 0:
             return None
 
@@ -467,7 +467,7 @@ class DCTaxCleaner(CleanerBase):
         return row
 
 
-class hmda_cleaner(CleanerBase):    
+class hmda_cleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
         row = self.parse_dates(row)
@@ -514,4 +514,6 @@ class topa_cleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', '\\', None])
         return row
 
-
+class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        return row

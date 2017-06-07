@@ -1,6 +1,6 @@
 """
 Module creates draft JSON file(s) from given csv data sources that after user
-review will be inserted into the meta.json 
+review will be inserted into the meta.json
 
 You can think of meta.json as the skeleton template for the data in tables
 loaded into the database.
@@ -143,7 +143,7 @@ def checkTable(table_name, meta):
     """
     Check whether the new table is in meta.json file
 
-    :param: table_name - the new data to be added 
+    :param: table_name - the new data to be added
     :param type: string
 
     :param: meta - path to the meta.json file (currently called meta.json)
@@ -232,7 +232,7 @@ def duplicateTable(new_table, new_json, master_json):
 
             masterJ_data.pop(new_table, 0)	# 0 as fail-safe parameter
             json.dump(masterJ_data, open(master_json, 'w'), indent=2)
-			
+
             appendJSON(new_json, master_json)
             return
 
@@ -253,14 +253,15 @@ def duplicateTable(new_table, new_json, master_json):
 if __name__ == '__main__':
     #
     # Edit these values before running!
-    csv_filename = os.path.abspath("../../../data/sample/project_sample.csv")
-    table_name = "mytable_name"
+    csv_filename = os.path.abspath("../../../data/processed/zoneUnitCount/zoneUnitCount_2017-06-03.csv")#"../../../data/sample/project_sample.csv"
+    table_name = "Zone_HousingUnit_Bedrm_Count"
     encoding = "latin1" #Try utf-8 or latin1. Put the successful value into manifest.csv
-
+    #print('main(): {}, {}, {}'.format())
+    # import ipdb; ipdb.set_trace()
     #Make the table
     if 'create' in sys.argv:
         make_draft_json(csv_filename, table_name, encoding)
-        
+
     if 'add' in sys.argv:
         new_json_path = os.path.join(logging_path, (table_name+".json"))
         json_filepath = python_filepath + "/scripts/meta.json"
@@ -278,4 +279,3 @@ if __name__ == '__main__':
 
         except ValueError:
             print("Path to meta.json is invalid")
-
