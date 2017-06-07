@@ -1,3 +1,4 @@
+
 from pprint import pprint
 
 from housinginsights.sources.base import BaseApiConn
@@ -44,7 +45,7 @@ class MarApiConn(BaseApiConn):
             pprint(result.json())
         elif output_type == 'csv':
             data = result.json()['returnDataset']['Table1']
-            results = [MarResult(address) for address in data]
+            results = [MarResult(address).data for address in data]
             self.result_to_csv(FIELDS, results, output_file)
         return result.json()
 
@@ -157,15 +158,16 @@ class MarApiConn(BaseApiConn):
         Do a reverse geocode lookup for MAR address/alias points within 200 
         meters from the given Latitude and Longitude coordinates and returns 
         the nearest five. The returned distance unit is meter.
-
+        
         :param latitude: Latitude
         :type latitude: str
-
+        
         :param longitude: Longitude
         :type longitude: str
+        
         :param output_type: Output type specified by user.
         :type  output_type: str
-
+        
         :param output_file: Output file specified by user.
         :type  output_file: str
 
@@ -178,6 +180,38 @@ class MarApiConn(BaseApiConn):
             'lng': longitude
         }
         result = self.get('/reverseLatLngGeocoding2', params=params)
+        if result.status_code != 200:
+            err = "An error occurred during request: status {0}"
+            raise Exception(err.format(result.status_code))
+        if output_type == 'stdout':
+            pprint(result.json())
+        elif output_type == 'csv':
+            data = result.json()['Table1']
+            results = [MarResult(address) for address in data]
+            self.result_to_csv(FIELDS, results, output_file)
+        return result.json()
+
+    def reverse_address_id(self, aid, output_type=None, output_file=None):
+        """
+        Returns mars location result when given a valid address id (aid).
+        
+        :param aid: address id to lookup
+        :type aid: integer
+        
+        :param output_type: Output type specified by user.
+        :type  output_type: str
+        
+        :param output_file: Output file specified by user.
+        :type  output_file: str
+
+        :returns: Json output from the api.
+        :rtype: json 
+        """
+        params = {
+            'f': 'json',
+            'AID': aid,
+        }
+        result = self.get('/findAID2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))

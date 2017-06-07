@@ -93,23 +93,23 @@ def hello():
 def filter_data():
     q = """
         select p.nlihc_id
-          , p.proj_units_tot as total_units_in_building
-          , p.proj_units_assist_max as total_subsidized_units_in_building
+          , p.proj_units_tot
+          , p.proj_units_assist_max
           , cast(p.proj_units_assist_max / p.proj_units_tot as decimal(3,2)) as percent_affordable_housing
-          , p.hud_own_type as building_ownership_type
+          , p.hud_own_type
           , p.ward
           , p.anc
           , p.census_tract
-          , p.neighborhood_cluster as neighborhood_id
-          , p.neighborhood_cluster_desc as neighborhood_name
-          , p.zip as zip_code
-          , c.acs_median_rent as census_tract_median_rent
-          , s.portfolio as subsidy_program
-          , s.agency as subsidy_agency
-          , to_char(s.poa_start, 'YYYY-MM-DD') as subsidy_start_date
-          , to_char(s.poa_end, 'YYYY-MM-DD') as subsidy_end_date
-          , s.units_assist as subsidy_units_covered
-          , s.subsidy_id as subsidy_id
+          , p.neighborhood_cluster
+          , p.neighborhood_cluster_desc
+          , p.zip
+          , c.acs_median_rent
+          , s.portfolio
+          , s.agency
+          , to_char(s.poa_start, 'YYYY-MM-DD') as poa_start
+          , to_char(s.poa_end, 'YYYY-MM-DD') as poa_end
+          , s.units_assist
+          , s.subsidy_id
         from project as p
         left join census as c on c.census_tract = p.census_tract and c.unique_data_id = 'acs_rent_median_15_5YR'
         left join subsidy as s on s.nlihc_id = p.nlihc_id

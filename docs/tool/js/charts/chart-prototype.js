@@ -24,9 +24,9 @@ ChartProto.prototype = {
         .attr('text-anchor','middle');
         
        
-      chartOptions.dataRequest.callback = chartCallback;         
+      chartOptions.dataRequest.callback = chartCallback;     
+    
       controller.getData(chartOptions.dataRequest) // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
-      
       function chartCallback(data){
         chart.data = data.items;
         if (chartOptions.sort !== undefined ) {
@@ -41,7 +41,9 @@ ChartProto.prototype = {
         chart.maxValue = d3.max(chart.data, function(d) { 
               return d[chartOptions.field]
         });
-        chart.setupType(chartOptions); 
+
+        // The below 'if' block is necessary because SubsidyTimlineChart cannot access its own setupType function during the necessary ChartProto.call() call.
+        if (typeof chart.setupType === "function"){ chart.setupType(chartOptions); }
       }
 
     },                       

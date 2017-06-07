@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 include_flag,destination_table,unique_data_id,data_date,encoding,local_folder,s3_folder,filepath,notes
 use,Zone_HousingUnit_Bedrm_Count,zoneUnitCount,06/06/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,processed/zoneUnitCount/zoneUnitCount_2017-06-03.csv,total count of housing units and bedrm in a zone
 use,dchousing,dchousing_20170505,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/dc_housing/20170509/DCHousing.csv,intial load of DCHousing data set
@@ -52,25 +53,41 @@ use,census,acs_rent_median_10_5YR,7/1/2008,latin-1,../../../data,https://s3.amaz
 use,census,acs_rent_median_11_5YR,7/1/2009,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25058_median_rent_by_tract/2011_5year/ACS_11_5YR_B25058_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
 use,census,acs_rent_median_12_5YR,7/1/2010,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25058_median_rent_by_tract/2012_5year/ACS_12_5YR_B25058_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
 use,census,acs_rent_median_13_5YR,7/1/2011,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25058_median_rent_by_tract/2013_5year/ACS_13_5YR_B25058_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-use,census,acs_rent_median_14_5YR,7/1/2012,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25058_median_rent_by_tract/2014_5year/ACS_14_5YR_B25058_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-use,census,acs_rent_median_15_5YR,7/1/2013,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25058_median_rent_by_tract/2015_5year/ACS_15_5YR_B25058_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-superseded,acs_rent_upper,acs_rent_upper_09_5YR,7/1/2007,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2009_5year/ACS_09_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-superseded,acs_rent_upper,acs_rent_upper_10_5YR,7/1/2008,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2010_5year/ACS_10_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-superseded,acs_rent_upper,acs_rent_upper_11_5YR,7/1/2009,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2011_5year/ACS_11_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-superseded,acs_rent_upper,acs_rent_upper_12_5YR,7/1/2010,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2012_5year/ACS_12_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-superseded,acs_rent_upper,acs_rent_upper_13_5YR,7/1/2011,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2013_5year/ACS_13_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-superseded,acs_rent_upper,acs_rent_upper_14_5YR,7/1/2012,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2014_5year/ACS_14_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-superseded,acs_rent_upper,acs_rent_upper_15_5YR,7/1/2013,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/acs/B25059_upper_rent_by_tract/2015_5year/ACS_15_5YR_B25059_with_ann.csv,Ready to go data at the census tract level. Do pay attention to margins of error
-____Crime Data____,,,,,,,,
-skip,crime,crime_2011,12/31/2011,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2011-all.csv,skipping for now until we are able to display older data
-skip,crime,crime_2012,12/31/2012,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2012-all.csv,skipping for now until we are able to display older data
-skip,crime,crime_2013,12/31/2013,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2013-all.csv,skipping for now until we are able to display older data
-skip,crime,crime_2014,12/31/2014,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/crime/mpd-crime-map/20170403/2014-all.csv,skipping for now until we are able to display older data
-use,crime,crime_2015,12/31/2015,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/crime_2015.csv,
-use,crime,crime_2016,12/31/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/crime_2016.csv,
-use,crime,crime_2017,4/3/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/crime_2017.csv,
-____WMATA Data____,,,,,,,,
-superseded,wmata_dist,wmata_dist_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist.csv,
-superseded,wmata_info,wmata_info_20170215,2/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/wmatainfo.csv,
-use,wmata_dist,wmata_dist_20170215,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist_updated_headers.csv,
-use,wmata_info,wmata_info_20170215,5/24/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/wmata_stops.csv,
+include_flag,destination_table,unique_data_id,update_method,data_date,encoding,local_folder,s3_folder,filepath,notes
+____________note all items marked skip in this manifest are ready but are being skipped due to their large size. Will be added back in when we are stable with our data loading process. ,,,,,,,,,
+skip,building_permits,building_permits_2013,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2013.csv,
+skip,building_permits,building_permits_2014,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2014.csv,
+skip,building_permits,building_permits_2015,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2015.csv,
+use,building_permits,building_permits_2016,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2016.csv,
+skip,building_permits,building_permits_2017,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2017.csv,This is still incomplete due to broken opendata.dc.gov . Excluding so we can cleanly say our database is 100% 2016 for clarity until opendata.dc.gov gets fixed
+needs cleaner,parcel,parcel_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Parcel.csv,
+use,project,project,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Project.csv,
+use,reac_score,reac_score_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Reac_score.csv,
+use,real_property,real_property_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Real_property.csv,
+use,subsidy,subsidy_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Subsidy.csv,
+use,dc_tax,tax,api,1/1/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/tax.csv,Same (?) as above with better names. Unclear which is authoritative
+skip,hmda,hmda_all_dc,manual,4/6/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
+use,project,dchousing_project,api,5/5/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_project.csv,append to 20170315/project.csv
+use,subsidy,dchousing_subsidy,api,5/5/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_subsidy.csv,append to 20170315/Subsidy.csv
+use,topa,topa_rcasd_2017,manual,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2016,manual,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2015,manual,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2015.csv,Parsed from DCHD data by Urban Institute staff.
+use,census,acs5_2009,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2009.csv,
+use,census,acs5_2010,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2010.csv,
+use,census,acs5_2011,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2011.csv,
+use,census,acs5_2012,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2012.csv,
+use,census,acs5_2013,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2013.csv,
+use,census,acs5_2014,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2014.csv,
+use,census,acs5_2015,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2015.csv,
+use,census_margin_of_error,acs5_2009_moe,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2009_moe.csv,
+use,census_margin_of_error,acs5_2010_moe,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2010_moe.csv,
+use,census_margin_of_error,acs5_2011_moe,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2011_moe.csv,
+use,census_margin_of_error,acs5_2012_moe,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2012_moe.csv,
+use,census_margin_of_error,acs5_2013_moe,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2013_moe.csv,
+use,census_margin_of_error,acs5_2014_moe,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2014_moe.csv,
+use,census_margin_of_error,acs5_2015_moe,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/acs5_2015_moe.csv,
+use,crime,crime_2015,api,12/31/2015,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2015.csv,
+use,crime,crime_2016,api,12/31/2016,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2016.csv,
+use,crime,crime_2017,api,4/3/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2017.csv,
+use,wmata_dist,wmata_dist_20170215,api,5/24/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist_updated_headers.csv,
+use,wmata_info,wmata_info_20170215,api,5/24/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/wmata_stops.csv,
