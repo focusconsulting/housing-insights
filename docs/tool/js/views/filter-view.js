@@ -10,14 +10,55 @@ var filterView = {
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
 
         {   source: 'total_units_in_building',
-            display_name: 'Project unit count',
+            display_name: 'Total units in building',
             component_type: 'continuous',
             data_type:'integer',
-            min: 4,
+            min: 0,
             max: 717,
             num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
         },
-        {   source: 'census_tract_median_rent',
+        
+        {   source: 'proj_units_assist_max',
+            display_name: "Subsidized units (max)",
+            component_type: 'continuous',
+            data_type:'integer',
+            min:0,
+            max:800,
+            num_decimals_displayed:0
+        },
+        {   source: 'hud_own_type',
+            display_name:'Ownership Type (per HUD)',
+            component_type: 'categorical',
+            data_type:'text'
+        },
+
+        {   source:'ward',
+            display_name: 'Ward',
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'neighborhood_cluster_desc',
+            display_name: 'Neighborhood Cluster',
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'anc',
+            display_name: 'ANC',
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'census_tract',
+            display_name: 'Census Tract',
+            component_type: 'categorical',
+            data_type: 'text',
+        },
+        {   source:'zip',
+            display_name: 'Zipcode',
+            component_type: 'categorical',
+            data_type: 'text',
+        },
+
+        {   source: 'acs_median_rent',
             display_name: 'Neighborhood Rent (ACS median)',
             component_type: 'continuous',
             data_type:'decimal',
@@ -25,24 +66,31 @@ var filterView = {
             max: 2500,
             num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead.
         },
+
+
+        {   source: 'portfolio',
+            display_name: 'Subsidy Program',
+            component_type:'categorical',
+            data_type: 'text'
+        },
         {   source:'poa_start',
+            display_name:'Subsidy Start Date',
             component_type: 'date',
             data_type: 'timestamp',
             min: '1950-01-01', //just example, TODO change to date format
             max: 'now'         //dummy example
         },
-        {   source:'ward',
-            display_name: 'Ward',
-            component_type: 'categorical',
-            data_type: 'text',
-            other: 'feel free to add other needed properties if they make sense',
-            options: ["Ward 1", "Ward 2", "Ward 3", "Ward 4", "Ward 5", "Ward 6", "Ward 7", "Ward 8"]
+        {   source:'poa_end',
+            display_name:'Subsidy End Date',
+            component_type: 'date',
+            data_type: 'timestamp',
+            min: '1950-01-01', //just example, TODO change to date format
+            max: 'now'         //dummy example
         },
-        {   source: 'subsidy_program',
-            display_name: 'Subsidy Program',
-            component_type:'categorical',
-            data_type: 'text',
-            options: ['LIHTC','Project-based section 8', 'Tax exempt bond']}
+
+
+
+       
     ],
 
     init: function() {
@@ -52,9 +100,6 @@ var filterView = {
             ['filterViewLoaded', filterUtil.init],
             ['sidebar', filterView.toggleSidebar],
             ['subNav', filterView.toggleSubNavButtons]
-
-
-
         ]);
 
         setState('subNav.left','layers');
@@ -96,8 +141,23 @@ var filterView = {
                 }*/
             }
         });
+
+        //Get the data and use it to dynamically apply configuration such as the list of categorical options
+        controller.getData({
+                    name: 'filterData',
+                    url: model.URLS.filterData, 
+                    callback: filterView.buildFilterComponents
+                }) 
+    
+    }, //end init
+
+
+    buildFilterComponents: function(){
+
+        //First we need to read the actual data to get our categories, mins, maxes, etc. 
+        var workingData = model.dataCollection['filterData'].items; 
+
         //Add components to the navigation using the appropriate component type
-        //TODO later we'll need to make sure this uses the appropriate order
         for (var i = 0; i < filterView.components.length; i++) {
 
 
@@ -162,12 +222,22 @@ var filterView = {
 
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
-
                 var c = filterView.components[i];
-                console.log("Found a categorical filter!")
+                console.log("Found a categorical filter: " + c.source)
+                
+
+                //First find the unique list of categories
+                var result = [];
+                for (var dataRow = 0; dataRow < workingData.length; dataRow++) {
+                    if(!result.includes(workingData[dataRow][c.source])){
+                        result.push(workingData[dataRow][c.source]);
+                    }
+                };
+                filterView.components[i]['options'] = result
+
+                
                 //Add a div with label and select element
                 //Bind user changes to a setState function
-
                 var parent = d3.select('#filter-components')
                     .append("div")
                       .attr("class","filter-group");
@@ -175,11 +245,11 @@ var filterView = {
                   .attr("class","filter-label")
                   .text(c.display_name);
                 var selector = parent.append("div")
-                  .attr("class","filter")
-                  .attr("class","categorical");
+                  .classed("filter", true)
+                  .classed("categorical",true);
                 var uiSelector = selector.append("select")
-                  .attr("class", "ui fluid search dropdown")
-                  .attr("class", "dropdown-" + c.source)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
+                  .classed("ui fluid search dropdown",true)
+                  .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
                   .attr("multiple", " ")
                   .attr("id", c.source);
 
@@ -188,7 +258,8 @@ var filterView = {
                   var select = document.getElementById(c.source);
                 }
 
-                //$('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect
+                $('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect.
+                $('.ui.dropdown').dropdown({ fullTextSearch: 'exact' });
                 $('#'+c.source).dropdown();
 
                
@@ -216,7 +287,8 @@ var filterView = {
         //After all filter components are loaded, user is allowed to filter data
         setState('filterViewLoaded',true);
 
-    }, //end init
+    },
+    
     toggleSidebar: function(msg,data){
         var sBar = document.getElementById(msg.replace('.','-'));
         var leftRight = msg.indexOf('left') !== -1 ? 'left' : 'right';
