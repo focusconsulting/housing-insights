@@ -1,4 +1,5 @@
 include_flag,destination_table,unique_data_id,data_date,encoding,local_folder,s3_folder,filepath,notes
+use,Zone_HousingUnit_Bedrm_Count,zoneUnitCount,06/06/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,processed/zoneUnitCount/zoneUnitCount_2017-06-03.csv,total count of housing units and bedrm in a zone
 use,dchousing,dchousing_20170505,5/5/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/dc_housing/20170509/DCHousing.csv,intial load of DCHousing data set
 ____City Development Data__,,,,,,,,
 superseded,building_permits,building_permits_2016_old,1/1/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/building_permits/2016/Building_Permits_2016.csv,
