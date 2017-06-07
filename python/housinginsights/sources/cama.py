@@ -99,8 +99,6 @@ class CamaApiConn(BaseApiConn):
         cluster_count = []
         ward_count = []
         zipcode_count = []
-        units_zero_ssl = []
-        units_none_ssl = []
 
 
         """
@@ -111,8 +109,11 @@ class CamaApiConn(BaseApiConn):
         Square would be the first four digits and suffix would be the letter.
         SSL sometimes comes as 8 digit string without spacing in the middle.
         """
-
-        """ [:100] for the first 100 cama_data points """
+        """
+        CAMA data includes bldgs under construction. CAMA's data includes AYB of 2018
+        as of June 2017. We eliminate all data points that are under construction and
+        don't provide any housing units and bedrm at this time.
+        """
         for row in cama_data['features']:
             try:
                 current_year = int(datetime.date.today().strftime('%Y'))
@@ -138,8 +139,6 @@ class CamaApiConn(BaseApiConn):
                 if row['properties']['NUM_UNITS']: num_units = row['properties']['NUM_UNITS']
                 if num_units == 0:
                     num_units = 1
-                    units_zero_ssl.append(row['properties']['SSL']) #for recording
-                if num_units == None: units_none_ssl.append(row['properties']['SSL']) #for recording
 
                 bedrm = row['properties']['BEDRM']
                 if bedrm == 0: bedrm = 1
@@ -169,8 +168,6 @@ class CamaApiConn(BaseApiConn):
                 print("Error! SSL: ", row['properties']['SSL'], row['properties']['AYB'])
                 continue
 
-
-        print("units_zero_ssl:", units_zero_ssl)
         return {'anc': anc_count, 'census_tract': census_count, 'neighborhood_cluster': cluster_count, 'ward': ward_count, 'zip': zipcode_count}
 
 
