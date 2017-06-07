@@ -10,6 +10,7 @@ import logging
 import json
 import sys
 import os
+from optparse import OptionParser
 
 import pandas as pandas
 
@@ -100,7 +101,6 @@ def make_draft_json(filename, tablename, encoding):
         }
     }
 
-    # TODO: insert 'unique_data_id' field into draft JSON
     unique_data_id_field = {
         "display_name": "Unique data ID",
         "display_text": "Identifies which source file this record came from",

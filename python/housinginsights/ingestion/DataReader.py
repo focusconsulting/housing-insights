@@ -100,6 +100,27 @@ class HIReader(object):
         """
         self._length = None
 
+    def get_row_by_column_name(self, col_header_name, look_up_value):
+        """
+        Returns the row for a given value in a given column in the data file.
+
+        :param col_header_name: a column header name in the data
+        :type col_header_name: str
+
+        :param look_up_value: the look up value to search for
+        :type look_up_value: str
+        :return: a dictionary representing the row that matches the search
+        criteria
+        """
+        # make sure column name is valid
+        if col_header_name not in self.keys:
+            return None
+
+        for row in self:
+            if row[col_header_name] == look_up_value:
+                return row
+        return None
+
 
 class ManifestReader(HIReader):
     """
@@ -113,6 +134,10 @@ class ManifestReader(HIReader):
     def __init__(self, path='manifest.csv'):
         super().__init__(path)
         self.unique_ids = {}  # from the unique_id column in the manifest
+
+        # validate the manifest
+        if not self.has_unique_ids():
+            raise ValueError('Manifest has duplicate unique_data_id!')
 
     def __iter__(self):
         self._length = 0
@@ -153,6 +178,17 @@ class ManifestReader(HIReader):
                 if row['include_flag'] in ManifestReader._include_flags_positive:
                     self.unique_ids[row['unique_data_id']] = 'found'
         return True
+
+    def get_manifest_row(self, unique_data_id):
+        """
+        Returns the row for the given unique_data_id else 'None' if not in
+        manifest.
+        """
+        for row in self:
+            use = row['include_flag'] == 'use'
+            if row['unique_data_id'] == unique_data_id and use:
+                return row
+        return None
 
 
 class DataReader(HIReader):
@@ -202,21 +238,30 @@ class DataReader(HIReader):
         self.encoding = manifest_row.get('encoding', 'latin-1')
 
         self.load_from = load_from
-        self.s3_path = os.path.join( manifest_row['s3_folder'],
-                                     manifest_row['filepath'].strip("\/")
-                                        ).replace("\\","/")
+        self.s3_path = os.path.join(manifest_row['s3_folder'],
+                                    manifest_row['filepath'].strip("\/")
+                                    ).replace("\\","/")
         self._error_reporting_overhead = {}
-        # Test connection to s3 URL
-        if self.manifest_row['include_flag'] == 'use':
-            self._suppress_verbose_error_reporting()
-            content_type_header = self._test_connection_to_URL(self.s3_path)
-            self._restore_verbose_error_reporting()
-            if content_type_header is not None:
-                logging.info("  Content (MIME) type: {}".format(content_type_header))
+        # # Test connection to s3 URL
+        # if self.manifest_row['include_flag'] == 'use':
+        #     self._suppress_verbose_error_reporting()
+        #     content_type_header = self._test_connection_to_URL(self.s3_path)
+        #     self._restore_verbose_error_reporting()
+        #     if content_type_header is not None:
+        #         logging.info("  Content (MIME) type: {}".format(content_type_header))
 
         self._keys = None
         # Load data file from given file system - S3 or local
         if load_from == "s3":
+            # Test connection to s3 URL
+            if self.manifest_row['include_flag'] == 'use':
+                self._suppress_verbose_error_reporting()
+                content_type_header = self._test_connection_to_URL(self.s3_path)
+                self._restore_verbose_error_reporting()
+                if content_type_header is not None:
+                    logging.info(
+                        "  Content (MIME) type: {}".format(content_type_header))
+
             self.path = self.s3_path
             self.path_type = "url"
         else:
