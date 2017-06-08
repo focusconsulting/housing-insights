@@ -21,7 +21,7 @@ var mapView = {
                 ['mapLayer', mapView.showLayer],
                 ['mapLoaded', model.loadMetaData],
                 ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
-                ['filteredData', resultsView.init],
+                ['dataLoaded.metaData', resultsView.init],
                 ['dataLoaded.metaData', mapView.placeProjects],
                 ['dataLoaded.metaData', mapView.overlayMenu],
                 ['dataLoaded.raw_project', filterView.init],

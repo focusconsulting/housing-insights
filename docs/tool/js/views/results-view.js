@@ -8,11 +8,9 @@ var resultsView = {
         // changed Jun 8 to be called by filteredData
         
         console.log('resultsView.init()');
-        setSubs([
-          // filteredData should trigger an update
-        ]);
+        
         resultsView.charts = [];
-        var instances = ['buildings','units'];
+        var instances = ['Buildings','Units'];
         instances.forEach(function(instance, i){
             resultsView.charts[i] = new DonutChart({
                 dataRequest: {
@@ -32,6 +30,9 @@ var resultsView = {
                     left:0
                 }
             })
-        });        
+        });
+        setSubs([
+          ['filteredData', DonutChart.prototype.updateSubscriber]
+        ]);        
     }
 };
