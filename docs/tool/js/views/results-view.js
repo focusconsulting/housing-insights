@@ -3,7 +3,7 @@
 var resultsView = {
     init: function() {
         setSubs([
-            ['firstPieReady', resultsView.setDropdownOptions],
+          //  ['firstPieReady', resultsView.setDropdownOptions],
             ['mapLayer',resultsView.changeZoneType],
             ['pieZone', resultsView.changeZoneType]
         ]);
@@ -49,7 +49,7 @@ var resultsView = {
           name: 'neighborhood_cluster_desc'
         }
     },
-    setDropdownOptions: function() {
+  /*  setDropdownOptions: function() {
                
             var activeLayer = getState().mapLayer[0];            
             if ( resultsView.zoneMapping[activeLayer].values === undefined ) { // i.e. the  zones withing the zoneType have not been 
@@ -74,10 +74,10 @@ var resultsView = {
                 selector.appendChild(option);
             });
 
-    },
+    }, */
     changeZoneType: function(msg){
         var zoneType = getState().mapLayer[0];
-        document.getElementById('zone-drilldown-instructions').innerHTML = 'Choose a ' + zoneType;
+       
         if (getState().firstPieReady) { 
             if (msg === 'mapLayer') {
                 setState('pieZone', 'All');
@@ -89,7 +89,7 @@ var resultsView = {
             });
             if ( msg === 'mapLayer' ) { // if fn was called by changing mapLayer state. if not, leave dropdown
                                         // menu alone
-                resultsView.setDropdownOptions();
+           //     resultsView.setDropdownOptions();
             }
         } else { // if this function was called suring initial setup, before pies were ready
             setState('pieZone', 'All');
