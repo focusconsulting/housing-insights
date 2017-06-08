@@ -1,8 +1,8 @@
 "use strict";
 
 var PieChartProto = function(chartOptions) { //
-    ChartProto.call(this, chartOptions); 
     this.extendPrototype(PieChartProto.prototype, PieProtoExtension);
+    ChartProto.call(this, chartOptions); 
 }
 
 PieChartProto.prototype = Object.create(ChartProto.prototype);
@@ -21,7 +21,7 @@ var PieProtoExtension = {
     this.arc = d3.arc()
       .outerRadius(chart.radius)
       .innerRadius(chart.radius - chart.width / 4)
-      .startAngle(0); // TODO set programmatically
+      .startAngle(0); 
     this.background = this.svgCentered  
         .append('path')
         .datum({endAngle: 2 * Math.PI})

@@ -180,6 +180,7 @@ var controller = {
         } else {
             // TODO publish that data is available every time it's requested or only on first load?
             if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                console.log(model.dataCollection[dataRequest.name]);
                 dataRequest.callback(model.dataCollection[dataRequest.name]);
             }              
         }

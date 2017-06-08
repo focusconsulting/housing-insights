@@ -32,7 +32,7 @@ var mapView = {
                 ['mapLayer', mapView.showLayer],
                 ['mapLoaded', model.loadMetaData],
                 ['dataLoaded.metaData', mapView.addInitialLayers],
-               //        ['dataLoaded.metaData', resultsView.init],
+                ['filteredData', resultsView.init],
                 ['dataLoaded.metaData', mapView.placeProjects],
                 ['dataLoaded.metaData', mapView.overlayMenu],
                 ['dataLoaded.raw_project', filterView.init],
@@ -365,7 +365,7 @@ var mapView = {
                 callback: dataCallback
             };
         controller.getData(dataRequest);
-        
+
         function dataCallback() {   
         console.log('in callback');     
             mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
