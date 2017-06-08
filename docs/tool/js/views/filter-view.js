@@ -93,62 +93,68 @@ var filterView = {
        
     ],
 
-    init: function() {
+    init: function(msg, data) {
+        //msg and data are from the pubsub module that this init is subscribed to. 
+        //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
+        
+        if ( data === true ) {
+            //Make sure other functionality is hooked up
+            setSubs([
+                ['filterViewLoaded', filterUtil.init],
+                ['sidebar', filterView.toggleSidebar],
+                ['subNav', filterView.toggleSubNavButtons]
+            ]);
 
-        //Make sure other functionality is hooked up
-        setSubs([
-            ['filterViewLoaded', filterUtil.init],
-            ['sidebar', filterView.toggleSidebar],
-            ['subNav', filterView.toggleSubNavButtons]
-        ]);
+            setState('subNav.left','layers');
+            setState('subNav.right','buildings');
 
-        setState('subNav.left','layers');
-        setState('subNav.right','buildings');
-
-        document.querySelectorAll('.sidebar-tab').forEach(function(tab){
-            tab.onclick = function(e){
-                var sideBarMsg = e.currentTarget.parentElement.id.replace('-','.');
-                filterView.toggleSidebarState(sideBarMsg);
-            }
-        });
-
-        document.querySelectorAll('.sub-nav-button').forEach(function(button){
-            button.onclick = function(e){
-                var leftRight = e.currentTarget.parentElement.id.replace('-options','');
-                var subNavType = e.currentTarget.id.replace('button-','');
-                if ( getState()['sidebar.' + leftRight] && getState()['sidebar.' + leftRight][0] ) { // if the accociated sidebar is open
-                    if (getState()['subNav.' + leftRight][0] === subNavType) { // if the clicked subNav button is already active
-                        setState('sidebar.' + leftRight, false); // close the sidebar
-                    }
-                } else {
-                    setState('sidebar.' + leftRight, true); // open the sidebar
+            document.querySelectorAll('.sidebar-tab').forEach(function(tab){
+                tab.onclick = function(e){
+                    var sideBarMsg = e.currentTarget.parentElement.id.replace('-','.');
+                    filterView.toggleSidebarState(sideBarMsg);
                 }
-                setState('subNav.' + leftRight, subNavType);
-               /* console.log('click');
-                var leftRight = e.currentTarget.parentElement.id.replace('-options','');
-                console.log(leftRight);
-                var sideBarMsg = 'sidebar.' + leftRight;
-                var subButton = e.currentTarget.id.replace('button-','');
-                console.log(subButton);
-                if (getState()[sideBarMsg] && getState()[sideBarMsg][0])  { // if the associated sidebar is open
-                    if (getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][0] === e.currentTarget.id){
-                        filterView.toggleSidebarState(sideBarMsg);
-                        setState('subNav.' + leftRight, e.currentTarget.id);
+            });
+
+            document.querySelectorAll('.sub-nav-button').forEach(function(button){
+                button.onclick = function(e){
+                    var leftRight = e.currentTarget.parentElement.id.replace('-options','');
+                    var subNavType = e.currentTarget.id.replace('button-','');
+                    if ( getState()['sidebar.' + leftRight] && getState()['sidebar.' + leftRight][0] ) { // if the associated sidebar is open
+                        if (getState()['subNav.' + leftRight][0] === subNavType) { // if the clicked subNav button is already active
+                            setState('sidebar.' + leftRight, false); // close the sidebar
+                        }
                     } else {
-                        setState('subNav.' + leftRight, 'none');
+                        setState('sidebar.' + leftRight, true); // open the sidebar
                     }
+                    setState('subNav.' + leftRight, subNavType);
+                   /* console.log('click');
+                    var leftRight = e.currentTarget.parentElement.id.replace('-options','');
+                    console.log(leftRight);
+                    var sideBarMsg = 'sidebar.' + leftRight;
+                    var subButton = e.currentTarget.id.replace('button-','');
+                    console.log(subButton);
+                    if (getState()[sideBarMsg] && getState()[sideBarMsg][0])  { // if the associated sidebar is open
+                        if (getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][0] === e.currentTarget.id){
+                            filterView.toggleSidebarState(sideBarMsg);
+                            setState('subNav.' + leftRight, e.currentTarget.id);
+                        } else {
+                            setState('subNav.' + leftRight, 'none');
+                        }
 
-                }*/
-            }
-        });
+                    }*/
+                }
+            });
 
-        //Get the data and use it to dynamically apply configuration such as the list of categorical options
-        controller.getData({
-                    name: 'filterData',
-                    url: model.URLS.filterData, 
-                    callback: filterView.buildFilterComponents
-                }) 
-    
+            //Get the data and use it to dynamically apply configuration such as the list of categorical options
+            controller.getData({
+                        name: 'filterData',
+                        url: model.URLS.filterData, 
+                        callback: filterView.buildFilterComponents
+                    }) 
+        } else {
+            console.log("ERROR data loaded === false")
+        };
+
     }, //end init
 
 
