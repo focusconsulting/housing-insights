@@ -214,20 +214,6 @@ html, body {
     border-left: 1px solid rgb(189, 54, 33);
 }
 
-
-.sub-nav-container h2 {
-    box-shadow: 0 8px 17px #fff;
-    margin-bottom: 0;
-    position: fixed;
-    will-change: scroll-position;
-    width: 100%;
-    top: 40px;
-    background-color: white;    
-    padding-top: 6px;
-}
-
-
-
 #buildings-list > div {
     
     overflow: hidden;
