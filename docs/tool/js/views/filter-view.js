@@ -9,7 +9,7 @@ var filterView = {
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
 
-        {   source: 'total_units_in_building',
+        {   source: 'proj_units_tot',
             display_name: 'Total units in building',
             component_type: 'continuous',
             data_type:'integer',
