@@ -1,0 +1,76 @@
+<div id="map-view" class="main-view">
+ <div id="sub-nav">
+        <div id="left-options">
+            <button class="sub-nav-button" id="button-layers">Layers</button>
+            <button class="sub-nav-button" id="button-filters">Filters</button>
+        </div>
+        <div id="options-spacer"></div>
+        <div id="right-options">
+            <button class="sub-nav-button" id="button-charts">Charts</button>
+            <button class="sub-nav-button" id="button-buildings">Buildings <span id="matching-count"></span></button>
+        </div>
+    </div>
+    <div id="sidebar-left" class="sidebar">
+        <button class="sidebar-tab"><div class="triangle right"></div></button>
+        <div class="sidebar-inner-wrapper">
+            <div id="layers" class="sub-nav-container">
+                <div class="sub-nav-group">
+                    <p>Show data</p>
+                    <div id="overlay-menu"></div>
+                </div>
+                <div class="sub-nav-group">
+                    <p>Divide by</p>
+                    <div id="layer-menu"></div>
+                </div>
+            </div>
+            <div id="filters" class="sub-nav-container">
+                <div id="filter-components">
+                </div>                
+            </div>
+        </div>
+    </div>
+    <div id="sidebar-right" class="sidebar">
+    <button class="sidebar-tab"><div class="triangle left"></div></button>
+        <div class="sidebar-inner-wrapper">
+            
+            <div id="charts" class="sub-nav-container">
+                <div class="sub-nav-group">                    
+                    <select id="zone-selector" role="group" aria-label="Filter">
+                    </select>
+                    <div id="pie-charts">
+                        <div id="pie-0"></div>
+                        <div id="pie-1"></div>
+                        <div id="pie-2"></div>
+                        <div id="pie-3"></div>
+                    </div>                        
+                </div>
+            </div>
+            <div id="buildings" class="sub-nav-container">
+                <div class="sub-nav-group">
+                    <h2 style="display:none;"></h2>
+                    <div id="buildings-list">
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        <div id="filter-panel">
+            <p>This is for potential use by Split.js - currently not working</p>
+        </div>
+        <div id="map-wrapper">
+            <div id="map"></div>
+            <div id="category-legend" class="legend" style="display: block;">
+                <h4>Subsidized Affordable Buildings</h4>
+                <div id="legend-items">
+                    <div><span style="background-color: #f03b20"></span>At-Risk or Flagged for Follow-up</div>
+                    <div><span style="background-color: #bd0026"></span>Recent Failing REAC Score</div>
+                    <div><span style="background-color: #8B4225"></span>Expiring Subsidy</div>              
+                    <div><span style="background-color: #fd8d3c"></span>Other Subsidized Property or More Info Needed</div>  
+                    <div><span style="background-color: #A9A9A9"></span>Lost Rental</div>
+                </div>    
+            </div>
+            <button id="reset-zoom">Reset zoom</button>
+        </div>    
+</div>

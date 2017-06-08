@@ -10,17 +10,23 @@ import dateutil.parser as dateparser
 import logging
 
 from housinginsights.ingestion.DataReader import HIReader
+from housinginsights.sources.mar import MarApiConn
 import os
 
 
 package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
                                            os.pardir))
+# TODO - add in manifest but don't load in db so the path isn't hard coded?
+mar_path = os.path.join(package_dir, os.pardir, 'data', 'raw', 'apis',
+                        '20170528', 'mar.csv')
 
 '''
 Usage:
 Dynamically import based on name of class in meta.json:
 http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-string-name-of-a-class-in-dynamically-imported
 '''
+
+
 class CleanerBase(object, metaclass=ABCMeta):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
         self.cleaned_csv = cleaned_csv
@@ -90,7 +96,8 @@ class CleanerBase(object, metaclass=ABCMeta):
             'TRUE': True,
             'FALSE': False,
             '1': True,
-            '0': False
+            '0': False,
+            '': self.null_value
             }
         return mapping[value]
 
@@ -140,10 +147,15 @@ class CleanerBase(object, metaclass=ABCMeta):
             '''
             Make all census tract names follow a consistent format. 
             column_name corresponds to the key of the row, which depends on 
-            the source file column name which may be different from the final consistent name of census_tract
+            the source file column name which may be different from the final
+            consistent name of census_tract
             '''
-            row[column_name] = self.census_mapping[row[column_name]]
-            return row
+            # deal with null values
+            if row[column_name] == self.null_value:
+                return row
+            else:
+                row[column_name] = self.census_mapping[row[column_name]]
+                return row
 
     def replace_tracts(self,row,row_num,column_name='census_tract'):
         '''
@@ -363,6 +375,53 @@ class CleanerBase(object, metaclass=ABCMeta):
             row['WARD'] = "Ward " + str(row['WARD'])
             return row
 
+    def rename_lat_lon(self, row):
+        pass
+
+    def add_mar_id(self, row, address_id_col_name='ADDRESS_ID'):
+        """
+        Returns the updated row after the mar_id column in the project table
+        has been populated with valid value.
+
+        The process involves using address id, lat/lon, or x/y-coords to
+        identify mar equivalent address id.
+        """
+        # api lookup with lat/lon or x/y coords if address id is null or invalid
+        mar_api = MarApiConn()
+        lat = row['Proj_lat']
+        lon = row['Proj_lon']
+        x_coord = row['Proj_x']
+        y_coord = row['Proj_y']
+        address = row['Proj_addre']
+
+        # using mar api lookup instead of mar.csv because too slow - see to do^
+        proj_address_id = row[address_id_col_name]
+        if proj_address_id != self.null_value:
+            result = mar_api.reverse_address_id(aid=proj_address_id)
+            return_data_set = result['returnDataset']
+            if 'Table1' in return_data_set:
+                row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
+                return row
+
+        if lat is not None and lon is not None:
+            result = mar_api.reverse_lat_lng_geocode(latitude=lat,
+                                                     longitude=lon)
+        elif x_coord is not None and y_coord is not None:
+            result = mar_api.reverse_geocode(xcoord=x_coord,
+                                             ycoord=y_coord)
+        elif address is not None:
+            # check whether address is valid - it has street number
+            try:
+                str_num = address.split(' ')[0]
+                int(str_num)
+                first_address = address.split(';')[0]
+                result = mar_api.find_location(first_address)
+            except ValueError:
+                result = None
+        row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+        return row
+
+
 #############################################
 # Custom Cleaners
 #############################################
@@ -380,6 +439,7 @@ class ProjectCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['N','', None])
         row = self.parse_dates(row)
         row = self.rename_census_tract(row,row_num,column_name='Geo2010')
+        row = self.add_mar_id(row, 'Proj_address_id')
         return row
 
 
@@ -415,19 +475,9 @@ class CensusCleaner(CleanerBase):
         #Handle the first row which is a descriptive row, not data. 
         if row_num == 0:
             return None
-
-        row = self.remove_non_dc_tracts(row,column_name='GEO.id2')
-        if row is None:
-            return None
-
-        #Clean up the ones we keep
-        row = self.high_low_rent(row)
-        row['lower_quartile_rent'] = None #waiting on ACS to come from API instead
-
+        row['census_tract'] = ""+row['state']+row['county']+row['tract']
         #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
         row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
-        row = self.rename_census_tract(row,column_name='GEO.id2')
-
         return row
 
     def high_low_rent(self,row):
@@ -490,6 +540,10 @@ class reac_score_cleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', None])
         return row
 
+class real_property_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row, null_values=['', None])
+        return row
 
 class dchousing_cleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -502,3 +556,62 @@ class dchousing_cleaner(CleanerBase):
             datetime.fromtimestamp(milli_sec / 1000.0).strftime('%m/%d/%Y')
 
         return row
+
+class topa_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
+        # character in one or two columns.  Leave here for now.
+        row = self.replace_nulls(row, null_values=['', '\\', None])
+        return row
+
+
+class ZillowCleaner(CleanerBase):
+    '''
+    Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)
+    '''
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
+        #Call the parent method and pass all the arguments as-is
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv)
+        
+        # These are the 28 zips defined by NeighborhoodInfoDC as the 'primary' zip codes. 
+        # Not all are available in Zillow data, so want to insert Nulls for any others. 
+        self._possible_zips = [
+                            "20001","20002","20003","20004","20005","20006","20007","20008","20009","20010",
+                            "20011","20012","20015","20016","20017","20018","20019","20020","20024","20032",
+                            "20036","20037","20052","20057","20059","20064","20332","20336"
+                            ]
+
+        #All possible neighborhoods as defined here: https://www.zillow.com/howto/api/neighborhood-boundaries.htm
+        #Again, data is not available for all neighborhoods. 
+        self._possible_neighborhoods = [ "Barnaby Woods","Bellevue","Benning","Chevy Chase","Dupont Park","Eastland Gardens",
+        "Foxhall","Ivy City","Judiciary Square","Manor Park","Marshall Heights","Benning Heights","Capitol Hill","Cathedral Heights",
+        "Chinatown","Colony Hill","U Street Corridor","Crestwood","Edgewood","Forest Hills","Fort Dupont","Friendship Heights",
+        "Gateway","Hawthorne","Kent","Lincoln Heights","Mount Pleasant","Park View","Potomac Heights","Shaw","Tenleytown","Twining",
+        "Observatory Circle","Wakefield","Langston","Brightwood Park","Brookland","Buena Vista","Stronghold","Sursum Corda Cooperative",
+        "Benning Ridge","Mahaning Heights","Barry Farm","Carver","Burleith","Columbia Heights","Congress Heights","Fairfax Village",
+        "Fairlawn","Foggy Bottom","Glover Park","Good Hope","Greenway","Langdon","Ledroit Park","Mount Vernon Square","Naylor Gardens",
+        "North Cleveland Park","North Michigan Park","River Terrace","The Palisades","Trinidad","Truxton Circle","Berkley","Brentwood",
+        "National Arboretum","National Mall - West Potomac Park","Lady Bird Johnson Park","Gallaudet","Barney Circle","Near Northeast",
+        "Penn Quarter","Southwest Federal Center","Knox Hill","Woodlands","Blue Plains Treatment Plant","Woodland-Normanstone Terrace",
+        "Pleasant Plains","Burrville","Civic Betterment","East Corner","Hillbrook","Adams Morgan","Anacostia","Bloomingdale","Brightwood",
+        "Capitol View","Cleveland Park","Colonial Village","Deanwood","Dupont Circle","Eckington","Fort Davis","Garfield Heights",
+        "Georgetown","Hillcrest","Kenilworth","Kingman Park","Theodore Roosevelt Island","Mayfair","Woodridge","Woodley Park",
+        "Anacostia Naval Station - Boiling Air Force Base","Navy Yard","Fort Totten","Massachusetts Heights","Downtown","Fort Lincoln",
+        "West End","Wesley Heights","Washington Highlands","Spring Valley","Shipley Terrace","Petworth","Penn Branch","Logan Circle",
+        "McLean Gardens","Michigan Park","Randle Highlands","Riggs Park","Shepherd Park","Kalorama","Takoma","American University Park",
+        "Catholic University","Southwest Waterfront","East Potomac Park","Sixteenth Street Heights","Pleasant Hill","NoMa","Swampoodle",
+        "Skyland","Douglas","Arboretum","Fort Davis","Shipley Terrace","Saint Elizabeths"
+        ]
+
+        #Same as above, but this is the 'RegionID' as defined by Zillow. 
+        self._possible_neighborhood_ids = ['121672', '121674', '121675', '121689', '121705', '121708', '121724', '121739', '121740', 
+        '121755', '121756', '121676', '121685', '121687', '121692', '121696', '275794', '121701', '121710', '121717', '121719', '121726', 
+        '121728', '121735', '121744', '121751', '121762', '121771', '121776', '121785', '121794', '121801', '268821', '268832', '403482', 
+        '121680', '121681', '121682', '403484', '403491', '403493', '403498', '403500', '403507', '121683', '121697', '121698', '121713', 
+        '121714', '121716', '121731', '121732', '121733', '121748', '121750', '121763', '121764', '121765', '121767', '121780', '121797', 
+        '121799', '121800', '268801', '268803', '268819', '403137', '403138', '403485', '403486', '403487', '403488', '403489', '403502', 
+        '403503', '403504', '403479', '403480', '403494', '403495', '403496', '403497', '121668', '121670', '121677', '121679', '121686', 
+        '121693', '121695', '121702', '121704', '121709', '121718', '121727', '121729', '121736', '121743', '121745', '403135', '403134', 
+        '121816', '121815', '403139', '403116', '273767', '403478', '273489', '268811', '121808', '121807', '121806', '121791', '121788', 
+        '121774', '121772', '121754', '121759', '121761', '121777', '121779', '121786', '268815', '268831', '272818', '273159', '275465', 
+        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']

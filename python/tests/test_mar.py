@@ -72,6 +72,19 @@ class MyTestCase(unittest.TestCase):
         result = self.mar_api.get_condo_count('915 E St NW')
         self.assertEqual(result, 160)
 
+    def test_reverse_address_id(self):
+        result = self.mar_api.reverse_address_id(68416)
+        loc_object = result['returnDataset']['Table1'][0]
+
+        # spot check returned data matches output from url end point
+        self.assertEqual(loc_object['MARID'], 68416)
+        self.assertEqual(loc_object['FULLADDRESS'], '1309 ALABAMA AVENUE SE')
+        self.assertEqual(loc_object['XCOORD'], 401042.46)
+        self.assertEqual(loc_object['YCOORD'], 130751.44)
+        self.assertEqual(loc_object['LATITUDE'], 38.84456326)
+        self.assertEqual(loc_object['LONGITUDE'], -76.98799165)
+        self.assertEqual(loc_object['ConfidenceLevel'], 100.0)
+
 
 if __name__ == '__main__':
     unittest.main()

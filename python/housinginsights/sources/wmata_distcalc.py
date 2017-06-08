@@ -61,9 +61,13 @@ class WmataApiConn(BaseApiConn):
 
             elif ( output_type == 'stdout'):
                 logging.info("==========================================================================\n")
-                logging.info(self.stopsHeader,'\n')
+                logging.info(self.stopsHeader)
                 logging.info("--------------------------------------------------------------------------\n")
-                logging.info(self.stopsOutput,'\n')
+                for line in self.stopsOutput:
+                    logging.info(line)
+
+            else:
+                self._array_to_csv(self.stopsHeader,self.stopsOutput,output_type)
         else:
             #Not an id supported by this method
             pass
@@ -82,7 +86,7 @@ class WmataApiConn(BaseApiConn):
                 #Configure the connection
                 engine = dbtools.get_database_engine(db)
                 conn = dbtools.get_database_connection(db) 
-                print("  Connected to Housing Insights database")
+                logging.info("  Connected to Housing Insights database")
                 columnset = conn.execute('select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=\'project\'')
                 
                 #Get the rows
@@ -133,10 +137,14 @@ class WmataApiConn(BaseApiConn):
                 self._array_to_csv(self.distHeader, self.distOutput, self.output_paths[u])
 
             elif ( output_type == 'stdout'):
-                print("==========================================================================\n")
-                print(self.distHeader,'\n')
-                print("==========================================================================\n")
-                print(self.distOutput,'\n')
+                logging.info("==========================================================================\n")
+                logging.info(self.distHeader)
+                logging.info("==========================================================================\n")
+                for line in self.distOutput:
+                    logging.info(line)
+
+            else:
+                self._array_to_csv(self.distHeader, self.distOutput,output_type)
         else:
             #not a unique data id supported by this class
             pass
@@ -266,11 +274,39 @@ class WmataApiConn(BaseApiConn):
         nlihc_id = project_details['nlihcid']
 
         for idx, station in enumerate(railStations):
-            walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']))
-
-            if walkDist <=radiusinmeters:
+            crow_distance = self._haversine(lat, lon, station['Lat'], station['Lon'])
+            
+            if crow_distance < (radiusinmeters / self.meters_per_mile):
+                walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']))
                 walkDistMiles = walkDist / self.meters_per_mile
-                self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles)])
+
+                logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+
+                if walkDist <=radiusinmeters:
+                    self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles)])
+            else:
+                logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
+
+    def _haversine(self, lat1, lon1, lat2,lon2):
+        """
+        Calculate the great circle distance between two points
+        on the earth (specified in decimal degrees)
+        """
+        from math import radians, cos, sin, asin, sqrt
+
+        # convert decimal degrees to radians
+        original_coords = (lat1,lon1,lat2,lon2) #for debugging
+        lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+        # haversine formula
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+        c = 2 * asin(sqrt(a))
+        r = 3956 # Radius of earth in miles
+        d = c * r
+        #print("Haversine for {} = {}".format(original_coords,d))
+        return c * r
 
 
     def _find_bus_stations(self, project_details,radiusinmeters,sample=False):
