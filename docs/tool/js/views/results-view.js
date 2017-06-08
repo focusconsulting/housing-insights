@@ -1,35 +1,42 @@
 "use strict";
 
 var resultsView = {
-    init: function() {
-        setSubs([
-            ['firstPieReady', resultsView.setDropdownOptions],
-            ['mapLayer',resultsView.changeZoneType],
-            ['pieZone', resultsView.changeZoneType]
-        ]);
-        resultsView.charts = [];
-        var instances = ['subsidized','cat_expiring','cat_failing_insp','cat_at_risk'];
-        instances.forEach(function(instance, i){
-            resultsView.charts[i] = new DonutChart({
-                dataRequest: {
-                    name: 'raw_project',
-                    url: model.dataCollection.metaData.project.api.raw_endpoint
-                },
-                field: instance,
-                container: '#pie-' + i,
-                width: 75,
-                height: 95,
-                zoneType: 'ward',
-                zoneName: 'All',
-                index: i,
-                margin: {
-                    top:0,
-                    right:0,
-                    bottom:20,
-                    left:0
-                }
-            })
-        });
+    init: function(msg, data) {
+        //msg and data are from the pubsub module that this init is subscribed to. 
+        //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
+        
+        if ( data === true ) {
+            setSubs([
+                ['firstPieReady', resultsView.setDropdownOptions],
+                ['mapLayer',resultsView.changeZoneType],
+                ['pieZone', resultsView.changeZoneType]
+            ]);
+            resultsView.charts = [];
+            var instances = ['subsidized','cat_expiring','cat_failing_insp','cat_at_risk'];
+            instances.forEach(function(instance, i){
+                resultsView.charts[i] = new DonutChart({
+                    dataRequest: {
+                        name: 'raw_project',
+                        url: model.dataCollection.metaData.project.api.raw_endpoint
+                    },
+                    field: instance,
+                    container: '#pie-' + i,
+                    width: 75,
+                    height: 95,
+                    zoneType: 'ward',
+                    zoneName: 'All',
+                    index: i,
+                    margin: {
+                        top:0,
+                        right:0,
+                        bottom:20,
+                        left:0
+                    }
+                })
+            });
+        } else {
+            console.log("ERROR data loaded === false")
+        }
     },
     zoneMapping: { // object to map mapLayer names (the keys) to the field in the data
                   // later code adds an array of all the values for each type to the objects
@@ -77,7 +84,7 @@ var resultsView = {
     },
     changeZoneType: function(msg){
         var zoneType = getState().mapLayer[0];
-        document.getElementById('zone-drilldown-instructions').innerHTML = 'Choose a ' + zoneType;
+        
         if (getState().firstPieReady) { 
             if (msg === 'mapLayer') {
                 setState('pieZone', 'All');
