@@ -170,7 +170,7 @@ var filterView = {
 
                 var parent = d3.select('#filter-components')
                     .append("div")
-                      .attr("class","filter-group");
+                      .attr("class","sub-nav-group");
                 parent.append("p")
                   .attr("class","filter-label")
                   .text(c.display_name);
@@ -240,7 +240,7 @@ var filterView = {
                 //Bind user changes to a setState function
                 var parent = d3.select('#filter-components')
                     .append("div")
-                      .attr("class","filter-group");
+                      .attr("class","sub-nav-group");
                 parent.append("p")
                   .attr("class","filter-label")
                   .text(c.display_name);

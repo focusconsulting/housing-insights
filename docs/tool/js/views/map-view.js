@@ -512,8 +512,8 @@ var mapView = {
                 return feature.properties.matches_filters === true;
             });
 
-            d3.select('#buildings.sub-nav-container h2')
-             .text(data.length + ' matching');
+            d3.select('#matching-count')
+             .text('(' + data.length + ')');
 
             var t = d3.transition()
               .duration(750);
