@@ -1,7 +1,12 @@
 "use strict";
 
 var resultsView = {
-    init: function() {
+
+    init: function(msg, data) {
+        console.log(msg,data);
+        //msg and data are from the pubsub module that this init is subscribed to. 
+        // changed Jun 8 to be called by filteredData
+        
         console.log('resultsView.init()');
         setSubs([
           // filteredData should trigger an update
@@ -27,7 +32,6 @@ var resultsView = {
                     left:0
                 }
             })
-        });
+        });        
     }
-
 };
