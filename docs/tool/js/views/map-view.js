@@ -91,6 +91,7 @@ var mapView = {
     },
     buildOverlayOptions: function(){
 
+        //TODO we want to move this config data into it's own file or to the api
         mapView.initialOverlays = [
             {   name:"crime",
                 display_name: "Crime",
@@ -399,7 +400,11 @@ var mapView = {
         //'data' is the name of the zone type (layer) to show
 
         //first clear all existing layers
-        var layerChoices = ['ward','neighborhood_cluster','zip','tract']
+        var layerChoices = mapView.initialLayers.map(function(i) {
+            return i['source']
+        })
+
+
         for (var i = 0; i < layerChoices.length; i++) {
             mapView.map.setLayoutProperty(layerChoices[i] + 'Layer', 'visibility', 'none');
         }
