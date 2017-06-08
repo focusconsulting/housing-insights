@@ -46,7 +46,7 @@ html, body {
     position: relative; 
     margin-top: 40px;  
     display: none;
-    overflow-y: scroll;
+    overflow-y: auto;
     
 }
 
