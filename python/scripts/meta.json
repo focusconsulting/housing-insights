@@ -3506,7 +3506,7 @@
         "display_text": "The Advisory Neighborhood Committee of the address of TOPA notice as designated in 2012.",
         "required_in_source": true,
         "source_name": "Anc2012",
-        "sql_name": "anc2012",
+        "sql_name": "anc",
         "type": "text"
       },
       {
