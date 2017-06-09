@@ -3530,7 +3530,7 @@
           "display_text": "Full census tract ID from 2010 associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "Geo2010",
-        "sql_name": "geo2010",
+        "sql_name": "census_tract",
         "type": "text"
       },
       {
