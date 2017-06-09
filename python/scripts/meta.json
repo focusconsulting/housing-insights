@@ -3626,7 +3626,7 @@
         "display_text": "Geocoded ZIP code result.",
         "required_in_source": true,
         "source_name": "M_ZIP",
-        "sql_name": "m_zip",
+        "sql_name": "zip",
         "type": "decimal"
       },
       {
