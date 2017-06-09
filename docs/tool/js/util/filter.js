@@ -16,22 +16,28 @@ var filterUtil = {
 
 	filteredData: [],
 	
-	filterData: function(data){ 	
-        
-		var workingData = model.dataCollection['filterData'].items; 
-		var state = getState();
+    getFilterValues: function(){
+        var state = getState();
 
         //Extract just the filterValues stuff from our state
-        //state is stored as filterValues.dataid with period as part of the object's key. 
-        //TODO this only works w/ one level of dot notation nesting (probably all we need). Should this be moved
-        //into the state module, though, so anyone can request just a subsection of the state when desired??
+        //state is stored as filterValues.data_id with period as part of the object's key. 
+        //TODO this only works w/ one level of dot notation nesting (probably all we need).
         var filterValues = {};
         for (key in state) {
             splitKey = key.split(".");
             if (splitKey[0]=='filterValues') {
-                filterValues[splitKey[1]] = state[key]
+                var currentState = state[key]
+                filterValues[splitKey[1]] = currentState
             };
         };
+        console.log(filterValues);
+        return filterValues
+    },
+
+	filterData: function(data){ 	
+        
+		var workingData = model.dataCollection['filterData'].items; 
+		var filterValues = filterUtil.getFilterValues();
 
 		for (key in filterValues) { // iterate through registered filters
 			
@@ -39,18 +45,23 @@ var filterUtil = {
             var component = filterView.components.filter(function(obj) {
               return obj.source == key;
             });
-            component = component[0] //assume we get only one element back, as we should
+            component = component[0] //the most recent filter (current and previous are returned in a list)
                         
 			if (component['component_type'] == 'continuous') { //filter data for a 'continuous' filter
-                //javascript rounding is weird
-                var decimalPlaces = component['data_type'] == 'integer' ? 0 : 2 //ternary operator
-                var min = Number(Math.round(filterValues[key][0][0]+'e'+decimalPlaces) +'e-'+decimalPlaces);
-                var max =Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
+                
+                if (filterValues[key][0].length == 0){
+                    //don't filter because the filter has been removed
+                } else {
+                    //javascript rounding is weird
+                    var decimalPlaces = component['data_type'] == 'integer' ? 0 : 2 //ternary operator
+                    var min = Number(Math.round(filterValues[key][0][0]+'e'+decimalPlaces) +'e-'+decimalPlaces);
+                    var max =Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
 
-                //filter it
-                workingData = workingData.filter(function(d){
-					return (d[key] >= min && d[key] <= max);
-				});
+                    //filter it
+                    workingData = workingData.filter(function(d){
+    					return (d[key] >= min && d[key] <= max);
+    				});
+                };
 			}
 
 			if (component['component_type']== 'date') {

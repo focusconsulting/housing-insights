@@ -9,8 +9,9 @@ var filterView = {
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
 
-        {   source: 'total_units_in_building',
-            display_name: 'Total units in building',
+        {   source: 'proj_units_tot',
+            display_name: 'Total units in project',
+            display_text: 'Total count of units in the project, including both subsidized and market rate units.',
             component_type: 'continuous',
             data_type:'integer',
             min: 0,
@@ -20,6 +21,7 @@ var filterView = {
         
         {   source: 'proj_units_assist_max',
             display_name: "Subsidized units (max)",
+            display_text: "The number of subsidized units in the project. When a project participates in multiple subsidy programs, this number is the number of units subsidized by the project with the most units. Partially overlapping subsidies could result in more units than are reflected here.",
             component_type: 'continuous',
             data_type:'integer',
             min:0,
@@ -28,38 +30,45 @@ var filterView = {
         },
         {   source: 'hud_own_type',
             display_name:'Ownership Type (per HUD)',
+            display_text:"This field is only available for buildings participating in HUD programs; others are listed as 'Unknown'",
             component_type: 'categorical',
             data_type:'text'
         },
 
         {   source:'ward',
             display_name: 'Ward',
+            display_text: "The largest geograpical division of the city.",
             component_type: 'categorical',
             data_type: 'text'
         },
         {   source:'neighborhood_cluster_desc',
             display_name: 'Neighborhood Cluster',
+            display_text: "39 clusters each combining a set of smaller neighborhoods.",
             component_type: 'categorical',
             data_type: 'text'
         },
         {   source:'anc',
             display_name: 'ANC',
+            display_text: 'Advisory Neighborhood Council',
             component_type: 'categorical',
             data_type: 'text'
         },
         {   source:'census_tract',
             display_name: 'Census Tract',
+            display_text: 'A small division used in collection of the US Census.',
             component_type: 'categorical',
             data_type: 'text',
         },
         {   source:'zip',
             display_name: 'Zipcode',
+            display_text: '',
             component_type: 'categorical',
             data_type: 'text',
         },
 
         {   source: 'acs_median_rent',
             display_name: 'Neighborhood Rent (ACS median)',
+            display_text: 'Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.',
             component_type: 'continuous',
             data_type:'decimal',
             min: 0,
@@ -67,14 +76,15 @@ var filterView = {
             num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead.
         },
 
-
         {   source: 'portfolio',
             display_name: 'Subsidy Program',
+            display_text: 'Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list',
             component_type:'categorical',
             data_type: 'text'
         },
         {   source:'poa_start',
             display_name:'Subsidy Start Date',
+            display_text: 'Filters to buildings with at least one subsidy whose start date falls between the selected dates.',
             component_type: 'date',
             data_type: 'timestamp',
             min: '1950-01-01', //just example, TODO change to date format
@@ -82,6 +92,7 @@ var filterView = {
         },
         {   source:'poa_end',
             display_name:'Subsidy End Date',
+            display_text: 'Filters to buildings with at least one subsidy whose end date falls between the selected dates.',
             component_type: 'date',
             data_type: 'timestamp',
             min: '1950-01-01', //just example, TODO change to date format
@@ -93,62 +104,69 @@ var filterView = {
        
     ],
 
-    init: function() {
+    init: function(msg, data) {
+        //msg and data are from the pubsub module that this init is subscribed to. 
+        //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
+        
+        if ( data === true ) {
+            //Make sure other functionality is hooked up
+            setSubs([
+                ['filterViewLoaded', filterUtil.init],
+                ['sidebar', filterView.toggleSidebar],
+                ['subNav', filterView.toggleSubNavButtons],
+                ['filterValues', filterView.indicateActivatedFilters]
+            ]);
 
-        //Make sure other functionality is hooked up
-        setSubs([
-            ['filterViewLoaded', filterUtil.init],
-            ['sidebar', filterView.toggleSidebar],
-            ['subNav', filterView.toggleSubNavButtons]
-        ]);
+            setState('subNav.left','layers');
+            setState('subNav.right','buildings');
 
-        setState('subNav.left','layers');
-        setState('subNav.right','buildings');
-
-        document.querySelectorAll('.sidebar-tab').forEach(function(tab){
-            tab.onclick = function(e){
-                var sideBarMsg = e.currentTarget.parentElement.id.replace('-','.');
-                filterView.toggleSidebarState(sideBarMsg);
-            }
-        });
-
-        document.querySelectorAll('.sub-nav-button').forEach(function(button){
-            button.onclick = function(e){
-                var leftRight = e.currentTarget.parentElement.id.replace('-options','');
-                var subNavType = e.currentTarget.id.replace('button-','');
-                if ( getState()['sidebar.' + leftRight] && getState()['sidebar.' + leftRight][0] ) { // if the accociated sidebar is open
-                    if (getState()['subNav.' + leftRight][0] === subNavType) { // if the clicked subNav button is already active
-                        setState('sidebar.' + leftRight, false); // close the sidebar
-                    }
-                } else {
-                    setState('sidebar.' + leftRight, true); // open the sidebar
+            document.querySelectorAll('.sidebar-tab').forEach(function(tab){
+                tab.onclick = function(e){
+                    var sideBarMsg = e.currentTarget.parentElement.id.replace('-','.');
+                    filterView.toggleSidebarState(sideBarMsg);
                 }
-                setState('subNav.' + leftRight, subNavType);
-               /* console.log('click');
-                var leftRight = e.currentTarget.parentElement.id.replace('-options','');
-                console.log(leftRight);
-                var sideBarMsg = 'sidebar.' + leftRight;
-                var subButton = e.currentTarget.id.replace('button-','');
-                console.log(subButton);
-                if (getState()[sideBarMsg] && getState()[sideBarMsg][0])  { // if the associated sidebar is open
-                    if (getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][0] === e.currentTarget.id){
-                        filterView.toggleSidebarState(sideBarMsg);
-                        setState('subNav.' + leftRight, e.currentTarget.id);
+            });
+
+            document.querySelectorAll('.sub-nav-button').forEach(function(button){
+                button.onclick = function(e){
+                    var leftRight = e.currentTarget.parentElement.id.replace('-options','');
+                    var subNavType = e.currentTarget.id.replace('button-','');
+                    if ( getState()['sidebar.' + leftRight] && getState()['sidebar.' + leftRight][0] ) { // if the associated sidebar is open
+                        if (getState()['subNav.' + leftRight][0] === subNavType) { // if the clicked subNav button is already active
+                            setState('sidebar.' + leftRight, false); // close the sidebar
+                        }
                     } else {
-                        setState('subNav.' + leftRight, 'none');
+                        setState('sidebar.' + leftRight, true); // open the sidebar
                     }
+                    setState('subNav.' + leftRight, subNavType);
+                   /* console.log('click');
+                    var leftRight = e.currentTarget.parentElement.id.replace('-options','');
+                    console.log(leftRight);
+                    var sideBarMsg = 'sidebar.' + leftRight;
+                    var subButton = e.currentTarget.id.replace('button-','');
+                    console.log(subButton);
+                    if (getState()[sideBarMsg] && getState()[sideBarMsg][0])  { // if the associated sidebar is open
+                        if (getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][0] === e.currentTarget.id){
+                            filterView.toggleSidebarState(sideBarMsg);
+                            setState('subNav.' + leftRight, e.currentTarget.id);
+                        } else {
+                            setState('subNav.' + leftRight, 'none');
+                        }
 
-                }*/
-            }
-        });
+                    }*/
+                }
+            });
 
-        //Get the data and use it to dynamically apply configuration such as the list of categorical options
-        controller.getData({
-                    name: 'filterData',
-                    url: model.URLS.filterData, 
-                    callback: filterView.buildFilterComponents
-                }) 
-    
+            //Get the data and use it to dynamically apply configuration such as the list of categorical options
+            controller.getData({
+                        name: 'filterData',
+                        url: model.URLS.filterData, 
+                        callback: filterView.buildFilterComponents
+                    }) 
+        } else {
+            console.log("ERROR data loaded === false")
+        };
+
     }, //end init
 
 
@@ -168,19 +186,33 @@ var filterView = {
               console.log(c)
                 console.log("Found a continuous source!");
 
+
                 var parent = d3.select('#filter-components')
-                    .append("div")
-                      .attr("class","filter-group");
-                parent.append("p")
-                  .attr("class","filter-label")
-                  .text(c.display_name);
-                parent.append("div")
-                  .attr("id",c.source)
-                  .attr("class","filter")
-                  .attr("class","slider");
+                var title = parent.append("div")
+                        .classed("title filter-title",true)
+
+                    title.append("i")
+                        .classed("dropdown icon",true)
+                    title.append("span")
+                        .classed("title-text",true)
+                        .text(c.display_name)
+
+                    title.attr("id", "filter-"+c.source)
+
+                var content = parent.append("div")
+                        .classed("content", true);
+                var description = content.append("p")
+                        .classed("description",true);
+                    
+                    description.html(c.display_text);
+
+                var slider = content.append("div")
+                        .classed("filter", true)
+                        .classed("slider",true)
+                        .attr("id",c.source);
 
 
-                var slider = document.getElementById(c.source);
+                slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
                 noUiSlider.create(slider, {
                     start: [c.min, c.max],
                     connect: true,
@@ -206,6 +238,11 @@ var filterView = {
                         // tap: Event was caused by the user tapping the slider (boolean);
                         // positions: Left offset of the handles in relation to the slider
                         var specific_state_code = 'filterValues.' + component.source
+                        
+                        //If the sliders have been 'reset', remove the filter
+                        if (component.min == unencoded[0] && component.max == unencoded[1]){
+                            unencoded = [];
+                        }
                         setState(specific_state_code,unencoded);
                     }
                 }
@@ -219,6 +256,9 @@ var filterView = {
 
             };//end slider setup
 
+            var parent = d3.select('#filter-components')
+                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
+            $('#filter-components').accordion({'exclusive':false}) //allows multiple opened
 
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
@@ -239,15 +279,28 @@ var filterView = {
                 //Add a div with label and select element
                 //Bind user changes to a setState function
                 var parent = d3.select('#filter-components')
-                    .append("div")
-                      .attr("class","filter-group");
-                parent.append("p")
-                  .attr("class","filter-label")
-                  .text(c.display_name);
-                var selector = parent.append("div")
-                  .classed("filter", true)
-                  .classed("categorical",true);
-                var uiSelector = selector.append("select")
+                var title = parent.append("div")
+                        .classed("title filter-title",true)
+
+                    title.append("i")
+                        .classed("dropdown icon",true)
+                    title.append("span")
+                        .classed("title-text",true)
+                        .text(c.display_name)
+
+                    title.attr("id", "filter-"+c.source)
+
+                var content = parent.append("div")
+                        .classed("filter", true)
+                        .classed("categorical",true)
+                        .classed("content", true);
+
+                var description = content.append("p")
+                        .classed("description",true)
+                    
+                    description.html(c.display_text)
+
+                var uiSelector = content.append("select")
                   .classed("ui fluid search dropdown",true)
                   .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
                   .attr("multiple", " ")
@@ -271,7 +324,10 @@ var filterView = {
                     setState(specific_state_code,selectedValues);
                 }};
                 var currentSelectCallback = makeSelectCallback(c)
-                $("select").change(currentSelectCallback);
+                
+                //TODO change this to a click event instead of any change
+                $(".dropdown-"+c.source).change(currentSelectCallback);
+
                 
             };
 
@@ -289,6 +345,18 @@ var filterView = {
 
     },
     
+    indicateActivatedFilters: function(){
+        //add/remove classes to the on-page elements that tell the users which filters are currently activated
+        //e.g. the filter sidebar data name titles
+        var filterValues = filterUtil.getFilterValues();
+        for (key in filterValues){
+            var activated = filterValues[key][0].length == 0 ? false : true;
+            
+            d3.select('#filter-'+key)
+                .classed("filter-activated",activated);
+        
+        };
+    },
     toggleSidebar: function(msg,data){
         var sBar = document.getElementById(msg.replace('.','-'));
         var leftRight = msg.indexOf('left') !== -1 ? 'left' : 'right';

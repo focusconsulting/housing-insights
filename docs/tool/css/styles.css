@@ -45,8 +45,10 @@ html, body {
 .sub-nav-container {
     position: relative; 
     margin-top: 40px;  
-    border-bottom: 1px solid black;
-    display: none; 
+    display: none;
+    overflow-y: auto;
+    padding-top: 10px;
+    
 }
 
 .sub-nav-container.active {
@@ -54,12 +56,9 @@ html, body {
     flex-direction: column;
 }
 
-#sidebar-left p {
-    border-top: 1px solid black;
-    padding: 5px;
-    font-weight: bold;
-
-
+#buildings-list {
+    
+    margin-top:105px;
 }
 
 #left-options .sub-nav-button {
@@ -148,17 +147,29 @@ html, body {
     }
 
 
-#sidebar {
+.sidebar-inner-wrapper {
     position: absolute;
     top: 0px;
-    bottom: 0px;
-    right: 0px;
+    bottom: 0px;    
     background-color: #fff;
     display: flex;
     flex-direction: column;
+    width:100%;
 }
 
-#sidebar > div {
+.sidebar-inner-wrapper:before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 40px;
+    border-bottom: 1px solid black;
+    position: absolute;
+        box-shadow: 0 8px 17px #fff;
+    z-index: 99;
+}
+
+
+.sidebar-inner-wrapper > div {
     
     flex-grow: 1;
     
@@ -166,7 +177,16 @@ html, body {
 
 #pie-charts {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
+    position: fixed;
+    width: 100%;
+    box-shadow: 0 8px 17px #fff;
+    background-color: #fff;
+        top: 40px;
+    padding-top: 10px;
+}
+    
+
 }
 
 #zone-selector {
@@ -196,30 +216,6 @@ html, body {
     transform: translate(100%,0);
     border-right-width: 0;
     border-left: 1px solid rgb(189, 54, 33);
-}
-
-#sidebar h2 {
-    background-color: transparent;
-    border-top: 1px solid black;
-    position: relative;
-    padding: 5px 10px;
-    
-}
-
-#buildings h2 {
-    box-shadow: 0 10px 17px #fff;
-    margin-bottom: 0;
-}
-
-#buildings {
-    
-    flex-direction: column;
-}
-
-#buildings-list {
-    overflow-y: scroll;
-    padding: 9px 10px 0px 10px;
-    margin-bottom: 10px;
 }
 
 #buildings-list > div {
@@ -256,10 +252,6 @@ html, body {
     transition: transform 0.2s linear;
     z-index: 9999;
 
-}
-
-#stats-inner {
-    padding: 0 10px 10px;
 }
 
 #sidebar-left .sidebar-tab {
@@ -343,4 +335,68 @@ a.active {
     border: none;
     background-color: rgba(0,0,0,0.3);
     padding: 3px;
+}
+
+
+
+
+
+/*copy-pasted from semantic ui so we can modify
+Currently only used in layers but can be adapted to filters too
+*/
+
+/*Layer accordions (blue)*/
+/* Normal */
+.ui.styled.accordion .title.overlay-title {
+  background:rgba(30, 92, 223,0.3);
+  margin: 0em;
+  padding: 0.5em 0.5em;
+  color: rgba(0, 0, 30, 0.95);
+  font-weight: bold;
+  border-top: 1px solid rgba(34, 36, 38, 0.15);
+}
+
+/* Hover */
+
+.ui.styled.accordion .title.overlay-title:hover {
+  background: rgba(30, 92, 223,0.5);
+  color: rgba(50, 50, 80, 0.95);
+}
+
+/* Active */
+
+.ui.styled.accordion .active.title.overlay-title {
+  background: rgba(24,100,178,0.7);
+  color: rgba(0, 0, 30, 0.95);
+}
+
+
+/*Filter accordions (orange)*/
+/* Normal */
+.ui.styled.accordion .title.filter-title {
+  background:rgba(253,126,35,0.3);
+  margin: 0em;
+  padding: 0.5em 0.5em;
+  color: rgba(0, 0, 30, 0.95);
+  font-weight: bold;
+  border-top: 1px solid rgba(34, 36, 38, 0.15);
+}
+
+/* Hover */
+
+.ui.styled.accordion .title.filter-title:hover {
+  background: rgba(253,126,35,0.5);
+  color: rgba(50, 50, 80, 0.95);
+}
+
+/* Active */
+
+.ui.styled.accordion .active.title.filter-title {
+  background:rgba(253,126,35,0.3);
+  color: rgba(0, 0, 30, 0.95);
+}
+
+.ui.styled.accordion .title.filter-title.filter-activated,
+.ui.styled.accordion .active.title.filter-title.filter-activated {
+    background: rgba(234,100,2,0.7);
 }
