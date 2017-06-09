@@ -22,11 +22,11 @@ var mapView = {
                 ['mapLoaded', model.loadMetaData],
                 ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
                 ['dataLoaded.metaData', resultsView.init],
+                ['dataLoaded.metaData', mapView.placeProjects],
                 ['dataLoaded.metaData', mapView.overlayMenu],
-                ['dataLoaded.metaData', filterView.init],
+                ['dataLoaded.raw_project', filterView.init],
                 ['overlayRequest', mapView.addOverlayData],
                 ['joinedToGeo', mapView.addOverlayLayer],
-                ['dataLoaded.raw_project', mapView.placeProjects],
                 ['previewBuilding', mapView.showPopup],
                 ['filteredData', mapView.filterMap],
                 ['hoverBuildingList', mapView.highlightBuilding]
@@ -448,90 +448,104 @@ var mapView = {
 
 
     },
-    placeProjects: function(msg, data){ // some repetition here with the addLayer function used for zone layers. could be DRYer if combines
-                               // or if used constructor with prototypical inheritance
-        
-        //msg and data are from the pubsub module that this init is subscribed to. 
-        //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
+
+    placeProjects: function(msg,data){ // some repetition here with the addLayer function used for zone layers. could be DRYer if combined
+                                       // or if used constructor with prototypical inheritance
         if ( data === true ) {
-            mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
-            mapView.convertedProjects.features.forEach(function(feature){
-                feature.properties.matches_filters = true;
-            });
-            mapView.listBuildings();
-            mapView.map.addSource('project', {
-              'type': 'geojson',
-              'data': mapView.convertedProjects
-            });
-            mapView.circleStrokeWidth =  1;
-            mapView.circleStrokeOpacity =  1;
-            mapView.map.addLayer({
-                'id': 'project',
-                'type': 'circle',
-                'source': 'project',
-                'paint': {
-                    'circle-radius': {
-                        'base': 1.75,
-                        'stops': [[12, 3], [15, 32]]
-                    }, 
-                    'circle-opacity': 0.3,      
-                    'circle-color': {
-                          property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
-                          type: 'categorical',
-                          stops: [ 
-                            ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                            ['2 - Expiring Subsidy', '#8B4225'],
-                            ['3 - Recent Failing REAC Score', '#bd0026'],
-                            ['4 - More Info Needed', '#A9A9A9'],
-                            ['5 - Other Subsidized Property', ' #fd8d3c'],
-                            ['6 - Lost Rental', '#A9A9A9']
-                          ]
-                    },
-                'circle-stroke-width': mapView.circleStrokeWidth,
-                'circle-stroke-opacity': mapView.circleStrokeOpacity,
-                
-                'circle-stroke-color': {
-                    property: 'category_code', 
-                          type: 'categorical',
-                          stops: [ 
-                            ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                            ['2 - Expiring Subsidy', '#8B4225'],
-                            ['3 - Recent Failing REAC Score', '#bd0026'],
-                            ['4 - More Info Needed', '#A9A9A9'],
-                            ['5 - Other Subsidized Property', ' #fd8d3c'],
-                            ['6 - Lost Rental', '#A9A9A9']
-                          ]
+            //msg and data are from the pubsub module that this init is subscribed to. 
+            //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
+            console.log(msg,data);
+            var dataURLInfo = model.dataCollection.metaData.project.api;
+            var dataURL = dataURLInfo.raw_endpoint;
+            var dataRequest = {
+                    name: 'raw_project',
+                    url: dataURL, 
+                    callback: dataCallback
+                };
+            controller.getData(dataRequest);
+
+            function dataCallback() {   
+                console.log('in callback');     
+                mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
+                mapView.convertedProjects.features.forEach(function(feature){
+                    feature.properties.matches_filters = true;
+                });
+                mapView.listBuildings();
+                mapView.map.addSource('project', {
+                  'type': 'geojson',
+                  'data': mapView.convertedProjects
+                });
+                mapView.circleStrokeWidth =  1;
+                mapView.circleStrokeOpacity =  1;
+                mapView.map.addLayer({
+                    'id': 'project',
+                    'type': 'circle',
+                    'source': 'project',
+                    'paint': {
+                        'circle-radius': {
+                            'base': 1.75,
+                            'stops': [[12, 3], [15, 32]]
+                        }, 
+                        'circle-opacity': 0.3,      
+                        'circle-color': {
+                              property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
+                              type: 'categorical',
+                              stops: [ 
+                                ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                ['2 - Expiring Subsidy', '#8B4225'],
+                                ['3 - Recent Failing REAC Score', '#bd0026'],
+                                ['4 - More Info Needed', '#A9A9A9'],
+                                ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                ['6 - Lost Rental', '#A9A9A9']
+                              ]
+                        },
+                    'circle-stroke-width': mapView.circleStrokeWidth,
+                    'circle-stroke-opacity': mapView.circleStrokeOpacity,
+                    
+                    'circle-stroke-color': {
+                        property: 'category_code', 
+                              type: 'categorical',
+                              stops: [ 
+                                ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                ['2 - Expiring Subsidy', '#8B4225'],
+                                ['3 - Recent Failing REAC Score', '#bd0026'],
+                                ['4 - More Info Needed', '#A9A9A9'],
+                                ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                ['6 - Lost Rental', '#A9A9A9']
+                              ]
+                        }
                     }
-                }
-            });
-           // TODO: MAKE LEGEND
-            mapView.map.on('mousemove', function(e) {
-                 //get the province feature underneath the mouse
-                 var features = mapView.map.queryRenderedFeatures(e.point, {
-                     layers: ['project']
-                 });
-                 //if there's a point under our mouse, then do the following.
-                 if (features.length > 0) {
-                     //use the following code to change the 
-                     //cursor to a pointer ('pointer') instead of the default ('')
-                     mapView.map.getCanvas().style.cursor = (features[0].properties.proj_addre != null) ? 'pointer' : '';
-                 }
-                 //if there are no points under our mouse, 
-                 //then change the cursor back to the default
-                 else {
-                     mapView.map.getCanvas().style.cursor = '';
-                 }
-            });
-            mapView.map.on('click', function (e) {
-                console.log(e);
-                var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
-                console.log(building);
-                if ( building === undefined ) return;
-                setState('previewBuilding', building);
-               });               
+                });
+               // TODO: MAKE LEGEND
+                mapView.map.on('mousemove', function(e) {
+                     //get the province feature underneath the mouse
+                     var features = mapView.map.queryRenderedFeatures(e.point, {
+                         layers: ['project']
+                     });
+                     //if there's a point under our mouse, then do the following.
+                     if (features.length > 0) {
+                         //use the following code to change the 
+                         //cursor to a pointer ('pointer') instead of the default ('')
+                         mapView.map.getCanvas().style.cursor = (features[0].properties.proj_addre != null) ? 'pointer' : '';
+                     }
+                     //if there are no points under our mouse, 
+                     //then change the cursor back to the default
+                     else {
+                         mapView.map.getCanvas().style.cursor = '';
+                     }
+                });
+                mapView.map.on('click', function (e) {
+                    console.log(e);
+                    var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
+                    console.log(building);
+                    if ( building === undefined ) return;
+                    setState('previewBuilding', building);
+                   });               
+            } // end dataCallback
         } else {
-            console.log("ERROR data loaded === false")
-        };
+             console.log("ERROR data loaded === false");
+        }
+
     },
 
     showPopup: function(msg,data){

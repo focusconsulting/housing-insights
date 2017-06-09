@@ -47,6 +47,7 @@ html, body {
     margin-top: 40px;  
     display: none;
     overflow-y: auto;
+    padding-top: 10px;
     
 }
 
@@ -55,6 +56,10 @@ html, body {
     flex-direction: column;
 }
 
+#buildings-list {
+    
+    margin-top:105px;
+}
 
 #left-options .sub-nav-button {
     border-right: 2px solid rgb(189, 54, 33);
@@ -172,7 +177,16 @@ html, body {
 
 #pie-charts {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
+    position: fixed;
+    width: 100%;
+    box-shadow: 0 8px 17px #fff;
+    background-color: #fff;
+        top: 40px;
+    padding-top: 10px;
+}
+    
+
 }
 
 #zone-selector {
