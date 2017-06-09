@@ -379,7 +379,7 @@
         "display_text": "",
         "required_in_source": true,
         "source_name": "ZIPCODE",
-        "sql_name": "zipcode",
+        "sql_name": "zip",
         "type": "text"
       },
       {
