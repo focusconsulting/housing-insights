@@ -3514,7 +3514,7 @@
         "display_text": "Tract-based neighborhood cluster data from 2000 associated with address of TOPA notice.",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
-        "sql_name": "cluster_tr2000",
+        "sql_name": "neighborhood_cluster",
         "type": "text"
       },
       {
