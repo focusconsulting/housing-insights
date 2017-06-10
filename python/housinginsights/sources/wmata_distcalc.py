@@ -355,7 +355,7 @@ class WmataApiConn(BaseApiConn):
         data = response.json()
 
         for idx, stop in enumerate(data['Stops']):
-            crow_distance = self._haversine(lat, lon, station['Lat'], station['Lon'])
+            crow_distance = self._haversine(lat, lon, stop['Lat'], stop['Lon'])
 
             if crow_distance < (radiusinmeters / self.meters_per_mile):
                 walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
