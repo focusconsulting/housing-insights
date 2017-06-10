@@ -139,21 +139,6 @@ var filterView = {
                         setState('sidebar.' + leftRight, true); // open the sidebar
                     }
                     setState('subNav.' + leftRight, subNavType);
-                   /* console.log('click');
-                    var leftRight = e.currentTarget.parentElement.id.replace('-options','');
-                    console.log(leftRight);
-                    var sideBarMsg = 'sidebar.' + leftRight;
-                    var subButton = e.currentTarget.id.replace('button-','');
-                    console.log(subButton);
-                    if (getState()[sideBarMsg] && getState()[sideBarMsg][0])  { // if the associated sidebar is open
-                        if (getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][0] === e.currentTarget.id){
-                            filterView.toggleSidebarState(sideBarMsg);
-                            setState('subNav.' + leftRight, e.currentTarget.id);
-                        } else {
-                            setState('subNav.' + leftRight, 'none');
-                        }
-
-                    }*/
                 }
             });
 
