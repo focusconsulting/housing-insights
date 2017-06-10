@@ -79,7 +79,7 @@ class WmataApiConn(BaseApiConn):
             u = 'wmata_dist'
             #Variable to hold data until written to file
             self.distOutput = []
-            self.distHeader = ('nlihc_id','type','stop_id_or_station_code','dist_in_miles','building_lat','building_lon','stop_or_station_lat','stop_or_station_lon')
+            self.distHeader = ('nlihc_id','type','stop_id_or_station_code','dist_in_miles','crow_distance','building_lat','building_lon','stop_or_station_lat','stop_or_station_lon')
 
 
             #First, find which projects we should be calculating from
@@ -245,7 +245,7 @@ class WmataApiConn(BaseApiConn):
 
                 if ( 'building_lat' in columns and 'building_lon' in columns and 'stop_or_station_lat' in columns and 'stop_or_station_lon' in columns ):
                 #See if row exists
-                    proj_query = 'select * from wmata_dist where building_lat=\'' + str(srcLat) + '\' and building_lon=\'' + str(srcLon) + '\' and stop_or_station_lat=\''+ str(destLat) + '\' and stop_or_station_lon=\'' + str(destLon) + '\''
+                    proj_query = 'select * from wmata_dist where building_lat=\'' + srcLat + '\' and building_lon=\'' + srcLon + '\' and stop_or_station_lat=\''+ destLat + '\' and stop_or_station_lon=\'' + destLon + '\''
                     rows = conn.execute(proj_query)
                     if ( rows != None ):
                         conn.close()
@@ -314,7 +314,7 @@ class WmataApiConn(BaseApiConn):
                     logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
 
                     if walkDist <=radiusinmeters:
-                        self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),lat,lon,str(station['Lat']),str(station['Lon'])])
+                        self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),crow_distance, lat,lon,str(station['Lat']),str(station['Lon'])])
 
             else:
                 logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
@@ -355,12 +355,20 @@ class WmataApiConn(BaseApiConn):
         data = response.json()
 
         for idx, stop in enumerate(data['Stops']):
-            walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
+            crow_distance = self._haversine(lat, lon, station['Lat'], station['Lon'])
 
-            if walkDist != None:
-                if walkDist <= radiusinmeters: #within 0.5 miles walking
+            if crow_distance < (radiusinmeters / self.meters_per_mile):
+                walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
+
+                if walkDist != None:
                     walkDistMiles = walkDist / self.meters_per_mile
-                    self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),lat,lon,str(stop['Lat']),str(stop['Lon'])])
+                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+
+                    if walkDist <= radiusinmeters: #within 0.5 miles walking
+                        self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),crow_distance,lat,lon,str(stop['Lat']),str(stop['Lon'])])
+
+            else:
+                logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
 
 
     def _array_to_csv(self, fields, list_of_lists, filepath):
