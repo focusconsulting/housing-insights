@@ -98,9 +98,6 @@ var filterView = {
             min: '1950-01-01', //just example, TODO change to date format
             max: 'now'         //dummy example
         },
-
-
-
        
     ],
 
@@ -114,7 +111,8 @@ var filterView = {
                 ['filterViewLoaded', filterUtil.init],
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
-                ['filterValues', filterView.indicateActivatedFilters]
+                ['filterValues', filterView.indicateActivatedFilters],
+                ['anyFilterActive', filterView.handleFilterClearance]
             ]);
 
             setState('subNav.left','layers');
@@ -152,94 +150,172 @@ var filterView = {
             console.log("ERROR data loaded === false")
         };
 
+        // For inheritance
+        filterView.continuousFilterControl.prototype = Object.create(filterView.filterControl.prototype);
+        filterView.categoricalFilterControl.prototype = Object.create(filterView.filterControl.prototype);
+
     }, //end init
+    filterControls: [],
+    filterControl: function(component){
+        filterView.filterControls.push(this);
+        this.component = component;
+    },
+    continuousFilterControl: function(component){
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+
+        var parent = d3.select('#filter-components')
+        var title = parent.append("div")
+            .classed("title filter-title",true);
+
+        title.append("i")
+            .classed("dropdown icon",true)
+        title.append("span")
+            .classed("title-text",true)
+            .text(c.display_name);
+
+        title.attr("id", "filter-"+c.source)
+
+        var content = parent.append("div")
+                .classed("content", true);
+        var description = content.append("p")
+                .classed("description",true);
+                    
+            description.html(c.display_text);
+
+            var slider = content.append("div")
+                    .classed("filter", true)
+                    .classed("slider",true)
+                    .attr("id",c.source);
 
 
+        slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
+        noUiSlider.create(slider, {
+            start: [c.min, c.max],
+            connect: true,
+
+            //the wNumb is a number formatting library. This is what was recommended by noUiSlider; we should consider using elsewhere.
+            //order of the two wNumb calls corresponds to left and right slider respectively.
+            tooltips: [ wNumb({ decimals: c.num_decimals_displayed }), wNumb({ decimals: c.num_decimals_displayed }) ],
+            range: {
+                'min': c.min,
+                'max': c.max
+            }
+
+        });
+
+        //Each slider needs its own copy of the sliderMove function so that it can use the current component
+        function makeSliderCallback(component){
+            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
+                // This is the custom binding module used by the noUiSlider.on() callback.
+
+                // values: Current slider values;
+                // handle: Handle that caused the event;
+                // unencoded: Slider values without formatting;
+                // tap: Event was caused by the user tapping the slider (boolean);
+                // positions: Left offset of the handles in relation to the slider
+                var specific_state_code = 'filterValues.' + component.source
+                
+                //If the sliders have been 'reset', remove the filter
+                if (component.min == unencoded[0] && component.max == unencoded[1]){
+                    unencoded = [];
+                }
+                setState(specific_state_code,unencoded);
+            }
+        }
+
+        //Construct a new copy of the function with access to the current c variable
+        var currentSliderCallback = makeSliderCallback(c)
+
+        //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates.
+        //using 'set' for now for easier development (less console logging of state changes)
+        slider.noUiSlider.on('set', currentSliderCallback);
+
+        this.clear = function(){
+            // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
+            slider.noUiSlider.reset();
+        }
+
+    },
+    categoricalFilterControl: function(component){
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+
+        //Add a div with label and select element
+        //Bind user changes to a setState function
+        var parent = d3.select('#filter-components')
+        var title = parent.append("div")
+                .classed("title filter-title",true)
+
+            title.append("i")
+                .classed("dropdown icon",true)
+            title.append("span")
+                .classed("title-text",true)
+                .text(c.display_name)
+
+            title.attr("id", "filter-"+c.source)
+
+        var content = parent.append("div")
+                .classed("filter", true)
+                .classed("categorical",true)
+                .classed("content", true);
+
+        var description = content.append("p")
+                .classed("description",true)
+            
+            description.html(c.display_text)
+
+        var uiSelector = content.append("select")
+            .classed("ui fluid search dropdown",true)
+            .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
+            .attr("multiple", " ")
+            .attr("id", c.source);
+
+        for(var j = 0; j < c.options.length; j++){
+            uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
+            var select = document.getElementById(c.source);
+        }
+
+        $('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect.
+        $('.ui.dropdown').dropdown({ fullTextSearch: 'exact' });
+        $('#'+c.source).dropdown();
+
+        //Set callback for when user makes a change
+        function makeSelectCallback(component){
+            return function(){
+            var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
+            var specific_state_code = 'filterValues.' + component.source
+            setState(specific_state_code,selectedValues);
+        }};
+        var currentSelectCallback = makeSelectCallback(c)
+        
+        //TODO change this to a click event instead of any change
+        $(".dropdown-"+c.source).change(currentSelectCallback);
+
+        this.clear = function(){
+            // 'restore defaults' as an argument of .dropdown resets the dropdown menu to its original state,
+            // per the Semantic UI docs.
+            $('.dropdown-' + c.source).dropdown('restore defaults');
+        }
+
+    },
     buildFilterComponents: function(){
 
-        //First we need to read the actual data to get our categories, mins, maxes, etc. 
+        //We need to read the actual data to get our categories, mins, maxes, etc. 
         var workingData = model.dataCollection['filterData'].items; 
-
+        
         //Add components to the navigation using the appropriate component type
         for (var i = 0; i < filterView.components.length; i++) {
-
 
             //Set up sliders
             if (filterView.components[i].component_type == 'continuous'){
 
-              var c = filterView.components[i]
-              console.log(c)
+                console.log(filterView.components[i])
                 console.log("Found a continuous source!");
-
-
-                var parent = d3.select('#filter-components')
-                var title = parent.append("div")
-                        .classed("title filter-title",true)
-
-                    title.append("i")
-                        .classed("dropdown icon",true)
-                    title.append("span")
-                        .classed("title-text",true)
-                        .text(c.display_name)
-
-                    title.attr("id", "filter-"+c.source)
-
-                var content = parent.append("div")
-                        .classed("content", true);
-                var description = content.append("p")
-                        .classed("description",true);
-                    
-                    description.html(c.display_text);
-
-                var slider = content.append("div")
-                        .classed("filter", true)
-                        .classed("slider",true)
-                        .attr("id",c.source);
-
-
-                slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
-                noUiSlider.create(slider, {
-                    start: [c.min, c.max],
-                    connect: true,
-
-                    //the wNumb is a number formatting library. This is what was recommended by noUiSlider; we should consider using elsewhere.
-                    //order of the two wNumb calls corresponds to left and right slider respectively.
-                    tooltips: [ wNumb({ decimals: c.num_decimals_displayed }), wNumb({ decimals: c.num_decimals_displayed }) ],
-                    range: {
-                        'min': c.min,
-                        'max': c.max
-                    }
-
-                });
-
-                //Each slider needs its own copy of the sliderMove function so that it can use the current component
-                function makeSliderCallback(component){
-                    return function sliderCallback ( values, handle, unencoded, tap, positions ) {
-                        // This is the custom binding module used by the noUiSlider.on() callback.
-
-                        // values: Current slider values;
-                        // handle: Handle that caused the event;
-                        // unencoded: Slider values without formatting;
-                        // tap: Event was caused by the user tapping the slider (boolean);
-                        // positions: Left offset of the handles in relation to the slider
-                        var specific_state_code = 'filterValues.' + component.source
-                        
-                        //If the sliders have been 'reset', remove the filter
-                        if (component.min == unencoded[0] && component.max == unencoded[1]){
-                            unencoded = [];
-                        }
-                        setState(specific_state_code,unencoded);
-                    }
-                }
-
-                //Construct a new copy of the function with access to the current c variable
-                var currentSliderCallback = makeSliderCallback(c)
-
-                //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates.
-                //using 'set' for now for easier development (less console logging of state changes)
-                slider.noUiSlider.on('set', currentSliderCallback);
-
-            };//end slider setup
+                
+                new filterView.continuousFilterControl(filterView.components[i]);
+            }
+                           
 
             var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
@@ -247,73 +323,19 @@ var filterView = {
 
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
-                var c = filterView.components[i];
-                console.log("Found a categorical filter: " + c.source)
-                
 
                 //First find the unique list of categories
                 var result = [];
                 for (var dataRow = 0; dataRow < workingData.length; dataRow++) {
-                    if(!result.includes(workingData[dataRow][c.source])){
-                        result.push(workingData[dataRow][c.source]);
+                    if(!result.includes(workingData[dataRow][filterView.components[i].source])){
+                        result.push(workingData[dataRow][filterView.components[i].source]);
                     }
                 };
-                filterView.components[i]['options'] = result
+                filterView.components[i]['options'] = result;
+                console.log("Found a categorical filter: " + filterView.components[i].source)
 
-                
-                //Add a div with label and select element
-                //Bind user changes to a setState function
-                var parent = d3.select('#filter-components')
-                var title = parent.append("div")
-                        .classed("title filter-title",true)
-
-                    title.append("i")
-                        .classed("dropdown icon",true)
-                    title.append("span")
-                        .classed("title-text",true)
-                        .text(c.display_name)
-
-                    title.attr("id", "filter-"+c.source)
-
-                var content = parent.append("div")
-                        .classed("filter", true)
-                        .classed("categorical",true)
-                        .classed("content", true);
-
-                var description = content.append("p")
-                        .classed("description",true)
-                    
-                    description.html(c.display_text)
-
-                var uiSelector = content.append("select")
-                  .classed("ui fluid search dropdown",true)
-                  .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
-                  .attr("multiple", " ")
-                  .attr("id", c.source);
-
-                for(var j = 0; j < c.options.length; j++){
-                  uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
-                  var select = document.getElementById(c.source);
-                }
-
-                $('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect.
-                $('.ui.dropdown').dropdown({ fullTextSearch: 'exact' });
-                $('#'+c.source).dropdown();
-
-               
-                //Set callback for when user makes a change
-                 function makeSelectCallback(component){
-                    return function(){
-                    var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
-                    var specific_state_code = 'filterValues.' + component.source
-                    setState(specific_state_code,selectedValues);
-                }};
-                var currentSelectCallback = makeSelectCallback(c)
-                
-                //TODO change this to a click event instead of any change
-                $(".dropdown-"+c.source).change(currentSelectCallback);
-
-                
+                new filterView.categoricalFilterControl(filterView.components[i]);
+                  
             };
 
             if (filterView.components[i].component_type == 'date'){
@@ -329,11 +351,69 @@ var filterView = {
         setState('filterViewLoaded',true);
 
     },
+    clearAllFilters: function(){
+        for(var i = 0; i < filterView.filterControls.length; i++){
+            filterView.filterControls[i].clear();
+        }
+        filterView.indicateActivatedFilters();
+    },
+
+    clearAllButton: {
+        init: function(){
+            var thisButton = this;
+
+            this.pill = document.createElement('div');
+            this.pill.id = 'clearFiltersPillbox';
+            this.pill.classList.add('ui', 'label', 'transition', 'visible');
+
+            this.site = document.getElementById('button-filters');
+            this.replacedText = this.site.innerText;
+
+            this.trigger = document.createElement('i');
+            this.trigger.id = 'clearFiltersTrigger';
+            this.trigger.classList.add('delete', 'icon');
+
+            this.site.innerText = "";
+
+            this.pill.innerText = this.replacedText;
+
+            this.site.appendChild(this.pill);
+            this.pill.appendChild(this.trigger);
+            
+            this.trigger.addEventListener('click', function(){
+                filterView.clearAllFilters();
+            });
+        },
+        replacedText: undefined,
+        site: undefined,
+        tearDown: function(){
+            console.log("this.pill", this.pill);
+            console.log("this.pill.parentElement", this.pill.parentElement);
+            this.pill.parentElement.removeChild(this.pill);
+            this.trigger.parentElement.removeChild(this.trigger);
+            this.site.innerText = this.replacedText;
+        },
+        trigger: undefined
+    },
+
+    handleFilterClearance: function(message, data){
+        if(data === true){
+            filterView.clearAllButton.init();
+        }
+        if(data === false){
+            filterView.clearAllButton.tearDown();
+        }
+    },
     
     indicateActivatedFilters: function(){
         //add/remove classes to the on-page elements that tell the users which filters are currently activated
         //e.g. the filter sidebar data name titles
         var filterValues = filterUtil.getFilterValues();
+        var filterStateIsActive = getState()['anyFilterActive'] && getState()['anyFilterActive'][0] == true;
+        var noRemainingFilters = ((Object.keys(filterValues)).filter(function(key){
+            return filterValues[key][0].length > 0;
+        })).length == 0;
+
         for (key in filterValues){
             var activated = filterValues[key][0].length == 0 ? false : true;
             
@@ -341,6 +421,13 @@ var filterView = {
                 .classed("filter-activated",activated);
         
         };
+
+        if(noRemainingFilters && filterStateIsActive){
+            setState('anyFilterActive', false);
+        }
+        if(!noRemainingFilters && !filterStateIsActive){
+            setState('anyFilterActive', true);
+        }
     },
     toggleSidebar: function(msg,data){
         var sBar = document.getElementById(msg.replace('.','-'));

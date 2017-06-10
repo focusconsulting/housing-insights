@@ -58,5 +58,10 @@
   left: 10px;
 }
 
+/* override the Semantic.js label styling for the Clear Filters button */
+#clearFiltersPillbox{
+    font-size: 1em !important;
+}
+
 
 /**/
