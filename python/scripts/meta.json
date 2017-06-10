@@ -2502,6 +2502,46 @@
         "type": "decimal"
       },
       {
+        "display_name": "crow_distance",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "crow_distance",
+        "sql_name": "crow_distance",
+        "type": "decimal"
+      },
+      {
+        "display_name": "building_lat",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "building_lat",
+        "sql_name": "building_lat",
+        "type": "decimal"
+      },
+      {
+        "display_name": "building_lon",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "building_lon",
+        "sql_name": "building_lon",
+        "type": "decimal"
+      },
+      {
+        "display_name": "stop_or_station_lat",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "stop_or_station_lat",
+        "sql_name": "stop_or_station_lat",
+        "type": "decimal"
+      },
+      {
+        "display_name": "stop_or_station_lon",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "stop_or_station_lon",
+        "sql_name": "stop_or_station_lon",
+        "type": "decimal"
+      },
+      {
         "display_name": "Unique data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
