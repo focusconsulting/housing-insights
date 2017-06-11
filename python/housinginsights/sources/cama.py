@@ -203,6 +203,6 @@ class CamaApiConn(BaseApiConn):
             dict_writer.writeheader()
             dict_writer.writerows(toCSV)
 
-
+if __name__ == '__main__':
 my_api = CamaApiConn()
 csvfile = my_api.get_csv()
