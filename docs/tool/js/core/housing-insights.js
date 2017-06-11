@@ -172,14 +172,19 @@ var controller = {
                         dataRequest.callback(data);
                     }                              
                 } else {
-                    alert('Data returned null'); // TODO think through what to do when data returns null. is not an error,
-                                                 // but { "items": null }
+                    //This approach suggests that either the caller (via callback) or the subscriber (via dataLoaded state change)
+                    //should appropriately handle a null data return. If they don't handle it, they'll probably get errors anyways.
+                    setState('dataLoaded.' + dataRequest.name, false );
+                    if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                        dataRequest.callback(data);
+                    }
                 }
             });
                
         } else {
             // TODO publish that data is available every time it's requested or only on first load?
             if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                console.log(model.dataCollection[dataRequest.name]);
                 dataRequest.callback(model.dataCollection[dataRequest.name]);
             }              
         }
@@ -208,7 +213,7 @@ var controller = {
             }).count;
         });
         setState('joinedToGeo.' +  overlay + '_' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
-        // e.g. joinedToGeo.crime-neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
+        // e.g. joinedToGeo.crime_neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
     },
     convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
                                       // and returns geoJSON with the original data in the properties field

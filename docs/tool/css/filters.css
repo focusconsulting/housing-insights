@@ -9,8 +9,8 @@
 
 
 /*Stuff for all filter components*/
-.filter-group-inner {
-    
+.filter-group {
+    border-bottom: 1px solid black;
 }
 
 .filter-label {

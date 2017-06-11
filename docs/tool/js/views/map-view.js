@@ -2,18 +2,7 @@
 
 var mapView = {
     el: 'map-view',
-    buildOverlayOptions: function(){
-        var tablesWithOverlays = Object.keys(model.dataCollection.metaData).filter(function(key){
-            var tableProperties = model.dataCollection.metaData[key];
-            return tableProperties.api && tableProperties.api.available_aggregates.length > 0;
-        });
-        mapView.initialOverlays = tablesWithOverlays.map(function(tableName){
-            return {
-                "name": tableName,
-                "zones": model.dataCollection.metaData[tableName]['api']['available_aggregates']
-            }
-        });
-    },
+
     init: function() { // as single page app, view init() functions should include only what should happen the first time
                        // the view is loaded. things that need to happen every time the view is made active should be in 
                        // the onReturn methods. nothing needs to be there so far for mapView, but buildingView for instance 
@@ -31,13 +20,13 @@ var mapView = {
             setSubs([
                 ['mapLayer', mapView.showLayer],
                 ['mapLoaded', model.loadMetaData],
-                ['dataLoaded.metaData', mapView.addInitialLayers],
+                ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
                 ['dataLoaded.metaData', resultsView.init],
+                ['dataLoaded.metaData', mapView.placeProjects],
                 ['dataLoaded.metaData', mapView.overlayMenu],
-                ['dataLoaded.metaData', filterView.init],
+                ['dataLoaded.raw_project', filterView.init],
                 ['overlayRequest', mapView.addOverlayData],
                 ['joinedToGeo', mapView.addOverlayLayer],
-                ['dataLoaded.raw_project', mapView.placeProjects],
                 ['previewBuilding', mapView.showPopup],
                 ['filteredData', mapView.filterMap],
                 ['hoverBuildingList', mapView.highlightBuilding]
@@ -45,13 +34,7 @@ var mapView = {
                 
             ]);
             
-            //Initial page layout stuff
-            /*
-            Split(['#filter-panel', '#map-wrapper'], {
-                sizes: [25, 75],
-                minSize: 200
-            });
-            */
+
             this.originalZoom = 11;
             this.originalCenter = [-77, 38.9072];
             //Add the map
@@ -97,71 +80,129 @@ var mapView = {
         }
 
     },
-    onReturn: function(){
-        console.log('nothing to do');
-    },
-    overlayMenu: function(){    
-        mapView.buildOverlayOptions();    
-        mapView.initialOverlays.forEach(function(overlay){
-            new mapView.overlayMenuOption(overlay);
-        });
 
+
+    initialOverlays: [],
+
+    findOverlayConfig: function(key,value){
+        return mapView.initialOverlays.filter(function(v) {
+            return v[key] === value;
+        })[0];
+    },
+    buildOverlayOptions: function(){
+
+        //TODO we want to move this config data into it's own file or to the api
+        mapView.initialOverlays = [
+            {   name:"crime",
+                display_name: "Crime",
+                display_text: "Number of crime incidents reported in the past 3 months.",
+                zones: ["ward","neighborhood_cluster"],
+                aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/",
+                available_aggregates: ["ward", "neighborhood_cluster"],
+                default_layer: "ward"
+            },
+            {   name:"building_permits",
+                display_name: "Building Permits",
+                display_text: "Number of building permits issued in the zone during 2016.",
+                zones: ["ward","neighborhood_cluster"],
+                aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
+                available_aggregates: ["ward", "neighborhood_cluster"],
+                default_layer: "neighborhood_cluster"
+            },
+            {   name:"more_building_permits_1",
+                display_name: "More Building Permits 1",
+                display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
+                zones: ["ward","neighborhood_cluster"],
+                aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
+                available_aggregates: ["ward", "neighborhood_cluster"],
+                default_layer: "neighborhood_cluster"
+            },
+            {   name:"more_building_permits_2",
+                display_name: "More Building Permits 2",
+                display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
+                zones: ["ward","neighborhood_cluster"],
+                aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
+                available_aggregates: ["ward", "neighborhood_cluster"],
+                default_layer: "neighborhood_cluster"
+            },
+            {   name:"more_building_permits_3",
+                display_name: "More Building Permits 3",
+                display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
+                zones: ["ward","neighborhood_cluster"],
+                aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
+                available_aggregates: ["ward", "neighborhood_cluster"],
+                default_layer: "neighborhood_cluster"
+            }
+        ];
+    },
+
+    overlayMenu: function(msg, data){    
+
+        if ( data === true ) {
+            mapView.buildOverlayOptions();    
+            mapView.initialOverlays.forEach(function(overlay){
+                new mapView.overlayMenuOption(overlay);
+            });
+        } else {
+            console.log("ERROR data loaded === false")
+        }
     },
     overlayMenuOption: function(overlay){
-        var thisOption = this;
-        this.name = overlay.name;
-        mapView.overlayMenuOptions.push(this);
+        
 
-        this.link = document.createElement('a');
-        this.link.href = '#';
-        this.link.id = overlay.name + '-overlay-item';
-        this.link.innerHTML = overlay.name.toUpperCase().replace('_',' ');
-        document.getElementById('overlay-menu').appendChild(this.link);
+        var parent = d3.select('#overlay-menu')
+                .classed("ui styled fluid accordion",true)  //semantic UI styling
+            
+        var title = parent.append("div")
+                      .classed("title overlay-title",true);
+            title.append("i")
+                .classed("dropdown icon",true);
+            title.append("span")
+                .classed("title-text",true)
+                .text(overlay.display_name)
+            title.attr("id", "overlay-"+overlay.name); //TODO need to change this to different variable after changing meta logic structure
 
-        this.availableLayerNames = (mapView.initialOverlays.find(function(ovly){
-            return ovly.name === thisOption.name;
-        })).zones;
+        var content = parent.append("div")
+              .classed("content",true)
+              .text(overlay.display_text)
 
-        this.makeAvailable = function(){
-            this.link.className = '';
-            this.link.onclick = function(e){
-                e.preventDefault();
-                var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-                console.log(existingOverlayType, overlay.name);
-                if ( existingOverlayType !== overlay.name ) {
+        $('.ui.accordion').accordion(); //alternately allow multiple to be open: .accordion({'exclusive':false})
+        
+        //Set it up to trigger the layer when title is clicked
+        document.getElementById("overlay-"+overlay.name).addEventListener("click", clickCallback);
+        function clickCallback(){
+            console.log("you clicked on the overlay title for " + overlay.name);
+            var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
+            console.log("changing from " + existingOverlayType + " to " + overlay.name);
+
+            if ( existingOverlayType !== overlay.name ) {
                     setState('overlayRequest', {overlay: overlay.name, activeLayer: getState().mapLayer[0]});                     
                 } else {
                     mapView.clearOverlay();
-                }
-                mapView.layerMenuOptions.forEach(function(opt){
-                    if(thisOption.availableLayerNames.indexOf(opt.name) === -1){
-                        opt.makeUnavailable();
-                    }
-                    else{
-                        opt.makeAvailable();
-                    }
-                });
-            };
-        }
-        this.makeUnavailable = function(){
-            this.link.className = 'unavailable';
-            this.link.onclick = function(e){
-                e.preventDefault();
-            }
+                };
 
-        }
-        // makes the link available by default.
-        this.makeAvailable();
+            //probably not currently working - disabling of layers
+            mapView.layerMenuOptions.forEach(function(opt){
+                if(thisOption.availableLayerNames.indexOf(opt.name) === -1){
+                    opt.makeUnavailable();
+                }
+                else{
+                    opt.makeAvailable();
+                }
+            });
+
+        }; //end clickCallback
     },
-    overlayMenuOptions: [],
-    initialOverlays: [],
-    overlayMapping: {
-        neighborhood: {
-            group:'neighborhood_cluster', // including key-values here if the overlay grouping name is not the same
-                                             // as the name of the mapLayer
-            
-        }
+
+
+
+    
+    onReturn: function(){
+        console.log('nothing to do');
     },
+
+
+
     clearOverlay: function(layer){
         var i = layer === 'previous' ? 1 : 0;
         
@@ -175,33 +216,46 @@ var mapView = {
         if ( i === 0 ) { // i.e. clearing the existing current overlay, with result that none will be visible         
           clearState('overlaySet');
         }
-    },   
+    }, 
+
     addOverlayData: function(msg,data){ // data e.g. { overlay: 'building_permits', activeLayer: 'ward'}]
         if ( data == null) { // ie if the overlays have been cleared
             return;
         }
-        var grouping = mapView.overlayMapping[data.activeLayer] !== undefined ? mapView.overlayMapping[data.activeLayer].group || data.activeLayer : data.activeLayer;
-        if ( getState()['joinedToGeo.' + data.overlay + '-' + data.activeLayer] === undefined ) {
-            function dataCallback() {           
-                controller.joinToGeoJSON(data.overlay,grouping,data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
+
+        var grouping = data.activeLayer
+
+        if ( getState()['joinedToGeo.' + data.overlay + '_' + data.activeLayer] === undefined ) {
+            function dataCallback(d) {
+                if (d.items === null){
+                    //If the data returned is null that aggregation is not available. Use default aggregation instead
+                    //var default_layer = 'ward'; //TODO should make this a config param for each layer so that it can vary
+                    var config = mapView.findOverlayConfig('name',data.overlay)
+                    var default_layer = config.default_layer
+                    setState('mapLayer',default_layer);
+                    setState('overlayRequest', {overlay: data.overlay, activeLayer: default_layer});
+                } else {      
+                    controller.joinToGeoJSON(data.overlay,grouping,data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
+                };
             }
 
-            var dataURLInfo = model.dataCollection.metaData[data.overlay].api;
-
-            var dataURL = dataURLInfo.aggregate_endpoint_base + data.activeLayer;
-            
+            var overlayConfig = mapView.findOverlayConfig('name',data.overlay)
+            var url = overlayConfig.aggregate_endpoint_base + data.activeLayer;
             var dataRequest = {
                 name: data.overlay + "_" + data.activeLayer, //e.g. crime
-                url: dataURL, 
+                url: url, 
                 callback: dataCallback
             };
+
             controller.getData(dataRequest);
         } else {
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
         }
     },
-    addOverlayLayer: function(msg,data){ // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood'}
-        
+
+    addOverlayLayer: function(msg,data){ // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
+        //Called after the data join from addOverlayData's callback
+
         if (mapView.map.getLayer( data.activeLayer + '_' + data.overlay ) === undefined) {
         
             mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
@@ -233,12 +287,20 @@ var mapView = {
         mapView.showOverlayLayer(data.overlay,data.activeLayer);
 
     },
+
     showOverlayLayer: function(overlay, activeLayer){
-      mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
-      mapView.toggleActive('#' + overlay + '-overlay-item')               
-      setState('overlaySet', {overlay: overlay, activeLayer: activeLayer});  
-      mapView.clearOverlay('previous');
-      // TODO: make / show legend
+
+        setState('mapLayer', activeLayer);
+
+        //Toggle the overlay colors themselves
+        mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
+        mapView.toggleActive('#' + overlay + '-overlay-item')               
+        setState('overlaySet', {overlay: overlay, activeLayer: activeLayer});  
+        
+        mapView.clearOverlay('previous');
+
+
+        // TODO: make / show legend
     },
     toggleActive: function(selector){
         d3.select(selector)
@@ -272,15 +334,21 @@ var mapView = {
         }
     ],
     addInitialLayers: function(msg,data){
+
+        //This function adds the zone layers, i.e. ward, zip, etc.
         if ( data === true ) {
             //controller.appendPartial('layer-menu','main-view');
             mapView.initialLayers.forEach(function(layer){  // refers to mapView instead of this bc being called form PubSub
                                                             //  context. `this` causes error
                 mapView.addLayer(layer);
             });            
-        } 
+        } else {
+            console.log("ERROR data loaded === false")
+        };
     },
     addLayer: function(layer){
+        //Adds an individual zone (ward, zip, etc.) to the geoJSON
+
         var layerName = layer.source + 'Layer'; // e.g. 'wardLayer'
         var dataRequest = {
             name: layer.source,  // e.g. ward
@@ -339,102 +407,149 @@ var mapView = {
             });
 
     },
+
+
     layerMenuOptions: [],
+
+
     showLayer: function(msg,data) {
-        
-        var previousLayer = getState().mapLayer[1];
-        if (previousLayer !== undefined ) {
-            mapView.clearOverlay();
-            mapView.map.setLayoutProperty(previousLayer + 'Layer', 'visibility', 'none');            
+        //'data' is the name of the zone type (layer) to show
+
+        //first clear all existing layers
+        var layerChoices = mapView.initialLayers.map(function(i) {
+            return i['source']
+        })
+
+
+        for (var i = 0; i < layerChoices.length; i++) {
+            mapView.map.setLayoutProperty(layerChoices[i] + 'Layer', 'visibility', 'none');
         }
+
+        var previousOverlayState = getState().overlaySet
+        var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
+        if (previousOverlayState !== undefined ) {
+            var previousLayer = previousOverlayState[0].activeLayer
+            mapView.clearOverlay();
+        }
+        
+        //Toggle boundaries ('layer')
         mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
+
+        //Make sure the menu reflects the current choice
         d3.selectAll('#layer-menu a')
             .attr('class','');
         d3.select('#' + data + '-menu-item')
             .attr('class','active');
 
+        //Keep the currently selected overlay data choice with the new zone type
+        if (existingOverlayType !== null){
+            setState('overlayRequest', {overlay: existingOverlayType, activeLayer: data});
+        };
+
+
     },
-    placeProjects: function(){ // some repetition here with the addLayer function used for zone layers. could be DRYer if combines
-                               // or if used constructor with prototypical inheritance
-        mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
-        mapView.convertedProjects.features.forEach(function(feature){
-            feature.properties.matches_filters = true;
-        });
-        mapView.listBuildings();
-        mapView.map.addSource('project', {
-          'type': 'geojson',
-          'data': mapView.convertedProjects
-        });
-        mapView.circleStrokeWidth =  1;
-        mapView.circleStrokeOpacity =  1;
-        mapView.map.addLayer({
-            'id': 'project',
-            'type': 'circle',
-            'source': 'project',
-            'paint': {
-                'circle-radius': {
-                    'base': 1.75,
-                    'stops': [[12, 3], [15, 32]]
-                }, 
-                'circle-opacity': 0.3,      
-                'circle-color': {
-                      property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
-                      type: 'categorical',
-                      stops: [ 
-                        ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                        ['2 - Expiring Subsidy', '#8B4225'],
-                        ['3 - Recent Failing REAC Score', '#bd0026'],
-                        ['4 - More Info Needed', '#A9A9A9'],
-                        ['5 - Other Subsidized Property', ' #fd8d3c'],
-                        ['6 - Lost Rental', '#A9A9A9']
-                      ]
-                },
-            'circle-stroke-width': mapView.circleStrokeWidth,
-            'circle-stroke-opacity': mapView.circleStrokeOpacity,
-            
-            'circle-stroke-color': {
-                property: 'category_code', 
-                      type: 'categorical',
-                      stops: [ 
-                        ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                        ['2 - Expiring Subsidy', '#8B4225'],
-                        ['3 - Recent Failing REAC Score', '#bd0026'],
-                        ['4 - More Info Needed', '#A9A9A9'],
-                        ['5 - Other Subsidized Property', ' #fd8d3c'],
-                        ['6 - Lost Rental', '#A9A9A9']
-                      ]
-                }
-            }
-        });
-       // TODO: MAKE LEGEND
-        mapView.map.on('mousemove', function(e) {
-             //get the province feature underneath the mouse
-             var features = mapView.map.queryRenderedFeatures(e.point, {
-                 layers: ['project']
-             });
-             //if there's a point under our mouse, then do the following.
-             if (features.length > 0) {
-                 //use the following code to change the 
-                 //cursor to a pointer ('pointer') instead of the default ('')
-                 mapView.map.getCanvas().style.cursor = (features[0].properties.proj_addre != null) ? 'pointer' : '';
-             }
-             //if there are no points under our mouse, 
-             //then change the cursor back to the default
-             else {
-                 mapView.map.getCanvas().style.cursor = '';
-             }
-        });
-        mapView.map.on('click', function (e) {
-            console.log(e);
-            var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
-            console.log(building);
-            if ( building === undefined ) return;
-            setState('previewBuilding', building);
-           });               
-        
+
+    placeProjects: function(msg,data){ // some repetition here with the addLayer function used for zone layers. could be DRYer if combined
+                                       // or if used constructor with prototypical inheritance
+        if ( data === true ) {
+            //msg and data are from the pubsub module that this init is subscribed to. 
+            //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
+            console.log(msg,data);
+            var dataURLInfo = model.dataCollection.metaData.project.api;
+            var dataURL = dataURLInfo.raw_endpoint;
+            var dataRequest = {
+                    name: 'raw_project',
+                    url: dataURL, 
+                    callback: dataCallback
+                };
+            controller.getData(dataRequest);
+
+            function dataCallback() {   
+                console.log('in callback');     
+                mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
+                mapView.convertedProjects.features.forEach(function(feature){
+                    feature.properties.matches_filters = true;
+                });
+                mapView.listBuildings();
+                mapView.map.addSource('project', {
+                  'type': 'geojson',
+                  'data': mapView.convertedProjects
+                });
+                mapView.circleStrokeWidth =  1;
+                mapView.circleStrokeOpacity =  1;
+                mapView.map.addLayer({
+                    'id': 'project',
+                    'type': 'circle',
+                    'source': 'project',
+                    'paint': {
+                        'circle-radius': {
+                            'base': 1.75,
+                            'stops': [[12, 3], [15, 32]]
+                        }, 
+                        'circle-opacity': 0.3,      
+                        'circle-color': {
+                              property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
+                              type: 'categorical',
+                              stops: [ 
+                                ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                ['2 - Expiring Subsidy', '#8B4225'],
+                                ['3 - Recent Failing REAC Score', '#bd0026'],
+                                ['4 - More Info Needed', '#A9A9A9'],
+                                ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                ['6 - Lost Rental', '#A9A9A9']
+                              ]
+                        },
+                    'circle-stroke-width': mapView.circleStrokeWidth,
+                    'circle-stroke-opacity': mapView.circleStrokeOpacity,
+                    
+                    'circle-stroke-color': {
+                        property: 'category_code', 
+                              type: 'categorical',
+                              stops: [ 
+                                ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                ['2 - Expiring Subsidy', '#8B4225'],
+                                ['3 - Recent Failing REAC Score', '#bd0026'],
+                                ['4 - More Info Needed', '#A9A9A9'],
+                                ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                ['6 - Lost Rental', '#A9A9A9']
+                              ]
+                        }
+                    }
+                });
+               // TODO: MAKE LEGEND
+                mapView.map.on('mousemove', function(e) {
+                     //get the province feature underneath the mouse
+                     var features = mapView.map.queryRenderedFeatures(e.point, {
+                         layers: ['project']
+                     });
+                     //if there's a point under our mouse, then do the following.
+                     if (features.length > 0) {
+                         //use the following code to change the 
+                         //cursor to a pointer ('pointer') instead of the default ('')
+                         mapView.map.getCanvas().style.cursor = (features[0].properties.proj_addre != null) ? 'pointer' : '';
+                     }
+                     //if there are no points under our mouse, 
+                     //then change the cursor back to the default
+                     else {
+                         mapView.map.getCanvas().style.cursor = '';
+                     }
+                });
+                mapView.map.on('click', function (e) {
+                    console.log(e);
+                    var building = (mapView.map.queryRenderedFeatures(e.point, { layers: ['project'] }))[0];
+                    console.log(building);
+                    if ( building === undefined ) return;
+                    setState('previewBuilding', building);
+                   });               
+            } // end dataCallback
+        } else {
+             console.log("ERROR data loaded === false");
+        }
+
     },
+
     showPopup: function(msg,data){
-console.log(data);
+            console.log(data);
 
             if ( document.querySelector('.mapboxgl-popup') ){                
                 d3.select('.mapboxgl-popup')
@@ -506,8 +621,8 @@ console.log(data);
                 return feature.properties.matches_filters === true;
             });
 
-            d3.select('#buildings.sub-nav-container h2')
-             .text(data.length + ' matching');
+            d3.select('#matching-count')
+             .text('(' + data.length + ')');
 
             var t = d3.transition()
               .duration(750);

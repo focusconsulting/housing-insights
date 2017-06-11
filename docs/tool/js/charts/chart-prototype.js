@@ -8,6 +8,8 @@ var ChartProto = function(chartOptions) {    //chartOptions is an object, was DA
 ChartProto.prototype = {
     
     initialize: function(chartOptions) {
+      chartOptions.dataRequest.callback = chartCallback;  
+
       var chart = this; 
       this.field = chartOptions.field;
       this.width = chartOptions.width;
@@ -24,10 +26,10 @@ ChartProto.prototype = {
         .attr('text-anchor','middle');
         
        
-      chartOptions.dataRequest.callback = chartCallback;     
     
-      controller.getData(chartOptions.dataRequest) // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
+      controller.getData(chartOptions.dataRequest); // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
       function chartCallback(data){
+        console.log('chartProto callback',chart);
         chart.data = data.items;
         if (chartOptions.sort !== undefined ) {
           chart.data.sort(function(a, b) { 
@@ -36,14 +38,16 @@ ChartProto.prototype = {
           });            
         }
         chart.minValue = d3.min(chart.data, function(d) { 
-              return d[chartOptions.field]
+              if (chartOptions.field) return d[chartOptions.field];
+                return null;
         });
         chart.maxValue = d3.max(chart.data, function(d) { 
-              return d[chartOptions.field]
+              if (chartOptions.field) return d[chartOptions.field];
+              return null;
         });
-
+        console.log(chart.setupType);
         // The below 'if' block is necessary because SubsidyTimlineChart cannot access its own setupType function during the necessary ChartProto.call() call.
-        if (typeof chart.setupType === "function"){ chart.setupType(chartOptions); }
+        if (typeof chart.setupType === "function"){ console.log('calling setupType'); chart.setupType(chartOptions); }
       }
 
     },                       
