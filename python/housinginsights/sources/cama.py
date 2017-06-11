@@ -2,7 +2,7 @@ from pprint import pprint
 import os
 import sys
 import requests
-from collections import OrderedDict
+from collections import OrderedDictq
 import csv
 import datetime
 
@@ -67,8 +67,9 @@ class MarApiConn_2(BaseApiConn):
 
 class CamaApiConn(BaseApiConn):
     """
-    API Interface to the Master Address Record (MAR) database.
-    Use public methods to retrieve data.
+    API Interface to the Computer Assisted Mass Appraisal - Residential (CAMA)
+    API, to obtain SSL numbers to use as input for the  MarApiConn_2 and get
+    the corresponding housing and bedroom units.
     """
 
     BASEURL = 'https://opendata.arcgis.com/datasets'
