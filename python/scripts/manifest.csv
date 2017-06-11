@@ -36,3 +36,4 @@ use,crime,crime_2016,api,12/31/2016,utf-8,../../../data,https://s3.amazonaws.com
 use,crime,crime_2017,api,4/3/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2017.csv,
 use,wmata_dist,wmata_dist_20170215,api,5/24/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist_updated_headers.csv,
 use,wmata_info,wmata_info_20170215,api,5/24/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/wmata_stops.csv,
+use,Zone_HousingUnit_Bedrm_Count,zoneUnitCount,api,06/06/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,processed/zoneUnitCount/zoneUnitCount_2017-06-03.csv,total count of housing units and bedrm in a zone
