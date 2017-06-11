@@ -27,6 +27,7 @@ var mapView = {
                 ['dataLoaded.raw_project', filterView.init],
                 ['overlayRequest', mapView.addOverlayData],
                 ['joinedToGeo', mapView.addOverlayLayer],
+                ['overlaySet', chloroplethLegend.init],
                 ['previewBuilding', mapView.showPopup],
                 ['filteredData', mapView.filterMap],
                 ['hoverBuildingList', mapView.highlightBuilding]
@@ -80,8 +81,35 @@ var mapView = {
         }
 
     },
+    ChloroplethColorRange: function(chloroData){
+        // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
+        // make a chloropleth map with a single color, but if you try to,
+        // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
+        // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
+        var CHLOROPLETH_STOP_COUNT = 5;
+        var MIN_COLOR = "#fff";
+        var MAX_COLOR = "#1e5cdf";
+        var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
+            return d.count;
+        });
+        var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
+            return d.count;
+        });
+        var colorScale = d3.scaleLinear()
+            .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
+            .range([MIN_COLOR, MAX_COLOR]);
 
+        this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
+            var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
+            var domainValue = Math.round(MAX_DOMAIN_VALUE - (stopIncrement * i));
+            var rangeValue = colorScale(domainValue);
+            return [domainValue, rangeValue];
+        });
 
+        this.stopsAscending = this.stops.sort(function(a,b){
+            return a[0] - b[0];
+        });
+    },
     initialOverlays: [],
 
     findOverlayConfig: function(key,value){
@@ -164,6 +192,7 @@ var mapView = {
 
         var content = parent.append("div")
               .classed("content",true)
+              .attr("id", "overlay-about-"+overlay.name)
               .text(overlay.display_text)
 
         $('.ui.accordion').accordion(); //alternately allow multiple to be open: .accordion({'exclusive':false})
@@ -260,14 +289,12 @@ var mapView = {
         
             mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                                                                                                      // it is not dynamically connected to the
-                                                                                                     // dataCollection           
+            var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;                                                                                     // dataCollection           
+    
+            // assign the chloropleth color range to the data so we can use it for other
+            // purposes when the state is changed
+            data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse);
 
-            var minValue = d3.min(model.dataCollection[data.overlay + '_' + data.grouping].items, function(d){
-                return d.count;
-            });
-            var maxValue = d3.max(model.dataCollection[data.overlay + '_' + data.grouping].items, function(d){
-                return d.count;
-            });
             mapView.map.addLayer({
               'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
               'type': 'fill',
@@ -278,7 +305,7 @@ var mapView = {
               'paint': {
                 'fill-color': {
                   'property': data.overlay,          
-                  'stops': [[minValue, "#fff"], [maxValue, "#1e5cdf"]]
+                  'stops': data.chloroplethRange.stopsAscending
                 },
                 'fill-opacity': .5
               }

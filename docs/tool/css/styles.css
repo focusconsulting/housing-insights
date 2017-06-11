@@ -187,8 +187,6 @@ html, body {
 }
     
 
-}
-
 #zone-selector {
     width: 120px;   
 }
@@ -400,3 +398,23 @@ Currently only used in layers but can be adapted to filters too
 .ui.styled.accordion .active.title.filter-title.filter-activated {
     background: rgba(234,100,2,0.7);
 }
+/* chloroplath legend */
+
+#chloroplethLegend ul {
+  list-style: none;
+}
+
+.chloroplethLegendSquare {
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  border: solid rgba(0,0,0,0.3) 1px;
+  margin-right: 5px;
+}
+
+#chloroplethLegend{
+    display: block;
+    position: relative;
+    width: 100%;
+} 
