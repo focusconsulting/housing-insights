@@ -2,7 +2,7 @@ from pprint import pprint
 import os
 import sys
 import requests
-from collections import OrderedDict
+from collections import OrderedDictq
 import csv
 import datetime
 
@@ -10,10 +10,9 @@ PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
 sys.path.append(PYTHON_PATH)
 
 from housinginsights.sources.base import BaseApiConn
-from housinginsights.sources.models.mar import MarResult, FIELDS
 
 
-class MarApiConn(BaseApiConn):
+class MarApiConn_2(BaseApiConn):
     """
     API Interface to the Master Address Record (MAR) database.
     Use public methods to retrieve data.
@@ -22,7 +21,7 @@ class MarApiConn(BaseApiConn):
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
     def __init__(self):
-        super().__init__(MarApiConn.BASEURL)
+        super().__init__(MarApiConn_2.BASEURL)
 
     def get_data(self, square, lot, suffix):
         """
@@ -68,8 +67,9 @@ class MarApiConn(BaseApiConn):
 
 class CamaApiConn(BaseApiConn):
     """
-    API Interface to the Master Address Record (MAR) database.
-    Use public methods to retrieve data.
+    API Interface to the Computer Assisted Mass Appraisal - Residential (CAMA)
+    API, to obtain SSL numbers to use as input for the  MarApiConn_2 and get
+    the corresponding housing and bedroom units.
     """
 
     BASEURL = 'https://opendata.arcgis.com/datasets'
@@ -84,7 +84,7 @@ class CamaApiConn(BaseApiConn):
         by get_csv() method.
         """
 
-        mar_api = MarApiConn()
+        mar_api = MarApiConn_2()
         result = self.get(urlpath='/c5fb3fbe4c694a59a6eef7bf5f8bc49a_25.geojson', params=None)
 
         if result.status_code != 200:
@@ -203,6 +203,6 @@ class CamaApiConn(BaseApiConn):
             dict_writer.writeheader()
             dict_writer.writerows(toCSV)
 
-
+if __name__ == '__main__':
 my_api = CamaApiConn()
 csvfile = my_api.get_csv()
