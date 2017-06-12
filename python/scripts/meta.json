@@ -3524,11 +3524,11 @@
         "type": "decimal"
       },
       {
-        "display_name": "fulladdress",
+        "display_name": "address_std",
         "display_text": "",
         "required_in_source": true,
         "source_name": "FULLADDRESS",
-        "sql_name": "fulladdress",
+        "sql_name": "address_std",
         "type": "text"
       },
       {
