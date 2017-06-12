@@ -250,10 +250,8 @@ class WmataApiConn(BaseApiConn):
                     if ( row != None ):
                         conn.close()
                         engine.dispose()
-                        result = []
-                        for r in row:
-                            result.append(r)
-                        return result
+                        index = columns.index("dist_in_miles")
+                        return row[index]*self.meters_per_mile
 
                 conn.close()
                 engine.dispose()
