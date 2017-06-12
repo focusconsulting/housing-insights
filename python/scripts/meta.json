@@ -187,7 +187,7 @@
         "display_text": "Neighborhood cluster description",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
-        "sql_name": "cluster_desc",
+        "sql_name": "neighborhood_cluster_desc",
         "type": "text"
       },
       {
@@ -235,7 +235,7 @@
         "display_text": "Population weight for counts (Pop / Pop_tr10)",
         "required_in_source": true,
         "source_name": "Popwt",
-        "sql_name": "population_weight_in_tract",
+        "sql_name": "population_weight_counts",
         "type": "decimal"
       },
       {
@@ -243,7 +243,7 @@
         "display_text": "Population weight for proportions (Pop / Pop_cltr00)",
         "required_in_source": true,
         "source_name": "Popwt_prop",
-        "sql_name": "population_weight_in_cluster",
+        "sql_name": "population_weight_proportions",
         "type": "decimal"
       },
       {
@@ -273,7 +273,7 @@
         "display_text": "Ward description",
         "required_in_source": true,
         "source_name": "Ward2012",
-        "sql_name": "ward_desc",
+        "sql_name": "ward",
         "type": "text"
       },
       {
@@ -321,7 +321,7 @@
         "display_text": "Population weight for counts (Pop / Pop_tr10)",
         "required_in_source": true,
         "source_name": "Popwt",
-        "sql_name": "population_weight_in_tract",
+        "sql_name": "population_weight_counts",
         "type": "decimal"
       },
       {
@@ -329,7 +329,7 @@
         "display_text": "Population weight for proportions (Pop / Pop_wd12)",
         "required_in_source": true,
         "source_name": "Popwt_prop",
-        "sql_name": "population_weight_in_ward",
+        "sql_name": "population_weight_proportions",
         "type": "decimal"
       },
       {
