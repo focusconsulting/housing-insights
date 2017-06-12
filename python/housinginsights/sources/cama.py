@@ -2,7 +2,7 @@ from pprint import pprint
 import os
 import sys
 import requests
-from collections import OrderedDictq
+from collections import OrderedDict
 import csv
 import datetime
 
@@ -26,7 +26,7 @@ class MarApiConn_2(BaseApiConn):
     def get_data(self, square, lot, suffix):
         """
         Get information on a location based on a simple query string.
-        
+
         :param square: SSL first part
         :type  location: String.
         :param lot: SSL second part
@@ -93,7 +93,7 @@ class CamaApiConn(BaseApiConn):
         cama_data = result.json()
 
         """
-        Example of: anc_count = [OrderedDict([('zone_type', 'anc'), ('zone', 'ANC 2B'), 
+        Example of: anc_count = [OrderedDict([('zone_type', 'anc'), ('zone', 'ANC 2B'),
                                 ('housing_unit_count', 10), ('bedroom_unit_count', 10)], etc)]
         """
         zone_types = ['anc', 'census_tract', 'neighborhood_cluster', 'ward', 'zip']
