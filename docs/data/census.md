@@ -1,5 +1,4 @@
 ---
----
 layout: datasource
 tablename:
 title: Census
