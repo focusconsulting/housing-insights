@@ -5,6 +5,7 @@ import requests
 from collections import OrderedDict
 import csv
 import datetime
+import logging
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 sys.path.append(PYTHON_PATH)
@@ -83,7 +84,8 @@ class CamaApiConn(BaseApiConn):
         Return the count data (in dictionary form) to be processed into csv
         by get_csv() method.
         """
-
+        logging.info("Starting CAMA")
+        
         mar_api = MarApiConn_2()
         result = self.get(urlpath='/c5fb3fbe4c694a59a6eef7bf5f8bc49a_25.geojson', params=None)
 
@@ -91,6 +93,7 @@ class CamaApiConn(BaseApiConn):
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
         cama_data = result.json()
+        logging.info("  Got cama_data. Length:".format(cama_data['features'].length))
 
         """
         Example of: anc_count = [OrderedDict([('zone_type', 'anc'), ('zone', 'ANC 2B'),
@@ -117,7 +120,8 @@ class CamaApiConn(BaseApiConn):
         as of June 2017. We eliminate all data points that are under construction and
         don't provide any housing units and bedrm at this time.
         """
-        for row in cama_data['features']:
+        for index, row in enumerate(cama_data['features']):
+            logging.info("  trying row {}".format(index))
             try:
                 current_year = int(datetime.date.today().strftime('%Y'))
                 #Skipping none values for units under construction
@@ -204,5 +208,11 @@ class CamaApiConn(BaseApiConn):
             dict_writer.writerows(toCSV)
 
 if __name__ == '__main__':
-my_api = CamaApiConn()
-csvfile = my_api.get_csv()
+
+    # Pushes everything from the logger to the command line output as well.
+    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir,"logs","sources.log"))
+    logging.basicConfig(filename=log_path, level=logging.DEBUG)
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    my_api = CamaApiConn()
+    csvfile = my_api.get_csv()
