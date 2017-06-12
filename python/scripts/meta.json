@@ -183,11 +183,11 @@
         "type": "text"
       },
       {
-        "display_name": "Neighborhood cluster description",
-        "display_text": "Neighborhood cluster description",
+        "display_name": "Neighborhood cluster",
+        "display_text": "Neighborhood cluster",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
-        "sql_name": "neighborhood_cluster_desc",
+        "sql_name": "neighborhood_cluster",
         "type": "text"
       },
       {
