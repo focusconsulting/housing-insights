@@ -3778,11 +3778,11 @@
         "type": "text"
       },
       {
-        "display_name": "m_city",
+        "display_name": "city",
         "display_text": "Geocoded city result.",
         "required_in_source": true,
         "source_name": "M_CITY",
-        "sql_name": "m_city",
+        "sql_name": "city",
         "type": "text"
       },
       {
