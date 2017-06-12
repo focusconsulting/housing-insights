@@ -2233,19 +2233,19 @@
         "type": "text"
       },
       {
-        "display_name": "proj_x",
+        "display_name": "xcoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_x",
-        "sql_name": "proj_x",
+        "sql_name": "xcoord",
         "type": "decimal"
       },
       {
-        "display_name": "proj_y",
+        "display_name": "ycoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_y",
-        "sql_name": "proj_y",
+        "sql_name": "ycoord",
         "type": "decimal"
       },
       {
