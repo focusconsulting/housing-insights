@@ -3436,7 +3436,7 @@
         "type": "text"
       },
       {
-        "display_name": "mar_ward",
+        "display_name": "ward",
         "display_text": "",
         "required_in_source": true,
         "source_name": "MAR_WARD",
