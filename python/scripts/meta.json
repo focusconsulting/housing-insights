@@ -3786,11 +3786,11 @@
         "type": "text"
       },
       {
-        "display_name": "m_state",
+        "display_name": "state",
         "display_text": "Geocoded state result.",
         "required_in_source": true,
         "source_name": "M_STATE",
-        "sql_name": "m_state",
+        "sql_name": "state",
         "type": "text"
       },
       {
