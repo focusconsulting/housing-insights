@@ -547,7 +547,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "zipcode",
+        "display_name": "zip",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ZIPCODE",
@@ -2041,7 +2041,7 @@
         "type": "text"
       },
       {
-        "display_name": "Zip code",
+        "display_name": "zip",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Zip",
@@ -3794,7 +3794,7 @@
         "type": "text"
       },
       {
-        "display_name": "m_zip",
+        "display_name": "zip",
         "display_text": "Geocoded ZIP code result.",
         "required_in_source": true,
         "source_name": "M_ZIP",
