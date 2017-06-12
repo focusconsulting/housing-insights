@@ -310,15 +310,10 @@ class WmataApiConn(BaseApiConn):
 
             if crow_distance < (radiusinmeters / self.meters_per_mile):
                 walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']),db=db)
-                if type(walkDist) is not list:
-                    walkDistMiles = walkDist / self.meters_per_mile
-
-                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
-
-                    if walkDist <=radiusinmeters:
-                        self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),crow_distance, lat,lon,str(station['Lat']),str(station['Lon'])])
-                else:
-                    self.distOutput.append(walkDist)
+                walkDistMiles = walkDist / self.meters_per_mile
+                logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                if walkDist <=radiusinmeters:
+                    self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),crow_distance, lat,lon,str(station['Lat']),str(station['Lon'])])
 
             else:
                 logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
@@ -363,15 +358,10 @@ class WmataApiConn(BaseApiConn):
 
             if crow_distance < (radiusinmeters / self.meters_per_mile):
                 walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
-
-                if type(walkDist) is not list:
-                    walkDistMiles = walkDist / self.meters_per_mile
-                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
-
-                    if walkDist <= radiusinmeters: #within 0.5 miles walking
-                        self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),crow_distance,lat,lon,str(stop['Lat']),str(stop['Lon'])])
-                else:
-                    self.distOutput.append(walkDist)
+                walkDistMiles = walkDist / self.meters_per_mile
+                logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                if walkDist <= radiusinmeters: #within 0.5 miles walking
+                    self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),crow_distance,lat,lon,str(stop['Lat']),str(stop['Lon'])])
 
             else:
                 logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
