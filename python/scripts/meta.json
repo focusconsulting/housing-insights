@@ -171,6 +171,178 @@
     ],
     "replace_table": false
   },
+  "census_tract_to_neighborhood_cluster": {
+    "cleaner": "CensusTractToNeighborhoodClusterCleaner",
+    "fields": [
+      {
+        "display_name": "Census tract",
+        "display_text": "Census tract",
+        "required_in_source": true,
+        "source_name": "Geo2010",
+        "sql_name": "census_tract",
+        "type": "text"
+      },
+      {
+        "display_name": "Neighborhood cluster",
+        "display_text": "Neighborhood cluster",
+        "required_in_source": true,
+        "source_name": "Cluster_tr2000",
+        "sql_name": "neighborhood_cluster",
+        "type": "text"
+      },
+      {
+        "display_name": "Cluster tract population",
+        "display_text": "Neighborhood Cluster-Tract piece population",
+        "required_in_source": true,
+        "source_name": "Pop",
+        "sql_name": "cluster_tract_population",
+        "type": "integer"
+      },
+      {
+        "display_name": "Tract pieces",
+        "display_text": "Tract pieces split by Neighborhood Cluster",
+        "required_in_source": true,
+        "source_name": "Pieces_tr10",
+        "sql_name": "num_tract_pieces_in_cluster",
+        "type": "integer"
+      },
+      {
+        "display_name": "Tract population",
+        "display_text": "Tract population",
+        "required_in_source": true,
+        "source_name": "Pop_tr10",
+        "sql_name": "tract_population",
+        "type": "integer"
+      },
+      {
+        "display_name": "Cluster pieces",
+        "display_text": "Neighborhood Cluster pieces split by Tract",
+        "required_in_source": true,
+        "source_name": "Pieces_cltr00",
+        "sql_name": "num_cluster_pieces_in_tract",
+        "type": "integer"
+      },
+      {
+        "display_name": "Cluster population",
+        "display_text": "Cluster population",
+        "required_in_source": true,
+        "source_name": "Pop_cltr00",
+        "sql_name": "cluster_population",
+        "type": "integer"
+      },
+      {
+        "display_name": "Population weight in tract",
+        "display_text": "Population weight for counts (Pop / Pop_tr10)",
+        "required_in_source": true,
+        "source_name": "Popwt",
+        "sql_name": "population_weight_counts",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Population weight in cluster",
+        "display_text": "Population weight for proportions (Pop / Pop_cltr00)",
+        "required_in_source": true,
+        "source_name": "Popwt_prop",
+        "sql_name": "population_weight_proportions",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      }
+    ],
+    "replace_table": false
+  },
+  "census_tract_to_ward": {
+    "cleaner": "CensusTractToWardCleaner",
+    "fields": [
+      {
+        "display_name": "Census tract",
+        "display_text": "Census tract",
+        "required_in_source": true,
+        "source_name": "Geo2010",
+        "sql_name": "census_tract",
+        "type": "text"
+      },
+      {
+        "display_name": "Ward description",
+        "display_text": "Ward description",
+        "required_in_source": true,
+        "source_name": "Ward2012",
+        "sql_name": "ward",
+        "type": "text"
+      },
+      {
+        "display_name": "Ward tract population",
+        "display_text": "Ward-Tract piece population",
+        "required_in_source": true,
+        "source_name": "Pop",
+        "sql_name": "ward_tract_population",
+        "type": "integer"
+      },
+      {
+        "display_name": "Tract pieces",
+        "display_text": "Tract pieces split by Ward",
+        "required_in_source": true,
+        "source_name": "Pieces_tr10",
+        "sql_name": "num_tract_pieces_in_ward",
+        "type": "integer"
+      },
+      {
+        "display_name": "Tract population",
+        "display_text": "Tract population",
+        "required_in_source": true,
+        "source_name": "Pop_tr10",
+        "sql_name": "tract_population",
+        "type": "integer"
+      },
+      {
+        "display_name": "Ward pieces",
+        "display_text": "Ward pieces split by Tract",
+        "required_in_source": true,
+        "source_name": "Pieces_wd12",
+        "sql_name": "num_ward_pieces_in_tract",
+        "type": "integer"
+      },
+      {
+        "display_name": "Ward population",
+        "display_text": "Ward population",
+        "required_in_source": true,
+        "source_name": "Pop_wd12",
+        "sql_name": "ward_population",
+        "type": "integer"
+      },
+      {
+        "display_name": "Population weight in tract",
+        "display_text": "Population weight for counts (Pop / Pop_tr10)",
+        "required_in_source": true,
+        "source_name": "Popwt",
+        "sql_name": "population_weight_counts",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Population weight in ward",
+        "display_text": "Population weight for proportions (Pop / Pop_wd12)",
+        "required_in_source": true,
+        "source_name": "Popwt_prop",
+        "sql_name": "population_weight_proportions",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      }
+    ],
+    "replace_table": false
+  },
   "building_permits": {
     "cleaner": "BuildingPermitsCleaner",
     "fields": [
