@@ -551,7 +551,7 @@
         "display_text": "",
         "required_in_source": true,
         "source_name": "ZIPCODE",
-        "sql_name": "zipcode",
+        "sql_name": "zip",
         "type": "text"
       },
       {
@@ -3440,7 +3440,7 @@
         "display_text": "",
         "required_in_source": true,
         "source_name": "MAR_WARD",
-        "sql_name": "mar_ward",
+        "sql_name": "ward",
         "type": "text"
       },
       {
@@ -3678,7 +3678,7 @@
         "display_text": "The Advisory Neighborhood Committee of the address of TOPA notice as designated in 2012.",
         "required_in_source": true,
         "source_name": "Anc2012",
-        "sql_name": "anc2012",
+        "sql_name": "anc",
         "type": "text"
       },
       {
@@ -3686,7 +3686,7 @@
         "display_text": "Tract-based neighborhood cluster data from 2000 associated with address of TOPA notice.",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
-        "sql_name": "cluster_tr2000",
+        "sql_name": "neighborhood_cluster",
         "type": "text"
       },
       {
@@ -3702,7 +3702,7 @@
           "display_text": "Full census tract ID from 2010 associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "Geo2010",
-        "sql_name": "geo2010",
+        "sql_name": "census_tract",
         "type": "text"
       },
       {
@@ -3798,7 +3798,7 @@
         "display_text": "Geocoded ZIP code result.",
         "required_in_source": true,
         "source_name": "M_ZIP",
-        "sql_name": "m_zip",
+        "sql_name": "zip",
         "type": "decimal"
       },
       {

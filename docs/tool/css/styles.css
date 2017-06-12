@@ -157,6 +157,7 @@ html, body {
     height: 40px;
     border-bottom: 1px solid black;
     position: absolute;
+
     box-shadow: 0 8px 17px #fff;
     z-index: 99;
 }
@@ -202,6 +203,7 @@ html, body {
     border-right-width: 0;
     border-left: 1px solid rgb(189, 54, 33);
 }
+
 #buildings-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
@@ -237,6 +239,7 @@ html, body {
     transition: transform 0.2s linear;
     z-index: 9999;
 }
+
 #sidebar-left .sidebar-tab {
     right: 0;
     transform: translate(20px, 0);
