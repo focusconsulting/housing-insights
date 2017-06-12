@@ -4,33 +4,30 @@
     box-sizing: border-box;
 }
 
-
-html, body { 
-  margin:0; 
-  padding:0; 
-  height:100%; 
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
 }
 
 #main-nav {
     background-color: rgb(189, 54, 33);
-    color:#fff;
+    color: #fff;
     width: 100%;
     height: 40px;
     z-index: 9999;
     position: fixed;
-
 }
 
 #sub-nav {
     width: 100%;
-    position:absolute;
+    position: absolute;
     top: 40px;
     color: inherit;
     background-color: #d69c93;
     height: 40px;
     display: flex;
     justify-content: space-between;
-    
 }
 
 .sub-nav-button {
@@ -43,12 +40,11 @@ html, body {
 }
 
 .sub-nav-container {
-    position: relative; 
-    margin-top: 40px;  
+    position: relative;
+    margin-top: 40px;
     display: none;
     overflow-y: auto;
     padding-top: 10px;
-    
 }
 
 .sub-nav-container.active {
@@ -57,14 +53,12 @@ html, body {
 }
 
 #buildings-list {
-    
-    margin-top:105px;
+    margin-top: 105px;
 }
 
 #left-options .sub-nav-button {
     border-right: 2px solid rgb(189, 54, 33);
 }
-
 
 #right-options .sub-nav-button {
     border-left: 2px solid rgb(189, 54, 33);
@@ -97,9 +91,9 @@ html, body {
     overflow: hidden;
 }
 
-.main-view:not(#map-view){
+.main-view:not(#map-view) {
     position: relative;
-    top:40px;
+    top: 40px;
 }
 
 .main-view.fade {
@@ -111,15 +105,15 @@ html, body {
 }
 
 .main-view.transition-right {
-    transform: translate(100%,0);
+    transform: translate(100%, 0);
 }
 
 .main-view.transition-left {
-    transform: translate(-100%,0);
+    transform: translate(-100%, 0);
 }
 
 .legend {
-    background-color: rgba(255,255,255,.85);
+    background-color: rgba(255, 255, 255, .85);
     padding: 10px;
     position: absolute;
     bottom: 0;
@@ -144,17 +138,16 @@ html, body {
     height: 10px;
     margin-right: 5px;
     width: 10px;
-    }
-
+}
 
 .sidebar-inner-wrapper {
     position: absolute;
     top: 0px;
-    bottom: 0px;    
+    bottom: 0px;
     background-color: #fff;
     display: flex;
     flex-direction: column;
-    width:100%;
+    width: 100%;
 }
 
 .sidebar-inner-wrapper:before {
@@ -164,15 +157,13 @@ html, body {
     height: 40px;
     border-bottom: 1px solid black;
     position: absolute;
-        box-shadow: 0 8px 17px #fff;
+
+    box-shadow: 0 8px 17px #fff;
     z-index: 99;
 }
 
-
-.sidebar-inner-wrapper > div {
-    
+.sidebar-inner-wrapper>div {
     flex-grow: 1;
-    
 }
 
 #pie-charts {
@@ -182,17 +173,14 @@ html, body {
     width: 100%;
     box-shadow: 0 8px 17px #fff;
     background-color: #fff;
-        top: 40px;
+    top: 40px;
     padding-top: 10px;
 }
-    
 
-}
 
 #zone-selector {
-    width: 120px;   
+    width: 120px;
 }
-
 .sidebar {
     position: absolute;
     width: 100%;
@@ -200,49 +188,48 @@ html, body {
     top: 80px;
     bottom: 0;
     z-index: 9999;
-    background-color: rgba(255,255,255,0.95 );
-    transform: translate(-100%,0);
+    background-color: rgba(255, 255, 255, 0.95);
+    transform: translate(-100%, 0);
     transition: transform 0.2s linear;
     border-right: 1px solid rgb(189, 54, 33);
-
 }
 .sidebar.active {
-    transform: translate(0,0) !important;
+    transform: translate(0, 0) !important;
 }
-
 #sidebar-right {
-    right:0;
+    right: 0;
     max-width: 350px;
-    transform: translate(100%,0);
+    transform: translate(100%, 0);
     border-right-width: 0;
     border-left: 1px solid rgb(189, 54, 33);
 }
 
-#buildings-list > div {
-    
+#buildings-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
     margin-bottom: 0;
-    opacity: 0;  
+    opacity: 0;
     cursor: pointer;
-    
 }
-
-#buildings-list > div:hover p {
+#buildings-list>div .project-title {
     font-weight: bold;
+    font-size: 1.3em;
 }
-#buildings-list > div.enter, #buildings-list > div.update {
-     margin-bottom: 10px;
-     max-height: 100px;
-     opacity: 1;
+#buildings-list>div:hover {
+    background-color: #ddebff;
+}
+#buildings-list>div.enter, #buildings-list>div.update {
+    padding: 5px 4px;
+    max-height: 100px;
+    opacity: 1;
 }
 .sidebar-tab {
     width: 20px;
     height: 40px;
     position: absolute;
     border: none;
-    position: absolute;    
+    position: absolute;
     background-color: rgb(189, 54, 33);
     display: flex;
     flex-direction: column;
@@ -251,62 +238,51 @@ html, body {
     cursor: pointer;
     transition: transform 0.2s linear;
     z-index: 9999;
-
 }
 
 #sidebar-left .sidebar-tab {
     right: 0;
-    transform: translate(20px,0);
+    transform: translate(20px, 0);
 }
-
 #sidebar-right .sidebar-tab {
     left: 0;
-    transform: translate(-20px,0);
+    transform: translate(-20px, 0);
 }
-
 .sidebar.active .sidebar-tab {
-    transform: translate(0,0) !important;
+    transform: translate(0, 0) !important;
 }
-
 .sidebar.active .triangle {
     transform: rotate(180deg);
 }
-
 .triangle {
     width: 0;
     height: 0;
-    border-top: 6px solid transparent;   
+    border-top: 6px solid transparent;
     border-bottom: 6px solid transparent;
     transition: transform 0.2s linear;
 }
-
 .triangle.right {
-    border-left: 12px solid #fff;    
+    border-left: 12px solid #fff;
 }
-
 .triangle.left {
-    border-right: 12px solid #fff;    
+    border-right: 12px solid #fff;
 }
 
 /*
  * MAPBOX
  */
- 
- #map {
-  position: absolute;
-  width: 100%;
-  top:80px;
-  bottom:0;
- }
-
+#map {
+    position: absolute;
+    width: 100%;
+    top: 80px;
+    bottom: 0;
+}
 #layer-menu, #overlay-menu, #temp-filter-menu {
     background: inherit;
 }
-
-
-#layer-menu,#overlay-menu {
+#layer-menu, #overlay-menu {
     width: 100%;
-    }
+}
 #layer-menu a, #overlay-menu a {
     font-size: 13px;
     color: #404040;
@@ -314,16 +290,13 @@ html, body {
     margin: 0;
     padding: 0;
     padding: 10px;
-    text-decoration: none;    
+    text-decoration: none;
     text-align: center;
 }
-
-
 a.unavailable {
-    background-color: rgb(220,220,220);
+    background-color: rgb(220, 220, 220);
     color: rgb(200, 200, 200);
 }
-
 a.active {
     background-color: #b3cde3;
 }
@@ -333,70 +306,81 @@ a.active {
     right: 350px;
     top: 80px;
     border: none;
-    background-color: rgba(0,0,0,0.3);
+    background-color: rgba(0, 0, 0, 0.3);
     padding: 3px;
 }
-
-
-
-
 
 /*copy-pasted from semantic ui so we can modify
 Currently only used in layers but can be adapted to filters too
 */
 
 /*Layer accordions (blue)*/
+
 /* Normal */
 .ui.styled.accordion .title.overlay-title {
-  background:rgba(30, 92, 223,0.3);
-  margin: 0em;
-  padding: 0.5em 0.5em;
-  color: rgba(0, 0, 30, 0.95);
-  font-weight: bold;
-  border-top: 1px solid rgba(34, 36, 38, 0.15);
+    background: rgba(30, 92, 223, 0.3);
+    margin: 0em;
+    padding: 0.5em 0.5em;
+    color: rgba(0, 0, 30, 0.95);
+    font-weight: bold;
+    border-top: 1px solid rgba(34, 36, 38, 0.15);
 }
 
 /* Hover */
-
 .ui.styled.accordion .title.overlay-title:hover {
-  background: rgba(30, 92, 223,0.5);
-  color: rgba(50, 50, 80, 0.95);
+    background: rgba(30, 92, 223, 0.5);
+    color: rgba(50, 50, 80, 0.95);
 }
 
 /* Active */
-
 .ui.styled.accordion .active.title.overlay-title {
-  background: rgba(24,100,178,0.7);
-  color: rgba(0, 0, 30, 0.95);
+    background: rgba(24, 100, 178, 0.7);
+    color: rgba(0, 0, 30, 0.95);
 }
-
 
 /*Filter accordions (orange)*/
+
 /* Normal */
 .ui.styled.accordion .title.filter-title {
-  background:rgba(253,126,35,0.3);
-  margin: 0em;
-  padding: 0.5em 0.5em;
-  color: rgba(0, 0, 30, 0.95);
-  font-weight: bold;
-  border-top: 1px solid rgba(34, 36, 38, 0.15);
+    background: rgba(253, 126, 35, 0.3);
+    margin: 0em;
+    padding: 0.5em 0.5em;
+    color: rgba(0, 0, 30, 0.95);
+    font-weight: bold;
+    border-top: 1px solid rgba(34, 36, 38, 0.15);
 }
 
 /* Hover */
-
 .ui.styled.accordion .title.filter-title:hover {
-  background: rgba(253,126,35,0.5);
-  color: rgba(50, 50, 80, 0.95);
+    background: rgba(253, 126, 35, 0.5);
+    color: rgba(50, 50, 80, 0.95);
 }
 
 /* Active */
-
 .ui.styled.accordion .active.title.filter-title {
-  background:rgba(253,126,35,0.3);
-  color: rgba(0, 0, 30, 0.95);
+    background: rgba(253, 126, 35, 0.3);
+    color: rgba(0, 0, 30, 0.95);
+}
+.ui.styled.accordion .title.filter-title.filter-activated, .ui.styled.accordion .active.title.filter-title.filter-activated {
+    background: rgba(234, 100, 2, 0.7);
+}
+/* chloroplath legend */
+
+#chloroplethLegend ul {
+  list-style: none;
 }
 
-.ui.styled.accordion .title.filter-title.filter-activated,
-.ui.styled.accordion .active.title.filter-title.filter-activated {
-    background: rgba(234,100,2,0.7);
+.chloroplethLegendSquare {
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  border: solid rgba(0,0,0,0.3) 1px;
+  margin-right: 5px;
 }
+
+#chloroplethLegend{
+    display: block;
+    position: relative;
+    width: 100%;
+} 
