@@ -88,8 +88,8 @@
         // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
         // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
         var CHLOROPLETH_STOP_COUNT = 5;
-        var MIN_COLOR = "#fff";
-        var MAX_COLOR = "#1e5cdf";
+        var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
+        var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
         var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
             return d.count;
         });
@@ -316,12 +316,9 @@
                     'paint': {
                         'fill-color': {
                             'property': data.overlay,
-                  'stops': data.chloroplethRange.stopsAscending
-                                [minValue, "#fff"],
-                                [maxValue, "#1e5cdf"]
-                            ]
+                            'stops': data.chloroplethRange.stopsAscending
                         },
-                        'fill-opacity': .5
+                        'fill-opacity': 1 //using rgba in the chloropleth color range instead
                     }
                 });
             }
