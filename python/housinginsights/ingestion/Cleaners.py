@@ -496,6 +496,13 @@ class CensusCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
+class CensusTractToNeighborhoodClusterCleaner(CleanerBase):
+    def clean(self,row, row_num = None):
+        return row
+
+class CensusTractToWardCleaner(CleanerBase):
+    def clean(self,row, row_num = None):
+        return row
 
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
