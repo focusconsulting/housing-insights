@@ -306,17 +306,23 @@ class WmataApiConn(BaseApiConn):
         nlihc_id = project_details['nlihcid']
 
         for idx, station in enumerate(railStations):
-            crow_distance = self._haversine(lat, lon, station['Lat'], station['Lon'])
+            try:
+                crow_distance = self._haversine(lat, lon, station['Lat'], station['Lon'])
 
-            if crow_distance < (radiusinmeters / self.meters_per_mile):
-                walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']),db=db)
-                walkDistMiles = walkDist / self.meters_per_mile
-                logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
-                if walkDist <=radiusinmeters:
-                    self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),crow_distance, lat,lon,str(station['Lat']),str(station['Lon'])])
+                if crow_distance < (radiusinmeters / self.meters_per_mile):
+                    walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']),db=db)
+                    walkDistMiles = walkDist / self.meters_per_mile
+                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                    if walkDist <=radiusinmeters:
+                        self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),crow_distance, lat,lon,str(station['Lat']),str(station['Lon'])])
 
-            else:
-                logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
+                else:
+                    logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
+            
+            except Exception as e:
+                #Main error encountered was 'Null' values for project lat/lon. Returning null value
+                logging.warning("Error calculating for {}".format(nlihc_id))
+                self.distOutput.append([nlihc_id, 'rail', station['Code'], "Null", "Null", lat,lon,str(station['Lat']),str(station['Lon'])])
 
     def _haversine(self, lat1, lon1, lat2,lon2):
         """
@@ -354,18 +360,22 @@ class WmataApiConn(BaseApiConn):
         data = response.json()
 
         for idx, stop in enumerate(data['Stops']):
-            crow_distance = self._haversine(lat, lon, stop['Lat'], stop['Lon'])
+            try:
+                crow_distance = self._haversine(lat, lon, stop['Lat'], stop['Lon'])
 
-            if crow_distance < (radiusinmeters / self.meters_per_mile):
-                walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
-                walkDistMiles = walkDist / self.meters_per_mile
-                logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
-                if walkDist <= radiusinmeters: #within 0.5 miles walking
-                    self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),crow_distance,lat,lon,str(stop['Lat']),str(stop['Lon'])])
+                if crow_distance < (radiusinmeters / self.meters_per_mile):
+                    walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
+                    walkDistMiles = walkDist / self.meters_per_mile
+                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                    if walkDist <= radiusinmeters: #within 0.5 miles walking
+                        self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),crow_distance,lat,lon,str(stop['Lat']),str(stop['Lon'])])
 
-            else:
-                logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
-
+                else:
+                    logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
+            except Exception as e:
+                #Main error encountered was 'Null' values for project lat/lon. Returning null value
+                logging.warning("Error calculating for {}".format(nlihc_id))
+                self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "Null","Null",lat,lon,str(stop['Lat']),str(stop['Lon'])])
 
     def _array_to_csv(self, fields, list_of_lists, filepath):
         """
