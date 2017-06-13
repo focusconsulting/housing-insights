@@ -6,6 +6,7 @@ import os
 import time
 import time
 import logging
+import traceback
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir)))
 from housinginsights.sources.base import BaseApiConn
@@ -20,6 +21,7 @@ class WmataApiConn(BaseApiConn):
 
         self.meters_per_mile = 1609.344
         self.use_cached_distance = use_cached_distance
+        logging.info("Use cached distance: {}".format(use_cached_distance))
 
         #pull API keys
         secretsFileName =  os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -241,28 +243,37 @@ class WmataApiConn(BaseApiConn):
                 #Configure the connection
                 engine = dbtools.get_database_engine(db)
                 conn = dbtools.get_database_connection(db)
-                logging.info("  Connected to Housing Insights database")
 
                 #Pull columns to see if the database has updated columns in wmata_dist
                 columnset = conn.execute('select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=\'wmata_dist\'')
                 columns = []
                 for c in columnset:
-                    columns.append(c)
+                    columns.append(c[0])
 
                 if ( 'building_lat' in columns and 'building_lon' in columns and 'stop_or_station_lat' in columns and 'stop_or_station_lon' in columns ):
                 #See if row exists
-                    proj_query = 'select * from wmata_dist where building_lat=\'' + srcLat + '\' and building_lon=\'' + srcLon + '\' and stop_or_station_lat=\''+ destLat + '\' and stop_or_station_lon=\'' + destLon + '\''
-                    row = conn.execute(proj_query)
-                    if ( row != None ):
+                    proj_query = 'select * from wmata_dist where building_lat=\'' + str(srcLat) + '\' and building_lon=\'' + str(srcLon) + '\' and stop_or_station_lat=\''+ str(destLat) + '\' and stop_or_station_lon=\'' + str(destLon) + '\''
+                    proxy = conn.execute(proj_query)
+                    results = [dict(x) for x in proxy.fetchall()]
+
+                    if ( len(results) != 0 ):
+                        logging.info("  Found cached row!")
+                        walking_distance = results[0]['dist_in_miles']
+
                         conn.close()
                         engine.dispose()
-                        index = columns.index("dist_in_miles")
-                        return row[index]*self.meters_per_mile
+
+                        return float(walking_distance)*self.meters_per_mile
+                    else:
+                        logging.info("  Couldn't find cached row for {}".format(proj_query))
+                else:
+                    logging.info("Couldn't find all columns")
 
                 conn.close()
                 engine.dispose()
             except Exception as e:
                 logging.warning(e)
+                traceback.print_exc(file=sys.stdout)
                 logging.warning("I am unable to connect to the database")
 
         distReqCoords = str(srcLon) + ',' + str(srcLat) + ';' + str(destLon) + ',' + str(destLat)

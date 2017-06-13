@@ -1,5 +1,5 @@
 ---
-layout: http://www.neighborhoodinfodc.org/dcpreservationcatalog/
+layout: datasource
 tablename: subsidy
 title: Subsidy
 ---

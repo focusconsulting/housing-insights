@@ -1,4 +1,6 @@
-"use strict";
+//A comment here helps keep Jekyll from getting confused about rendering
+
+    "use strict";
 
 var buildingView = {
     addCurrentBuildingToMap: function(map, source){
@@ -68,7 +70,7 @@ var buildingView = {
             },
             {
                 name: "transit_stats",
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + getState()['selectedBuilding']['Nlihc_id'],
+                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + getState()['selectedBuilding'][0]['properties']['nlihc_id'],
                 callback: dataBatchCallback
             },
             {
@@ -83,6 +85,8 @@ var buildingView = {
             }
         ]
         for(var i = 0; i < dataRequests.length; i++){
+            console.log(dataRequests[i]);
+            console.log(getState()['selectedBuilding'][0]['properties']['nlihc_id']);
             controller.getData(dataRequests[i]);
         }
         function dataBatchCallback(){
@@ -305,9 +309,11 @@ var buildingView = {
         ///////////////
         //Nearby Housing sidebar
         ///////////////
+        
         d3.select("#tot_buildings").html(model.dataCollection['nearby_projects']['tot_buildings']);
         d3.select("#tot_units").html(model.dataCollection['nearby_projects']['tot_units']);
         d3.select("#nearby_housing_distance").html(model.dataCollection['nearby_projects']['distance'])
+        
      }
 
 }
