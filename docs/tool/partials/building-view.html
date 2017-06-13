@@ -2,16 +2,12 @@
     <div class="container">
         <header class="building-header">
                 <div class="row">
-                    <a class="col-sm-4" href="javascript:void(0);" onclick="controller.goBack()" style="margin-bottom: -20px;">&lt; Back</a>
+                    <div class="col-sm-4">
+                        <a href="javascript:void(0);" onclick="controller.goBack()" style="margin-bottom: -20px;">&lt; Back</a>
+                    </div>
                 </div>
                 <div class="row">
-                    <h2 class="col-sm-8" id="building-name"></h2>
-                    <div class="col-sm-4 search-bar-wrapper">
-                        <p>Search for building or address</p>
-                        <form action="" id="building-search" method="get" name="building-search">
-                            <input class="building-search-box" type="text"> <input class="building-search-button" type="submit" value="Search">
-                        </form>
-                    </div>
+                    <h2 class="col-sm-12" id="building-name"></h2>
                 </div>
                 <div class="row">
                     <article class="col-sm-3 building-address">
@@ -116,7 +112,12 @@
                 <div class="accordion-panel">
                     <div class="accordion-body">
                         <div class="col-sm-6">
-                            <p>Pending</p>
+                            <h3>This Section will include data about:</h3>
+                            <ul>
+                                <li>Building permits within 0.25 miles</li>
+                                <li>Planned Unit Development applications (pending and recent)</li>
+                                <li>Units recently added to the DC Master Address Repository</li>
+                            </ul>
                         </div>
                         <div class="col-sm-6">
                             <p>Pending</p>
@@ -138,9 +139,7 @@
                             <div class="mapbox-portal" id="affordable-housing-map"></div>
                         </div>
                         <div class="col-sm-6" id = "nearbyAffordableHousing">
-                            <h3><span id="tot_buildings"></span> active affordable buildings 
-                            (with <span id="tot_units"></span> total subsidized units)
-                            within <span id="nearby_housing_distance"></span> miles.</h3>
+                            <h3><span id="tot_buildings"></span> active affordable buildings (with <span id="tot_units"></span> total subsidized units) within <span id="nearby_housing_distance"></span> miles.</h3>
                             <p>(includes this building)</p>
                         </div>
                         <div class="clearfix"></div>
