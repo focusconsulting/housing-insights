@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from housinginsights.ingestion.make_draft_json import (sql_name_clean, pandas_to_sql_data_type,
+from housinginsights.ingestion.make_draft_json import (_sql_name_clean, _pandas_to_sql_data_type,
                                                        make_draft_json, make_all_json)
 
 
@@ -19,18 +19,18 @@ class TestMakeDraftJson(unittest.TestCase):
         self.manifest_path = 'test'
 
     def test_sql_name_clean(self):
-        result = sql_name_clean(self.name)
+        result = _sql_name_clean(self.name)
         self.assertEqual(result, 'foo_bar')
 
     def test_pandas_to_sqal_data_type(self):
-        exists = pandas_to_sql_data_type(self.pandas_type_string)
+        exists = _pandas_to_sql_data_type(self.pandas_type_string)
         self.assertEqual(exists, 'integer')
 
-        not_exists = pandas_to_sql_data_type('something')
+        not_exists = _pandas_to_sql_data_type('something')
         self.assertEqual(not_exists, 'text')
 
     @patch('housinginsights.ingestion.make_draft_json.open')
-    @patch('housinginsights.ingestion.make_draft_json.pandas_to_sql_data_type')
+    @patch('housinginsights.ingestion.make_draft_json._pandas_to_sql_data_type')
     @patch('housinginsights.ingestion.make_draft_json.pandas.read_csv')
     def test_make_draft_json(self, mock_read_csv, mock_pandas_to_sql_data_type, mock_open):
         """ TODO:  Still needs more tests.

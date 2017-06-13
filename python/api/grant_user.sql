@@ -1,0 +1,6 @@
+CREATE USER hi_readonly WITH ENCRYPTED PASSWORD 'hireader';
+GRANT CONNECT ON DATABASE housing_insights_raw TO hi_readonly;
+GRANT USAGE ON SCHEMA public TO hi_readonly;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO hi_readonly;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO hi_readonly;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO hi_readonly;

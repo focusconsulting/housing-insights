@@ -13,6 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
 
 import housinginsights.ingestion.Cleaners as Cleaners
 
+
 # Completed, tests not written.
 def load_meta_data(filename='meta.json'):
     """
@@ -90,6 +91,7 @@ def check_or_create_sql_manifest(engine, rebuild=False):
                 ("include_flag","text"),
                 ("destination_table","text"),
                 ("unique_data_id","text"),
+                ("update_method", "text"),
                 ("data_date","date"),
                 ("encoding", "text"),
                 ("local_folder","text"),
@@ -138,6 +140,11 @@ def join_paths(pieces=[]):
 
 #Used for testing purposes
 if __name__ == '__main__':
-    pass
-    instance = get_cleaner_from_name("GenericCleaner")
-    print(type(instance))
+
+    from housinginsights.tools import dbtools
+    meta_path = os.path.abspath('../../scripts/meta.json')
+
+
+    meta = load_meta_data(meta_path)
+    engine = dbtools.get_database_engine('docker_database')
+    meta_json_to_database(engine=engine, meta=meta)

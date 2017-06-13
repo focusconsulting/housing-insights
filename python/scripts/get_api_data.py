@@ -1,102 +1,98 @@
 """
 get_api_data.py provides command line convenience access to the modules in the housinginsights.sources
-directory. Here is a brief explanation.
+directory.
 
-BRIEF EXPLANATION
------------------
-
-Use this script to download a csv file from an API. Specify the output file with the -o flag.
-Specify whatever parameters you need with --params in key:value;k2:val2 format. For example,
-if the find_location method requires a location, you would specify that location with:
-    --params "location: some street somewhere in dc".
-
-Example usage:
-
-bin/data.sh -o ~/csvfile --params "location:641 S St NW" mar find_location
-
-Calling from this folder using Python directly (with your virtual environment activated):
-
-python get_api_data.py mar find_location --output ../../data/interim/out.csv --params "location:617 Morton Street NW"
-
-
-DETAILED EXPLANATION:
---------------------
-get_api_data.py expects the user to supplies at least 4
-things when it is run:
-1. Output Type [--outtype]
-2. Output File (optional) [--output, -o]
-3. Api Module name
-4. Api Method name
-
-It then tries to import housinginsights.sources + whatever module you specified.
-For example if the api module name supplied by the user is "mar", then it tries to import
-"housinginsights.sources.mar". It then looks for a class with the module name + "ApiConn"
-as a suffix. In this case it would be "MarApiConn". It then calls whatever method the user specied
-from that ApiConn class. Whatever parameters specified by the user with the --params argument
-are split and passed as keyword arguments (**kwargs) to the function.
-The --outtype argument is added as output_type, and --o or --output is added as output_file.
-Thus, each public function compatible with data.sh needs to have as a minimum those two parameters
-(output_type and output_file). See the mar.py file for an example.
+Every API class should implement a few key features
 """
 
-from argparse import ArgumentParser
-import importlib
 
 import sys
 import os
+import importlib
+import logging
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             os.pardir)))
+python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                               os.pardir))
+sys.path.append(python_filepath)
 
+# Configure logging
+logging_path = os.path.abspath(os.path.join(python_filepath, "logs"))
+logging_filename = os.path.abspath(os.path.join(logging_path, "sources.log"))
+logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
+# Pushes everything from the logger to the command line output as well.
+logging.getLogger().addHandler(logging.StreamHandler())
+
+
+#TODO is this import necessary?
 from housinginsights.config.base import HousingInsightsConfig
 
-API_MODULE = 'housinginsights.sources'
 
-def main():
-    description = "Get csv data from api(s)."
-    output_help = "Path and filename of a csv file where you'd like to write the output. \
-                   Required if outtype=csv, omit if outtype=stdout"
-    outtype_help = "Where the output should be written. Options: 'stdout', 'csv'"
-    params_help = "Keyword variables that passed directly to the api method; \
-                   check the method for required parameters. Parameters are given in \
-                   semicolon separated key:value;key2:value2 format."
-    parser = ArgumentParser(description=description)
-    parser.add_argument("--config", "-c", help="Path to the configuration file. \
-                                                [Not implemented YET!]")
-    parser.add_argument("--output", "-o", help=output_help)
-    parser.add_argument("--outtype", "-t", default="stdout", help=outtype_help)
-    parser.add_argument("--params", help=params_help)
-    parser.add_argument("api", help="The name of the api module located in housinginsights.source.")
-    parser.add_argument("method", help="Method of the api to call.")
-    ns = parser.parse_args()
-    result = call_module(ns)
+def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 'csv', db=None, debug=False, module_list = None):
+    '''
+    This method takes a list of unique_data_ids and calls the 'get_data' method on each ApiConn class in the /sources folder
+    By passing a list with one id, you can download (or test) just one API at a time. 
+    Passing 'None' to unique_data_ids will run all get_data methods. 
 
-def call_module(ns):
-    try:
-        kwargs = parse_params(ns.params)
-        kwargs['output_type'] = ns.outtype
-        kwargs['output_file'] = ns.output
-        # Hack. for now to have sensible defaults...
-        if ns.output:
-            kwargs['output_type'] = 'csv'
-        apimod = API_MODULE + '.' + ns.api
-        classname = ns.api[0].upper() + ns.api[1:] + 'ApiConn'
-        module = importlib.import_module(apimod)
-        api_class = getattr(module, classname)
-        api = api_class()
-        apifunc = getattr(api, ns.method)
-        result = apifunc(**kwargs)
-    except Exception as e:
-        print('Your request failed. {0}'.format(e))
+    sample: when possible, download just a few lines (for faster testing)
+    output_type: either 'csv' or 'stdout'
+    db: the database choice, such as 'docker_database', as identified in the secrets.json. 
+    debug: if True exceptions will be raised. if False, they will be printed but processing will continue. 
+    module_list: in addition to the unique_data_ids (which are passed directly to the ApiConn.get_data() method), you can choose to 
+                 only run listed modules. 
 
-def parse_params(params):
-    kwargs = {}
-    if not params:
-        return kwargs
-    for kv in params.split(';'):
-        key, value = kv.split(':')
-        kwargs[key] = value
-    return kwargs
+    '''
+
+    API_FOLDER = 'housinginsights.sources'
+    
+    #All possible source modules and classes as key:value of module:classname
+    modules = {
+            "wmata_distcalc":"WmataApiConn",
+            "opendata":"OpenDataApiConn",
+            "DCHousing":"DCHousingApiConn",
+            "census":"CensusApiConn"
+    }
+
+    #If no module list is provided, use them all
+    if module_list == None:
+        module_list = list(modules.keys())
+
+    for m in module_list:
+        try:
+            module_name = API_FOLDER + '.' + m
+            module = importlib.import_module(module_name)
+
+            class_name = modules[m]
+            api_class = getattr(module, class_name)
+
+            api_instance = api_class()
+            api_method = getattr(api_instance, 'get_data') #Every class should have a get_data method! 
+
+            #Get the data
+            api_method(unique_data_ids, sample, output_type, db=db)
+
+        except Exception as e:
+            logging.warning('The request for "{0}" failed. Error: {1}'.format(m,e))
+
+            if debug==True:
+                raise e
 
 if __name__ == '__main__':
-    main()
+
+    #Set up the appropriate settings for what you want to download
+
+    debug = True            # Errors are raised when they occur instead of only logged.
+    unique_data_ids = None   # Alternatively, pass a list of only the data sources you want to download
+                            # Available ids:
+                            # [ 'dchousing',"tax", "wmata_stops","wmata_dist"
+                            #  "building_permits_2013","building_permits_2014","building_permits_2015","building_permits_2016","building_permits_2017"
+                            #  "crime_2013","crime_2014","crime_2015","crime_2016","crime_2017", 
+                            #  "mar"
+                            #  ]
+
+    sample = False          # Some ApiConn classes can just grab a sample of the data for use during development / testing
+    output_type = 'csv'     # Other option is stdout which just prints to console
+    db = 'docker_database'  # Only used by connections that need to read from the database to get their job done (example: wmata)
+    module_list = ["wmata_distcalc"] # ["opendata","DCHousing", "census"] #["wmata_distcalc"]
+
+    get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
+

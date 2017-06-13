@@ -16,10 +16,11 @@ import logging
 from flask_cors import CORS, cross_origin
 
 import math
+import sys
 
 #Different json output methods.
 # Currently looks like best pick is jsonify, but with the simplejson package pip-installed so that
-# jsonify will uitilize simplejson's decimal conversion ability. 
+# jsonify will uitilize simplejson's decimal conversion ability.
 import json
 import simplejson
 from flask import jsonify
@@ -56,9 +57,15 @@ application.json_encoder = CustomJSONEncoder
 #Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
 CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
 
+#Allow us to test locally if desired
+if 'docker' in sys.argv:
+    database_choice = 'docker_database'
+else:
+    database_choice = 'remote_database'
+
 with open('secrets.json') as f:
     secrets = json.load(f)
-    connect_str = secrets['remote_database']['connect_str']
+    connect_str = secrets[database_choice]['connect_str']
 
 
 #Should create a new connection each time a separate query is needed so that API can recover from bad queries
@@ -73,6 +80,7 @@ results = proxy.fetchall()
 tables = [x[0] for x in results]
 application.logger.debug('Tables available: {}'.format(tables))
 conn.close()
+logging.info(tables)
 
 ##########################################
 # API Endpoints
@@ -81,6 +89,39 @@ conn.close()
 @application.route('/')
 def hello():
     return("The Housing Insights API Rules!")
+
+@application.route('/api/filter/', methods=['GET'])
+def filter_data():
+    q = """
+        select p.nlihc_id
+          , p.proj_units_tot
+          , p.proj_units_assist_max
+          , cast(p.proj_units_assist_max / p.proj_units_tot as decimal(3,2)) as percent_affordable_housing
+          , p.hud_own_type
+          , p.ward
+          , p.anc
+          , p.census_tract
+          , p.neighborhood_cluster
+          , p.neighborhood_cluster_desc
+          , p.zip
+          , c.acs_median_rent
+          , s.portfolio
+          , s.agency
+          , to_char(s.poa_start, 'YYYY-MM-DD') as poa_start
+          , to_char(s.poa_end, 'YYYY-MM-DD') as poa_end
+          , s.units_assist
+          , s.subsidy_id
+        from project as p
+        left join census as c on c.census_tract = p.census_tract and c.unique_data_id = 'acs_rent_median_15_5YR'
+        left join subsidy as s on s.nlihc_id = p.nlihc_id
+        """
+
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    results = [dict(x) for x in proxy.fetchall()]
+    conn.close()
+    output = {'items':results}
+    return jsonify(output)
 
 
 @application.route('/api/raw/<table>', methods=['GET'])
@@ -102,6 +143,17 @@ def list_all(table):
     conn.close()
 
     return jsonify(items=results)
+
+@application.route('/api/meta', methods=['GET'])
+def get_meta():
+    '''
+    Outputs the meta.json to the front end
+    '''
+
+    conn = engine.connect()
+    result = conn.execute("SELECT meta FROM meta")
+    row = result.fetchone()
+    return row[0]
 
 
 @application.route('/api/<data_source>/all/<grouping>', methods=['GET'])
@@ -135,7 +187,7 @@ def count_all(data_source,grouping):
             FROM {}
             where {} between '2016-01-01' and '2016-12-31'
             --WHERE report_date BETWEEN (now()::TIMESTAMP - INTERVAL '1 year') AND now()::TIMESTAMP
-            GROUP BY {} 
+            GROUP BY {}
             ORDER BY {}
             """.format(grouping,fallback,data_source,date_field,grouping,grouping)
 
@@ -144,7 +196,7 @@ def count_all(data_source,grouping):
 
         #transform the results.
         #TODO should come up with a better generic way to do this using column
-          #names for any arbitrary sql table results. 
+          #names for any arbitrary sql table results.
         formatted = []
         for x in results:
             dictionary = dict({'group':x[0], 'count':x[1]})
@@ -152,7 +204,7 @@ def count_all(data_source,grouping):
 
 
         conn.close()
-        return jsonify({'items': formatted, 'grouping':grouping, 'table':data_source})
+        return jsonify({'items': formatted, 'grouping':grouping, 'data_id':data_source})
 
     #TODO do better error handling - for interim development purposes only
     except Exception as e:
@@ -162,11 +214,11 @@ def count_all(data_source,grouping):
 @application.route('/api/wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
     '''
-    Returns the nearby bus and metro routes and stops. 
+    Returns the nearby bus and metro routes and stops.
     Currently this assumes that all entries in the wmata_dist
-    table are those that have a walking distance of 0.5 miles 
+    table are those that have a walking distance of 0.5 miles
     or less. We may later want to implement functionality to
-    filter this to those with less distance. 
+    filter this to those with less distance.
     '''
 
     conn = engine.connect()
@@ -193,16 +245,16 @@ def nearby_transit(nlihc_id):
             routes = unique_transit_routes([stop_id])
 
             stop_dict = dict({'dist_in_miles':dist,
-                            'type':typ, 
+                            'type':typ,
                             'stop_id_or_station_code':stop_id,
                             'routes':routes
                             })
-            
+
             #Calculate summary statistics for ease of use
             if typ == 'bus':
                 stops['bus'].append(stop_dict)
                 bus_stops.append(stop_id)
-                
+
                 #Add all unique routes to a master list, with the shortest walking distance to that route
                 for route in routes:
                     if route not in bus_routes:
@@ -242,9 +294,9 @@ def nearby_transit(nlihc_id):
                 rail_routes_grouped.append({"shortest_dist":dist, "routes":[]})
                 idx = idx_from_ld(rail_routes_grouped,'shortest_dist',dist)
             rail_routes_grouped[idx]['routes'].append(key)
-        
+
         #TODO would be good to sort rail_routes_grouped and bus_routes_grouped before delivery (currently sorting on the front end)
-        
+
         conn.close()
         return jsonify({'stops':stops,
                         'bus_routes':bus_routes,
@@ -260,7 +312,7 @@ def nearby_transit(nlihc_id):
 
 def idx_from_ld(lst,key,value):
     '''
-    Takes a list of dictionaries and returns the dictionary 
+    Takes a list of dictionaries and returns the dictionary
     entry matching the key and value supplied
     Used for data forms like this: [{'foo':'bar'},{'foo':'asdf'}]
     '''
@@ -301,7 +353,7 @@ def nearby_building_permits(dist):
     longitude = request.args.get('longitude',None)
     if latitude == None or longitude==None:
         return "Please supply latitude and longitude"
-    else: 
+    else:
         latitude=float(latitude)
         longitude=float(longitude)
 
@@ -362,7 +414,7 @@ def nearby_building_permits(dist):
 
 @application.route('/api/projects/<dist>', methods=['GET'])
 def nearby_projects(dist):
-    
+
     conn = engine.connect()
     dist = float(dist)
     #Get our params
@@ -370,7 +422,7 @@ def nearby_projects(dist):
     longitude = request.args.get('longitude',None)
     if latitude == None or longitude==None:
         return "Please supply latitude and longitude"
-    else: 
+    else:
         latitude=float(latitude)
         longitude=float(longitude)
 
@@ -425,18 +477,18 @@ from math import radians, cos, sin, asin, sqrt
 
 def haversine(lat1, lon1, lat2,lon2):
     """
-    Calculate the great circle distance between two points 
+    Calculate the great circle distance between two points
     on the earth (specified in decimal degrees)
     """
-    # convert decimal degrees to radians 
+    # convert decimal degrees to radians
     original_coords = (lat1,lon1,lat2,lon2) #for debugging
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
-    # haversine formula 
-    dlon = lon2 - lon1 
-    dlat = lat2 - lat1 
+    # haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    c = 2 * asin(sqrt(a)) 
+    c = 2 * asin(sqrt(a))
     r = 3956 # Radius of earth in miles
     d = c * r
     #print("Haversine for {} = {}".format(original_coords,d))
@@ -469,7 +521,42 @@ def project_subsidies(nlihc_id):
     conn.close()
     output = {'items':results}
     return jsonify(output)
+
+@application.route('/api/census/<data_id>/<grouping>', methods=['GET'])
+def census_with_weighting(data_id,grouping):
+    #TODO this does not yet return the proper grouping
     
+    #TODO when we add more than one year of data we need to use a newly added 'year' column to distinguish the rows and update the sql query.
+    q = "SELECT * FROM census"
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    census_results = [dict(x) for x in proxy.fetchall()]
+
+    q = "SELECT * FROM census_tract_to_neighborhood_cluster"
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    nc_weighting = [dict(x) for x in proxy.fetchall()]
+
+    q = "SELECT * FROM census_tract_to_ward"
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    ward_weighting = [dict(x) for x in proxy.fetchall()]
+
+    conn.close()
+
+    #perform the proper calculation
+    items = []
+    if data_id == 'poverty_rate':
+        for r in census_results:
+            pop = r['population']
+            pop_poverty = r['population_poverty']
+            rate = (pop_poverty / pop)*100
+            output = dict({'group':r['census_tract'], 'count':rate})
+            items.append(output)
+
+    return jsonify({'items': items, 'grouping':grouping, 'data_id':data_id})
+
+
 
 ##########################################
 # Start the app
