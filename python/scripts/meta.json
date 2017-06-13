@@ -2097,7 +2097,7 @@
         "type": "text"
       },
       {
-        "display_name": "hud_mgr_name",
+        "display_name": "Hud Mgr Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Hud_Mgr_Name",
@@ -2105,7 +2105,7 @@
         "type": "text"
       },
       {
-        "display_name": "hud_mgr_type",
+        "display_name": "Hud Mgr Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Hud_Mgr_Type",
@@ -2113,7 +2113,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidy_start_first",
+        "display_name": "Subsidy Start First",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_Start_First",
@@ -2121,7 +2121,7 @@
         "type": "date"
       },
       {
-        "display_name": "subsidy_start_last",
+        "display_name": "Subsidy Start Last",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_Start_Last",
@@ -2129,7 +2129,7 @@
         "type": "date"
       },
       {
-        "display_name": "subsidy_end_first",
+        "display_name": "Subsidy End First",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_End_First",
@@ -2137,7 +2137,7 @@
         "type": "date"
       },
       {
-        "display_name": "subsidy_end_last",
+        "display_name": "Subsidy End Last",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_End_Last",
@@ -2153,7 +2153,7 @@
         "type": "text"
       },
       {
-        "display_name": "pbca",
+        "display_name": "PBCA",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PBCA",
@@ -2169,7 +2169,7 @@
         "type": "text"
       },
       {
-        "display_name": "psa2012",
+        "display_name": "Psa 2012",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Psa2012",
@@ -2177,7 +2177,7 @@
         "type": "text"
       },
       {
-        "display_name": "Census tract",
+        "display_name": "Census Tract",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Geo2010",
@@ -2209,7 +2209,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_image_url",
+        "display_name": "Project Image url",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_image_url",
@@ -2217,7 +2217,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_streetview_url",
+        "display_name": "Project Street View url",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_streetview_url",
@@ -2225,7 +2225,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_address_id",
+        "display_name": "Project Address ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_address_id",
@@ -2233,7 +2233,7 @@
         "type": "text"
       },
       {
-        "display_name": "xcoord",
+        "display_name": "Xcoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_x",
@@ -2241,7 +2241,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "ycoord",
+        "display_name": "Ycoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_y",
@@ -2265,7 +2265,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "bldg_count",
+        "display_name": "Building Count",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Bldg_count",
@@ -2274,7 +2274,7 @@
       },
       {
         "_comment": "TODO This needs to be parsed and converted to date format (need to write appropriate parser)",
-        "display_name": "update_dtm",
+        "display_name": "Update Dtm",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Update_Dtm",
@@ -2282,7 +2282,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidy_info_source_property",
+        "display_name": "Subsidy Info Source property",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_info_source_property",
@@ -2290,7 +2290,7 @@
         "type": "text"
       },
       {
-        "display_name": "contract_number",
+        "display_name": "Contract number",
         "display_text": "",
         "required_in_source": true,
         "source_name": "contract_number",
@@ -2298,7 +2298,7 @@
         "type": "text"
       },
       {
-        "display_name": "category_code",
+        "display_name": "Category Code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Category_Code",
@@ -2306,7 +2306,7 @@
         "type": "text"
       },
       {
-        "display_name": "cat_at_risk",
+        "display_name": "Cat at Risk",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cat_At_Risk",
@@ -2314,7 +2314,7 @@
         "type": "text"
       },
       {
-        "display_name": "cat_more_info",
+        "display_name": "Cat More Info",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cat_More_Info",
@@ -2322,7 +2322,7 @@
         "type": "text"
       },
       {
-        "display_name": "cat_lost",
+        "display_name": "Cat Lost",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cat_Lost",
@@ -2330,7 +2330,7 @@
         "type": "text"
       },
       {
-        "display_name": "cat_replaced",
+        "display_name": "Cat Replaced",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cat_Replaced",
@@ -2338,7 +2338,7 @@
         "type": "text"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -2352,7 +2352,7 @@
     "cleaner": "reac_score_cleaner",
     "fields": [
       {
-        "display_name": "NLIHC ID",
+        "display_name": "Nlihc ID",
         "display_text": "Preservation Catalog ID",
         "required_in_source": true,
         "source_name": "Nlihc_id",
@@ -2400,7 +2400,7 @@
         "type": "text"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -2414,7 +2414,7 @@
     "cleaner": "real_property_cleaner",
     "fields": [
       {
-        "display_name": "nlihc_id",
+        "display_name": "Nlihc ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Nlihc_id",
@@ -2422,7 +2422,7 @@
         "type": "text"
       },
       {
-        "display_name": "ssl",
+        "display_name": "SSL",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Ssl",
@@ -2430,7 +2430,7 @@
         "type": "text"
       },
       {
-        "display_name": "rp_date",
+        "display_name": "RP Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "RP_date",
@@ -2446,7 +2446,7 @@
         "type": "text"
       },
       {
-        "display_name": "rp_desc",
+        "display_name": "RP description",
         "display_text": "",
         "required_in_source": true,
         "source_name": "RP_desc",
@@ -2454,7 +2454,7 @@
         "type": "text"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -2468,7 +2468,7 @@
     "cleaner": "SubsidyCleaner",
     "fields": [
       {
-        "display_name": "nlihc_id",
+        "display_name": "Nlihc ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Nlihc_id",
@@ -2476,7 +2476,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidy_id",
+        "display_name": "Subsidy ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_id",
@@ -2484,7 +2484,7 @@
         "type": "text"
       },
       {
-        "display_name": "units_assist",
+        "display_name": "Units Assist",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Units_Assist",
@@ -2492,7 +2492,7 @@
         "type": "integer"
       },
       {
-        "display_name": "poa_start",
+        "display_name": "POA Start",
         "display_text": "",
         "required_in_source": true,
         "source_name": "POA_start",
@@ -2500,7 +2500,7 @@
         "type": "date"
       },
       {
-        "display_name": "poa_end",
+        "display_name": "POA End",
         "display_text": "",
         "required_in_source": true,
         "source_name": "POA_end",
@@ -2508,7 +2508,7 @@
         "type": "date"
       },
       {
-        "display_name": "contract_number",
+        "display_name": "Contract Number",
         "display_text": "",
         "required_in_source": true,
         "source_name": "contract_number",
@@ -2516,7 +2516,7 @@
         "type": "text"
       },
       {
-        "display_name": "rent_to_fmr_description",
+        "display_name": "Rent to fmr Description",
         "display_text": "",
         "required_in_source": true,
         "source_name": "rent_to_fmr_description",
@@ -2524,7 +2524,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidy_active",
+        "display_name": "Subsidy Active",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_Active",
@@ -2532,7 +2532,7 @@
         "type": "boolean"
       },
       {
-        "display_name": "subsidy_info_source_id",
+        "display_name": "Subsidy Info Source ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_Info_Source_ID",
@@ -2540,7 +2540,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidy_info_source",
+        "display_name": "Subsidy Info Source",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_Info_Source",
@@ -2548,7 +2548,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidy_info_source_date",
+        "display_name": "Subsidy Info Source Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_Info_Source_Date",
@@ -2556,7 +2556,7 @@
         "type": "date"
       },
       {
-        "display_name": "update_dtm",
+        "display_name": "Update Dtm",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Update_Dtm",
@@ -2564,7 +2564,7 @@
         "type": "text"
       },
       {
-        "display_name": "program",
+        "display_name": "Program",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Program",
@@ -2572,7 +2572,7 @@
         "type": "text"
       },
       {
-        "display_name": "compl_end",
+        "display_name": "Compl End",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Compl_end",
@@ -2580,7 +2580,7 @@
         "type": "date"
       },
       {
-        "display_name": "poa_end_prev",
+        "display_name": "POA End Prev",
         "display_text": "",
         "required_in_source": true,
         "source_name": "POA_end_prev",
@@ -2588,7 +2588,7 @@
         "type": "date"
       },
       {
-        "display_name": "agency",
+        "display_name": "Agency",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Agency",
@@ -2596,7 +2596,7 @@
         "type": "text"
       },
       {
-        "display_name": "poa_start_orig",
+        "display_name": "POA Start Orig",
         "display_text": "",
         "required_in_source": true,
         "source_name": "POA_start_orig",
@@ -2604,7 +2604,7 @@
         "type": "date"
       },
       {
-        "display_name": "portfolio",
+        "display_name": "Portfolio",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Portfolio",
@@ -2612,7 +2612,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidy_info_source_property",
+        "display_name": "Subsidy Info Source Property",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidy_info_source_property",
@@ -2620,7 +2620,7 @@
         "type": "text"
       },
       {
-        "display_name": "poa_end_actual",
+        "display_name": "POA End Actual",
         "display_text": "",
         "required_in_source": true,
         "source_name": "POA_end_actual",
@@ -2628,7 +2628,7 @@
         "type": "date"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -2650,7 +2650,7 @@
         "type": "text"
       },
       {
-        "display_name": "type",
+        "display_name": "Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "type",
@@ -2658,7 +2658,7 @@
         "type": "text"
       },
       {
-        "display_name": "stop_id_or_station_code",
+        "display_name": "Stop ID or Station Code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "stop_id_or_station_code",
@@ -2666,7 +2666,7 @@
         "type": "text"
       },
       {
-        "display_name": "dist_in_miles",
+        "display_name": "Distance in Miles",
         "display_text": "",
         "required_in_source": true,
         "source_name": "dist_in_miles",
@@ -2674,7 +2674,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -2704,7 +2704,7 @@
         "type": "text"
       },
       {
-        "display_name": "Stop name",
+        "display_name": "Stop Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "name",
@@ -2728,7 +2728,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "Available lines",
+        "display_name": "Available Lines",
         "display_text": "",
         "required_in_source": true,
         "source_name": "lines",
@@ -2736,7 +2736,7 @@
         "type": "text"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -2750,7 +2750,7 @@
     "cleaner": "zillow_zrisqft_neighbor_cleaner",
     "fields": [
       {
-        "display_name": "regionid",
+        "display_name": "Region ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "RegionID",
@@ -2758,7 +2758,7 @@
         "type": "text"
       },
       {
-        "display_name": "regionname",
+        "display_name": "Region Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "RegionName",
@@ -2766,7 +2766,7 @@
         "type": "text"
       },
       {
-        "display_name": "city",
+        "display_name": "City",
         "display_text": "",
         "required_in_source": true,
         "source_name": "City",
@@ -2774,7 +2774,7 @@
         "type": "text"
       },
       {
-        "display_name": "state",
+        "display_name": "State",
         "display_text": "",
         "required_in_source": true,
         "source_name": "State",
@@ -2782,7 +2782,7 @@
         "type": "text"
       },
       {
-        "display_name": "metro",
+        "display_name": "Metro",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Metro",
@@ -2790,7 +2790,7 @@
         "type": "text"
       },
       {
-        "display_name": "countyname",
+        "display_name": "County Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "CountyName",
@@ -2798,7 +2798,7 @@
         "type": "text"
       },
       {
-        "display_name": "sizerank",
+        "display_name": "Size Rank",
         "display_text": "",
         "required_in_source": true,
         "source_name": "SizeRank",
@@ -3406,7 +3406,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -3420,7 +3420,7 @@
     "cleaner": "dchousing_cleaner",
     "fields": [
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -3428,7 +3428,7 @@
         "type": "text"
       },
       {
-        "display_name": "objectid",
+        "display_name": "Object ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "OBJECTID",
@@ -3436,7 +3436,7 @@
         "type": "text"
       },
       {
-        "display_name": "ward",
+        "display_name": "Ward",
         "display_text": "",
         "required_in_source": true,
         "source_name": "MAR_WARD",
@@ -3444,7 +3444,7 @@
         "type": "text"
       },
       {
-        "display_name": "address",
+        "display_name": "Address",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ADDRESS",
@@ -3452,7 +3452,7 @@
         "type": "text"
       },
       {
-        "display_name": "project_name",
+        "display_name": "Project Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PROJECT_NAME",
@@ -3460,7 +3460,7 @@
         "type": "text"
       },
       {
-        "display_name": "status_public",
+        "display_name": "Status Public",
         "display_text": "",
         "required_in_source": true,
         "source_name": "STATUS_PUBLIC",
@@ -3468,7 +3468,7 @@
         "type": "text"
       },
       {
-        "display_name": "agency_calculated",
+        "display_name": "Agency Calculated",
         "display_text": "",
         "required_in_source": true,
         "source_name": "AGENCY_CALCULATED",
@@ -3476,7 +3476,7 @@
         "type": "text"
       },
       {
-        "display_name": "report_units_affordable",
+        "display_name": "Report Units Affordable",
         "display_text": "",
         "required_in_source": true,
         "source_name": "REPORT_UNITS_AFFORDABLE",
@@ -3484,7 +3484,7 @@
         "type": "integer"
       },
       {
-        "display_name": "latitude",
+        "display_name": "Latitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "LATITUDE",
@@ -3492,7 +3492,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "longitude",
+        "display_name": "Longitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "LONGITUDE",
@@ -3500,7 +3500,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "address_id",
+        "display_name": "Address ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ADDRESS_ID",
@@ -3508,7 +3508,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "xcoord",
+        "display_name": "Xcoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "XCOORD",
@@ -3516,7 +3516,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "ycoord",
+        "display_name": "Ycoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "YCOORD",
@@ -3524,7 +3524,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "address_std",
+        "display_name": "Address Std",
         "display_text": "",
         "required_in_source": true,
         "source_name": "FULLADDRESS",
@@ -3532,7 +3532,7 @@
         "type": "text"
       },
       {
-        "display_name": "lastmodifieddate",
+        "display_name": "Last Modified Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "GIS_LAST_MOD_DTTM",
@@ -3546,7 +3546,7 @@
     "cleaner": "topa_cleaner",
     "fields": [
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -3554,7 +3554,7 @@
         "type": "text"
       },
       {
-        "display_name": "nidc_rcasd_id",
+        "display_name": "Nidc rcasd ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Nidc_rcasd_id",
@@ -3562,7 +3562,7 @@
         "type": "text"
       },
       {
-        "display_name": "notice_type",
+        "display_name": "Notice Type",
         "display_text": "Category of TOPA notice recorded.",
         "required_in_source": true,
         "source_name": "Notice_type",
@@ -3570,7 +3570,7 @@
         "type": "text"
       },
       {
-        "display_name": "orig_address",
+        "display_name": "Original Address",
         "display_text": "The original address associated with TOPA noticed as received before cleaning.",
         "required_in_source": true,
         "source_name": "Orig_address",
@@ -3578,7 +3578,7 @@
         "type": "text"
       },
       {
-        "display_name": "notes",
+        "display_name": "Notes",
         "display_text": "Urban Institute notes on the nature of this TOPA notice.",
         "required_in_source": true,
         "source_name": "Notes",
@@ -3586,7 +3586,7 @@
         "type": "text"
       },
       {
-        "display_name": "source_file",
+        "display_name": "Source File",
         "display_text": "Original CSV file as used by Urban Institute in their ingestion process.",
         "required_in_source": true,
         "source_name": "Source_file",
@@ -3594,7 +3594,7 @@
         "type": "text"
       },
       {
-        "display_name": "notice_date",
+        "display_name": "Notice Date",
         "display_text": "Date of the TOPA notice in question.",
         "required_in_source": true,
         "source_name": "Notice_date",
@@ -3602,7 +3602,7 @@
         "type": "text"
       },
       {
-        "display_name": "num_units",
+        "display_name": "Number of Units",
         "display_text": "Number of housing units associated with this TOPA notification.",
         "required_in_source": true,
         "source_name": "Num_units",
@@ -3610,7 +3610,7 @@
         "type": "integer"
       },
       {
-        "display_name": "sale_price",
+        "display_name": "Sale Price",
         "display_text": "If TOPA notice advertises a sale, the sale price in US dollars (whole number and non-decimal)",
         "required_in_source": true,
         "source_name": "Sale_price",
@@ -3618,7 +3618,7 @@
         "type": "integer"
       },
       {
-        "display_name": "address",
+        "display_name": "Address",
         "display_text": "The address cleaned and parsed by Urban Institute for their ingestion of raw TOPA notice distribution.",
         "required_in_source": true,
         "source_name": "Address",
@@ -3626,7 +3626,7 @@
         "type": "text"
       },
       {
-        "display_name": "addr_num",
+        "display_name": "Number of Housing Units per Address",
         "display_text": "Number of housing units related to the address associated with the TOPA notice, when volunteered by property owner.",
         "required_in_source": true,
         "source_name": "Addr_num",
@@ -3634,7 +3634,7 @@
         "type": "integer"
       },
       {
-        "display_name": "address_std",
+        "display_name": "Address Std",
         "display_text": "Normalized address after cleaning for data ingestion, confirmed by reverse geocoding.",
         "required_in_source": true,
         "source_name": "address_std",
@@ -3642,7 +3642,7 @@
         "type": "text"
       },
       {
-        "display_name": "latitude",
+        "display_name": "Latitude",
         "display_text": "Latitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
         "required_in_source": true,
         "source_name": "Y",
@@ -3650,7 +3650,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "longitude",
+        "display_name": "Longitude",
         "display_text": "Longitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
         "required_in_source": true,
         "source_name": "X",
@@ -3658,7 +3658,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "address_id",
+        "display_name": "Address_id",
         "display_text": "The DCGIS Master Address Record ID as confirmed by reverse geocoding",
         "required_in_source": true,
         "source_name": "ADDRESS_ID",
@@ -3666,7 +3666,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "anc2002",
+        "display_name": "ANC 2002",
         "display_text": "The Advisory Neighborhood Committee of the address of TOPA notice as designated in 2002.",
         "required_in_source": true,
         "source_name": "Anc2002",
@@ -3674,7 +3674,7 @@
         "type": "text"
       },
       {
-        "display_name": "anc2012",
+        "display_name": "ANC 2012",
         "display_text": "The Advisory Neighborhood Committee of the address of TOPA notice as designated in 2012.",
         "required_in_source": true,
         "source_name": "Anc2012",
@@ -3682,7 +3682,7 @@
         "type": "text"
       },
       {
-        "display_name": "neighborhood_cluster",
+        "display_name": "Neighborhood Cluster",
         "display_text": "Tract-based neighborhood cluster data from 2000 associated with address of TOPA notice.",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
@@ -3690,7 +3690,7 @@
         "type": "text"
       },
       {
-        "display_name": "geo2000",
+        "display_name": "Geo 2000",
         "display_text": "Full census tract ID from 2000 associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "Geo2000",
@@ -3698,7 +3698,7 @@
         "type": "text"
       },
       {
-        "display_name": "census_tract",
+        "display_name": "Census Tract",
           "display_text": "Full census tract ID from 2010 associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "Geo2010",
@@ -3706,7 +3706,7 @@
         "type": "text"
       },
       {
-        "display_name": "geobg2010",
+        "display_name": "Geobg 2010",
         "display_text": "Full census block group ID from 2010 associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "GeoBg2010",
@@ -3714,7 +3714,7 @@
         "type": "text"
       },
       {
-        "display_name": "geoblk2010",
+        "display_name": "Geoblk 2010",
         "display_text": "Full census block ID from 2010 associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "GeoBlk2010",
@@ -3722,7 +3722,7 @@
         "type": "text"
       },
       {
-        "display_name": "psa2004",
+        "display_name": "PSA 2004",
         "display_text": "Police service area assoicated with the address of the TOPA notice as of 2004",
         "required_in_source": true,
         "source_name": "Psa2004",
@@ -3730,7 +3730,7 @@
         "type": "text"
       },
       {
-        "display_name": "psa2012",
+        "display_name": "PSA 2012",
         "display_text": "Police service area assoicated with the address of the TOPA notice as of 2004",
         "required_in_source": true,
         "source_name": "Psa2012",
@@ -3738,7 +3738,7 @@
         "type": "text"
       },
       {
-        "display_name": "ssl",
+        "display_name": "SSL",
         "display_text": "Square Suffix Lot ID for the address associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "SSL",
@@ -3746,7 +3746,7 @@
         "type": "text"
       },
       {
-        "display_name": "voterpre2012",
+        "display_name": "Voter Precinct 2012",
         "display_text": "2012 voter precinct data associated with the address of the TOPA notice.",
         "required_in_source": true,
         "source_name": "VoterPre2012",
@@ -3754,7 +3754,7 @@
         "type": "text"
       },
       {
-        "display_name": "ward2002",
+        "display_name": "Ward 2002",
         "display_text": "Ward of the address associated with the TOPA notice as of 2002.",
         "required_in_source": true,
         "source_name": "Ward2002",
@@ -3762,7 +3762,7 @@
         "type": "text"
       },
       {
-        "display_name": "ward",
+        "display_name": "Ward",
         "display_text": "Ward of the address associated with the TOPA notice as of 2012.",
         "required_in_source": true,
         "source_name": "Ward2012",
@@ -3770,7 +3770,7 @@
         "type": "text"
       },
       {
-        "display_name": "m_addr",
+        "display_name": "M Address",
         "display_text": "Geocoded address result.",
         "required_in_source": true,
         "source_name": "M_ADDR",
@@ -3778,7 +3778,7 @@
         "type": "text"
       },
       {
-        "display_name": "city",
+        "display_name": "City",
         "display_text": "Geocoded city result.",
         "required_in_source": true,
         "source_name": "M_CITY",
@@ -3786,7 +3786,7 @@
         "type": "text"
       },
       {
-        "display_name": "state",
+        "display_name": "State",
         "display_text": "Geocoded state result.",
         "required_in_source": true,
         "source_name": "M_STATE",
@@ -3794,7 +3794,7 @@
         "type": "text"
       },
       {
-        "display_name": "zip",
+        "display_name": "Zip Code",
         "display_text": "Geocoded ZIP code result.",
         "required_in_source": true,
         "source_name": "M_ZIP",
@@ -3802,7 +3802,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "m_obs",
+        "display_name": "M Obs",
         "display_text": "Geocoded OBS result from the address.",
         "required_in_source": true,
         "source_name": "M_OBS",
@@ -3810,7 +3810,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "dc_mar_geocode_matched",
+        "display_name": "DC Mar Geocode Matched",
         "display_text": "",
         "required_in_source": true,
         "source_name": "_MATCHED_",
@@ -3818,7 +3818,7 @@
         "type": "text"
       },
       {
-        "display_name": "dc_mar_geocode_status",
+        "display_name": "DC Mar Geocode Status",
         "display_text": "Geocoding match level for the result.",
         "required_in_source": true,
         "source_name": "_STATUS_",
@@ -3826,7 +3826,7 @@
         "type": "text"
       },
       {
-        "display_name": "dc_mar_geocode_notes",
+        "display_name": "DC Mar Geocode Notes",
         "display_text": "Markings from the Urban Institute geocoding service results.",
         "required_in_source": true,
         "source_name": "_NOTES_",
@@ -3834,7 +3834,7 @@
         "type": "text"
       },
       {
-        "display_name": "dc_mar_geocode_score",
+        "display_name": "DC Mar Geocode Score",
         "display_text": "Confidence score attributed to geocoding result for Urban Institute geocoding service",
         "required_in_source": true,
         "source_name": "_SCORE_",
@@ -3848,7 +3848,7 @@
     "cleaner": "Zone_HousingUnit_Bedrm_Count_cleaner",
     "fields": [
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -3856,7 +3856,7 @@
         "type": "text"
       },
       {
-        "display_name": "zone_type",
+        "display_name": "Zone Type",
         "display_text": "Zone type",
         "required_in_source": true,
         "source_name": "zone_type",
@@ -3864,7 +3864,7 @@
         "type": "text"
       },
       {
-        "display_name": "zone",
+        "display_name": "Zone specific value",
         "display_text": "Specific value of the zone type",
         "required_in_source": true,
         "source_name": "zone",
@@ -3872,7 +3872,7 @@
         "type": "text"
       },
       {
-        "display_name": "housing_unit_count",
+        "display_name": "Housing Unit Count",
         "display_text": "Count of total housing units in that zone",
         "required_in_source": true,
         "source_name": "housing_unit_count",
@@ -3880,7 +3880,7 @@
         "type": "integer"
       },
       {
-        "display_name": "bedroom_unit_count",
+        "display_name": "Bedroom Unit Count",
         "display_text": "Count of total bedrooms in that zone",
         "required_in_source": true,
         "source_name": "bedroom_unit_count",
