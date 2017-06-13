@@ -93,7 +93,7 @@ class CamaApiConn(BaseApiConn):
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
         cama_data = result.json()
-        logging.info("  Got cama_data. Length:".format(cama_data['features'].length))
+        logging.info("  Got cama_data. Length:{}".format(len(cama_data['features'])))
 
         """
         Example of: anc_count = [OrderedDict([('zone_type', 'anc'), ('zone', 'ANC 2B'),
@@ -121,7 +121,8 @@ class CamaApiConn(BaseApiConn):
         don't provide any housing units and bedrm at this time.
         """
         for index, row in enumerate(cama_data['features']):
-            logging.info("  trying row {}".format(index))
+            if (index % 1000 == 0):
+                print("  currently at index {}".format(index))
             try:
                 current_year = int(datetime.date.today().strftime('%Y'))
                 #Skipping none values for units under construction
@@ -211,7 +212,7 @@ if __name__ == '__main__':
 
     # Pushes everything from the logger to the command line output as well.
     log_path = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir,"logs","sources.log"))
-    logging.basicConfig(filename=log_path, level=logging.DEBUG)
+    logging.basicConfig(filename=log_path, level=logging.INFO)
     logging.getLogger().addHandler(logging.StreamHandler())
 
     my_api = CamaApiConn()
