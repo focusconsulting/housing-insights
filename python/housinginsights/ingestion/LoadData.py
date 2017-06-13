@@ -261,6 +261,9 @@ class LoadData(object):
         """
         self._drop_tables()
 
+        # reload meta.json into db
+        self._meta_json_to_database()
+
         processed_data_ids = []
 
         # Iterate through each row in the manifest then clean and validate
