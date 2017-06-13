@@ -209,7 +209,7 @@ class HISql(object):
     def drop_table(self, table=None):
 
         db_conn = self.engine.connect()
-        table = self.tablename if table==None else table
+        table = self.tablename if table is None else table
 
         #TODO also need to delete manifest row(s)
         #TODO need to use a transaction to ensure both operations sync
