@@ -108,6 +108,7 @@ class WmataApiConn(BaseApiConn):
 
             numrow = 0
             total_rows = rows.rowcount
+            logging.info("  Total rows: {}".format(total_rows))
 
             #Get the rail stations once (no option to only get closest ones provided by wmata)
             wmata_headers = self._get_wmata_headers()
@@ -119,19 +120,24 @@ class WmataApiConn(BaseApiConn):
                 radius = self._get_meters(0.5)
 
                 project_details = self._get_project_info(row,columns)
+                lat = project_details['lat']
+                lon = project_details['lon']
 
+                if lat == None or lon == None:
+                    logging.warning("  Lat or Lon not available for project {}".format(project_details['nlihcid']))
+                    
+                if lat != None and lon != None:
+                    logging.info("  Processing project {} of {}".format(numrow,total_rows))
 
-                logging.info("  Processing project {} of {}".format(numrow,total_rows))
+                    # find all metro stations within 0.5 miles
+                    logging.info("  Starting processing rail stations for {}".format(project_details['nlihcid']))
+                    self._find_rail_stations(self.railStations,project_details,radius,sample=sample,db=db)
+                    logging.info("  Completed processing rail stations for project id {}".format(project_details['nlihcid']))
 
-                # find all metro stations within 0.5 miles
-                logging.info("  Starting processing rail stations for {}".format(project_details['nlihcid']))
-                self._find_rail_stations(self.railStations,project_details,radius,sample=sample,db=db)
-                logging.info("  Completed processing rail stations for project id {}".format(project_details['nlihcid']))
-
-                # find all bus stops within 0.5 miles
-                logging.info("  Starting processing bus stations for project id {}".format(project_details['nlihcid']))
-                self._find_bus_stations(project_details, radius,sample=sample,db=db)
-                logging.info("  Completed processing bus stations for project id {}".format(project_details['nlihcid']))
+                    # find all bus stops within 0.5 miles
+                    logging.info("  Starting processing bus stations for project id {}".format(project_details['nlihcid']))
+                    self._find_bus_stations(project_details, radius,sample=sample,db=db)
+                    logging.info("  Completed processing bus stations for project id {}".format(project_details['nlihcid']))
 
             #Save the data
             if ( output_type == 'csv'):
