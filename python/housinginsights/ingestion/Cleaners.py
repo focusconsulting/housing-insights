@@ -71,7 +71,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             row[key] = row[key].replace('\r','__')
             row[key] = row[key].replace('\n','__')
         return row
-    
+
     def format_date(self, value):
         date = None
         try:
@@ -145,7 +145,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
     def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
             '''
-            Make all census tract names follow a consistent format. 
+            Make all census tract names follow a consistent format. 
             column_name corresponds to the key of the row, which depends on 
             the source file column name which may be different from the final
             consistent name of census_tract
@@ -160,7 +160,7 @@ class CleanerBase(object, metaclass=ABCMeta):
     def replace_tracts(self,row,row_num,column_name='census_tract'):
         '''
         Converts the raw census tract code to the more readable format used by PresCat
-        TODO should read these mappings from file instead of having them hardcoded. 
+        TODO should read these mappings from file instead of having them hardcoded.
 
         TODO should use self.census_mapping instead
         '''
@@ -350,21 +350,21 @@ class CleanerBase(object, metaclass=ABCMeta):
             row[column_name] = census_tract_mapping[current]
         except KeyError:
             pass
-            #this prints error for many rows with nulls. 
+            #this prints error for many rows with nulls.
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
     def append_tract_label(self,row,row_num,column_name='census_tract_number'):
         '''
-        Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value 
-        consistent with the more readable format used by PresCat 
+        Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value
+        consistent with the more readable format used by PresCat
         '''
         current = row[column_name]
         try:
             row[column_name] = "Tract " + str(current)
         except KeyError:
             pass
-            #this prints error for many rows with nulls. 
+            #this prints error for many rows with nulls.
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
@@ -478,7 +478,7 @@ class BuildingPermitsCleaner(CleanerBase):
 
 class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
-        #Handle the first row which is a descriptive row, not data. 
+        #Handle the first row which is a descriptive row, not data.
         if row_num == 0:
             return None
         row['census_tract'] = ""+row['state']+row['county']+row['tract']
@@ -502,6 +502,13 @@ class CensusCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
+class CensusTractToNeighborhoodClusterCleaner(CleanerBase):
+    def clean(self,row, row_num = None):
+        return row
+
+class CensusTractToWardCleaner(CleanerBase):
+    def clean(self,row, row_num = None):
+        return row
 
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
@@ -523,7 +530,7 @@ class DCTaxCleaner(CleanerBase):
         return row
 
 
-class hmda_cleaner(CleanerBase):    
+class hmda_cleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', None])
         row = self.parse_dates(row)
@@ -568,6 +575,11 @@ class topa_cleaner(CleanerBase):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
         # character in one or two columns.  Leave here for now.
         row = self.replace_nulls(row, null_values=['', '\\', None])
+        return row
+
+
+class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
+    def clean(self,row,row_num=None):
         return row
 
 
@@ -620,4 +632,4 @@ class ZillowCleaner(CleanerBase):
         '121693', '121695', '121702', '121704', '121709', '121718', '121727', '121729', '121736', '121743', '121745', '403135', '403134', 
         '121816', '121815', '403139', '403116', '273767', '403478', '273489', '268811', '121808', '121807', '121806', '121791', '121788', 
         '121774', '121772', '121754', '121759', '121761', '121777', '121779', '121786', '268815', '268831', '272818', '273159', '275465', 
-        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']
+        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']       

@@ -6,53 +6,56 @@
         </div>
         <div id="options-spacer"></div>
         <div id="right-options">
-            <button class="sub-nav-button" id="button-charts">Charts</button>
-            <button class="sub-nav-button" id="button-buildings">Buildings</button>
+            <!--<button class="sub-nav-button" id="button-charts">Charts</button>-->
+            <button class="sub-nav-button" id="button-buildings">Buildings <span id="matching-count"></span></button>
         </div>
     </div>
     <div id="sidebar-left" class="sidebar">
         <button class="sidebar-tab"><div class="triangle right"></div></button>
-        <div id="layers" class="sub-nav-container">
-            <p>Show data</p>
-            <div id="overlay-menu"></div>
-            <p>Divide by</p>
-            <div id="layer-menu"></div>
-        </div>
-        <div id="filters" class="sub-nav-container">
-            <div id="temp-filter-menu">                
-                <div id="filter-components">
+        <div class="sidebar-inner-wrapper">
+            <div id="layers" class="sub-nav-container">
+                <div class="sub-nav-group">
+                    <h3>Show data</h3>
+                    <div id="overlay-menu"></div>
                 </div>
+                <div class="sub-nav-group">
+                    <h3>Divide by</h3>
+                    <div id="layer-menu"></div>
+                </div>
+            </div>
+            <div id="filters" class="sub-nav-container">
+                <div id="filter-components">
+                </div>                
             </div>
         </div>
     </div>
     <div id="sidebar-right" class="sidebar">
     <button class="sidebar-tab"><div class="triangle left"></div></button>
-        <sidebar id="sidebar">
+        <div class="sidebar-inner-wrapper">
             
             <div id="charts" class="sub-nav-container">
-                <div id="stats">
-                    <h2>Affordable building statistics</h2>
-                    <div id="stats-inner">
-                        <p>Select a zone type on the left to change drilldown options</p>
-                        <p id="zone-drilldown-instructions">Choose a ward</p>
-                        <select id="zone-selector" role="group" aria-label="Filter">
-                        </select>
+
+                <div class="sub-nav-group">                    
+                    
+                                          
+                </div>
+
+            </div>
+            <div id="buildings" class="sub-nav-container">
+                <div class="sub-nav-group">
+                    
                         <div id="pie-charts">
                             <div id="pie-0"></div>
-                            <div id="pie-1"></div>
-                            <div id="pie-2"></div>
-                            <div id="pie-3"></div>
-                        </div>
+                            <div id="pie-1"></div>                       
+                        </div>  
+                    
+                </div>
+                <div class="sub-nav-group">                   
+                    <div id="buildings-list">                       
                     </div>
                 </div>
             </div>
-            <div id="buildings" class="sub-nav-container">
-                <h2></h2>
-                <div id="buildings-list">
-                   
-                </div>
-            </div>
-        </sidebar>
+        </div>
     </div>
         
         <div id="filter-panel">
