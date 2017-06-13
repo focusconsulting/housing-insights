@@ -18,14 +18,65 @@
         "sql_name": "census_tract",
         "type": "text"
       },
+
       {
-        "display_name": "Total population",
-        "display_text": "Total population",
+        "display_name": "Population",
+        "display_text": "Total Population from census tract data in ACS B01003_001E",
         "required_in_source": true,
         "source_name": "B01003_001E",
-        "sql_name": "total_population",
+        "sql_name": "population",
         "type": "integer"
       },
+
+      {
+        "display_name": "Population - Black",
+        "display_text": "Total number of the population that is Black or African American",
+        "required_in_source": true,
+        "source_name": "B02001_003E",
+        "sql_name": "population_black",
+        "type": "integer"
+      },
+      {
+        "display_name": "Population Below Poverty Level",
+        "display_text": "Count of people below poverty level per ACS B17020_002E",
+        "required_in_source": true,
+        "source_name": "B17020_002E",
+        "sql_name": "population_poverty",
+        "type": "integer"
+      },
+      {
+        "display_name": "Aggregate Household Income",
+        "display_text": "Sum of income of people living in this census tract per ACS B19025_001E",
+        "required_in_source": true,
+        "source_name": "B19025_001E",
+        "sql_name": "aggregate_income",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Population In Labor Force",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "B23025_002E",
+        "sql_name": "population_working",
+        "type": "integer"
+      },
+      {
+        "display_name": "Population - Foreign",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "B16008_019E",
+        "sql_name": "population_foreign",
+        "type": "integer"
+      },
+      {
+        "display_name": "Population - Single Mothers",
+        "display_text": "Number of single mothers in the population from ACS B09002_015E",
+        "required_in_source": true,
+        "source_name": "B09002_015E",
+        "sql_name": "population_single_mother",
+        "type": "integer"
+      },
+
       {
         "display_name": "Lower contract rent quartile",
         "display_text": "B25057.  LOWER CONTRACT RENT QUARTILE (DOLLARS)",
@@ -50,6 +101,7 @@
         "sql_name": "acs_upper_rent_quartile",
         "type": "integer"
       },
+
       {
         "display_name": "state",
         "display_text": "Census state ID",

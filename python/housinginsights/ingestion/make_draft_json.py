@@ -253,9 +253,9 @@ def duplicateTable(new_table, new_json, master_json):
 if __name__ == '__main__':
     #
     # Edit these values before running!
-    csv_filename = os.path.abspath("../../../data/processed/zoneUnitCount/zoneUnitCount_2017-06-03.csv")#"../../../data/sample/project_sample.csv"
-    table_name = "Zone_HousingUnit_Bedrm_Count"
-    encoding = "latin1" #Try utf-8 or latin1. Put the successful value into manifest.csv
+    csv_filename = os.path.abspath("../../../data/raw/apis/20170613/acs5_2015.csv")#"../../../data/sample/project_sample.csv"
+    table_name = "census"
+    encoding = "utf-8" #Try utf-8 or latin1. Put the successful value into manifest.csv
     #print('main(): {}, {}, {}'.format())
     # import ipdb; ipdb.set_trace()
     #Make the table
