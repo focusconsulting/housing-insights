@@ -80,6 +80,7 @@ results = proxy.fetchall()
 tables = [x[0] for x in results]
 application.logger.debug('Tables available: {}'.format(tables))
 conn.close()
+logging.info(tables)
 
 ##########################################
 # API Endpoints
