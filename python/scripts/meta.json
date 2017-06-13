@@ -1015,7 +1015,7 @@
         "type": "integer"
       },
       {
-        "display_name": "appraised_value_baseyear_bldg",
+        "display_name": "Appraised Value Baseyear Building",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPRAISED_VALUE_BASEYEAR_BLDG",
@@ -1023,7 +1023,7 @@
         "type": "integer"
       },
       {
-        "display_name": "appraised_value_prior_land",
+        "display_name": "Appraised Value Prior Land",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPRAISED_VALUE_PRIOR_LAND",
@@ -1031,7 +1031,7 @@
         "type": "integer"
       },
       {
-        "display_name": "appraised_value_prior_impr",
+        "display_name": "Appraised Value Prior Improvements",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPRAISED_VALUE_PRIOR_IMPR",
@@ -1039,7 +1039,7 @@
         "type": "integer"
       },
       {
-        "display_name": "appraised_value_prior_total",
+        "display_name": "Appraised Value Prior Total",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPRAISED_VALUE_PRIOR_TOTAL",
@@ -1047,7 +1047,7 @@
         "type": "integer"
       },
       {
-        "display_name": "appraised_value_current_land",
+        "display_name": "Appraised Value Current Land",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPRAISED_VALUE_CURRENT_LAND",
@@ -1055,7 +1055,7 @@
         "type": "integer"
       },
       {
-        "display_name": "appraised_value_current_impr",
+        "display_name": "Appraised Value Current Improvement",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPRAISED_VALUE_CURRENT_IMPR",
@@ -1063,7 +1063,7 @@
         "type": "integer"
       },
       {
-        "display_name": "appraised_value_current_total",
+        "display_name": "Appraised Value Current Total",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPRAISED_VALUE_CURRENT_TOTAL",
@@ -1071,7 +1071,7 @@
         "type": "integer"
       },
       {
-        "display_name": "phasein_value_current_land",
+        "display_name": "Phasein Value Current Land",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PHASEIN_VALUE_CURRENT_LAND",
@@ -1079,7 +1079,7 @@
         "type": "integer"
       },
       {
-        "display_name": "phasein_value_current_bldg",
+        "display_name": "Phasein Value Current Building",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PHASEIN_VALUE_CURRENT_BLDG",
@@ -1087,7 +1087,7 @@
         "type": "integer"
       },
       {
-        "display_name": "vacant_use",
+        "display_name": "Vacant Use",
         "display_text": "",
         "required_in_source": true,
         "source_name": "VACANT_USE",
@@ -1095,7 +1095,7 @@
         "type": "boolean"
       },
       {
-        "display_name": "homestead_description",
+        "display_name": "Homestead Description",
         "display_text": "",
         "required_in_source": true,
         "source_name": "HOMESTEAD_DESCRIPTION",
@@ -1103,7 +1103,7 @@
         "type": "text"
       },
       {
-        "display_name": "tax_type_description",
+        "display_name": "Tax Type Description",
         "display_text": "",
         "required_in_source": true,
         "source_name": "TAX_TYPE_DESCRIPTION",
@@ -1111,7 +1111,7 @@
         "type": "text"
       },
       {
-        "display_name": "taxrate",
+        "display_name": "Tax Rate",
         "display_text": "",
         "required_in_source": true,
         "source_name": "TAXRATE",
@@ -1119,7 +1119,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "mixed_use",
+        "display_name": "Mixed Use",
         "display_text": "",
         "required_in_source": true,
         "source_name": "MIXED_USE",
@@ -1127,7 +1127,7 @@
         "type": "text"
       },
       {
-        "display_name": "owner_occupied_coop_units",
+        "display_name": "Owner Occupied Coop Units",
         "display_text": "",
         "required_in_source": true,
         "source_name": "OWNER_OCCUPIED_COOP_UNITS",
@@ -1135,7 +1135,7 @@
         "type": "integer"
       },
       {
-        "display_name": "last_sale_price",
+        "display_name": "Last Sale Price",
         "display_text": "",
         "required_in_source": true,
         "source_name": "LAST_SALE_PRICE",
@@ -1143,7 +1143,7 @@
         "type": "integer"
       },
       {
-        "display_name": "last_sale_date",
+        "display_name": "Last Sale Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "LAST_SALE_DATE",
@@ -1151,7 +1151,7 @@
         "type": "timestamp"
       },
       {
-        "display_name": "deed_date",
+        "display_name": "Deed Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "DEED_DATE",
@@ -1159,7 +1159,7 @@
         "type": "timestamp"
       },
       {
-        "display_name": "current_assessment_cap",
+        "display_name": "Current Assessment Cap",
         "display_text": "",
         "required_in_source": true,
         "source_name": "CURRENT_ASSESSMENT_CAP",
@@ -1167,7 +1167,7 @@
         "type": "integer"
       },
       {
-        "display_name": "proposed_assessment_cap",
+        "display_name": "Proposed Assessment Cap",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PROPOSED_ASSESSMENT_CAP",
@@ -1175,7 +1175,7 @@
         "type": "integer"
       },
       {
-        "display_name": "owner_name_secondary",
+        "display_name": "Owner Name Secondary",
         "display_text": "",
         "required_in_source": true,
         "source_name": "OWNER_NAME_SECONDARY",
@@ -1183,7 +1183,7 @@
         "type": "text"
       },
       {
-        "display_name": "address_id",
+        "display_name": "Address ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ADDRESS_ID",
@@ -1191,7 +1191,7 @@
         "type": "text"
       },
       {
-        "display_name": "lastmodifieddate",
+        "display_name": "Last Modified Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "LASTMODIFIEDDATE",
@@ -1199,7 +1199,7 @@
         "type": "date"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -1213,7 +1213,7 @@
     "cleaner": "hmda_cleaner",
     "fields": [
       {
-        "display_name": "action_taken",
+        "display_name": "Action Taken",
         "display_text": "",
         "required_in_source": true,
         "source_name": "action_taken",
@@ -1221,7 +1221,7 @@
         "type": "text"
       },
       {
-        "display_name": "action_taken_name",
+        "display_name": "Action Taken Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "action_taken_name",
@@ -1229,7 +1229,7 @@
         "type": "text"
       },
       {
-        "display_name": "agency_code",
+        "display_name": "Agency Code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "agency_code",
@@ -1237,7 +1237,7 @@
         "type": "text"
       },
       {
-        "display_name": "agency_abbr",
+        "display_name": "Agency Abbr",
         "display_text": "",
         "required_in_source": true,
         "source_name": "agency_abbr",
@@ -1245,7 +1245,7 @@
         "type": "text"
       },
       {
-        "display_name": "agency_name",
+        "display_name": "Agency Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "agency_name",
@@ -1253,7 +1253,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_ethnicity",
+        "display_name": "Applicant Ethnicity",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_ethnicity",
@@ -1261,7 +1261,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_ethnicity_name",
+        "display_name": "Applicant Ethnicity Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_ethnicity_name",
@@ -1269,7 +1269,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_income_000s",
+        "display_name": "Applicant Income 000s",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_income_000s",
@@ -1277,7 +1277,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "applicant_race_1",
+        "display_name": "Applicant Race 1",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_1",
@@ -1285,7 +1285,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_2",
+        "display_name": "Applicant Race 2",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_2",
@@ -1293,7 +1293,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_3",
+        "display_name": "Applicant Race 3",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_3",
@@ -1301,7 +1301,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_4",
+        "display_name": "Applicant Race 4",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_4",
@@ -1309,7 +1309,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_5",
+        "display_name": "Applicant Race 5",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_5",
@@ -1317,7 +1317,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_name_1",
+        "display_name": "Applicant Race Name 1",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_name_1",
@@ -1325,7 +1325,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_name_2",
+        "display_name": "Applicant Race Name 2",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_name_2",
@@ -1333,7 +1333,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_name_3",
+        "display_name": "Applicant Race Name 3",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_name_3",
@@ -1341,7 +1341,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_name_4",
+        "display_name": "Applicant Race Name 4",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_name_4",
@@ -1349,7 +1349,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_race_name_5",
+        "display_name": "Applicant Race Name 5",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_race_name_5",
@@ -1357,7 +1357,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_sex",
+        "display_name": "Applicant Sex",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_sex",
@@ -1365,7 +1365,7 @@
         "type": "text"
       },
       {
-        "display_name": "applicant_sex_name",
+        "display_name": "Applicant Sex Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "applicant_sex_name",
@@ -1373,7 +1373,7 @@
         "type": "text"
       },
       {
-        "display_name": "application_date_indicator",
+        "display_name": "Application Date Indicator",
         "display_text": "",
         "required_in_source": true,
         "source_name": "application_date_indicator",
@@ -1381,7 +1381,7 @@
         "type": "text"
       },
       {
-        "display_name": "as_of_year",
+        "display_name": "As of Year",
         "display_text": "",
         "required_in_source": true,
         "source_name": "as_of_year",
@@ -1389,7 +1389,7 @@
         "type": "integer"
       },
       {
-        "display_name": "census_tract_number",
+        "display_name": "Census Tract Number",
         "display_text": "",
         "required_in_source": true,
         "source_name": "census_tract_number",
@@ -1397,7 +1397,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_ethnicity",
+        "display_name": "Co Applicant Ethnicity",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_ethnicity",
@@ -1405,7 +1405,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_ethnicity_name",
+        "display_name": "Co Applicant Ethnicity Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_ethnicity_name",
@@ -1413,7 +1413,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_1",
+        "display_name": "Co Applicant Race 1",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_1",
@@ -1421,7 +1421,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_2",
+        "display_name": "Co Applicant Race 2",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_2",
@@ -1429,7 +1429,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_3",
+        "display_name": "Co Applicant Race 3",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_3",
@@ -1437,7 +1437,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_4",
+        "display_name": "Co Applicant Race 4",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_4",
@@ -1445,7 +1445,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_5",
+        "display_name": "Co Applicant Race 5",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_5",
@@ -1453,7 +1453,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_name_1",
+        "display_name": "Co Applicant Race Name 1",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_name_1",
@@ -1461,7 +1461,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_name_2",
+        "display_name": "Co Applicant Race Name 2",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_name_2",
@@ -1469,7 +1469,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_name_3",
+        "display_name": "Co Applicant Race Name 3",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_name_3",
@@ -1477,7 +1477,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_name_4",
+        "display_name": "Co Applicant Race Name 4",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_name_4",
@@ -1485,7 +1485,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_race_name_5",
+        "display_name": "Co Applicant Race Name 5",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_race_name_5",
@@ -1493,7 +1493,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_sex",
+        "display_name": "Co Applicant Sex",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_sex",
@@ -1501,7 +1501,7 @@
         "type": "text"
       },
       {
-        "display_name": "co_applicant_sex_name",
+        "display_name": "Co Applicant Sex Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "co_applicant_sex_name",
@@ -1509,7 +1509,7 @@
         "type": "text"
       },
       {
-        "display_name": "county_code",
+        "display_name": "County Code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "county_code",
@@ -1517,7 +1517,7 @@
         "type": "text"
       },
       {
-        "display_name": "county_name",
+        "display_name": "County Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "county_name",
@@ -1525,7 +1525,7 @@
         "type": "text"
       },
       {
-        "display_name": "denial_reason_1",
+        "display_name": "Denial Reason 1",
         "display_text": "",
         "required_in_source": true,
         "source_name": "denial_reason_1",
@@ -1533,7 +1533,7 @@
         "type": "text"
       },
       {
-        "display_name": "denial_reason_2",
+        "display_name": "Denial Reason 2",
         "display_text": "",
         "required_in_source": true,
         "source_name": "denial_reason_2",
@@ -1541,7 +1541,7 @@
         "type": "text"
       },
       {
-        "display_name": "denial_reason_3",
+        "display_name": "Denial Reason 3",
         "display_text": "",
         "required_in_source": true,
         "source_name": "denial_reason_3",
@@ -1549,7 +1549,7 @@
         "type": "text"
       },
       {
-        "display_name": "denial_reason_name_1",
+        "display_name": "Denial Reason Name 1",
         "display_text": "",
         "required_in_source": true,
         "source_name": "denial_reason_name_1",
@@ -1557,7 +1557,7 @@
         "type": "text"
       },
       {
-        "display_name": "denial_reason_name_2",
+        "display_name": "Denial Reason Name 2",
         "display_text": "",
         "required_in_source": true,
         "source_name": "denial_reason_name_2",
@@ -1565,7 +1565,7 @@
         "type": "text"
       },
       {
-        "display_name": "denial_reason_name_3",
+        "display_name": "Denial Reason Name 3",
         "display_text": "",
         "required_in_source": true,
         "source_name": "denial_reason_name_3",
@@ -1573,7 +1573,7 @@
         "type": "text"
       },
       {
-        "display_name": "edit_status",
+        "display_name": "Edit Status",
         "display_text": "",
         "required_in_source": true,
         "source_name": "edit_status",
@@ -1581,7 +1581,7 @@
         "type": "text"
       },
       {
-        "display_name": "edit_status_name",
+        "display_name": "Edit Status Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "edit_status_name",
@@ -1589,7 +1589,7 @@
         "type": "text"
       },
       {
-        "display_name": "hoepa_status",
+        "display_name": "Hoepa Status",
         "display_text": "",
         "required_in_source": true,
         "source_name": "hoepa_status",
@@ -1597,7 +1597,7 @@
         "type": "text"
       },
       {
-        "display_name": "hoepa_status_name",
+        "display_name": "Hoepa Status Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "hoepa_status_name",
@@ -1605,7 +1605,7 @@
         "type": "text"
       },
       {
-        "display_name": "lien_status",
+        "display_name": "Lien Status",
         "display_text": "",
         "required_in_source": true,
         "source_name": "lien_status",
@@ -1613,7 +1613,7 @@
         "type": "text"
       },
       {
-        "display_name": "lien_status_name",
+        "display_name": "Lien Status Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "lien_status_name",
@@ -1621,7 +1621,7 @@
         "type": "text"
       },
       {
-        "display_name": "loan_purpose",
+        "display_name": "Loan Purpose",
         "display_text": "",
         "required_in_source": true,
         "source_name": "loan_purpose",
@@ -1629,7 +1629,7 @@
         "type": "text"
       },
       {
-        "display_name": "loan_purpose_name",
+        "display_name": "Loan Purpose Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "loan_purpose_name",
@@ -1637,7 +1637,7 @@
         "type": "text"
       },
       {
-        "display_name": "loan_type",
+        "display_name": "Loan Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "loan_type",
@@ -1645,7 +1645,7 @@
         "type": "text"
       },
       {
-        "display_name": "loan_type_name",
+        "display_name": "Loan Type Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "loan_type_name",
@@ -1653,7 +1653,7 @@
         "type": "text"
       },
       {
-        "display_name": "msamd",
+        "display_name": "Msamd",
         "display_text": "",
         "required_in_source": true,
         "source_name": "msamd",
@@ -1661,7 +1661,7 @@
         "type": "text"
       },
       {
-        "display_name": "msamd_name",
+        "display_name": "Msamd Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "msamd_name",
@@ -1669,7 +1669,7 @@
         "type": "text"
       },
       {
-        "display_name": "owner_occupancy",
+        "display_name": "Owner Occupancy",
         "display_text": "",
         "required_in_source": true,
         "source_name": "owner_occupancy",
@@ -1677,7 +1677,7 @@
         "type": "text"
       },
       {
-        "display_name": "owner_occupancy_name",
+        "display_name": "Owner Occupancy Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "owner_occupancy_name",
@@ -1685,7 +1685,7 @@
         "type": "text"
       },
       {
-        "display_name": "preapproval",
+        "display_name": "Preapproval",
         "display_text": "",
         "required_in_source": true,
         "source_name": "preapproval",
@@ -1693,7 +1693,7 @@
         "type": "text"
       },
       {
-        "display_name": "preapproval_name",
+        "display_name": "Preapproval Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "preapproval_name",
@@ -1701,7 +1701,7 @@
         "type": "text"
       },
       {
-        "display_name": "property_type",
+        "display_name": "Property Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "property_type",
@@ -1709,7 +1709,7 @@
         "type": "text"
       },
       {
-        "display_name": "property_type_name",
+        "display_name": "Property Type Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "property_type_name",
@@ -1717,7 +1717,7 @@
         "type": "text"
       },
       {
-        "display_name": "purchaser_type",
+        "display_name": "Purchaser Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "purchaser_type",
@@ -1725,7 +1725,7 @@
         "type": "text"
       },
       {
-        "display_name": "purchaser_type_name",
+        "display_name": "Purchaser Type Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "purchaser_type_name",
@@ -1733,7 +1733,7 @@
         "type": "text"
       },
       {
-        "display_name": "respondent_id",
+        "display_name": "Respondent ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "respondent_id",
@@ -1741,7 +1741,7 @@
         "type": "text"
       },
       {
-        "display_name": "sequence_number",
+        "display_name": "Sequence Number",
         "display_text": "",
         "required_in_source": true,
         "source_name": "sequence_number",
@@ -1749,7 +1749,7 @@
         "type": "text"
       },
       {
-        "display_name": "state_code",
+        "display_name": "State Code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "state_code",
@@ -1757,7 +1757,7 @@
         "type": "text"
       },
       {
-        "display_name": "state_abbr",
+        "display_name": "State Abbr",
         "display_text": "",
         "required_in_source": true,
         "source_name": "state_abbr",
@@ -1765,7 +1765,7 @@
         "type": "text"
       },
       {
-        "display_name": "state_name",
+        "display_name": "State Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "state_name",
@@ -1773,7 +1773,7 @@
         "type": "text"
       },
       {
-        "display_name": "hud_median_family_income",
+        "display_name": "Hud Median Family Income",
         "display_text": "",
         "required_in_source": true,
         "source_name": "hud_median_family_income",
@@ -1781,7 +1781,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "loan_amount_000s",
+        "display_name": "Loan Amount 000s",
         "display_text": "",
         "required_in_source": true,
         "source_name": "loan_amount_000s",
@@ -1789,7 +1789,7 @@
         "type": "integer"
       },
       {
-        "display_name": "number_of_1_to_4_family_units",
+        "display_name": "Number of 1 to 4 Family Units",
         "display_text": "",
         "required_in_source": true,
         "source_name": "number_of_1_to_4_family_units",
@@ -1797,7 +1797,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "number_of_owner_occupied_units",
+        "display_name": "Number of Owner Occupied Units",
         "display_text": "",
         "required_in_source": true,
         "source_name": "number_of_owner_occupied_units",
@@ -1805,7 +1805,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "minority_population",
+        "display_name": "Minority Population",
         "display_text": "",
         "required_in_source": true,
         "source_name": "minority_population",
@@ -1813,7 +1813,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "population",
+        "display_name": "Population",
         "display_text": "",
         "required_in_source": true,
         "source_name": "population",
@@ -1821,7 +1821,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "rate_spread",
+        "display_name": "Rate Spread",
         "display_text": "",
         "required_in_source": true,
         "source_name": "rate_spread",
@@ -1829,7 +1829,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "tract_to_msamd_income",
+        "display_name": "Tract to Msamd Income",
         "display_text": "",
         "required_in_source": true,
         "source_name": "tract_to_msamd_income",
@@ -1837,7 +1837,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -1851,7 +1851,7 @@
     "cleaner": "parcel_cleaner",
     "fields": [
       {
-        "display_name": "nlihc_id",
+        "display_name": "Nlihc ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Nlihc_id",
@@ -1859,7 +1859,7 @@
         "type": "text"
       },
       {
-        "display_name": "ssl",
+        "display_name": "SSL",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Ssl",
@@ -1867,7 +1867,7 @@
         "type": "text"
       },
       {
-        "display_name": "parcel_address_id",
+        "display_name": "Parcel Address ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_address_id",
@@ -1875,7 +1875,7 @@
         "type": "text"
       },
       {
-        "display_name": "ssl_orig",
+        "display_name": "SSL Orig",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Ssl_orig",
@@ -1883,7 +1883,7 @@
         "type": "text"
       },
       {
-        "display_name": "parcel_owner_date",
+        "display_name": "Parcel Owner Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_owner_date",
@@ -1891,7 +1891,7 @@
         "type": "text"
       },
       {
-        "display_name": "parcel_info_source_date",
+        "display_name": "Parcel Info Source Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_Info_Source_Date",
@@ -1899,7 +1899,7 @@
         "type": "text"
       },
       {
-        "display_name": "in_last_ownerpt",
+        "display_name": "In Last Ownerpt",
         "display_text": "",
         "required_in_source": true,
         "source_name": "in_last_ownerpt",
@@ -1907,7 +1907,7 @@
         "type": "boolean"
       },
       {
-        "display_name": "parcel_type",
+        "display_name": "Parcel Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_type",
@@ -1915,7 +1915,7 @@
         "type": "text"
       },
       {
-        "display_name": "parcel_x",
+        "display_name": "Parcel X",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_x",
@@ -1923,7 +1923,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "parcel_y",
+        "display_name": "Parcel Y",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_y",
@@ -1931,7 +1931,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "parcel_owner_name",
+        "display_name": "Parcel Owne Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_owner_name",
@@ -1939,7 +1939,7 @@
         "type": "text"
       },
       {
-        "display_name": "parcel_owner_type",
+        "display_name": "Parcel Owner Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Parcel_owner_type",
@@ -1947,7 +1947,7 @@
         "type": "text"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",
@@ -1961,7 +1961,7 @@
     "cleaner": "ProjectCleaner",
     "fields": [
       {
-        "display_name": "nlihc_id",
+        "display_name": "Nlihc_id",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Nlihc_id",
@@ -1969,7 +1969,7 @@
         "type": "text"
       },
       {
-        "display_name": "mar_id",
+        "display_name": "Mar ID",
         "display_text": "The mar id for the building location",
         "required_in_source": false,
         "source_name": "mar_id",
@@ -1977,7 +1977,7 @@
         "type": "text"
       },
       {
-        "display_name": "status",
+        "display_name": "Status",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Status",
@@ -1985,7 +1985,7 @@
         "type": "text"
       },
       {
-        "display_name": "subsidized",
+        "display_name": "Subsidized",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Subsidized",
@@ -1993,7 +1993,7 @@
         "type": "text"
       },
       {
-        "display_name": "cat_expiring",
+        "display_name": "Cat Expiring",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cat_Expiring",
@@ -2001,7 +2001,7 @@
         "type": "text"
       },
       {
-        "display_name": "cat_failing_insp",
+        "display_name": "Cat Failing Inspection",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Cat_Failing_Insp",
@@ -2009,7 +2009,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_name",
+        "display_name": "Project Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Name",
@@ -2017,7 +2017,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_addre",
+        "display_name": "Project Address",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_addre",
@@ -2025,7 +2025,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_city",
+        "display_name": "Project City",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_City",
@@ -2033,7 +2033,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_st",
+        "display_name": "Project State",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_ST",
@@ -2041,7 +2041,7 @@
         "type": "text"
       },
       {
-        "display_name": "zip",
+        "display_name": "Zip Code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Zip",
@@ -2049,7 +2049,7 @@
         "type": "text"
       },
       {
-        "display_name": "proj_units_tot",
+        "display_name": "Project Units Total",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Units_Tot",
@@ -2057,7 +2057,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "proj_units_assist_min",
+        "display_name": "Project Units Assist Min",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Units_Assist_Min",
@@ -2065,7 +2065,7 @@
         "type": "integer"
       },
       {
-        "display_name": "proj_units_assist_max",
+        "display_name": "project Units Assist Max",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Proj_Units_Assist_Max",
@@ -2073,7 +2073,7 @@
         "type": "integer"
       },
       {
-        "display_name": "hud_own_effect_dt",
+        "display_name": "Hud Owner Effect Dt",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Hud_Own_Effect_dt",
@@ -2081,7 +2081,7 @@
         "type": "date"
       },
       {
-        "display_name": "hud_own_name",
+        "display_name": "Hud Owner Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Hud_Own_Name",
@@ -2089,7 +2089,7 @@
         "type": "text"
       },
       {
-        "display_name": "hud_own_type",
+        "display_name": "Hud Owner Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "Hud_Own_Type",
