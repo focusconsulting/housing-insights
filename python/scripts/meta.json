@@ -3812,7 +3812,7 @@
     ],
     "replace_table": false
   },
-  "Zone_HousingUnit_Bedrm_Count": {
+  "zone_housingunit_bedrm_count": {
     "cleaner": "Zone_HousingUnit_Bedrm_Count_cleaner",
     "fields": [
       {
