@@ -3883,5 +3883,51 @@
       }
     ],
     "replace_table": false
+  },
+  "Zone_HousingUnit_Bedrm_Count": {
+    "cleaner": "Zone_HousingUnit_Bedrm_Count_cleaner",
+    "fields": [
+      {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      },
+      {
+        "display_name": "zone_type",
+        "display_text": "Zone type",
+        "required_in_source": true,
+        "source_name": "zone_type",
+        "sql_name": "zone_type",
+        "type": "text"
+      },
+      {
+        "display_name": "zone",
+        "display_text": "Specific value of the zone type",
+        "required_in_source": true,
+        "source_name": "zone",
+        "sql_name": "zone_specific",
+        "type": "text"
+      },
+      {
+        "display_name": "housing_unit_count",
+        "display_text": "Count of total housing units in that zone",
+        "required_in_source": true,
+        "source_name": "housing_unit_count",
+        "sql_name": "housing_unit_count",
+        "type": "integer"
+      },
+      {
+        "display_name": "bedroom_unit_count",
+        "display_text": "Count of total bedrooms in that zone",
+        "required_in_source": true,
+        "source_name": "bedroom_unit_count",
+        "sql_name": "bedroom_unit_count",
+        "type": "integer"
+      }
+    ],
+    "replace_table": true
   }
 }
