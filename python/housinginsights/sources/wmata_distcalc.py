@@ -14,15 +14,16 @@ import sqlalchemy
 
 class WmataApiConn(BaseApiConn):
 
-    def __init__(self, proxies=None):
+    def __init__(self, proxies=None, use_cached_distance=True):
         baseurl=None #more than one, so calls to self.get() must pass whole url
         super().__init__(baseurl, proxies=None)
 
         self.meters_per_mile = 1609.344
+        self.use_cached_distance = use_cached_distance
 
         #pull API keys
         secretsFileName =  os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                               os.pardir,"secrets.json"))    
+                                               os.pardir,"secrets.json"))
         self.api_keys = json.loads(open(secretsFileName).read())
         self.wmata_api_key = self.api_keys['wmata']['api_key']
         self.mapbox_api_key = {'access_token':self.api_keys['mapbox']['public-token']}
@@ -31,8 +32,8 @@ class WmataApiConn(BaseApiConn):
                         "wmata_stops",
                         "wmata_dist"]
 
-        
-    def get_data(self,unique_data_ids=None, sample=False, output_type ='csv',db='local_database', **kwargs): 
+
+    def get_data(self,unique_data_ids=None, sample=False, output_type ='csv',db='local_database', **kwargs):
         if unique_data_ids == None:
             unique_data_ids = self._available_unique_data_ids
 
@@ -45,11 +46,11 @@ class WmataApiConn(BaseApiConn):
                 logging.info("  unique_data_id '{}' not supported by the WmataApiConn".format(u))
 
     def get_stops(self, unique_data_ids=None, sample=False, output_type ='csv'):
-        
+
         #Variable to hold both bus and rail stops data while accessing the data
         self.stopsOutput = []
         self.stopsHeader = ('stop_id_or_station_code','type','name','latitude','longitude','lines')
-        
+
         if 'wmata_stops' in unique_data_ids:
             u = 'wmata_stops'
             #Create objects and write to table
@@ -73,22 +74,22 @@ class WmataApiConn(BaseApiConn):
             pass
 
     def get_dist(self, unique_data_ids=None, sample=False, output_type='csv',db='local_database'):
-        
+
         if 'wmata_dist' in unique_data_ids:
             u = 'wmata_dist'
             #Variable to hold data until written to file
             self.distOutput = []
-            self.distHeader = ('nlihc_id','type','stop_id_or_station_code','dist_in_miles')
-            
+            self.distHeader = ('nlihc_id','type','stop_id_or_station_code','dist_in_miles','crow_distance','building_lat','building_lon','stop_or_station_lat','stop_or_station_lon')
+
 
             #First, find which projects we should be calculating from
             try:
                 #Configure the connection
                 engine = dbtools.get_database_engine(db)
-                conn = dbtools.get_database_connection(db) 
+                conn = dbtools.get_database_connection(db)
                 logging.info("  Connected to Housing Insights database")
                 columnset = conn.execute('select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=\'project\'')
-                
+
                 #Get the rows
                 proj_query = 'select * from project'
                 if sample==True:
@@ -107,6 +108,7 @@ class WmataApiConn(BaseApiConn):
 
             numrow = 0
             total_rows = rows.rowcount
+            logging.info("  Total rows: {}".format(total_rows))
 
             #Get the rail stations once (no option to only get closest ones provided by wmata)
             wmata_headers = self._get_wmata_headers()
@@ -116,21 +118,26 @@ class WmataApiConn(BaseApiConn):
             #for every project, get nearby stations and walking distance
             for idx, row in enumerate(rows):
                 radius = self._get_meters(0.5)
-                
+
                 project_details = self._get_project_info(row,columns)
+                lat = project_details['lat']
+                lon = project_details['lon']
 
+                if lat == None or lon == None:
+                    logging.warning("  Lat or Lon not available for project {}".format(project_details['nlihcid']))
+                    
+                if lat != None and lon != None:
+                    logging.info("  Processing project {} of {}".format(numrow,total_rows))
 
-                logging.info("  Processing project {} of {}".format(numrow,total_rows))
+                    # find all metro stations within 0.5 miles
+                    logging.info("  Starting processing rail stations for {}".format(project_details['nlihcid']))
+                    self._find_rail_stations(self.railStations,project_details,radius,sample=sample,db=db)
+                    logging.info("  Completed processing rail stations for project id {}".format(project_details['nlihcid']))
 
-                # find all metro stations within 0.5 miles
-                logging.info("  Starting processing rail stations for {}".format(project_details['nlihcid']))
-                self._find_rail_stations(self.railStations,project_details,radius,sample=sample)
-                logging.info("  Completed processing rail stations for project id {}".format(project_details['nlihcid']))
-
-                # find all bus stops within 0.5 miles
-                logging.info("  Starting processing bus stations for project id {}".format(project_details['nlihcid']))
-                self._find_bus_stations(project_details, radius,sample=sample)
-                logging.info("  Completed processing bus stations for project id {}".format(project_details['nlihcid']))
+                    # find all bus stops within 0.5 miles
+                    logging.info("  Starting processing bus stations for project id {}".format(project_details['nlihcid']))
+                    self._find_bus_stations(project_details, radius,sample=sample,db=db)
+                    logging.info("  Completed processing bus stations for project id {}".format(project_details['nlihcid']))
 
             #Save the data
             if ( output_type == 'csv'):
@@ -218,7 +225,7 @@ class WmataApiConn(BaseApiConn):
     def _set_mapbox_api_key(self, mapbox_api_key):
         self.mapbox_api_key = {'access_token':mapbox_api_key}
 
-    def _get_walking_distance(self, srcLat, srcLon, destLat, destLon):
+    def _get_walking_distance(self, srcLat, srcLon, destLat, destLon,db='local_database'):
         """Returns the walking distance in meters between two locations
 
            Parameters:
@@ -228,6 +235,36 @@ class WmataApiConn(BaseApiConn):
            destLon - longitude for destination location
            mapbox_api_key - api key for mapbox REST services
            """
+
+        if self.use_cached_distance == True:
+            try:
+                #Configure the connection
+                engine = dbtools.get_database_engine(db)
+                conn = dbtools.get_database_connection(db)
+                logging.info("  Connected to Housing Insights database")
+
+                #Pull columns to see if the database has updated columns in wmata_dist
+                columnset = conn.execute('select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=\'wmata_dist\'')
+                columns = []
+                for c in columnset:
+                    columns.append(c)
+
+                if ( 'building_lat' in columns and 'building_lon' in columns and 'stop_or_station_lat' in columns and 'stop_or_station_lon' in columns ):
+                #See if row exists
+                    proj_query = 'select * from wmata_dist where building_lat=\'' + srcLat + '\' and building_lon=\'' + srcLon + '\' and stop_or_station_lat=\''+ destLat + '\' and stop_or_station_lon=\'' + destLon + '\''
+                    row = conn.execute(proj_query)
+                    if ( row != None ):
+                        conn.close()
+                        engine.dispose()
+                        index = columns.index("dist_in_miles")
+                        return row[index]*self.meters_per_mile
+
+                conn.close()
+                engine.dispose()
+            except Exception as e:
+                logging.warning(e)
+                logging.warning("I am unable to connect to the database")
+
         distReqCoords = str(srcLon) + ',' + str(srcLat) + ';' + str(destLon) + ',' + str(destLat)
 
         mapbox_params = self.mapbox_api_key
@@ -242,6 +279,7 @@ class WmataApiConn(BaseApiConn):
             time.sleep(0.8)
             if i == 10:
                 raise Exception('This is some exception to be defined later')
+        print("Return value: " ,walkDistResponse.json()['routes'][0]['legs'][0]['distance'])
         return walkDistResponse.json()['routes'][0]['legs'][0]['distance']
 
 
@@ -256,12 +294,12 @@ class WmataApiConn(BaseApiConn):
                 project_info['nlihcid'] = project[columns.index(column_name)]
         return project_info
 
-    def _find_rail_stations(self, railStations,project_details,radiusinmeters,sample=False):
+    def _find_rail_stations(self, railStations,project_details,radiusinmeters,sample=False,db='local_database'):
         """Finds all the rail stations within a given distance from a given project.  Writes to the given CSV file.
 
         Parameters:
-        railStations - json object containing all the wmata rail station information. WMATA does not provide a 'search 
-                within radius' method so we have to calculate walking distance for all stops. 
+        railStations - json object containing all the wmata rail station information. WMATA does not provide a 'search
+                within radius' method so we have to calculate walking distance for all stops.
 
         project_details - dictionary containing lat, lon and nlihcid
         radiusinmeters - radius in meteres
@@ -274,18 +312,23 @@ class WmataApiConn(BaseApiConn):
         nlihc_id = project_details['nlihcid']
 
         for idx, station in enumerate(railStations):
-            crow_distance = self._haversine(lat, lon, station['Lat'], station['Lon'])
+            try:
+                crow_distance = self._haversine(lat, lon, station['Lat'], station['Lon'])
+
+                if crow_distance < (radiusinmeters / self.meters_per_mile):
+                    walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']),db=db)
+                    walkDistMiles = walkDist / self.meters_per_mile
+                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                    if walkDist <=radiusinmeters:
+                        self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),crow_distance, lat,lon,str(station['Lat']),str(station['Lon'])])
+
+                else:
+                    logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
             
-            if crow_distance < (radiusinmeters / self.meters_per_mile):
-                walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']))
-                walkDistMiles = walkDist / self.meters_per_mile
-
-                logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
-
-                if walkDist <=radiusinmeters:
-                    self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles)])
-            else:
-                logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
+            except Exception as e:
+                #Main error encountered was 'Null' values for project lat/lon. Returning null value
+                logging.warning("Error calculating for {}".format(nlihc_id))
+                self.distOutput.append([nlihc_id, 'rail', station['Code'], "Null", "Null", lat,lon,str(station['Lat']),str(station['Lon'])])
 
     def _haversine(self, lat1, lon1, lat2,lon2):
         """
@@ -309,7 +352,7 @@ class WmataApiConn(BaseApiConn):
         return c * r
 
 
-    def _find_bus_stations(self, project_details,radiusinmeters,sample=False):
+    def _find_bus_stations(self, project_details,radiusinmeters,sample=False,db='local_database'):
         lat = project_details['lat']
         lon = project_details['lon']
         nlihc_id = project_details['nlihcid']
@@ -323,12 +366,22 @@ class WmataApiConn(BaseApiConn):
         data = response.json()
 
         for idx, stop in enumerate(data['Stops']):
-            walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']))
+            try:
+                crow_distance = self._haversine(lat, lon, stop['Lat'], stop['Lon'])
 
-            if walkDist <= radiusinmeters: #within 0.5 miles walking
-                walkDistMiles = walkDist / self.meters_per_mile
-                self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles)])
+                if crow_distance < (radiusinmeters / self.meters_per_mile):
+                    walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
+                    walkDistMiles = walkDist / self.meters_per_mile
+                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                    if walkDist <= radiusinmeters: #within 0.5 miles walking
+                        self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),crow_distance,lat,lon,str(stop['Lat']),str(stop['Lon'])])
 
+                else:
+                    logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
+            except Exception as e:
+                #Main error encountered was 'Null' values for project lat/lon. Returning null value
+                logging.warning("Error calculating for {}".format(nlihc_id))
+                self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "Null","Null",lat,lon,str(stop['Lat']),str(stop['Lon'])])
 
     def _array_to_csv(self, fields, list_of_lists, filepath):
         """
