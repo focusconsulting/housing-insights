@@ -111,6 +111,7 @@ var filterView = {
                 ['filterViewLoaded', filterUtil.init],
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
+
                 ['filterValues', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance]
             ]);
@@ -276,6 +277,7 @@ var filterView = {
             var select = document.getElementById(c.source);
         }
 
+
         $('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect.
         $('.ui.dropdown').dropdown({ fullTextSearch: 'exact' });
         $('#'+c.source).dropdown();
@@ -331,6 +333,7 @@ var filterView = {
                         result.push(workingData[dataRow][filterView.components[i].source]);
                     }
                 };
+
                 filterView.components[i]['options'] = result;
                 console.log("Found a categorical filter: " + filterView.components[i].source)
 
