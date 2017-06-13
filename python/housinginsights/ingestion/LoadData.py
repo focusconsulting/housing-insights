@@ -43,10 +43,11 @@ if __name__ == "__main__":
 
 from housinginsights.tools import dbtools
 
-from housinginsights.ingestion import DataReader, ManifestReader
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
+from housinginsights.ingestion.Manifest import Manifest
+
 
 class LoadData(object):
 
@@ -81,7 +82,7 @@ class LoadData(object):
 
         # load given meta.json and manifest.csv files into memory
         self.meta = ingestionfunctions.load_meta_data(meta_path)
-        self.manifest = ManifestReader(manifest_path)
+        self.manifest = Manifest(manifest_path)
 
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
@@ -170,22 +171,6 @@ class LoadData(object):
 
         return None
 
-    def create_list(self, folder_path):
-        """
-        Returns a list of potential unique_data_ids based on csv files in the
-        given folder path. The assumption is that all raw data a saved as csv
-        with filename that matches unique_data_id used in manifest.
-        """
-        unique_data_ids = list()
-        files_in_folder = os.listdir(folder_path)
-        for file in files_in_folder:
-            file_path = os.path.join(folder_path, file)
-            uid, file_ext = file.split(sep='.')
-            if os.path.isfile(file_path) and file_ext == 'csv':
-                unique_data_ids.append(uid)
-
-        return unique_data_ids
-
     def _get_most_recent_timestamp_subfolder(self, root_folder_path):
         """
         Returns the most recent timestamp subfolder in a given folder path.
@@ -202,7 +187,7 @@ class LoadData(object):
         dirs.sort(reverse=True)
         return dirs[0]
 
-    def make_manifest(self, all_folders_path, overwrite=True):
+    def make_manifest(self, all_folders_path):
         """
         Creates a new manifest.csv with updated data date and filepath for
         the raw data files within the most recent timestamp subfolder of the
@@ -219,41 +204,15 @@ class LoadData(object):
         :param overwrite: should the current manifest.csv be overwritten?
         :type overwrite: bool
 
-        :return: None
+        :return: the path of the manifest
         """
         # get most recent subfolder, gather info for updating manifest
         timestamp = self._get_most_recent_timestamp_subfolder(
             all_folders_path)
         most_recent_subfolder_path = os.path.join(all_folders_path,
                                                   timestamp)
-        filepath_base = most_recent_subfolder_path.split('data/')[-1]
 
-        # get unique_data_ids for data files in recent subfolder
-        recent_uids = self.create_list(most_recent_subfolder_path)
-
-        # temp file for new manifest
-        temp_manifest_file = os.path.join(os.path.split(self.manifest.path)[0],
-                                          'temp_manifest.csv')
-
-        with open(temp_manifest_file, mode='w', encoding='utf-8') as f:
-            writer = DictWriter(f, fieldnames=self.manifest.keys)
-            writer.writeheader()
-
-            for row in self.manifest:
-                row_uid = row['unique_data_id']
-                if row_uid in recent_uids:
-                    row['data_date'] = datetime.strptime(
-                        timestamp, '%Y%m%d').strftime('%m/%d/%Y')
-                    filepath = os.path.join(filepath_base,
-                                            "{}.csv".format(row_uid))
-                    row['filepath'] = filepath
-
-                writer.writerow(row)
-
-        # rename temp file and then recreate instance of manifest
-        if overwrite:
-            os.rename(temp_manifest_file, self.manifest.path)
-            self.manifest = ManifestReader(self.manifest.path)
+        return self.manifest.update_manifest(most_recent_subfolder_path)
 
     def update_database(self, unique_data_id_list):
         """
@@ -423,13 +382,12 @@ class LoadData(object):
             csv_writer.close()
 
             # write the data to the database
-            self._update_database(table_name=table_name,
-                                  sql_interface=sql_interface)
+            self._update_database(sql_interface=sql_interface)
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
 
-    def _update_database(self, table_name, sql_interface):
+    def _update_database(self, sql_interface):
         """
         Load the clean PSV file into the database
         """

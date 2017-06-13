@@ -121,7 +121,11 @@ class MyTestCase(unittest.TestCase):
     def test_make_manifest(self):
         folder_path = os.path.join(PYTHON_PATH, os.pardir, 'data', 'raw',
                                    'apis')
-        self.loader.make_manifest(folder_path, overwrite=False)
+        fields = self.loader.manifest.keys
+        print(fields)
+        self.assertTrue(fields)
+        result_path = self.loader.make_manifest(folder_path)
+        self.assertEqual(self.loader.manifest.path, result_path)
 
     # TODO - write test code
     def test__remove_existing_data(self):

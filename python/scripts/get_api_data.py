@@ -10,6 +10,7 @@ import sys
 import os
 import importlib
 import logging
+from datetime import datetime
 
 python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir))
@@ -25,6 +26,7 @@ logging.getLogger().addHandler(logging.StreamHandler())
 
 #TODO is this import necessary?
 from housinginsights.config.base import HousingInsightsConfig
+from python.housinginsights.ingestion.Manifest import Manifest
 
 
 def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 'csv', db=None, debug=False, module_list = None):
@@ -53,7 +55,7 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
     }
 
     #If no module list is provided, use them all
-    if module_list == None:
+    if module_list is None:
         module_list = list(modules.keys())
 
     for m in module_list:
@@ -73,8 +75,22 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
         except Exception as e:
             logging.warning('The request for "{0}" failed. Error: {1}'.format(m,e))
 
-            if debug==True:
+            if debug:
                 raise e
+
+    # update the manifest
+    manifest = Manifest(os.path.abspath(os.path.join(
+        python_filepath, 'scripts', 'manifest.csv')))
+    d = datetime.now().strftime('%Y%m%d')
+
+    # use correct root folder for raw folder path
+    if db == 'remote_database':
+        folder = 'https://s3.amazonaws.com/housinginsights'
+    else:
+        folder = os.path.join(python_filepath, os.pardir, 'data')
+
+    date_stamped_folder = os.path.join(folder, 'raw', 'apis', d)
+    manifest.update_manifest(date_stamped_folder=date_stamped_folder)
 
 if __name__ == '__main__':
 

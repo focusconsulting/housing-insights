@@ -396,6 +396,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         # using mar api lookup instead of mar.csv because too slow - see to do^
         proj_address_id = row[address_id_col_name]
+
         if proj_address_id != self.null_value:
             result = mar_api.reverse_address_id(aid=proj_address_id)
             return_data_set = result['returnDataset']
@@ -403,13 +404,15 @@ class CleanerBase(object, metaclass=ABCMeta):
                 row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
                 return row
 
-        if lat is not None and lon is not None:
+        result = None # track result from reverse lookup api calls
+
+        if lat != self.null_value and lon != self.null_value:
             result = mar_api.reverse_lat_lng_geocode(latitude=lat,
                                                      longitude=lon)
-        elif x_coord is not None and y_coord is not None:
+        elif x_coord != self.null_value and y_coord != self.null_value:
             result = mar_api.reverse_geocode(xcoord=x_coord,
                                              ycoord=y_coord)
-        elif address is not None:
+        elif address != self.null_value:
             # check whether address is valid - it has street number
             try:
                 str_num = address.split(' ')[0]
@@ -418,7 +421,10 @@ class CleanerBase(object, metaclass=ABCMeta):
                 result = mar_api.find_location(first_address)
             except ValueError:
                 result = None
-        row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
+        if result is not None:
+            row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
         return row
 
 
