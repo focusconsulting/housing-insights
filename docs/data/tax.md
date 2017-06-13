@@ -1,5 +1,4 @@
 ---
----
 layout: datasource
 tablename: dc_tax
 title: DC Tax Data
@@ -11,4 +10,4 @@ This data is released on an annual basis - we display data from 2017. The latest
 
 Basic cleaning was performed on this data, including replacement of null values and normalization of dates.
 
-This data source is used with permission from [OpenData DC]({{site.baseurl}}/opendata).
+This data source is used with permission from [OpenData DC]({{site.baseurl}}/data/opendata).

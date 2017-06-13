@@ -1,5 +1,4 @@
 ---
----
 layout: datasource
 tablename: building_permits
 title: Building Permit Data
@@ -11,4 +10,4 @@ This data is released on an annual basis - we display data from 2013-2017. The l
 
 Basic cleaning was performed on this data, including replacement of null values and normalization of dates and census tract/ward names.
 
-This data source is used with permission from [OpenData DC]({{site.baseurl}}/opendata).
+This data source is used with permission from [OpenData DC]({{site.baseurl}}/data/opendata).

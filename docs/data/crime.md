@@ -1,5 +1,4 @@
 ---
----
 layout: datasource
 tablename: crime
 title: Crime Data
