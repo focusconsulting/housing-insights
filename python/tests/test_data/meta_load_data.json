@@ -329,6 +329,30 @@
     "cleaner": "CrimeCleaner",
     "fields": [
       {
+        "display_name": "X",
+        "display_text": "X geographic coordinate",
+        "required_in_source": true,
+        "source_name": "X",
+        "sql_name": "x",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Y",
+        "display_text": "Y geographic coordinate",
+        "required_in_source": true,
+        "source_name": "Y",
+        "sql_name": "y",
+        "type": "decimal"
+      },
+      {
+        "display_name": "ccn",
+        "display_text": "Customer complaint number",
+        "required_in_source": true,
+        "source_name": "CCN",
+        "sql_name": "ccn",
+        "type": "integer"
+      },
+      {
         "display_name": "Date Reported",
         "display_text": "A timestamp indicating the date and time that the crime was reported.",
         "required_in_source": true,
@@ -345,14 +369,6 @@
         "type": "text"
       },
       {
-        "display_name": "Offense Category",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "OFFENSE",
-        "sql_name": "offense",
-        "type": "text"
-      },
-      {
         "display_name": "Method",
         "display_text": "A subtype of category only applicable to some crimes.",
         "required_in_source": true,
@@ -361,11 +377,51 @@
         "type": "text"
       },
       {
+        "display_name": "Offense Category",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "OFFENSE",
+        "sql_name": "offense",
+        "type": "text"
+      },
+      {
         "display_name": "Block",
         "display_text": "City block name consistent with the Master Address Repository format.",
         "required_in_source": true,
         "source_name": "BLOCK",
         "sql_name": "block",
+        "type": "text"
+      },
+      {
+        "display_name": "xblock",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "XBLOCK",
+        "sql_name": "xblock",
+        "type": "decimal"
+      },
+      {
+        "display_name": "yblock",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "YBLOCK",
+        "sql_name": "yblock",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Ward",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "WARD",
+        "sql_name": "ward",
+        "type": "text"
+      },
+      {
+        "display_name": "ANC",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "ANC",
+        "sql_name": "anc",
         "type": "text"
       },
       {
@@ -382,22 +438,6 @@
         "required_in_source": true,
         "source_name": "PSA",
         "sql_name": "psa",
-        "type": "text"
-      },
-      {
-        "display_name": "Ward",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "WARD",
-        "sql_name": "ward",
-        "type": "text"
-      },
-      {
-        "display_name": "ANC",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "ANC",
-        "sql_name": "anc",
         "type": "text"
       },
       {
@@ -433,28 +473,44 @@
         "type": "text"
       },
       {
-        "display_name": "ccn",
+        "display_name": "xcoord",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "CCN",
-        "sql_name": "ccn",
-        "type": "integer"
-      },
-      {
-        "display_name": "xblock",
-        "display_text": "",
-        "required_in_source": true,
-        "source_name": "XBLOCK",
-        "sql_name": "xblock",
+        "source_name": "XCOORD",
+        "sql_name": "xcoord",
         "type": "decimal"
       },
       {
-        "display_name": "yblock",
+        "display_name": "ycoord",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "YBLOCK",
-        "sql_name": "yblock",
+        "source_name": "YCOORD",
+        "sql_name": "ycoord",
         "type": "decimal"
+      },
+      {
+        "display_name": "latitude",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "LATITUDE",
+        "sql_name": "latitude",
+        "type": "decimal"
+      },
+      {
+        "display_name": "longitude",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "LONGITUDE",
+        "sql_name": "longitude",
+        "type": "decimal"
+      },
+      {
+        "display_name": "bid",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "BID",
+        "sql_name": "bid",
+        "type": "text"
       },
       {
         "display_name": "Start Date",
@@ -473,6 +529,14 @@
         "type": "timestamp"
       },
       {
+        "display_name": "objectid",
+        "display_text": "",
+        "required_in_source": true,
+        "source_name": "OBJECTID",
+        "sql_name": "objectid",
+        "type": "text"
+      },
+      {
         "display_name": "Unique data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
@@ -481,7 +545,7 @@
         "type": "text"
       }
     ],
-    "replace_table": false
+    "replace_table": true
   },
   "project": {
     "cleaner": "ProjectCleaner",
