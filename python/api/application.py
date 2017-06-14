@@ -162,10 +162,10 @@ def count_all(data_source,grouping):
 
 
     #input validation so users only execute valid queries
-    if grouping not in ['zipcode','ward','anc', 'neighborhood_cluster']:
-        return jsonify({'items': None})
+    if grouping not in ['zip','ward','anc','neighborhood_cluster','census_tract']:
+        return jsonify({'items': None, 'notes':"invalid input"})
     if data_source not in ['building_permits', 'crime']:
-        return jsonify({'items': None})
+        return jsonify({'items': None, 'notes':"invalid input"})
 
 
     application.logger.debug('Getting all {}'.format(grouping))
@@ -209,7 +209,7 @@ def count_all(data_source,grouping):
     #TODO do better error handling - for interim development purposes only
     except Exception as e:
         #conn.close()
-        return "Query failed: {}".format(e)
+        return jsonify({'items': None, 'notes':"Query failed: {}".format(e)})
 
 @application.route('/api/wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
