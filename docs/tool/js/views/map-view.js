@@ -245,6 +245,7 @@
             }
             if (i === 0) { // i.e. clearing the existing current overlay, with result that none will be visible
                 clearState('overlaySet');
+                mapView.updateZoneChoiceDisabling("msg",{overlay: null});
             }
         },
 
@@ -356,10 +357,20 @@
             layerMenu.selectAll('a')
                 .each(function(d) {
 
-                  var zoneButton = d3.select(this)
-                  var buttonId = zoneButton.attr('id')
-                  var layerType = buttonId.replace("-menu-item","")
-                  var availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+                    var zoneButton = d3.select(this)
+                    var buttonId = zoneButton.attr('id')
+                    var layerType = buttonId.replace("-menu-item","")
+
+                    //Get layers from the overlay config, or if no overlay selected use all available layers
+                    var availableLayers = []
+                    if (data.overlay == null){
+                        mapView.initialLayers.forEach(function(layer) {
+                            availableLayers.push(layer.source);
+                        });
+                    } else {
+                        availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+                    };
+
 
                   //True if in the list, false if not
                   var status = true
