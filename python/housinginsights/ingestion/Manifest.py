@@ -96,8 +96,17 @@ class Manifest(HIReader):
         return unique_data_ids
 
     def update_manifest(self, date_stamped_folder):
+        '''
+        Used for automatically swapping out old files for new ones in our manifest.csv
+        whenever we gather new data. 
+
+        Using the folder passed (e.g. /data/raw/apis), find the most recent subfolder
+        (by sorting alphabetically). Make a list of .csv files in that folder
+        and update the manifest.csv for every unique_data_id that corresponds
+        to one of the .csv files. 
+        '''
         timestamp = os.path.basename(date_stamped_folder)
-        data_date = datetime.strptime(timestamp, '%Y%m%d').strftime('%m/%d/%Y')
+        data_date = datetime.strptime(timestamp, '%Y%m%d').strftime('%Y-%m-%d')
         file_path_base = date_stamped_folder[date_stamped_folder.find('raw'):]
 
         field_names = self.keys
@@ -114,20 +123,9 @@ class Manifest(HIReader):
                 filepath = os.path.join(file_path_base,
                                         "{}.csv".format(row_uid))
                 row['filepath'] = filepath
-            else:
-                # parse the date back into format used in manifest
-                # TODO - discuss with Neal to standardize timestamp in
-                # TODO - manifest so we don't have to clean between sql and
-                # TODO - manifest
-                try:
-                    _date = dateparser.parse(row['data_date'], dayfirst=False,
-                                             yearfirst=False)
-                    row['data_date'] = datetime.strftime(_date, '%m/%d/%Y')
-                except ValueError:
-                    row['data_date'] = 'Null'
             data.append(row)
 
-        with open(self.path, mode='w', encoding='utf-8') as f:
+        with open(self.path, mode='w', encoding='utf-8', newline='') as f:
             writer = DictWriter(f, fieldnames=field_names)
             writer.writeheader()
             writer.writerows(data)

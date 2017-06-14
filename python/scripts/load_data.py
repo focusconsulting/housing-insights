@@ -19,7 +19,7 @@ from housinginsights.ingestion.LoadData import LoadData, main
 # configuration: see /logs/example-logging.py for usage examples
 logging_path = os.path.abspath(os.path.join(PYTHON_PATH, "logs"))
 logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
-logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
+logging.basicConfig(filename=logging_filename, level=logging.INFO)
 
 # Pushes everything from the logger to the command line output as well.
 logging.getLogger().addHandler(logging.StreamHandler())
@@ -35,7 +35,7 @@ description = ('Loads our flat file data into the database of choice. You '
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument("database", help='which database the data should be '
                                      'loaded to',
-                    choices=['docker', 'docker-local', 'local', 'remote'])
+                    choices=['docker', 'docker_local', 'local', 'remote'])
 parser.add_argument('-s', '--sample', help='load with sample data',
                     action='store_true')
 parser.add_argument('--update-only', nargs='+',
@@ -66,7 +66,7 @@ if arguments.manual:
     api_folder_path = os.path.abspath(os.path.join(PYTHON_PATH, os.pardir, 'data/raw/apis'))
     print(api_folder_path)
 
-    #loader.
+    loader.make_manifest(api_folder_path)
 
 #typically we use the approach that is coded into LoadData.py
 else:
