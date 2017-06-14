@@ -80,6 +80,7 @@ results = proxy.fetchall()
 tables = [x[0] for x in results]
 application.logger.debug('Tables available: {}'.format(tables))
 conn.close()
+logging.info(tables)
 
 ##########################################
 # API Endpoints
@@ -203,7 +204,7 @@ def count_all(data_source,grouping):
 
 
         conn.close()
-        return jsonify({'items': formatted, 'grouping':grouping, 'table':data_source})
+        return jsonify({'items': formatted, 'grouping':grouping, 'data_id':data_source})
 
     #TODO do better error handling - for interim development purposes only
     except Exception as e:
@@ -520,6 +521,41 @@ def project_subsidies(nlihc_id):
     conn.close()
     output = {'items':results}
     return jsonify(output)
+
+@application.route('/api/census/<data_id>/<grouping>', methods=['GET'])
+def census_with_weighting(data_id,grouping):
+    #TODO this does not yet return the proper grouping
+    
+    #TODO when we add more than one year of data we need to use a newly added 'year' column to distinguish the rows and update the sql query.
+    q = "SELECT * FROM census"
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    census_results = [dict(x) for x in proxy.fetchall()]
+
+    q = "SELECT * FROM census_tract_to_neighborhood_cluster"
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    nc_weighting = [dict(x) for x in proxy.fetchall()]
+
+    q = "SELECT * FROM census_tract_to_ward"
+    conn = engine.connect()
+    proxy = conn.execute(q)
+    ward_weighting = [dict(x) for x in proxy.fetchall()]
+
+    conn.close()
+
+    #perform the proper calculation
+    items = []
+    if data_id == 'poverty_rate':
+        for r in census_results:
+            pop = r['population']
+            pop_poverty = r['population_poverty']
+            rate = (pop_poverty / pop)*100
+            output = dict({'group':r['census_tract'], 'count':rate})
+            items.append(output)
+
+    return jsonify({'items': items, 'grouping':grouping, 'data_id':data_id})
+
 
 
 ##########################################

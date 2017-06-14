@@ -1,41 +1,28 @@
 include_flag,destination_table,unique_data_id,update_method,data_date,encoding,local_folder,s3_folder,filepath,notes
-____________note all items marked skip in this manifest are ready but are being skipped due to their large size. Will be added back in when we are stable with our data loading process. ,,,,Null,,,,,
-skip,building_permits,building_permits_2013,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/building_permits_2013.csv,
-skip,building_permits,building_permits_2014,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/building_permits_2014.csv,
-skip,building_permits,building_permits_2015,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/building_permits_2015.csv,
-use,building_permits,building_permits_2016,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/building_permits_2016.csv,
-skip,building_permits,building_permits_2017,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/building_permits_2017.csv,This is still incomplete due to broken opendata.dc.gov . Excluding so we can cleanly say our database is 100% 2016 for clarity until opendata.dc.gov gets fixed
-needs cleaner,parcel,parcel_Mar2017,manual,03/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Parcel.csv,
-use,project,project,manual,03/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Project.csv,
-use,reac_score,reac_score_Mar2017,manual,03/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Reac_score.csv,
-use,real_property,real_property_Mar2017,manual,03/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Real_property.csv,
-use,subsidy,subsidy_Mar2017,manual,03/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Subsidy.csv,
-use,dc_tax,tax,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/tax.csv,Same (?) as above with better names. Unclear which is authoritative
-skip,hmda,hmda_all_dc,manual,04/06/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
-use,project,dchousing_project,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/dchousing_project.csv,append to 20170315/project.csv
-use,subsidy,dchousing_subsidy,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/dchousing_subsidy.csv,append to 20170315/Subsidy.csv
-use,topa,topa_rcasd_2017,manual,05/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
-use,topa,topa_rcasd_2016,manual,05/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
-use,topa,topa_rcasd_2015,manual,05/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2015.csv,Parsed from DCHD data by Urban Institute staff.
-use,census,acs5_2009,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2009.csv,
-use,census,acs5_2010,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2010.csv,
-use,census,acs5_2011,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2011.csv,
-use,census,acs5_2012,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2012.csv,
-use,census,acs5_2013,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2013.csv,
-use,census,acs5_2014,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2014.csv,
-use,census,acs5_2015,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2015.csv,
-use,census_margin_of_error,acs5_2009_moe,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2009_moe.csv,
-use,census_margin_of_error,acs5_2010_moe,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2010_moe.csv,
-use,census_margin_of_error,acs5_2011_moe,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2011_moe.csv,
-use,census_margin_of_error,acs5_2012_moe,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2012_moe.csv,
-use,census_margin_of_error,acs5_2013_moe,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2013_moe.csv,
-use,census_margin_of_error,acs5_2014_moe,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2014_moe.csv,
-use,census_margin_of_error,acs5_2015_moe,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2015_moe.csv,
+____________note all items marked skip in this manifest are ready but are being skipped due to their large size. Will be added back in when we are stable with our data loading process. ,,,,,,,,,
+skip,building_permits,building_permits_2013,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2013.csv,
+skip,building_permits,building_permits_2014,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2014.csv,
+skip,building_permits,building_permits_2015,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2015.csv,
+use,building_permits,building_permits_2016,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2016.csv,
+skip,building_permits,building_permits_2017,api,2/2/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2017.csv,This is still incomplete due to broken opendata.dc.gov . Excluding so we can cleanly say our database is 100% 2016 for clarity until opendata.dc.gov gets fixed
+needs cleaner,parcel,parcel_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Parcel.csv,
+use,project,project,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Project.csv,
+use,reac_score,reac_score_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Reac_score.csv,
+use,real_property,real_property_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Real_property.csv,
+use,subsidy,subsidy_Mar2017,manual,3/15/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Subsidy.csv,
+use,dc_tax,tax,api,1/1/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/tax.csv,Same (?) as above with better names. Unclear which is authoritative
+skip,hmda,hmda_all_dc,manual,4/6/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
+use,project,dchousing_project,api,5/5/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_project.csv,append to 20170315/project.csv
+use,subsidy,dchousing_subsidy,api,5/5/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/dchousing_append_subsidy.csv,append to 20170315/Subsidy.csv
+use,topa,topa_rcasd_2017,manual,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2016,manual,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2015,manual,5/20/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2015.csv,Parsed from DCHD data by Urban Institute staff.
+use,census,acs5_2015,api,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/acs5_2015.csv,
 use,census_tract_to_neighborhood_cluster,tract2010_cluster2000,manual,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/geographic_data/Tract_weights/Wt_tr10_cltr00.csv,
 use,census_tract_to_ward,tract2010_ward2012,manual,7/1/2013,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/geographic_data/Tract_weights/Wt_tr10_ward12.csv,
-use,crime,crime_2015,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/crime_2015.csv,
-use,crime,crime_2016,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/crime_2016.csv,
-use,crime,crime_2017,api,06/13/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170613/crime_2017.csv,
+skip,crime,crime_2015,api,12/31/2015,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2015.csv,
+use,crime,crime_2016,api,12/31/2016,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2016.csv,
+use,crime,crime_2017,api,4/3/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2017.csv,
 use,wmata_dist,wmata_dist_20170215,api,5/24/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/wmata/20170215/dist_from_sql_with_lat.csv,
 use,wmata_info,wmata_info_20170215,api,5/24/2017,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170524/wmata_stops.csv,
-use,Zone_HousingUnit_Bedrm_Count,zoneUnitCount,api,6/6/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,processed/zoneUnitCount/zoneUnitCount_2017-06-03.csv,total count of housing units and bedrm in a zone
+use,zone_housingunit_bedrm_count,zoneUnitCount,api,6/6/2017,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,processed/zoneUnitCount/zoneUnitCount_2017-06-03.csv,total count of housing units and bedrm in a zone

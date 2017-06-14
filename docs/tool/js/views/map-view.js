@@ -140,25 +140,17 @@
                     default_layer: "neighborhood_cluster"
                 },
                 {
-                    name: "more_building_permits_1",
-                    display_name: "More Building Permits 1",
-                    display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
-                    zones: ["ward", "neighborhood_cluster"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster"],
-                    default_layer: "neighborhood_cluster"
+                    name: "poverty_rate",
+                    display_name: "Poverty Rate",
+                    display_text: "Fraction of residents below the poverty rate.",
+                    zones: ["tract"],
+                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/",
+                    available_aggregates: ["tract"],
+                    default_layer: "tract"
                 },
+
                 {
-                    name: "more_building_permits_2",
-                    display_name: "More Building Permits 2",
-                    display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
-                    zones: ["ward", "neighborhood_cluster"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster"],
-                    default_layer: "neighborhood_cluster"
-                },
-                {
-                    name: "more_building_permits_3",
+                    name: "more_building_permits",
                     display_name: "More Building Permits 3",
                     display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
                     zones: ["ward", "neighborhood_cluster"],

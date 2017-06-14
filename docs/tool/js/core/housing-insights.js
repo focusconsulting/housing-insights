@@ -208,9 +208,20 @@ var controller = {
         model.dataCollection[activeLayer].features.forEach(function(feature){
             var zone = feature.properties.NAME;
             var dataKey = overlay + '_' + grouping;
-            feature.properties[overlay] = model.dataCollection[dataKey].items.find(function(obj){
-                return obj.group === zone;
-            }).count;
+            console.log(grouping)
+            console.log(activeLayer)
+            console.log(zone)
+
+            var zone_entry = model.dataCollection[dataKey].items.find(function(obj){
+                            return obj.group === zone;
+                        });
+            //Handle case of a missing entry in the API
+            if (zone_entry == undefined){
+                zone_entry = {}
+                zone_entry['count'] = 0 //TODO this should probably be something like Null but our overlay needs to handle the null appropriately. 
+            };
+
+            feature.properties[overlay] = zone_entry.count;
         });
         setState('joinedToGeo.' +  overlay + '_' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
         // e.g. joinedToGeo.crime_neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
