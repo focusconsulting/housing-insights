@@ -69,7 +69,7 @@ class LoadData(object):
         # load defaults if no arguments passed
         _scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
         if database_choice is None:
-            self.database_choice = 'local_database'
+            self.database_choice = 'docker_database'
         else:
             self.database_choice = database_choice
         if meta_path is None:
@@ -415,12 +415,14 @@ def main(passed_arguments):
     Initializes load procedure based on passed command line arguments and
     options.
     """
+
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
     manifest_path = os.path.abspath(os.path.join(scripts_path, 'manifest.csv'))
 
-    if passed_arguments.sample:
+    #Locally, we can optionally have sample data
+    if passed_arguments.sample and passed_arguments.database != 'remote':
         meta_path = os.path.abspath(os.path.join(scripts_path,
                                                  'meta_sample.json'))
         manifest_path = os.path.abspath(
@@ -430,36 +432,43 @@ def main(passed_arguments):
     # the lowest risk if database is updated
     if passed_arguments.database == 'docker':
         database_choice = 'docker_database'
-        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
-                          manifest_path=manifest_path, keep_temp_files=True, drop_tables=True)
+        drop_tables = True
+
     elif passed_arguments.database == 'docker_local':
         database_choice = 'docker_with_local_python'
-        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
-                          manifest_path=manifest_path, keep_temp_files=True, drop_tables=True)
+        drop_tables = True
+
     elif passed_arguments.database == 'remote':
         database_choice = 'remote_database'
-        # Don't want sample data in the remote database
-        meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
-        manifest_path = os.path.abspath(
-            os.path.join(scripts_path, 'manifest.csv'))
+        drop_tables = False #TODO this is a hacky way to avoid dropping tables because it's not working with RDS...
 
         # Only users with additional admin privileges can rebuild the
         # remote database
         if not passed_arguments.update_only:
             database_choice = 'remote_database_master'
 
-        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
-                          manifest_path=manifest_path, keep_temp_files=True, drop_tables=False) #TODO this is a hacky way to avoid dropping tables because it's not working with RDS...
     # TODO: do we want to default to local or docker?
     elif passed_arguments.database == 'local':
         database_choice = 'local_database'
-        loader = LoadData(database_choice=database_choice, meta_path=meta_path,
-                          manifest_path=manifest_path, keep_temp_files=True)
+        drop_tables = True
+
+
+
+    #universal defaults
+    keep_temp_files = True
+
+
+    #Instantiate and run the loader
+    loader = LoadData(database_choice=database_choice, meta_path=meta_path,
+                      manifest_path=manifest_path, keep_temp_files=keep_temp_files,
+                      drop_tables=drop_tables)
 
     if passed_arguments.update_only:
         loader.update_database(passed_arguments.update_only)
     else:
         loader.rebuild()
+
+
 
     #TODO add in failures report here e.g. _failed_table_count
 
