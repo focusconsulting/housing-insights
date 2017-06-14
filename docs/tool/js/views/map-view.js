@@ -20,6 +20,7 @@
                 console.log(this);
                 setSubs([
                     ['mapLayer', mapView.showLayer],
+                    ['mapLayer', mapView.layerOverlayToggle],
                     ['mapLoaded', model.loadMetaData],
                     ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
                     ['dataLoaded.metaData', resultsView.init],
@@ -27,8 +28,9 @@
                     ['dataLoaded.metaData', mapView.overlayMenu],
                     ['dataLoaded.raw_project', filterView.init],
                     ['overlayRequest', mapView.addOverlayData],
+                    ['overlayRequest', mapView.updateZoneChoiceDisabling],
                     ['joinedToGeo', mapView.addOverlayLayer],
-                ['overlaySet', chloroplethLegend.init],
+                    ['overlaySet', chloroplethLegend.init],
                     ['previewBuilding', mapView.showPopup],
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding]
@@ -125,28 +127,28 @@
                     name: "crime",
                     display_name: "Crime",
                     display_text: "Number of crime incidents reported in the past 3 months.",
-                    zones: ["ward", "neighborhood_cluster"],
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
                     aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster"],
+                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "ward"
                 },
                 {
                     name: "building_permits",
                     display_name: "Building Permits",
                     display_text: "Number of building permits issued in the zone during 2016.",
-                    zones: ["ward", "neighborhood_cluster"],
+                    zones: ["ward", "neighborhood_cluster", "zip"],
                     aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster"],
+                    available_aggregates: ["ward", "neighborhood_cluster", "zip"],
                     default_layer: "neighborhood_cluster"
                 },
                 {
                     name: "poverty_rate",
                     display_name: "Poverty Rate",
                     display_text: "Fraction of residents below the poverty rate.",
-                    zones: ["tract"],
+                    zones: ["census_tract"],
                     aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/",
-                    available_aggregates: ["tract"],
-                    default_layer: "tract"
+                    available_aggregates: ["census_tract"],
+                    default_layer: "census_tract"
                 },
 
                 {
@@ -192,13 +194,12 @@
               .attr("id", "overlay-about-"+overlay.name)
                 .text(overlay.display_text)
 
-            $('.ui.accordion').accordion(); //alternately allow multiple to be open: .accordion({'exclusive':false})
+            $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
 
             //Set it up to trigger the layer when title is clicked
             document.getElementById("overlay-" + overlay.name).addEventListener("click", clickCallback);
 
             function clickCallback() {
-                console.log("you clicked on the overlay title for " + overlay.name);
                 var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
                 console.log("changing from " + existingOverlayType + " to " + overlay.name);
 
@@ -247,6 +248,26 @@
             }
         },
 
+
+        layerOverlayToggle: function(msg, data) {
+        //Used when the user clicks the zone name to decide if we need to swap the overlay
+        //'data' is the name of the zone type (layer) that was clicked
+
+            var overlayState = getState()['overlaySet']
+            var previousOverlayState = getState().overlaySet
+            var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
+            if (previousOverlayState !== undefined) {
+                var previousLayer = previousOverlayState[0].activeLayer
+                mapView.clearOverlay();
+                setState('overlayRequest',{
+                                overlay: existingOverlayType,
+                                activeLayer: data
+                });
+            };
+
+            //to use w/ addOverlayData{ overlay: 'building_permits', activeLayer: 'ward'}
+        },
+
         addOverlayData: function(msg, data) { // data e.g. { overlay: 'building_permits', activeLayer: 'ward'}]
             if (data == null) { // ie if the overlays have been cleared
                 return;
@@ -254,18 +275,29 @@
 
             var grouping = data.activeLayer
 
+            //If we haven't loaded the data yet, need to get it
             if (getState()['joinedToGeo.' + data.overlay + '_' + data.activeLayer] === undefined) {
+                
+                //When data is loaded, display the layer if possible or switch to the default zone type instead.
                 function dataCallback(d) {
-                    if (d.items === null) {
+                    var loadSuccessful = getState()['dataLoaded.' + data.overlay + '_' + data.activeLayer][0]
+                    if (loadSuccessful === false) {
+                        console.log("Grouping not available, switching to default")
                         //If the data returned is null that aggregation is not available. Use default aggregation instead
-                        //var default_layer = 'ward'; //TODO should make this a config param for each layer so that it can vary
+                        //Using setState here means that after the data is loaded, the addOverlayData function will be called
+                        //again. 
                         var config = mapView.findOverlayConfig('name', data.overlay)
                         var default_layer = config.default_layer
-                        setState('mapLayer', default_layer);
-                        setState('overlayRequest', {
-                            overlay: data.overlay,
-                            activeLayer: default_layer
-                        });
+
+                        //Prevent an infinite loop
+                        if (data.activeLayer == default_layer){
+                            console.log("ERROR: request for data layer returned null")
+                        } else {
+                            setState('overlayRequest', {
+                                overlay: data.overlay,
+                                activeLayer: default_layer
+                            });
+                        };
                     } else {
                         controller.joinToGeoJSON(data.overlay, grouping, data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
                     };
@@ -317,10 +349,30 @@
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
 
         },
+        updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
+            //Checks to see if the current overlay is different from previous overlay
+            //If so, use the 'available_aggregates' to enable/disable zone selection buttons
+            var layerMenu = d3.select('#layer-menu').classed("myclass",true)
+            layerMenu.selectAll('a')
+                .each(function(d) {
+
+                  var zoneButton = d3.select(this)
+                  var buttonId = zoneButton.attr('id')
+                  var layerType = buttonId.replace("-menu-item","")
+                  var availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+
+                  //True if in the list, false if not
+                  var status = true
+                  if (availableLayers.indexOf(layerType) != -1) {
+                    status = false
+                  }
+                  zoneButton.classed('unavailable',status)
+                });
+        },
 
         showOverlayLayer: function(overlay, activeLayer) {
 
-            setState('mapLayer', activeLayer);
+            setState('mapLayer', activeLayer); //todo is this needed?
 
             //Toggle the overlay colors themselves
             mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
@@ -332,8 +384,6 @@
 
             mapView.clearOverlay('previous');
 
-
-            // TODO: make / show legend
         },
         toggleActive: function(selector) {
             d3.select(selector)
@@ -355,7 +405,7 @@
                 visibility: 'none',
             },
             {
-                source: 'tract',
+                source: 'census_tract',
                 color: '#8DE2B8',
                 visibility: 'none'
             },
@@ -445,24 +495,16 @@
 
 
         showLayer: function(msg, data) {
-            //'data' is the name of the zone type (layer) to show
+            //'data' is the name of the zone type (layer) that was clicked
 
             //first clear all existing layers
             var layerChoices = mapView.initialLayers.map(function(i) {
                 return i['source']
             })
-
-
             for (var i = 0; i < layerChoices.length; i++) {
                 mapView.map.setLayoutProperty(layerChoices[i] + 'Layer', 'visibility', 'none');
             }
 
-            var previousOverlayState = getState().overlaySet
-            var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-            if (previousOverlayState !== undefined) {
-                var previousLayer = previousOverlayState[0].activeLayer
-                mapView.clearOverlay();
-            }
 
             //Toggle boundaries ('layer')
             mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
@@ -472,16 +514,6 @@
                 .attr('class', '');
             d3.select('#' + data + '-menu-item')
                 .attr('class', 'active');
-
-            //Keep the currently selected overlay data choice with the new zone type
-            if (existingOverlayType !== null) {
-                setState('overlayRequest', {
-                    overlay: existingOverlayType,
-                    activeLayer: data
-                });
-            };
-
-
         },
 
         placeProjects: function(msg, data) { // some repetition here with the addLayer function used for zone layers. could be DRYer if combined

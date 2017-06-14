@@ -293,10 +293,12 @@ html, body {
 a.unavailable {
     background-color: rgb(220, 220, 220);
     color: rgb(200, 200, 200);
+    pointer-events: none;
 }
 a.active {
     background-color: #b3cde3;
 }
+
 #reset-zoom {
     display: none;
     position: absolute;
