@@ -699,33 +699,45 @@ def project_subsidies(nlihc_id):
 @application.route('/api/census/<data_id>/<grouping>', methods=['GET'])
 def census_with_weighting(data_id,grouping):
     '''
-    
-    TODO This is currently mixing two different approaches to keep the API working as is
-    Need to switch the poverty_rate calc to use new weighting method instead
+    API Endpoint to get data from our census table. data_id can either be a column
+    name or a custom calculated value.
+
+    data_id: if in the list of calculated values, perform custom calculation. Otherwise, 
+            try to get it from the census database table as a column name
+
+    grouping: one of 'census_tract', 'ward', or 'neighborhood_cluster'
     '''
-    
-    if data_id == 'poverty_rate':
-        #TODO when we add more than one year of data we need to use a newly added 'year' column to distinguish the rows and update the sql query.
-        q = "SELECT * FROM census"
-        conn = engine.connect()
-        proxy = conn.execute(q)
-        census_results = [dict(x) for x in proxy.fetchall()]
+    if data_id in ['poverty_rate','fraction_black','income_per_capita',
+                    'labor_participation','fraction_foreign','fraction_single_mothers']:
 
-        conn.close()
-        items = []
+        if data_id == 'poverty_rate':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'population_poverty')
+        if data_id == 'fraction_black':
+            numerator = get_weighted_census_results(grouping, 'population_black')
+            denominator = get_weighted_census_results(grouping, 'population')
+        if data_id == 'income_per_capita':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'aggregate_income')
+        if data_id == 'labor_participation':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping,'population_working')
+        if data_id == 'fraction_foreign':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'population_foreign')
+        if data_id == 'fraction_single_mothers':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'population_single_mother')
 
-        for r in census_results:
-            pop = r['population']
-            pop_poverty = r['population_poverty']
-            rate = (pop_poverty / pop)*100
-            output = dict({'group':r['census_tract'], 'count':rate})
-            items.append(output)
+        api_results = items_divide(numerator,denominator)
+        #api_results = scale(api_results)
+        api_results['data_id'] = 'poverty_rate'
 
-        return jsonify({'items': items, 'grouping':grouping, 'data_id':data_id})
-
+    #If the data_id isn't one of our custom ones, assume it is a column name
     else:
         api_results = get_weighted_census_results(grouping, data_id)
-        return jsonify(api_results)
+    
+    return jsonify(api_results)
 
 def get_weighted_census_results(grouping, field):
     '''
@@ -734,7 +746,7 @@ def get_weighted_census_results(grouping, field):
 
     Currently only implemented for the 'counts' weighting factor not for the proportion version
     '''
-    q = "SELECT * FROM census"
+    q = "SELECT census_tract, {field} FROM census".format(field=field) #TODO need to add 'year' column for multiple census years when this is added to the data
     conn = engine.connect()
     proxy = conn.execute(q)
     census_results = [dict(x) for x in proxy.fetchall()]
@@ -761,9 +773,11 @@ def get_weighted_census_results(grouping, field):
             for result in results:
                 tract = result['census_tract']
                 factor = result['population_weight_counts']
-                matching_data = next((item for item in census_results if item["census_tract"] == tract),{field:0})
-                if matching_data[field] == 0:
+                matching_data = next((item for item in census_results if item["census_tract"] == tract),{field:None})
+                if matching_data[field] == None:
                     logging.warning("Missing data for census tract when calculating weightings: {}".format(tract))
+                    matching_data[field] = 0
+                    
                 value = matching_data[field]
                 count += (value * factor)
 
