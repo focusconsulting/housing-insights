@@ -259,7 +259,7 @@ def summarize_observations(method,table_name,filter_name,months,grouping):
             api_results = items_divide(api_results, denominator)
             api_results = scale(api_results, 1000) #per 1000 residential units
         if table_name in ['crime']:
-            denominator = get_population(grouping)
+            denominator = get_weighted_census_results(grouping, 'population')
             api_results = items_divide(api_results, denominator)
             api_results = scale(api_results, 100000) #crime incidents per 100,000 people
     
@@ -276,14 +276,25 @@ def items_divide(numerator_data, denominator_data):
     with key "items", which contains a list of dictionaries each with 'grouping' 
     and 'count'
     '''
-    #matching_data = next((item for item in census_results if item["census_tract"] == tract),{field:0})
+    items = []
+    for n in numerator_data['items']:
+        #TODO what should we do when a matching item isn't found? currently returning default of 1 so that division will go through
+        matching_d = next((item for item in denominator_data['items'] if item['group'] == n['group']),{'group':'Unknown','count':1})
+        divided = n['count'] / matching_d['count']
+        item = dict({'group':n['group'], 'count':divided}) #TODO here and elsewhere need to change 'count' to 'value' for clarity, but need to fix front end to expect this first
+        items.append(item)
 
-    return numerator_data
+    return {'items':items, 'grouping':numerator_data['grouping'], 'data_id':numerator_data['grouping']}
+
 
 def scale(data,factor):
     '''
     Multiplies each of the items 'count' entry by the factor
     '''
+
+    for idx, d in enumerate(data['items']):
+        data['items'][idx]['count'] = (data['items'][idx]['count'] * factor)
+
     return data
 
 def get_population(grouping):
@@ -300,44 +311,8 @@ def get_residential_units(grouping):
     #TODO implement me
     return None
 
-
-
-@application.route('/api/<table_name>/all/<grouping>', methods=['GET'])
-def count_all(table_name,grouping):
-    """
-    Example endpoint of doing a COUNT on a specific zipcode.
-    
-    DEPRECATED! Remove once front end is swapped out
-
-    USE THE summarize_observations method instead!
-    
-    """
-
-
-    #input validation so users only execute valid queries
-    if grouping not in ['zip','ward','anc','neighborhood_cluster','census_tract']:
-        return jsonify({'items': None, 'notes':"invalid input"})
-    if table_name not in ['building_permits', 'crime']:
-        return jsonify({'items': None, 'notes':"invalid input"})
-
-
-    application.logger.debug('Getting all {}'.format(grouping))
-
-    #Determine some parameters based on user submissions
-    #TODO this approach will get unwieldy soon - temporary quick approach
-    #date field name varies by table_name
-    date_fields = {'building_permits': 'issue_date', 'crime': 'report_date'}
-    date_field = date_fields[table_name]
-
-    date_range_sql = "'2016-01-01' and '2016-12-31'"
-
-    api_results = count_observations(table_name, grouping, date_field, date_range_sql)
-    return jsonify(api_results)
-
 def count_observations(table_name, grouping, date_field, date_range_sql, additional_wheres=''):
     fallback = "'Unknown'"
-    
-    
 
     try:
         conn = engine.connect()
@@ -372,6 +347,40 @@ def count_observations(table_name, grouping, date_field, date_range_sql, additio
     except Exception as e:
         #conn.close()
         return {'items': None, 'notes':"Query failed: {}".format(e), 'grouping':grouping, 'data_id':table_name}
+
+
+
+@application.route('/api/<table_name>/all/<grouping>', methods=['GET'])
+def count_all(table_name,grouping):
+    """
+    Example endpoint of doing a COUNT on a specific zipcode.
+    
+    DEPRECATED! Remove once front end is swapped out
+
+    USE THE summarize_observations method instead!
+
+    """
+
+
+    #input validation so users only execute valid queries
+    if grouping not in ['zip','ward','anc','neighborhood_cluster','census_tract']:
+        return jsonify({'items': None, 'notes':"invalid input"})
+    if table_name not in ['building_permits', 'crime']:
+        return jsonify({'items': None, 'notes':"invalid input"})
+
+
+    application.logger.debug('Getting all {}'.format(grouping))
+
+    #Determine some parameters based on user submissions
+    #TODO this approach will get unwieldy soon - temporary quick approach
+    #date field name varies by table_name
+    date_fields = {'building_permits': 'issue_date', 'crime': 'report_date'}
+    date_field = date_fields[table_name]
+
+    date_range_sql = "'2016-01-01' and '2016-12-31'"
+
+    api_results = count_observations(table_name, grouping, date_field, date_range_sql)
+    return jsonify(api_results)
 
 
 
