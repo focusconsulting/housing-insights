@@ -283,7 +283,7 @@ def items_divide(numerator_data, denominator_data):
         for n in numerator_data['items']:
             #TODO what should we do when a matching item isn't found?
             matching_d = next((item for item in denominator_data['items'] if item['group'] == n['group']),{'group':'_unknown','count':None})
-            if matching_d['count'] == None:
+            if matching_d['count'] == None or n['count']== None:
                 divided = None
             else:
                 divided = n['count'] / matching_d['count']
