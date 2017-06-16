@@ -5,6 +5,9 @@ flask api
 ~~~~~~~~~
 This is a simple Flask applicationlication that creates SQL query endpoints.
 
+
+TODO, as of 6/15/2017 none of these endpoints are SQL Injection ready
+
 """
 
 from flask import Flask, request, Response, abort, json
@@ -27,6 +30,7 @@ from flask import jsonify
 from flask.json import JSONEncoder
 import calendar
 from datetime import datetime, date
+import dateutil.parser as dateparser
 
 #######################
 # Setup
@@ -155,41 +159,174 @@ def get_meta():
     row = result.fetchone()
     return row[0]
 
+@application.route('/api/<method>/<table_name>/<filter_name>/<months>/<grouping>', methods=['GET'])
+def summarize_observations(method,table_name,filter_name,months,grouping):
+    '''
+    This endpoint takes a table that has each record as list of observations 
+    (like our crime and building_permits tables) and returns summary statistics
+    either as raw counts or as a rate, optionally filtered. 
 
-@application.route('/api/<data_source>/all/<grouping>', methods=['GET'])
-def count_all(data_source,grouping):
-    """ Example endpoint of doing a COUNT on a specific zipcode. """
+    methods: "count" or "rate"
+    table_name: name of the table in the database, e.g. 'building_permits' or 'crime'
+    filter_name: code name of the filter to apply to the data, which varies by table
+                "all" - no filtering applied
+                "construction" - only building_permits with permit_type_name = 'CONSTRUCTION'
+                "violent" - only crimes where the offense type is a violent crime (note, not 100% match, need to compare DCPD definitions to official to verify)
+                "nonviolent" - the other crime incidents
+    months: The number of months of date to include. By default this is from now() but can be modified by an optional parameter
+    grouping: What to use for the 'GROUP BY' clause, e.g. 'ward', 'neighbourhood_cluster', 'zip', 'census_tract'. 
+            Can accept any valid column name, so 'offense' for crime or 'permit_type_name' for building_permits are also valid
+    
+    Optional params:
+    start: YYYYMMDD format start date to use instead of now() for the duration filter
 
 
-    #input validation so users only execute valid queries
-    if grouping not in ['zip','ward','anc','neighborhood_cluster','census_tract']:
-        return jsonify({'items': None, 'notes':"invalid input"})
-    if data_source not in ['building_permits', 'crime']:
-        return jsonify({'items': None, 'notes':"invalid input"})
+    replaces the count_all method that is deprecated
+
+    Example working URLS:
+    /api/count/crime/all/12/ward - count of all crime incidents
+    /api/count/building_permits/construction/12/neighborhood_cluster - all construction permits in the past year grouped by neighborhood_cluster
+    '''
 
 
-    application.logger.debug('Getting all {}'.format(grouping))
+    ###########################
+    #Handle filters
+    ###########################
+    #Be sure concatenated 'AND' statements have a space in front of them
+    additional_wheres = ''
+    if filter_name == 'all':
+        additional_wheres += " "
 
-    #Determine some parameters based on user submissions
-    #TODO this approach will get unwieldy soon - temporary quick approach
-    #date field name varies by data_source
+    # Filter options for building_permits
+    elif filter_name == 'construction':
+        additional_wheres += " AND permit_type_name = 'CONSTRUCTION' "
+    
+    # Filter options for crime
+    elif filter_name == 'violent':
+        additional_wheres += " AND OFFENSE IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
+    elif filter_name == 'nonviolent':
+        additional_wheres += " AND OFFENSE NOT IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
+
+
+    # Fallback for an invalid filter
+    else:
+        additional_wheres += " Incorrect filter name - this inserted SQL will cause query to fail"
+
+    ##########################
+    #Handle date range
+    ##########################
     date_fields = {'building_permits': 'issue_date', 'crime': 'report_date'}
-    date_field = date_fields[data_source]
+    date_field = date_fields[table_name]
+
+    #method currently not implemented. 'count' or 'rate'
+
+
+    start_date = request.args.get('start')
+    print("Start_date found: {}".format(start_date))
+    if start_date == None:
+        start_date = "now()"
+    else:
+        start_date = dateparser.parse(start_date,dayfirst=False,yearfirst=False)
+        start_date = datetime.strftime(start_date,'%Y-%m-%d')
+        start_date = "'" + start_date + "'"
+
+    date_range_sql = ("({start_date}::TIMESTAMP - INTERVAL '{months} months')"
+                      " AND {start_date}::TIMESTAMP"
+                      ).format(start_date=start_date, months=months)
+
+
+    #########################
+    #Optional - validate other inputs
+    #########################
+    #Should we restrict the group by to a specific list, or allow whatever people want? 
+    #Ditto for table name
+
+
+    ###############
+    #Get results
+    ###############
+    api_results = count_observations(table_name, grouping, date_field, date_range_sql, additional_wheres)
+
+    #Edit the data_id. TODO this is not specific enough, need univeral system for handling unique data ids to be used on front end. 
+    #Is this better handled here in the API or front end exclusively?
+    api_results['data_id'] += '_' + filter_name
+
+
+    # Apply the normalization if needed
+    if method == 'rate':
+        if table_name in ['building_permits']:
+            denominator = get_residential_units(grouping)
+            api_results = items_divide(api_results, denominator)
+            api_results = scale(api_results, 1000) #per 1000 residential units
+        if table_name in ['crime']:
+            denominator = get_weighted_census_results(grouping, 'population')
+            api_results = items_divide(api_results, denominator)
+            api_results = scale(api_results, 100000) #crime incidents per 100,000 people
+    
+    #Output as JSON
+    return jsonify(api_results)
+
+
+def items_divide(numerator_data, denominator_data):
+    '''
+    Divides items in the numerator by items in the denominator by matching
+    the appropriate groupings. 
+
+    Takes data that is formatted for output the API, i.e. a dictionary 
+    with key "items", which contains a list of dictionaries each with 'grouping' 
+    and 'count'
+    '''
+    items = []
+    for n in numerator_data['items']:
+        #TODO what should we do when a matching item isn't found? currently returning default of 1 so that division will go through
+        matching_d = next((item for item in denominator_data['items'] if item['group'] == n['group']),{'group':'Unknown','count':1})
+        divided = n['count'] / matching_d['count']
+        item = dict({'group':n['group'], 'count':divided}) #TODO here and elsewhere need to change 'count' to 'value' for clarity, but need to fix front end to expect this first
+        items.append(item)
+
+    return {'items':items, 'grouping':numerator_data['grouping'], 'data_id':numerator_data['grouping']}
+
+
+def scale(data,factor):
+    '''
+    Multiplies each of the items 'count' entry by the factor
+    '''
+
+    for idx, d in enumerate(data['items']):
+        data['items'][idx]['count'] = (data['items'][idx]['count'] * factor)
+
+    return data
+
+def get_population(grouping):
+    '''
+    Returns the population count for each zone in the standard 'items' format
+    '''
+    #TODO implement me
+    return None
+
+def get_residential_units(grouping):
+    '''
+    Returns the number of residential units in the standard 'items' format
+    '''
+    #TODO implement me
+    return None
+
+def count_observations(table_name, grouping, date_field, date_range_sql, additional_wheres=''):
     fallback = "'Unknown'"
 
     try:
-        #TODO verify if this is auto-closed if the transaction errors out. Or does it matter?
         conn = engine.connect()
 
         q = """
-            SELECT COALESCE({},{}) --'Unknown'
+            SELECT COALESCE({grouping},{fallback}) --'Unknown'
             ,count(*) AS records
-            FROM {}
-            where {} between '2016-01-01' and '2016-12-31'
-            --WHERE report_date BETWEEN (now()::TIMESTAMP - INTERVAL '1 year') AND now()::TIMESTAMP
-            GROUP BY {}
-            ORDER BY {}
-            """.format(grouping,fallback,data_source,date_field,grouping,grouping)
+            FROM {table_name}
+            where {date_field} between {date_range_sql}
+            {additional_wheres}
+            GROUP BY {grouping}
+            ORDER BY {grouping}
+            """.format(grouping=grouping,fallback=fallback,table_name=table_name,
+                date_field=date_field,date_range_sql=date_range_sql,additional_wheres=additional_wheres)
 
         proxy = conn.execute(q)
         results = proxy.fetchall()
@@ -204,12 +341,49 @@ def count_all(data_source,grouping):
 
 
         conn.close()
-        return jsonify({'items': formatted, 'grouping':grouping, 'data_id':data_source})
+        return {'items': formatted, 'grouping':grouping, 'data_id':table_name}
 
     #TODO do better error handling - for interim development purposes only
     except Exception as e:
         #conn.close()
-        return jsonify({'items': None, 'notes':"Query failed: {}".format(e)})
+        return {'items': None, 'notes':"Query failed: {}".format(e), 'grouping':grouping, 'data_id':table_name}
+
+
+
+@application.route('/api/<table_name>/all/<grouping>', methods=['GET'])
+def count_all(table_name,grouping):
+    """
+    Example endpoint of doing a COUNT on a specific zipcode.
+    
+    DEPRECATED! Remove once front end is swapped out
+
+    USE THE summarize_observations method instead!
+
+    """
+
+
+    #input validation so users only execute valid queries
+    if grouping not in ['zip','ward','anc','neighborhood_cluster','census_tract']:
+        return jsonify({'items': None, 'notes':"invalid input"})
+    if table_name not in ['building_permits', 'crime']:
+        return jsonify({'items': None, 'notes':"invalid input"})
+
+
+    application.logger.debug('Getting all {}'.format(grouping))
+
+    #Determine some parameters based on user submissions
+    #TODO this approach will get unwieldy soon - temporary quick approach
+    #date field name varies by table_name
+    date_fields = {'building_permits': 'issue_date', 'crime': 'report_date'}
+    date_field = date_fields[table_name]
+
+    date_range_sql = "'2016-01-01' and '2016-12-31'"
+
+    api_results = count_observations(table_name, grouping, date_field, date_range_sql)
+    return jsonify(api_results)
+
+
+
 
 @application.route('/api/wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
@@ -524,38 +698,97 @@ def project_subsidies(nlihc_id):
 
 @application.route('/api/census/<data_id>/<grouping>', methods=['GET'])
 def census_with_weighting(data_id,grouping):
-    #TODO this does not yet return the proper grouping
+    '''
+    API Endpoint to get data from our census table. data_id can either be a column
+    name or a custom calculated value.
+
+    data_id: if in the list of calculated values, perform custom calculation. Otherwise, 
+            try to get it from the census database table as a column name
+
+    grouping: one of 'census_tract', 'ward', or 'neighborhood_cluster'
+    '''
+    if data_id in ['poverty_rate','fraction_black','income_per_capita',
+                    'labor_participation','fraction_foreign','fraction_single_mothers']:
+
+        if data_id == 'poverty_rate':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'population_poverty')
+        if data_id == 'fraction_black':
+            numerator = get_weighted_census_results(grouping, 'population_black')
+            denominator = get_weighted_census_results(grouping, 'population')
+        if data_id == 'income_per_capita':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'aggregate_income')
+        if data_id == 'labor_participation':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping,'population_working')
+        if data_id == 'fraction_foreign':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'population_foreign')
+        if data_id == 'fraction_single_mothers':
+            denominator = get_weighted_census_results(grouping, 'population')
+            numerator = get_weighted_census_results(grouping, 'population_single_mother')
+
+        api_results = items_divide(numerator,denominator)
+        #api_results = scale(api_results)
+        api_results['data_id'] = 'poverty_rate'
+
+    #If the data_id isn't one of our custom ones, assume it is a column name
+    else:
+        api_results = get_weighted_census_results(grouping, data_id)
     
-    #TODO when we add more than one year of data we need to use a newly added 'year' column to distinguish the rows and update the sql query.
-    q = "SELECT * FROM census"
+    return jsonify(api_results)
+
+def get_weighted_census_results(grouping, field):
+    '''
+    queries the census table for the relevant field and returns the results as a weighted count
+    returns the standard 'items' format
+
+    Currently only implemented for the 'counts' weighting factor not for the proportion version
+    '''
+    q = "SELECT census_tract, {field} FROM census".format(field=field) #TODO need to add 'year' column for multiple census years when this is added to the data
     conn = engine.connect()
     proxy = conn.execute(q)
     census_results = [dict(x) for x in proxy.fetchall()]
 
-    q = "SELECT * FROM census_tract_to_neighborhood_cluster"
-    conn = engine.connect()
-    proxy = conn.execute(q)
-    nc_weighting = [dict(x) for x in proxy.fetchall()]
+    #Transform the results
+    items = []  #For storing results as we go
 
-    q = "SELECT * FROM census_tract_to_ward"
-    conn = engine.connect()
-    proxy = conn.execute(q)
-    ward_weighting = [dict(x) for x in proxy.fetchall()]
-
-    conn.close()
-
-    #perform the proper calculation
-    items = []
-    if data_id == 'poverty_rate':
+    if grouping == 'census_tract':
+        #No weighting required, data already in proper format
         for r in census_results:
-            pop = r['population']
-            pop_poverty = r['population_poverty']
-            rate = (pop_poverty / pop)*100
-            output = dict({'group':r['census_tract'], 'count':rate})
+            output = dict({'group':r['census_tract'], 'count':r[field]})
             items.append(output)
 
-    return jsonify({'items': items, 'grouping':grouping, 'data_id':data_id})
+    elif grouping in ['ward', 'neighborhood_cluster']:
+        proxy = conn.execute("SELECT DISTINCT {grouping} FROM census_tract_to_{grouping}".format(grouping=grouping))
+        groups = [x[0] for x in proxy.fetchall()]
 
+        
+        for group in groups:
+            proxy = conn.execute("SELECT * FROM census_tract_to_{grouping} WHERE {grouping} = '{group}'".format(grouping=grouping, group=group))
+            results = [dict(x) for x in proxy.fetchall()]
+
+            count = 0
+            for result in results:
+                tract = result['census_tract']
+                factor = result['population_weight_counts']
+                matching_data = next((item for item in census_results if item["census_tract"] == tract),{field:None})
+                if matching_data[field] == None:
+                    logging.warning("Missing data for census tract when calculating weightings: {}".format(tract))
+                    matching_data[field] = 0
+                    
+                value = matching_data[field]
+                count += (value * factor)
+
+            output = dict({'group':group, 'count':round(count,0)})
+            items.append(output)
+    else:
+        #Invalid grouping
+        items = None
+
+    conn.close()
+    return {'items': items, 'grouping':grouping, 'data_id':field}
 
 
 ##########################################
