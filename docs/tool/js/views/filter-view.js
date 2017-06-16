@@ -145,24 +145,6 @@ var filterView = {
 
         oldPills.exit().remove();
 
-
-
-        /*
-        this.trigger = document.createElement('i');
-        this.trigger.id = 'clearFiltersTrigger';
-        this.trigger.classList.add('delete', 'icon');
-
-        this.site.innerText = "";
-
-        this.pill.innerText = this.replacedText;
-
-        this.site.appendChild(this.pill);
-        this.pill.appendChild(this.trigger);
-        
-        this.trigger.addEventListener('click', function(){
-            filterView.clearAllFilters();
-        });
-        */
     },
 
     init: function(msg, data) {
