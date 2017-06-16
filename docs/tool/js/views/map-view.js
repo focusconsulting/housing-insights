@@ -147,7 +147,8 @@
                     display_text: "Number of violent crime incidents per 100,000 people reported in the past 12 months.",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward"
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
                     name: "crime_nonviolent_12",
@@ -155,7 +156,8 @@
                     display_text: "Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward"
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
                     name: "crime_all_3",
@@ -163,7 +165,8 @@
                     display_text: "Total number of crime incidents per 100,000 people reported in the past 12 months.",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward"
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
                     name: "building_permits_construction",
@@ -171,7 +174,8 @@
                     display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
                     zones: ["ward", "neighborhood_cluster", "zip"],
-                    default_layer: "ward"
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
                     name: "building_permits_all",
@@ -179,7 +183,8 @@
                     display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
                     zones: ["ward", "neighborhood_cluster", "zip"],
-                    default_layer: "ward"
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
                     name: "poverty_rate",
@@ -187,7 +192,8 @@
                     display_text: "Fraction of residents below the poverty rate.",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract"
+                    default_layer: "census_tract",
+                    style: "percent"
                 },
                 {
                     name: "income_per_capita",
@@ -195,7 +201,8 @@
                     display_text: "Average income per resident",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract"
+                    default_layer: "census_tract",
+                    style: "money"
                 },
                 {
                     name: "labor_participation",
@@ -203,7 +210,8 @@
                     display_text: "Percent of the population that is working",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract"
+                    default_layer: "census_tract",
+                    style: "percent"
                 },
                 {
                     name: "fraction_single_mothers",
@@ -211,7 +219,8 @@
                     display_text: "Percent of the total population that is a single mother",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract"
+                    default_layer: "census_tract",
+                    style: "percent"
                 },
                 {
                     name: "fraction_black",
@@ -219,7 +228,8 @@
                     display_text: "Proportion of residents that are black or African American",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract"
+                    default_layer: "census_tract",
+                    style: "percent"
                 },
                 {
                     name: "fraction_foreign",
@@ -227,7 +237,8 @@
                     display_text: "Percent of the population that is foreign born",
                     url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract"
+                    default_layer: "census_tract",
+                    style: "percent"
                 }
                 
             ];
