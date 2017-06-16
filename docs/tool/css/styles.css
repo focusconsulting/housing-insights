@@ -82,6 +82,14 @@ html, body {
 #options-spacer {
     flex-grow: 1;
     border-bottom: 2px solid rgb(189, 54, 33);
+    position: relative; /*so pillboxes can be appended*/
+}
+
+#clear-pillbox-holder {
+    position: absolute;
+    z-index:10;
+    top: 50px;
+    flex-grow: 1;
 }
 
 .main-view {
@@ -309,9 +317,7 @@ a.active {
     padding: 3px;
 }
 
-/*copy-pasted from semantic ui so we can modify
-Currently only used in layers but can be adapted to filters too
-*/
+/*copy-pasted from semantic ui so we can modify*/
 
 /*Layer accordions (blue)*/
 
@@ -363,6 +369,15 @@ Currently only used in layers but can be adapted to filters too
 .ui.styled.accordion .title.filter-title.filter-activated, .ui.styled.accordion .active.title.filter-title.filter-activated {
     background: rgba(234, 100, 2, 0.7);
 }
+
+/*Clear filter pillboxes*/
+.ui.label.clear-single {
+    background-color: rgba(253,126,35,0.7);
+    font-size: .95em;
+    margin-top:5px;
+}
+
+
 /* chloroplath legend */
 
 #chloroplethLegend ul {
@@ -383,3 +398,4 @@ Currently only used in layers but can be adapted to filters too
     position: relative;
     width: 100%;
 } 
+

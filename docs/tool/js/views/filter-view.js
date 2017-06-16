@@ -107,25 +107,62 @@ var filterView = {
             var x = filterView.filterControls[i]['component']['source'] //display_name
         }
 
+        //Compare our activated filterValues (from the state module) to the list of all 
+        //possible filterControls to make a list containing only the activated filter objects. 
+        //filterValues = obj with keys of the 'source' data id and values of current setpoint
+        //filterControls = list of objects that encapsulates the actual component including its clear() method
         var activeFilterIds = []
         var filterValues = filterUtil.getFilterValues()
         for (var key in filterValues){
             if (filterValues[key][0].length != 0){
-                activeFilterIds.push(key)
+                var control = filterView.filterControls.find(function(obj){
+                    return obj['component']['source'] === key;
+                })
+                activeFilterIds.push(control)
             };
         }
         
-        var pills = d3.select('#options-spacer')
-                        .selectAll('div')
-                        .data(activeFilterIds);
-        pills.classed("not-most-recent",true);
+        //Use d3 to bind the list of control objects to our html pillboxes
+        var oldPills = d3.select('#clear-pillbox-holder')
+                        .selectAll('.clear-single')
+                        .data(activeFilterIds)
+                        .classed("not-most-recent",true);
 
-        pills.enter().append("div")
+        var allPills = oldPills.enter().append("div")
             .attr("class","ui label transition visible")
-          .merge(pills)
-            .text(function(d) { return d;});
+            .classed("clear-single",true)
+          .merge(oldPills)
+            .text(function(d) { return d['component']['display_name'];});
 
-        pills.exit().remove();
+        //Add the 'clear' x mark and its callback
+        allPills.each(function(d) {
+            d3.select(this).append("i")
+                .classed("delete icon",true)
+                .on("click", function(d) {
+                    d.clear();
+                })
+        });
+
+        oldPills.exit().remove();
+
+
+
+        /*
+        this.trigger = document.createElement('i');
+        this.trigger.id = 'clearFiltersTrigger';
+        this.trigger.classList.add('delete', 'icon');
+
+        this.site.innerText = "";
+
+        this.pill.innerText = this.replacedText;
+
+        this.site.appendChild(this.pill);
+        this.pill.appendChild(this.trigger);
+        
+        this.trigger.addEventListener('click', function(){
+            filterView.clearAllFilters();
+        });
+        */
     },
 
     init: function(msg, data) {
