@@ -243,6 +243,68 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return row
 
+    def add_geocode_from_mar(self, row):
+        """
+        Uses mar api lookup to populate geographic zones are missing for
+        buildings in the project table. The following zones are validated:
+
+        ward
+        neighborhood_cluster (e.g. 'cluster 1'
+        neighborhood_cluster_desc (eg. 'woodley park and zoo')
+        zip
+        anc
+        census_tract
+        status
+        """
+        # don't do anything if mar_id doesn't exist for the building
+        # this is assuming 'add_mar_id' was called first
+        if row['mar_id'] == self.null_value:
+            return row
+
+        ward = row['Ward2012']
+        neighbor_cluster = row['Cluster_tr2000']
+        neighborhood_cluster_desc = row['Cluster_tr2000_name']
+        zipcode = row['Proj_Zip']
+        anc = row['Anc2012']
+        census_tract = row['Geo2010']
+        status = row['Status']
+        full_address = row['Proj_addre']
+
+        # only do mar api lookup if we have a null geocode value
+        if self.null_value in [ward, neighbor_cluster,
+                               neighborhood_cluster_desc, zipcode, anc,
+                               census_tract, status, full_address]:
+            mar_api = MarApiConn()
+            result = mar_api.reverse_address_id(aid=row['mar_id'])
+            result = result['returnDataset']['Table1'][0]
+        else:
+            return row
+
+        # update missing geocode values accordingly
+        if ward == self.null_value:
+            ward = result['WARD'].split(' ')[-1]
+            row['Ward2012'] = "Ward " + str(ward)
+
+        if neighbor_cluster == self.null_value:
+            row['Cluster_tr2000'] = result['CLUSTER_']
+
+        if zipcode == self.null_value:
+            row['Proj_Zip'] = result['ZIPCODE']
+
+        if anc == self.null_value:
+            row['Anc2012'] = result['ANC_2012']
+
+        if census_tract == self.null_value:
+            row['Geo2010'] = result['CENSUS_TRACT']
+
+        if status == self.null_value:
+            row['Status'] = result['STATUS']
+
+        if full_address == self.null_value:
+            row['Proj_addre'] = result['FULLADDRESS']
+
+        return row
+
 
 #############################################
 # Custom Cleaners
@@ -260,8 +322,9 @@ class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['N','', None])
         row = self.parse_dates(row)
-        row = self.rename_census_tract(row,row_num,column_name='Geo2010')
         row = self.add_mar_id(row, 'Proj_address_id')
+        row = self.add_geocode_from_mar(row=row)
+        row = self.rename_census_tract(row, row_num, column_name='Geo2010')
         return row
 
 
