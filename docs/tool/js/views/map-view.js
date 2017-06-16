@@ -33,7 +33,8 @@
                     ['overlaySet', chloroplethLegend.init],
                     ['previewBuilding', mapView.showPopup],
                     ['filteredData', mapView.filterMap],
-                    ['hoverBuildingList', mapView.highlightBuilding]
+                    ['hoverBuildingList', mapView.highlightBuilding],
+                    ['filterViewLoaded', mapView.initialSidebarState]
 
 
                 ]);
@@ -84,35 +85,56 @@
             }
 
         },
-    ChloroplethColorRange: function(chloroData){
-        // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
-        // make a chloropleth map with a single color, but if you try to,
-        // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
-        // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
-        var CHLOROPLETH_STOP_COUNT = 5;
-        var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
-        var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
-        var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
-            return d.count;
-        });
-        var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
-            return d.count;
-        });
-        var colorScale = d3.scaleLinear()
-            .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
-            .range([MIN_COLOR, MAX_COLOR]);
+        initialSidebarState: function(){
+            setState('sidebar.left',true);
+            setState('sidebar.right',true);
+            setState('subNav.left', 'filters');
+        },
+        ChloroplethColorRange: function(chloroData){
+            // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
+            // make a chloropleth map with a single color, but if you try to,
+            // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
+            // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
+            var CHLOROPLETH_STOP_COUNT = 5;
+            var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
+            var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
 
-        this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
-            var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
-            var domainValue = Math.round(MAX_DOMAIN_VALUE - (stopIncrement * i));
-            var rangeValue = colorScale(domainValue);
-            return [domainValue, rangeValue];
-        });
+            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can 
+            //especially screw up the scale when using rates as they come back as a count instead of a rate
+            var currentLayer = getState().mapLayer[0]
+            var activeZones = []
+            model.dataCollection[currentLayer].features.forEach(function(feature){
+                var zone = feature.properties.NAME;
+                activeZones.push(zone)
+            });
 
-        this.stopsAscending = this.stops.sort(function(a,b){
-            return a[0] - b[0];
-        });
-    },
+            var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
+                if (activeZones.includes(d.group)) {
+                    return d.count;
+                } else {
+                    return 0;
+                };
+            });
+
+            var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
+                return d.count;
+            });
+
+            var colorScale = d3.scaleLinear()
+                .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
+                .range([MIN_COLOR, MAX_COLOR]);
+
+            this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
+                var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
+                var domainValue = Math.round((MAX_DOMAIN_VALUE - (stopIncrement * i))*1000)/1000; //stupid javascript rounding. Close enough for this purpose. 
+                var rangeValue = colorScale(domainValue);
+                return [domainValue, rangeValue];
+            });
+
+            this.stopsAscending = this.stops.sort(function(a,b){
+                return a[0] - b[0];
+            });
+        },
         initialOverlays: [],
 
         findOverlayConfig: function(key, value) {
@@ -122,44 +144,109 @@
         },
         buildOverlayOptions: function() {
 
+            console.log(location.hostname);
+
             //TODO we want to move this config data into it's own file or to the api
             mapView.initialOverlays = [{
-                    name: "crime",
-                    display_name: "Crime",
-                    display_text: "Number of crime incidents reported in the past 3 months.",
+                    name: "crime_violent_12",
+                    display_name: "Crime Rate: Violent 12 months",
+                    display_text: "Number of violent crime incidents per 100,000 people reported in the past 12 months.",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward"
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
-                    name: "building_permits",
-                    display_name: "Building Permits",
-                    display_text: "Number of building permits issued in the zone during 2016.",
+                    name: "crime_nonviolent_12",
+                    display_name: "Crime Rate: Non-Violent 12 months",
+                    display_text: "Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "ward",
+                    style: "number"
+                },
+                {
+                    name: "crime_all_3",
+                    display_name: "Crime Rate: All 3 months",
+                    display_text: "Total number of crime incidents per 100,000 people reported in the past 12 months.",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "ward",
+                    style: "number"
+                },
+                {
+                    name: "building_permits_construction",
+                    display_name: "Building Permits: Construction 2016",
+                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
                     zones: ["ward", "neighborhood_cluster", "zip"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "zip"],
-                    default_layer: "neighborhood_cluster"
+                    default_layer: "ward",
+                    style: "number"
+                },
+                {
+                    name: "building_permits_all",
+                    display_name: "Building Permits: All 2016",
+                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
+                    zones: ["ward", "neighborhood_cluster", "zip"],
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
                     name: "poverty_rate",
-                    display_name: "Poverty Rate",
+                    display_name: "ACS: Poverty Rate",
                     display_text: "Fraction of residents below the poverty rate.",
-                    zones: ["census_tract"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/",
-                    available_aggregates: ["census_tract"],
-                    default_layer: "census_tract"
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
                 },
-
                 {
-                    name: "more_building_permits",
-                    display_name: "More Building Permits 3",
-                    display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
-                    zones: ["ward", "neighborhood_cluster"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster"],
-                    default_layer: "neighborhood_cluster"
+                    name: "income_per_capita",
+                    display_name: "ACS: Income Per Capita",
+                    display_text: "Average income per resident",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "money"
+                },
+                {
+                    name: "labor_participation",
+                    display_name: "ACS: Labor Participation",
+                    display_text: "Percent of the population that is working",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
+                },
+                {
+                    name: "fraction_single_mothers",
+                    display_name: "ACS: Fraction Single Mothers",
+                    display_text: "Percent of the total population that is a single mother",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
+                },
+                {
+                    name: "fraction_black",
+                    display_name: "ACS: Fraction Black",
+                    display_text: "Proportion of residents that are black or African American",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
+                },
+                {
+                    name: "fraction_foreign",
+                    display_name: "ACS: Fraction Foreign",
+                    display_text: "Percent of the population that is foreign born",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
                 }
+                
             ];
         },
 
@@ -245,6 +332,7 @@
             }
             if (i === 0) { // i.e. clearing the existing current overlay, with result that none will be visible
                 clearState('overlaySet');
+                mapView.updateZoneChoiceDisabling("msg",{overlay: null});
             }
         },
 
@@ -304,7 +392,8 @@
                 }
 
                 var overlayConfig = mapView.findOverlayConfig('name', data.overlay)
-                var url = overlayConfig.aggregate_endpoint_base + data.activeLayer;
+                var url = overlayConfig.url_format.replace('<zone>',data.activeLayer)
+
                 var dataRequest = {
                     name: data.overlay + "_" + data.activeLayer, //e.g. crime
                     url: url,
@@ -324,42 +413,55 @@
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
-            var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;                                                                                     // dataCollection           
-    
-            // assign the chloropleth color range to the data so we can use it for other
-            // purposes when the state is changed
-            data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse);
+                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;                                                                                     // dataCollection           
+        
+                // assign the chloropleth color range to the data so we can use it for other
+                // purposes when the state is changed
+                data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse);
 
-                mapView.map.addLayer({
-                    'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
-                    'type': 'fill',
-                    'source': data.activeLayer + 'Layer',
-                    'layout': {
-                        'visibility': 'none'
-                    },
-                    'paint': {
-                        'fill-color': {
-                            'property': data.overlay,
-                            'stops': data.chloroplethRange.stopsAscending
+                    mapView.map.addLayer({
+                        'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
+                        'type': 'fill',
+                        'source': data.activeLayer + 'Layer',
+                        'layout': {
+                            'visibility': 'none'
                         },
-                        'fill-opacity': 1 //using rgba in the chloropleth color range instead
-                    }
-                });
-            }
+                        'paint': {
+                            'fill-color': {
+                                'property': data.overlay,
+                                'stops': data.chloroplethRange.stopsAscending
+                            },
+                            'fill-opacity': 1 //using rgba in the chloropleth color range instead
+                        }
+                    });
+
+                console.log(data.chloroplethRange.stopsAscending);
+                };
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
 
         },
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay
-            //If so, use the 'available_aggregates' to enable/disable zone selection buttons
+            //If so, use the 'zones' to enable/disable zone selection buttons
+            
             var layerMenu = d3.select('#layer-menu').classed("myclass",true)
             layerMenu.selectAll('a')
                 .each(function(d) {
 
-                  var zoneButton = d3.select(this)
-                  var buttonId = zoneButton.attr('id')
-                  var layerType = buttonId.replace("-menu-item","")
-                  var availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+                    var zoneButton = d3.select(this)
+                    var buttonId = zoneButton.attr('id')
+                    var layerType = buttonId.replace("-menu-item","")
+
+                    //Get layers from the overlay config, or if no overlay selected use all available layers
+                    var availableLayers = []
+                    if (data.overlay == null){
+                        mapView.initialLayers.forEach(function(layer) {
+                            availableLayers.push(layer.source);
+                        });
+                    } else {
+                        availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+                    };
+
 
                   //True if in the list, false if not
                   var status = true
@@ -370,15 +472,15 @@
                 });
         },
 
-        showOverlayLayer: function(overlay, activeLayer) {
+        showOverlayLayer: function(overlay_name, activeLayer) {
 
             setState('mapLayer', activeLayer); //todo is this needed?
 
             //Toggle the overlay colors themselves
-            mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
-            mapView.toggleActive('#' + overlay + '-overlay-item')
+            mapView.map.setLayoutProperty(activeLayer + '_' + overlay_name, 'visibility', 'visible');
+            mapView.toggleActive('#' + overlay_name + '-overlay-item')
             setState('overlaySet', {
-                overlay: overlay,
+                overlay: overlay_name,
                 activeLayer: activeLayer
             });
 
@@ -552,8 +654,9 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [12, 3],
-                                    [15, 32]
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
                                 ]
                             },
                             'circle-opacity': 0.3,
@@ -658,9 +761,10 @@
             mapView.map.getSource('project').setData(mapView.convertedProjects);
             mapView.map.setFilter('project', ['==', 'matches_filters', true]);
             mapView.listBuildings();
+
             setTimeout(function() {
                 mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
-            }, 20);
+            }, 0);
             /*
             console.log(data.toString().replace(/([^,]+)/g,"'$1'"));
             var idStr = data.toString().replace(/([^,]+)/g,"'$1'")
@@ -674,15 +778,18 @@
                 mapView.circleStrokeOpacity = mapView.shrinkGrow === 'grow' ? mapView.circleStrokeOpacity / 1.2 : mapView.circleStrokeOpacity * 1.2;
                 mapView.map.setPaintProperty('project', 'circle-stroke-width', mapView.circleStrokeWidth);
                 mapView.map.setPaintProperty('project', 'circle-stroke-opacity', mapView.circleStrokeOpacity);
-                if (mapView.shrinkGrow === 'grow' && mapView.circleStrokeWidth >= 32) {
-
+                
+                //Grow, then shrink, then stop
+                if (mapView.shrinkGrow === 'grow' && mapView.circleStrokeWidth >= 10) {
+                    //go the other way
                     mapView.shrinkGrow = 'shrink';
                 }
                 if (mapView.shrinkGrow === 'shrink' && mapView.circleStrokeWidth <= 1) {
-                    mapView.shrinkGrow = 'grow';
+                    //stop
+                    mapView.shrinkGrow = 'grow'; //ready for next time
                     cancelAnimationFrame(mapView.growShrinkId);
                 } else {
-
+                    //keep going same direction w/ recursive call
                     mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
                 }
             }, (1000 / 20));
@@ -695,13 +802,16 @@
         listBuildings: function() {
 
 
-
-            var data = mapView.convertedProjects.features.filter(function(feature) {
+            var allData = mapView.convertedProjects.features
+            var data = allData.filter(function(feature) {
                 return feature.properties.matches_filters === true;
             });
 
-            d3.select('#matching-count')
-                .text('(' + data.length + ')');
+            d3.selectAll('.matching-count')
+                .text(data.length);
+
+            d3.selectAll('.total-count')
+                .text(allData.length);
 
             var t = d3.transition()
                 .duration(750);

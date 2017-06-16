@@ -101,6 +101,52 @@ var filterView = {
        
     ],
 
+    addClearPillboxes: function(msg,data){
+    
+        for (var i=0; i < filterView.filterControls.length; i++){
+            var x = filterView.filterControls[i]['component']['source'] //display_name
+        }
+
+        //Compare our activated filterValues (from the state module) to the list of all 
+        //possible filterControls to make a list containing only the activated filter objects. 
+        //filterValues = obj with keys of the 'source' data id and values of current setpoint
+        //filterControls = list of objects that encapsulates the actual component including its clear() method
+        var activeFilterIds = []
+        var filterValues = filterUtil.getFilterValues()
+        for (var key in filterValues){
+            if (filterValues[key][0].length != 0){
+                var control = filterView.filterControls.find(function(obj){
+                    return obj['component']['source'] === key;
+                })
+                activeFilterIds.push(control)
+            };
+        }
+        
+        //Use d3 to bind the list of control objects to our html pillboxes
+        var oldPills = d3.select('#clear-pillbox-holder')
+                        .selectAll('.clear-single')
+                        .data(activeFilterIds)
+                        .classed("not-most-recent",true);
+
+        var allPills = oldPills.enter().append("div")
+            .attr("class","ui label transition visible")
+            .classed("clear-single",true)
+          .merge(oldPills)
+            .text(function(d) { return d['component']['display_name'];});
+
+        //Add the 'clear' x mark and its callback
+        allPills.each(function(d) {
+            d3.select(this).append("i")
+                .classed("delete icon",true)
+                .on("click", function(d) {
+                    d.clear();
+                })
+        });
+
+        oldPills.exit().remove();
+
+    },
+
     init: function(msg, data) {
         //msg and data are from the pubsub module that this init is subscribed to. 
         //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
@@ -112,7 +158,8 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
-                ['anyFilterActive', filterView.handleFilterClearance]
+                ['anyFilterActive', filterView.handleFilterClearance],
+                ['filterValues', filterView.addClearPillboxes]
             ]);
 
             setState('subNav.left','layers');

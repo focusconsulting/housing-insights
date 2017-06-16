@@ -4,10 +4,12 @@
             <button class="sub-nav-button" id="button-layers">Layers</button>
             <button class="sub-nav-button" id="button-filters">Filters</button>
         </div>
-        <div id="options-spacer"></div>
+        <div id="options-spacer">
+            <div id="clear-pillbox-holder"></div><!--will be style positioned downwards-->
+        </div>
         <div id="right-options">
             <!--<button class="sub-nav-button" id="button-charts">Charts</button>-->
-            <button class="sub-nav-button" id="button-buildings">Buildings <span id="matching-count"></span></button>
+            <button class="sub-nav-button" id="button-buildings">Filter Results (<span class="matching-count"></span>)</button>
         </div>
     </div>
     <div id="sidebar-left" class="sidebar">
@@ -43,7 +45,9 @@
             </div>
             <div id="buildings" class="sub-nav-container">
                 <div class="sub-nav-group">
-                    
+                        <h3>Your filters match <span class="matching-count">0</span> out of <span class="total-count">0</span> projects.</h3>
+                        <p>Each project is a building or group of buildings that participates in at least one subsidy program to provide affordable housing to low income residents. <a href="/data/affordable-housing-inventory.html">Read more</a></p>
+                        <h4>Filtered results represent:</h4>
                         <div id="pie-charts">
                             <div id="pie-0"></div>
                             <div id="pie-1"></div>                       
