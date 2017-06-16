@@ -33,7 +33,8 @@
                     ['overlaySet', chloroplethLegend.init],
                     ['previewBuilding', mapView.showPopup],
                     ['filteredData', mapView.filterMap],
-                    ['hoverBuildingList', mapView.highlightBuilding]
+                    ['hoverBuildingList', mapView.highlightBuilding],
+                    ['filterViewLoaded', mapView.initialSidebarState]
 
 
                 ]);
@@ -83,6 +84,11 @@
 
             }
 
+        },
+        initialSidebarState: function(){
+            setState('sidebar.left',true);
+            setState('sidebar.right',true);
+            setState('subNav.left', 'filters');
         },
         ChloroplethColorRange: function(chloroData){
             // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
