@@ -53,7 +53,7 @@ html, body {
 }
 
 #buildings-list {
-    margin-top: 105px;
+    margin-top: 30px;
 }
 
 #left-options .sub-nav-button {
@@ -176,7 +176,7 @@ html, body {
 #pie-charts {
     display: flex;
     justify-content: space-around;
-    position: fixed;
+    position: static;
     width: 100%;
     box-shadow: 0 8px 17px #fff;
     background-color: #fff;
@@ -217,10 +217,12 @@ html, body {
     margin-bottom: 0;
     opacity: 0;
     cursor: pointer;
+    border-bottom: 1px solid gray;
+
 }
 #buildings-list>div .project-title {
     font-weight: bold;
-    font-size: 1.3em;
+    font-size: 1em;
 }
 #buildings-list>div:hover {
     background-color: #ddebff;
