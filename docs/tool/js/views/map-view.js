@@ -145,56 +145,91 @@
                     name: "crime_violent_12",
                     display_name: "Crime Rate: Violent 12 months",
                     display_text: "Number of violent crime incidents per 100,000 people reported in the past 12 months.",
-                    zones: ["ward", "neighborhood_cluster", "census_tract", "zip"],
-                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/rate/crime/violent/12/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "ward"
                 },
                 {
                     name: "crime_nonviolent_12",
                     display_name: "Crime Rate: Non-Violent 12 months",
                     display_text: "Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
-                    zones: ["ward", "neighborhood_cluster", "census_tract", "zip"],
-                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/rate/crime/nonviolent/12/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "ward"
                 },
                 {
                     name: "crime_all_3",
                     display_name: "Crime Rate: All 3 months",
                     display_text: "Total number of crime incidents per 100,000 people reported in the past 12 months.",
-                    zones: ["ward", "neighborhood_cluster", "census_tract", "zip"],
-                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/rate/crime/all/3/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "ward"
                 },
                 {
                     name: "building_permits_construction",
                     display_name: "Building Permits: Construction 2016",
                     display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
                     zones: ["ward", "neighborhood_cluster", "zip"],
-                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/count/building_permits/construction/12/", //TODO need to add start date
-                    available_aggregates: ["ward", "neighborhood_cluster", "zip"],
                     default_layer: "ward"
                 },
                 {
                     name: "building_permits_all",
                     display_name: "Building Permits: All 2016",
                     display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
-                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/count/building_permits/all/12/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "zip"],
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
                     zones: ["ward", "neighborhood_cluster", "zip"],
                     default_layer: "ward"
                 },
                 {
                     name: "poverty_rate",
-                    display_name: "Poverty Rate",
+                    display_name: "ACS: Poverty Rate",
                     display_text: "Fraction of residents below the poverty rate.",
-                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/census/poverty_rate/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract"],
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "census_tract"
                 },
+                {
+                    name: "income_per_capita",
+                    display_name: "ACS: Income Per Capita",
+                    display_text: "Average income per resident",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract"
+                },
+                {
+                    name: "labor_participation",
+                    display_name: "ACS: Labor Participation",
+                    display_text: "Percent of the population that is working",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract"
+                },
+                {
+                    name: "fraction_single_mothers",
+                    display_name: "ACS: Fraction Single Mothers",
+                    display_text: "Percent of the total population that is a single mother",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract"
+                },
+                {
+                    name: "fraction_black",
+                    display_name: "ACS: Fraction Black",
+                    display_text: "Proportion of residents that are black or African American",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract"
+                },
+                {
+                    name: "fraction_foreign",
+                    display_name: "ACS: Fraction Foreign",
+                    display_text: "Percent of the population that is foreign born",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract"
+                }
+                
             ];
         },
 
@@ -340,7 +375,8 @@
                 }
 
                 var overlayConfig = mapView.findOverlayConfig('name', data.overlay)
-                var url = overlayConfig.aggregate_endpoint_base + data.activeLayer;
+                var url = overlayConfig.url_format.replace('<zone>',data.activeLayer)
+
                 var dataRequest = {
                     name: data.overlay + "_" + data.activeLayer, //e.g. crime
                     url: url,
@@ -389,7 +425,7 @@
         },
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay
-            //If so, use the 'available_aggregates' to enable/disable zone selection buttons
+            //If so, use the 'zones' to enable/disable zone selection buttons
             
             var layerMenu = d3.select('#layer-menu').classed("myclass",true)
             layerMenu.selectAll('a')
