@@ -648,8 +648,9 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [12, 3],
-                                    [15, 32]
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
                                 ]
                             },
                             'circle-opacity': 0.3,
@@ -754,9 +755,10 @@
             mapView.map.getSource('project').setData(mapView.convertedProjects);
             mapView.map.setFilter('project', ['==', 'matches_filters', true]);
             mapView.listBuildings();
+
             setTimeout(function() {
                 mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
-            }, 20);
+            }, 0);
             /*
             console.log(data.toString().replace(/([^,]+)/g,"'$1'"));
             var idStr = data.toString().replace(/([^,]+)/g,"'$1'")
@@ -770,15 +772,18 @@
                 mapView.circleStrokeOpacity = mapView.shrinkGrow === 'grow' ? mapView.circleStrokeOpacity / 1.2 : mapView.circleStrokeOpacity * 1.2;
                 mapView.map.setPaintProperty('project', 'circle-stroke-width', mapView.circleStrokeWidth);
                 mapView.map.setPaintProperty('project', 'circle-stroke-opacity', mapView.circleStrokeOpacity);
-                if (mapView.shrinkGrow === 'grow' && mapView.circleStrokeWidth >= 32) {
-
+                
+                //Grow, then shrink, then stop
+                if (mapView.shrinkGrow === 'grow' && mapView.circleStrokeWidth >= 10) {
+                    //go the other way
                     mapView.shrinkGrow = 'shrink';
                 }
                 if (mapView.shrinkGrow === 'shrink' && mapView.circleStrokeWidth <= 1) {
-                    mapView.shrinkGrow = 'grow';
+                    //stop
+                    mapView.shrinkGrow = 'grow'; //ready for next time
                     cancelAnimationFrame(mapView.growShrinkId);
                 } else {
-
+                    //keep going same direction w/ recursive call
                     mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
                 }
             }, (1000 / 20));
@@ -791,13 +796,16 @@
         listBuildings: function() {
 
 
-
-            var data = mapView.convertedProjects.features.filter(function(feature) {
+            var allData = mapView.convertedProjects.features
+            var data = allData.filter(function(feature) {
                 return feature.properties.matches_filters === true;
             });
 
-            d3.select('#matching-count')
-                .text('(' + data.length + ')');
+            d3.selectAll('.matching-count')
+                .text(data.length);
+
+            d3.selectAll('.total-count')
+                .text(allData.length);
 
             var t = d3.transition()
                 .duration(750);
