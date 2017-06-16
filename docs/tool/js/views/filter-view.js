@@ -101,6 +101,33 @@ var filterView = {
        
     ],
 
+    addClearPillboxes: function(msg,data){
+    
+        for (var i=0; i < filterView.filterControls.length; i++){
+            var x = filterView.filterControls[i]['component']['source'] //display_name
+        }
+
+        var activeFilterIds = []
+        var filterValues = filterUtil.getFilterValues()
+        for (var key in filterValues){
+            if (filterValues[key][0].length != 0){
+                activeFilterIds.push(key)
+            };
+        }
+        
+        var pills = d3.select('#options-spacer')
+                        .selectAll('div')
+                        .data(activeFilterIds);
+        pills.classed("not-most-recent",true);
+
+        pills.enter().append("div")
+            .attr("class","ui label transition visible")
+          .merge(pills)
+            .text(function(d) { return d;});
+
+        pills.exit().remove();
+    },
+
     init: function(msg, data) {
         //msg and data are from the pubsub module that this init is subscribed to. 
         //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
@@ -112,7 +139,8 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
-                ['anyFilterActive', filterView.handleFilterClearance]
+                ['anyFilterActive', filterView.handleFilterClearance],
+                ['filterValues', filterView.addClearPillboxes]
             ]);
 
             setState('subNav.left','layers');
