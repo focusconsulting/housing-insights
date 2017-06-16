@@ -84,35 +84,51 @@
             }
 
         },
-    ChloroplethColorRange: function(chloroData){
-        // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
-        // make a chloropleth map with a single color, but if you try to,
-        // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
-        // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
-        var CHLOROPLETH_STOP_COUNT = 5;
-        var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
-        var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
-        var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
-            return d.count;
-        });
-        var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
-            return d.count;
-        });
-        var colorScale = d3.scaleLinear()
-            .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
-            .range([MIN_COLOR, MAX_COLOR]);
+        ChloroplethColorRange: function(chloroData){
+            // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
+            // make a chloropleth map with a single color, but if you try to,
+            // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
+            // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
+            var CHLOROPLETH_STOP_COUNT = 5;
+            var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
+            var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
 
-        this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
-            var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
-            var domainValue = Math.round(MAX_DOMAIN_VALUE - (stopIncrement * i));
-            var rangeValue = colorScale(domainValue);
-            return [domainValue, rangeValue];
-        });
+            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can 
+            //especially screw up the scale when using rates as they come back as a count instead of a rate
+            var currentLayer = getState().mapLayer[0]
+            var activeZones = []
+            model.dataCollection[currentLayer].features.forEach(function(feature){
+                var zone = feature.properties.NAME;
+                activeZones.push(zone)
+            });
 
-        this.stopsAscending = this.stops.sort(function(a,b){
-            return a[0] - b[0];
-        });
-    },
+            var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
+                if (activeZones.includes(d.group)) {
+                    return d.count;
+                } else {
+                    return 0;
+                };
+            });
+
+            var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
+                return d.count;
+            });
+
+            var colorScale = d3.scaleLinear()
+                .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
+                .range([MIN_COLOR, MAX_COLOR]);
+
+            this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
+                var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
+                var domainValue = Math.round((MAX_DOMAIN_VALUE - (stopIncrement * i))*1000)/1000; //stupid javascript rounding. Close enough for this purpose. 
+                var rangeValue = colorScale(domainValue);
+                return [domainValue, rangeValue];
+            });
+
+            this.stopsAscending = this.stops.sort(function(a,b){
+                return a[0] - b[0];
+            });
+        },
         initialOverlays: [],
 
         findOverlayConfig: function(key, value) {
@@ -122,44 +138,63 @@
         },
         buildOverlayOptions: function() {
 
+            console.log(location.hostname);
+
             //TODO we want to move this config data into it's own file or to the api
             mapView.initialOverlays = [{
-                    name: "crime",
-                    display_name: "Crime",
-                    display_text: "Number of crime incidents reported in the past 3 months.",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract"],
+                    name: "crime_violent_12",
+                    display_name: "Crime Rate: Violent 12 months",
+                    display_text: "Number of violent crime incidents per 100,000 people reported in the past 12 months.",
+                    zones: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/rate/crime/violent/12/",
+                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract", "zip"],
                     default_layer: "ward"
                 },
                 {
-                    name: "building_permits",
-                    display_name: "Building Permits",
-                    display_text: "Number of building permits issued in the zone during 2016.",
+                    name: "crime_nonviolent_12",
+                    display_name: "Crime Rate: Non-Violent 12 months",
+                    display_text: "Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
+                    zones: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/rate/crime/nonviolent/12/",
+                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    default_layer: "ward"
+                },
+                {
+                    name: "crime_all_3",
+                    display_name: "Crime Rate: All 3 months",
+                    display_text: "Total number of crime incidents per 100,000 people reported in the past 12 months.",
+                    zones: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/rate/crime/all/3/",
+                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract", "zip"],
+                    default_layer: "ward"
+                },
+                {
+                    name: "building_permits_construction",
+                    display_name: "Building Permits: Construction 2016",
+                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
                     zones: ["ward", "neighborhood_cluster", "zip"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
+                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/count/building_permits/construction/12/", //TODO need to add start date
                     available_aggregates: ["ward", "neighborhood_cluster", "zip"],
-                    default_layer: "neighborhood_cluster"
+                    default_layer: "ward"
+                },
+                {
+                    name: "building_permits_all",
+                    display_name: "Building Permits: All 2016",
+                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/count/building_permits/all/12/",
+                    available_aggregates: ["ward", "neighborhood_cluster", "zip"],
+                    zones: ["ward", "neighborhood_cluster", "zip"],
+                    default_layer: "ward"
                 },
                 {
                     name: "poverty_rate",
                     display_name: "Poverty Rate",
                     display_text: "Fraction of residents below the poverty rate.",
-                    zones: ["census_tract"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/",
-                    available_aggregates: ["census_tract"],
+                    aggregate_endpoint_base: "http://127.0.0.1:5000/api/census/poverty_rate/",
+                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract"],
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "census_tract"
                 },
-
-                {
-                    name: "more_building_permits",
-                    display_name: "More Building Permits 3",
-                    display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
-                    zones: ["ward", "neighborhood_cluster"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster"],
-                    default_layer: "neighborhood_cluster"
-                }
             ];
         },
 
@@ -325,34 +360,37 @@
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
-            var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;                                                                                     // dataCollection           
-    
-            // assign the chloropleth color range to the data so we can use it for other
-            // purposes when the state is changed
-            data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse);
+                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;                                                                                     // dataCollection           
+        
+                // assign the chloropleth color range to the data so we can use it for other
+                // purposes when the state is changed
+                data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse);
 
-                mapView.map.addLayer({
-                    'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
-                    'type': 'fill',
-                    'source': data.activeLayer + 'Layer',
-                    'layout': {
-                        'visibility': 'none'
-                    },
-                    'paint': {
-                        'fill-color': {
-                            'property': data.overlay,
-                            'stops': data.chloroplethRange.stopsAscending
+                    mapView.map.addLayer({
+                        'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
+                        'type': 'fill',
+                        'source': data.activeLayer + 'Layer',
+                        'layout': {
+                            'visibility': 'none'
                         },
-                        'fill-opacity': 1 //using rgba in the chloropleth color range instead
-                    }
-                });
-            }
+                        'paint': {
+                            'fill-color': {
+                                'property': data.overlay,
+                                'stops': data.chloroplethRange.stopsAscending
+                            },
+                            'fill-opacity': 1 //using rgba in the chloropleth color range instead
+                        }
+                    });
+
+                console.log(data.chloroplethRange.stopsAscending);
+                };
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
 
         },
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay
             //If so, use the 'available_aggregates' to enable/disable zone selection buttons
+            
             var layerMenu = d3.select('#layer-menu').classed("myclass",true)
             layerMenu.selectAll('a')
                 .each(function(d) {
@@ -381,15 +419,15 @@
                 });
         },
 
-        showOverlayLayer: function(overlay, activeLayer) {
+        showOverlayLayer: function(overlay_name, activeLayer) {
 
             setState('mapLayer', activeLayer); //todo is this needed?
 
             //Toggle the overlay colors themselves
-            mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
-            mapView.toggleActive('#' + overlay + '-overlay-item')
+            mapView.map.setLayoutProperty(activeLayer + '_' + overlay_name, 'visibility', 'visible');
+            mapView.toggleActive('#' + overlay_name + '-overlay-item')
             setState('overlaySet', {
-                overlay: overlay,
+                overlay: overlay_name,
                 activeLayer: activeLayer
             });
 
