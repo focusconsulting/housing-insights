@@ -4,6 +4,9 @@ tablename: project
 title: Affordable Housing Inventory
 ---
 
+**NOTE** This page is incomplete, but will document the source of data about buildings that are shown in the Housing Insights tool. More thorough documentation will be ready for our August release. 
+
+
 The Housing Insights database aims to capture a complete inventory of all the subsidized affordable housing available in DC. The data sources that we are using include:
 
 1) The Preservation Catalog
@@ -37,4 +40,6 @@ Some notes on the Affordable Housing data source opendata.dc.gov dataset scope:
 
 ## DHCD's Quickbase Database
 
-This database is connected to DHCD's internal record keeping; however, per DHCD's admission it is an incomplete account of buildings they have funded. Per DHCD it should contain all post 2015 buildings, about "80% of buildings they worked on 2013-2015, 50% of those from 2011-2013, and sporadic before that." In addition, the DC Auditor has noted that the records DHCD does keep are unreliable description of available affordable units, due to lack of enforcement with recipients of Housing Production Trust Fund money. The auditor's report is [available here](http://www.dcauditor.org/HPTF).
+We have not yet finished adding this database to our data; it is expected for our August release. Some of the data overlaps with DC's open data portal housing inventory, maintained by DMPED. 
+
+This database is connected to DHCD's internal record keeping; however, per DHCD's admission it is an incomplete account of buildings they have funded. Per DHCD it should contain all post 2015 buildings, about "80% of buildings they worked on 2013-2015, 50% of those from 2011-2013, and sporadic before that."
