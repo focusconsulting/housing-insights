@@ -624,8 +624,7 @@
                 //msg and data are from the pubsub module that this init is subscribed to.
                 //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
                 console.log(msg, data);
-                var dataURLInfo = model.dataCollection.metaData.project.api;
-                var dataURL = dataURLInfo.raw_endpoint;
+                var dataURL = model.URLS.project
                 var dataRequest = {
                     name: 'raw_project',
                     url: dataURL,
