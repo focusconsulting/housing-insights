@@ -101,7 +101,7 @@ html, body {
 
 .main-view:not(#map-view) {
     position: relative;
-    top: 40px;
+    top: 20px;
 }
 
 .main-view.fade {
@@ -400,4 +400,25 @@ a.active {
     position: relative;
     width: 100%;
 } 
+
+
+/* building view */
+#button-back {
+    background-color: #fff;
+    border-bottom-width: 0;
+}
+
+#sub-nav-building {
+    width: 100%;
+    position: relative;
+    color: inherit;
+    background-color: #d69c93;
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#building-view-container {
+    margin-top: 20px;
+}
 
