@@ -1,3 +1,4 @@
+/*Comment here helps keep Jekyll from getting confused*/
 "use strict";
 
 /* 
@@ -20,8 +21,9 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
     //NOTE raw data sources have their urls included in the metaData
     URLS: {
       geoJSONPolygonsBase: "/tool/data/",
-      metaData: "/tool/data/meta.json",
-      filterData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/filter/"
+      metaData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/meta",
+      filterData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/filter",
+      project: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/project"
     }
     
 };
