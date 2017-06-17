@@ -319,6 +319,15 @@ a.active {
     padding: 3px;
 }
 
+.mapboxgl-ctrl-top-left{
+    top: 80px;
+    position: absolute;
+    z-index: 10000 !important;
+    transition: left .5s;
+}
+.mapboxgl-ctrl-top-left.movedIn{
+    left: 250px;
+}
 /*copy-pasted from semantic ui so we can modify*/
 
 /*Layer accordions (blue)*/
