@@ -319,14 +319,16 @@ a.active {
     padding: 3px;
 }
 
-.mapboxgl-ctrl-top-left{
-    top: 80px;
+.mapboxgl-ctrl-top-right{
+    top: 120px;
     position: absolute;
     z-index: 10000 !important;
-    transition: left .5s;
+    transition: transform .5s;
+    transform: translateX(0px);
+    
 }
-.mapboxgl-ctrl-top-left.movedIn{
-    left: 250px;
+.mapboxgl-ctrl-top-right.movedIn{
+    transform: translateX(-350px);
 }
 /*copy-pasted from semantic ui so we can modify*/
 

@@ -65,18 +65,15 @@ var filterView = {
             component_type: 'categorical',
             data_type: 'text',
         },
-
-        // COMMENTED OUT UNTIL FIXED: The 'acs_median_rent' for all items in dataCollection.filterData
-        // is 'null'.
-        // {   source: 'acs_median_rent',
-        //     display_name: 'Neighborhood Rent (ACS median)',
-        //     display_text: 'Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.',
-        //     component_type: 'continuous',
-        //     data_type:'decimal',
-        //     min: 0,
-        //     max: 2500,
-        //     num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead.
-        // },
+        {   source: 'acs_median_rent',
+            display_name: 'Neighborhood Rent (ACS median)',
+            display_text: 'Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.',
+            component_type: 'continuous',
+            data_type:'decimal',
+            min: 0,
+            max: 2500,
+            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead.
+        },
 
         {   source: 'portfolio',
             display_name: 'Subsidy Program',
