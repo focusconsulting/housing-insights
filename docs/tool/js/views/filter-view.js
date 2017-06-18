@@ -8,6 +8,36 @@ var filterView = {
         //"source" is the column name from the filter table, which should match the table in the original database table.
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
+        {   source:'ward',
+            display_name: 'Location: Ward',
+            display_text: "The largest geograpical division of the city.",
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'neighborhood_cluster_desc',
+            display_name: 'Location: Neighborhood Cluster',
+            display_text: "39 clusters each combining a set of smaller neighborhoods.",
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'anc',
+            display_name: 'Location: ANC',
+            display_text: 'Advisory Neighborhood Council',
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'census_tract',
+            display_name: 'Location: Census Tract',
+            display_text: 'A small division used in collection of the US Census.',
+            component_type: 'categorical',
+            data_type: 'text',
+        },
+        {   source:'zip',
+            display_name: 'Location: Zipcode',
+            display_text: '',
+            component_type: 'categorical',
+            data_type: 'text',
+        },
 
         {   source: 'proj_units_tot',
             display_name: 'Total units in project',
@@ -35,39 +65,8 @@ var filterView = {
             data_type:'text'
         },
 
-        {   source:'ward',
-            display_name: 'Ward',
-            display_text: "The largest geograpical division of the city.",
-            component_type: 'categorical',
-            data_type: 'text'
-        },
-        {   source:'neighborhood_cluster_desc',
-            display_name: 'Neighborhood Cluster',
-            display_text: "39 clusters each combining a set of smaller neighborhoods.",
-            component_type: 'categorical',
-            data_type: 'text'
-        },
-        {   source:'anc',
-            display_name: 'ANC',
-            display_text: 'Advisory Neighborhood Council',
-            component_type: 'categorical',
-            data_type: 'text'
-        },
-        {   source:'census_tract',
-            display_name: 'Census Tract',
-            display_text: 'A small division used in collection of the US Census.',
-            component_type: 'categorical',
-            data_type: 'text',
-        },
-        {   source:'zip',
-            display_name: 'Zipcode',
-            display_text: '',
-            component_type: 'categorical',
-            data_type: 'text',
-        },
-
         {   source: 'acs_median_rent',
-            display_name: 'Neighborhood Rent (ACS median)',
+            display_name: 'ACS: Median Neighborhood Rent',
             display_text: 'Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.',
             component_type: 'continuous',
             data_type:'decimal',
