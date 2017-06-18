@@ -116,7 +116,7 @@ def filter_data():
           , s.units_assist
           , s.subsidy_id
         from project as p
-        left join census as c on c.census_tract = p.census_tract and c.unique_data_id = 'acs_rent_median_15_5YR'
+        left join census as c on c.census_tract = p.census_tract and c.unique_data_id = 'acs5_2015'
         left join subsidy as s on s.nlihc_id = p.nlihc_id
         """
 
