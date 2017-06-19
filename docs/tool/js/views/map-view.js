@@ -433,7 +433,7 @@
                             },
                             'fill-opacity': 1 //using rgba in the chloropleth color range instead
                         }
-                    });
+                    }, 'project');
 
                 console.log(data.chloroplethRange.stopsAscending);
                 };
