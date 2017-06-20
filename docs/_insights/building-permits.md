@@ -1,6 +1,6 @@
 ---
 layout: insight
-title: Housing Inventory
+title: Building Permits
 author: Jay Louvis
 url: https://public.tableau.com/views/HousingInsightsBuildingPermitsbyWard/BuildingPermitsbyWard?:embed=y&:display_count=yes
 ---
