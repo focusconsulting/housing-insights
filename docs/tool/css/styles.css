@@ -90,6 +90,8 @@ html, body {
     z-index:10;
     top: 50px;
     flex-grow: 1;
+    padding-left: 10px;
+    padding-right: 50px; /*allows space for mapbox zoom control*/
 }
 
 .main-view {
