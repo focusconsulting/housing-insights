@@ -51,7 +51,7 @@ var filterView = {
         
         {   source: 'proj_units_assist_max',
             display_name: "Subsidized units (max)",
-            display_text: "The number of subsidized units in the project. When a project participates in multiple subsidy programs, this number is the number of units subsidized by the project with the most units. Partially overlapping subsidies could result in more units than are reflected here.",
+            display_text: "The number of subsidized units in the project. When a project participates in multiple subsidy programs, this number is the number of units subsidized by the program with the most units. Partially overlapping subsidies could result in more units than are reflected here.",
             component_type: 'continuous',
             data_type:'integer',
             min:0,
