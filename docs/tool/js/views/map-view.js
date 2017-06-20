@@ -637,7 +637,8 @@
                     mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
                     mapView.convertedProjects.features.forEach(function(feature) {
                         feature.properties.matches_filters = true;
-                    });
+                        feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'                                           
+                     });
                     mapView.listBuildings();
                     mapView.map.addSource('project', {
                         'type': 'geojson',
@@ -649,6 +650,7 @@
                         'id': 'project',
                         'type': 'circle',
                         'source': 'project',
+                        'filter': ['==', 'klass', 'stay'],
                         'paint': {
                             'circle-radius': {
                                 'base': 1.75,
@@ -671,8 +673,12 @@
                                     ['6 - Lost Rental', '#A9A9A9']
                                 ]
                             },
-                            'circle-stroke-width': mapView.circleStrokeWidth,
-                            'circle-stroke-opacity': mapView.circleStrokeOpacity,
+                            'circle-stroke-width': 1,                            
+                            'circle-stroke-width-transition': {
+                                duration: 300,
+                                delay: 0
+                            },                            
+                            'circle-stroke-opacity': 1,
 
                             'circle-stroke-color': {
                                 property: 'category_code',
@@ -688,11 +694,60 @@
                             }
                         }
                     });
+                    mapView.map.addLayer({
+                        'id': 'project-enter',
+                        'type': 'circle',
+                        'source': 'project',
+                        'filter': ['==', 'klass', 'enter'],
+                        'paint': {
+                            'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
+                                ]
+                            },
+                            'circle-opacity': 0.3,
+                            'circle-color': {
+                                property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
+                                type: 'categorical',
+                                stops: [
+                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                    ['2 - Expiring Subsidy', '#8B4225'],
+                                    ['3 - Recent Failing REAC Score', '#bd0026'],
+                                    ['4 - More Info Needed', '#A9A9A9'],
+                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                    ['6 - Lost Rental', '#A9A9A9']
+                                ]
+                            },
+                            'circle-stroke-width': 1,                            
+                            'circle-stroke-width-transition': {
+                                duration: 300,
+                                delay: 0
+                            },                            
+                            'circle-stroke-opacity': 1,
+
+                            'circle-stroke-color': {
+                                property: 'category_code',
+                                type: 'categorical',
+                                stops: [
+                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                    ['2 - Expiring Subsidy', '#8B4225'],
+                                    ['3 - Recent Failing REAC Score', '#bd0026'],
+                                    ['4 - More Info Needed', '#A9A9A9'],
+                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                    ['6 - Lost Rental', '#A9A9A9']
+                                ]
+                            }
+                        }
+                    });
+
                     // TODO: MAKE LEGEND
                     mapView.map.on('mousemove', function(e) {
                         //get the province feature underneath the mouse
                         var features = mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project']
+                            layers: ['project','project-enter']
                         });
                         //if there's a point under our mouse, then do the following.
                         if (features.length > 0) {
@@ -709,7 +764,7 @@
                     mapView.map.on('click', function(e) {
                         console.log(e);
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project']
+                            layers: ['project','project-enter']
                         }))[0];
                         console.log(building);
                         if (building === undefined) return;
@@ -721,7 +776,7 @@
             }
 
         },
-
+        
         showPopup: function(msg, data) {
             console.log(data);
 
@@ -751,26 +806,29 @@
         filterMap: function(msg, data) {
 
             mapView.convertedProjects.features.forEach(function(feature) {
+                feature.properties.previous_filters = feature.properties.matches_filters;
                 if (data.indexOf(feature.properties.nlihc_id) !== -1) {
                     feature.properties.matches_filters = true;
+                    feature.properties.klass = feature.properties.previous_filters === true ? 'stay' : 'enter';
                 } else {
                     feature.properties.matches_filters = false;
+                    feature.properties.klass = feature.properties.previous_filters === false ? 'none' : 'exit';
                 }
             });
             mapView.map.getSource('project').setData(mapView.convertedProjects);
-            mapView.map.setFilter('project', ['==', 'matches_filters', true]);
-            mapView.listBuildings();
-
-            setTimeout(function() {
-                mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
-            }, 0);
-            /*
-            console.log(data.toString().replace(/([^,]+)/g,"'$1'"));
-            var idStr = data.toString().replace(/([^,]+)/g,"'$1'")
-            var str = "NL000001";
-            mapView.map.setFilter('project',['in','nlihc_id', data]);*/
+            mapView.animateEnterExit();
+            mapView.listBuildings();        
         },
-        animateSize: function(timestamp) {
+        animateEnterExit: function(){
+            setTimeout(function(){
+                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 8);
+                setTimeout(function(){
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 1);                    
+                },300);
+            },400);
+         
+        },
+        /*animateSize: function(timestamp) {
             setTimeout(function() {
                 mapView.shrinkGrow = mapView.shrinkGrow || 'grow';
                 mapView.circleStrokeWidth = mapView.shrinkGrow === 'grow' ? mapView.circleStrokeWidth * 2 : mapView.circleStrokeWidth / 2; // ( 20 - mapView.circleStrokeWidth ) / ( 1000 / ( timestamp - mapView.lastTimestamp ));
@@ -792,7 +850,7 @@
                     mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
                 }
             }, (1000 / 20));
-        },
+        },*/
         /*
         The listBuildings function controls the right sidebar in the main map view.
         Unlike the filter-view side-bar, the buildings list side-bar does not have it's
