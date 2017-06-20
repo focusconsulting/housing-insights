@@ -22,6 +22,8 @@
                     ['mapLayer', mapView.showLayer],
                     ['mapLayer', mapView.layerOverlayToggle],
                     ['mapLoaded', model.loadMetaData],
+                    ['mapLoaded', mapView.navControl.init],
+                    ['sidebar.right', mapView.navControl.move],
                     ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
                     ['dataLoaded.metaData', resultsView.init],
                     ['dataLoaded.metaData', mapView.placeProjects],
@@ -35,8 +37,6 @@
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState]
-
-
                 ]);
 
 
@@ -53,7 +53,7 @@
                     preserveDrawingBuffer: true
                 });
 
-                this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+                this.map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
@@ -84,6 +84,17 @@
 
             }
 
+        },
+        navControl: {
+            el: null,
+            init: function(){
+                mapView.navControl.el = document.getElementsByClassName('mapboxgl-ctrl-top-right')[0];
+                mapView.navControl.el.parentElement.removeChild(mapView.navControl.el);
+                document.getElementById(mapView.el).appendChild(mapView.navControl.el);
+            },
+            move: function(){
+                mapView.navControl.el.classList.toggle('movedIn');
+            }
         },
         initialSidebarState: function(){
             setState('sidebar.left',true);
