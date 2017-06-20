@@ -1,35 +1,37 @@
 <div id="building-view" class="main-view">
-    <div class="container">
+    <div id="sub-nav-building">
+        <div id="left-options">
+            <button class="sub-nav-button" id="button-back" onclick="controller.goBack()">&lt; Back</button>
+        </div>
+        <div id="options-spacer">
+        </div>
+    </div>
+    <div class="container" id="building-view-container">
         <header class="building-header">
-                <div class="row">
-                    <div class="col-sm-4">
-                        <a href="javascript:void(0);" onclick="controller.goBack()" style="margin-bottom: -20px;">&lt; Back</a>
+            <div class="row">
+                <h2 class="col-sm-12" id="building-name"></h2>
+            </div>
+            <div class="row">
+                <article class="col-sm-3 building-address">
+                    <div class="building-info-block">
+                        <h1 class="building-info-heading">Location</h1>
+                        <p id="building-street"></p>
+                        <p id="building-ward"></p>
+                        <p id="building-cluster"></p>
                     </div>
-                </div>
-                <div class="row">
-                    <h2 class="col-sm-12" id="building-name"></h2>
-                </div>
-                <div class="row">
-                    <article class="col-sm-3 building-address">
-                        <div class="building-info-block">
-                            <h1 class="building-info-heading">Location</h1>
-                            <p id="building-street"></p>
-                            <p id="building-ward"></p>
-                            <p id="building-cluster"></p>
-                        </div>
-                    </article>
-                    <article class="col-sm-4 building-info">
-                        <div class="building-info-block">
-                            <h1 class="building-info-heading">Owner</h1>
-                            <p id="owner-name"></p>
-                            <p id="owner-phone"></p><br>
-                            <h1 class="building-info-heading">Tax Assessment</h1>
-                        </div>
-                    </article>
-                </div>
-                <div class="svg-zone">
-                    <!-- circles go in here -->
-                </div>
+                </article>
+                <article class="col-sm-4 building-info">
+                    <div class="building-info-block">
+                        <h1 class="building-info-heading">Owner</h1>
+                        <p id="owner-name"></p>
+                        <p id="owner-phone"></p><br>
+                        <h1 class="building-info-heading">Tax Assessment</h1>
+                    </div>
+                </article>
+            </div>
+            <div class="svg-zone">
+                <!-- circles go in here -->
+            </div>
         </header>
         <section class="accordion-wrapper">
             <div class="accordion-header">
