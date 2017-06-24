@@ -282,6 +282,10 @@ var filterView = {
             slider.noUiSlider.reset();
         }
 
+        this.isTouched = function(){
+            return slider.noUiSlider.get()[0] === c.min && slider.noUiSlider.get()[1] === c.max;
+        }
+
     },
     categoricalFilterControl: function(component){
         filterView.filterControl.call(this, component);
@@ -343,6 +347,10 @@ var filterView = {
             // per the Semantic UI docs.
             $('.dropdown-' + c.source).dropdown('restore defaults');
         }
+        
+        this.isTouched = function(){
+           return $('.dropdown-' + c.source).dropdown('get value').length > 0;
+        }
 
     },
     buildFilterComponents: function(){
@@ -399,7 +407,9 @@ var filterView = {
     },
     clearAllFilters: function(){
         for(var i = 0; i < filterView.filterControls.length; i++){
-            filterView.filterControls[i].clear();
+            if(filterView.filterControls[i].isTouched()){
+                filterView.filterControls[i].clear();
+            }
         }
         filterView.indicateActivatedFilters();
     },
