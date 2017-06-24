@@ -287,11 +287,16 @@
                 .text(overlay.display_name)
             title.attr("id", "overlay-" + overlay.name); //TODO need to change this to different variable after changing meta logic structure
 
+
             var content = parent.append("div")
                 .classed("content", true)
               .attr("id", "overlay-about-"+overlay.name)
                 .text(overlay.display_text)
 
+            var legendLocation = content.append("div")
+                .attr("id", "overlay-" + overlay.name + "-legend") // TODO need to change this to different variable after changing meta logic structure
+                .style("height", "150px"); 
+                
             $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
 
             //Set it up to trigger the layer when title is clicked

@@ -8,7 +8,7 @@ var chloroplethLegend = {
 
     chloroplethLegend.tearDownPrevious();
 
-    var wrapperId = 'overlay-about-' + data.overlay;
+    var wrapperId = 'overlay-' + data.overlay + '-legend';
 
     var partialRequest = {
         partial: 'chloropleth-legend',
