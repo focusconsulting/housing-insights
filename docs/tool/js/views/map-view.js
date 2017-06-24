@@ -101,7 +101,7 @@
             setState('sidebar.right',true);
             setState('subNav.left', 'filters');
         },
-        ChloroplethColorRange: function(chloroData){
+        ChloroplethColorRange: function(chloroData, style){
             // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
             // make a chloropleth map with a single color, but if you try to,
             // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
@@ -135,9 +135,23 @@
                 .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
                 .range([MIN_COLOR, MAX_COLOR]);
 
+            var roundedVersionOf = function(val){
+                switch(style){
+                    case "percent":
+                        return Math.roundTo(val, .01);
+                    case "money":
+                        return Math.roundTo(val, 100);
+                    case "number":
+                        return Math.roundTo(val, 100);
+                    default:
+                        return Math.round(val);
+                }
+            }
+
             this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
                 var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
-                var domainValue = Math.round((MAX_DOMAIN_VALUE - (stopIncrement * i))*1000)/1000; //stupid javascript rounding. Close enough for this purpose. 
+                var domainValue = MAX_DOMAIN_VALUE - (stopIncrement * i);
+                var domainValue = roundedVersionOf(domainValue);
                 var rangeValue = colorScale(domainValue);
                 return [domainValue, rangeValue];
             });
@@ -429,11 +443,13 @@
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
-                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;                                                                                     // dataCollection           
+                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;    
+                                                                                 // dataCollection        
+                var thisStyle = mapView.initialOverlays.find(function(obj){return obj['name']==data.overlay}).style;
         
                 // assign the chloropleth color range to the data so we can use it for other
                 // purposes when the state is changed
-                data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse);
+                data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse, thisStyle);
 
                     mapView.map.addLayer({
                         'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
@@ -451,7 +467,6 @@
                         }
                     }, 'project');
 
-                console.log(data.chloroplethRange.stopsAscending);
                 };
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
 
