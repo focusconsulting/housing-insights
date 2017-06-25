@@ -5,17 +5,19 @@
         <script src="js/external/offline-use/d3.min.js"></script>
 
         <style> /* set the CSS */
-        .column-chart > .percent { fill:  rgba(234, 100, 2, 0.7); }
+        .bar-chart .values { fill:  rgba(234, 100, 2, 0.7); }
 
-        .filler { fill: rgba(200,200,200,0.7); }
+        .bar-chart .filler { fill: rgba(200,200,200,0.7); }
 
         </style>
     </head>
     <body>
         <h1>This is my new chart</h1>
-        <div class="mychart"></div>
-
-    <script src="js/charts/column-chart.js"></script>
+        <div class="demoPercentChart"></div>
+        <div class="demoValueChart"></div>
+    <script src="js/charts/chart-prototype-nocallback.js"></script>
+    <script src="js/charts/bar-chart-proto.js"></script>
+    <script src="js/views/test_chart.js"></script>
     </body>
 
 </html>
