@@ -24,6 +24,11 @@ var BarProtoExtension = {
           .classed("x-axis",true)
           .attr("transform", "translate(" + this.margin.left + "," + this.innerHeight() + ")")
 
+        //Assigning here allows positional constancy; assumes all groups are present
+        this.yScale = d3.scaleBand()
+            .domain(this.data.map(function(d) { return d[chartOptions.label]; }))
+            .range([this.innerHeight(),0])
+            .padding(this.barPadding)
 
         //Animate data for the first time
         this.update(this.data);
@@ -37,15 +42,14 @@ var BarProtoExtension = {
         var chart = this;
         var field = this.field;
         var label = this.label;
+        var yScale = this.yScale;
+
 
         var min = d3.min(data, function(d) { return d[field]})
         var max = d3.max(data,function(d) {return d[field]})
 
 
-        var yScale = d3.scaleBand()
-                .domain(data.map(function(d) { return d.group; }))
-                .range([chart.innerHeight(),0])
-                .padding(this.barPadding)
+        
 
         var xScale = d3.scaleLinear()
                 .range([0,chart.innerWidth()])
@@ -106,14 +110,14 @@ var BarProtoExtension = {
 
         var newBars = bars.enter().append('rect')
                 .classed("values", true)
-                     
+        
+        console.log("new chart")
         var allBars = newBars.merge(bars)
                 .attr("x", 0)
-                
                 .attr("height", yScale.bandwidth())
                 .transition()
                     .duration(500)
-                    .attr("y", function(d,i) {return yScale(d.group)})
+                    .attr("y", function(d,i) {console.log(yScale(d.group)); return yScale(d.group)})
                     .attr("width", function(d) { 
                         return xScale(d[field]);})
                     
