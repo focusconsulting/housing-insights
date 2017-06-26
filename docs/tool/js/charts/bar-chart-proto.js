@@ -15,6 +15,10 @@ var BarProtoExtension = {
         this.percentMode = chartOptions.percentMode || false;
         this.label = chartOptions.label || chartOptions.field; 
 
+        //animations
+        this.delay = 200
+        this.duration = 1000
+
         //Add some items that won't change in the chart
         this.svg.selectAll('.y-axis').data([0]).enter().append("g")
           .classed("y-axis",true)
@@ -24,11 +28,8 @@ var BarProtoExtension = {
           .classed("x-axis",true)
           .attr("transform", "translate(" + this.margin.left + "," + this.innerHeight() + ")")
 
-        //Assigning here allows positional constancy; assumes all groups are present
-        this.yScale = d3.scaleBand()
-            .domain(this.data.map(function(d) { return d[chartOptions.label]; }))
-            .range([this.innerHeight(),0])
-            .padding(this.barPadding)
+        
+        
 
         //Animate data for the first time
         this.update(this.data);
@@ -37,20 +38,24 @@ var BarProtoExtension = {
     update: function(data){
         //update the data stored on the chart object
         this.data = data
-        
+
         //namespace assignment for access within child functions
         var chart = this;
         var field = this.field;
         var label = this.label;
-        var yScale = this.yScale;
-
+        
 
         var min = d3.min(data, function(d) { return d[field]})
         var max = d3.max(data,function(d) {return d[field]})
-
+        
+        //Assigning here assumes data is in the order we want to display - updating elements will move
+        this.yScale = d3.scaleBand()
+            .domain(this.data.map(function(d) { return d[label]; }))
+            .range([this.innerHeight(),0])
+            .padding(this.barPadding)
 
         
-
+        var yScale = this.yScale;
         var xScale = d3.scaleLinear()
                 .range([0,chart.innerWidth()])
 
@@ -66,19 +71,21 @@ var BarProtoExtension = {
         }
         else {
             xScale.domain([0,max])
-            xAxis.tickFormat(d3.format(".0%")) //TODO look up proper format
+            xAxis.tickFormat(d3.format(",")) //TODO look up proper format
         }
  
 
         this.svg.select('.x-axis')
             .transition()
-            .duration(500)
+            .delay(this.delay)
+            .duration(this.duration)
             .call(xAxis);
 
         // add the y Axis
         this.svg.select('.y-axis')
             .transition()
-            .duration(500)
+            .delay(this.delay)
+            .duration(this.duration)
                 .call(yAxis);
 
 
@@ -109,15 +116,20 @@ var BarProtoExtension = {
             .classed("update",true) //only existing bars
 
         var newBars = bars.enter().append('rect')
-                .classed("values", true)
-        
-        console.log("new chart")
-        var allBars = newBars.merge(bars)
+                .classed("values", true)                    
                 .attr("x", 0)
                 .attr("height", yScale.bandwidth())
+                .attr("y", function(d,i) {return yScale(d.group)})
+                .attr("width", 0)
+                
+        
+        var allBars = newBars.merge(bars)
                 .transition()
-                    .duration(500)
-                    .attr("y", function(d,i) {console.log(yScale(d.group)); return yScale(d.group)})
+                    .delay(this.delay)          //Allows chart to load slightly before starting animation
+                    .duration(this.duration)
+                    .attr("x", 0)
+                    .attr("height", yScale.bandwidth())
+                    .attr("y", function(d,i) {return yScale(d.group)})
                     .attr("width", function(d) { 
                         return xScale(d[field]);})
                     
