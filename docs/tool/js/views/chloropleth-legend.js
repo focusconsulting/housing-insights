@@ -8,7 +8,7 @@ var chloroplethLegend = {
 
     chloroplethLegend.tearDownPrevious();
 
-    var wrapperId = 'overlay-about-' + data.overlay;
+    var wrapperId = 'overlay-' + data.overlay + '-legend';
 
     var partialRequest = {
         partial: 'chloropleth-legend',
@@ -36,11 +36,9 @@ var chloroplethLegend = {
           return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); //adds thousands separators, from https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
         }
         if (style == "percent") {
-          x = Math.round(x * 100) + "%"
-          return x
+          return Math.round(x * 100) + "%";
         }
         if (style == "money"){
-          x = Math.round(x)
           x = x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); //adds thousands separators
           x = "$" + x
           return x

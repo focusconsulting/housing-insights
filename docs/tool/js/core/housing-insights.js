@@ -296,6 +296,11 @@ var setSubs = controller.controlSubs.setSubs,
 
  //TODO should these be wrapped up into a 'helpers' namespace? Or maybe the new utils section?
 
+// HELPER roundTo
+Math.roundTo = function(start, tensExample){
+    var numberToRound = start/tensExample;
+    return Math.round(numberToRound) * tensExample;
+}
 
  // HELPER get parameter by name
  var getParameterByName = function(name, url) { // HT http://stackoverflow.com/a/901144/5701184
