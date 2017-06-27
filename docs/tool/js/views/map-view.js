@@ -151,7 +151,7 @@
             this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
                 var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
                 var domainValue = MAX_DOMAIN_VALUE - (stopIncrement * i);
-                var domainValue = roundedVersionOf(domainValue);
+                    domainValue = roundedVersionOf(domainValue);
                 var rangeValue = colorScale(domainValue);
                 return [domainValue, rangeValue];
             });
