@@ -55,7 +55,7 @@ var filterView = {
             component_type: 'continuous',
             data_type:'integer',
             min:0,
-            max:800,
+            max:600,
             num_decimals_displayed:0
         },
         {   source: 'hud_own_type',
