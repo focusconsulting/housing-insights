@@ -184,11 +184,22 @@ class CleanerBase(object, metaclass=ABCMeta):
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
-    def rename_ward(self,row):
-        if row['WARD'] == self.null_value:
+    def rename_ward(self, row, ward_key='WARD'):
+        """
+        Standardize ward field to be 'Ward #' - where # represents the numeric
+        ward value.
+        :param row: the current data row to be cleaned
+        :param ward_key: optional parameter for specifying ward field name
+        :return: cleaned row data
+        """
+        if row[ward_key] == self.null_value:
             return row
         else:
-            row['WARD'] = "Ward " + str(row['WARD'])
+            ward = row[ward_key].split(' ')
+            if len(ward) == 1:  # add text if only number
+                row[ward_key] = "Ward " + str(row[ward_key])
+            else:  # make sure text is lower case
+                row[ward_key] = "Ward " + ward[1]
             return row
 
     def rename_lat_lon(self, row):
@@ -320,10 +331,11 @@ class GenericCleaner(CleanerBase):
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
-        row = self.replace_nulls(row, null_values=['N','', None])
+        row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
         row = self.add_mar_id(row, 'Proj_address_id')
         row = self.add_geocode_from_mar(row=row)
+        row = self.rename_ward(row, ward_key='Ward2012')
         row = self.rename_census_tract(row, row_num, column_name='Geo2010')
         return row
 
