@@ -8,10 +8,11 @@ from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
 import logging
+import os
 
 from housinginsights.ingestion.DataReader import HIReader
 from housinginsights.sources.mar import MarApiConn
-import os
+from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
 
 
 package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -184,15 +185,31 @@ class CleanerBase(object, metaclass=ABCMeta):
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
-    def rename_ward(self,row):
-        if row['WARD'] == self.null_value:
+    def rename_ward(self, row, ward_key='WARD'):
+        """
+        Standardize ward field to be 'Ward #' - where # represents the numeric
+        ward value.
+        :param row: the current data row to be cleaned
+        :param ward_key: optional parameter for specifying ward field name
+        :return: cleaned row data
+        """
+        if row[ward_key] == self.null_value:
             return row
         else:
-            row['WARD'] = "Ward " + str(row['WARD'])
+            ward = row[ward_key]
+            if ward.isnumeric():  # add text if only number
+                row[ward_key] = "Ward " + str(ward)
+            else:  # make sure text is 'Ward #'
+                row[ward_key] = ward.lower().capitalize()
             return row
 
-    def rename_lat_lon(self, row):
-        pass
+    def rename_status(self, row):
+        """
+        Standardize status field to have first letter capitalized and
+        remaining letters lowercase.
+        """
+        row['Status'] = row['Status'].lower().capitalize()
+        return row
 
     def add_mar_id(self, row, address_id_col_name='ADDRESS_ID'):
         """
@@ -243,6 +260,82 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return row
 
+    def add_geocode_from_mar(self, row):
+        """
+        Uses mar api lookup to populate geographic zones are missing for
+        buildings in the project table. The following zones are validated:
+
+        ward
+        neighborhood_cluster (e.g. 'cluster 1'
+        neighborhood_cluster_desc (eg. 'woodley park and zoo')
+        zip
+        anc
+        census_tract
+        status
+        """
+        # populate proj_city & proj_st accordingly
+        if row['Proj_City'] == self.null_value:
+            row['Proj_City'] = 'Washington'
+
+        if row['Proj_ST'] == self.null_value:
+            row['Proj_ST'] = 'DC'
+
+        # don't do anything if mar_id doesn't exist for the building
+        # this is assuming 'add_mar_id' was called first
+        if row['mar_id'] == self.null_value:
+            return row
+
+        ward = row['Ward2012']
+        neighbor_cluster = row['Cluster_tr2000']
+        neighborhood_cluster_desc = row['Cluster_tr2000_name']
+        zipcode = row['Proj_Zip']
+        anc = row['Anc2012']
+        census_tract = row['Geo2010']
+        status = row['Status']
+        full_address = row['Proj_addre']
+
+        # only do mar api lookup if we have a null geocode value
+        if self.null_value in [ward, neighbor_cluster,
+                               neighborhood_cluster_desc, zipcode, anc,
+                               census_tract, status, full_address]:
+            mar_api = MarApiConn()
+            result = mar_api.reverse_address_id(aid=row['mar_id'])
+            result = result['returnDataset']['Table1'][0]
+        else:
+            return row
+
+        # update missing geocode values accordingly
+        if ward == self.null_value:
+            row['Ward2012'] = result['WARD'].lower().capitalize()
+
+        if neighbor_cluster == self.null_value:
+            cluster = result['CLUSTER_']
+            if cluster is not None:
+                row['Cluster_tr2000'] = cluster
+
+        if neighborhood_cluster_desc == self.null_value:
+            row['Cluster_tr2000_name'] = CLUSTER_DESC_MAP.get(
+                row['Cluster_tr2000'], self.null_value)
+
+        if zipcode == self.null_value:
+            zip_code = result['ZIPCODE']
+            row['Proj_Zip'] = zip_code
+            row['Zip'] = 'ZIP ' + str(zip_code)
+
+        if anc == self.null_value:
+            row['Anc2012'] = result['ANC_2012']
+
+        if census_tract == self.null_value:
+            row['Geo2010'] = result['CENSUS_TRACT']
+
+        if status == self.null_value:
+            row['Status'] = result['STATUS']
+
+        if full_address == self.null_value:
+            row['Proj_addre'] = result['FULLADDRESS']
+
+        return row
+
 
 #############################################
 # Custom Cleaners
@@ -258,10 +351,13 @@ class GenericCleaner(CleanerBase):
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
-        row = self.replace_nulls(row, null_values=['N','', None])
+        row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
-        row = self.rename_census_tract(row,row_num,column_name='Geo2010')
         row = self.add_mar_id(row, 'Proj_address_id')
+        row = self.add_geocode_from_mar(row=row)
+        row = self.rename_ward(row, ward_key='Ward2012')
+        row = self.rename_status(row)
+        row = self.rename_census_tract(row, row_num, column_name='Geo2010')
         return row
 
 

@@ -1,5 +1,4 @@
 include_flag,destination_table,unique_data_id,update_method,data_date,encoding,local_folder,s3_folder,filepath,notes
-____________note all items marked skip in this manifest are ready but are being skipped due to their large size. Will be added back in when we are stable with our data loading process. ,,,,Null,,,,,
 skip,building_permits,building_permits_2013,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2013.csv,
 skip,building_permits,building_permits_2014,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2014.csv,
 skip,building_permits,building_permits_2015,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2015.csv,
@@ -17,7 +16,7 @@ use,subsidy,dchousing_subsidy,api,2017-05-05,utf-8,../../../data,https://s3.amaz
 use,topa,topa_rcasd_2017,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
 use,topa,topa_rcasd_2016,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
 use,topa,topa_rcasd_2015,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/TOPA_notices/Rcasd_2015.csv,Parsed from DCHD data by Urban Institute staff.
-use,census,acs5_2015,api,2017-06-13,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw\apis\20170613\acs5_2015.csv,
+use,census,acs5_2015,api,2017-06-28,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170628/acs5_2015.csv,
 use,census_tract_to_neighborhood_cluster,tract2010_cluster2000,manual,2013-07-01,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/geographic_data/Tract_weights/Wt_tr10_cltr00.csv,
 use,census_tract_to_ward,tract2010_ward2012,manual,2013-07-01,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/geographic_data/Tract_weights/Wt_tr10_ward12.csv,
 skip,crime,crime_2015,api,2015-12-31,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/crime_2015.csv,
