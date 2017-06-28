@@ -15,7 +15,7 @@ var resultsView = {
             resultsView.charts[i] = new DonutChart({
                 dataRequest: {
                     name: 'raw_project',
-                    url: model.dataCollection.metaData.project.api.raw_endpoint
+                    url: model.URLS.project
                 },
 
                 count: instance,

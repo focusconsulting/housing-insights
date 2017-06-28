@@ -8,6 +8,36 @@ var filterView = {
         //"source" is the column name from the filter table, which should match the table in the original database table.
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
+        {   source:'ward',
+            display_name: 'Location: Ward',
+            display_text: "The largest geograpical division of the city.",
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'neighborhood_cluster_desc',
+            display_name: 'Location: Neighborhood Cluster',
+            display_text: "39 clusters each combining a set of smaller neighborhoods.",
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'anc',
+            display_name: 'Location: ANC',
+            display_text: 'Advisory Neighborhood Council',
+            component_type: 'categorical',
+            data_type: 'text'
+        },
+        {   source:'census_tract',
+            display_name: 'Location: Census Tract',
+            display_text: 'A small division used in collection of the US Census.',
+            component_type: 'categorical',
+            data_type: 'text',
+        },
+        {   source:'zip',
+            display_name: 'Location: Zipcode',
+            display_text: '',
+            component_type: 'categorical',
+            data_type: 'text',
+        },
 
         {   source: 'proj_units_tot',
             display_name: 'Total units in project',
@@ -21,11 +51,11 @@ var filterView = {
         
         {   source: 'proj_units_assist_max',
             display_name: "Subsidized units (max)",
-            display_text: "The number of subsidized units in the project. When a project participates in multiple subsidy programs, this number is the number of units subsidized by the project with the most units. Partially overlapping subsidies could result in more units than are reflected here.",
+            display_text: "The number of subsidized units in the project. When a project participates in multiple subsidy programs, this number is the number of units subsidized by the program with the most units. Partially overlapping subsidies could result in more units than are reflected here.",
             component_type: 'continuous',
             data_type:'integer',
             min:0,
-            max:800,
+            max:600,
             num_decimals_displayed:0
         },
         {   source: 'hud_own_type',
@@ -35,39 +65,8 @@ var filterView = {
             data_type:'text'
         },
 
-        {   source:'ward',
-            display_name: 'Ward',
-            display_text: "The largest geograpical division of the city.",
-            component_type: 'categorical',
-            data_type: 'text'
-        },
-        {   source:'neighborhood_cluster_desc',
-            display_name: 'Neighborhood Cluster',
-            display_text: "39 clusters each combining a set of smaller neighborhoods.",
-            component_type: 'categorical',
-            data_type: 'text'
-        },
-        {   source:'anc',
-            display_name: 'ANC',
-            display_text: 'Advisory Neighborhood Council',
-            component_type: 'categorical',
-            data_type: 'text'
-        },
-        {   source:'census_tract',
-            display_name: 'Census Tract',
-            display_text: 'A small division used in collection of the US Census.',
-            component_type: 'categorical',
-            data_type: 'text',
-        },
-        {   source:'zip',
-            display_name: 'Zipcode',
-            display_text: '',
-            component_type: 'categorical',
-            data_type: 'text',
-        },
-
         {   source: 'acs_median_rent',
-            display_name: 'Neighborhood Rent (ACS median)',
+            display_name: 'ACS: Median Neighborhood Rent',
             display_text: 'Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.',
             component_type: 'continuous',
             data_type:'decimal',
@@ -101,6 +100,52 @@ var filterView = {
        
     ],
 
+    addClearPillboxes: function(msg,data){
+    
+        for (var i=0; i < filterView.filterControls.length; i++){
+            var x = filterView.filterControls[i]['component']['source'] //display_name
+        }
+
+        //Compare our activated filterValues (from the state module) to the list of all 
+        //possible filterControls to make a list containing only the activated filter objects. 
+        //filterValues = obj with keys of the 'source' data id and values of current setpoint
+        //filterControls = list of objects that encapsulates the actual component including its clear() method
+        var activeFilterIds = []
+        var filterValues = filterUtil.getFilterValues()
+        for (var key in filterValues){
+            if (filterValues[key][0].length != 0){
+                var control = filterView.filterControls.find(function(obj){
+                    return obj['component']['source'] === key;
+                })
+                activeFilterIds.push(control)
+            };
+        }
+        
+        //Use d3 to bind the list of control objects to our html pillboxes
+        var oldPills = d3.select('#clear-pillbox-holder')
+                        .selectAll('.clear-single')
+                        .data(activeFilterIds)
+                        .classed("not-most-recent",true);
+
+        var allPills = oldPills.enter().append("div")
+            .attr("class","ui label transition visible")
+            .classed("clear-single",true)
+          .merge(oldPills)
+            .text(function(d) { return d['component']['display_name'];});
+
+        //Add the 'clear' x mark and its callback
+        allPills.each(function(d) {
+            d3.select(this).append("i")
+                .classed("delete icon",true)
+                .on("click", function(d) {
+                    d.clear();
+                })
+        });
+
+        oldPills.exit().remove();
+
+    },
+
     init: function(msg, data) {
         //msg and data are from the pubsub module that this init is subscribed to. 
         //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
@@ -112,7 +157,8 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
-                ['anyFilterActive', filterView.handleFilterClearance]
+                ['anyFilterActive', filterView.handleFilterClearance],
+                ['filterValues', filterView.addClearPillboxes]
             ]);
 
             setState('subNav.left','layers');
@@ -236,6 +282,10 @@ var filterView = {
             slider.noUiSlider.reset();
         }
 
+        this.isTouched = function(){
+            return slider.noUiSlider.get()[0] === c.min && slider.noUiSlider.get()[1] === c.max;
+        }
+
     },
     categoricalFilterControl: function(component){
         filterView.filterControl.call(this, component);
@@ -297,6 +347,10 @@ var filterView = {
             // per the Semantic UI docs.
             $('.dropdown-' + c.source).dropdown('restore defaults');
         }
+        
+        this.isTouched = function(){
+           return $('.dropdown-' + c.source).dropdown('get value').length > 0;
+        }
 
     },
     buildFilterComponents: function(){
@@ -353,7 +407,9 @@ var filterView = {
     },
     clearAllFilters: function(){
         for(var i = 0; i < filterView.filterControls.length; i++){
-            filterView.filterControls[i].clear();
+            if(filterView.filterControls[i].isTouched()){
+                filterView.filterControls[i].clear();
+            }
         }
         filterView.indicateActivatedFilters();
     },

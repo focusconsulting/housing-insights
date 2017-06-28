@@ -52,8 +52,12 @@ html, body {
     flex-direction: column;
 }
 
+.scroll-y {
+    overflow-y: auto;
+}
+
 #buildings-list {
-    margin-top: 105px;
+    margin-top: 30px;
 }
 
 #left-options .sub-nav-button {
@@ -82,6 +86,16 @@ html, body {
 #options-spacer {
     flex-grow: 1;
     border-bottom: 2px solid rgb(189, 54, 33);
+    position: relative; /*so pillboxes can be appended*/
+}
+
+#clear-pillbox-holder {
+    position: absolute;
+    z-index:10;
+    top: 50px;
+    flex-grow: 1;
+    padding-left: 10px;
+    padding-right: 50px; /*allows space for mapbox zoom control*/
 }
 
 .main-view {
@@ -93,7 +107,7 @@ html, body {
 
 .main-view:not(#map-view) {
     position: relative;
-    top: 40px;
+    top: 20px;
 }
 
 .main-view.fade {
@@ -168,7 +182,7 @@ html, body {
 #pie-charts {
     display: flex;
     justify-content: space-around;
-    position: fixed;
+    position: static;
     width: 100%;
     box-shadow: 0 8px 17px #fff;
     background-color: #fff;
@@ -209,10 +223,12 @@ html, body {
     margin-bottom: 0;
     opacity: 0;
     cursor: pointer;
+    border-bottom: 1px solid gray;
+
 }
 #buildings-list>div .project-title {
     font-weight: bold;
-    font-size: 1.3em;
+    font-size: 1em;
 }
 #buildings-list>div:hover {
     background-color: #ddebff;
@@ -309,9 +325,18 @@ a.active {
     padding: 3px;
 }
 
-/*copy-pasted from semantic ui so we can modify
-Currently only used in layers but can be adapted to filters too
-*/
+.mapboxgl-ctrl-top-right{
+    top: 120px;
+    position: absolute;
+    z-index: 10000 !important;
+    transition: transform .5s;
+    transform: translateX(0px);
+    
+}
+.mapboxgl-ctrl-top-right.movedIn{
+    transform: translateX(-350px);
+}
+/*copy-pasted from semantic ui so we can modify*/
 
 /*Layer accordions (blue)*/
 
@@ -363,6 +388,15 @@ Currently only used in layers but can be adapted to filters too
 .ui.styled.accordion .title.filter-title.filter-activated, .ui.styled.accordion .active.title.filter-title.filter-activated {
     background: rgba(234, 100, 2, 0.7);
 }
+
+/*Clear filter pillboxes*/
+.ui.label.clear-single {
+    background-color: rgba(253,126,35,0.7);
+    font-size: .95em;
+    margin-top:5px;
+}
+
+
 /* chloroplath legend */
 
 #chloroplethLegend ul {
@@ -383,3 +417,25 @@ Currently only used in layers but can be adapted to filters too
     position: relative;
     width: 100%;
 } 
+
+
+/* building view */
+#button-back {
+    background-color: #fff;
+    border-bottom-width: 0;
+}
+
+#sub-nav-building {
+    width: 100%;
+    position: relative;
+    color: inherit;
+    background-color: #d69c93;
+    height: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#building-view-container {
+    margin-top: 20px;
+}
+

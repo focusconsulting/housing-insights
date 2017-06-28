@@ -11,3 +11,4 @@ SQLAlchemy==1.1.9
 Werkzeug==0.12.1
 simplejson==3.10.0
 six==1.10.0
+python-dateutil
