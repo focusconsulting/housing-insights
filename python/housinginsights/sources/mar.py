@@ -206,6 +206,8 @@ class MarApiConn(BaseApiConn):
 
         :returns: Json output from the api.
         :rtype: json 
+
+        Example resulting API url: http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx/findAID2?f=json&aid=233807
         """
         params = {
             'f': 'json',
