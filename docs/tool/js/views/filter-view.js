@@ -12,31 +12,36 @@ var filterView = {
             display_name: 'Location: Ward',
             display_text: "The largest geograpical division of the city.",
             component_type: 'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'neighborhood_cluster_desc',
             display_name: 'Location: Neighborhood Cluster',
             display_text: "39 clusters each combining a set of smaller neighborhoods.",
             component_type: 'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'anc',
             display_name: 'Location: ANC',
             display_text: 'Advisory Neighborhood Council',
             component_type: 'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'census_tract',
             display_name: 'Location: Census Tract',
             display_text: 'A small division used in collection of the US Census.',
             component_type: 'categorical',
             data_type: 'text',
+            data_level: 'project'
         },
         {   source:'zip',
             display_name: 'Location: Zipcode',
             display_text: '',
             component_type: 'categorical',
             data_type: 'text',
+            data_level: 'project'
         },
 
         {   source: 'proj_units_tot',
@@ -46,7 +51,8 @@ var filterView = {
             data_type:'integer',
             min: 0,
             max: 717,
-            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
+            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead. 
+            data_level: 'project'
         },
         
         {   source: 'proj_units_assist_max',
@@ -56,13 +62,15 @@ var filterView = {
             data_type:'integer',
             min:0,
             max:600,
-            num_decimals_displayed:0
+            num_decimals_displayed:0,
+            data_level: 'project'
         },
         {   source: 'hud_own_type',
             display_name:'Ownership Type (per HUD)',
             display_text:"This field is only available for buildings participating in HUD programs; others are listed as 'Unknown'",
             component_type: 'categorical',
-            data_type:'text'
+            data_type:'text',
+            data_level: 'project'
         },
 
         {   source: 'acs_median_rent',
@@ -72,14 +80,32 @@ var filterView = {
             data_type:'decimal',
             min: 0,
             max: 2500,
-            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead.
+            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead.
+            data_level: 'zone'
         },
+
+        //TODO this is a dummy data set to show a second option for combined overlay/filtering!!!
+        {
+            source: "building_permits_construction",
+            display_name: "Building Permits: Construction 2016",
+            display_text: "Important! This is not actually included in our filter data yet, shown as a demo",
+            component_type: 'continuous',
+            data_type:'decimal',
+            min: 0,
+            max: 2500,
+            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead.
+            data_level: 'zone'
+        },
+
+
+
 
         {   source: 'portfolio',
             display_name: 'Subsidy Program',
             display_text: 'Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list',
             component_type:'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'poa_start',
             display_name:'Subsidy Start Date',
@@ -87,7 +113,8 @@ var filterView = {
             component_type: 'date',
             data_type: 'timestamp',
             min: '1950-01-01', //just example, TODO change to date format
-            max: 'now'         //dummy example
+            max: 'now',         //dummy example
+            data_level: 'project'
         },
         {   source:'poa_end',
             display_name:'Subsidy End Date',
@@ -95,7 +122,8 @@ var filterView = {
             component_type: 'date',
             data_type: 'timestamp',
             min: '1950-01-01', //just example, TODO change to date format
-            max: 'now'         //dummy example
+            max: 'now',         //dummy example
+            data_level: 'project'
         },
        
     ],
@@ -209,30 +237,12 @@ var filterView = {
     continuousFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
+        var contentContainer = filterView.setupFilter(c);
 
-        var parent = d3.select('#filter-components')
-        var title = parent.append("div")
-            .classed("title filter-title",true);
-
-        title.append("i")
-            .classed("dropdown icon",true)
-        title.append("span")
-            .classed("title-text",true)
-            .text(c.display_name);
-
-        title.attr("id", "filter-"+c.source)
-
-        var content = parent.append("div")
-                .classed("content", true);
-        var description = content.append("p")
-                .classed("description",true);
-                    
-            description.html(c.display_text);
-
-            var slider = content.append("div")
-                    .classed("filter", true)
-                    .classed("slider",true)
-                    .attr("id",c.source);
+        var slider = contentContainer.append("div")
+                .classed("filter", true)
+                .classed("slider",true)
+                .attr("id",c.source);
 
 
         slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
@@ -287,35 +297,87 @@ var filterView = {
         }
 
     },
+    setupFilter: function(c){
+    //This function does all the stuff needed for each filter regardless of type. 
+    //It returns the "content" div, which is where the actual UI element for doing
+    //filtering needs to be appended
+
+            //Add a div with label and select element
+            //Bind user changes to a setState function
+            var parent = d3.select('#filter-components')
+            var title = parent.append("div")
+                    .classed("title filter-title",true)
+                    .classed(c.data_level, true)
+
+                /*
+                Trying out using the 'data type' icon instead of the triangle
+                title.append("i")
+                    .classed("dropdown icon",true)
+                */
+                //Add data-specific icon
+                if(c.data_level == 'project') {
+                    title.append("i")
+                    .classed("building icon",true)
+                    .attr("style","margin-right:8px;")
+                } else if(c.data_level == 'zone'){
+                    title.append("img")
+                    .attr("src","/assets/icons/neighborhood.svg")
+                    //.attr("onerror","this.src='backup.png'")
+                    .attr("width",20)
+                    .attr("height",20)
+                    .attr("style","margin-right:5px;") //slightly bigger width than project
+                }
+                
+                title.append("span")
+                    .classed("title-text",true)
+                    .text(c.display_name)
+
+                title.attr("id", "filter-"+c.source)
+
+            var content = parent.append("div")
+                    .classed("filter", true)
+                    .classed(c.component_type,true)
+                    .classed("content", true);
+
+            var description = content.append("p")
+                    .classed("description",true)
+                description.html(c.display_text)
+            
+            //Set it up to trigger the layer when title is clicked
+            document.getElementById("filter-" + c.source).addEventListener("click", clickCallback);
+            function clickCallback() {
+                //TODO this is hacked at the moment, need to restructure how a merged filter+overlay would work together
+                //Currently hacking by assuming the overlay.name is the same as c.source (these are essentially the code name of the data set). 
+                //True only for ACS median rent, the demo data set. 
+                //This function is very similar to the overlay callback but w/ c.source instead of overlay.name
+                if (c.data_level == 'zone'){
+                    var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
+                    console.log("changing from " + existingOverlayType + " to " + c.source);
+
+                    if (existingOverlayType !== c.source) {
+                        setState('overlayRequest', {
+                            overlay: c.source,
+                            activeLayer: getState().mapLayer[0]
+                        });
+
+                    } else {
+                        mapView.clearOverlay();
+                    };
+                } else {
+                    mapView.clearOverlay();
+                };
+            }; //end clickCallback
+
+            return content
+
+    },  
+
     categoricalFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
+        var contentContainer = filterView.setupFilter(c);
 
-        //Add a div with label and select element
-        //Bind user changes to a setState function
-        var parent = d3.select('#filter-components')
-        var title = parent.append("div")
-                .classed("title filter-title",true)
-
-            title.append("i")
-                .classed("dropdown icon",true)
-            title.append("span")
-                .classed("title-text",true)
-                .text(c.display_name)
-
-            title.attr("id", "filter-"+c.source)
-
-        var content = parent.append("div")
-                .classed("filter", true)
-                .classed("categorical",true)
-                .classed("content", true);
-
-        var description = content.append("p")
-                .classed("description",true)
-            
-            description.html(c.display_text)
-
-        var uiSelector = content.append("select")
+        var uiSelector = contentContainer.append("select")
             .classed("ui fluid search dropdown",true)
             .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
             .attr("multiple", " ")
@@ -373,7 +435,7 @@ var filterView = {
 
             var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':false}) //allows multiple opened
+            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
 
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){

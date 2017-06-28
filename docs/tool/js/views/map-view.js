@@ -270,6 +270,15 @@
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "census_tract",
                     style: "percent"
+                },
+                {
+                    name: "acs_median_rent",
+                    display_name: "ACS: Median Rent",
+                    display_text: "Median Rent per American Community Survey",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/acs_median_rent/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "number"
                 }
                 
             ];

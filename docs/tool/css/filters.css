@@ -33,6 +33,11 @@
     margin-bottom: 15px;
 }
 
+/*colors*/
+.noUi-connect {
+  background:rgba(234, 100, 2, 0.7);
+}
+
 /*Make handles smaller*/
 .noUi-horizontal {
   height: 18px;
