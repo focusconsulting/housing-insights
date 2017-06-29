@@ -131,19 +131,7 @@ html, body {
     padding: 10px;
     position: absolute;
     bottom: 0;
-    left: 260px;
-    right: 360px;
-    min-width: 235px;
-}
-
-#legend-items {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-}
-
-#legend-items div {
-    width: 310px;
+    left: 260px;    
 }
 
 #legend-items div span {
@@ -152,6 +140,10 @@ html, body {
     height: 10px;
     margin-right: 5px;
     width: 10px;
+}
+
+#legend-items div span.square {
+    border-radius: 0;
 }
 
 .sidebar-inner-wrapper {
