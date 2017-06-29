@@ -807,7 +807,7 @@
                     mapView.map.on('click', function(e) {
                         console.log(e);
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project','project-enter']
+                            layers: ['project','project-enter','project-exit', 'project-unmatched']
                         }))[0];
                         console.log(building);
                         if (building === undefined) return;
