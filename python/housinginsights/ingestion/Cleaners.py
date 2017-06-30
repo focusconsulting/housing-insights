@@ -489,6 +489,10 @@ class topa_cleaner(CleanerBase):
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
+
+        if row['zone_type'] == 'census_tract':
+            row = self.rename_census_tract(row, column_name = 'zone')
+
         return row
 
 
