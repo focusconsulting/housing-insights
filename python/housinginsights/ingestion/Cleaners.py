@@ -293,11 +293,14 @@ class CleanerBase(object, metaclass=ABCMeta):
         census_tract = row['Geo2010']
         status = row['Status']
         full_address = row['Proj_addre']
+        image_url = row['Proj_image_url']
+        street_view_url = row['Proj_streetview_url']
 
         # only do mar api lookup if we have a null geocode value
         if self.null_value in [ward, neighbor_cluster,
                                neighborhood_cluster_desc, zipcode, anc,
-                               census_tract, status, full_address]:
+                               census_tract, status, full_address, image_url,
+                               street_view_url]:
             mar_api = MarApiConn()
             result = mar_api.reverse_address_id(aid=row['mar_id'])
             result = result['returnDataset']['Table1'][0]
@@ -333,6 +336,25 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         if full_address == self.null_value:
             row['Proj_addre'] = result['FULLADDRESS']
+
+        if street_view_url == self.null_value:
+            street_view_url = result['STREETVIEWURL']
+            if street_view_url is not None:
+                row['Proj_streetview_url'] = street_view_url
+            else:
+                # create custom street view url based on info from this link
+                # http://web.archive.org/web/20110903160743/http://mapki.com/wiki/Google_Map_Parameters#Street_View
+                # note: using 180 degrees as default for rotation angle
+                url = 'http://maps.google.com/maps?z=16&layer=c&cbll={},{}' \
+                      '&cbp=11,{},,0,2.09'.format(row['Proj_lat'],
+                                                  row['Proj_lon'], 180)
+                row['Proj_streetview_url'] = url
+
+        if image_url == self.null_value:
+            img_url = result['IMAGEURL']
+            img_dir = result['IMAGEDIR']
+            img_name = result['IMAGENAME']
+            row['Proj_image_url'] = '{}/{}/{}'.format(img_url, img_dir, img_name)
 
         return row
 
