@@ -295,12 +295,13 @@ class CleanerBase(object, metaclass=ABCMeta):
         full_address = row['Proj_addre']
         image_url = row['Proj_image_url']
         street_view_url = row['Proj_streetview_url']
+        psa = row['Psa2012']
 
         # only do mar api lookup if we have a null geocode value
         if self.null_value in [ward, neighbor_cluster,
                                neighborhood_cluster_desc, zipcode, anc,
                                census_tract, status, full_address, image_url,
-                               street_view_url]:
+                               street_view_url, psa]:
             mar_api = MarApiConn()
             result = mar_api.reverse_address_id(aid=row['mar_id'])
             result = result['returnDataset']['Table1'][0]
@@ -355,6 +356,11 @@ class CleanerBase(object, metaclass=ABCMeta):
             img_dir = result['IMAGEDIR']
             img_name = result['IMAGENAME']
             row['Proj_image_url'] = '{}/{}/{}'.format(img_url, img_dir, img_name)
+
+        if psa == self.null_value:
+            psa = result['PSA']
+            if psa is not None:
+                row['Psa2012'] = 'PSA ' + psa.split(' ')[-1]
 
         return row
 
