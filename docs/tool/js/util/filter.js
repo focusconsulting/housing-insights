@@ -30,7 +30,6 @@ var filterUtil = {
                 filterValues[splitKey[1]] = currentState
             };
         };
-        console.log(filterValues);
         return filterValues
     },
 

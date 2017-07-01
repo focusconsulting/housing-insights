@@ -418,9 +418,6 @@ class BuildingPermitsCleaner(CleanerBase):
 
 class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
-        #Handle the first row which is a descriptive row, not data.
-        if row_num == 0:
-            return None
         row['census_tract'] = ""+row['state']+row['county']+row['tract']
         #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
         row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
@@ -520,6 +517,10 @@ class topa_cleaner(CleanerBase):
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
+
+        if row['zone_type'] == 'census_tract':
+            row = self.rename_census_tract(row, column_name = 'zone')
+
         return row
 
 

@@ -22,6 +22,8 @@
                     ['mapLayer', mapView.showLayer],
                     ['mapLayer', mapView.layerOverlayToggle],
                     ['mapLoaded', model.loadMetaData],
+                    ['mapLoaded', mapView.navControl.init],
+                    ['sidebar.right', mapView.navControl.move],
                     ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
                     ['dataLoaded.metaData', resultsView.init],
                     ['dataLoaded.metaData', mapView.placeProjects],
@@ -33,9 +35,8 @@
                     ['overlaySet', chloroplethLegend.init],
                     ['previewBuilding', mapView.showPopup],
                     ['filteredData', mapView.filterMap],
-                    ['hoverBuildingList', mapView.highlightBuilding]
-
-
+                    ['hoverBuildingList', mapView.highlightBuilding],
+                    ['filterViewLoaded', mapView.initialSidebarState]
                 ]);
 
 
@@ -52,7 +53,7 @@
                     preserveDrawingBuffer: true
                 });
 
-                this.map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+                this.map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
@@ -84,35 +85,81 @@
             }
 
         },
-    ChloroplethColorRange: function(chloroData){
-        // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
-        // make a chloropleth map with a single color, but if you try to,
-        // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
-        // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
-        var CHLOROPLETH_STOP_COUNT = 5;
-        var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
-        var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
-        var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
-            return d.count;
-        });
-        var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
-            return d.count;
-        });
-        var colorScale = d3.scaleLinear()
-            .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
-            .range([MIN_COLOR, MAX_COLOR]);
+        navControl: {
+            el: null,
+            init: function(){
+                mapView.navControl.el = document.getElementsByClassName('mapboxgl-ctrl-top-right')[0];
+                mapView.navControl.el.parentElement.removeChild(mapView.navControl.el);
+                document.getElementById(mapView.el).appendChild(mapView.navControl.el);
+            },
+            move: function(){
+                mapView.navControl.el.classList.toggle('movedIn');
+            }
+        },
+        initialSidebarState: function(){
+            setState('sidebar.left',true);
+            setState('sidebar.right',true);
+            setState('subNav.left', 'filters');
+        },
+        ChloroplethColorRange: function(chloroData, style){
+            // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
+            // make a chloropleth map with a single color, but if you try to,
+            // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
+            // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
+            var CHLOROPLETH_STOP_COUNT = 5;
+            var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
+            var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
 
-        this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
-            var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
-            var domainValue = Math.round(MAX_DOMAIN_VALUE - (stopIncrement * i));
-            var rangeValue = colorScale(domainValue);
-            return [domainValue, rangeValue];
-        });
+            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can 
+            //especially screw up the scale when using rates as they come back as a count instead of a rate
+            var currentLayer = getState().mapLayer[0]
+            var activeZones = []
+            model.dataCollection[currentLayer].features.forEach(function(feature){
+                var zone = feature.properties.NAME;
+                activeZones.push(zone)
+            });
 
-        this.stopsAscending = this.stops.sort(function(a,b){
-            return a[0] - b[0];
-        });
-    },
+            var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
+                if (activeZones.includes(d.group)) {
+                    return d.count;
+                } else {
+                    return 0;
+                };
+            });
+
+            var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
+                return d.count;
+            });
+
+            var colorScale = d3.scaleLinear()
+                .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
+                .range([MIN_COLOR, MAX_COLOR]);
+
+            var roundedVersionOf = function(val){
+                switch(style){
+                    case "percent":
+                        return Math.roundTo(val, .01);
+                    case "money":
+                        return Math.roundTo(val, 100);
+                    case "number":
+                        return Math.roundTo(val, 100);
+                    default:
+                        return Math.round(val);
+                }
+            }
+
+            this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
+                var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
+                var domainValue = MAX_DOMAIN_VALUE - (stopIncrement * i);
+                    domainValue = roundedVersionOf(domainValue);
+                var rangeValue = colorScale(domainValue);
+                return [domainValue, rangeValue];
+            });
+
+            this.stopsAscending = this.stops.sort(function(a,b){
+                return a[0] - b[0];
+            });
+        },
         initialOverlays: [],
 
         findOverlayConfig: function(key, value) {
@@ -122,44 +169,109 @@
         },
         buildOverlayOptions: function() {
 
+            console.log(location.hostname);
+
             //TODO we want to move this config data into it's own file or to the api
             mapView.initialOverlays = [{
-                    name: "crime",
-                    display_name: "Crime",
-                    display_text: "Number of crime incidents reported in the past 3 months.",
+                    name: "crime_violent_12",
+                    display_name: "Crime Rate: Violent 12 months",
+                    display_text: "Number of violent crime incidents per 100,000 people reported in the past 12 months.",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/crime/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward"
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
-                    name: "building_permits",
-                    display_name: "Building Permits",
-                    display_text: "Number of building permits issued in the zone during 2016.",
+                    name: "crime_nonviolent_12",
+                    display_name: "Crime Rate: Non-Violent 12 months",
+                    display_text: "Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "ward",
+                    style: "number"
+                },
+                {
+                    name: "crime_all_3",
+                    display_name: "Crime Rate: All 3 months",
+                    display_text: "Total number of crime incidents per 100,000 people reported in the past 12 months.",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "ward",
+                    style: "number"
+                },
+                {
+                    name: "building_permits_construction",
+                    display_name: "Building Permits: Construction 2016",
+                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
                     zones: ["ward", "neighborhood_cluster", "zip"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster", "zip"],
-                    default_layer: "neighborhood_cluster"
+                    default_layer: "ward",
+                    style: "number"
+                },
+                {
+                    name: "building_permits_all",
+                    display_name: "Building Permits: All 2016",
+                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
+                    zones: ["ward", "neighborhood_cluster", "zip"],
+                    default_layer: "ward",
+                    style: "number"
                 },
                 {
                     name: "poverty_rate",
-                    display_name: "Poverty Rate",
+                    display_name: "ACS: Poverty Rate",
                     display_text: "Fraction of residents below the poverty rate.",
-                    zones: ["census_tract"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/",
-                    available_aggregates: ["census_tract"],
-                    default_layer: "census_tract"
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
                 },
-
                 {
-                    name: "more_building_permits",
-                    display_name: "More Building Permits 3",
-                    display_text: "This is duplicated just as a demo, because we haven't added more api endpoints yet.",
-                    zones: ["ward", "neighborhood_cluster"],
-                    aggregate_endpoint_base: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/building_permits/all/",
-                    available_aggregates: ["ward", "neighborhood_cluster"],
-                    default_layer: "neighborhood_cluster"
+                    name: "income_per_capita",
+                    display_name: "ACS: Income Per Capita",
+                    display_text: "Average income per resident",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "money"
+                },
+                {
+                    name: "labor_participation",
+                    display_name: "ACS: Labor Participation",
+                    display_text: "Percent of the population that is working",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
+                },
+                {
+                    name: "fraction_single_mothers",
+                    display_name: "ACS: Fraction Single Mothers",
+                    display_text: "Percent of the total population that is a single mother",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
+                },
+                {
+                    name: "fraction_black",
+                    display_name: "ACS: Fraction Black",
+                    display_text: "Proportion of residents that are black or African American",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
+                },
+                {
+                    name: "fraction_foreign",
+                    display_name: "ACS: Fraction Foreign",
+                    display_text: "Percent of the population that is foreign born",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "percent"
                 }
+                
             ];
         },
 
@@ -189,11 +301,16 @@
                 .text(overlay.display_name)
             title.attr("id", "overlay-" + overlay.name); //TODO need to change this to different variable after changing meta logic structure
 
+
             var content = parent.append("div")
                 .classed("content", true)
               .attr("id", "overlay-about-"+overlay.name)
                 .text(overlay.display_text)
 
+            var legendLocation = content.append("div")
+                .attr("id", "overlay-" + overlay.name + "-legend") // TODO need to change this to different variable after changing meta logic structure
+                .style("height", "150px"); 
+                
             $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
 
             //Set it up to trigger the layer when title is clicked
@@ -305,7 +422,8 @@
                 }
 
                 var overlayConfig = mapView.findOverlayConfig('name', data.overlay)
-                var url = overlayConfig.aggregate_endpoint_base + data.activeLayer;
+                var url = overlayConfig.url_format.replace('<zone>',data.activeLayer)
+
                 var dataRequest = {
                     name: data.overlay + "_" + data.activeLayer, //e.g. crime
                     url: url,
@@ -325,34 +443,38 @@
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
-            var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;                                                                                     // dataCollection           
-    
-            // assign the chloropleth color range to the data so we can use it for other
-            // purposes when the state is changed
-            data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse);
+                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;    
+                                                                                 // dataCollection        
+                var thisStyle = mapView.initialOverlays.find(function(obj){return obj['name']==data.overlay}).style;
+        
+                // assign the chloropleth color range to the data so we can use it for other
+                // purposes when the state is changed
+                data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse, thisStyle);
 
-                mapView.map.addLayer({
-                    'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
-                    'type': 'fill',
-                    'source': data.activeLayer + 'Layer',
-                    'layout': {
-                        'visibility': 'none'
-                    },
-                    'paint': {
-                        'fill-color': {
-                            'property': data.overlay,
-                            'stops': data.chloroplethRange.stopsAscending
+                    mapView.map.addLayer({
+                        'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
+                        'type': 'fill',
+                        'source': data.activeLayer + 'Layer',
+                        'layout': {
+                            'visibility': 'none'
                         },
-                        'fill-opacity': 1 //using rgba in the chloropleth color range instead
-                    }
-                });
-            }
+                        'paint': {
+                            'fill-color': {
+                                'property': data.overlay,
+                                'stops': data.chloroplethRange.stopsAscending
+                            },
+                            'fill-opacity': 1 //using rgba in the chloropleth color range instead
+                        }
+                    }, 'project');
+
+                };
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
 
         },
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay
-            //If so, use the 'available_aggregates' to enable/disable zone selection buttons
+            //If so, use the 'zones' to enable/disable zone selection buttons
+            
             var layerMenu = d3.select('#layer-menu').classed("myclass",true)
             layerMenu.selectAll('a')
                 .each(function(d) {
@@ -381,15 +503,15 @@
                 });
         },
 
-        showOverlayLayer: function(overlay, activeLayer) {
+        showOverlayLayer: function(overlay_name, activeLayer) {
 
             setState('mapLayer', activeLayer); //todo is this needed?
 
             //Toggle the overlay colors themselves
-            mapView.map.setLayoutProperty(activeLayer + '_' + overlay, 'visibility', 'visible');
-            mapView.toggleActive('#' + overlay + '-overlay-item')
+            mapView.map.setLayoutProperty(activeLayer + '_' + overlay_name, 'visibility', 'visible');
+            mapView.toggleActive('#' + overlay_name + '-overlay-item')
             setState('overlaySet', {
-                overlay: overlay,
+                overlay: overlay_name,
                 activeLayer: activeLayer
             });
 
@@ -533,8 +655,7 @@
                 //msg and data are from the pubsub module that this init is subscribed to.
                 //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
                 console.log(msg, data);
-                var dataURLInfo = model.dataCollection.metaData.project.api;
-                var dataURL = dataURLInfo.raw_endpoint;
+                var dataURL = model.URLS.project
                 var dataRequest = {
                     name: 'raw_project',
                     url: dataURL,
@@ -547,7 +668,8 @@
                     mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
                     mapView.convertedProjects.features.forEach(function(feature) {
                         feature.properties.matches_filters = true;
-                    });
+                        feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'                                           
+                     });
                     mapView.listBuildings();
                     mapView.map.addSource('project', {
                         'type': 'geojson',
@@ -559,12 +681,14 @@
                         'id': 'project',
                         'type': 'circle',
                         'source': 'project',
+                        'filter': ['==', 'klass', 'stay'],
                         'paint': {
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [12, 3],
-                                    [15, 32]
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
                                 ]
                             },
                             'circle-opacity': 0.3,
@@ -580,8 +704,12 @@
                                     ['6 - Lost Rental', '#A9A9A9']
                                 ]
                             },
-                            'circle-stroke-width': mapView.circleStrokeWidth,
-                            'circle-stroke-opacity': mapView.circleStrokeOpacity,
+                            'circle-stroke-width': 1,                            
+                            'circle-stroke-width-transition': {
+                                duration: 300,
+                                delay: 0
+                            },                            
+                            'circle-stroke-opacity': 1,
 
                             'circle-stroke-color': {
                                 property: 'category_code',
@@ -597,11 +725,107 @@
                             }
                         }
                     });
+                    mapView.map.addLayer({
+                        'id': 'project-enter', // add layer for entering projects. empty at first. very repetitive of project layer, which could be improved
+                        'type': 'circle',
+                        'source': 'project',
+                        'filter': ['==', 'klass', 'enter'],
+                        'paint': {
+                            'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
+                                ]
+                            },
+                            'circle-opacity': 0.3,
+                            'circle-color': {
+                                property: 'category_code', 
+                                type: 'categorical',
+                                stops: [
+                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                    ['2 - Expiring Subsidy', '#8B4225'],
+                                    ['3 - Recent Failing REAC Score', '#bd0026'],
+                                    ['4 - More Info Needed', '#A9A9A9'],
+                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                    ['6 - Lost Rental', '#A9A9A9']
+                                ]
+                            },
+                            'circle-stroke-width': 1,                            
+                            'circle-stroke-width-transition': {
+                                duration: 300,
+                                delay: 0
+                            },                            
+                            'circle-stroke-opacity': 1,
+
+                            'circle-stroke-color': {
+                                property: 'category_code',
+                                type: 'categorical',
+                                stops: [
+                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                    ['2 - Expiring Subsidy', '#8B4225'],
+                                    ['3 - Recent Failing REAC Score', '#bd0026'],
+                                    ['4 - More Info Needed', '#A9A9A9'],
+                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                    ['6 - Lost Rental', '#A9A9A9']
+                                ]
+                            }
+                        }
+                    });
+                    mapView.map.addLayer({
+                        'id': 'project-exit', // add layer for exiting projects. empty at first. very repetitive of project layer, which could be improved
+                        'type': 'circle',
+                        'source': 'project',
+                        'filter': ['==', 'klass', 'exit'],
+                        'paint': {
+                            'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
+                                ]
+                            },
+                            'circle-opacity-transition': {
+                                duration: 1000,
+                                delay: 0
+                            },                            
+                            'circle-opacity': 1,
+                            'circle-color': {
+                                property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
+                                type: 'categorical',
+                                stops: [
+                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                    ['2 - Expiring Subsidy', '#8B4225'],
+                                    ['3 - Recent Failing REAC Score', '#bd0026'],
+                                    ['4 - More Info Needed', '#A9A9A9'],
+                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                    ['6 - Lost Rental', '#A9A9A9']
+                                ]
+                            },
+                            
+
+                            'circle-stroke-color': {
+                                property: 'category_code',
+                                type: 'categorical',
+                                stops: [
+                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
+                                    ['2 - Expiring Subsidy', '#8B4225'],
+                                    ['3 - Recent Failing REAC Score', '#bd0026'],
+                                    ['4 - More Info Needed', '#A9A9A9'],
+                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
+                                    ['6 - Lost Rental', '#A9A9A9']
+                                ]
+                            }
+                        }
+                    });
+
                     // TODO: MAKE LEGEND
                     mapView.map.on('mousemove', function(e) {
                         //get the province feature underneath the mouse
                         var features = mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project']
+                            layers: ['project','project-enter']
                         });
                         //if there's a point under our mouse, then do the following.
                         if (features.length > 0) {
@@ -618,7 +842,7 @@
                     mapView.map.on('click', function(e) {
                         console.log(e);
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project']
+                            layers: ['project','project-enter']
                         }))[0];
                         console.log(building);
                         if (building === undefined) return;
@@ -630,7 +854,7 @@
             }
 
         },
-
+        
         showPopup: function(msg, data) {
             console.log(data);
 
@@ -658,45 +882,39 @@
 
         },
         filterMap: function(msg, data) {
-
+            
             mapView.convertedProjects.features.forEach(function(feature) {
+                feature.properties.previous_filters = feature.properties.matches_filters;
                 if (data.indexOf(feature.properties.nlihc_id) !== -1) {
                     feature.properties.matches_filters = true;
+                    feature.properties.klass = feature.properties.previous_filters === true ? 'stay' : 'enter'; // two trues in a row means stay; new true means enter
                 } else {
                     feature.properties.matches_filters = false;
+                    feature.properties.klass = feature.properties.previous_filters === false ? 'none' : 'exit'; // two falses in a row means no action; new false means exit
                 }
             });
+            mapView.map.setFilter('project-exit', ['==','klass','exit']); // resets exit filter to be meaningful. it's set to nonsense after the animations
+                                                                          // so that previous exits don't show when the opacity is set back to 1
             mapView.map.getSource('project').setData(mapView.convertedProjects);
-            mapView.map.setFilter('project', ['==', 'matches_filters', true]);
-            mapView.listBuildings();
-            setTimeout(function() {
-                mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
-            }, 20);
-            /*
-            console.log(data.toString().replace(/([^,]+)/g,"'$1'"));
-            var idStr = data.toString().replace(/([^,]+)/g,"'$1'")
-            var str = "NL000001";
-            mapView.map.setFilter('project',['in','nlihc_id', data]);*/
+            mapView.animateEnterExit();
+            mapView.listBuildings();        
         },
-        animateSize: function(timestamp) {
-            setTimeout(function() {
-                mapView.shrinkGrow = mapView.shrinkGrow || 'grow';
-                mapView.circleStrokeWidth = mapView.shrinkGrow === 'grow' ? mapView.circleStrokeWidth * 2 : mapView.circleStrokeWidth / 2; // ( 20 - mapView.circleStrokeWidth ) / ( 1000 / ( timestamp - mapView.lastTimestamp ));
-                mapView.circleStrokeOpacity = mapView.shrinkGrow === 'grow' ? mapView.circleStrokeOpacity / 1.2 : mapView.circleStrokeOpacity * 1.2;
-                mapView.map.setPaintProperty('project', 'circle-stroke-width', mapView.circleStrokeWidth);
-                mapView.map.setPaintProperty('project', 'circle-stroke-opacity', mapView.circleStrokeOpacity);
-                if (mapView.shrinkGrow === 'grow' && mapView.circleStrokeWidth >= 32) {
+        animateEnterExit: function(){
+            setTimeout(function(){
+                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 8);
+                mapView.map.setPaintProperty('project-exit','circle-opacity', 0);
+                setTimeout(function(){
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 1);                    
+                },300);
+                setTimeout(function(){
+                    mapView.map.setFilter('project-exit', ['==','klass','doesnotexist']); // sets filter to nonexistant klass to clear the layer
+                    mapView.map.setPaintProperty('project-exit','circle-opacity', 1); // put the empty exit layer back to opacity 1, read for next filtering
 
-                    mapView.shrinkGrow = 'shrink';
-                }
-                if (mapView.shrinkGrow === 'shrink' && mapView.circleStrokeWidth <= 1) {
-                    mapView.shrinkGrow = 'grow';
-                    cancelAnimationFrame(mapView.growShrinkId);
-                } else {
-
-                    mapView.growShrinkId = requestAnimationFrame(mapView.animateSize);
-                }
-            }, (1000 / 20));
+                },1000);
+            },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
+                    // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
+                    // would be nicer with a callback, but I don't htink that's available -JO
+         
         },
         /*
         The listBuildings function controls the right sidebar in the main map view.
@@ -706,13 +924,16 @@
         listBuildings: function() {
 
 
-
-            var data = mapView.convertedProjects.features.filter(function(feature) {
+            var allData = mapView.convertedProjects.features
+            var data = allData.filter(function(feature) {
                 return feature.properties.matches_filters === true;
             });
 
-            d3.select('#matching-count')
-                .text('(' + data.length + ')');
+            d3.selectAll('.matching-count')
+                .text(data.length);
+
+            d3.selectAll('.total-count')
+                .text(allData.length);
 
             var t = d3.transition()
                 .duration(750);
