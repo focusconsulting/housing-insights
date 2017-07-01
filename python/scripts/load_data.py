@@ -19,7 +19,7 @@ from housinginsights.ingestion.LoadData import LoadData, main
 # configuration: see /logs/example-logging.py for usage examples
 logging_path = os.path.abspath(os.path.join(PYTHON_PATH, "logs"))
 logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
-logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
+logging.basicConfig(filename=logging_filename, level=logging.INFO)
 
 # Pushes everything from the logger to the command line output as well.
 logging.getLogger().addHandler(logging.StreamHandler())
