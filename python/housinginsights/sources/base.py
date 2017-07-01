@@ -14,7 +14,7 @@ from housinginsights.tools import dbtools
 import requests
 import csv
 import os
-
+import logging
 
 class BaseApiConn(object):
     """
@@ -95,6 +95,8 @@ class BaseApiConn(object):
         else:
             url = urlpath
 
+        logging.debug("Url requested: {}".format(url))
+        logging.debug("params: {}".format(params))
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):
