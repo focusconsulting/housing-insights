@@ -24,7 +24,7 @@ var calculatePercents = function(data) {
 
 calculatePercents(apiData.items);
 
-var demoValueChart = new BarChartProto({
+var demoValueChart = new BarChart({
                     width: 400,
                     height: 200,
                     container: '.demoValueChart',
@@ -35,7 +35,7 @@ var demoValueChart = new BarChartProto({
                     percentMode: false
                 })
 
-var demoPercentChart = new BarChartProto({
+var demoPercentChart = new BarChart({
                     width: 300,
                     height: 200,
                     container: '.demoPercentChart',
@@ -64,4 +64,12 @@ setTimeout(function(){
         demoValueChart.update(newApiData.items);
         demoPercentChart.update(newApiData.items);
 
-    }, 3000);
+    }, 4000);
+
+setTimeout(function(){
+        console.log(demoValueChart.innerHeight());
+        demoValueChart.width(200)
+            .height(200)
+            .resize();
+
+     }, 2000);

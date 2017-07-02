@@ -1,56 +1,63 @@
 "use strict";
 
-var BarChartProto = function(chartOptions) { //
-    this.extendPrototype(BarChartProto.prototype, BarProtoExtension);
-    ChartProtoStatic.call(this, chartOptions); 
+var BarChart = function(chartOptions) { //
+    this.extendPrototype(BarChart.prototype, BarExtension);
+    ChartProto.call(this, chartOptions); 
 }
 
-BarChartProto.prototype = Object.create(ChartProtoStatic.prototype);
+BarChart.prototype = Object.create(ChartProto.prototype);
 
-var BarProtoExtension = {
-    setupType: function(chartOptions){ 
-        
+var BarExtension = {
+    _setup: function(chartOptions){ 
+        //namespace assignment - inside any of the functions defined below, 'this' no longer
+        //refers to the chart. Therefore, we namespace 'this' to 'chart' and then always refer
+        //to chart properties as chart.propertyname
+        var chart = this 
+
         //Graph-specific attributes from chartOptions
-        this.barPadding = chartOptions.barPadding || 0.1;
-        this.percentMode = chartOptions.percentMode || false;
-        this.label = chartOptions.label || chartOptions.field; 
+        chart.barPadding = chartOptions.barPadding || 0.1;
+        chart.percentMode = chartOptions.percentMode || false;
+        chart.label = chartOptions.label || chartOptions.field; 
 
         //animations
-        this.delay = 200
-        this.duration = 1000
+        chart.delay = 200
+        chart.duration = 1000
 
         //Add some items that won't change in the chart
-        this.svg.selectAll('.y-axis').data([0]).enter().append("g")
+        chart.yAxis = chart.svg.selectAll('.y-axis').data([0]).enter().append("g")
           .classed("y-axis",true)
-          .attr("transform", "translate(" + this.margin.left + "," + 0 + ")");
+          .attr("transform", "translate(" + chart.margin.left + "," + 0 + ")");
           
-        this.svg.append("g")
+        chart.xAxis = chart.svg.append("g")
           .classed("x-axis",true)
-          .attr("transform", "translate(" + this.margin.left + "," + this.innerHeight() + ")")
-
-        
-        
+          .attr("transform", "translate(" + chart.margin.left + "," + chart.innerHeight() + ")")
 
         //Animate data for the first time
-        this.update(this.data);
+        chart.update(chart.data);
     }, // end setupType
-
-    update: function(data){
-        //update the data stored on the chart object
-        this.data = data
-
-        //namespace assignment for access within child functions
+    _resize: function() {
         var chart = this;
-        var field = this.field;
-        var label = this.label;
-        
+        chart.yAxis
+            .attr("transform", "translate(" + chart.margin.left + "," + 0 + ")")
+            .transition()
+            .delay(this.delay)
+            .duration(this.duration);
+        chart.xAxis
+            .attr("transform", "translate(" + chart.margin.left + "," + chart.innerHeight() + ")")
+            .transition()
+            .delay(this.delay)
+            .duration(this.duration);
+    },
+    _update: function(){
+        //namespace assignment - allow access to 'this' inside child functions
+        var chart = this;
 
-        var min = d3.min(data, function(d) { return d[field]})
-        var max = d3.max(data,function(d) {return d[field]})
+        var min = d3.min(chart.data, function(d) { return d[chart.field]})
+        var max = d3.max(chart.data,function(d) {return d[chart.field]})
         
-        //Assigning here assumes data is in the order we want to display - updating elements will move
+        //Assigning scales within the update function assumes data is in the order we want to display - updating elements will move
         this.yScale = d3.scaleBand()
-            .domain(this.data.map(function(d) { return d[label]; }))
+            .domain(chart.data.map(function(d) { return d[chart.label]; }))
             .range([this.innerHeight(),0])
             .padding(this.barPadding)
 
@@ -93,7 +100,7 @@ var BarProtoExtension = {
             //Rest of the percent bars
             //var backgroundBars = d3.selectAll(this.container + ' rect.filler')
             var backgroundBars = this.innerChart.selectAll('rect.filler')
-                .data(data)
+                .data(chart.data)
                 .classed("update",true)
 
             backgroundBars.enter().append('rect')
@@ -112,7 +119,7 @@ var BarProtoExtension = {
 
         //Actual quantity bars
         var bars = this.innerChart.selectAll('rect.values')
-            .data(data, function(d) { return d[label];})
+            .data(chart.data, function(d) { return d[chart.label];})
             .classed("update",true) //only existing bars
 
         var newBars = bars.enter().append('rect')
@@ -131,7 +138,7 @@ var BarProtoExtension = {
                     .attr("height", yScale.bandwidth())
                     .attr("y", function(d,i) {return yScale(d.group)})
                     .attr("width", function(d) { 
-                        return xScale(d[field]);})
+                        return xScale(d[chart.field]);})
                     
 
         var leavingBars = bars.exit().remove()
@@ -142,7 +149,7 @@ var BarProtoExtension = {
     //Calculated attributes accessible from all functions
     innerHeight: function(_){
         if (!arguments.length) {
-            var innerHeight = (this.height - this.margin.top - this.margin.bottom)
+            var innerHeight = (this._height - this.margin.top - this.margin.bottom)
             return innerHeight;
         }
         console.log("can't set inner height, it's calculated")
@@ -151,12 +158,14 @@ var BarProtoExtension = {
     //Calculated attributes accessible from all functions
     innerWidth: function(_){
         if (!arguments.length) {
-            var innerWidth = (this.width - this.margin.left - this.margin.right)   
+            var innerWidth = (this._width - this.margin.left - this.margin.right)   
             return innerWidth;
         }
         console.log("can't set inner height, it's calculated")
         return this;
     }
+
+
 
 };//end barProtoExtension
 

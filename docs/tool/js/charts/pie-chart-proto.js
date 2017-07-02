@@ -5,7 +5,7 @@ var PieChartProto = function(chartOptions) { //
     ChartProto.call(this, chartOptions); 
 }
 
-PieChartProto.prototype = Object.create(ChartProto.prototype);
+PieChartProto.prototype = Object.create(ChartProtoCallback.prototype);
 
 var PieProtoExtension = {
   setupType: function(chartOptions){    
