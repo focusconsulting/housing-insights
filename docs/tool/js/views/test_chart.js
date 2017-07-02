@@ -24,42 +24,44 @@ var calculatePercents = function(data) {
 
 calculatePercents(apiData.items);
 
-var demoValueChart = new BarChart({
-                    width: 400,
-                    height: 200,
-                    container: '.demoValueChart',
-                    margin: {top: 20, right: 20, bottom: 20, left: 50},
-                    data: apiData['items'],
-                    field: 'matching',
-                    label: 'group',
-                    percentMode: false
-                })
+var demoValueChart = new BarChart('.demoValueChart')
+            .width(400)
+            .height(200)
+            .margin({top: 20, right: 20, bottom: 20, left: 50})
+            .data(apiData['items'])
+            .field('matching')
+            .label('group')
+            .percentMode(false)
+            .create()
 
-var demoPercentChart = new BarChart({
-                    width: 300,
-                    height: 200,
-                    container: '.demoPercentChart',
-                    margin: {top: 20, right: 20, bottom: 20, left: 50},
-                    data: apiData['items'],
-                    field: 'percent',
-                    label: 'group',
-                    percentMode: true
-                })
 
+var demoPercentChart = new BarChart('.demoPercentChart')
+            .width(300)
+            .height(200)
+            .margin({top: 20, right: 20, bottom: 20, left: 50})
+            .data(apiData['items'])
+            .field('percent')
+            .label('group')
+            .percentMode(true)
+            .create()
 
 setTimeout(function(){
         //Change some data to demonstrate animation, both swapping and stretching
         //Important - when updating data, need a new object not a modified object to ensure object constancy (i.e. bars move if needed)
         newApiData = JSON.parse(JSON.stringify(apiData))    //make deep copy
-        newApiData.items[0].matching = 350;
-        newApiData.items[1].matching = 250;
-        newApiData.items[2].matching = 300;
-        newApiData.items[3].matching = 50;
-        newApiData.items[4].matching = 300;
-        newApiData.items[7].matching = 10;
-        calculatePercents(newApiData.items);
         newApiData.items[0].group = "Ward 4";
         newApiData.items[3].group = "Ward 1";
+
+        newApiData.items[0].matching = 350;
+        newApiData.items[1].matching = 300;
+        newApiData.items[2].matching = 250;
+        newApiData.items[3].matching = 200;
+        newApiData.items[4].matching = 150;
+        newApiData.items[5].matching = 100
+        newApiData.items[6].matching = 50
+        newApiData.items[7].matching = 10;
+        calculatePercents(newApiData.items);
+        
 
         demoValueChart.update(newApiData.items);
         demoPercentChart.update(newApiData.items);
@@ -67,7 +69,6 @@ setTimeout(function(){
     }, 4000);
 
 setTimeout(function(){
-        console.log(demoValueChart.innerHeight());
         demoValueChart.width(200)
             .height(200)
             .resize();

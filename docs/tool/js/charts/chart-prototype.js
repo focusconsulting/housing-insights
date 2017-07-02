@@ -1,10 +1,100 @@
 "use strict";
 
-var ChartProto = function(chartOptions) {    //chartOptions is an object, was DATA_FILE, el, field, sortField, asc, readableField                                                              
-    this.setup(chartOptions); 
+var ChartProto = function(container) {    //chartOptions is an object, was DATA_FILE, el, field, sortField, asc, readableField                                                              
+    this.setup(container); 
+    return this;
 };
 
 ChartProto.prototype = {
+    create: function(){
+      /*
+      This method is called to trigger drawing of the chart once all initial properties have been 
+      set using method chaining. Example:
+
+      myChart = new ChartProto('.myContainerSelector')
+                .width(500)
+                .height(200)
+                .create()
+      */
+      var chart = this
+      //resize performs all the stuff needed to draw the chart the first time
+      chart.resize()
+
+      //Allows variable assignment with a method chain that conclues in create()
+      return chart
+
+    },
+    setup: function(container) {
+      /*
+      setup initializes all the default parameters, and create the container objects that are only created once. 
+      This method is run automatically when a new object is created
+
+      Any chart that inherits from this prototype should have a _setup method, which is called at the end of this function
+      */
+
+      var chart = this; 
+
+      //Setup defaults
+      chart._data = []
+      chart._field = null;
+      chart._width = 400;
+      chart._height = 300;
+      chart._margin = {top:10,right:10,bottom:10,left:10};
+      chart._container = container
+
+      chart._delay = 200
+      chart._duration = 1000
+
+      //Create graph objects needed
+      chart.svg = d3.select(chart.container())
+        .append("svg")
+        .attr('width', chart.width())
+        .attr('height', chart.height());
+
+      chart.innerChart = this.svg.append('g')
+            .classed("bar-chart",true)
+
+      //Call the chart-specific setup function for continued setup
+      if (typeof chart._setup === "function"){ chart._setup(); }
+
+    },
+    resize: function(){
+      /*
+      Anything that needs to be changed on resize should go in here. 
+      Note, this function also sets up the initial sizes of these elements because
+      it is run the first time the graph is created as well. 
+
+      Note, resize also calls update(), because anything that needs to change in update
+      also needs to be changed in resize. 
+
+      Inherited charts should have a _resize function that is called at the end of this public method
+      */
+
+      var chart = this;
+      chart.svg
+        .attr('width', chart._width)
+        .attr('height', chart._height)
+        .transition()
+        .delay(chart.delay())
+        .duration(chart.duration())
+
+      chart.innerChart.attr("transform", "translate(" + this.margin().left + "," + 0 + ")");
+
+      if (typeof chart._resize === "function"){ chart._resize(); };
+      
+      //Make the resize happen instantaneously
+      var old_duration = chart.duration()
+      var old_delay = chart.delay()
+      chart.duration(0)
+      chart.delay(0)
+      
+      chart.update();
+
+      //Reset the transition settings
+      chart.duration(old_duration)
+      chart.delay(old_delay)
+
+    }, 
     update: function(data){
       /*This is the public method used to call the private _update method of each chart
       
@@ -22,90 +112,56 @@ ChartProto.prototype = {
       */
       var chart = this
       if (arguments.length) {
-        this.data = data;
+
+        chart.data(data);
 
         //Calculated fields as necessary
-        this.minValue = d3.min(this.data, function(d) { 
-              if (chart.field) return d[chart.field];
+        //TODO maybe move this into the data getter/setter?
+        this.minValue = d3.min(chart.data(), function(d) { 
+              if (chart.field()) return d[chart.field()];
               return null;
         });
-        this.maxValue = d3.max(this.data, function(d) { 
-              if (chart.field) return d[chart.field];
+        this.maxValue = d3.max(chart.data(), function(d) { 
+              if (chart.field()) return d[chart.field()];
               return null;
         });
 
       };
 
       this._update();
-    },
-    resize: function(){
-      var chart = this;
-      chart.svg
-        .attr('width', chart._width)
-        .attr('height', chart._height)
-        .transition()
-        .delay(this.delay)
-        .duration(this.duration)
+    },      
 
-      chart.innerChart.attr("transform", "translate(" + this.margin.left + "," + 0 + ")");
-
-      if (typeof chart._resize === "function"){ chart._resize(); };
-      var temp_duration = chart.duration
-      var temp_delay = chart.delay
-      chart.duration = 0
-      chart.delay = 0
-      
-      chart.update();
-
-      chart.duration =temp_duration
-      chart.delay = temp_delay
-
-    },
-    setup: function(chartOptions) {
+    extendPrototype: function(destinationPrototype, obj){ 
       /*
-      Template for chart options. Inherited charts can add fields. 
-      chartOptions = {
-        field: 'my_fieldname'
-        width: 300,
-        height: 300,
-        margin: {top: 10, right:10, bottom:10, left:10}
-        container: '#divid' //used in a d3.select statement, svg is appended to this
-        data: [{my_fieldname: 100, label: 'item1'},{my_fieldname: 200, label:'item2'}]
+      Convenience function for merging prototypes
+
+      Example usage:
+      var BarChart = function(container) { //
+          this.extendPrototype(BarChart.prototype, BarExtension);
+          ChartProto.call(this, container); 
       }
       */
 
-      //re-assign the chartOptions onto this object
-      var chart = this; 
-      chart.field = chartOptions.field;
-      chart._width = chartOptions.width;
-      chart._height = chartOptions.height;
-      chart.margin = chartOptions.margin || {top:10,right:10,bottom:10,left:10};
-      chart.data = chartOptions.data;
-      chart.container = 'chartOptions.container';
-
-      //Set up basic graph stuff
-      this.svg = d3.select(chartOptions.container)
-        .append("svg")
-        .attr('width', chart._width)
-        .attr('height', chart._height); // TODO allow margins to be passed in
-      this.innerChart = this.svg.append('g')
-            .classed("bar-chart",true)
-            .attr("transform", "translate(" + this.margin.left + "," + 0 + ")");
-
-      //Call the chart-specific setup function for continued setup
-      if (typeof chart._setup === "function"){ chart._setup(chartOptions); }
-
-    },                       
-    extendPrototype: function(destinationPrototype, obj){ 
       for(var i in obj){
           destinationPrototype[i] = obj[i];
       } 
     },
+
+    //TODO not used currently
     sort: function(field, direction) {
         chart.data.sort(function(a, b) { 
           if (direction === 'asc') return a[chartOptions.sort.field] - b[chartOptions.sort.field];
           return b[chartOptions.sort.field] - a[chartOptions.sort.field]; 
         });             
+    },
+
+    /*
+    Custom getter/setters for chart proto properties
+    */
+    data: function(_){
+        if (!arguments.length) return this._data;
+        this._data = _;
+        return this;
     },
     width: function(_){
         if (!arguments.length) return this._width;
@@ -115,6 +171,34 @@ ChartProto.prototype = {
     height: function(_){
         if (!arguments.length) return this._height;
         this._height = _;
+        return this;
+    },
+
+    field: function(_){
+        if (!arguments.length) return this._field;
+        this._field = _;
+        return this;
+    },
+    margin: function(_){
+        if (!arguments.length) return this._margin;
+          for (var key in _ ) {
+            this._margin[key] = _[key]
+          }
+        return this;
+    },
+    container: function(_){
+        if (!arguments.length) return this._container;
+        this._container = _;
+        return this;
+    },
+    delay: function(_){
+        if (!arguments.length) return this._delay;
+        this._delay = _;
+        return this;
+    },
+    duration: function(_){
+        if (!arguments.length) return this._duration;
+        this._duration = _;
         return this;
     }
 };
