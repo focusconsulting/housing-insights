@@ -20,13 +20,15 @@ class DCHousingApiConn(BaseApiConn):
     Inherits from BaseApiConn class.
     """
 
-    BASEURL = 'http://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/' \
+    # constants for downloading data via api query
+    API_BASEURL = 'http://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/' \
               'Property_and_Land_WebMercator/MapServer/62'
     # default query to get all data as json output
-    QUERY = '/query?where=1%3D1&outFields=*&outSR=4326&f=json'
-    # optional url for batch download as csv
-    FULL_DATA_URL = 'https://opendata.arcgis.com/datasets/' \
-                '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
+    API_QUERY = '/query?where=1%3D1&outFields=*&outSR=4326&f=json'
+
+    # constants for batch download as csv
+    BASEURL = 'https://opendata.arcgis.com/datasets/'
+    DATA_URL = '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
 
     def __init__(self):
         super().__init__(DCHousingApiConn.BASEURL)
@@ -45,23 +47,23 @@ class DCHousingApiConn(BaseApiConn):
         db = kwargs.get('db', None)
 
         for u in unique_data_ids:
-            if (u not in self._available_unique_data_ids):
+            if u not in self._available_unique_data_ids:
                 #TODO this will always be raised when passing a list to get_multiple_api_sources method for those not in this class. 
                 logging.info("  The unique_data_id '{}' is not supported by the DCHousingApiConn".format(u))
 
             else:
-                result = self.get(DCHousingApiConn.QUERY)
+                result = self.get(DCHousingApiConn.DATA_URL)
                 if result.status_code != 200:
                     err = "An error occurred during request: status {0}"
                     raise Exception(err.format(result.status_code))
 
+                content = result.text
+
                 if output_type == 'stdout':
-                    pprint(result.json())
+                    print(content)
                 elif output_type == 'csv':
-                    data = result.json()['features']
-                    results = [DCHousingResult(address['attributes']).data for address in
-                               data]
-                    self.result_to_csv(FIELDS, results, self.output_paths[u])
+                    self.directly_to_file(data=content,
+                                          filepath=self.output_paths[u])
                     self.create_project_subsidy_csv(
                         self._available_unique_data_ids[0], PROJECT_FIELDS_MAP,
                         SUBSIDY_FIELDS_MAP, db)
