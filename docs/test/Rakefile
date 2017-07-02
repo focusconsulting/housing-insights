@@ -1,0 +1,10 @@
+require 'rubygems'
+require 'rspec/core/rake_task'
+
+# following:
+# https://gist.github.com/juliocesar/639636/0dcf58a140e1d865ffbfcbc0c7184cfb7f3c8e62
+
+RSpec::Core::RakeTask.new do |task|
+  task.rspec_opts = ["-c", "-f progress", "-r ./spec_helper.rb"]
+  task.pattern = './specs/*_spec.rb'
+end
