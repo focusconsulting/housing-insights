@@ -185,12 +185,14 @@ class BaseApiConn(object):
             else:
                 data[field] = line[value]
 
+            # NOTE - only needed if using data downloaded from api call
+            # instead of batch csv download
             # clean opendata 'GIS_DTTM' formatting - convert milliseconds
-            if value == 'GIS_LAST_MOD_DTTM':
-                milli_sec = int(line[value])
-                data[field] = \
-                    datetime.fromtimestamp(milli_sec / 1000.0).strftime(
-                        '%m/%d/%Y')
+            # if value == 'GIS_LAST_MOD_DTTM':
+            #     milli_sec = int(line[value])
+            #     data[field] = \
+            #         datetime.fromtimestamp(milli_sec / 1000.0).strftime(
+            #             '%m/%d/%Y')
         return data
 
     def _get_nlihc_id_from_db(self, db_conn, address_id):
