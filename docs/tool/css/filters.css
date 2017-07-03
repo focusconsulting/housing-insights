@@ -69,4 +69,16 @@
 }
 
 
+/*Descriptive text*/
+
+.description .neighborhood-flag {
+    font-size: 0.8em;
+    color: rgba(24, 100, 178,1);
+}
+
+.description .project-flag {
+    font-size: 0.8em;
+    color: rgba(234, 100, 2, 1);
+  }
+
 /**/

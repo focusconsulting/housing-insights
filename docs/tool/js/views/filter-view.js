@@ -309,23 +309,16 @@ var filterView = {
                     .classed("title filter-title",true)
                     .classed(c.data_level, true)
 
-                /*
-                Trying out using the 'data type' icon instead of the triangle
-                title.append("i")
-                    .classed("dropdown icon",true)
-                */
                 //Add data-specific icon
                 if(c.data_level == 'project') {
                     title.append("i")
                     .classed("building icon",true)
                     .attr("style","margin-right:8px;")
                 } else if(c.data_level == 'zone'){
-                    title.append("img")
-                    .attr("src","/assets/icons/neighborhood.svg")
-                    //.attr("onerror","this.src='backup.png'")
-                    .attr("width",20)
-                    .attr("height",20)
-                    .attr("style","margin-right:5px;") //slightly bigger width than project
+                    title.append("i")
+                    .classed("icons",true)
+                    .attr("style","margin-right:8px;")
+                    .html('<i class="home blue icon"></i><i class="corner blue home icon"></i>')
                 }
                 
                 title.append("span")
@@ -339,9 +332,34 @@ var filterView = {
                     .classed(c.component_type,true)
                     .classed("content", true);
 
-            var description = content.append("p")
-                    .classed("description",true)
-                description.html(c.display_text)
+            var description = content.append("div")
+                            .classed("description",true)
+
+                    //Add data-specific icon
+                if(c.data_level == 'project') {
+                    var helper = description.append("p")
+                        .classed("project-flag",true)
+
+                    helper.append("i")
+                    .classed("building icon small",true)
+                    
+                    helper.append("span")
+                    .html("Project-specific data set")
+
+                } else if(c.data_level == 'zone'){
+                    var helper = description.append("p")
+                        .classed("neighborhood-flag", true)
+
+                    helper.append("i")
+                    .classed("icons small",true)
+                    .html('<i class="home blue icon"></i><i class="corner blue home icon"></i>')
+                    
+                    helper.append("span")
+                    .html("Neighborhood level data set")                   
+                    
+                }
+
+                description.append("p").html(c.display_text)
             
             //Set it up to trigger the layer when title is clicked
             document.getElementById("filter-" + c.source).addEventListener("click", clickCallback);
