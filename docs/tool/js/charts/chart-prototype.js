@@ -258,7 +258,6 @@ Maintained here until refactoring is completed
 */
 
 var ChartProtoCallback = function(chartOptions) {    //chartOptions is an object, was DATA_FILE, el, field, sortField, asc, readableField                                                              
-    
     this.initialize(chartOptions); 
 };
 
@@ -277,12 +276,13 @@ ChartProtoCallback.prototype = {
         .attr('width', chart.width)
         .attr('height', this.height); // TODO allow margins to be passed in
       this.label = chart.svg.append('text')
-        .attr('y', chart._height - 5 ) // TODO 
-        .attr('x', chart._width / 2)
+        .attr('y', chart.height - 5 ) // TODO 
+        .attr('x', chart.width / 2)
         .attr('class','pie_text')
         .attr('text-anchor','middle'); 
-    
+
       controller.getData(chartOptions.dataRequest); // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
+
       function chartCallback(data){
         console.log('chartProto callback',chart);
         chart.data = data.items;
