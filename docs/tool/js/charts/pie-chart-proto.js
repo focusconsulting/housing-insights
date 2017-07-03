@@ -1,5 +1,13 @@
 "use strict";
 
+
+/*
+
+Note, this chart does not inherit from the newer chart prototype - see template-inherited-chart for the preferred approach
+
+*/
+
+
 var PieChartProto = function(chartOptions) { //
     this.extendPrototype(PieChartProto.prototype, PieProtoExtension);
     ChartProto.call(this, chartOptions); 

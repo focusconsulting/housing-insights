@@ -1,5 +1,14 @@
 "use strict"; 
 
+
+/*
+
+Note, this chart does not inherit from the newer chart prototype - see template-inherited-chart for the preferred approach
+
+*/
+
+
+
 var SubsidyTimelineChart = function(chartOptions) { 
                               // param1 = what to extend      param2 = with what
     this.extendPrototype(SubsidyTimelineChart.prototype, subsidyTimelineExtension);
