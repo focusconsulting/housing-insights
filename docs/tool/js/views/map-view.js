@@ -100,6 +100,7 @@
             setState('sidebar.left',true);
             setState('sidebar.right',true);
             setState('subNav.left', 'filters');
+            setState('subNav.right', 'charts');
         },
         ChloroplethColorRange: function(chloroData, style){
             // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
