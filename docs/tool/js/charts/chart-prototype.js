@@ -37,6 +37,7 @@ ChartProto.prototype = {
       //Setup defaults
       chart._data = []
       chart._field = null;
+      chart._label = null //"field" will be returned as placeholder by getter if _label is null
       chart._width = 400;
       chart._height = 300;
       chart._margin = {top:10,right:10,bottom:10,left:10};
@@ -78,11 +79,11 @@ ChartProto.prototype = {
         .delay(chart.delay())
         .duration(chart.duration())
 
-      chart.innerChart.attr("transform", "translate(" + this.margin().left + "," + 0 + ")");
+      chart.innerChart.attr("transform", "translate(" + this.margin().left + "," + this.margin().top + ")");
 
       if (typeof chart._resize === "function"){ chart._resize(); };
       
-      //Make the resize happen instantaneously
+      //Make the resize happen instantaneously - necessary when update uses transitions for normal updates
       var old_duration = chart.duration()
       var old_delay = chart.delay()
       chart.duration(0)
@@ -155,6 +156,26 @@ ChartProto.prototype = {
         });             
     },
 
+    //Calculated attributes accessible from all functions
+    innerHeight: function(_){
+        if (!arguments.length) {
+            var innerHeight = (this._height - this.margin().top - this.margin().bottom)
+            return innerHeight;
+        }
+        console.log("can't set inner height, it's calculated")
+        return this;
+    },
+    //Calculated attributes accessible from all functions
+    innerWidth: function(_){
+        if (!arguments.length) {
+            var innerWidth = (this._width - this.margin().left - this.margin().right)   
+            return innerWidth;
+        }
+        console.log("can't set inner height, it's calculated")
+        return this;
+    },
+
+
     /*
     Custom getter/setters for chart proto properties
     */
@@ -174,9 +195,20 @@ ChartProto.prototype = {
         return this;
     },
 
+    //Name of the key in the data object to be used for the primary numeric data, e.g. "value" with data of shape [{'id':'point 1', 'value': 100 }]
     field: function(_){
         if (!arguments.length) return this._field;
         this._field = _;
+        return this;
+    },
+    //Name of the key in the data object to be used for the displayed name of a data point, e.g. "id" with data of shape [{'id':'point 1', 'value': 100 }]
+    label: function(_){
+        if (!arguments.length) {
+            //Return a default label if none exists yet
+            if (this._label == null) return this._field;
+            return this._label
+        };
+        this._label = _;
         return this;
     },
     margin: function(_){

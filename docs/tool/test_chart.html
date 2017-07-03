@@ -12,12 +12,43 @@
         </style>
     </head>
     <body>
-        <h1>This is my new chart</h1>
-        <div class="demoPercentChart"></div>
-        <div class="demoValueChart"></div>
+        <h1>Demo of chart template</h1>
+        <div class="demoChart"></div>
     <script src="js/charts/chart-prototype.js"></script>
-    <script src="js/charts/bar-chart-proto.js"></script>
-    <script src="js/views/test_chart.js"></script>
+    <script src="js/charts/template-inherited-chart.js"></script>
+    <script>
+
+        exampleData = [
+            {"value": 10, "group": "Ward 1"}, 
+            {"value": 112, "group": "Ward 2"}, 
+            {"value": 12,  "group": "Ward 3"}, 
+            {"value": 110, "group": "Ward 4"}, 
+            {"value": 157, "group": "Ward 5"}, 
+            {"value": 122, "group": "Ward 6"}, 
+            {"value": 75, "group": "Ward 7"}
+          ]
+
+
+
+        var demoChart = new myCustomChart('.demoChart')
+                    .width(400)
+                    .height(200)
+                    .margin({top: 20, right: 20, bottom: 20, left: 50})
+                    .data(exampleData)
+                    .field('value')
+                    .label('group')
+                    .create()
+
+        setTimeout(function(){
+            var copiedData = JSON.parse(JSON.stringify(exampleData))
+            copiedData.pop(0)
+            copiedData.push({"value": 229, "group": "Ward 8"})
+
+            demoChart.update(copiedData)
+
+
+        }, 2000)
+    </script>
     </body>
 
 </html>
