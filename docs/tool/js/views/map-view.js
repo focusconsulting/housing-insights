@@ -678,6 +678,51 @@
                     mapView.circleStrokeWidth = 1;
                     mapView.circleStrokeOpacity = 1;
                     mapView.map.addLayer({
+                        'id': 'project-unmatched', 
+                        'type': 'circle',
+                        'source': 'project',
+                        'filter': ['==', 'klass', 'none'],
+                        'paint': {
+                            'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
+                                ]
+                            },
+
+                            'circle-stroke-opacity': 0.5,                          
+                            'circle-opacity': 0.5,
+                            'circle-stroke-width': 2, 
+                            'circle-color': '#aaaaaa',
+                            'circle-stroke-color': '#aaaaaa'
+                            
+                        }
+                    });
+                    mapView.map.addLayer({
+                        'id': 'project-exit', // add layer for exiting projects. empty at first. very repetitive of project layer, which could be improved
+                        'type': 'circle',
+                        'source': 'project',
+                        'filter': ['==', 'klass', 'exit'],
+                        'paint': {
+                            'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
+                                ]
+                            },                         
+                            'circle-opacity': 0.5,
+                            'circle-color': '#aaaaaa',
+
+                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-width': 2, 
+                            'circle-stroke-color': '#626262'
+                        }
+                    });
+                    mapView.map.addLayer({
                         'id': 'project',
                         'type': 'circle',
                         'source': 'project',
@@ -691,38 +736,12 @@
                                     [15, 15]
                                 ]
                             },
-                            'circle-opacity': 0.3,
-                            'circle-color': {
-                                property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            },
-                            'circle-stroke-width': 1,                            
-                            'circle-stroke-width-transition': {
-                                duration: 300,
-                                delay: 0
-                            },                            
-                            'circle-stroke-opacity': 1,
+                            'circle-opacity': 0.5,
+                            'circle-color': '#fd8d3c',
 
-                            'circle-stroke-color': {
-                                property: 'category_code',
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            }
+                            'circle-stroke-width': 2,                  
+                            'circle-stroke-opacity': 0.5,
+                            'circle-stroke-color': '#fd8d3c'    //same as circle for existing
                         }
                     });
                     mapView.map.addLayer({
@@ -739,87 +758,16 @@
                                     [15, 15]
                                 ]
                             },
-                            'circle-opacity': 0.3,
-                            'circle-color': {
-                                property: 'category_code', 
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            },
-                            'circle-stroke-width': 1,                            
-                            'circle-stroke-width-transition': {
-                                duration: 300,
-                                delay: 0
-                            },                            
-                            'circle-stroke-opacity': 1,
 
-                            'circle-stroke-color': {
-                                property: 'category_code',
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            }
+                            'circle-opacity': 0.5,
+                            'circle-color': '#fd8d3c', 
+
+                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it          
+                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
-                    mapView.map.addLayer({
-                        'id': 'project-exit', // add layer for exiting projects. empty at first. very repetitive of project layer, which could be improved
-                        'type': 'circle',
-                        'source': 'project',
-                        'filter': ['==', 'klass', 'exit'],
-                        'paint': {
-                            'circle-radius': {
-                                'base': 1.75,
-                                'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
-                                ]
-                            },
-                            'circle-opacity-transition': {
-                                duration: 1000,
-                                delay: 0
-                            },                            
-                            'circle-opacity': 1,
-                            'circle-color': {
-                                property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            },
-                            
-
-                            'circle-stroke-color': {
-                                property: 'category_code',
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            }
-                        }
-                    });
+                   
 
                     // TODO: MAKE LEGEND
                     mapView.map.on('mousemove', function(e) {
@@ -842,7 +790,7 @@
                     mapView.map.on('click', function(e) {
                         console.log(e);
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project','project-enter']
+                            layers: ['project','project-enter','project-exit', 'project-unmatched']
                         }))[0];
                         console.log(building);
                         if (building === undefined) return;
@@ -893,27 +841,31 @@
                     feature.properties.klass = feature.properties.previous_filters === false ? 'none' : 'exit'; // two falses in a row means no action; new false means exit
                 }
             });
-            mapView.map.setFilter('project-exit', ['==','klass','exit']); // resets exit filter to be meaningful. it's set to nonsense after the animations
+           // mapView.map.setFilter('project-exit', ['==','klass','exit']); // resets exit filter to be meaningful. it's set to nonsense after the animations
                                                                           // so that previous exits don't show when the opacity is set back to 1
             mapView.map.getSource('project').setData(mapView.convertedProjects);
             mapView.animateEnterExit();
             mapView.listBuildings();        
         },
         animateEnterExit: function(){
-            setTimeout(function(){
-                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 8);
-                mapView.map.setPaintProperty('project-exit','circle-opacity', 0);
-                setTimeout(function(){
-                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 1);                    
+            var delayAnimation = setTimeout(function(){
+                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);                
+                var shrinkCircles = setTimeout(function(){
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);                     
                 },300);
-                setTimeout(function(){
+             /*   var exitColor = setTimeout(function(){
+                    mapView.map.setPaintProperty('project-exit','circle-color', '#767676');
+                    mapView.map.setPaintProperty('project-exit','circle-stroke-color', '#767676');                                           
+                },500);*/
+               /* setTimeout(function(){
                     mapView.map.setFilter('project-exit', ['==','klass','doesnotexist']); // sets filter to nonexistant klass to clear the layer
                     mapView.map.setPaintProperty('project-exit','circle-opacity', 1); // put the empty exit layer back to opacity 1, read for next filtering
 
-                },1000);
+                },1000); */
             },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
                     // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
                     // would be nicer with a callback, but I don't htink that's available -JO
+            
          
         },
         /*
