@@ -10,7 +10,7 @@ Note, this chart does not inherit from the newer chart prototype - see template-
 
 var PieChartProto = function(chartOptions) { //
     this.extendPrototype(PieChartProto.prototype, PieProtoExtension);
-    ChartProto.call(this, chartOptions); 
+    ChartProtoCallback.call(this, chartOptions); 
 }
 
 PieChartProto.prototype = Object.create(ChartProtoCallback.prototype);
