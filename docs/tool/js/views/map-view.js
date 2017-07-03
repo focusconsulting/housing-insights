@@ -691,16 +691,12 @@
                                     [15, 16]
                                 ]
                             },
-                      /*      'circle-color-transition': {
-                                duration: 5000,
-                                delay: 0
-                            },
-                            'circle-stroke-color-transition': {
-                                duration: 5000,
-                                delay: 0
-                            },   */                          
-                            'circle-opacity': 0.3,
-                            'circle-color': '#aaaaaa'
+
+                            'circle-stroke-opacity': 0.5,                          
+                            'circle-opacity': 0.5,
+                            'circle-stroke-width': 2, 
+                            'circle-color': '#aaaaaa',
+                            'circle-stroke-color': '#aaaaaa'
                             
                         }
                     });
@@ -717,19 +713,13 @@
                                     [12, 4],
                                     [15, 15]
                                 ]
-                            },
-                      /*      'circle-color-transition': {
-                                duration: 5000,
-                                delay: 0
-                            },
-                            'circle-stroke-color-transition': {
-                                duration: 5000,
-                                delay: 0
-                            },   */                          
-                            'circle-opacity': 0.3,
-                            'circle-color': '#aaa',
-                            'circle-stroke-width': 1, 
-                            'circle-stroke-color': '#767676'
+                            },                         
+                            'circle-opacity': 0.5,
+                            'circle-color': '#aaaaaa',
+
+                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-width': 2, 
+                            'circle-stroke-color': '#626262'
                         }
                     });
                     mapView.map.addLayer({
@@ -746,16 +736,12 @@
                                     [15, 15]
                                 ]
                             },
-                            'circle-opacity': 0.3,
-                            'circle-color': '#bd3621',
-                            'circle-stroke-width': 1,                            
-                            'circle-stroke-width-transition': {
-                                duration: 300,
-                                delay: 0
-                            },                            
-                            'circle-stroke-opacity': 1,
+                            'circle-opacity': 0.5,
+                            'circle-color': '#fd8d3c',
 
-                            'circle-stroke-color': '#bd3621'
+                            'circle-stroke-width': 2,                  
+                            'circle-stroke-opacity': 0.5,
+                            'circle-stroke-color': '#fd8d3c'    //same as circle for existing
                         }
                     });
                     mapView.map.addLayer({
@@ -772,16 +758,13 @@
                                     [15, 15]
                                 ]
                             },
-                            'circle-opacity': 0.3,
-                            'circle-color': '#bd3621',
-                            'circle-stroke-width': 1,                            
-                            'circle-stroke-width-transition': {
-                                duration: 300,
-                                delay: 0
-                            },                            
-                            'circle-stroke-opacity': 1,
 
-                            'circle-stroke-color': '#bd3621'
+                            'circle-opacity': 0.5,
+                            'circle-color': '#fd8d3c', 
+
+                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it          
+                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
                    
@@ -866,9 +849,9 @@
         },
         animateEnterExit: function(){
             var delayAnimation = setTimeout(function(){
-                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 8);                
+                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);                
                 var shrinkCircles = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 1);                     
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);                     
                 },300);
              /*   var exitColor = setTimeout(function(){
                     mapView.map.setPaintProperty('project-exit','circle-color', '#767676');
