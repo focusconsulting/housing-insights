@@ -158,18 +158,39 @@ var filterView = {
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
-                ['filterValues', filterView.addClearPillboxes]
+                ['filterValues', filterView.addClearPillboxes], 
+                ['subNavExpanded.right', filterView.expandSidebar]
             ]);
 
             setState('subNav.left','layers');
             setState('subNav.right','buildings');
 
+            //TODO this is for the triangular boxes to expand/collapse, which might be tweaked in new UI. Check if this is still relevant. 
             document.querySelectorAll('.sidebar-tab').forEach(function(tab){
                 tab.onclick = function(e){
                     var sideBarMsg = e.currentTarget.parentElement.id.replace('-','.');
                     filterView.toggleSidebarState(sideBarMsg);
                 }
             });
+
+            //Expand/Collapse right sidebar control clickbacks
+            d3.select('#expand-sidebar-right')
+                .on('click', function(){
+                    //toggle which control is shown
+                    d3.selectAll('#sidebar-control-right i').classed("hidden",true)
+                    d3.select('#compress-sidebar-right').classed("hidden",false)
+
+                    setState('subNavExpanded.right',true)
+                });
+
+            d3.select('#compress-sidebar-right')
+                .on('click', function(){
+                    //Toggle which control is shown
+                    d3.selectAll('#sidebar-control-right i').classed("hidden",true)
+                    d3.select('#expand-sidebar-right').classed("hidden",false)
+
+                    setState('subNavExpanded.right',false)
+                });
 
             document.querySelectorAll('.sub-nav-button').forEach(function(button){
                 button.onclick = function(e){
@@ -517,6 +538,12 @@ var filterView = {
         if ( getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][1] ){
             document.querySelector('#' + getState()['subNav.' + leftRight][1]).classList.remove('active');
         }
+    },
+    expandSidebar: function(msg, data){
+        //data is the state of the expansion, either true or false
+
+        //TODO this does not touch the fact that the sidebar can also be active or not. With current setup this does not cause issues but if controls are rearranged could be an issue
+        d3.select('#sidebar-right').classed('expanded', data)
     }
 
 };
