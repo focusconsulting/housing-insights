@@ -1,4 +1,13 @@
 "use strict";
+/*
+
+Note, this chart does not inherit from the newer chart prototype - see template-inherited-chart for the preferred approach
+
+*/
+
+
+
+
 
 var DonutChart = function(chartOptions) { 
     this.extendPrototype(DonutChart.prototype, DonutChartExtension);

@@ -1,0 +1,14 @@
+{
+  "data_id": "ward", 
+  "grouping": "ward", 
+  "items": [
+    {"count": 124, "group": "Ward 1"}, 
+    {"count": 112, "group": "Ward 2"}, 
+    {"count": 12,"group": "Ward 3"}, 
+    {"count": 110,"group": "Ward 4"}, 
+    {"count": 157,"group": "Ward 5"}, 
+    {"count": 122,"group": "Ward 6"}, 
+    {"count": 291,"group": "Ward 7"}, 
+    {"count": 229,"group": "Ward 8"}
+  ]
+}
