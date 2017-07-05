@@ -98,7 +98,7 @@ html, body {
 }
 
 #left-options {
-    width: 250px;
+    width: 300px;
     display: flex;
 }
 
@@ -224,7 +224,7 @@ html, body {
 .sidebar {
     position: absolute;
     width: 100%;
-    max-width: 250px;
+    max-width: 300px;
     top: 80px;
     bottom: 0;
     z-index: 9999;
@@ -336,6 +336,10 @@ Others are working correctly.
     top: 80px;
     bottom: 0;
 }
+
+
+/*
+Switched to semantic-ui buttons instead
 #layer-menu, #overlay-menu, #temp-filter-menu {
     background: inherit;
 }
@@ -361,6 +365,8 @@ a.active {
     background-color: #b3cde3;
 }
 
+*/
+
 #reset-zoom {
     display: none;
     position: absolute;
@@ -382,7 +388,36 @@ a.active {
 .mapboxgl-ctrl-top-right.movedIn{
     transform: translateX(-350px);
 }
-/*copy-pasted from semantic ui so we can modify*/
+
+
+
+/*Partially override semantic-ui styling, so some is inherited from there*/
+
+/*Mimics accordion title styling*/
+#filters .header {
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 1.3em;
+    background: #d69c93;
+    margin: 0em;
+    padding: 0.3em 0.5em;
+    color: rgba(0, 0, 30, 0.95);
+    font-weight: bold;
+    border-top: 1px solid rgba(34, 36, 38, 0.15);
+}
+/*Mimics accordion content styling*/
+#filters .static-content {
+    margin: 0;
+    padding: .5em 1em 1.5em;
+    display: block;
+}
+
+/*Used for the actively selected boundary type*/
+.ui.button.toggle.active, 
+.ui.buttons .button.toggle.active, 
+.ui.toggle.buttons .active.button {
+    background-color: #0D5C7D!important;
+    color: #FFF!important;
+}
 
 /*Layer accordions (blue)*/
 
