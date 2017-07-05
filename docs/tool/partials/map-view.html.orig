@@ -16,6 +16,7 @@
 
         </div>
     </div>
+<<<<<<< HEAD
 
     <div id="outer-map-wrapper">
         <div id="sidebar-left" class="sidebar left">
@@ -30,26 +31,58 @@
                     </div>
                     <div class="sub-nav-group">
                         <h3>Divide by</h3>
-                    <!--old layer menu location-->
-                    <!--<div id="layer-menu"></div>-->
+                        <div id="layer-menu"></div>
                     </div>
                 </div>
 
 
                 <div id="filters" class="sub-nav-container">
+                    <div class="sub-nav-heading">
+                        <h1>Select data sources</h1>
+                    </div>
+                    <div id="filter-components">
+                    </div>                
+                </div>
+            </div>
+        </div>
+        <div id="sidebar-right" class="sidebar right">
+=======
+    <div id="sidebar-left" class="sidebar">
+        <button class="sidebar-tab"><div class="triangle right"></div></button>
+        <div class="sidebar-inner-wrapper">
+
+            <div id="layers" class="sub-nav-container">
+                <div class="sub-nav-group scroll-y">
+                    <h3>Show data</h3>
+                    <div id="overlay-menu"></div>
+                </div>
+                <div class="sub-nav-group">
+                    <h3>Divide by</h3>
+                    <!--old layer menu location-->
+                    <!--<div id="layer-menu"></div>-->
+                </div>
+            </div>
+
+            <div id="filters" class="sub-nav-container">
                 <div id="zone-choice-header" class="header">1) Select Zone Type</div>
                 <div id="layer-menu"></div>
                 <div class="static-content">
                     <p id="zone-choice-description">This is a description</p>
                 </div>
                 <div id="zone-choice-header" class="header">2) Data choices</div>
-                    <div id="filter-components">
-                    </div>                
-                </div>
-
+                <div id="filter-components">
+                </div>                
             </div>
+
         </div>
-        <div id="sidebar-right" class="sidebar right">
+    </div>
+
+
+
+    <div id="sidebar-right" class="sidebar">
+    <button class="sidebar-tab"><div class="triangle left"></div></button>
+        <div class="sidebar-inner-wrapper">
+>>>>>>> demo-merged-layer-filter
             
 
             <!--<button class="sidebar-tab" style="visibility:hidden"><div class="triangle left"></div></button>-->
@@ -74,12 +107,7 @@
                         <div id="pie-charts">
                             <div id="pie-0"></div>
                             <div id="pie-1"></div>                       
-                        </div>
-                        <div id="bar-charts">
-                            <br/>
-                            <h4>Example Bar (doesn't update)</h4>
-                            <div id="demoPercentChart"></div>
-                        </div>
+                        </div>  
                     </div>
                     <div class="sub-nav-group">                    
                         

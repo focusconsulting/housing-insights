@@ -155,7 +155,7 @@ html, body {
     padding: 10px;
     position: absolute;
     bottom: 0;
-    left: 260px;    
+    left: 310px;    
 }
 
 #legend-items div span {
@@ -238,7 +238,7 @@ html, body {
 }
 
 .sidebar.left{
-    max-width:250px;
+    max-width:300px;
 }
 
 .sidebar.right {
@@ -255,9 +255,9 @@ Note, transition from expanded to totally closed is snapping instantly because o
 Others are working correctly. 
 */
 .sidebar.right.expanded {
-    max-width: -webkit-calc(100% - 250px);
-    max-width:    -moz-calc(100% - 250px);
-    max-width:         calc(100% - 250px);
+    max-width: -webkit-calc(100% - 300px);
+    max-width:    -moz-calc(100% - 300px);
+    max-width:         calc(100% - 300px);
     transition: max-width 0.2s linear;
 }
 
@@ -286,7 +286,7 @@ Others are working correctly.
 }
 .sidebar-tab {
     width: 20px;
-    height: 40px;
+    height: 37px;
     position: absolute;
     border: none;
     position: absolute;

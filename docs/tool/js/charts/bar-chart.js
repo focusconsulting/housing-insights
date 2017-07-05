@@ -13,7 +13,7 @@ var BarExtension = {
         Add graph-specific defaults and insert one-time DOM elements like axes
         This is called from ChartProto.setup()
         */
-
+        console.log("adding bar chart")
         //namespace assignment - allow access to 'this' inside child functions
         var chart = this 
 
