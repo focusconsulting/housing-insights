@@ -553,15 +553,16 @@
 
                 for (var i = 0; i < mapView.initialLayers.length; i++) {
                     console.log("Adding " + mapView.initialLayers[i].source);
-                    mapView.addLayer(mapView.initialLayers[i])
+                    mapView.addZoneLayerToMap(mapView.initialLayers[i])
+                    mapView.addButtonToZoneMenu(mapView.initialLayers[i]);
                 }
+
             } else {
                 console.log("ERROR data loaded === false")
             };
         },
-        addLayer: function(layer) {
+        addZoneLayerToMap: function(layer) {
             //Adds an individual zone (ward, zip, etc.) to the geoJSON
-            //TODO should rename this - this is confusing with the mapView.map.addLayer method, which is Mapbox's layer as opposed to zone type. 
 
             var layerName = layer.source + 'Layer'; // e.g. 'wardLayer'
             var dataRequest = {
@@ -571,6 +572,7 @@
             };
             controller.getData(dataRequest);
 
+            //TODO we can't control the order of zone type choices because this occurs via callback!
             function addLayerCallback(data) {
                 if (mapView.map.getSource(layerName) === undefined) {
                     mapView.map.addSource(layerName, {
@@ -594,11 +596,14 @@
                         'visibility': layer.visibility
                     }
                 });
-                mapView.addToLayerMenu(layer);
+                
             }
         },
 
-        addToLayerMenu: function(layer) {
+        addButtonToZoneMenu: function(layer) {
+            //Appends a new button to the list of zone choices
+
+            console.log("Adding layerMenuOption for " + layer.source);
             d3.select('#layer-menu-buttons')
 
                 .append('button')
@@ -613,7 +618,6 @@
                 .on('click', function() {
                     setState('mapLayer', layer.source);  
                 });
-
         },
 
 

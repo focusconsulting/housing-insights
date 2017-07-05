@@ -8,6 +8,15 @@ var filterView = {
         //"source" is the column name from the filter table, which should match the table in the original database table.
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
+        {   source:'location',
+            display_name: 'Location',
+            display_text: "Dropdown menu updates when selecting a new zone type. <br><br>Logic Incomplete: still need to a) clear the existing filter when new zone is selected and b) writecallback for the locationFilterControl",
+            component_type: 'location',
+            data_type: 'text',
+            data_level: 'project'
+        },
+
+        /*
         {   source:'ward',
             display_name: 'Location: Ward',
             display_text: "The largest geograpical division of the city.",
@@ -43,7 +52,7 @@ var filterView = {
             data_type: 'text',
             data_level: 'project'
         },
-
+        */
         {   source: 'proj_units_tot',
             display_name: 'Total units in project',
             display_text: 'Total count of units in the project, including both subsidized and market rate units.',
@@ -186,7 +195,9 @@ var filterView = {
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
-                ['filterValues', filterView.addClearPillboxes]
+                ['filterValues', filterView.addClearPillboxes],
+                ['mapLayer', filterView.updateLocationFilterControl],
+                ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
             ]);
 
             setState('subNav.left','layers');
@@ -227,6 +238,7 @@ var filterView = {
         // For inheritance
         filterView.continuousFilterControl.prototype = Object.create(filterView.filterControl.prototype);
         filterView.categoricalFilterControl.prototype = Object.create(filterView.filterControl.prototype);
+        filterView.locationFilterControl.prototype = Object.create(filterView.categoricalFilterControl.prototype);
 
     }, //end init
     filterControls: [],
@@ -330,7 +342,8 @@ var filterView = {
             var content = parent.append("div")
                     .classed("filter", true)
                     .classed(c.component_type,true)
-                    .classed("content", true);
+                    .classed("content", true)
+                    .attr("id","filter-content-"+c.source);
 
             var description = content.append("div")
                             .classed("description",true)
@@ -401,14 +414,13 @@ var filterView = {
             .attr("multiple", " ")
             .attr("id", c.source);
 
+        //Add the dropdown menu choices
         for(var j = 0; j < c.options.length; j++){
             uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
-            var select = document.getElementById(c.source);
+            //var select = document.getElementById(c.source);
         }
 
-        $('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect.
-        $('.ui.dropdown').dropdown({ fullTextSearch: 'exact' });
-        $('#'+c.source).dropdown();
+        $('#'+c.source).dropdown({ fullTextSearch: 'exact' });
 
         //Set callback for when user makes a change
         function makeSelectCallback(component){
@@ -433,6 +445,39 @@ var filterView = {
         }
 
     },
+
+
+    locationFilterControl: function(component){
+        filterView.categoricalFilterControl.call(this, component);
+        var c = this.component;
+        var contentContainer = d3.select("#filter-content-"+c.source)
+        var uiSelector = d3.select(c.source)
+
+
+        console.log("Set up location filter")
+        //TODO we will need to override the callback with a different callback that knows how to tell the state module the right zone type
+
+    },
+
+    updateLocationFilterControl: function(msg,data){
+        //Find out what layer is active. (using getState so we can subscribe to any event type)
+        var layerType = getState()['mapLayer'][0]
+        var choices = filterView.locationFilterChoices[layerType]
+
+        //remove all existing choices
+        d3.selectAll("#location option").remove()
+
+        //Add the new ones in
+        for(var j = 0; j < choices.length; j++){
+            d3.select('#location').append("option")
+                .attr("value", choices[j])
+                .text(choices[j])
+        }
+        
+    },
+
+    locationFilterChoices: {}, //populated based on data in the buildFilterComponents function
+
     buildFilterComponents: function(){
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
@@ -443,9 +488,6 @@ var filterView = {
 
             //Set up sliders
             if (filterView.components[i].component_type == 'continuous'){
-
-                console.log(filterView.components[i])
-                console.log("Found a continuous source!");
                 
                 new filterView.continuousFilterControl(filterView.components[i]);
             }
@@ -466,14 +508,44 @@ var filterView = {
                     }
                 };
                 filterView.components[i]['options'] = result;
-                console.log("Found a categorical filter: " + filterView.components[i].source)
 
                 new filterView.categoricalFilterControl(filterView.components[i]);
                   
             };
 
+            //set up location picker
+            if (filterView.components[i].component_type == 'location'){
+                //Create the object itself
+                var location_options = ["First select a zone type"];
+                filterView.components[i]['options'] = location_options;
+                new filterView.locationFilterControl(filterView.components[i]);  
+
+                ///////////////////////////////////////////////////
+                //Save the drop down choices for each location type for later use
+                ///////////////////////////////////////////////////
+                
+                //Make empty lists for each type of dropdown
+                mapView.initialLayers.forEach(function(layerDefinition){
+                    filterView.locationFilterChoices[layerDefinition.source] = []
+                });
+
+                //Iterate over the data itself and build a set of unique values
+                for (var dataRow = 0; dataRow < workingData.length; dataRow++) {
+
+                    mapView.initialLayers.forEach(function(layerDefinition){
+                        if(!filterView.locationFilterChoices[layerDefinition.source].includes(
+                                workingData[dataRow][layerDefinition.source])
+                            ){
+                                filterView.locationFilterChoices[layerDefinition.source].push(
+                                    workingData[dataRow][layerDefinition.source]
+                                );
+                            }
+                    }); 
+                };
+                
+            };
+
             if (filterView.components[i].component_type == 'date'){
-                console.log("Found a date filter! (need code to add this element)")
                 //Add a div with label and select element
                 //Bind user changes to a setState function
             };
