@@ -480,37 +480,6 @@
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
 
         },
-        updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
-            //Checks to see if the current overlay is different from previous overlay
-            //If so, use the 'zones' to enable/disable zone selection buttons
-            
-            var layerMenu = d3.select('#layer-menu').classed("myclass",true)
-            layerMenu.selectAll('a')
-                .each(function(d) {
-
-                    var zoneButton = d3.select(this)
-                    var buttonId = zoneButton.attr('id')
-                    var layerType = buttonId.replace("-menu-item","")
-
-                    //Get layers from the overlay config, or if no overlay selected use all available layers
-                    var availableLayers = []
-                    if (data.overlay == null){
-                        mapView.initialLayers.forEach(function(layer) {
-                            availableLayers.push(layer.source);
-                        });
-                    } else {
-                        availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
-                    };
-
-
-                  //True if in the list, false if not
-                  var status = true
-                  if (availableLayers.indexOf(layerType) != -1) {
-                    status = false
-                  }
-                  zoneButton.classed('unavailable',status)
-                });
-        },
 
         showOverlayLayer: function(overlay_name, activeLayer) {
 
@@ -528,50 +497,71 @@
 
         },
         toggleActive: function(selector) {
+            //TODO I think this is not actually selecting anything?
+            console.log("toggling active")
+            console.log(selector);
             d3.select(selector)
-                .attr('class', function() {
+                .classed('active', function() {
                     if (d3.select(this).attr('class') === 'active') {
-                        return '';
+                        return false;
                     }
-                    return 'active';
+                    return true;
                 });
         },
-        initialLayers: [{
+        initialLayers: [
+            {
                 source: 'ward',
-                color: "#002D61",
+                display_name: 'Ward',
+                display_text: 'The largest geograpical division of the city, each with approximately equal population.',
+                color: "#0D5C7D",
                 visibility: 'visible'
             },
             {
                 source: 'neighborhood_cluster',
+                display_name: 'Neighborhood Cluster',
+                display_text: '39 clusters each combining a set of smaller neighborhoods.',
                 color: '#0D5C7D',
                 visibility: 'none',
             },
             {
                 source: 'census_tract',
-                color: '#8DE2B8',
+                display_name: 'Census Tract',
+                display_text: 'A small division used in collection of the US Census.',
+                color: '#0D5C7D',
                 visibility: 'none'
-            },
+            }
+           
+            /*
             {
                 source: 'zip',
+                display_name: 'Zip',
                 color: '#0D7B8A',
                 visibility: 'none'
             }
+            */
         ],
         addInitialLayers: function(msg, data) {
 
             //This function adds the zone layers, i.e. ward, zip, etc.
             if (data === true) {
-                //controller.appendPartial('layer-menu','main-view');
-                mapView.initialLayers.forEach(function(layer) { // refers to mapView instead of this bc being called form PubSub
-                    //  context. `this` causes error
-                    mapView.addLayer(layer);
-                });
+
+                //Set up the initial holder of layer buttons
+                d3.select("#layer-menu")
+                    .append('div')
+                        .classed("ui three large buttons",true) //TODO does "three" need to be based on count of layers if we add/remove some?
+                        .attr("id","layer-menu-buttons")
+
+                for (var i = 0; i < mapView.initialLayers.length; i++) {
+                    console.log("Adding " + mapView.initialLayers[i].source);
+                    mapView.addLayer(mapView.initialLayers[i])
+                }
             } else {
                 console.log("ERROR data loaded === false")
             };
         },
         addLayer: function(layer) {
             //Adds an individual zone (ward, zip, etc.) to the geoJSON
+            //TODO should rename this - this is confusing with the mapView.map.addLayer method, which is Mapbox's layer as opposed to zone type. 
 
             var layerName = layer.source + 'Layer'; // e.g. 'wardLayer'
             var dataRequest = {
@@ -609,25 +599,19 @@
         },
 
         addToLayerMenu: function(layer) {
+            d3.select('#layer-menu-buttons')
 
-            d3.select('#layer-menu')
-                .append('a')
-                .attr('href', '#')
+                .append('button')
+                .classed("ui toggle button", true)
                 .attr('id', function() {
-                    return layer.source + '-menu-item';
+                    return layer.source + '-menu-item'; 
                 })
-                .attr('class', function() {
-                    if (layer.visibility === 'visible') {
-                        return 'active';
-                    }
-                    return '';
-                })
+                .classed('active', (layer.visibility === 'visible'))
                 .text(function() {
-                    return layer.source.split('_')[0].toUpperCase();
+                    return layer.display_name;
                 })
                 .on('click', function() {
-                    d3.event.preventDefault();
-                    setState('mapLayer', layer.source);
+                    setState('mapLayer', layer.source);  
                 });
 
         },
@@ -652,10 +636,44 @@
             mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
 
             //Make sure the menu reflects the current choice
-            d3.selectAll('#layer-menu a')
-                .attr('class', '');
+            d3.selectAll('#layer-menu-buttons button')
+                .classed('active',false)
             d3.select('#' + data + '-menu-item')
-                .attr('class', 'active');
+                .classed('active',true);
+            d3.select('#zone-choice-description')
+                .text(mapView.initialLayers.find(x => x.source === data).display_text)
+
+        },
+        updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
+            //Checks to see if the current overlay is different from previous overlay
+            //If so, use the 'zones' to enable/disable zone selection buttons
+            
+            var layerMenu = d3.select('#layer-menu-buttons')
+            layerMenu.selectAll('button')
+                .each(function(d) {
+
+                    var zoneButton = d3.select(this)
+                    var buttonId = zoneButton.attr('id')
+                    var layerType = buttonId.replace("-menu-item","")
+
+                    //Get layers from the overlay config, or if no overlay selected use all available layers
+                    var availableLayers = []
+                    if (data.overlay == null){
+                        mapView.initialLayers.forEach(function(layer) {
+                            availableLayers.push(layer.source);
+                        });
+                    } else {
+                        availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+                    };
+
+
+                  //True if in the list, false if not
+                  var status = true
+                  if (availableLayers.indexOf(layerType) != -1) {
+                    status = false
+                  }
+                  zoneButton.classed('disabled',status)
+                });
         },
 
         placeProjects: function(msg, data) { // some repetition here with the addLayer function used for zone layers. could be DRYer if combined
