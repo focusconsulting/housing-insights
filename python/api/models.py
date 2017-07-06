@@ -9,6 +9,7 @@ class MedianRent(Base):
 
     tract = relationship("CensusMapping", uselist=False, backref='median_rent')
 
+
 class Project(Base):
     __tablename__ = 'project'
 
@@ -16,10 +17,13 @@ class Project(Base):
 #   total_units = db.Column('proj_units_tot', Integer)
     min_assisted_units = Column('proj_units_assist_min', Integer)
     latitude = Column('proj_lat', Float)
-    longitude = Column('proj_lon', Float) 
+    longitude = Column('proj_lon', Float)
+
 
 class CensusMapping(Base):
     __tablename__ = 'census_mapping'
 
     acs_code = Column('acs_code', Text, primary_key=True)
     tract_code = Column('tract_code', Text)
+
+class 

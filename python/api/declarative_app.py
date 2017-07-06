@@ -17,7 +17,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = connect_str
 manager = APIManager(app, flask_sqlalchemy_db=db)
 
 for model in [MedianRent, Project, CensusMapping]:
-	manager.create_api(model, methods=['GET'])
+    manager.create_api(model, methods=['GET'])
+
 
 @app.route('/')
 def hello():
@@ -25,4 +26,4 @@ def hello():
 
 
 if __name__ == '__main__':
-	app.run()
+    app.run()
