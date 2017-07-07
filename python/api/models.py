@@ -26,4 +26,17 @@ class CensusMapping(Base):
     acs_code = Column('acs_code', Text, primary_key=True)
     tract_code = Column('tract_code', Text)
 
-class 
+
+class Census(Base):
+    __tablename__ = 'census'
+
+    census_tract_desc = Column('census_tract_desc', Text)
+    census_tract = Column('census_tract', Text, primary_key=True)
+    total_population = Column('total_population', Integer)
+    acs_lower_rent_quartile = Column('acs_lower_rent_quartile', Integer)
+    acs_median_rent = Column('acs_median_rent', Integer)
+    acs_upper_rent_quartile = Column('acs_upper_rent_quartile', Integer)
+    state = Column('state', Text)
+    county = Column('county', Text)
+    tract = Column('tract', Text)
+    unique_data_id = Column('unique_data_id', Text)
