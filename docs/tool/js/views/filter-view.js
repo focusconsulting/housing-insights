@@ -158,7 +158,9 @@ var filterView = {
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
-                ['filterValues', filterView.addClearPillboxes]
+                ['filterValues', filterView.addClearPillboxes],
+                ['dataLoaded.filterData', filterView.formatFilterDates],
+                ['filterDatesFormatted', filterView.buildFilterComponents]
             ]);
 
             setState('subNav.left','layers');
@@ -189,8 +191,7 @@ var filterView = {
             //Get the data and use it to dynamically apply configuration such as the list of categorical options
             controller.getData({
                         name: 'filterData',
-                        url: model.URLS.filterData, 
-                        callback: filterView.buildFilterComponents
+                        url: model.URLS.filterData
                     }) 
         } else {
             console.log("ERROR data loaded === false")
@@ -201,6 +202,33 @@ var filterView = {
         filterView.categoricalFilterControl.prototype = Object.create(filterView.filterControl.prototype);
 
     }, //end init
+    // Iterate through dataCollection.filterData and, for any property
+    // that's of type 'date', turn the value into a JS date.
+    // This is necessary for comparing dates.
+    formatFilterDates: function(){
+        var dateComponents = filterView.components.filter(function(component){
+            return component.component_type === 'date';
+        });
+
+        // assumes the string is of the format yyyy-mm-dd.
+        function makeDateFromString(val){
+            if(val === null){ return null }
+            var dateSplit = val.split('-');
+            
+            return new Date(+dateSplit[0], +dateSplit[1] - 1, +dateSplit[2]);
+        }
+
+        model.dataCollection.filterData.items.forEach(function(item){
+            dateComponents.forEach(function(dateComponent){
+                if(item.hasOwnProperty(dateComponent.source)){
+                    item[dateComponent.source] = makeDateFromString(item[dateComponent.source]);
+                }
+            });
+        });
+
+        setState("filterDatesFormatted", true);
+
+    },
     filterControls: [],
     filterControl: function(component){
         filterView.filterControls.push(this);
@@ -283,7 +311,136 @@ var filterView = {
         }
 
         this.isTouched = function(){
-            return slider.noUiSlider.get()[0] === c.min && slider.noUiSlider.get()[1] === c.max;
+            return slider.noUiSlider.get()[0] !== c.min && slider.noUiSlider.get()[1] !== c.max;
+        }
+
+    },
+    dateFilterControl: function(component){
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+
+        var parent = d3.select('#filter-components')
+        var title = parent.append('div')
+            .classed('title filter-title', true);
+
+        title.append('i')
+            .classed('dropdown icon', true);
+        
+        title.append('span')
+            .classed('title-text', true)
+            .text(c.display_name);
+
+        title.attr('id', 'filter-'+ c.source);
+
+        var content = parent.append('div')
+            .classed('content', true);
+
+        var description = content.append('p')
+            .classed('description', true);
+
+        description.html(c.display_text);
+
+        var slider = content.append('div')
+            .classed('filter', true)
+            .classed('slider', true)
+            .attr('id', c.source);
+
+        // this is used for d3.min and d3.max.
+        var componentValuesOnly = model.dataCollection.filterData.items.map(function(item){
+            return item[c.source];
+        });
+            
+        // We need to define the min and max outside a given
+        // date component since these are only available after the filterData loads.
+        var newMin = d3.min(componentValuesOnly);
+        var newMax = d3.max(componentValuesOnly);
+
+        // since noUISlider doesn't accept JS Date objects for its 'range' option, we'll use
+        // a d3 Scale to go from slider steps to Dates.
+        var dateScale = d3.scaleTime()
+        // range: steps on the slider. This is arbitrary.
+            .range([0, 1000])
+            .domain([newMin, newMax]);
+
+        
+        function getDateObjFromString(strng){
+            // This assumes the format "Jan 3, 2017".
+            var dateTooltipPattern = /^([A-Za-z]{3})\ (\d{1,2})\ (\d{4})$/;
+
+            var matches = dateTooltipPattern.exec(strng);
+            return new Date(matches[2], months.indexOf(matches[0]), matches[1]);
+
+        }
+
+        function getStringFromDateObj(dateObj){
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            var chosenMonth = months[dateObj.getMonth()];
+            var chosenYear = dateObj.getYear() > 100 ? "" + (2000 + (dateObj.getYear() - 100)) : "" + (1900 + dateObj.getYear());
+            return "" + chosenMonth + " " + dateObj.getDate() + " " + chosenYear;
+        }
+        
+        var formatter = {
+            to: function(value){
+                return getStringFromDateObj(dateScale.invert(value));
+            },
+            from: function(value){
+                return dateScale(getDateObjFromString(value));
+            }
+        }
+        
+        slider = document.getElementById(c.source);
+        noUiSlider.create(slider, {
+            start: [dateScale(newMin), dateScale(newMax)],
+            connect: true,
+            tooltips: [formatter, formatter],
+            range: {
+                'min': dateScale(newMin),
+                'max': dateScale(newMax)
+            }
+        });
+
+        function makeSliderCallback(component){
+            // TODO: This is copied verbatim from the continuousFilterControl
+            // constructor, so it may be worth extracting makeSliderCallback
+            // to a property of filterView (or something with broader scope).
+            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
+                // This is the custom binding module used by the noUiSlider.on() callback.
+
+                // values: Current slider values;
+                // handle: Handle that caused the event;
+                // unencoded: Slider values without formatting;
+                // tap: Event was caused by the user tapping the slider (boolean);
+                // positions: Left offset of the handles in relation to the slider
+                var specific_state_code = 'filterValues.' + component.source
+
+                //If the sliders have been 'reset', remove the filter
+                if (component.min == unencoded[0] && component.max == unencoded[1]){
+                    var unencoded = [];
+                }
+                else{
+                    unencoded = unencoded.map(function(el){
+                        return dateScale.invert(el);
+                    });
+                }
+
+                setState(specific_state_code,unencoded);
+            }
+        }
+
+        var currentSliderCallback = makeSliderCallback(c);
+        
+        //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates.
+        //using 'set' for now for easier development (less console logging of state changes)
+        slider.noUiSlider.on('set', currentSliderCallback);
+
+        this.clear = function(){
+            // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
+            slider.noUiSlider.reset();
+        }
+
+        this.isTouched = function(){
+            return slider.noUiSlider.get()[0] !== newMin && slider.noUiSlider.get()[1] !== newMax;
         }
 
     },
@@ -362,12 +519,13 @@ var filterView = {
         for (var i = 0; i < filterView.components.length; i++) {
 
             //Set up sliders
-            if (filterView.components[i].component_type == 'continuous'){
-
-                console.log(filterView.components[i])
-                console.log("Found a continuous source!");
+            if (filterView.components[i].component_type === 'continuous'){
                 
                 new filterView.continuousFilterControl(filterView.components[i]);
+            }
+
+            if (filterView.components[i].component_type === 'date'){
+                new filterView.dateFilterControl(filterView.components[i]);
             }
                            
 
@@ -386,16 +544,9 @@ var filterView = {
                     }
                 };
                 filterView.components[i]['options'] = result;
-                console.log("Found a categorical filter: " + filterView.components[i].source)
 
                 new filterView.categoricalFilterControl(filterView.components[i]);
                   
-            };
-
-            if (filterView.components[i].component_type == 'date'){
-                console.log("Found a date filter! (need code to add this element)")
-                //Add a div with label and select element
-                //Bind user changes to a setState function
             };
 
         }; //end for loop. All components on page.
@@ -443,8 +594,6 @@ var filterView = {
         replacedText: undefined,
         site: undefined,
         tearDown: function(){
-            console.log("this.pill", this.pill);
-            console.log("this.pill.parentElement", this.pill.parentElement);
             this.pill.parentElement.removeChild(this.pill);
             this.trigger.parentElement.removeChild(this.trigger);
             this.site.innerText = this.replacedText;
