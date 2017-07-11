@@ -74,7 +74,7 @@ var DonutChartExtension = {
   update: function(filterData){
     var chart = this;
     var factor;
-    if ( this.countType === 'Buildings' ) {
+    if ( this.countType === 'Projects' ) {
       factor = filterData.length / this.data.length;
     } else {
       factor = returnUnitFactor();

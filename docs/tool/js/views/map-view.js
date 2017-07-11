@@ -100,6 +100,7 @@
             setState('sidebar.left',true);
             setState('sidebar.right',true);
             setState('subNav.left', 'filters');
+            setState('subNav.right', 'charts');
         },
         ChloroplethColorRange: function(chloroData, style){
             // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
@@ -270,6 +271,15 @@
                     zones: ["ward", "neighborhood_cluster", "census_tract"],
                     default_layer: "census_tract",
                     style: "percent"
+                },
+                {
+                    name: "acs_median_rent",
+                    display_name: "ACS: Median Rent",
+                    display_text: "Median Rent per American Community Survey",
+                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/acs_median_rent/<zone>",
+                    zones: ["ward", "neighborhood_cluster", "census_tract"],
+                    default_layer: "census_tract",
+                    style: "number"
                 }
                 
             ];
@@ -471,37 +481,6 @@
             mapView.showOverlayLayer(data.overlay, data.activeLayer);
 
         },
-        updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
-            //Checks to see if the current overlay is different from previous overlay
-            //If so, use the 'zones' to enable/disable zone selection buttons
-            
-            var layerMenu = d3.select('#layer-menu').classed("myclass",true)
-            layerMenu.selectAll('a')
-                .each(function(d) {
-
-                    var zoneButton = d3.select(this)
-                    var buttonId = zoneButton.attr('id')
-                    var layerType = buttonId.replace("-menu-item","")
-
-                    //Get layers from the overlay config, or if no overlay selected use all available layers
-                    var availableLayers = []
-                    if (data.overlay == null){
-                        mapView.initialLayers.forEach(function(layer) {
-                            availableLayers.push(layer.source);
-                        });
-                    } else {
-                        availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
-                    };
-
-
-                  //True if in the list, false if not
-                  var status = true
-                  if (availableLayers.indexOf(layerType) != -1) {
-                    status = false
-                  }
-                  zoneButton.classed('unavailable',status)
-                });
-        },
 
         showOverlayLayer: function(overlay_name, activeLayer) {
 
@@ -519,49 +498,71 @@
 
         },
         toggleActive: function(selector) {
+            //TODO I think this is not actually selecting anything?
+            console.log("toggling active")
+            console.log(selector);
             d3.select(selector)
-                .attr('class', function() {
+                .classed('active', function() {
                     if (d3.select(this).attr('class') === 'active') {
-                        return '';
+                        return false;
                     }
-                    return 'active';
+                    return true;
                 });
         },
-        initialLayers: [{
+        initialLayers: [
+            {
                 source: 'ward',
-                color: "#002D61",
+                display_name: 'Ward',
+                display_text: 'The largest geograpical division of the city, each with approximately equal population.',
+                color: "#0D5C7D",
                 visibility: 'visible'
             },
             {
                 source: 'neighborhood_cluster',
+                display_name: 'Neighborhood Cluster',
+                display_text: '39 clusters each combining a set of smaller neighborhoods.',
                 color: '#0D5C7D',
                 visibility: 'none',
             },
             {
                 source: 'census_tract',
-                color: '#8DE2B8',
+                display_name: 'Census Tract',
+                display_text: 'A small division used in collection of the US Census.',
+                color: '#0D5C7D',
                 visibility: 'none'
-            },
+            }
+           
+            /*
             {
                 source: 'zip',
+                display_name: 'Zip',
                 color: '#0D7B8A',
                 visibility: 'none'
             }
+            */
         ],
         addInitialLayers: function(msg, data) {
 
             //This function adds the zone layers, i.e. ward, zip, etc.
             if (data === true) {
-                //controller.appendPartial('layer-menu','main-view');
-                mapView.initialLayers.forEach(function(layer) { // refers to mapView instead of this bc being called form PubSub
-                    //  context. `this` causes error
-                    mapView.addLayer(layer);
-                });
+
+                //Set up the initial holder of layer buttons
+                d3.select("#layer-menu")
+                    .append('div')
+                        .classed("ui three large buttons",true) //TODO does "three" need to be based on count of layers if we add/remove some?
+                        .attr("id","layer-menu-buttons")
+
+                for (var i = 0; i < mapView.initialLayers.length; i++) {
+                    console.log("Adding " + mapView.initialLayers[i].source);
+                    mapView.addZoneLayerToMap(mapView.initialLayers[i])
+                    mapView.addButtonToZoneMenu(mapView.initialLayers[i]);
+                }
+
             } else {
                 console.log("ERROR data loaded === false")
             };
         },
-        addLayer: function(layer) {
+        addZoneLayerToMap: function(layer) {
             //Adds an individual zone (ward, zip, etc.) to the geoJSON
 
             var layerName = layer.source + 'Layer'; // e.g. 'wardLayer'
@@ -572,6 +573,7 @@
             };
             controller.getData(dataRequest);
 
+            //TODO we can't control the order of zone type choices because this occurs via callback!
             function addLayerCallback(data) {
                 if (mapView.map.getSource(layerName) === undefined) {
                     mapView.map.addSource(layerName, {
@@ -595,32 +597,28 @@
                         'visibility': layer.visibility
                     }
                 });
-                mapView.addToLayerMenu(layer);
+                
             }
         },
 
-        addToLayerMenu: function(layer) {
+        addButtonToZoneMenu: function(layer) {
+            //Appends a new button to the list of zone choices
 
-            d3.select('#layer-menu')
-                .append('a')
-                .attr('href', '#')
+            console.log("Adding layerMenuOption for " + layer.source);
+            d3.select('#layer-menu-buttons')
+
+                .append('button')
+                .classed("ui toggle button", true)
                 .attr('id', function() {
-                    return layer.source + '-menu-item';
+                    return layer.source + '-menu-item'; 
                 })
-                .attr('class', function() {
-                    if (layer.visibility === 'visible') {
-                        return 'active';
-                    }
-                    return '';
-                })
+                .classed('active', (layer.visibility === 'visible'))
                 .text(function() {
-                    return layer.source.split('_')[0].toUpperCase();
+                    return layer.display_name;
                 })
                 .on('click', function() {
-                    d3.event.preventDefault();
-                    setState('mapLayer', layer.source);
+                    setState('mapLayer', layer.source);  
                 });
-
         },
 
 
@@ -643,10 +641,44 @@
             mapView.map.setLayoutProperty(data + 'Layer', 'visibility', 'visible');
 
             //Make sure the menu reflects the current choice
-            d3.selectAll('#layer-menu a')
-                .attr('class', '');
+            d3.selectAll('#layer-menu-buttons button')
+                .classed('active',false)
             d3.select('#' + data + '-menu-item')
-                .attr('class', 'active');
+                .classed('active',true);
+            d3.select('#zone-choice-description')
+                .text(mapView.initialLayers.find(x => x.source === data).display_text)
+
+        },
+        updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
+            //Checks to see if the current overlay is different from previous overlay
+            //If so, use the 'zones' to enable/disable zone selection buttons
+            
+            var layerMenu = d3.select('#layer-menu-buttons')
+            layerMenu.selectAll('button')
+                .each(function(d) {
+
+                    var zoneButton = d3.select(this)
+                    var buttonId = zoneButton.attr('id')
+                    var layerType = buttonId.replace("-menu-item","")
+
+                    //Get layers from the overlay config, or if no overlay selected use all available layers
+                    var availableLayers = []
+                    if (data.overlay == null){
+                        mapView.initialLayers.forEach(function(layer) {
+                            availableLayers.push(layer.source);
+                        });
+                    } else {
+                        availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+                    };
+
+
+                  //True if in the list, false if not
+                  var status = true
+                  if (availableLayers.indexOf(layerType) != -1) {
+                    status = false
+                  }
+                  zoneButton.classed('disabled',status)
+                });
         },
 
         placeProjects: function(msg, data) { // some repetition here with the addLayer function used for zone layers. could be DRYer if combined
@@ -678,6 +710,51 @@
                     mapView.circleStrokeWidth = 1;
                     mapView.circleStrokeOpacity = 1;
                     mapView.map.addLayer({
+                        'id': 'project-unmatched', 
+                        'type': 'circle',
+                        'source': 'project',
+                        'filter': ['==', 'klass', 'none'],
+                        'paint': {
+                            'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
+                                ]
+                            },
+
+                            'circle-stroke-opacity': 0.5,                          
+                            'circle-opacity': 0.5,
+                            'circle-stroke-width': 2, 
+                            'circle-color': '#aaaaaa',
+                            'circle-stroke-color': '#aaaaaa'
+                            
+                        }
+                    });
+                    mapView.map.addLayer({
+                        'id': 'project-exit', // add layer for exiting projects. empty at first. very repetitive of project layer, which could be improved
+                        'type': 'circle',
+                        'source': 'project',
+                        'filter': ['==', 'klass', 'exit'],
+                        'paint': {
+                            'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 3],
+                                    [12, 4],
+                                    [15, 15]
+                                ]
+                            },                         
+                            'circle-opacity': 0.5,
+                            'circle-color': '#aaaaaa',
+
+                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-width': 2, 
+                            'circle-stroke-color': '#626262'
+                        }
+                    });
+                    mapView.map.addLayer({
                         'id': 'project',
                         'type': 'circle',
                         'source': 'project',
@@ -691,38 +768,12 @@
                                     [15, 15]
                                 ]
                             },
-                            'circle-opacity': 0.3,
-                            'circle-color': {
-                                property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            },
-                            'circle-stroke-width': 1,                            
-                            'circle-stroke-width-transition': {
-                                duration: 300,
-                                delay: 0
-                            },                            
-                            'circle-stroke-opacity': 1,
+                            'circle-opacity': 0.5,
+                            'circle-color': '#fd8d3c',
 
-                            'circle-stroke-color': {
-                                property: 'category_code',
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            }
+                            'circle-stroke-width': 2,                  
+                            'circle-stroke-opacity': 0.5,
+                            'circle-stroke-color': '#fd8d3c'    //same as circle for existing
                         }
                     });
                     mapView.map.addLayer({
@@ -739,87 +790,16 @@
                                     [15, 15]
                                 ]
                             },
-                            'circle-opacity': 0.3,
-                            'circle-color': {
-                                property: 'category_code', 
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            },
-                            'circle-stroke-width': 1,                            
-                            'circle-stroke-width-transition': {
-                                duration: 300,
-                                delay: 0
-                            },                            
-                            'circle-stroke-opacity': 1,
 
-                            'circle-stroke-color': {
-                                property: 'category_code',
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            }
+                            'circle-opacity': 0.5,
+                            'circle-color': '#fd8d3c', 
+
+                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it          
+                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
-                    mapView.map.addLayer({
-                        'id': 'project-exit', // add layer for exiting projects. empty at first. very repetitive of project layer, which could be improved
-                        'type': 'circle',
-                        'source': 'project',
-                        'filter': ['==', 'klass', 'exit'],
-                        'paint': {
-                            'circle-radius': {
-                                'base': 1.75,
-                                'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
-                                ]
-                            },
-                            'circle-opacity-transition': {
-                                duration: 1000,
-                                delay: 0
-                            },                            
-                            'circle-opacity': 1,
-                            'circle-color': {
-                                property: 'category_code', // the field on which to base the color. this is probably not the category we want for v1
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            },
-                            
-
-                            'circle-stroke-color': {
-                                property: 'category_code',
-                                type: 'categorical',
-                                stops: [
-                                    ['1 - At-Risk or Flagged for Follow-up', '#f03b20'],
-                                    ['2 - Expiring Subsidy', '#8B4225'],
-                                    ['3 - Recent Failing REAC Score', '#bd0026'],
-                                    ['4 - More Info Needed', '#A9A9A9'],
-                                    ['5 - Other Subsidized Property', ' #fd8d3c'],
-                                    ['6 - Lost Rental', '#A9A9A9']
-                                ]
-                            }
-                        }
-                    });
+                   
 
                     // TODO: MAKE LEGEND
                     mapView.map.on('mousemove', function(e) {
@@ -842,7 +822,7 @@
                     mapView.map.on('click', function(e) {
                         console.log(e);
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project','project-enter']
+                            layers: ['project','project-enter','project-exit', 'project-unmatched']
                         }))[0];
                         console.log(building);
                         if (building === undefined) return;
@@ -893,27 +873,31 @@
                     feature.properties.klass = feature.properties.previous_filters === false ? 'none' : 'exit'; // two falses in a row means no action; new false means exit
                 }
             });
-            mapView.map.setFilter('project-exit', ['==','klass','exit']); // resets exit filter to be meaningful. it's set to nonsense after the animations
+           // mapView.map.setFilter('project-exit', ['==','klass','exit']); // resets exit filter to be meaningful. it's set to nonsense after the animations
                                                                           // so that previous exits don't show when the opacity is set back to 1
             mapView.map.getSource('project').setData(mapView.convertedProjects);
             mapView.animateEnterExit();
             mapView.listBuildings();        
         },
         animateEnterExit: function(){
-            setTimeout(function(){
-                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 8);
-                mapView.map.setPaintProperty('project-exit','circle-opacity', 0);
-                setTimeout(function(){
-                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 1);                    
+            var delayAnimation = setTimeout(function(){
+                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);                
+                var shrinkCircles = setTimeout(function(){
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);                     
                 },300);
-                setTimeout(function(){
+             /*   var exitColor = setTimeout(function(){
+                    mapView.map.setPaintProperty('project-exit','circle-color', '#767676');
+                    mapView.map.setPaintProperty('project-exit','circle-stroke-color', '#767676');                                           
+                },500);*/
+               /* setTimeout(function(){
                     mapView.map.setFilter('project-exit', ['==','klass','doesnotexist']); // sets filter to nonexistant klass to clear the layer
                     mapView.map.setPaintProperty('project-exit','circle-opacity', 1); // put the empty exit layer back to opacity 1, read for next filtering
 
-                },1000);
+                },1000); */
             },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
                     // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
                     // would be nicer with a callback, but I don't htink that's available -JO
+            
          
         },
         /*

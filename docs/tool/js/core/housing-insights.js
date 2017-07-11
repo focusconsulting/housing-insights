@@ -62,6 +62,9 @@ function StateModule() {
             if ( state[key].length > 2 ) {
                 state[key].length = 2;
             }
+        } else {
+            //TODO do we want for there to be another 'announceState' method that publishes every time it fires, even if the value remains the same??
+            console.log("State value is the same as previous:", key, value);
         }
         
     }
@@ -186,7 +189,6 @@ var controller = {
         } else {
             // TODO publish that data is available every time it's requested or only on first load?
             if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
-                console.log(model.dataCollection[dataRequest.name]);
                 dataRequest.callback(model.dataCollection[dataRequest.name]);
             }              
         }
