@@ -41,10 +41,8 @@ html, body {
 
 .sub-nav-container {
     position: relative;
-    margin-top: 40px;
     display: none;
     overflow-y: auto;
-    padding-top: 10px;
 }
 
 .sub-nav-container.active {
@@ -52,12 +50,38 @@ html, body {
     flex-direction: column;
 }
 
+.sub-nav-heading {
+    height:40px;
+    /*Allow space for controls on the right side*/
+    width: -webkit-calc(100% - 40px);
+    width:    -moz-calc(100% - 40px);
+    width:         calc(100% - 40px); 
+}
+.sub-nav-heading h1 {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 0px 10px 10px;
+}
+
+/*Color code the text for projects that match the specified filters*/
+.matching {
+    color:rgba(253,126,35,0.7) !important;
+}
+.total {
+    color:rgba(25,25,25,.6) !important;
+}
+
+
+
+.sub-nav-group {
+    padding: 0px 10px 0px 10px;
+}
 .scroll-y {
     overflow-y: auto;
 }
 
 #buildings-list {
-    margin-top: 30px;
+    margin-top: 0px;
 }
 
 #left-options .sub-nav-button {
@@ -74,7 +98,7 @@ html, body {
 }
 
 #left-options {
-    width: 250px;
+    width: 300px;
     display: flex;
 }
 
@@ -131,19 +155,7 @@ html, body {
     padding: 10px;
     position: absolute;
     bottom: 0;
-    left: 260px;
-    right: 360px;
-    min-width: 235px;
-}
-
-#legend-items {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-}
-
-#legend-items div {
-    width: 310px;
+    left: 310px;    
 }
 
 #legend-items div span {
@@ -152,6 +164,10 @@ html, body {
     height: 10px;
     margin-right: 5px;
     width: 10px;
+}
+
+#legend-items div span.square {
+    border-radius: 0;
 }
 
 .sidebar-inner-wrapper {
@@ -164,6 +180,7 @@ html, body {
     width: 100%;
 }
 
+/*
 .sidebar-inner-wrapper:before {
     content: '';
     display: block;
@@ -174,9 +191,19 @@ html, body {
     box-shadow: 0 8px 17px #fff;
     z-index: 99;
 }
+*/
+
 
 .sidebar-inner-wrapper>div {
     flex-grow: 1;
+}
+
+#sidebar-control-right {
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    z-index:100;
+    cursor: pointer;
 }
 
 #pie-charts {
@@ -197,7 +224,7 @@ html, body {
 .sidebar {
     position: absolute;
     width: 100%;
-    max-width: 250px;
+    max-width: 300px;
     top: 80px;
     bottom: 0;
     z-index: 9999;
@@ -209,13 +236,32 @@ html, body {
 .sidebar.active {
     transform: translate(0, 0) !important;
 }
-#sidebar-right {
+
+.sidebar.left{
+    max-width:300px;
+}
+
+.sidebar.right {
     right: 0;
     max-width: 350px;
     transform: translate(100%, 0);
     border-right-width: 0;
     border-left: 1px solid rgb(189, 54, 33);
 }
+
+/*
+This is minus the left sidebar width; TODO should make this flexbox or something more dynamic?\
+Note, transition from expanded to totally closed is snapping instantly because of the mixing of two approaches, max-width and translate. 
+Others are working correctly. 
+*/
+.sidebar.right.expanded {
+    max-width: -webkit-calc(100% - 300px);
+    max-width:    -moz-calc(100% - 300px);
+    max-width:         calc(100% - 300px);
+    transition: max-width 0.2s linear;
+}
+
+
 #buildings-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
@@ -240,7 +286,7 @@ html, body {
 }
 .sidebar-tab {
     width: 20px;
-    height: 40px;
+    height: 37px;
     position: absolute;
     border: none;
     position: absolute;
@@ -290,6 +336,10 @@ html, body {
     top: 80px;
     bottom: 0;
 }
+
+
+/*
+Switched to semantic-ui buttons instead
 #layer-menu, #overlay-menu, #temp-filter-menu {
     background: inherit;
 }
@@ -315,6 +365,8 @@ a.active {
     background-color: #b3cde3;
 }
 
+*/
+
 #reset-zoom {
     display: none;
     position: absolute;
@@ -328,7 +380,7 @@ a.active {
 .mapboxgl-ctrl-top-right{
     top: 120px;
     position: absolute;
-    z-index: 10000 !important;
+    z-index: 1000 !important;
     transition: transform .5s;
     transform: translateX(0px);
     
@@ -336,7 +388,36 @@ a.active {
 .mapboxgl-ctrl-top-right.movedIn{
     transform: translateX(-350px);
 }
-/*copy-pasted from semantic ui so we can modify*/
+
+
+
+/*Partially override semantic-ui styling, so some is inherited from there*/
+
+/*Mimics accordion title styling*/
+#filters .header {
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-size: 1.3em;
+    background: #d69c93;
+    margin: 0em;
+    padding: 0.3em 0.5em;
+    color: rgba(0, 0, 30, 0.95);
+    font-weight: bold;
+    border-top: 1px solid rgba(34, 36, 38, 0.15);
+}
+/*Mimics accordion content styling*/
+#filters .static-content {
+    margin: 0;
+    padding: .5em 1em 1.5em;
+    display: block;
+}
+
+/*Used for the actively selected boundary type*/
+.ui.button.toggle.active, 
+.ui.buttons .button.toggle.active, 
+.ui.toggle.buttons .active.button {
+    background-color: #0D5C7D!important;
+    color: #FFF!important;
+}
 
 /*Layer accordions (blue)*/
 
@@ -344,7 +425,7 @@ a.active {
 .ui.styled.accordion .title.overlay-title {
     background: rgba(30, 92, 223, 0.3);
     margin: 0em;
-    padding: 0.5em 0.5em;
+    padding: 0.3em 0.5em;
     color: rgba(0, 0, 30, 0.95);
     font-weight: bold;
     border-top: 1px solid rgba(34, 36, 38, 0.15);
@@ -368,7 +449,7 @@ a.active {
 .ui.styled.accordion .title.filter-title {
     background: rgba(253, 126, 35, 0.3);
     margin: 0em;
-    padding: 0.5em 0.5em;
+    padding: 0.3em 0.5em;
     color: rgba(0, 0, 30, 0.95);
     font-weight: bold;
     border-top: 1px solid rgba(34, 36, 38, 0.15);
@@ -385,10 +466,18 @@ a.active {
     background: rgba(253, 126, 35, 0.3);
     color: rgba(0, 0, 30, 0.95);
 }
+
+/*colors the currently selected data field if data_level is zone*/
+.ui.styled.accordion .active.title.filter-title.zone {
+    background: rgba(24, 100, 178, 0.7);
+    color: rgba(0, 0, 30, 0.95);
+}
+
+/*
 .ui.styled.accordion .title.filter-title.filter-activated, .ui.styled.accordion .active.title.filter-title.filter-activated {
     background: rgba(234, 100, 2, 0.7);
 }
-
+*/
 /*Clear filter pillboxes*/
 .ui.label.clear-single {
     background-color: rgba(253,126,35,0.7);

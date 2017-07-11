@@ -8,37 +8,51 @@ var filterView = {
         //"source" is the column name from the filter table, which should match the table in the original database table.
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
+        {   source:'location',
+            display_name: 'Location',
+            display_text: "Dropdown menu updates when selecting a new zone type. <br><br>Logic Incomplete: still need to a) clear the existing filter when new zone is selected and b) writecallback for the locationFilterControl",
+            component_type: 'location',
+            data_type: 'text',
+            data_level: 'project'
+        },
+
+        /*
         {   source:'ward',
             display_name: 'Location: Ward',
             display_text: "The largest geograpical division of the city.",
             component_type: 'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'neighborhood_cluster_desc',
             display_name: 'Location: Neighborhood Cluster',
             display_text: "39 clusters each combining a set of smaller neighborhoods.",
             component_type: 'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'anc',
             display_name: 'Location: ANC',
             display_text: 'Advisory Neighborhood Council',
             component_type: 'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'census_tract',
             display_name: 'Location: Census Tract',
             display_text: 'A small division used in collection of the US Census.',
             component_type: 'categorical',
             data_type: 'text',
+            data_level: 'project'
         },
         {   source:'zip',
             display_name: 'Location: Zipcode',
             display_text: '',
             component_type: 'categorical',
             data_type: 'text',
+            data_level: 'project'
         },
-
+        */
         {   source: 'proj_units_tot',
             display_name: 'Total units in project',
             display_text: 'Total count of units in the project, including both subsidized and market rate units.',
@@ -46,7 +60,8 @@ var filterView = {
             data_type:'integer',
             min: 0,
             max: 717,
-            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead. 
+            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead. 
+            data_level: 'project'
         },
         
         {   source: 'proj_units_assist_max',
@@ -56,13 +71,15 @@ var filterView = {
             data_type:'integer',
             min:0,
             max:600,
-            num_decimals_displayed:0
+            num_decimals_displayed:0,
+            data_level: 'project'
         },
         {   source: 'hud_own_type',
             display_name:'Ownership Type (per HUD)',
             display_text:"This field is only available for buildings participating in HUD programs; others are listed as 'Unknown'",
             component_type: 'categorical',
-            data_type:'text'
+            data_type:'text',
+            data_level: 'project'
         },
 
         {   source: 'acs_median_rent',
@@ -72,14 +89,32 @@ var filterView = {
             data_type:'decimal',
             min: 0,
             max: 2500,
-            num_decimals_displayed: 0 //0 if integer, 1 otherwise. Could also store data type instead.
+            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead.
+            data_level: 'zone'
         },
+
+        //TODO this is a dummy data set to show a second option for combined overlay/filtering!!!
+        {
+            source: "building_permits_construction",
+            display_name: "Building Permits: Construction 2016",
+            display_text: "Important! This is not actually included in our filter data yet, shown as a demo",
+            component_type: 'continuous',
+            data_type:'decimal',
+            min: 0,
+            max: 2500,
+            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead.
+            data_level: 'zone'
+        },
+
+
+
 
         {   source: 'portfolio',
             display_name: 'Subsidy Program',
             display_text: 'Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list',
             component_type:'categorical',
-            data_type: 'text'
+            data_type: 'text',
+            data_level: 'project'
         },
         {   source:'poa_start',
             display_name:'Subsidy Start Date',
@@ -87,7 +122,8 @@ var filterView = {
             component_type: 'date',
             data_type: 'timestamp',
             min: '1950-01-01', //just example, TODO change to date format
-            max: 'now'         //dummy example
+            max: 'now',         //dummy example
+            data_level: 'project'
         },
         {   source:'poa_end',
             display_name:'Subsidy End Date',
@@ -95,7 +131,8 @@ var filterView = {
             component_type: 'date',
             data_type: 'timestamp',
             min: '1950-01-01', //just example, TODO change to date format
-            max: 'now'         //dummy example
+            max: 'now',         //dummy example
+            data_level: 'project'
         },
        
     ],
@@ -158,18 +195,41 @@ var filterView = {
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
-                ['filterValues', filterView.addClearPillboxes]
+                ['filterValues', filterView.addClearPillboxes],
+                ['subNavExpanded.right', filterView.expandSidebar],
+                ['mapLayer', filterView.updateLocationFilterControl],
+                ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
             ]);
 
             setState('subNav.left','layers');
             setState('subNav.right','buildings');
 
+            //TODO this is for the triangular boxes to expand/collapse, which might be tweaked in new UI. Check if this is still relevant. 
             document.querySelectorAll('.sidebar-tab').forEach(function(tab){
                 tab.onclick = function(e){
                     var sideBarMsg = e.currentTarget.parentElement.id.replace('-','.');
                     filterView.toggleSidebarState(sideBarMsg);
                 }
             });
+
+            //Expand/Collapse right sidebar control clickbacks
+            d3.select('#expand-sidebar-right')
+                .on('click', function(){
+                    //toggle which control is shown
+                    d3.selectAll('#sidebar-control-right i').classed("hidden",true)
+                    d3.select('#compress-sidebar-right').classed("hidden",false)
+
+                    setState('subNavExpanded.right',true)
+                });
+
+            d3.select('#compress-sidebar-right')
+                .on('click', function(){
+                    //Toggle which control is shown
+                    d3.selectAll('#sidebar-control-right i').classed("hidden",true)
+                    d3.select('#expand-sidebar-right').classed("hidden",false)
+
+                    setState('subNavExpanded.right',false)
+                });
 
             document.querySelectorAll('.sub-nav-button').forEach(function(button){
                 button.onclick = function(e){
@@ -199,6 +259,7 @@ var filterView = {
         // For inheritance
         filterView.continuousFilterControl.prototype = Object.create(filterView.filterControl.prototype);
         filterView.categoricalFilterControl.prototype = Object.create(filterView.filterControl.prototype);
+        filterView.locationFilterControl.prototype = Object.create(filterView.categoricalFilterControl.prototype);
 
     }, //end init
     filterControls: [],
@@ -209,30 +270,12 @@ var filterView = {
     continuousFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
+        var contentContainer = filterView.setupFilter(c);
 
-        var parent = d3.select('#filter-components')
-        var title = parent.append("div")
-            .classed("title filter-title",true);
-
-        title.append("i")
-            .classed("dropdown icon",true)
-        title.append("span")
-            .classed("title-text",true)
-            .text(c.display_name);
-
-        title.attr("id", "filter-"+c.source)
-
-        var content = parent.append("div")
-                .classed("content", true);
-        var description = content.append("p")
-                .classed("description",true);
-                    
-            description.html(c.display_text);
-
-            var slider = content.append("div")
-                    .classed("filter", true)
-                    .classed("slider",true)
-                    .attr("id",c.source);
+        var slider = contentContainer.append("div")
+                .classed("filter", true)
+                .classed("slider",true)
+                .attr("id",c.source);
 
 
         slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
@@ -287,48 +330,118 @@ var filterView = {
         }
 
     },
+    setupFilter: function(c){
+    //This function does all the stuff needed for each filter regardless of type. 
+    //It returns the "content" div, which is where the actual UI element for doing
+    //filtering needs to be appended
+
+            //Add a div with label and select element
+            //Bind user changes to a setState function
+            var parent = d3.select('#filter-components')
+            var title = parent.append("div")
+                    .classed("title filter-title",true)
+                    .classed(c.data_level, true)
+
+                //Add data-specific icon
+                if(c.data_level == 'project') {
+                    title.append("i")
+                    .classed("building icon",true)
+                    .attr("style","margin-right:8px;")
+                } else if(c.data_level == 'zone'){
+                    title.append("i")
+                    .classed("icons",true)
+                    .attr("style","margin-right:8px;")
+                    .html('<i class="home blue icon"></i><i class="corner blue home icon"></i>')
+                }
+                
+                title.append("span")
+                    .classed("title-text",true)
+                    .text(c.display_name)
+
+                title.attr("id", "filter-"+c.source)
+
+            var content = parent.append("div")
+                    .classed("filter", true)
+                    .classed(c.component_type,true)
+                    .classed("content", true)
+                    .attr("id","filter-content-"+c.source);
+
+            var description = content.append("div")
+                            .classed("description",true)
+
+                    //Add data-specific icon
+                if(c.data_level == 'project') {
+                    var helper = description.append("p")
+                        .classed("project-flag",true)
+
+                    helper.append("i")
+                    .classed("building icon small",true)
+                    
+                    helper.append("span")
+                    .html("Project-specific data set")
+
+                } else if(c.data_level == 'zone'){
+                    var helper = description.append("p")
+                        .classed("neighborhood-flag", true)
+
+                    helper.append("i")
+                    .classed("icons small",true)
+                    .html('<i class="home blue icon"></i><i class="corner blue home icon"></i>')
+                    
+                    helper.append("span")
+                    .html("Neighborhood level data set")                   
+                    
+                }
+
+                description.append("p").html(c.display_text)
+            
+            //Set it up to trigger the layer when title is clicked
+            document.getElementById("filter-" + c.source).addEventListener("click", clickCallback);
+            function clickCallback() {
+                //TODO this is hacked at the moment, need to restructure how a merged filter+overlay would work together
+                //Currently hacking by assuming the overlay.name is the same as c.source (these are essentially the code name of the data set). 
+                //True only for ACS median rent, the demo data set. 
+                //This function is very similar to the overlay callback but w/ c.source instead of overlay.name
+                if (c.data_level == 'zone'){
+                    var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
+                    console.log("changing from " + existingOverlayType + " to " + c.source);
+
+                    if (existingOverlayType !== c.source) {
+                        setState('overlayRequest', {
+                            overlay: c.source,
+                            activeLayer: getState().mapLayer[0]
+                        });
+
+                    } else {
+                        mapView.clearOverlay();
+                    };
+                } else {
+                    mapView.clearOverlay();
+                };
+            }; //end clickCallback
+
+            return content
+
+    },  
+
     categoricalFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
+        var contentContainer = filterView.setupFilter(c);
 
-        //Add a div with label and select element
-        //Bind user changes to a setState function
-        var parent = d3.select('#filter-components')
-        var title = parent.append("div")
-                .classed("title filter-title",true)
-
-            title.append("i")
-                .classed("dropdown icon",true)
-            title.append("span")
-                .classed("title-text",true)
-                .text(c.display_name)
-
-            title.attr("id", "filter-"+c.source)
-
-        var content = parent.append("div")
-                .classed("filter", true)
-                .classed("categorical",true)
-                .classed("content", true);
-
-        var description = content.append("p")
-                .classed("description",true)
-            
-            description.html(c.display_text)
-
-        var uiSelector = content.append("select")
+        var uiSelector = contentContainer.append("select")
             .classed("ui fluid search dropdown",true)
             .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
             .attr("multiple", " ")
             .attr("id", c.source);
 
+        //Add the dropdown menu choices
         for(var j = 0; j < c.options.length; j++){
             uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
-            var select = document.getElementById(c.source);
+            //var select = document.getElementById(c.source);
         }
 
-        $('.ui.dropdown').dropdown(); //not sure what this for, didn't appear to have effect.
-        $('.ui.dropdown').dropdown({ fullTextSearch: 'exact' });
-        $('#'+c.source).dropdown();
+        $('#'+c.source).dropdown({ fullTextSearch: 'exact' });
 
         //Set callback for when user makes a change
         function makeSelectCallback(component){
@@ -353,6 +466,39 @@ var filterView = {
         }
 
     },
+
+
+    locationFilterControl: function(component){
+        filterView.categoricalFilterControl.call(this, component);
+        var c = this.component;
+        var contentContainer = d3.select("#filter-content-"+c.source)
+        var uiSelector = d3.select(c.source)
+
+
+        console.log("Set up location filter")
+        //TODO we will need to override the callback with a different callback that knows how to tell the state module the right zone type
+
+    },
+
+    updateLocationFilterControl: function(msg,data){
+        //Find out what layer is active. (using getState so we can subscribe to any event type)
+        var layerType = getState()['mapLayer'][0]
+        var choices = filterView.locationFilterChoices[layerType]
+
+        //remove all existing choices
+        d3.selectAll("#location option").remove()
+
+        //Add the new ones in
+        for(var j = 0; j < choices.length; j++){
+            d3.select('#location').append("option")
+                .attr("value", choices[j])
+                .text(choices[j])
+        }
+        
+    },
+
+    locationFilterChoices: {}, //populated based on data in the buildFilterComponents function
+
     buildFilterComponents: function(){
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
@@ -363,9 +509,6 @@ var filterView = {
 
             //Set up sliders
             if (filterView.components[i].component_type == 'continuous'){
-
-                console.log(filterView.components[i])
-                console.log("Found a continuous source!");
                 
                 new filterView.continuousFilterControl(filterView.components[i]);
             }
@@ -373,7 +516,7 @@ var filterView = {
 
             var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':false}) //allows multiple opened
+            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
 
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
@@ -386,14 +529,44 @@ var filterView = {
                     }
                 };
                 filterView.components[i]['options'] = result;
-                console.log("Found a categorical filter: " + filterView.components[i].source)
 
                 new filterView.categoricalFilterControl(filterView.components[i]);
                   
             };
 
+            //set up location picker
+            if (filterView.components[i].component_type == 'location'){
+                //Create the object itself
+                var location_options = ["First select a zone type"];
+                filterView.components[i]['options'] = location_options;
+                new filterView.locationFilterControl(filterView.components[i]);  
+
+                ///////////////////////////////////////////////////
+                //Save the drop down choices for each location type for later use
+                ///////////////////////////////////////////////////
+                
+                //Make empty lists for each type of dropdown
+                mapView.initialLayers.forEach(function(layerDefinition){
+                    filterView.locationFilterChoices[layerDefinition.source] = []
+                });
+
+                //Iterate over the data itself and build a set of unique values
+                for (var dataRow = 0; dataRow < workingData.length; dataRow++) {
+
+                    mapView.initialLayers.forEach(function(layerDefinition){
+                        if(!filterView.locationFilterChoices[layerDefinition.source].includes(
+                                workingData[dataRow][layerDefinition.source])
+                            ){
+                                filterView.locationFilterChoices[layerDefinition.source].push(
+                                    workingData[dataRow][layerDefinition.source]
+                                );
+                            }
+                    }); 
+                };
+                
+            };
+
             if (filterView.components[i].component_type == 'date'){
-                console.log("Found a date filter! (need code to add this element)")
                 //Add a div with label and select element
                 //Bind user changes to a setState function
             };
@@ -517,6 +690,12 @@ var filterView = {
         if ( getState()['subNav.' + leftRight] && getState()['subNav.' + leftRight][1] ){
             document.querySelector('#' + getState()['subNav.' + leftRight][1]).classList.remove('active');
         }
+    },
+    expandSidebar: function(msg, data){
+        //data is the state of the expansion, either true or false
+
+        //TODO this does not touch the fact that the sidebar can also be active or not. With current setup this does not cause issues but if controls are rearranged could be an issue
+        d3.select('#sidebar-right').classed('expanded', data)
     }
 
 };
