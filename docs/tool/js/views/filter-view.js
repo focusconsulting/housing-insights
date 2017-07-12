@@ -392,15 +392,15 @@ var filterView = {
             
         // We need to define the min and max outside a given
         // date component since these are only available after the filterData loads.
-        var newMin = d3.min(componentValuesOnly);
-        var newMax = d3.max(componentValuesOnly);
+        component.min = d3.min(componentValuesOnly);
+        component.max = d3.max(componentValuesOnly);
 
         // since noUISlider doesn't accept JS Date objects for its 'range' option, we'll use
         // a d3 Scale to go from slider steps to Dates.
         var dateScale = d3.scaleTime()
         // range: steps on the slider. This is arbitrary.
             .range([0, 1000])
-            .domain([newMin, newMax]);
+            .domain([component.min, component.max]);
 
         
         function getDateObjFromString(strng){
@@ -431,12 +431,12 @@ var filterView = {
         
         slider = document.getElementById(c.source);
         noUiSlider.create(slider, {
-            start: [dateScale(newMin), dateScale(newMax)],
+            start: [dateScale(component.min), dateScale(component.max)],
             connect: true,
             tooltips: [formatter, formatter],
             range: {
-                'min': dateScale(newMin),
-                'max': dateScale(newMax)
+                'min': dateScale(component.min),
+                'max': dateScale(component.max)
             }
         });
 
@@ -480,7 +480,7 @@ var filterView = {
         }
 
         this.isTouched = function(){
-            return slider.noUiSlider.get()[0] !== newMin && slider.noUiSlider.get()[1] !== newMax;
+            return slider.noUiSlider.get()[0] !== component.min && slider.noUiSlider.get()[1] !== component.max;
         }
 
     },
