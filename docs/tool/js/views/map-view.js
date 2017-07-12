@@ -64,9 +64,9 @@
 
                     d3.select('#reset-zoom')
                         .style('display', function() {
-                            if (Math.abs(mapView.map.getZoom() - mapView.originalZoom) < 0.001 &&
-                                Math.abs(mapView.map.getCenter().lng - mapView.originalCenter[0]) < 0.001 &&
-                                Math.abs(mapView.map.getCenter().lat - mapView.originalCenter[1]) < 0.001) {
+                            if (Math.abs(mapView.map.getZoom() - mapView.originalZoom) < 0.1 &&
+                                Math.abs(mapView.map.getCenter().lng - mapView.originalCenter[0]) < 0.01 &&
+                                Math.abs(mapView.map.getCenter().lat - mapView.originalCenter[1]) < 0.01) {
                                 return 'none';
                             } else {
                                 return 'block';
