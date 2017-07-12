@@ -206,6 +206,16 @@ class HISql(object):
         db_conn.execute(create_command)
         logging.info("  Table created: {}".format(table))
 
+        # Create an id column and make it a primary key
+        create_id = "ALTER TABLE {} ADD COLUMN {} text;".format(table, 'id')
+        db_conn.execute(create_id)
+        set_primary_key = "ALTER TABLE {} ADD PRIMARY KEY ({});".format(table, 'id')
+        db_conn.execute(set_primary_key)
+
+
+    def create_primary_key_table(self, db_conn, table):
+        pass
+
     def drop_table(self, table=None):
 
         db_conn = self.engine.connect()
