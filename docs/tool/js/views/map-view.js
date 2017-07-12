@@ -36,7 +36,8 @@
                     ['previewBuilding', mapView.showPopup],
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding],
-                    ['filterViewLoaded', mapView.initialSidebarState]
+                    ['filterViewLoaded', mapView.initialSidebarState],
+                    ['filteredProjectsAvailable',mapView.zoomToFilteredProjects]
                 ]);
 
 
@@ -994,5 +995,27 @@
                     'filter': ['==', 'nlihc_id', data]
                 });
             }
+        },
+        zoomToFilteredProjects: function(msg, data){
+            if (getState().filteredProjectsAvailable.length < 2 ) {
+                return; // disable function on first filter, which happens when the app first loads
+            }
+            var maxLat = d3.max(data, function(d){
+                return d.latitude;
+            });            
+            var minLat = d3.min(data, function(d){
+                return d.latitude;
+            });
+            var maxLon = d3.max(data, function(d){
+                if (d.longitude < 0 ) {
+                    return d.longitude; // workaround of data error where one project has positive longitude instead of positive
+                                        // can remove `if` statement when resolved (issue 405)                    
+                }
+            });
+            var minLon = d3.min(data, function(d){
+                return d.longitude;
+            });
+            console.log(minLon,minLat,maxLon,maxLat);
+            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], {linear: true, padding: 20});
         }
     };
