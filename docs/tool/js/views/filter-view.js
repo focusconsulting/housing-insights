@@ -2,141 +2,6 @@
 
 var filterView = {
 
-    components: [
-        //TODO this hard coded array of objects is just a temporary method.
-        //This should be served from the API, probably from meta.json
-        //"source" is the column name from the filter table, which should match the table in the original database table.
-        //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
-        //  the same meaning in both places (e.g. 'ward' and 'ward' can appear in two tables but should have same name/format)
-        {   source:'location',
-            display_name: 'Location',
-            display_text: "Dropdown menu updates when selecting a new zone type. <br><br>Logic Incomplete: still need to a) clear the existing filter when new zone is selected and b) writecallback for the locationFilterControl",
-            component_type: 'location',
-            data_type: 'text',
-            data_level: 'project'
-        },
-
-        /*
-        {   source:'ward',
-            display_name: 'Location: Ward',
-            display_text: "The largest geograpical division of the city.",
-            component_type: 'categorical',
-            data_type: 'text',
-            data_level: 'project'
-        },
-        {   source:'neighborhood_cluster_desc',
-            display_name: 'Location: Neighborhood Cluster',
-            display_text: "39 clusters each combining a set of smaller neighborhoods.",
-            component_type: 'categorical',
-            data_type: 'text',
-            data_level: 'project'
-        },
-        {   source:'anc',
-            display_name: 'Location: ANC',
-            display_text: 'Advisory Neighborhood Council',
-            component_type: 'categorical',
-            data_type: 'text',
-            data_level: 'project'
-        },
-        {   source:'census_tract',
-            display_name: 'Location: Census Tract',
-            display_text: 'A small division used in collection of the US Census.',
-            component_type: 'categorical',
-            data_type: 'text',
-            data_level: 'project'
-        },
-        {   source:'zip',
-            display_name: 'Location: Zipcode',
-            display_text: '',
-            component_type: 'categorical',
-            data_type: 'text',
-            data_level: 'project'
-        },
-        */
-        {   source: 'proj_units_tot',
-            display_name: 'Total units in project',
-            display_text: 'Total count of units in the project, including both subsidized and market rate units.',
-            component_type: 'continuous',
-            data_type:'integer',
-            min: 0,
-            max: 717,
-            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead. 
-            data_level: 'project'
-        },
-        
-        {   source: 'proj_units_assist_max',
-            display_name: "Subsidized units (max)",
-            display_text: "The number of subsidized units in the project. When a project participates in multiple subsidy programs, this number is the number of units subsidized by the program with the most units. Partially overlapping subsidies could result in more units than are reflected here.",
-            component_type: 'continuous',
-            data_type:'integer',
-            min:0,
-            max:600,
-            num_decimals_displayed:0,
-            data_level: 'project'
-        },
-        {   source: 'hud_own_type',
-            display_name:'Ownership Type (per HUD)',
-            display_text:"This field is only available for buildings participating in HUD programs; others are listed as 'Unknown'",
-            component_type: 'categorical',
-            data_type:'text',
-            data_level: 'project'
-        },
-
-        {   source: 'acs_median_rent',
-            display_name: 'ACS: Median Neighborhood Rent',
-            display_text: 'Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.',
-            component_type: 'continuous',
-            data_type:'decimal',
-            min: 0,
-            max: 2500,
-            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead.
-            data_level: 'zone'
-        },
-
-        //TODO this is a dummy data set to show a second option for combined overlay/filtering!!!
-        {
-            source: "building_permits_construction",
-            display_name: "Building Permits: Construction 2016",
-            display_text: "Important! This is not actually included in our filter data yet, shown as a demo",
-            component_type: 'continuous',
-            data_type:'decimal',
-            min: 0,
-            max: 2500,
-            num_decimals_displayed: 0, //0 if integer, 1 otherwise. Could also store data type instead.
-            data_level: 'zone'
-        },
-
-
-
-
-        {   source: 'portfolio',
-            display_name: 'Subsidy Program',
-            display_text: 'Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list',
-            component_type:'categorical',
-            data_type: 'text',
-            data_level: 'project'
-        },
-        {   source:'poa_start',
-            display_name:'Subsidy Start Date',
-            display_text: 'Filters to buildings with at least one subsidy whose start date falls between the selected dates.',
-            component_type: 'date',
-            data_type: 'timestamp',
-            min: '1950-01-01', //just example, TODO change to date format
-            max: 'now',         //dummy example
-            data_level: 'project'
-        },
-        {   source:'poa_end',
-            display_name:'Subsidy End Date',
-            display_text: 'Filters to buildings with at least one subsidy whose end date falls between the selected dates.',
-            component_type: 'date',
-            data_type: 'timestamp',
-            min: '1950-01-01', //just example, TODO change to date format
-            max: 'now',         //dummy example
-            data_level: 'project'
-        },
-       
-    ],
-
     addClearPillboxes: function(msg,data){
     
         for (var i=0; i < filterView.filterControls.length; i++){
@@ -498,26 +363,30 @@ var filterView = {
     },
 
     locationFilterChoices: {}, //populated based on data in the buildFilterComponents function
+    
+    components: dataChoices, //TODO replace all filterView.components references with dataChoices references after @ptgott merges in his changes
 
     buildFilterComponents: function(){
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
         var workingData = model.dataCollection['filterData'].items; 
         
+        var parent = d3.select('#filter-components')
+                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
+            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
+
         //Add components to the navigation using the appropriate component type
         for (var i = 0; i < filterView.components.length; i++) {
 
+            console.log("building filter component: " + filterView.components[i].source);
+            
             //Set up sliders
             if (filterView.components[i].component_type == 'continuous'){
                 
                 new filterView.continuousFilterControl(filterView.components[i]);
             }
-                           
 
-            var parent = d3.select('#filter-components')
-                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
-
+            
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
 
