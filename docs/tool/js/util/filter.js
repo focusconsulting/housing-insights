@@ -68,17 +68,19 @@ var filterUtil = {
                 workingData = workingData.filter(function(d){
                     // If the filter has returned to the original min/max values,
                     // reveal everything.
-                    if(filterValues[key][0][0].valueOf() == component.min.valueOf() && filterValues[key][0][1].valueOf() == component.max.valueOf()){
+                    if(filterValues[key][0][0] == component.min && filterValues[key][0][1] == component.max){
                         return true;
                     }
 
                     // Projects with 'null' date values are not shown.
-                    // TODO: Indicate on the front-end that null values are not shown.
+                    // TODO: Change this once we implement a toggle switch for showing
+                    // null values
                     if(d[key] === null){
                          return false;
                     }
-                    return d[key] > filterValues[key][0][0] && d[key] < filterValues[key][0][1];
-                })
+
+                    return d[key].getFullYear() > filterValues[key][0][0] && d[key].getFullYear() < filterValues[key][0][1];
+                });
 
 			}
 

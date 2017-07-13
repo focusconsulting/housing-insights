@@ -260,52 +260,19 @@ var filterView = {
             
         // We need to define the min and max outside a given
         // date component since these are only available after the filterData loads.
-        component.min = d3.min(componentValuesOnly);
-        component.max = d3.max(componentValuesOnly);
-
-        // since noUISlider doesn't accept JS Date objects for its 'range' option, we'll use
-        // a d3 Scale to go from slider steps to Dates.
-        var dateScale = d3.scaleTime()
-        // range: steps on the slider. This is arbitrary.
-            .range([0, 1000])
-            .domain([component.min, component.max]);
-
-        
-        function getDateObjFromString(strng){
-            // This assumes the format "Jan 3, 2017".
-            var dateTooltipPattern = /^([A-Za-z]{3})\ (\d{1,2})\ (\d{4})$/;
-
-            var matches = dateTooltipPattern.exec(strng);
-            return new Date(matches[2], months.indexOf(matches[0]), matches[1]);
-
-        }
-
-        function getStringFromDateObj(dateObj){
-            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-            var chosenMonth = months[dateObj.getMonth()];
-            var chosenYear = dateObj.getYear() > 100 ? "" + (2000 + (dateObj.getYear() - 100)) : "" + (1900 + dateObj.getYear());
-            return "" + chosenMonth + " " + dateObj.getDate() + " " + chosenYear;
-        }
-        
-        var formatter = {
-            to: function(value){
-                return getStringFromDateObj(dateScale.invert(value));
-            },
-            from: function(value){
-                return dateScale(getDateObjFromString(value));
-            }
-        }
+        component.min = d3.min(componentValuesOnly).getFullYear();
+        component.max = d3.max(componentValuesOnly).getFullYear();
         
         slider = document.getElementById(c.source);
         noUiSlider.create(slider, {
-            start: [dateScale(component.min), dateScale(component.max)],
+            start: [component.min, component.max],
             connect: true,
-            tooltips: [formatter, formatter],
+            tooltips: [ wNumb({ decimals: 0 }), wNumb({ decimals: 0 }) ],
             range: {
-                'min': dateScale(component.min),
-                'max': dateScale(component.max)
-            }
+                'min': component.min,
+                'max': component.max
+            },
+            step: 1
         });
 
         function makeSliderCallback(component){
@@ -321,16 +288,6 @@ var filterView = {
                 // tap: Event was caused by the user tapping the slider (boolean);
                 // positions: Left offset of the handles in relation to the slider
                 var specific_state_code = 'filterValues.' + component.source
-
-                //If the sliders have been 'reset', remove the filter
-                if (component.min == unencoded[0] && component.max == unencoded[1]){
-                    var unencoded = [];
-                }
-                else{
-                    unencoded = unencoded.map(function(el){
-                        return dateScale.invert(el);
-                    });
-                }
 
                 setState(specific_state_code,unencoded);
             }
@@ -600,10 +557,6 @@ var filterView = {
                 
             };
 
-            if (filterView.components[i].component_type == 'date'){
-                //Add a div with label and select element
-                //Bind user changes to a setState function
-            };
 
         }; //end for loop. All components on page.
 
