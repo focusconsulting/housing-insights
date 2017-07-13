@@ -154,9 +154,22 @@ html, body {
     background-color: rgba(255, 255, 255, .85);
     padding: 10px;
     position: absolute;
-    bottom: 0;
-    left: 310px;    
+    display: block;
 }
+#category-legend{
+    bottom: 0;
+    left: 310px;   
+}
+
+#chloroplethLegend-wrapper {
+    bottom: 0;
+    right: 360px; 
+    
+}
+#chloroplethLegend {
+    height:120px;
+}
+
 
 #legend-items div span {
     border-radius: 50%;

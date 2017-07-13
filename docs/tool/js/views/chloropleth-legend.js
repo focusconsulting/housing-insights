@@ -2,14 +2,15 @@
 
 var chloroplethLegend = {
   init: function(message,data){
+
     var joinedToGeoName = "joinedToGeo." + data.overlay + "_" + data.activeLayer;
     var chloroplethRange = getState()[joinedToGeoName][0].chloroplethRange;
-    var overlayConfig = mapView.initialOverlays.find(function(obj){return obj['name']==data.overlay});
+    var overlayConfig = mapView.initialOverlays.find(function(obj){return obj['source']==data.overlay});
 
     chloroplethLegend.tearDownPrevious();
 
-    var wrapperId = 'overlay-' + data.overlay + '-legend';
-
+    //var wrapperId = 'overlay-' + data.overlay + '-legend';    //old way- when it was located within the sidebar
+    var wrapperId = 'chloroplethLegend-wrapper';
     var partialRequest = {
         partial: 'chloropleth-legend',
         container: wrapperId,

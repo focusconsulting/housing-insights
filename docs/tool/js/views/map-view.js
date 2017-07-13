@@ -27,7 +27,7 @@
                     ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
                     ['dataLoaded.metaData', resultsView.init],
                     ['dataLoaded.metaData', mapView.placeProjects],
-                    ['dataLoaded.metaData', mapView.overlayMenu],
+                    ['dataLoaded.metaData', mapView.buildOverlayOptions],
                     ['dataLoaded.raw_project', filterView.init],
                     ['overlayRequest', mapView.addOverlayData],
                     ['overlayRequest', mapView.updateZoneChoiceDisabling],
@@ -36,7 +36,8 @@
                     ['previewBuilding', mapView.showPopup],
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding],
-                    ['filterViewLoaded', mapView.initialSidebarState]
+                    ['filterViewLoaded', mapView.initialSidebarState],
+                    ['filteredProjectsAvailable',mapView.zoomToFilteredProjects]
                 ]);
 
 
@@ -63,9 +64,9 @@
 
                     d3.select('#reset-zoom')
                         .style('display', function() {
-                            if (Math.abs(mapView.map.getZoom() - mapView.originalZoom) < 0.001 &&
-                                Math.abs(mapView.map.getCenter().lng - mapView.originalCenter[0]) < 0.001 &&
-                                Math.abs(mapView.map.getCenter().lat - mapView.originalCenter[1]) < 0.001) {
+                            if (Math.abs(mapView.map.getZoom() - mapView.originalZoom) < 0.1 &&
+                                Math.abs(mapView.map.getCenter().lng - mapView.originalCenter[0]) < 0.01 &&
+                                Math.abs(mapView.map.getCenter().lat - mapView.originalCenter[1]) < 0.01) {
                                 return 'none';
                             } else {
                                 return 'block';
@@ -172,119 +173,22 @@
 
             console.log(location.hostname);
 
+            var test = dataChoices.filter(function(d){
+                return d['data_level'] === "zone";
+            })
+
+            console.log("overlay choices:")
+            console.log(test);
             //TODO we want to move this config data into it's own file or to the api
-            mapView.initialOverlays = [{
-                    name: "crime_violent_12",
-                    display_name: "Crime Rate: Violent 12 months",
-                    display_text: "Number of violent crime incidents per 100,000 people reported in the past 12 months.",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward",
-                    style: "number"
-                },
-                {
-                    name: "crime_nonviolent_12",
-                    display_name: "Crime Rate: Non-Violent 12 months",
-                    display_text: "Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward",
-                    style: "number"
-                },
-                {
-                    name: "crime_all_3",
-                    display_name: "Crime Rate: All 3 months",
-                    display_text: "Total number of crime incidents per 100,000 people reported in the past 12 months.",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "ward",
-                    style: "number"
-                },
-                {
-                    name: "building_permits_construction",
-                    display_name: "Building Permits: Construction 2016",
-                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
-                    zones: ["ward", "neighborhood_cluster", "zip"],
-                    default_layer: "ward",
-                    style: "number"
-                },
-                {
-                    name: "building_permits_all",
-                    display_name: "Building Permits: All 2016",
-                    display_text: "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
-                    zones: ["ward", "neighborhood_cluster", "zip"],
-                    default_layer: "ward",
-                    style: "number"
-                },
-                {
-                    name: "poverty_rate",
-                    display_name: "ACS: Poverty Rate",
-                    display_text: "Fraction of residents below the poverty rate.",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract",
-                    style: "percent"
-                },
-                {
-                    name: "income_per_capita",
-                    display_name: "ACS: Income Per Capita",
-                    display_text: "Average income per resident",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract",
-                    style: "money"
-                },
-                {
-                    name: "labor_participation",
-                    display_name: "ACS: Labor Participation",
-                    display_text: "Percent of the population that is working",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract",
-                    style: "percent"
-                },
-                {
-                    name: "fraction_single_mothers",
-                    display_name: "ACS: Fraction Single Mothers",
-                    display_text: "Percent of the total population that is a single mother",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract",
-                    style: "percent"
-                },
-                {
-                    name: "fraction_black",
-                    display_name: "ACS: Fraction Black",
-                    display_text: "Proportion of residents that are black or African American",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract",
-                    style: "percent"
-                },
-                {
-                    name: "fraction_foreign",
-                    display_name: "ACS: Fraction Foreign",
-                    display_text: "Percent of the population that is foreign born",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract",
-                    style: "percent"
-                },
-                {
-                    name: "acs_median_rent",
-                    display_name: "ACS: Median Rent",
-                    display_text: "Median Rent per American Community Survey",
-                    url_format: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/acs_median_rent/<zone>",
-                    zones: ["ward", "neighborhood_cluster", "census_tract"],
-                    default_layer: "census_tract",
-                    style: "number"
-                }
-                
-            ];
+            mapView.initialOverlays = test//TODO load this from dataChoices
         },
 
+
+
+        //No longer used - we are moving this into the combined filter/layer setup. 
+        //Keep this code here until we confirm the removal of separate layers menu with user tests around 7/25
+        //TODO remove once confirmed
+        /*
         overlayMenu: function(msg, data) {
 
             if (data === true) {
@@ -309,30 +213,30 @@
             title.append("span")
                 .classed("title-text", true)
                 .text(overlay.display_name)
-            title.attr("id", "overlay-" + overlay.name); //TODO need to change this to different variable after changing meta logic structure
+            title.attr("id", "overlay-" + overlay.source); //TODO need to change this to different variable after changing meta logic structure
 
 
             var content = parent.append("div")
                 .classed("content", true)
-              .attr("id", "overlay-about-"+overlay.name)
+              .attr("id", "overlay-about-"+overlay.source)
                 .text(overlay.display_text)
 
             var legendLocation = content.append("div")
-                .attr("id", "overlay-" + overlay.name + "-legend") // TODO need to change this to different variable after changing meta logic structure
+                .attr("id", "overlay-" + overlay.source + "-legend") // TODO need to change this to different variable after changing meta logic structure
                 .style("height", "150px"); 
                 
             $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
 
             //Set it up to trigger the layer when title is clicked
-            document.getElementById("overlay-" + overlay.name).addEventListener("click", clickCallback);
+            document.getElementById("overlay-" + overlay.source).addEventListener("click", clickCallback);
 
             function clickCallback() {
                 var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-                console.log("changing from " + existingOverlayType + " to " + overlay.name);
+                console.log("changing from " + existingOverlayType + " to " + overlay.source);
 
-                if (existingOverlayType !== overlay.name) {
+                if (existingOverlayType !== overlay.source) {
                     setState('overlayRequest', {
-                        overlay: overlay.name,
+                        overlay: overlay.source,
                         activeLayer: getState().mapLayer[0]
                     });
                 } else {
@@ -341,7 +245,7 @@
 
                 //probably not currently working - disabling of layers
                 mapView.layerMenuOptions.forEach(function(opt) {
-                    if (thisOption.availableLayerNames.indexOf(opt.name) === -1) {
+                    if (thisOption.availableLayerNames.indexOf(opt.source) === -1) {
                         opt.makeUnavailable();
                     } else {
                         opt.makeAvailable();
@@ -351,7 +255,7 @@
             }; //end clickCallback
         },
 
-
+        */
 
 
         onReturn: function() {
@@ -361,6 +265,7 @@
 
 
         clearOverlay: function(layer) {
+
             var i = layer === 'previous' ? 1 : 0;
 
             var layerObj = getState().overlaySet !== undefined ? getState().overlaySet[i] : undefined;
@@ -372,6 +277,7 @@
             }
             if (i === 0) { // i.e. clearing the existing current overlay, with result that none will be visible
                 clearState('overlaySet');
+                chloroplethLegend.tearDownPrevious();
                 mapView.updateZoneChoiceDisabling("msg",{overlay: null});
             }
         },
@@ -414,7 +320,7 @@
                         //If the data returned is null that aggregation is not available. Use default aggregation instead
                         //Using setState here means that after the data is loaded, the addOverlayData function will be called
                         //again. 
-                        var config = mapView.findOverlayConfig('name', data.overlay)
+                        var config = mapView.findOverlayConfig('source', data.overlay)
                         var default_layer = config.default_layer
 
                         //Prevent an infinite loop
@@ -431,7 +337,7 @@
                     };
                 }
 
-                var overlayConfig = mapView.findOverlayConfig('name', data.overlay)
+                var overlayConfig = mapView.findOverlayConfig('source', data.overlay)
                 var url = overlayConfig.url_format.replace('<zone>',data.activeLayer)
 
                 var dataRequest = {
@@ -455,7 +361,7 @@
                 // it is not dynamically connected to the dataCollection
                 var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;    
                                                                                  // dataCollection        
-                var thisStyle = mapView.initialOverlays.find(function(obj){return obj['name']==data.overlay}).style;
+                var thisStyle = mapView.initialOverlays.find(function(obj){return obj['source']==data.overlay}).style;
         
                 // assign the chloropleth color range to the data so we can use it for other
                 // purposes when the state is changed
@@ -531,15 +437,9 @@
                 color: '#0D5C7D',
                 visibility: 'none'
             }
-           
-            /*
-            {
-                source: 'zip',
-                display_name: 'Zip',
-                color: '#0D7B8A',
-                visibility: 'none'
-            }
-            */
+            
+            //TODO add ANC? Need weighting factors in database first
+
         ],
         addInitialLayers: function(msg, data) {
 
@@ -668,7 +568,7 @@
                             availableLayers.push(layer.source);
                         });
                     } else {
-                        availableLayers = mapView.findOverlayConfig('name', data.overlay)['zones']
+                        availableLayers = mapView.findOverlayConfig('source', data.overlay)['zones']
                     };
 
 
@@ -800,8 +700,6 @@
                         }
                     });
                    
-
-                    // TODO: MAKE LEGEND
                     mapView.map.on('mousemove', function(e) {
                         //get the province feature underneath the mouse
                         var features = mapView.map.queryRenderedFeatures(e.point, {
@@ -994,5 +892,27 @@
                     'filter': ['==', 'nlihc_id', data]
                 });
             }
+        },
+        zoomToFilteredProjects: function(msg, data){
+            if (getState().filteredProjectsAvailable.length < 2 ) {
+                return; // disable function on first filter, which happens when the app first loads
+            }
+            var maxLat = d3.max(data, function(d){
+                return d.latitude;
+            });            
+            var minLat = d3.min(data, function(d){
+                return d.latitude;
+            });
+            var maxLon = d3.max(data, function(d){
+                if (d.longitude < 0 ) {
+                    return d.longitude; // workaround of data error where one project has positive longitude instead of positive
+                                        // can remove `if` statement when resolved (issue 405)                    
+                }
+            });
+            var minLon = d3.min(data, function(d){
+                return d.longitude;
+            });
+            console.log(minLon,minLat,maxLon,maxLat);
+            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], {linear: true, padding: 20});
         }
     };
