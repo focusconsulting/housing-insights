@@ -17,11 +17,11 @@ with open('secrets.json') as f:
     secrets = json.load(f)
     connect_str = secrets['docker_database']['connect_str']
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = connect_str
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+application = Flask(__name__)
+application.config['SQLALCHEMY_DATABASE_URI'] = connect_str
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(application)
 Base = automap_base()
 
 metadata = MetaData(bind=db)
@@ -47,10 +47,10 @@ models = [BuildingPermits, Census, CensusMarginOfError, Crime, DcTax, Project, R
           RealProperty, Subsidy, Topa, WmataDist, WmataInfo
           ]
 
-db.init_app(app)
+db.init_app(application)
 
 
-manager = APIManager(app, flask_sqlalchemy_db=db)
+manager = APIManager(application, flask_sqlalchemy_db=db)
 
 for model in models:
     # https://github.com/jfinkels/flask-restless/pull/436
@@ -58,10 +58,10 @@ for model in models:
     manager.create_api(model, methods=['GET'])
 
 
-@app.route('/')
+@application.route('/')
 def hello():
     return("The Housing Insights API Rules!")
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    application.run(host='0.0.0.0', port=5001)
