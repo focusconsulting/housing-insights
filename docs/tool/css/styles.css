@@ -63,6 +63,28 @@ html, body {
     padding: 10px 0px 10px 10px;
 }
 
+/* Text input boxes within sidebars */
+div.filter.content input.filter-text{
+    display: inline-block;
+    position: relative;
+    height: 2em;
+    border: 1px solid rgb(230, 230, 230);
+}
+
+div.filter.content input.year-text {
+    width: 40px;
+    box-sizing: border-box;
+}
+div.filter.content input.month-text, 
+div.filter.content input.day-text {
+    width: 20px;
+    box-sizing: border-box;
+}
+
+div.filter.content span.text-input-max{
+    margin-left: 70px;
+}
+
 /*Color code the text for projects that match the specified filters*/
 .matching {
     color:rgba(253,126,35,0.7) !important;

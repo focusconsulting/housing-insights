@@ -160,6 +160,81 @@ var filterView = {
         filterView.filterControls.push(this);
         this.component = component;
     },
+    // filterTextInput takes as a parameter an array of keys.
+    // It produces text inputs corresponding to these keys and
+    // tracks their values.
+    // sourceObj is one element in dataChoices.
+    // keyValuePairsArray takes the form, [[key, val], [key, val]...]
+    filterTextInput: function(sourceObj, keyValuePairsArray){
+        var output = {};
+
+        // separatorCallback is a function that returns
+        // a JavaScript Node object to be appended after each
+        // input element.
+        this.toDOM = function(parentElement, separatorCallback){
+            for(var key in output){
+                parentElement.appendChild(output[key]);
+                if(separatorCallback && Object.keys(output).indexOf(key) < Object.keys(output).length - 1){
+                    parentElement.appendChild(separatorCallback());
+                }
+            }
+        }
+
+        this.setValues = function(keyValuePairsArray){
+            for(var i = 0; i < keyValuePairsArray.length; i++){
+                output[keyValuePairsArray[i][0]].value = keyValuePairsArray[i][1];
+            }
+        }
+
+        this.returnValues = function(){
+            var valueOutput = {};
+            for( var key in output){
+                valueOutput[key] = output[key].value;
+            }
+            return valueOutput;
+        }
+
+        this.setInputCallback = function(callback){
+
+            var checkKeyPress = function(e){
+                if(e.charCode === 9 || e.charCode === 13){
+                    callback();
+                }
+            }
+
+            var setUpEventListeners = function (element){
+
+                function setUpKeyPressListener(e){
+                    element.addEventListener('keypress', checkKeyPress);
+                }
+
+                function tearDownKeyPressListener(e){
+                    element.removeEventListener('keypress', checkKeyPress)
+                }
+
+                element.addEventListener('focus', setUpKeyPressListener);
+                element.addEventListener('blur', function(e){
+                   callback();
+                   tearDownKeyPressListener(e);
+                });
+            }
+            for(var key in output){
+                setUpEventListeners(output[key]);
+            }
+        }
+
+        for (var i = 0; i < keyValuePairsArray.length; i++){
+            output[keyValuePairsArray[i][0]] = document.createElement('input');
+            output[keyValuePairsArray[i][0]].setAttribute(
+                'id', sourceObj.source + '-' + keyValuePairsArray[i][0] + '-text'
+            );
+            output[keyValuePairsArray[i][0]].classList.add('filter-text');
+            output[keyValuePairsArray[i][0]].classList.add(keyValuePairsArray[i][0] + '-text');
+            output[keyValuePairsArray[i][0]].setAttribute('name', keyValuePairsArray[i][0]);
+            output[keyValuePairsArray[i][0]].value = keyValuePairsArray[i][1];
+        }
+
+    },
     continuousFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
@@ -234,6 +309,16 @@ var filterView = {
             .classed('slider', true)
             .attr('id', c.source);
 
+        var minInputContainer = document.createElement('span');
+        minInputContainer.setAttribute('id', c.source + '-input-min');
+        minInputContainer.classList.add('text-input-min');
+        var maxInputContainer = document.createElement('span');
+        maxInputContainer.setAttribute('id', c.source + '-input-max');
+        maxInputContainer.classList.add('text-input-max');
+
+        document.getElementById('filter-content-' + c.source).appendChild(minInputContainer);
+        document.getElementById('filter-content-' + c.source).appendChild(maxInputContainer);
+
         // this is used for d3.min and d3.max.
         var componentValuesOnly = model.dataCollection.filterData.items.map(function(item){
             return item[c.source];
@@ -241,25 +326,41 @@ var filterView = {
             
         // We need to define the min and max outside a given
         // date component since these are only available after the filterData loads.
-        component.min = d3.min(componentValuesOnly).getFullYear();
-        component.max = d3.max(componentValuesOnly).getFullYear();
-        
+        component.min = d3.min(componentValuesOnly);
+        component.max = d3.max(componentValuesOnly);
+
         slider = document.getElementById(c.source);
         noUiSlider.create(slider, {
             start: [component.min, component.max],
             connect: true,
-            tooltips: [ wNumb({ decimals: 0 }), wNumb({ decimals: 0 }) ],
+            tooltips: [ false, false ],
             range: {
-                'min': component.min,
-                'max': component.max
+                'min': component.min.getFullYear(),
+                'max': component.max.getFullYear()
             },
             step: 1
         });
 
-        function makeSliderCallback(component){
-            // TODO: This is copied verbatim from the continuousFilterControl
-            // constructor, so it may be worth extracting makeSliderCallback
-            // to a property of filterView (or something with broader scope).
+        var minDateInput = new filterView.filterTextInput(
+            component,        
+            [
+                ['day', component.min.getDate()],
+                ['month', component.min.getMonth() + 1],
+                ['year', component.min.getFullYear()]
+            ]
+        );
+
+        var maxDateInput = new filterView.filterTextInput(
+            component,
+            [
+                ['day', component.max.getDate()],
+                ['month', component.max.getMonth() + 1],
+                ['year', component.max.getFullYear()]
+            ]
+        );
+
+        function makeSliderCallback(component, doesItSetState){
+
             return function sliderCallback ( values, handle, unencoded, tap, positions ) {
                 // This is the custom binding module used by the noUiSlider.on() callback.
 
@@ -270,15 +371,84 @@ var filterView = {
                 // positions: Left offset of the handles in relation to the slider
                 var specific_state_code = 'filterValues.' + component.source
 
-                setState(specific_state_code,unencoded);
+                var dateForYear = function(minOrMax, year, component){
+                    if(year === component[minOrMax].getFullYear()){
+                        return component[minOrMax];
+                    }
+                    else{
+                        return new Date(year, 0, 1);
+                    }
+                }
+
+                var newMinDate = dateForYear('min', +unencoded[0], c);
+                var newMaxDate = dateForYear('max', +unencoded[1], c);
+
+                minDateInput.setValues([
+                    ['year', newMinDate.getFullYear()],
+                    ['month', newMinDate.getMonth() + 1],
+                    ['day', newMinDate.getDate()]
+                ]);
+
+                maxDateInput.setValues([
+                    ['year', newMaxDate.getFullYear()],
+                    ['month', newMaxDate.getMonth() + 1],
+                    ['day', newMaxDate.getDate()]
+                ]);
+
+                if(doesItSetState){
+                    setState(specific_state_code,[newMinDate, newMaxDate]);
+                }
             }
         }
 
-        var currentSliderCallback = makeSliderCallback(c);
+        var currentSliderCallback = makeSliderCallback(c, true);
+        var slideSliderCallback = makeSliderCallback(c, false);
         
-        //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates.
-        //using 'set' for now for easier development (less console logging of state changes)
-        slider.noUiSlider.on('set', currentSliderCallback);
+        // Binding currentSliderCallback to 'change'
+        // so that it doesn't trigger when the user changes
+        // the filter values through the text input boxes
+        // (which then move the slider to a certain position)
+        slider.noUiSlider.on('change', currentSliderCallback);
+        
+        // Change the value of the text input elements without
+        // setting state
+        slider.noUiSlider.on('slide', slideSliderCallback);
+
+
+        var inputCallback = function(){
+            var specific_state_code = 'filterValues.' + component.source
+
+            var minVals = minDateInput.returnValues();
+            var maxVals = maxDateInput.returnValues();
+
+            var newMinDate = new Date(minVals.year, minVals.month - 1, minVals.day);
+            var newMaxDate = new Date(maxVals.year, maxVals.month - 1, maxVals.day);
+
+            slider.noUiSlider.set(
+                [minVals.year, maxVals.year]
+            );
+
+            setState(specific_state_code, [newMinDate, newMaxDate]);
+        }
+
+        // For separating date inputs with a '/'
+        function addSlash(){
+            return document.createTextNode('/');
+        }
+
+        minDateInput.setInputCallback(inputCallback);
+        minDateInput.toDOM(
+            document.getElementById(c.source + '-input-min'),
+            addSlash
+        );
+        maxDateInput.setInputCallback(inputCallback);
+        maxDateInput.toDOM(
+            document.getElementById(c.source + '-input-max'),
+            addSlash
+        );
+
+        // code for setting the callback and adding minDateInput to the DOM
+        // code for doing the same stuff with maxDateInput
 
         this.clear = function(){
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
@@ -380,7 +550,7 @@ var filterView = {
                 };
             }; //end clickCallback
 
-            return content
+            return content;
 
     },  
 
