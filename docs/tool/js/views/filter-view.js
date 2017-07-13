@@ -227,28 +227,9 @@ var filterView = {
         filterView.filterControl.call(this, component);
         var c = this.component;
 
-        var parent = d3.select('#filter-components')
-        var title = parent.append('div')
-            .classed('title filter-title', true);
+        var contentContainer = filterView.setupFilter(c);
 
-        title.append('i')
-            .classed('dropdown icon', true);
-        
-        title.append('span')
-            .classed('title-text', true)
-            .text(c.display_name);
-
-        title.attr('id', 'filter-'+ c.source);
-
-        var content = parent.append('div')
-            .classed('content', true);
-
-        var description = content.append('p')
-            .classed('description', true);
-
-        description.html(c.display_text);
-
-        var slider = content.append('div')
+        var slider = contentContainer.append('div')
             .classed('filter', true)
             .classed('slider', true)
             .attr('id', c.source);
