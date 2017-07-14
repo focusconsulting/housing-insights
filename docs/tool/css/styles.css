@@ -69,20 +69,27 @@ div.filter.content input.filter-text{
     position: relative;
     height: 2em;
     border: 1px solid rgb(230, 230, 230);
+    box-sizing: border-box;
 }
 
 div.filter.content input.year-text {
     width: 40px;
-    box-sizing: border-box;
 }
 div.filter.content input.month-text, 
 div.filter.content input.day-text {
     width: 20px;
-    box-sizing: border-box;
 }
 
 div.filter.content span.text-input-max{
     margin-left: 70px;
+}
+
+div.filter.content .continuous-input-text{
+    width: 40px;
+}
+
+div.filter.content .continuous-input-right{
+    margin-left: 100px;
 }
 
 /*Color code the text for projects that match the specified filters*/

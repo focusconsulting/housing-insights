@@ -223,6 +223,12 @@ var filterView = {
             }
         }
 
+        this.allInputElements = function(){
+            return Object.keys(output).map(function(key){
+                return output[key];
+            });
+        }
+
         for (var i = 0; i < keyValuePairsArray.length; i++){
             output[keyValuePairsArray[i][0]] = document.createElement('input');
             output[keyValuePairsArray[i][0]].setAttribute(
@@ -238,13 +244,28 @@ var filterView = {
     continuousFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
-        var contentContainer = filterView.setupFilter(c);
 
+        var contentContainer = filterView.setupFilter(c);
+        
+        // Begin code common to continuousFilterControl and dateFilterControl
+        // TODO: Consider extracting this to setupFilter
         var slider = contentContainer.append("div")
                 .classed("filter", true)
                 .classed("slider",true)
                 .attr("id",c.source);
 
+        var minInputContainer = document.createElement('span');
+        minInputContainer.setAttribute('id', c.source + '-input-min');
+        minInputContainer.classList.add('text-input-min');
+        var maxInputContainer = document.createElement('span');
+        maxInputContainer.setAttribute('id', c.source + '-input-max');
+        maxInputContainer.classList.add('text-input-max');
+
+        document.getElementById('filter-content-' + c.source).appendChild(minInputContainer);
+        document.getElementById('filter-content-' + c.source).appendChild(maxInputContainer);
+        // End code tommon to continuousFilterContorl and dateFilterControl
+
+        var stepCount = Math.max(1, parseInt((c.max - c.min)/500));
 
         slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
         noUiSlider.create(slider, {
@@ -253,16 +274,26 @@ var filterView = {
 
             //the wNumb is a number formatting library. This is what was recommended by noUiSlider; we should consider using elsewhere.
             //order of the two wNumb calls corresponds to left and right slider respectively.
-            tooltips: [ wNumb({ decimals: c.num_decimals_displayed }), wNumb({ decimals: c.num_decimals_displayed }) ],
+            tooltips: [ false, false ],
             range: {
                 'min': c.min,
                 'max': c.max
-            }
-
+            },
+            step: stepCount
         });
 
+        var minTextInput = new filterView.filterTextInput(
+            component,        
+            [['min', component.min]]
+        );
+
+        var maxTextInput = new filterView.filterTextInput(
+            component,
+            [['max', component.max]]
+        );
+
         //Each slider needs its own copy of the sliderMove function so that it can use the current component
-        function makeSliderCallback(component){
+        function makeSliderCallback(component, doesItSetState){
             return function sliderCallback ( values, handle, unencoded, tap, positions ) {
                 // This is the custom binding module used by the noUiSlider.on() callback.
 
@@ -274,19 +305,78 @@ var filterView = {
                 var specific_state_code = 'filterValues.' + component.source
                 
                 //If the sliders have been 'reset', remove the filter
-                if (component.min == unencoded[0] && component.max == unencoded[1]){
-                    unencoded = [];
+                // if (component.min == unencoded[0] && component.max == unencoded[1]){
+                //     unencoded = [];
+                // }
+
+                // For any non-integer numbers resulting
+                // from the filter that are greater than zero,
+                // return the ceiling of that number.
+                unencoded = unencoded.map(function(el){
+                    return el >= 0 ? Math.ceil(el) : el;
+                });
+
+                console.log("component.source", component.source);
+
+                minTextInput.setValues([
+                    ['min', unencoded[0]]
+                ]);
+
+                maxTextInput.setValues([
+                    ['max', unencoded[1]]
+                ]);
+
+                if(doesItSetState){
+                    setState(specific_state_code,unencoded);
                 }
-                setState(specific_state_code,unencoded);
+
             }
         }
 
         //Construct a new copy of the function with access to the current c variable
-        var currentSliderCallback = makeSliderCallback(c)
+        var currentSliderCallback = makeSliderCallback(c, true)
+        var slideSliderCallback = makeSliderCallback(c, false)
 
-        //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates.
-        //using 'set' for now for easier development (less console logging of state changes)
-        slider.noUiSlider.on('set', currentSliderCallback);
+        // Binding currentSliderCallback to 'change'
+        // so that it doesn't trigger when the user changes
+        // the filter values through the text input boxes
+        // (which then move the slider to a certain position)
+        slider.noUiSlider.on('change', currentSliderCallback);
+
+        // Change the value of the text input elements without
+        // setting state
+        slider.noUiSlider.on('slide', slideSliderCallback);
+
+        var inputCallback = function(){
+            var specific_state_code = 'filterValues.' + component.source
+
+            var minVals = minTextInput.returnValues();
+            var maxVals = maxTextInput.returnValues();
+
+            slider.noUiSlider.set(
+                [minVals['min'], maxVals['max']]
+            );
+
+            setState(specific_state_code, [minVals['min'], maxVals['max']]);
+        }
+
+        minTextInput.setInputCallback(inputCallback);
+        minTextInput.toDOM(
+            document.getElementById(c.source + '-input-min')
+        );
+        maxTextInput.setInputCallback(inputCallback);
+        
+        maxTextInput.toDOM(
+            document.getElementById(c.source + '-input-max')
+        );
+
+        minTextInput.allInputElements().forEach(function(el){
+            el.classList.add('continuous-input-text');
+        });
+        maxTextInput.allInputElements().forEach(function(el){
+            el.classList.add('continuous-input-text');
+            el.classList.add('continuous-input-right');
+        });
 
         this.clear = function(){
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
@@ -303,7 +393,9 @@ var filterView = {
         var c = this.component;
 
         var contentContainer = filterView.setupFilter(c);
-
+       
+        // Begin code common to continuousFilterControl and dateFilterControl
+        // TODO: Consider extracting this to setupFilter
         var slider = contentContainer.append('div')
             .classed('filter', true)
             .classed('slider', true)
@@ -318,6 +410,7 @@ var filterView = {
 
         document.getElementById('filter-content-' + c.source).appendChild(minInputContainer);
         document.getElementById('filter-content-' + c.source).appendChild(maxInputContainer);
+        // End code tommon to continuousFilterContorl and dateFilterControl
 
         // this is used for d3.min and d3.max.
         var componentValuesOnly = model.dataCollection.filterData.items.map(function(item){
@@ -446,9 +539,6 @@ var filterView = {
             document.getElementById(c.source + '-input-max'),
             addSlash
         );
-
-        // code for setting the callback and adding minDateInput to the DOM
-        // code for doing the same stuff with maxDateInput
 
         this.clear = function(){
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
