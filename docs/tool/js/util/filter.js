@@ -76,9 +76,8 @@ var filterUtil = {
                     // TODO: Change this once we implement a toggle switch for showing
                     // null values
                     if(d[key] === null){
-                         return false;
+                         return component.nulls_shown;
                     }
-
 
                     return d[key].valueOf() >= filterValues[key][0][0].valueOf() 
                         && d[key].valueOf() <= filterValues[key][0][1].valueOf();

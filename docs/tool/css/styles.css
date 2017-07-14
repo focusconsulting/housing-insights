@@ -92,6 +92,47 @@ div.filter.content .continuous-input-right{
     margin-left: 100px;
 }
 
+/* the toggle switches for filter controls */
+div.null-switch-area{
+    margin-top: 30px;
+}
+div.null-toggle-container{
+    width: 60px;
+    height: 60px;
+    display: block;
+    position: relative;
+}
+
+div.null-toggle-container div.null-toggle-background{
+    display: block;
+    position: relative;
+    width: 30px;
+    height: 20px;
+    border-radius: 20%;
+    background: rgba(150, 150, 150, 1);
+}
+
+div.null-toggle-container div.null-toggle-switch{
+    display: block;
+    position: relative;
+    top: -22px;
+    left: -1px;
+    width: 25px;
+    height: 25px;
+    transition: left 200ms;
+    border-radius: 50%;
+    background: rgb(253,126,35);
+}
+
+div.null-toggle-container.switched-on div.null-toggle-switch{
+    left: 10px !important;
+}
+
+div.null-toggle-container.switched-on div.null-toggle-background{
+    background: rgba(253, 126, 35, .5) !important;
+
+}
+
 /*Color code the text for projects that match the specified filters*/
 .matching {
     color:rgba(253,126,35,0.7) !important;

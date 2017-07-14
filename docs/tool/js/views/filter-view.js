@@ -160,6 +160,43 @@ var filterView = {
         filterView.filterControls.push(this);
         this.component = component;
     },
+    nullValuesToggle: function(component){
+
+        this.element = document.createElement('div');
+        this.element.classList.add("null-switch-area");
+
+        var switchContainer = document.createElement('div');
+        switchContainer.setAttribute('id', component.source + '-toggle-null');
+        switchContainer.classList.add('null-toggle-container');
+
+        var switchBackground = document.createElement('div');
+        switchBackground.classList.add('null-toggle-background');
+        var switchHandle = document.createElement('div');
+        switchHandle.classList.add('null-toggle-switch');
+        var txt = document.createTextNode("If a project doesn't have this information, show the project anyway?");
+
+        this.toDOM = function(parentElement){
+            parentElement.appendChild(this.element);
+            this.element.appendChild(txt);
+            this.element.appendChild(switchContainer);
+            switchContainer.appendChild(switchBackground);
+            switchContainer.appendChild(switchHandle);
+        }
+
+        // toggles between values 'true' and 'false' 
+        // of object.property when the switch is clicked.
+        this.bindProperty = function(object, property, callback){
+            function toggleProperty(){
+                // Assign the property if it hasn't been assigned.
+                object[property] = object[property] || false;
+                object[property] = !object[property];
+
+                switchContainer.classList.toggle('switched-on');
+                callback();
+            }
+            switchContainer.addEventListener('click', toggleProperty);
+        }
+    },
     // filterTextInput takes as a parameter an array of keys.
     // It produces text inputs corresponding to these keys and
     // tracks their values.
@@ -378,6 +415,10 @@ var filterView = {
             el.classList.add('continuous-input-right');
         });
 
+        var toggle = new filterView.nullValuesToggle(c);
+        toggle.bindProperty(c, 'nulls_shown', inputCallback);
+        toggle.toDOM(document.getElementById('filter-content-' + c.source));
+
         this.clear = function(){
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
@@ -393,6 +434,7 @@ var filterView = {
         var c = this.component;
 
         var contentContainer = filterView.setupFilter(c);
+
        
         // Begin code common to continuousFilterControl and dateFilterControl
         // TODO: Consider extracting this to setupFilter
@@ -539,6 +581,11 @@ var filterView = {
             document.getElementById(c.source + '-input-max'),
             addSlash
         );
+
+        var toggle = new filterView.nullValuesToggle(c);
+        toggle.bindProperty(c, 'nulls_shown', inputCallback);
+        toggle.toDOM(document.getElementById('filter-content-' + c.source));
+
 
         this.clear = function(){
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
