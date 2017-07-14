@@ -6,6 +6,7 @@ file that can later be used to load to the database.
 from csv import DictWriter
 import os
 import copy
+import uuid
 
 logging_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                             os.pardir, os.pardir, "logs"))
@@ -46,10 +47,13 @@ class CSVWriter(object):
         # append this to provided data
         self.dictwriter_fields = copy.copy(self.csv_fields)
 
+        # Add id column to every table
+        self.dictwriter_fields.append('id')
+
         # By default, creates a temp csv file wherever the calling module was
         #  located
         self.filename = 'temp_{}.psv'.format(self.unique_data_id) if filename == None else filename
-        
+
         # remove any existing copy of the file so we are starting clean
         self.remove_file()
 
@@ -75,6 +79,9 @@ class CSVWriter(object):
         # Note to developers - if this row returns a key error due to an
         # optional column, it means you need to have your cleaner add a 'null'
         # value for that optional column.
+
+        # Generate a random uuid
+        row['id'] = str(uuid.uuid4())
         self.writer.writerow(row)
 
     def open(self):
