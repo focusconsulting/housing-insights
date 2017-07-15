@@ -127,9 +127,11 @@ class MyTestCase(unittest.TestCase):
         result_path = self.loader.make_manifest(folder_path)
         self.assertEqual(self.loader.manifest.path, result_path)
 
-    # TODO - write test code
-    def test__remove_existing_data(self):
-        pass
+    def test__create_zone_facts_table(self):
+        # self.loader.rebuild()
+        print(self.loader._create_zone_facts_table())
+        result = 'zone_facts' in self.loader.engine.table_names()
+        self.assertTrue(result, 'zone_facts table is in db')
 
 
 if __name__ == '__main__':

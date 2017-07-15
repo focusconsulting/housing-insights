@@ -22,8 +22,6 @@ import os
 import logging
 import argparse
 import json
-from datetime import datetime
-from csv import DictWriter
 from sqlalchemy import Table, Column, Integer, String, MetaData
 
 # Needed to make relative package imports when running this file as a script
@@ -286,7 +284,32 @@ class LoadData(object):
 
             processed_data_ids.append(manifest_row['unique_data_id'])
 
+        # build Zone Facts table
+        self._create_zone_facts_table()
+
         return processed_data_ids
+
+    def _create_zone_facts_table(self):
+        # drop zone_facts table if already in db
+        if 'zone_facts' in self.engine.table_names():
+            query = 'DROP TABLE zone_facts;'
+            self.engine.connect().execute(query)
+
+        # build zone_facts table
+        metadata = MetaData(bind=self.engine)
+        zone_facts = Table('zone_facts', metadata,
+                           Column('zone', String, primary_key=True),
+                           Column('census_with_weighting', String),
+                           Column('poverty_rate', Integer),
+                           Column('fraction_black', Integer),
+                           Column('income_per_capita', Integer),
+                           Column('labor_participation', Integer),
+                           Column('fraction_foreign', Integer),
+                           Column('fraction_single_mothers', Integer))
+
+        # add to db
+        metadata.create_all()
+        return metadata.tables
 
     def _process_data_file(self, manifest_row):
         """
@@ -421,7 +444,7 @@ def main(passed_arguments):
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
     manifest_path = os.path.abspath(os.path.join(scripts_path, 'manifest.csv'))
 
-    #Locally, we can optionally have sample data
+    # Locally, we can optionally have sample data
     if passed_arguments.sample and passed_arguments.database != 'remote':
         meta_path = os.path.abspath(os.path.join(scripts_path,
                                                  'meta_sample.json'))
@@ -452,15 +475,13 @@ def main(passed_arguments):
         database_choice = 'local_database'
         drop_tables = True
 
-
-
-    #universal defaults
+    # universal defaults
     keep_temp_files = True
 
-
-    #Instantiate and run the loader
+    # Instantiate and run the loader
     loader = LoadData(database_choice=database_choice, meta_path=meta_path,
-                      manifest_path=manifest_path, keep_temp_files=keep_temp_files,
+                      manifest_path=manifest_path,
+                      keep_temp_files=keep_temp_files,
                       drop_tables=drop_tables)
 
     if passed_arguments.update_only:
@@ -482,7 +503,6 @@ if __name__ == '__main__':
     logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
     # Pushes everything from the logger to the command line output as well.
     logging.getLogger().addHandler(logging.StreamHandler())
-
 
     description = 'Loads our flat file data into the database of choice. You ' \
                   'can load sample or real data and/or rebuild or update only '\
