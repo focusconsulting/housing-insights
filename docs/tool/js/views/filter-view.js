@@ -32,8 +32,36 @@ var filterView = {
         var allPills = oldPills.enter().append("div")
             .attr("class","ui label transition visible")
             .classed("clear-single",true)
-          .merge(oldPills)
-            .text(function(d) { return d['component']['display_name'];});
+            // Animate a label that 'flies' from the filter component
+            // to the pillbox.
+            .text(function(d) { return d['component']['display_name'];})
+            .each(function(d){
+                var originElement = document.getElementById("filter-content-"+d.component.source);
+                var destinationElement = this;
+                var flyLabel = document.createElement('div');
+                flyLabel.textContent = this.textContent;
+                console.log("flyer this", this);
+                flyLabel.classList.add('ui', 'label', 'transition', 'visible', 'clear-single-flier');
+                var originRect = originElement.getBoundingClientRect();
+                flyLabel.style.left = originRect.left + 'px';
+                flyLabel.style.top = ((originRect.top + originRect.bottom)/2) + 'px';
+                document.body.appendChild(flyLabel);
+                console.log("flyLabel after append", flyLabel);
+                // Change the 'top' and 'left' CSS properties of flyLabel,
+                // triggering its CSS transition.
+                window.setTimeout(function(){
+                    console.log("flyLabel destinationElement.clientLeft", destinationElement.clientLeft);
+                    console.log("flyLabel destinationElement.clientTop", destinationElement.clientTop);
+                    flyLabel.style.left = destinationElement.getBoundingClientRect().left + 'px';
+                    flyLabel.style.top = destinationElement.getBoundingClientRect().top + 'px';
+                }, 1);
+
+                // Remove flyLabel after its transition has elapsed.
+                window.setTimeout(function(){
+                    flyLabel.parentElement.removeChild(flyLabel);
+                }, 1500);
+
+            });
 
         //Add the 'clear' x mark and its callback
         allPills.each(function(d) {
@@ -42,7 +70,8 @@ var filterView = {
                 .on("click", function(d) {
                     d.clear();
                 })
-        });
+        })
+        .merge(oldPills);
 
         oldPills.exit().remove();
 
@@ -191,7 +220,7 @@ var filterView = {
         }
 
         this.isTouched = function(){
-            return slider.noUiSlider.get()[0] === c.min && slider.noUiSlider.get()[1] === c.max;
+            return slider.noUiSlider.get()[0] !== c.min && slider.noUiSlider.get()[1] !== c.max;
         }
 
     },
@@ -462,34 +491,26 @@ var filterView = {
 
             this.pill = document.createElement('div');
             this.pill.id = 'clearFiltersPillbox';
-            this.pill.classList.add('ui', 'label', 'transition', 'visible');
+            this.pill.classList.add('ui', 'label', 'transition', 'visible', 'clear-all');
 
-            this.site = document.getElementById('button-filters');
-            this.replacedText = this.site.innerText;
+            this.site = document.getElementById('clear-pillbox-holder');
 
             this.trigger = document.createElement('i');
             this.trigger.id = 'clearFiltersTrigger';
             this.trigger.classList.add('delete', 'icon');
 
-            this.site.innerText = "";
-
-            this.pill.innerText = this.replacedText;
-
-            this.site.appendChild(this.pill);
+            this.site.insertBefore(this.pill, this.site.firstChild);
+            this.pill.textContent = "Clear all filters";
             this.pill.appendChild(this.trigger);
             
             this.trigger.addEventListener('click', function(){
                 filterView.clearAllFilters();
             });
         },
-        replacedText: undefined,
         site: undefined,
         tearDown: function(){
-            console.log("this.pill", this.pill);
-            console.log("this.pill.parentElement", this.pill.parentElement);
             this.pill.parentElement.removeChild(this.pill);
             this.trigger.parentElement.removeChild(this.trigger);
-            this.site.innerText = this.replacedText;
         },
         trigger: undefined
     },

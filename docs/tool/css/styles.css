@@ -114,12 +114,8 @@ html, body {
 }
 
 #clear-pillbox-holder {
-    position: absolute;
-    z-index:10;
-    top: 50px;
-    flex-grow: 1;
-    padding-left: 10px;
-    padding-right: 50px; /*allows space for mapbox zoom control*/
+    position: relative;
+    display: block;
 }
 
 .main-view {
@@ -494,9 +490,31 @@ a.active {
 /*Clear filter pillboxes*/
 .ui.label.clear-single {
     background-color: rgba(253,126,35,0.7);
+    display: block !important;
+    position: relative;
     font-size: .95em;
     margin-top:5px;
 }
+
+.ui.label.clear-single-flier {
+    background-color: rgba(253,126,35,0.7);
+    display: block;
+    position: absolute !important;
+    font-size: .95em;
+    z-index: 99999;
+    transition: left 1.5s, top 1.5s;
+}
+
+.ui.label.clear-all {
+    background-color: rgba(150,150,150,0.7);
+    display: block !important;
+    position: relative;
+    font-size: .95em;
+    margin-top:5px;
+    margin-left: 2px;
+}
+
+
 
 
 /* chloroplath legend */

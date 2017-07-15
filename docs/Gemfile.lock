@@ -4,6 +4,7 @@ GEM
     addressable (2.4.0)
     colorator (1.1.0)
     ffi (1.9.14)
+    ffi (1.9.14-x64-mingw32)
     forwardable-extended (2.6.0)
     jekyll (3.3.1)
       addressable (~> 2.4)
@@ -37,9 +38,10 @@ GEM
 
 PLATFORMS
   ruby
+  x64-mingw32
 
 DEPENDENCIES
   jekyll (= 3.3.1)
 
 BUNDLED WITH
-   1.14.6
+   1.15.1
