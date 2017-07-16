@@ -29,9 +29,10 @@ http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-str
 
 
 class CleanerBase(object, metaclass=ABCMeta):
-    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
+        self.engine = engine
 
         self.manifest_row = manifest_row
         self.tablename = manifest_row['destination_table']
@@ -508,11 +509,25 @@ class dchousing_cleaner(CleanerBase):
         return row
 
 class topa_cleaner(CleanerBase):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        #Call the parent method and pass all the arguments as-is
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+
     def clean(self,row,row_num=None):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
         # character in one or two columns.  Leave here for now.
         row = self.replace_nulls(row, null_values=['', '\\', None])
+        exists = self.address_id_exists(row['ADDRESS_ID'])
         return row
+
+    def address_id_exists(self, address_id):
+        "Checks for record in project table with matching MAR id."
+        query = "select mar_id from project where mar_id = '{}'".format(address_id)
+        try:
+            result = self.engine.execute(query)
+            result.close()
+        except:
+            return 0
 
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):

@@ -113,7 +113,7 @@ def check_or_create_sql_manifest(engine, rebuild=False):
             raise e
 
 
-def get_cleaner_from_name(meta, manifest_row, name="GenericCleaner"):
+def get_cleaner_from_name(meta, manifest_row, name="GenericCleaner", engine=None):
     """
     Returns the instance of the cleaner class matching the given cleaner class
     name.
@@ -127,7 +127,7 @@ def get_cleaner_from_name(meta, manifest_row, name="GenericCleaner"):
     #Import
     #module = import_module("module.submodule")
     Class_ = getattr(Cleaners, name)
-    instance = Class_(meta, manifest_row)
+    instance = Class_(meta, manifest_row, engine=engine)
     return instance
 
 
