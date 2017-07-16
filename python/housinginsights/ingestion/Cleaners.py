@@ -517,7 +517,9 @@ class topa_cleaner(CleanerBase):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
         # character in one or two columns.  Leave here for now.
         row = self.replace_nulls(row, null_values=['', '\\', None])
-        exists = self.address_id_exists(row['ADDRESS_ID'])
+        exists_in_project = self.address_id_exists(row['ADDRESS_ID'])
+        if exists_in_project:
+            pass #TODO Process these records a certain way.
         return row
 
     def address_id_exists(self, address_id):
