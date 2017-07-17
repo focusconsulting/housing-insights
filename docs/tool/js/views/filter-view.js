@@ -15,6 +15,8 @@ var filterView = {
         var activeFilterIds = []
         var filterValues = filterUtil.getFilterValues()
         for (var key in filterValues){
+            // An 'empty' filterValues array has a single element,
+            // the value of nullsShown.
             if (filterValues[key][0].length != 0){
                 var control = filterView.filterControls.find(function(obj){
                     return obj['component']['source'] === key;
@@ -160,8 +162,7 @@ var filterView = {
         filterView.filterControls.push(this);
         this.component = component;
     },
-    nullValuesToggle: function(component){
-
+    nullValuesToggle: function(component, filterControl){
         this.element = document.createElement('div');
         this.element.classList.add("null-switch-area");
 
@@ -173,6 +174,9 @@ var filterView = {
         switchBackground.classList.add('null-toggle-background');
         var switchHandle = document.createElement('div');
         switchHandle.classList.add('null-toggle-switch');
+        if(filterControl.hasOwnProperty('nullsShown') && filterControl.nullsShown){
+            switchContainer.classList.add('switched-on');
+        }
         var txt = document.createTextNode("If a project doesn't have this information, show the project anyway?");
 
         this.toDOM = function(parentElement){
@@ -185,7 +189,7 @@ var filterView = {
 
         // toggles between values 'true' and 'false' 
         // of object.property when the switch is clicked.
-        this.bindProperty = function(object, property, callback){
+        this.bindPropertyToTextInput = function(object, property, callback){
             function toggleProperty(){
                 // Assign the property if it hasn't been assigned.
                 object[property] = object[property] || false;
@@ -205,6 +209,8 @@ var filterView = {
     filterTextInput: function(sourceObj, keyValuePairsArray){
         var output = {};
 
+        var initialValues = keyValuePairsArray;
+
         // separatorCallback is a function that returns
         // a JavaScript Node object to be appended after each
         // input element.
@@ -221,6 +227,10 @@ var filterView = {
             for(var i = 0; i < keyValuePairsArray.length; i++){
                 output[keyValuePairsArray[i][0]].value = keyValuePairsArray[i][1];
             }
+        }
+
+        this.reset = function(){
+            this.setValues(initialValues);
         }
 
         this.returnValues = function(){
@@ -282,6 +292,10 @@ var filterView = {
         filterView.filterControl.call(this, component);
         var c = this.component;
 
+        var ths = this;
+
+        this.nullsShown = true;
+
         var contentContainer = filterView.setupFilter(c);
         
         // Begin code common to continuousFilterControl and dateFilterControl
@@ -290,6 +304,17 @@ var filterView = {
                 .classed("filter", true)
                 .classed("slider",true)
                 .attr("id",c.source);
+
+        var allDataValuesForThisSource = model.dataCollection.filterData.items.map(function(item){
+            return item[c.source];
+        });
+        
+        // The eventual aim is to draw from dataCollection.filterData for the min and max
+        // values of the filter controls. Some data sources don't seem to be included in 
+        // dataCollect.filterData yet, e.g. crime within the last 12 months.
+        // Drawing from the dataChoices component is a last resort.
+        var minDatum = d3.min(allDataValuesForThisSource) || c.min;
+        var maxDatum = d3.max(allDataValuesForThisSource) || c.max;
 
         var minInputContainer = document.createElement('span');
         minInputContainer.setAttribute('id', c.source + '-input-min');
@@ -302,31 +327,31 @@ var filterView = {
         document.getElementById('filter-content-' + c.source).appendChild(maxInputContainer);
         // End code tommon to continuousFilterContorl and dateFilterControl
 
-        var stepCount = Math.max(1, parseInt((c.max - c.min)/500));
+        var stepCount = Math.max(1, parseInt((maxDatum - minDatum)/500));
 
         slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
         noUiSlider.create(slider, {
-            start: [c.min, c.max],
+            start: [minDatum, maxDatum],
             connect: true,
 
             //the wNumb is a number formatting library. This is what was recommended by noUiSlider; we should consider using elsewhere.
             //order of the two wNumb calls corresponds to left and right slider respectively.
             tooltips: [ false, false ],
             range: {
-                'min': c.min,
-                'max': c.max
+                'min': minDatum,
+                'max': maxDatum
             },
             step: stepCount
         });
 
         var minTextInput = new filterView.filterTextInput(
             component,        
-            [['min', component.min]]
+            [['min', minDatum]]
         );
 
         var maxTextInput = new filterView.filterTextInput(
             component,
-            [['max', component.max]]
+            [['max', maxDatum]]
         );
 
         //Each slider needs its own copy of the sliderMove function so that it can use the current component
@@ -353,8 +378,6 @@ var filterView = {
                     return el >= 0 ? Math.ceil(el) : el;
                 });
 
-                console.log("component.source", component.source);
-
                 minTextInput.setValues([
                     ['min', unencoded[0]]
                 ]);
@@ -362,6 +385,8 @@ var filterView = {
                 maxTextInput.setValues([
                     ['max', unencoded[1]]
                 ]);
+
+                unencoded.push(ths.nullsShown);
 
                 if(doesItSetState){
                     setState(specific_state_code,unencoded);
@@ -415,23 +440,39 @@ var filterView = {
             el.classList.add('continuous-input-right');
         });
 
-        var toggle = new filterView.nullValuesToggle(c);
-        toggle.bindProperty(c, 'nulls_shown', inputCallback);
+        var toggle = new filterView.nullValuesToggle(c, ths);
+        toggle.bindPropertyToTextInput(ths, 'nullsShown', function(){
+            setState('nullsShown.' + c.source, ths.nullsShown);
+        });
         toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
         this.clear = function(){
+            var specific_state_code = 'filterValues.' + component.source;
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
+            minTextInput.reset();
+            maxTextInput.reset();
+            setState(specific_state_code, []);
         }
 
         this.isTouched = function(){
-            return slider.noUiSlider.get()[0] !== c.min && slider.noUiSlider.get()[1] !== c.max;
+            var returnVals = {
+                min: +minTextInput.returnValues()['min'],
+                max: +maxTextInput.returnValues()['max']
+            }
+            return returnVals.min !== minDatum || returnVals.max !== maxDatum;
         }
 
+        // At the very end of setup, set the 'nullsShown' state so that it's available for
+        // use by code in filter.js that iterates through filterValues.
+        setState('nullsShown.' + c.source, ths.nullsShown);
     },
     dateFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
+        var ths = this;
+
+        this.nullsShown = true;
 
         var contentContainer = filterView.setupFilter(c);
 
@@ -459,19 +500,17 @@ var filterView = {
             return item[c.source];
         });
             
-        // We need to define the min and max outside a given
-        // date component since these are only available after the filterData loads.
-        component.min = d3.min(componentValuesOnly);
-        component.max = d3.max(componentValuesOnly);
+        var minDatum = d3.min(componentValuesOnly);
+        var maxDatum = d3.max(componentValuesOnly);
 
         slider = document.getElementById(c.source);
         noUiSlider.create(slider, {
-            start: [component.min, component.max],
+            start: [minDatum, maxDatum],
             connect: true,
             tooltips: [ false, false ],
             range: {
-                'min': component.min.getFullYear(),
-                'max': component.max.getFullYear()
+                'min': minDatum.getFullYear(),
+                'max': maxDatum.getFullYear()
             },
             step: 1
         });
@@ -479,18 +518,18 @@ var filterView = {
         var minDateInput = new filterView.filterTextInput(
             component,        
             [
-                ['day', component.min.getDate()],
-                ['month', component.min.getMonth() + 1],
-                ['year', component.min.getFullYear()]
+                ['day', minDatum.getDate()],
+                ['month', minDatum.getMonth() + 1],
+                ['year', minDatum.getFullYear()]
             ]
         );
 
         var maxDateInput = new filterView.filterTextInput(
             component,
             [
-                ['day', component.max.getDate()],
-                ['month', component.max.getMonth() + 1],
-                ['year', component.max.getFullYear()]
+                ['day', maxDatum.getDate()],
+                ['month', maxDatum.getMonth() + 1],
+                ['year', maxDatum.getFullYear()]
             ]
         );
 
@@ -506,17 +545,21 @@ var filterView = {
                 // positions: Left offset of the handles in relation to the slider
                 var specific_state_code = 'filterValues.' + component.source
 
-                var dateForYear = function(minOrMax, year, component){
-                    if(year === component[minOrMax].getFullYear()){
-                        return component[minOrMax];
+                var dateForYear = function(minOrMax, year){
+                    var minOrMaxObj = {
+                        'min': minDatum,
+                        'max': maxDatum
+                    }
+                    if(year === minOrMaxObj[minOrMax].getFullYear()){
+                        return minOrMaxObj[minOrMax];
                     }
                     else{
                         return new Date(year, 0, 1);
                     }
                 }
 
-                var newMinDate = dateForYear('min', +unencoded[0], c);
-                var newMaxDate = dateForYear('max', +unencoded[1], c);
+                var newMinDate = dateForYear('min', +unencoded[0]);
+                var newMaxDate = dateForYear('max', +unencoded[1]);
 
                 minDateInput.setValues([
                     ['year', newMinDate.getFullYear()],
@@ -549,21 +592,28 @@ var filterView = {
         // setting state
         slider.noUiSlider.on('slide', slideSliderCallback);
 
-
-        var inputCallback = function(){
-            var specific_state_code = 'filterValues.' + component.source
+        function getValuesAsDates(){
 
             var minVals = minDateInput.returnValues();
             var maxVals = maxDateInput.returnValues();
 
-            var newMinDate = new Date(minVals.year, minVals.month - 1, minVals.day);
-            var newMaxDate = new Date(maxVals.year, maxVals.month - 1, maxVals.day);
+            return {
+                min: new Date(minVals.year, minVals.month - 1, minVals.day),
+                max: new Date(maxVals.year, maxVals.month - 1, maxVals.day)
+            }
 
+        }
+
+        var inputCallback = function(){
+            var specific_state_code = 'filterValues.' + component.source
+
+            var dateValues = getValuesAsDates();
+            
             slider.noUiSlider.set(
-                [minVals.year, maxVals.year]
+                [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
             );
 
-            setState(specific_state_code, [newMinDate, newMaxDate]);
+            setState(specific_state_code, [dateValues.min, dateValues.max]);
         }
 
         // For separating date inputs with a '/'
@@ -582,19 +632,30 @@ var filterView = {
             addSlash
         );
 
-        var toggle = new filterView.nullValuesToggle(c);
-        toggle.bindProperty(c, 'nulls_shown', inputCallback);
+        var toggle = new filterView.nullValuesToggle(c, ths);
+        toggle.bindPropertyToTextInput(ths, 'nullsShown', function(){
+            setState('nullsShown.' + c.source, ths.nullsShown);
+        });
         toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
 
         this.clear = function(){
+            var specific_state_code = 'filterValues.' + component.source;
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
+            minDateInput.reset();
+            maxDateInput.reset();
+            setState(specific_state_code, []);
         }
 
         this.isTouched = function(){
-            return slider.noUiSlider.get()[0] !== component.min && slider.noUiSlider.get()[1] !== component.max;
+            var dateValues = getValuesAsDates();
+            return dateValues.min !== minDatum || dateValues.max !== maxDatum;
         }
+
+        // At the very end of setup, set the 'nullsShown' state so that it's available for
+        // use by code in filter.js that iterates through filterValues.
+        setState('nullsShown.' + c.source, ths.nullsShown);
 
     },
     setupFilter: function(c){
@@ -884,7 +945,8 @@ var filterView = {
             this.site.appendChild(this.pill);
             this.pill.appendChild(this.trigger);
             
-            this.trigger.addEventListener('click', function(){
+            this.trigger.addEventListener('click', function(e){
+                e.stopPropagation();
                 filterView.clearAllFilters();
             });
         },
@@ -913,10 +975,14 @@ var filterView = {
         var filterValues = filterUtil.getFilterValues();
         var filterStateIsActive = getState()['anyFilterActive'] && getState()['anyFilterActive'][0] == true;
         var noRemainingFilters = ((Object.keys(filterValues)).filter(function(key){
+            // An 'empty' filterValues array has one element,
+            // the value of nullsShown.
             return filterValues[key][0].length > 0;
         })).length == 0;
 
         for (key in filterValues){
+            // An 'empty' filterValues array has one element,
+            // the value of nullsShown.
             var activated = filterValues[key][0].length == 0 ? false : true;
             
             d3.select('#filter-'+key)

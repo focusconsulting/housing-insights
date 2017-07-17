@@ -2,7 +2,8 @@ var filterUtil = {
 	
 	init: function(){
 		setSubs([
-			['filterValues', filterUtil.publishFilteredData],
+            ['filterValues', filterUtil.publishFilteredData],
+            ['nullsShown', filterUtil.publishFilteredData]
 		]);
 
         // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
@@ -14,8 +15,23 @@ var filterUtil = {
 
 	},
 
-	filteredData: [],
-	
+    filteredData: [],
+    getNullsShown: function(){
+        var state = getState();
+        //Extract just the nullsShown stuff from our state
+        //state is stored as nullsShown.data_id with period as part of the object's key. 
+
+        var nullsShown = {};
+
+        for (key in state) {
+            splitKey = key.split(".");
+            if (splitKey[0]=='nullsShown') {
+                var currentState = state[key]
+                nullsShown[splitKey[1]] = currentState;
+            };
+        };
+        return nullsShown;
+    },
     getFilterValues: function(){
         var state = getState();
 
@@ -30,13 +46,26 @@ var filterUtil = {
                 filterValues[splitKey[1]] = currentState
             };
         };
-        return filterValues
+        return filterValues;
     },
 
 	filterData: function(data){ 	
         
 		var workingData = model.dataCollection['filterData'].items; 
-		var filterValues = filterUtil.getFilterValues();
+        var nullsShown = filterUtil.getNullsShown();
+        var filterValues = filterUtil.getFilterValues();
+
+        for (var key in nullsShown){
+            var component = (filterView.components.filter(function(obj){
+                return obj.source == key;
+            }))[0];
+
+            if (component.component_type == 'continuous' || component.component_type == 'date'){
+                workingData = workingData.filter(function(d){
+                    return d[key] !== null || nullsShown[key][0];
+                });
+            }
+        }
 
 		for (key in filterValues) { // iterate through registered filters
 			
@@ -49,7 +78,8 @@ var filterUtil = {
 			if (component['component_type'] == 'continuous') { //filter data for a 'continuous' filter
                 
                 if (filterValues[key][0].length == 0){
-                    //don't filter because the filter has been removed
+                    // don't filter because the filter has been removed.
+                    // The length would be '1' because nullsShown is always included.
                 } else {
                     //javascript rounding is weird
                     var decimalPlaces = component['data_type'] == 'integer' ? 0 : 2 //ternary operator
@@ -58,6 +88,12 @@ var filterUtil = {
 
                     //filter it
                     workingData = workingData.filter(function(d){
+                    // Refer to the third element of the most recent value of
+                    // filterValues, which is a boolean indicating whether
+                    // null values will be shown.
+                        if(d[key] === null){
+                            return nullsShown[key];
+                        }
     					return (d[key] >= min && d[key] <= max);
     				});
                 };
@@ -66,19 +102,19 @@ var filterUtil = {
 			if (component['component_type']== 'date') {
                 
                 workingData = workingData.filter(function(d){
-                    // If the filter has returned to the original min/max values,
-                    // reveal everything.
-                    if(filterValues[key][0][0].valueOf() == component.min.valueOf() && filterValues[key][0][1].valueOf() == component.max.valueOf()){
+                   // Refer to the third element of the most recent value of
+                   // filterValues, which is a boolean indicating whether
+                   // null values will be shown.
+                    if(d[key] === null){
+                        return nullsShown[key];
+                    }
+
+                    // If the filter is 'empty' and the value isn't null,
+                    // show the project.
+                    if(filterValues[key][0].length === 0){
                         return true;
                     }
-
-                    // Projects with 'null' date values are not shown.
-                    // TODO: Change this once we implement a toggle switch for showing
-                    // null values
-                    if(d[key] === null){
-                         return component.nulls_shown;
-                    }
-
+                    
                     return d[key].valueOf() >= filterValues[key][0][0].valueOf() 
                         && d[key].valueOf() <= filterValues[key][0][1].valueOf();
                 });
