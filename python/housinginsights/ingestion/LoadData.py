@@ -314,6 +314,9 @@ class LoadData(object):
             # add to db
             metadata.create_all(tables=[zone_facts])
 
+            # populate table with calculated fields values
+            self._add_census_with_weighting_fields_to_zone_facts_table()
+
         return metadata.tables
 
     def _add_census_with_weighting_fields_to_zone_facts_table(self):
