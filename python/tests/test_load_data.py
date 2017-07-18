@@ -179,10 +179,13 @@ class MyTestCase(unittest.TestCase):
     def test__add_census_with_weighting_fields_to_zone_facts_table(self):
         self.loader._create_zone_facts_table()
         result = self.loader\
-            ._add_census_with_weighting_fields_to_zone_facts_table()
+            ._populate_zone_facts_table()
         print(result)
 
         self.assertEqual(True, False)
+
+    def test__add_census_acs_quartiles_to_zone_facts_table(self):
+        pass
 
 
 if __name__ == '__main__':

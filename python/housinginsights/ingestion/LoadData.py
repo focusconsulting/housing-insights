@@ -318,27 +318,32 @@ class LoadData(object):
                            Column('income_per_capita', Numeric),
                            Column('labor_participation', Numeric),
                            Column('fraction_foreign', Numeric),
-                           Column('fraction_single_mothers', Numeric))
+                           Column('fraction_single_mothers', Numeric),
+                           Column('acs_lower_rent_quartile', Numeric),
+                           Column('acs_median_rent', Numeric),
+                           Column('acs_upper_rent_quartile', Numeric))
 
         # add to db
         metadata.create_all(tables=[zone_facts])
 
         # populate table with calculated fields values
-        self._add_census_with_weighting_fields_to_zone_facts_table()
+        self._populate_zone_facts_table()
 
         return metadata.tables
 
-    def _add_census_with_weighting_fields_to_zone_facts_table(self):
+    def _populate_zone_facts_table(self):
         """
-        Populates the zone_facts table with the calculated fields data.
+        Populates the zone_facts table with the calculated fields data and
+        acs rent data fields from census.
 
         :return: list of SQLAlchemy query result objects from inserting the
         calculated fields data into the zone_facts table.
         """
-        census_with_weighting_fields = [
+        census_fields = [
             'poverty_rate', 'fraction_black', 'income_per_capita',
             'labor_participation', 'fraction_foreign',
-            'fraction_single_mothers'
+            'fraction_single_mothers', 'acs_lower_rent_quartile',
+            'acs_median_rent', 'acs_upper_rent_quartile'
         ]
 
         zone_types = ['ward', 'neighborhood_cluster', 'census_tract']
@@ -350,7 +355,7 @@ class LoadData(object):
             field_values = dict()
 
             # get field value for each zone_specific type
-            for field in census_with_weighting_fields:
+            for field in census_fields:
                 result = self._census_with_weighting(data_id=field,
                                                      grouping=zone_type)
                 field_values[field] = result['items']
@@ -362,7 +367,7 @@ class LoadData(object):
                 # get not None values so we can added to db
                 columns = list()
                 values = list()
-                for field in census_with_weighting_fields:
+                for field in census_fields:
                     zone_value = field_values[field][zone]
 
                     if zone_value is not None:
@@ -427,7 +432,7 @@ class LoadData(object):
                 matching_d = next((item for item in denominator_data['items'] if
                                    item['group'] == n['group']),
                                   {'group': '_unknown', 'value': None})
-                if matching_d['value'] == None or n['value'] == None:
+                if matching_d['value'] is None or n['value'] is None:
                     divided = None
                 else:
                     divided = n['value'] / matching_d['value']
@@ -475,6 +480,13 @@ class LoadData(object):
         # If data_id isn't one of our custom ones, assume it is a column name
         else:
             api_results = self._get_weighted_census_results(grouping, data_id)
+
+            # transform items to dict with group/value instead of list of dict
+            temp_items = {}
+            for item in api_results['items']:
+                temp_items[item['group']] = item['value']
+
+            api_results['items'] = temp_items
 
         return api_results
 
