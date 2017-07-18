@@ -128,6 +128,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(self.loader.manifest.path, result_path)
 
     def test__get_zone_fact_zones(self):
+        # TODO: breaks because temp modified code to exclude original zone_type
         ward_types = self.loader._get_zone_specifics_for_zone_type('ward')
 
         for idx in range(9):
@@ -135,9 +136,20 @@ class MyTestCase(unittest.TestCase):
             self.assertTrue(ward in ward_types)
 
     def test__create_zone_facts_table(self):
-        print(self.loader.engine.table_names())
-        print(self.loader._create_zone_facts_table())
-        print(self.loader.engine.table_names())
+        # make sure zone_facts is not in db
+        with self.loader.engine.connect() as conn:
+            conn.execute('drop table zone_facts;')
+
+        # currently no zone_facts table
+        result = 'zone_facts' in self.loader.engine.table_names()
+        self.assertFalse(result, 'zone_facts table is not in db')
+
+        # check returned metadata.tables contains 'zone_facts' table
+        result = self.loader._create_zone_facts_table().keys()
+        self.assertTrue('zone_facts' in result, 'zone_facts is in '
+                                                'metadata.tables object')
+
+        # confirm zone_facts table was loaded into db
         result = 'zone_facts' in self.loader.engine.table_names()
         self.assertTrue(result, 'zone_facts table is in db')
 

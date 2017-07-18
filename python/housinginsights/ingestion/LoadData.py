@@ -295,31 +295,46 @@ class LoadData(object):
         return processed_data_ids
 
     def _create_zone_facts_table(self):
+        """
+        Creates the zone_facts table which is used as a master table for API
+        endpoints. The purpose is to avoid recalculating fields adhoc and
+        performing client-side reconfiguration of data into display fields.
+        This is all now done in the backend whenever new data is loaded.
+
+        :return: a immutable dict that contains the tables structure of the
+        table and sqlAlchemy metadata object used.
+        """
         with self.engine.connect() as conn:
             # drop zone_facts table if already in db
             if 'zone_facts' in self.engine.table_names():
                 conn.execute('DROP TABLE zone_facts;')
 
-            # create empty zone_facts table
-            metadata = MetaData(bind=self.engine)
-            zone_facts = Table('zone_facts', metadata,
-                               Column('zone', String, primary_key=True),
-                               Column('poverty_rate', Numeric),
-                               Column('fraction_black', Numeric),
-                               Column('income_per_capita', Numeric),
-                               Column('labor_participation', Numeric),
-                               Column('fraction_foreign', Numeric),
-                               Column('fraction_single_mothers', Numeric))
+        # create empty zone_facts table
+        metadata = MetaData(bind=self.engine)
+        zone_facts = Table('zone_facts', metadata,
+                           Column('zone', String, primary_key=True),
+                           Column('poverty_rate', Numeric),
+                           Column('fraction_black', Numeric),
+                           Column('income_per_capita', Numeric),
+                           Column('labor_participation', Numeric),
+                           Column('fraction_foreign', Numeric),
+                           Column('fraction_single_mothers', Numeric))
 
-            # add to db
-            metadata.create_all(tables=[zone_facts])
+        # add to db
+        metadata.create_all(tables=[zone_facts])
 
-            # populate table with calculated fields values
-            self._add_census_with_weighting_fields_to_zone_facts_table()
+        # populate table with calculated fields values
+        self._add_census_with_weighting_fields_to_zone_facts_table()
 
         return metadata.tables
 
     def _add_census_with_weighting_fields_to_zone_facts_table(self):
+        """
+        Populates the zone_facts table with the calculated fields data.
+
+        :return: list of SQLAlchemy query result objects from inserting the
+        calculated fields data into the zone_facts table.
+        """
         census_with_weighting_fields = [
             'poverty_rate', 'fraction_black', 'income_per_capita',
             'labor_participation', 'fraction_foreign',
@@ -398,7 +413,10 @@ class LoadData(object):
 
         Takes data that is formatted for output the API, i.e. a dictionary
         with key "items", which contains a list of dictionaries each with 'grouping'
-        and 'count'
+        and 'count'.
+
+        Returns items as dictionary with group and division result as
+        key/value pairs instead of list of dictionaries.
         """
         items = {}
         if numerator_data['items'] is None:
@@ -423,15 +441,18 @@ class LoadData(object):
 
     def _census_with_weighting(self, data_id, grouping):
         """
-        Zone facts table helper function to get data from our census table.
-        data_id can either be a column name or a custom calculated value.
+        Zone facts table helper function to get data from our census table.\
 
-        data_id: if in the list of calculated values, perform custom
-        calculation. Otherwise, try to get it from the census database table as
-        a column name.
+        :param data_id: must either be a column name or a custom calculated
+        value.
 
-        grouping: either 'census_tract', 'ward', or 'neighborhood_cluster'
+        :param grouping: either 'census_tract', 'ward',
+        or 'neighborhood_cluster'.
+
+        :return: dictionary with 'items', 'grouping', and 'data_id' as keys.
+        Items stores the results for the calculated data_id for the grouping.
         """
+
         calculated_values = {
             'poverty_rate': 'population_poverty',
             'fraction_black': 'population_black',
@@ -451,7 +472,7 @@ class LoadData(object):
             api_results = self._items_divide(numerator, denominator)
             api_results['data_id'] = data_id
 
-        # If the data_id isn't one of our custom ones, assume it is a column name
+        # If data_id isn't one of our custom ones, assume it is a column name
         else:
             api_results = self._get_weighted_census_results(grouping, data_id)
 
