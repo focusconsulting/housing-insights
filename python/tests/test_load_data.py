@@ -137,8 +137,9 @@ class MyTestCase(unittest.TestCase):
 
     def test__create_zone_facts_table(self):
         # make sure zone_facts is not in db
-        with self.loader.engine.connect() as conn:
-            conn.execute('drop table zone_facts;')
+        if 'zone_facts' in self.loader.engine.table_names():
+            with self.loader.engine.connect() as conn:
+                conn.execute('DROP TABLE zone_facts;')
 
         # currently no zone_facts table
         result = 'zone_facts' in self.loader.engine.table_names()

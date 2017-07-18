@@ -304,9 +304,9 @@ class LoadData(object):
         :return: a immutable dict that contains the tables structure of the
         table and sqlAlchemy metadata object used.
         """
-        with self.engine.connect() as conn:
-            # drop zone_facts table if already in db
-            if 'zone_facts' in self.engine.table_names():
+        # drop zone_facts table if already in db
+        if 'zone_facts' in self.engine.table_names():
+            with self.engine.connect() as conn:
                 conn.execute('DROP TABLE zone_facts;')
 
         # create empty zone_facts table
