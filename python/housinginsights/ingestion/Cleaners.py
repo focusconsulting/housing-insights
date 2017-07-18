@@ -508,7 +508,7 @@ class dchousing_cleaner(CleanerBase):
 
         return row
 
-class topa_cleaner(CleanerBase):
+class TopaCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         #Call the parent method and pass all the arguments as-is
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
@@ -517,19 +517,22 @@ class topa_cleaner(CleanerBase):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
         # character in one or two columns.  Leave here for now.
         row = self.replace_nulls(row, null_values=['', '\\', None])
-        exists_in_project = self.address_id_exists(row['ADDRESS_ID'])
-        if exists_in_project:
-            pass #TODO Process these records a certain way.
+        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
+        row['nlihc_id'] = nlihc_id
         return row
 
-    def address_id_exists(self, address_id):
+    def get_nlihc_id_if_exists(self, address_id):
         "Checks for record in project table with matching MAR id."
-        query = "select mar_id from project where mar_id = '{}'".format(address_id)
+        query = "select nlihc_id from project where mar_id = '{}'".format(address_id)
+        if address_id == self.null_value:
+            return self.null_value
         try:
-            result = self.engine.execute(query)
-            result.close()
+            result = self.engine.execute(query).fetchone()
+            if result:
+                return result[0]
         except:
-            return 0
+            return self.null_value
+        return self.null_value
 
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
