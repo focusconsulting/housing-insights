@@ -22,9 +22,9 @@ import os
 import logging
 import argparse
 import json
-from datetime import datetime
-from csv import DictWriter
-from sqlalchemy import Table, Column, Integer, String, MetaData
+from audioop import bias
+
+from sqlalchemy import Table, Column, Integer, String, MetaData, Numeric
 
 # Needed to make relative package imports when running this file as a script
 # (i.e. for testing purposes).
@@ -245,6 +245,9 @@ class LoadData(object):
                 self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
 
+        # build Zone Facts table
+        self._create_zone_facts_table()
+
         return processed_data_ids
 
     def _get_temp_filepath(self, manifest_row):
@@ -286,7 +289,266 @@ class LoadData(object):
 
             processed_data_ids.append(manifest_row['unique_data_id'])
 
+        # build Zone Facts table
+        self._create_zone_facts_table()
+
         return processed_data_ids
+
+    def _create_zone_facts_table(self):
+        """
+        Creates the zone_facts table which is used as a master table for API
+        endpoints. The purpose is to avoid recalculating fields adhoc and
+        performing client-side reconfiguration of data into display fields.
+        This is all now done in the backend whenever new data is loaded.
+
+        :return: a immutable dict that contains the tables structure of the
+        table and sqlAlchemy metadata object used.
+        """
+        # drop zone_facts table if already in db
+        if 'zone_facts' in self.engine.table_names():
+            with self.engine.connect() as conn:
+                conn.execute('DROP TABLE zone_facts;')
+
+        # create empty zone_facts table
+        metadata = MetaData(bind=self.engine)
+        zone_facts = Table('zone_facts', metadata,
+                           Column('zone', String, primary_key=True),
+                           Column('poverty_rate', Numeric),
+                           Column('fraction_black', Numeric),
+                           Column('income_per_capita', Numeric),
+                           Column('labor_participation', Numeric),
+                           Column('fraction_foreign', Numeric),
+                           Column('fraction_single_mothers', Numeric),
+                           Column('acs_lower_rent_quartile', Numeric),
+                           Column('acs_median_rent', Numeric),
+                           Column('acs_upper_rent_quartile', Numeric))
+
+        # add to db
+        metadata.create_all(tables=[zone_facts])
+
+        # populate table with calculated fields values
+        self._populate_zone_facts_table()
+
+        return metadata.tables
+
+    def _populate_zone_facts_table(self):
+        """
+        Populates the zone_facts table with the calculated fields data and
+        acs rent data fields from census.
+
+        :return: list of SQLAlchemy query result objects from inserting the
+        calculated fields data into the zone_facts table.
+        """
+        census_fields = [
+            'poverty_rate', 'fraction_black', 'income_per_capita',
+            'labor_participation', 'fraction_foreign',
+            'fraction_single_mothers', 'acs_lower_rent_quartile',
+            'acs_median_rent', 'acs_upper_rent_quartile'
+        ]
+
+        zone_types = ['ward', 'neighborhood_cluster', 'census_tract']
+
+        query_results = list()
+
+        # populate columns accordingly for each zone_specific type
+        for zone_type in zone_types:
+            field_values = dict()
+
+            # get field value for each zone_specific type
+            for field in census_fields:
+                result = self._census_with_weighting(data_id=field,
+                                                     grouping=zone_type)
+                field_values[field] = result['items']
+
+            zone_specifics = self._get_zone_specifics_for_zone_type(zone_type)
+
+            # TODO: add aggregate for each zone_type into table
+            for zone in zone_specifics:
+                # get not None values so we can added to db
+                columns = list()
+                values = list()
+                for field in census_fields:
+                    zone_value = field_values[field][zone]
+
+                    if zone_value is not None:
+                        columns.append(field)
+                        values.append("'" + str(zone_value) + "'")
+
+                # derive column and values strings needed for sql query
+                columns = ', '.join(columns)
+                columns = 'zone, ' + columns
+
+                values = ', '.join(values)
+                values = "'" + zone + "', " + values
+
+                q = "INSERT INTO zone_facts ({cols}) VALUES ({vals})".format(
+                    cols=columns, vals=values)
+
+                with self.engine.connect() as conn:
+                    result = conn.execute(q)
+                    query_results.append(result)
+
+        return query_results
+
+    def _get_zone_specifics_for_zone_type(self, zone_type):
+        """
+        Returns a list of zone_specific values for a given zone_type.
+        """
+        with self.engine.connect() as conn:
+
+            if zone_type == 'ward':
+                table = 'project'
+            elif zone_type == 'neighborhood_cluster':
+                table = 'census_tract_to_neighborhood_cluster'
+            else:
+                table = 'census'
+
+            query_result = conn.execute(
+                'select distinct {zone} from {table};'.format(zone=zone_type,
+                                                              table=table))
+            zone_specifics = [row[0] for row in query_result.fetchall()]
+            # zones.append(zone)
+
+        return zone_specifics
+
+    def _items_divide(self, numerator_data, denominator_data):
+        """
+        Divides items in the numerator by items in the denominator by matching
+        the appropriate groupings.
+
+        Takes data that is formatted for output the API, i.e. a dictionary
+        with key "items", which contains a list of dictionaries each with 'grouping'
+        and 'count'.
+
+        Returns items as dictionary with group and division result as
+        key/value pairs instead of list of dictionaries.
+        """
+        items = {}
+        if numerator_data['items'] is None:
+            items = None
+        else:
+            for n in numerator_data['items']:
+                # TODO what should we do when a matching item isn't found?
+                matching_d = next((item for item in denominator_data['items'] if
+                                   item['group'] == n['group']),
+                                  {'group': '_unknown', 'value': None})
+                if matching_d['value'] is None or n['value'] is None:
+                    divided = None
+                else:
+                    divided = n['value'] / matching_d['value']
+
+                # item = dict({'group': n['group'],
+                #              'value': divided})
+                items[n['group']] = divided
+
+        return {'items': items, 'grouping': numerator_data['grouping'],
+                'data_id': numerator_data['data_id']}
+
+    def _census_with_weighting(self, data_id, grouping):
+        """
+        Zone facts table helper function to get data from our census table.\
+
+        :param data_id: must either be a column name or a custom calculated
+        value.
+
+        :param grouping: either 'census_tract', 'ward',
+        or 'neighborhood_cluster'.
+
+        :return: dictionary with 'items', 'grouping', and 'data_id' as keys.
+        Items stores the results for the calculated data_id for the grouping.
+        """
+
+        calculated_values = {
+            'poverty_rate': 'population_poverty',
+            'fraction_black': 'population_black',
+            'income_per_capita': 'aggregate_income',
+            'labor_participation': 'population_working',
+            'fraction_foreign': 'population_foreign',
+            'fraction_single_mothers': 'population_single_mother'
+        }
+
+        if data_id in calculated_values:
+
+            field = calculated_values[data_id]
+            numerator = self._get_weighted_census_results(grouping, field)
+            denominator = self._get_weighted_census_results(grouping,
+                                                            'population')
+
+            api_results = self._items_divide(numerator, denominator)
+            api_results['data_id'] = data_id
+
+        # If data_id isn't one of our custom ones, assume it is a column name
+        else:
+            api_results = self._get_weighted_census_results(grouping, data_id)
+
+            # transform items to dict with group/value instead of list of dict
+            temp_items = {}
+            for item in api_results['items']:
+                temp_items[item['group']] = item['value']
+
+            api_results['items'] = temp_items
+
+        return api_results
+
+    def _get_weighted_census_results(self, grouping, field):
+        """
+        Queries the census table for the relevant field and returns the results
+        as a weighted count returns the standard 'items' format.
+
+        Currently only implemented for the 'counts' weighting factor not for
+        the proportion version.
+        """
+        with self.engine.connect() as conn:
+            q = "SELECT census_tract, {field} FROM census".format(
+                field=field)  # TODO need to add 'year' column for multiple census years when this is added to the data
+            proxy = conn.execute(q)
+            census_results = [dict(x) for x in proxy.fetchall()]
+
+            # Transform the results
+            items = []  # For storing results as we go
+
+            if grouping == 'census_tract':
+                # No weighting required, data already in proper format
+                for r in census_results:
+                    output = dict({'group': r['census_tract'],
+                                   'value': r[field]})
+                    items.append(output)
+
+            elif grouping in ['ward', 'neighborhood_cluster']:
+                proxy = conn.execute(
+                    "SELECT DISTINCT {grouping} FROM census_tract_to_{grouping}".format(
+                        grouping=grouping))
+                groups = [x[0] for x in proxy.fetchall()]
+
+                for group in groups:
+                    proxy = conn.execute(
+                        "SELECT * FROM census_tract_to_{grouping} WHERE {grouping} = '{group}'".format(
+                            grouping=grouping, group=group))
+                    results = [dict(x) for x in proxy.fetchall()]
+
+                    count = 0
+                    for result in results:
+                        tract = result['census_tract']
+                        factor = result['population_weight_counts']
+                        matching_data = next((item for item in census_results if
+                                              item["census_tract"] == tract),
+                                             {field: None})
+                        if matching_data[field] is None:
+                            logging.warning(
+                                "Missing data for census tract when calculating weightings: {}".format(
+                                    tract))
+                            matching_data[field] = 0
+
+                        value = matching_data[field]
+                        count += (value * factor)
+
+                    output = dict({'group': group, 'value': round(count, 0)})
+                    items.append(output)
+            else:
+                # Invalid grouping
+                items = None
+
+        return {'items': items, 'grouping': grouping, 'data_id': field}
 
     def _process_data_file(self, manifest_row):
         """
@@ -421,7 +683,7 @@ def main(passed_arguments):
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
     manifest_path = os.path.abspath(os.path.join(scripts_path, 'manifest.csv'))
 
-    #Locally, we can optionally have sample data
+    # Locally, we can optionally have sample data
     if passed_arguments.sample and passed_arguments.database != 'remote':
         meta_path = os.path.abspath(os.path.join(scripts_path,
                                                  'meta_sample.json'))
@@ -452,15 +714,13 @@ def main(passed_arguments):
         database_choice = 'local_database'
         drop_tables = True
 
-
-
-    #universal defaults
+    # universal defaults
     keep_temp_files = True
 
-
-    #Instantiate and run the loader
+    # Instantiate and run the loader
     loader = LoadData(database_choice=database_choice, meta_path=meta_path,
-                      manifest_path=manifest_path, keep_temp_files=keep_temp_files,
+                      manifest_path=manifest_path,
+                      keep_temp_files=keep_temp_files,
                       drop_tables=drop_tables)
 
     if passed_arguments.update_only:
@@ -482,7 +742,6 @@ if __name__ == '__main__':
     logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
     # Pushes everything from the logger to the command line output as well.
     logging.getLogger().addHandler(logging.StreamHandler())
-
 
     description = 'Loads our flat file data into the database of choice. You ' \
                   'can load sample or real data and/or rebuild or update only '\
