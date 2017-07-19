@@ -161,7 +161,8 @@ var controller = {
         setSubs([
             ['switchView', controller.switchView]
         ]);
-        setState('activeView',mapView);        
+        setState('activeView',mapView);
+        
         mapView.init();        
     },
     // dataRequest is an object with the properties 'name', 'url' and 'callback'. The 'callback' is a function
