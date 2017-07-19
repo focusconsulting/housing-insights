@@ -2,6 +2,9 @@
 //TODO much of this ends up being duplicated with meta.json. We will combine the two after the ZoneFacts table is available, 
 //Can't do till then because many of the fields below are only available in this not-yet-available table
 
+// "short_names" below are the abbreviations for use in the URL encoding of the state of filters. should add unit test to
+// ensure no duplicates. -JO
+
  "use strict";
  var dataChoices = [
         //TODO this hard coded array of objects is just a temporary method.
@@ -14,7 +17,8 @@
             "display_text": "Dropdown menu updates when selecting a new zone type. <br><br>Logic Incomplete: still need to a) clear the existing filter when new zone is selected and b) writecallback for the locationFilterControl",
             "component_type": "location",
             "data_type": "text",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "l"
         },
 
         {   "source": "proj_units_tot",
@@ -25,7 +29,8 @@
             "min": 0,
             "max": 717,
             "num_decimals_displayed": 0, //0 if integer, 1 otherwise. Could also store data type instead. 
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "pu"
         },
         
         {   "source": "proj_units_assist_max",
@@ -36,14 +41,16 @@
             "min":0,
             "max":600,
             "num_decimals_displayed":0,
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "pa"
         },
         {   "source": "hud_own_type",
             "display_name":"Ownership Type (per HUD)",
             "display_text":"This field is only available for buildings participating in HUD programs; others are listed as 'Unknown'",
             "component_type": "categorical",
             "data_type":"text",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "hud"
         },
 
         {   "source": "portfolio",
@@ -51,7 +58,8 @@
             "display_text": "Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list",
             "component_type":"categorical",
             "data_type": "text",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "sp"
         },
         {   "source":"poa_start",
             "display_name":"Subsidy Start Date",
@@ -60,7 +68,8 @@
             "data_type": "timestamp",
             "min": "1950-01-01", //just example, TODO change to date format
             "max": "now",         //dummy example
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "ps"
         },
         {   "source":"poa_end",
             "display_name":"Subsidy End Date",
@@ -69,7 +78,8 @@
             "data_type": "timestamp",
             "min": "1950-01-01", //just example, TODO change to date format
             "max": "now",         //dummy example
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "pe"
         },
 
 
@@ -92,7 +102,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "cv"
         },
         {
             "source": "crime_nonviolent_12",
@@ -106,7 +117,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "cn"
         },
         {
             "source": "crime_all_3",
@@ -120,7 +132,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "ca"
         },
         {
             "source": "building_permits_construction",
@@ -134,7 +147,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "bpc"
         },
         {
             "source": "building_permits_all",
@@ -148,7 +162,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "bpa"
         },
         {
             "source": "poverty_rate",
@@ -163,7 +178,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "pov"
         },
         {
             "source": "income_per_capita",
@@ -177,7 +193,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "money"
+            "style": "money",
+            "short_name": "inc"
         },
         {
             "source": "labor_participation",
@@ -191,7 +208,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "lp"
         },
         {
             "source": "fraction_single_mothers",
@@ -205,7 +223,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "sm"
         },
         {
             "source": "fraction_black",
@@ -219,7 +238,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "fb"
         },
         {
             "source": "fraction_foreign",
@@ -233,7 +253,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "ff"
         },
         {
             "source": "acs_median_rent",
@@ -247,7 +268,8 @@
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/acs_median_rent/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "number"
+            "style": "number",
+            "short_name": "rnt"
         }
        
     ];

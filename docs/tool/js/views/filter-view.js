@@ -290,6 +290,8 @@ var filterView = {
     },  
 
     categoricalFilterControl: function(component){
+        console.log(this);
+        console.log(component);
         filterView.filterControl.call(this, component);
         var c = this.component;
         var contentContainer = filterView.setupFilter(c);
