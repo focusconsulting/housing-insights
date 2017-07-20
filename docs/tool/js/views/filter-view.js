@@ -177,19 +177,19 @@ var filterView = {
         if(filterControl.hasOwnProperty('nullsShown') && filterControl.nullsShown){
             switchContainer.classList.add('switched-on');
         }
-        var txt = document.createTextNode("If a project doesn't have this information, show the project anyway?");
+        var txt = document.createTextNode("Unknown values included");
 
         this.toDOM = function(parentElement){
             parentElement.appendChild(this.element);
-            this.element.appendChild(txt);
             this.element.appendChild(switchContainer);
             switchContainer.appendChild(switchBackground);
             switchContainer.appendChild(switchHandle);
+            this.element.appendChild(txt);
         }
 
         // toggles between values 'true' and 'false' 
         // of object.property when the switch is clicked.
-        this.bindPropertyToTextInput = function(object, property, callback){
+        this.bindPropertyToToggleSwitch = function(object, property, callback){
             function toggleProperty(){
                 // Assign the property if it hasn't been assigned.
                 object[property] = object[property] || false;
@@ -206,50 +206,78 @@ var filterView = {
     // tracks their values.
     // sourceObj is one element in dataChoices.
     // keyValuePairsArray takes the form, [[key, val], [key, val]...]
-    filterTextInput: function(sourceObj, keyValuePairsArray){
-        var output = {};
+    filterTextInput: function(sourceObj, keyValuePairsArrayMin, keyValuePairsArrayMax){
+        var output = {
+            min: {},
+            max: {}
+        };
 
-        var initialValues = keyValuePairsArray;
+        var initialValues = {
+            min: keyValuePairsArrayMin,
+            max: keyValuePairsArrayMax
+        }
+
+        var submitButton = document.createElement('button');
+        submitButton.classList.add('nullValuesToggleSubmit');
+        submitButton.setAttribute('type', 'button');
 
         // separatorCallback is a function that returns
         // a JavaScript Node object to be appended after each
         // input element.
         this.toDOM = function(parentElement, separatorCallback){
-            for(var key in output){
-                parentElement.appendChild(output[key]);
-                if(separatorCallback && Object.keys(output).indexOf(key) < Object.keys(output).length - 1){
-                    parentElement.appendChild(separatorCallback());
+            var toSpan = document.createElement('span');
+            toSpan.textContent = 'to';
+            for(var pole in output){
+                for(var key in output[pole]){
+                    parentElement.appendChild(output[pole][key]);
+                    if(separatorCallback && Object.keys(output[pole]).indexOf(key) < Object.keys(output[pole]).length - 1){
+                        parentElement.appendChild(separatorCallback());
+                    }
+                }
+                if(pole === 'min'){
+                    parentElement.appendChild(toSpan);
                 }
             }
+            parentElement.appendChild(submitButton);
         }
 
-        this.setValues = function(keyValuePairsArray){
-            for(var i = 0; i < keyValuePairsArray.length; i++){
-                output[keyValuePairsArray[i][0]].value = keyValuePairsArray[i][1];
+        this.setValues = function(keyValuePairsArrayMin, keyValuePairsArrayMax){
+            for(var i = 0; i < keyValuePairsArrayMin.length; i++){
+                output.min[keyValuePairsArrayMin[i][0]].value = keyValuePairsArrayMin[i][1];
+            }
+            for(var i = 0; i < keyValuePairsArrayMax.length; i++){
+                output.max[keyValuePairsArrayMax[i][0]].value = keyValuePairsArrayMax[i][1];
             }
         }
 
         this.reset = function(){
-            this.setValues(initialValues);
+            this.setValues(initialValues.min, initialValues.max);
         }
 
         this.returnValues = function(){
-            var valueOutput = {};
-            for( var key in output){
-                valueOutput[key] = output[key].value;
+            var valueOutput = {
+                min: {},
+                max: {}
+            };
+            for(var pole in valueOutput){
+                for(var key in output[pole]){
+                    valueOutput[pole][key] = output[pole][key].value;
+                }
             }
             return valueOutput;
         }
 
         this.setInputCallback = function(callback){
-
+            
             var checkKeyPress = function(e){
                 if(e.charCode === 9 || e.charCode === 13){
                     callback();
                 }
             }
 
-            var setUpEventListeners = function (element){
+            submitButton.addEventListener('click', callback);
+
+            var setUpInputEventListeners = function (element){
 
                 function setUpKeyPressListener(e){
                     element.addEventListener('keypress', checkKeyPress);
@@ -265,26 +293,44 @@ var filterView = {
                    tearDownKeyPressListener(e);
                 });
             }
-            for(var key in output){
-                setUpEventListeners(output[key]);
+            for(var pole in output){
+                for(var key in output[pole]){
+                    setUpInputEventListeners(output[pole][key]);
+                }
             }
+
         }
 
         this.allInputElements = function(){
-            return Object.keys(output).map(function(key){
-                return output[key];
+            var minInputs = Object.keys(output['min']).map(function(key){
+                return output['min'][key];
             });
+
+            var maxInputs = Object.keys(output['max']).map(function(key){
+                return output['max'][key];
+            });
+            return minInputs.concat(maxInputs);
         }
 
-        for (var i = 0; i < keyValuePairsArray.length; i++){
-            output[keyValuePairsArray[i][0]] = document.createElement('input');
-            output[keyValuePairsArray[i][0]].setAttribute(
-                'id', sourceObj.source + '-' + keyValuePairsArray[i][0] + '-text'
+        for (var i = 0; i < keyValuePairsArrayMin.length; i++){
+            output['min'][keyValuePairsArrayMin[i][0]] = document.createElement('input');
+            output['min'][keyValuePairsArrayMin[i][0]].setAttribute(
+                'id', sourceObj.source + '-' + keyValuePairsArrayMin[i][0] + '-text'
             );
-            output[keyValuePairsArray[i][0]].classList.add('filter-text');
-            output[keyValuePairsArray[i][0]].classList.add(keyValuePairsArray[i][0] + '-text');
-            output[keyValuePairsArray[i][0]].setAttribute('name', keyValuePairsArray[i][0]);
-            output[keyValuePairsArray[i][0]].value = keyValuePairsArray[i][1];
+            output['min'][keyValuePairsArrayMin[i][0]].classList.add('filter-text');
+            output['min'][keyValuePairsArrayMin[i][0]].classList.add(keyValuePairsArrayMin[i][0] + '-text');
+            output['min'][keyValuePairsArrayMin[i][0]].setAttribute('name', keyValuePairsArrayMin[i][0]);
+            output['min'][keyValuePairsArrayMin[i][0]].value = keyValuePairsArrayMin[i][1];
+        }
+        for (var i = 0; i < keyValuePairsArrayMax.length; i++){
+            output['max'][keyValuePairsArrayMax[i][0]] = document.createElement('input');
+            output['max'][keyValuePairsArrayMax[i][0]].setAttribute(
+                'id', sourceObj.source + '-' + keyValuePairsArrayMax[i][0] + '-text'
+            );
+            output['max'][keyValuePairsArrayMax[i][0]].classList.add('filter-text');
+            output['max'][keyValuePairsArrayMax[i][0]].classList.add(keyValuePairsArrayMax[i][0] + '-text');
+            output['max'][keyValuePairsArrayMax[i][0]].setAttribute('name', keyValuePairsArrayMax[i][0]);
+            output['max'][keyValuePairsArrayMax[i][0]].value = keyValuePairsArrayMax[i][1];
         }
 
     },
@@ -309,23 +355,14 @@ var filterView = {
             return item[c.source];
         });
         
-        // The eventual aim is to draw from dataCollection.filterData for the min and max
-        // values of the filter controls. Some data sources don't seem to be included in 
-        // dataCollect.filterData yet, e.g. crime within the last 12 months.
-        // Drawing from the dataChoices component is a last resort.
         var minDatum = d3.min(allDataValuesForThisSource) || c.min;
         var maxDatum = d3.max(allDataValuesForThisSource) || c.max;
 
-        var minInputContainer = document.createElement('span');
-        minInputContainer.setAttribute('id', c.source + '-input-min');
-        minInputContainer.classList.add('text-input-min');
-        var maxInputContainer = document.createElement('span');
-        maxInputContainer.setAttribute('id', c.source + '-input-max');
-        maxInputContainer.classList.add('text-input-max');
+        var inputContainer = document.createElement('span');
+        inputContainer.setAttribute('id', c.source + '-input');
+        inputContainer.classList.add('text-input', 'continuous');
 
-        document.getElementById('filter-content-' + c.source).appendChild(minInputContainer);
-        document.getElementById('filter-content-' + c.source).appendChild(maxInputContainer);
-        // End code tommon to continuousFilterContorl and dateFilterControl
+        document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
 
         var stepCount = Math.max(1, parseInt((maxDatum - minDatum)/500));
 
@@ -344,13 +381,9 @@ var filterView = {
             step: stepCount
         });
 
-        var minTextInput = new filterView.filterTextInput(
+        var textInputs = new filterView.filterTextInput(
             component,        
-            [['min', minDatum]]
-        );
-
-        var maxTextInput = new filterView.filterTextInput(
-            component,
+            [['min', minDatum]],
             [['max', maxDatum]]
         );
 
@@ -378,13 +411,7 @@ var filterView = {
                     return el >= 0 ? Math.ceil(el) : el;
                 });
 
-                minTextInput.setValues([
-                    ['min', unencoded[0]]
-                ]);
-
-                maxTextInput.setValues([
-                    ['max', unencoded[1]]
-                ]);
+                textInputs.setValues([['min', unencoded[0]]],[['max', unencoded[1]]]);
 
                 unencoded.push(ths.nullsShown);
 
@@ -412,36 +439,26 @@ var filterView = {
         var inputCallback = function(){
             var specific_state_code = 'filterValues.' + component.source
 
-            var minVals = minTextInput.returnValues();
-            var maxVals = maxTextInput.returnValues();
+            var returnVals = textInputs.returnValues();
 
             slider.noUiSlider.set(
-                [minVals['min'], maxVals['max']]
+                [returnVals['min']['min'], returnVals['max']['max']]
             );
 
-            setState(specific_state_code, [minVals['min'], maxVals['max']]);
+            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max']]);
         }
 
-        minTextInput.setInputCallback(inputCallback);
-        minTextInput.toDOM(
-            document.getElementById(c.source + '-input-min')
-        );
-        maxTextInput.setInputCallback(inputCallback);
-        
-        maxTextInput.toDOM(
-            document.getElementById(c.source + '-input-max')
+        textInputs.setInputCallback(inputCallback);
+        textInputs.toDOM(
+            document.getElementById(c.source + '-input')
         );
 
-        minTextInput.allInputElements().forEach(function(el){
+        textInputs.allInputElements().forEach(function(el){
             el.classList.add('continuous-input-text');
-        });
-        maxTextInput.allInputElements().forEach(function(el){
-            el.classList.add('continuous-input-text');
-            el.classList.add('continuous-input-right');
         });
 
         var toggle = new filterView.nullValuesToggle(c, ths);
-        toggle.bindPropertyToTextInput(ths, 'nullsShown', function(){
+        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
             setState('nullsShown.' + c.source, ths.nullsShown);
         });
         toggle.toDOM(document.getElementById('filter-content-' + c.source));
@@ -450,17 +467,13 @@ var filterView = {
             var specific_state_code = 'filterValues.' + component.source;
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
-            minTextInput.reset();
-            maxTextInput.reset();
+            textInputs.reset();
             setState(specific_state_code, []);
         }
 
         this.isTouched = function(){
-            var returnVals = {
-                min: +minTextInput.returnValues()['min'],
-                max: +maxTextInput.returnValues()['max']
-            }
-            return returnVals.min !== minDatum || returnVals.max !== maxDatum;
+            var returnVals = textInputs.returnValues();
+            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum;
         }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
@@ -476,24 +489,16 @@ var filterView = {
 
         var contentContainer = filterView.setupFilter(c);
 
-       
-        // Begin code common to continuousFilterControl and dateFilterControl
-        // TODO: Consider extracting this to setupFilter
         var slider = contentContainer.append('div')
             .classed('filter', true)
             .classed('slider', true)
             .attr('id', c.source);
 
-        var minInputContainer = document.createElement('span');
-        minInputContainer.setAttribute('id', c.source + '-input-min');
-        minInputContainer.classList.add('text-input-min');
-        var maxInputContainer = document.createElement('span');
-        maxInputContainer.setAttribute('id', c.source + '-input-max');
-        maxInputContainer.classList.add('text-input-max');
+        var inputContainer = document.createElement('span');
+        inputContainer.setAttribute('id', c.source + '-input');
+        inputContainer.classList.add('text-input', 'date');
 
-        document.getElementById('filter-content-' + c.source).appendChild(minInputContainer);
-        document.getElementById('filter-content-' + c.source).appendChild(maxInputContainer);
-        // End code tommon to continuousFilterContorl and dateFilterControl
+        document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
 
         // this is used for d3.min and d3.max.
         var componentValuesOnly = model.dataCollection.filterData.items.map(function(item){
@@ -515,17 +520,13 @@ var filterView = {
             step: 1
         });
 
-        var minDateInput = new filterView.filterTextInput(
+        var dateInputs = new filterView.filterTextInput(
             component,        
             [
                 ['day', minDatum.getDate()],
                 ['month', minDatum.getMonth() + 1],
                 ['year', minDatum.getFullYear()]
-            ]
-        );
-
-        var maxDateInput = new filterView.filterTextInput(
-            component,
+            ],
             [
                 ['day', maxDatum.getDate()],
                 ['month', maxDatum.getMonth() + 1],
@@ -561,17 +562,18 @@ var filterView = {
                 var newMinDate = dateForYear('min', +unencoded[0]);
                 var newMaxDate = dateForYear('max', +unencoded[1]);
 
-                minDateInput.setValues([
-                    ['year', newMinDate.getFullYear()],
-                    ['month', newMinDate.getMonth() + 1],
-                    ['day', newMinDate.getDate()]
-                ]);
-
-                maxDateInput.setValues([
-                    ['year', newMaxDate.getFullYear()],
-                    ['month', newMaxDate.getMonth() + 1],
-                    ['day', newMaxDate.getDate()]
-                ]);
+                dateInputs.setValues(
+                    [
+                        ['year', newMinDate.getFullYear()],
+                        ['month', newMinDate.getMonth() + 1],
+                        ['day', newMinDate.getDate()]
+                    ],
+                    [
+                        ['year', newMaxDate.getFullYear()],
+                        ['month', newMaxDate.getMonth() + 1],
+                        ['day', newMaxDate.getDate()]
+                    ]
+                );
 
                 if(doesItSetState){
                     setState(specific_state_code,[newMinDate, newMaxDate]);
@@ -594,8 +596,8 @@ var filterView = {
 
         function getValuesAsDates(){
 
-            var minVals = minDateInput.returnValues();
-            var maxVals = maxDateInput.returnValues();
+            var minVals = dateInputs.returnValues()['min'];
+            var maxVals = dateInputs.returnValues()['max'];
 
             return {
                 min: new Date(minVals.year, minVals.month - 1, minVals.day),
@@ -621,19 +623,14 @@ var filterView = {
             return document.createTextNode('/');
         }
 
-        minDateInput.setInputCallback(inputCallback);
-        minDateInput.toDOM(
-            document.getElementById(c.source + '-input-min'),
-            addSlash
-        );
-        maxDateInput.setInputCallback(inputCallback);
-        maxDateInput.toDOM(
-            document.getElementById(c.source + '-input-max'),
+        dateInputs.setInputCallback(inputCallback);
+        dateInputs.toDOM(
+            document.getElementById(c.source + '-input'),
             addSlash
         );
 
         var toggle = new filterView.nullValuesToggle(c, ths);
-        toggle.bindPropertyToTextInput(ths, 'nullsShown', function(){
+        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
             setState('nullsShown.' + c.source, ths.nullsShown);
         });
         toggle.toDOM(document.getElementById('filter-content-' + c.source));
@@ -643,8 +640,7 @@ var filterView = {
             var specific_state_code = 'filterValues.' + component.source;
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
-            minDateInput.reset();
-            maxDateInput.reset();
+            dateInputs.reset();
             setState(specific_state_code, []);
         }
 

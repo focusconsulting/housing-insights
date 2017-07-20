@@ -80,31 +80,64 @@ div.filter.content input.day-text {
     width: 20px;
 }
 
-div.filter.content span.text-input-max{
-    margin-left: 70px;
-}
-
 div.filter.content .continuous-input-text{
     width: 40px;
 }
 
-div.filter.content .continuous-input-right{
-    margin-left: 100px;
+.text-input.date span{
+    margin-left: .3em;
+    margin-right: .3em;
+}
+.text-input.continuous span{
+    margin-left: 3em;
+    margin-right: 3em;
+}
+
+.text-input{
+    margin-left: 25px;
+}
+
+button.nullValuesToggleSubmit{
+    height: 1.5em;
+    width: 1.5em;
+    background: rgb(100, 100, 100);
+    display: inline-block;
+    position: relative;
+    border: none;
+    border-radius: 5px;
+    vertical-align: middle;
+    margin-left:2px;
+}
+
+/* drawn from https://codepen.io/jonneal/pen/kptBs */
+button.nullValuesToggleSubmit::before {
+    border-style: solid;
+    border-width: .25em .25em 0 0;
+    content: '';
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    top: .3em;
+    left: -.1em;
+    transform: rotate(45deg);
+    width: .75em;
+    height: .75em;
+    border-color: white;
 }
 
 /* the toggle switches for filter controls */
 div.null-switch-area{
     margin-top: 30px;
+    margin-left: 25px;
 }
 div.null-toggle-container{
-    width: 60px;
-    height: 60px;
-    display: block;
+    display: inline-block;
     position: relative;
+    vertical-align: middle;
 }
 
 div.null-toggle-container div.null-toggle-background{
-    display: block;
+    display: inline-block;
     position: relative;
     width: 30px;
     height: 20px;
@@ -113,19 +146,21 @@ div.null-toggle-container div.null-toggle-background{
 }
 
 div.null-toggle-container div.null-toggle-switch{
-    display: block;
+    display: inline-block;
     position: relative;
-    top: -22px;
-    left: -1px;
+    left: -40px;
+    top: 3px;
     width: 25px;
     height: 25px;
     transition: left 200ms;
     border-radius: 50%;
     background: rgb(253,126,35);
+    cursor: pointer;
+    box-shadow: 0px 1px 1px rgb(100, 100, 100);
 }
 
 div.null-toggle-container.switched-on div.null-toggle-switch{
-    left: 10px !important;
+    left: -15px !important;
 }
 
 div.null-toggle-container.switched-on div.null-toggle-background{
