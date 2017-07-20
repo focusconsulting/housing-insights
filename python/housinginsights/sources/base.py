@@ -14,7 +14,9 @@ from housinginsights.tools import dbtools
 import requests
 import csv
 import os
-import logging
+from housinginsights.tools.logger import HILogger
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class BaseApiConn(object):
     """
@@ -95,8 +97,8 @@ class BaseApiConn(object):
         else:
             url = urlpath
 
-        logging.debug("Url requested: {}".format(url))
-        logging.debug("params: {}".format(params))
+        logger.debug("Url requested: %s", url)
+        logger.debug("params: %s", params)
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):

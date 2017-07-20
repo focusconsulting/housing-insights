@@ -4,14 +4,15 @@ web site.
 """
 
 from pprint import pprint
-import logging
 
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.DCHousing import FIELDS,\
     DCHousingResult
 from housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
     SUBSIDY_FIELDS_MAP
+from housinginsights.tools.logger import HILogger
 
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class DCHousingApiConn(BaseApiConn):
     """
@@ -48,14 +49,15 @@ class DCHousingApiConn(BaseApiConn):
 
         for u in unique_data_ids:
             if u not in self._available_unique_data_ids:
-                #TODO this will always be raised when passing a list to get_multiple_api_sources method for those not in this class. 
-                logging.info("  The unique_data_id '{}' is not supported by the DCHousingApiConn".format(u))
+                #TODO this will always be raised when passing a list to get_multiple_api_sources method for those not in this class.
+                logger.info("  The unique_data_id '%s' is not supported by the DCHousingApiConn", u)
 
             else:
                 result = self.get(DCHousingApiConn.DATA_URL)
                 if result.status_code != 200:
-                    err = "An error occurred during request: status {0}"
-                    raise Exception(err.format(result.status_code))
+                    err = "An error occurred during request: status {0}".format(result.status_code)
+                    logger.error(err)
+                    raise Exception(err)
 
                 content = result.text
 
@@ -67,4 +69,3 @@ class DCHousingApiConn(BaseApiConn):
                     self.create_project_subsidy_csv(
                         self._available_unique_data_ids[0], PROJECT_FIELDS_MAP,
                         SUBSIDY_FIELDS_MAP, db)
-
