@@ -61,6 +61,8 @@ var filterView = {
                 ['filterValues', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
                 ['filterValues', filterView.addClearPillboxes],
+                ['dataLoaded.filterData', filterView.formatFilterDates],
+                ['filterDatesFormatted', filterView.buildFilterComponents],
                 ['subNavExpanded.right', filterView.expandSidebar],
                 ['mapLayer', filterView.updateLocationFilterControl],
                 ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
@@ -114,8 +116,7 @@ var filterView = {
             //Get the data and use it to dynamically apply configuration such as the list of categorical options
             controller.getData({
                         name: 'filterData',
-                        url: model.URLS.filterData, 
-                        callback: filterView.buildFilterComponents
+                        url: model.URLS.filterData
                     }) 
         } else {
             console.log("ERROR data loaded === false")
@@ -127,6 +128,33 @@ var filterView = {
         filterView.locationFilterControl.prototype = Object.create(filterView.categoricalFilterControl.prototype);
 
     }, //end init
+    // Iterate through dataCollection.filterData and, for any property
+    // that's of type 'date', turn the value into a JS date.
+    // This is necessary for comparing dates.
+    formatFilterDates: function(){
+        var dateComponents = filterView.components.filter(function(component){
+            return component.component_type === 'date';
+        });
+
+        // assumes the string is of the format yyyy-mm-dd.
+        function makeDateFromString(val){
+            if(val === null){ return null }
+            var dateSplit = val.split('-');
+            
+            return new Date(+dateSplit[0], +dateSplit[1] - 1, +dateSplit[2]);
+        }
+
+        model.dataCollection.filterData.items.forEach(function(item){
+            dateComponents.forEach(function(dateComponent){
+                if(item.hasOwnProperty(dateComponent.source)){
+                    item[dateComponent.source] = makeDateFromString(item[dateComponent.source]);
+                }
+            });
+        });
+
+        setState("filterDatesFormatted", true);
+
+    },
     filterControls: [],
     filterControl: function(component){
         filterView.filterControls.push(this);
@@ -191,7 +219,74 @@ var filterView = {
         }
 
         this.isTouched = function(){
-            return slider.noUiSlider.get()[0] === c.min && slider.noUiSlider.get()[1] === c.max;
+            return slider.noUiSlider.get()[0] !== c.min && slider.noUiSlider.get()[1] !== c.max;
+        }
+
+    },
+    dateFilterControl: function(component){
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+
+        var contentContainer = filterView.setupFilter(c);
+
+        var slider = contentContainer.append('div')
+            .classed('filter', true)
+            .classed('slider', true)
+            .attr('id', c.source);
+
+        // this is used for d3.min and d3.max.
+        var componentValuesOnly = model.dataCollection.filterData.items.map(function(item){
+            return item[c.source];
+        });
+            
+        // We need to define the min and max outside a given
+        // date component since these are only available after the filterData loads.
+        component.min = d3.min(componentValuesOnly).getFullYear();
+        component.max = d3.max(componentValuesOnly).getFullYear();
+        
+        slider = document.getElementById(c.source);
+        noUiSlider.create(slider, {
+            start: [component.min, component.max],
+            connect: true,
+            tooltips: [ wNumb({ decimals: 0 }), wNumb({ decimals: 0 }) ],
+            range: {
+                'min': component.min,
+                'max': component.max
+            },
+            step: 1
+        });
+
+        function makeSliderCallback(component){
+            // TODO: This is copied verbatim from the continuousFilterControl
+            // constructor, so it may be worth extracting makeSliderCallback
+            // to a property of filterView (or something with broader scope).
+            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
+                // This is the custom binding module used by the noUiSlider.on() callback.
+
+                // values: Current slider values;
+                // handle: Handle that caused the event;
+                // unencoded: Slider values without formatting;
+                // tap: Event was caused by the user tapping the slider (boolean);
+                // positions: Left offset of the handles in relation to the slider
+                var specific_state_code = 'filterValues.' + component.source
+
+                setState(specific_state_code,unencoded);
+            }
+        }
+
+        var currentSliderCallback = makeSliderCallback(c);
+        
+        //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates.
+        //using 'set' for now for easier development (less console logging of state changes)
+        slider.noUiSlider.on('set', currentSliderCallback);
+
+        this.clear = function(){
+            // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
+            slider.noUiSlider.reset();
+        }
+
+        this.isTouched = function(){
+            return slider.noUiSlider.get()[0] !== component.min && slider.noUiSlider.get()[1] !== component.max;
         }
 
     },
@@ -381,10 +476,18 @@ var filterView = {
             console.log("building filter component: " + filterView.components[i].source);
             
             //Set up sliders
-            if (filterView.components[i].component_type == 'continuous'){
+            if (filterView.components[i].component_type === 'continuous'){
                 
                 new filterView.continuousFilterControl(filterView.components[i]);
             }
+
+            if (filterView.components[i].component_type === 'date'){
+                new filterView.dateFilterControl(filterView.components[i]);
+            }
+                           
+            var parent = d3.select('#filter-components')
+                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
+            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
 
             
             //set up categorical pickers
@@ -435,10 +538,6 @@ var filterView = {
                 
             };
 
-            if (filterView.components[i].component_type == 'date'){
-                //Add a div with label and select element
-                //Bind user changes to a setState function
-            };
 
         }; //end for loop. All components on page.
 
@@ -485,8 +584,6 @@ var filterView = {
         replacedText: undefined,
         site: undefined,
         tearDown: function(){
-            console.log("this.pill", this.pill);
-            console.log("this.pill.parentElement", this.pill.parentElement);
             this.pill.parentElement.removeChild(this.pill);
             this.trigger.parentElement.removeChild(this.trigger);
             this.site.innerText = this.replacedText;

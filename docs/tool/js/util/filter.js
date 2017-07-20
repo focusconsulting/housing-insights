@@ -64,8 +64,24 @@ var filterUtil = {
 			}
 
 			if (component['component_type']== 'date') {
-				//TODO determine whether dates will always be published as [start, end], or, if
-				// not, in what format
+                
+                workingData = workingData.filter(function(d){
+                    // If the filter has returned to the original min/max values,
+                    // reveal everything.
+                    if(filterValues[key][0][0] == component.min && filterValues[key][0][1] == component.max){
+                        return true;
+                    }
+
+                    // Projects with 'null' date values are not shown.
+                    // TODO: Change this once we implement a toggle switch for showing
+                    // null values
+                    if(d[key] === null){
+                         return false;
+                    }
+
+                    return d[key].getFullYear() > filterValues[key][0][0] && d[key].getFullYear() < filterValues[key][0][1];
+                });
+
 			}
 
 			if (component['component_type'] == 'categorical') {
