@@ -29,7 +29,7 @@ var filterView = {
                         .data(activeFilterIds)
                         .classed("not-most-recent",true);
 
-        var allPills = oldPills.enter().append("div")
+        var newPills = oldPills.enter().append("div")
             .attr("class","ui label transition hidden")
             .classed("clear-single",true)
             // Animate a label that 'flies' from the filter component
@@ -66,14 +66,14 @@ var filterView = {
             });
 
         //Add the 'clear' x mark and its callback
-        allPills.each(function(d) {
+        newPills.each(function(d) {
             d3.select(this).append("i")
                 .classed("delete icon",true)
                 .on("click", function(d) {
                     d.clear();
                 })
-        })
-        .merge(oldPills);
+        });
+        var allPills = newPills.merge(oldPills);
 
         oldPills.exit().remove();
 
