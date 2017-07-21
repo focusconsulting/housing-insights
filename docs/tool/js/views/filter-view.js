@@ -220,7 +220,9 @@ var filterView = {
         }
 
         this.isTouched = function(){
-            return slider.noUiSlider.get()[0] !== c.min && slider.noUiSlider.get()[1] !== c.max;
+            // Since the result of 'get()' is a string, coerce it into a number
+            // before determining equality.
+            return +slider.noUiSlider.get()[0] !== c.min || +slider.noUiSlider.get()[1] !== c.max;
         }
 
     },
