@@ -30,7 +30,7 @@ var filterView = {
                         .classed("not-most-recent",true);
 
         var allPills = oldPills.enter().append("div")
-            .attr("class","ui label transition visible")
+            .attr("class","ui label transition hidden")
             .classed("clear-single",true)
             // Animate a label that 'flies' from the filter component
             // to the pillbox.
@@ -45,13 +45,13 @@ var filterView = {
                 var originRect = originElement.getBoundingClientRect();
                 flyLabel.style.left = originRect.left + 'px';
                 flyLabel.style.top = ((originRect.top + originRect.bottom)/2) + 'px';
+                var flyLabelX = document.createElement('i');
+                flyLabelX.classList.add('delete', 'icon');
                 document.body.appendChild(flyLabel);
-                console.log("flyLabel after append", flyLabel);
+                flyLabel.appendChild(flyLabelX);
                 // Change the 'top' and 'left' CSS properties of flyLabel,
                 // triggering its CSS transition.
                 window.setTimeout(function(){
-                    console.log("flyLabel destinationElement.clientLeft", destinationElement.clientLeft);
-                    console.log("flyLabel destinationElement.clientTop", destinationElement.clientTop);
                     flyLabel.style.left = destinationElement.getBoundingClientRect().left + 'px';
                     flyLabel.style.top = destinationElement.getBoundingClientRect().top + 'px';
                 }, 1);
@@ -59,6 +59,8 @@ var filterView = {
                 // Remove flyLabel after its transition has elapsed.
                 window.setTimeout(function(){
                     flyLabel.parentElement.removeChild(flyLabel);
+                    destinationElement.classList.remove('hidden');
+                    destinationElement.classList.add('visible');
                 }, 1500);
 
             });
