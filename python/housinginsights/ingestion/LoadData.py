@@ -22,9 +22,10 @@ import os
 import logging
 import argparse
 import json
-from audioop import bias
 
 from sqlalchemy import Table, Column, Integer, String, MetaData, Numeric
+from datetime import datetime
+import dateutil.parser as dateparser
 
 # Needed to make relative package imports when running this file as a script
 # (i.e. for testing purposes).
@@ -322,7 +323,15 @@ class LoadData(object):
                            Column('fraction_single_mothers', Numeric),
                            Column('acs_lower_rent_quartile', Numeric),
                            Column('acs_median_rent', Numeric),
-                           Column('acs_upper_rent_quartile', Numeric))
+                           Column('acs_upper_rent_quartile', Numeric),
+                           Column('crime_count', Numeric),
+                           Column('violent_crime_count', Numeric),
+                           Column('non_violent_crime_count', Numeric),
+                           Column('crime_rate', Numeric),
+                           Column('violent_crime_rate', Numeric),
+                           Column('non_violent_crime_rate', Numeric),
+                           Column('building_permits', Numeric),
+                           Column('construction_permits', Numeric))
 
         # add to db
         metadata.create_all(tables=[zone_facts])
@@ -348,7 +357,19 @@ class LoadData(object):
             'acs_median_rent', 'acs_upper_rent_quartile'
         ]
 
-        zone_types = ['ward', 'neighborhood_cluster', 'census_tract']
+        # dict with key/list pairs for calling summarize_observations method
+        summarize_field_args = {  # [method, table_name, filter_name]
+            'crime_count': ['count', 'crime', 'all'],
+            'violent_crime_count': ['count', 'crime', 'violent'],
+            'non_violent_crime_count': ['count', 'crime', 'nonviolent'],
+            'crime_rate': ['rate', 'crime', 'all'],
+            'violent_crime_rate': ['rate', 'crime', 'violent'],
+            'non_violent_crime_rate':['rate', 'crime', 'nonviolent'],
+            'building_permits': ['count', 'building_permits', 'all'],
+            'construction_permits': ['count', 'building_permits', 'all']
+        }
+
+        zone_types = ['census_tract', 'ward', 'neighborhood_cluster']
 
         query_results = list()
 
@@ -356,25 +377,44 @@ class LoadData(object):
         for zone_type in zone_types:
             field_values = dict()
 
-            # get field value for each zone_specific type
+            # get field value from census table
             for field in census_fields:
                 result = self._census_with_weighting(data_id=field,
                                                      grouping=zone_type)
+                field_values[field] = result['items']
+
+            # get field value from building permits and crime table
+            for field in summarize_field_args:
+                method, table_name, filter_name = summarize_field_args[
+                    field]
+                result = self._summarize_observations(method, table_name,
+                                                      filter_name,
+                                                      months=12,
+                                                      grouping=zone_type)
                 field_values[field] = result['items']
 
             zone_specifics = self._get_zone_specifics_for_zone_type(zone_type)
 
             # TODO: add aggregate for each zone_type into table
             for zone in zone_specifics:
+                # skip 'Non-cluster area'
+                if zone == 'Non-cluster area':
+                    continue
+
                 # get not None values so we can added to db
                 columns = list()
                 values = list()
-                for field in census_fields:
-                    zone_value = field_values[field][zone]
 
-                    if zone_value is not None:
-                        columns.append(field)
-                        values.append("'" + str(zone_value) + "'")
+                for field in field_values:
+                    field_val = field_values[field]
+
+                    # only proc
+                    if field_val is not None and zone in field_val:
+                        zone_value = field_val[zone]
+
+                        if zone_value is not None:
+                            columns.append(field)
+                            values.append("'" + str(zone_value) + "'")
 
                 # derive column and values strings needed for sql query
                 columns = ', '.join(columns)
@@ -425,23 +465,24 @@ class LoadData(object):
         Returns items as dictionary with group and division result as
         key/value pairs instead of list of dictionaries.
         """
-        items = {}
+        items = dict()
         if numerator_data['items'] is None:
             items = None
         else:
             for n in numerator_data['items']:
                 # TODO what should we do when a matching item isn't found?
-                matching_d = next((item for item in denominator_data['items'] if
-                                   item['group'] == n['group']),
-                                  {'group': '_unknown', 'value': None})
-                if matching_d['value'] is None or n['value'] is None:
+
+                if n not in denominator_data['items'] or \
+                                numerator_data['items'][n] is None \
+                        or denominator_data['items'][n] is None:
                     divided = None
                 else:
-                    divided = n['value'] / matching_d['value']
+                    divided = numerator_data['items'][n] / denominator_data[
+                        'items'][n]
 
                 # item = dict({'group': n['group'],
                 #              'value': divided})
-                items[n['group']] = divided
+                items[n] = divided
 
         return {'items': items, 'grouping': numerator_data['grouping'],
                 'data_id': numerator_data['data_id']}
@@ -484,12 +525,12 @@ class LoadData(object):
             api_results = self._get_weighted_census_results(grouping, data_id,
                                                             pop_wt_prop=True)
 
-            # transform items to dict with group/value instead of list of dict
-            temp_items = {}
-            for item in api_results['items']:
-                temp_items[item['group']] = item['value']
-
-            api_results['items'] = temp_items
+            # # transform items to dict with group/value instead of list of dict
+            # temp_items = {}
+            # for item in api_results['items']:
+            #     temp_items[item['group']] = item['value']
+            #
+            # api_results['items'] = temp_items
 
         return api_results
 
@@ -522,14 +563,15 @@ class LoadData(object):
             census_results = [dict(x) for x in proxy.fetchall()]
 
             # Transform the results
-            items = []  # For storing results as we go
+            items = dict()  # For storing results as we go
 
             if grouping == 'census_tract':
                 # No weighting required, data already in proper format
                 for r in census_results:
-                    output = dict({'group': r['census_tract'],
-                                   'value': r[field]})
-                    items.append(output)
+                    # output = dict({'group': r['census_tract'],
+                    #                'value': r[field]})
+                    # items.append(output)
+                    items[r['census_tract']] = r[field]
 
             elif grouping in ['ward', 'neighborhood_cluster']:
                 proxy = conn.execute(
@@ -559,13 +601,197 @@ class LoadData(object):
                         value = matching_data[field]
                         count += (value * factor)
 
-                    output = dict({'group': group, 'value': round(count, 0)})
-                    items.append(output)
+                    # output = dict({'group': group, 'value': round(count, 0)})
+                    # items.append(output)
+                    items[group] = round(count, 0)
             else:
                 # Invalid grouping
                 items = None
 
         return {'items': items, 'grouping': grouping, 'data_id': field}
+
+    def _summarize_observations(self, method, table_name, filter_name, months,
+                                grouping):
+        """
+        This endpoint takes a table that has each record as list of observations
+        (like our crime and building_permits tables) and returns summary
+        statistics either as raw counts or as a rate, optionally filtered.
+
+        :param method: "count" or "rate"
+        :param table_name: name of the table in the database, e.g.
+        'building_permits' or 'crime'
+        :param filter_name: code name of the filter to apply to the data, which
+        varies by table
+                    "all" - no filtering applied
+                    "construction" - only building_permits with permit_type_name
+                        = 'CONSTRUCTION'
+                    "violent" - only crimes where the offense type is a violent
+                        crime (note, not 100% match, need to compare DCPD definitions to official to verify)
+                    "nonviolent" - the other crime incidents
+        :param months: The number of months of date to include. By default this
+        is from now() but can be modified by an optional parameter
+        :param grouping: What to use for the 'GROUP BY' clause, e.g. 'ward',
+        'neighbourhood_cluster', 'zip', 'census_tract'.
+
+        Can accept any valid column name, so 'offense' for crime or
+        'permit_type_name' for building_permits are also valid
+
+        Optional params:
+        start: YYYYMMDD format start date to use instead of now() for the duration filter
+
+
+        replaces the count_all method that is deprecated
+
+        Example working URLS:
+        /api/count/crime/all/12/ward - count of all crime incidents
+        /api/count/building_permits/construction/12/neighborhood_cluster - all
+        construction permits in the past year grouped by neighborhood_cluster
+
+        :return:
+        """
+
+
+        ###########################
+        #Handle filters
+        ###########################
+        #Be sure concatenated 'AND' statements have a space in front of them
+        additional_wheres = ''
+        if filter_name == 'all':
+            additional_wheres += " "
+
+        # Filter options for building_permits
+        elif filter_name == 'construction':
+            additional_wheres += " AND permit_type_name = 'CONSTRUCTION' "
+
+        # Filter options for crime
+        elif filter_name == 'violent':
+            additional_wheres += " AND OFFENSE IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
+        elif filter_name == 'nonviolent':
+            additional_wheres += " AND OFFENSE NOT IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
+
+
+        # Fallback for an invalid filter
+        else:
+            additional_wheres += " Incorrect filter name - this inserted SQL will cause query to fail"
+
+        ##########################
+        #Handle date range
+        ##########################
+        date_fields = {'building_permits': 'issue_date',
+                       'crime': 'report_date'}
+        date_field = date_fields[table_name]
+
+        #method currently not implemented. 'count' or 'rate'
+
+        start_date = None #request.args.get('start')
+        print("Start_date found: {}".format(start_date))
+        if start_date is None:
+            start_date = "now()"
+        else:
+            start_date = dateparser.parse(start_date, dayfirst=False,
+                                          yearfirst=False)
+            start_date = datetime.strftime(start_date, '%Y-%m-%d')
+            start_date = "'" + start_date + "'"
+
+        date_range_sql = (
+            "({start_date}::TIMESTAMP - INTERVAL '{months} months')"
+            " AND {start_date}::TIMESTAMP"
+            ).format(start_date=start_date, months=months)
+
+        #########################
+        # Optional - validate other inputs
+        #########################
+        # Should we restrict the group by to a specific list, or allow whatever
+        # people want?
+        # Ditto for table name
+
+        ###############
+        # Get results
+        ###############
+        api_results = self._count_observations(table_name, grouping, date_field,
+                                               date_range_sql,
+                                               additional_wheres)
+
+        # Edit the data_id. TODO this is not specific enough, need univeral system for handling unique data ids to be used on front end.
+        # Is this better handled here in the API or front end exclusively?
+        api_results['data_id'] += '_' + filter_name
+
+        # Apply the normalization if needed
+        if method == 'rate':
+            # TODO: need to complete get_residential_permits method
+            if table_name in ['building_permits']:
+                denominator = self._get_residential_units(grouping)
+                api_results = self._items_divide(api_results, denominator)
+                api_results = self._scale(api_results, 1000)  # per 1000
+                # residential units
+            if table_name in ['crime']:
+                denominator = self._get_weighted_census_results(grouping,
+                                                           'population')
+                api_results = self._items_divide(api_results, denominator)
+                api_results = self._scale(api_results,
+                                          100000)  # crime incidents per 100,000 people
+
+        # Output as JSON
+        return api_results
+
+    def _count_observations(self, table_name, grouping, date_field,
+                            date_range_sql, additional_wheres=''):
+        fallback = "'Unknown'"
+
+        try:
+            with self.engine.connect() as conn:
+
+                q = """
+                    SELECT COALESCE({grouping},{fallback}) --'Unknown'
+                    ,count(*) AS records
+                    FROM {table_name}
+                    where {date_field} between {date_range_sql}
+                    {additional_wheres}
+                    GROUP BY {grouping}
+                    ORDER BY {grouping}
+                    """.format(grouping=grouping, fallback=fallback,
+                               table_name=table_name, date_field=date_field,
+                               date_range_sql=date_range_sql,
+                               additional_wheres=additional_wheres)
+
+                proxy = conn.execute(q)
+                results = proxy.fetchall()
+
+                #transform the results.
+                #TODO should come up with a better generic way to do this using column
+                  #names for any arbitrary sql table results.
+                formatted = dict()
+                for x in results:
+                    # dictionary = dict({'group': x[0], 'value': x[1]})
+                    formatted[x[0]] = x[1]
+
+            return {'items': formatted, 'grouping': grouping,
+                    'data_id': table_name}
+
+        #TODO do better error handling - for interim development purposes only
+        except Exception as e:
+            return {'items': None, 'notes': "Query failed: {}".format(e),
+                    'grouping': grouping, 'data_id': table_name}
+
+    def _scale(self, data, factor):
+        """
+        Multiplies each of the items 'count' entry by the factor
+        """
+
+        for zone in data['items']:
+            try:
+                data['items'][zone] *= factor
+            except Exception as e:
+                data['items'][zone] = None
+
+        return data
+
+    def _get_residential_units(self, grouping):
+        """
+        Returns the number of residential units in the standard 'items' format
+        """
+        # TODO implement me
+        return None
 
     def _process_data_file(self, manifest_row):
         """

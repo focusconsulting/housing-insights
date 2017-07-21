@@ -187,6 +187,14 @@ class MyTestCase(unittest.TestCase):
     def test__add_census_acs_quartiles_to_zone_facts_table(self):
         pass
 
+    def test__summarize_observations(self):
+        result = self.loader._summarize_observations('rate', 'building_permits',
+                                                     'all', 3, 'ward')
+        print(result)
+        self.assertTrue(result)
+
 
 if __name__ == '__main__':
     unittest.main()
+
+# census_tract construction_permits 11001007100
