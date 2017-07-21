@@ -127,8 +127,64 @@ class MyTestCase(unittest.TestCase):
         result_path = self.loader.make_manifest(folder_path)
         self.assertEqual(self.loader.manifest.path, result_path)
 
-    # TODO - write test code
-    def test__remove_existing_data(self):
+    def test__get_zone_fact_zones(self):
+        # TODO: breaks because temp modified code to exclude original zone_type
+        ward_types = self.loader._get_zone_specifics_for_zone_type('ward')
+
+        for idx in range(9):
+            ward = "Ward " + str(idx) if idx > 0 else 'ward'
+            self.assertTrue(ward in ward_types)
+
+    def test__create_zone_facts_table(self):
+        # make sure zone_facts is not in db
+        if 'zone_facts' in self.loader.engine.table_names():
+            with self.loader.engine.connect() as conn:
+                conn.execute('DROP TABLE zone_facts;')
+
+        # currently no zone_facts table
+        result = 'zone_facts' in self.loader.engine.table_names()
+        self.assertFalse(result, 'zone_facts table is not in db')
+
+        # check returned metadata.tables contains 'zone_facts' table
+        result = self.loader._create_zone_facts_table().keys()
+        self.assertTrue('zone_facts' in result, 'zone_facts is in '
+                                                'metadata.tables object')
+
+        # confirm zone_facts table was loaded into db
+        result = 'zone_facts' in self.loader.engine.table_names()
+        self.assertTrue(result, 'zone_facts table is in db')
+
+    def test__get_weighted_census_results(self):
+        grouping = 'ward'
+        field = 'population_poverty'
+        data_id = 'poverty_rate'
+
+        numerator = self.loader._get_weighted_census_results(grouping,
+                                                             field)
+        print(numerator)
+        print()
+        denominator = self.loader._get_weighted_census_results(grouping,
+                                                               'population')
+        print(denominator)
+        print()
+        result = self.loader._items_divide(numerator, denominator)
+        print(result)
+        print()
+
+        result = self.loader._census_with_weighting(data_id, grouping)
+        print(result)
+
+        self.assertEqual(True, False)
+
+    def test__add_census_with_weighting_fields_to_zone_facts_table(self):
+        self.loader._create_zone_facts_table()
+        result = self.loader\
+            ._populate_zone_facts_table()
+        print(result)
+
+        self.assertEqual(True, False)
+
+    def test__add_census_acs_quartiles_to_zone_facts_table(self):
         pass
 
 

@@ -894,9 +894,6 @@
             }
         },
         zoomToFilteredProjects: function(msg, data){
-            if (getState().filteredProjectsAvailable.length < 2 ) {
-                return; // disable function on first filter, which happens when the app first loads
-            }
             var maxLat = d3.max(data, function(d){
                 return d.latitude;
             });            
@@ -914,5 +911,9 @@
             });
             console.log(minLon,minLat,maxLon,maxLat);
             mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], {linear: true, padding: 20});
+            if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
+                mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
+                mapView.map.originalZoom = mapView.map.getZoom();
+            }
         }
     };
