@@ -512,10 +512,12 @@ a.active {
     font-size: .95em;
     margin-top:5px;
     margin-left: 2px;
+    cursor: pointer;
 }
 
-
-
+.ui.label.clear-all:hover {
+    color: rgb(50, 50, 50) !important;
+}
 
 /* chloroplath legend */
 

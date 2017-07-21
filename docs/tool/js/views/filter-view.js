@@ -497,25 +497,17 @@ var filterView = {
 
             this.site = document.getElementById('clear-pillbox-holder');
 
-            this.trigger = document.createElement('i');
-            this.trigger.id = 'clearFiltersTrigger';
-            this.trigger.classList.add('delete', 'icon');
-
             this.site.insertBefore(this.pill, this.site.firstChild);
             this.pill.textContent = "Clear all filters";
-            this.pill.appendChild(this.trigger);
             
-            this.trigger.addEventListener('click', function(){
+            this.pill.addEventListener('click', function(){
                 filterView.clearAllFilters();
             });
         },
         site: undefined,
         tearDown: function(){
             this.pill.parentElement.removeChild(this.pill);
-            this.trigger.parentElement.removeChild(this.trigger);
-        },
-        trigger: undefined
-    },
+        }    },
 
     handleFilterClearance: function(message, data){
         if(data === true){
