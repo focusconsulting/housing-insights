@@ -312,6 +312,7 @@ class LoadData(object):
         # create empty zone_facts table
         metadata = MetaData(bind=self.engine)
         zone_facts = Table('zone_facts', metadata,
+                           Column('zone_type', String),
                            Column('zone', String, primary_key=True),
                            Column('poverty_rate', Numeric),
                            Column('fraction_black', Numeric),
@@ -376,10 +377,10 @@ class LoadData(object):
 
                 # derive column and values strings needed for sql query
                 columns = ', '.join(columns)
-                columns = 'zone, ' + columns
+                columns = 'zone_type, zone, ' + columns
 
                 values = ', '.join(values)
-                values = "'" + zone + "', " + values
+                values = "'" + zone_type + "', '" + zone + "', " + values
 
                 q = "INSERT INTO zone_facts ({cols}) VALUES ({vals})".format(
                     cols=columns, vals=values)
@@ -397,7 +398,7 @@ class LoadData(object):
         with self.engine.connect() as conn:
 
             if zone_type == 'ward':
-                table = 'project'
+                table = 'census_tract_to_ward'
             elif zone_type == 'neighborhood_cluster':
                 table = 'census_tract_to_neighborhood_cluster'
             else:
