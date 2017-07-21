@@ -340,6 +340,7 @@ class LoadData(object):
         :return: list of SQLAlchemy query result objects from inserting the
         calculated fields data into the zone_facts table.
         """
+        # list of zone_fact headers created from census table
         census_fields = [
             'poverty_rate', 'fraction_black', 'income_per_capita',
             'labor_participation', 'fraction_foreign',
@@ -480,7 +481,8 @@ class LoadData(object):
 
         # If data_id isn't one of our custom ones, assume it is a column name
         else:
-            api_results = self._get_weighted_census_results(grouping, data_id)
+            api_results = self._get_weighted_census_results(grouping, data_id,
+                                                            pop_wt_prop=True)
 
             # transform items to dict with group/value instead of list of dict
             temp_items = {}
@@ -491,14 +493,28 @@ class LoadData(object):
 
         return api_results
 
-    def _get_weighted_census_results(self, grouping, field):
+    def _get_weighted_census_results(self, grouping, field, pop_wt_prop=False):
         """
         Queries the census table for the relevant field and returns the results
         as a weighted count returns the standard 'items' format.
 
         Currently only implemented for the 'counts' weighting factor not for
         the proportion version.
+
+        :param pop_wt_prop: determine which weighting factor to use. 'False'
+        implies should use population_weight_counts - use for anything that is
+        a total sum for the zone (i.e. total income, total people working, etc.)
+
+        'True' implies should use population_weight_proportion - used for
+        weighting proportion, mean, and median. Note - not quite statistically
+        accurate and should be only used when the source data size is not
+        useful.
         """
+        # configure weighting factor to be used
+        pop_wt = 'population_weight_counts'
+        if pop_wt_prop:
+            pop_wt = 'population_weight_proportions'
+
         with self.engine.connect() as conn:
             q = "SELECT census_tract, {field} FROM census".format(
                 field=field)  # TODO need to add 'year' column for multiple census years when this is added to the data
@@ -530,7 +546,7 @@ class LoadData(object):
                     count = 0
                     for result in results:
                         tract = result['census_tract']
-                        factor = result['population_weight_counts']
+                        factor = result[pop_wt]
                         matching_data = next((item for item in census_results if
                                               item["census_tract"] == tract),
                                              {field: None})
