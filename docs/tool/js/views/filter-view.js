@@ -3,33 +3,30 @@
 var filterView = {
 
     addClearPillboxes: function(msg,data){
-    
-        for (var i=0; i < filterView.filterControls.length; i++){
-            var x = filterView.filterControls[i]['component']['source'] //display_name
-        }
 
         //Compare our activated filterValues (from the state module) to the list of all 
         //possible filterControls to make a list containing only the activated filter objects. 
         //filterValues = obj with keys of the 'source' data id and values of current setpoint
         //filterControls = list of objects that encapsulates the actual component including its clear() method
-        var activeFilterIds = []
-        var filterValues = filterUtil.getFilterValues()
-        for (var key in filterValues){
-            if (filterValues[key][0].length != 0){
-                var control = filterView.filterControls.find(function(obj){
-                    return obj['component']['source'] === key;
-                })
-                activeFilterIds.push(control)
-            };
-        }
-        
+        var filterValues = filterUtil.getFilterValues();
+
+        var keysWithActiveFilterValues = Object.keys(filterValues).filter(function(key){
+            return filterValues[key][0].length !== 0;
+        });
+
+        var activeFilterControls = filterView.filterControls.filter(function(filterControl){
+            return keysWithActiveFilterValues.indexOf(filterControl.component.source) !== -1;
+        });
+      
         //Use d3 to bind the list of control objects to our html pillboxes
-        var oldPills = d3.select('#clear-pillbox-holder')
+        var allPills = d3.select('#clear-pillbox-holder')
                         .selectAll('.clear-single')
-                        .data(activeFilterIds)
+                        .data(activeFilterControls, function(d){
+                            return d.component.source;
+                        })
                         .classed("not-most-recent",true);
 
-        var newPills = oldPills.enter().append("div")
+        allPills.enter().append("div")
             .attr("class","ui label transition hidden")
             .classed("clear-single",true)
             // Animate a label that 'flies' from the filter component
@@ -63,20 +60,15 @@ var filterView = {
                     destinationElement.classList.add('visible');
                 }, 1500);
 
-            });
-
+            })
         //Add the 'clear' x mark and its callback
-        newPills.each(function(d) {
-            d3.select(this).append("i")
-                .classed("delete icon",true)
-                .on("click", function(d) {
-                    d.clear();
-                })
-        });
-        var allPills = newPills.merge(oldPills);
-
-        oldPills.exit().remove();
-
+            .append('i')
+            .classed("delete icon",true)
+            .on("click", function(d) {
+                d.clear();
+            })
+                       
+        allPills.exit().remove();
     },
 
     init: function(msg, data) {
