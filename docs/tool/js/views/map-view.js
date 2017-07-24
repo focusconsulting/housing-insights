@@ -34,6 +34,7 @@
                     ['joinedToGeo', mapView.addOverlayLayer],
                     ['overlaySet', chloroplethLegend.init],
                     ['previewBuilding', mapView.showPopup],
+                    ['previewBuilding', mapView.showProjectPreview],
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
@@ -733,6 +734,7 @@
 
         },
         
+        //TODO change this to respond to on hover and then go away
         showPopup: function(msg, data) {
             console.log(data);
 
@@ -759,6 +761,42 @@
             };
 
         },
+
+        showProjectPreview: function(msg, data) {
+            var project = [data.properties];    //defining as one-element array for d3 data binding
+            
+            //Bind the selected project to a div that will hold the preview graphics
+            var selection = d3.select('#project-preview')
+                            .selectAll("div.preview-contents")
+                                .data(project, function(d){
+                                    return typeof(d) !== "undefined" ? d.nlihc_id : null; //deals w/ initial div which has no bound data yet
+                                })
+            var fadeDuration = 500
+
+            //Transition the whole container of the previously previewed building
+            var leaving = selection.exit()
+                    .transition()
+                    .duration(fadeDuration)
+                    .style('opacity',0)
+                    .remove()
+
+            //Create the new container
+            var current = selection.enter()
+                        .append('div')
+                        .classed("preview-contents",true)
+                        .style('opacity',0)
+                        .text(function(d){return d.nlihc_id})
+            
+            current.append("div")       
+            //Make the new container appear after the old one is gone
+            setTimeout(function(){
+                current.transition()
+                    .duration(fadeDuration)
+                    .style('opacity',1)
+            },fadeDuration)
+
+        },
+
         filterMap: function(msg, data) {
             
             mapView.convertedProjects.features.forEach(function(feature) {

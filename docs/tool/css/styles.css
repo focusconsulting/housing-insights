@@ -56,11 +56,13 @@ html, body {
     width: -webkit-calc(100% - 40px);
     width:    -moz-calc(100% - 40px);
     width:         calc(100% - 40px); 
+
+    padding: 10px 0px 10px 10px;
 }
-.sub-nav-heading h1 {
+.sub-nav-heading h1,
+.sub-nav-group h1 {
     font-size: 16px;
     font-weight: bold;
-    padding: 10px 0px 10px 10px;
 }
 
 /*Color code the text for projects that match the specified filters*/
@@ -269,6 +271,9 @@ Others are working correctly.
     transition: max-width 0.2s linear;
 }
 
+#project-preview {
+    height:350px;
+}
 
 #buildings-list>div {
     overflow: hidden;
@@ -402,7 +407,7 @@ a.active {
 /*Partially override semantic-ui styling, so some is inherited from there*/
 
 /*Mimics accordion title styling*/
-#filters .header {
+.sub-nav-container .header {
     font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
     font-size: 1.3em;
     background: #d69c93;
