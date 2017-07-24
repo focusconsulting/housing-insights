@@ -46,6 +46,7 @@ var filterView = {
                 flyLabelX.classList.add('delete', 'icon');
                 document.body.appendChild(flyLabel);
                 flyLabel.appendChild(flyLabelX);
+
                 // Change the 'top' and 'left' CSS properties of flyLabel,
                 // triggering its CSS transition.
                 window.setTimeout(function(){
@@ -67,8 +68,15 @@ var filterView = {
             .on("click", function(d) {
                 d.clear();
             })
-                       
-        allPills.exit().remove();
+                 
+        allPills.exit()
+        .transition()
+            .duration(750)
+            .style("opacity",0)
+            .remove();
+
+        
+        
     },
 
     init: function(msg, data) {
@@ -500,7 +508,12 @@ var filterView = {
         },
         site: undefined,
         tearDown: function(){
-            this.pill.parentElement.removeChild(this.pill);
+            d3.select('#'+this.pill.id)
+                .transition()
+                    .duration(750)
+                    .style("opacity",0)
+                    .remove();
+
         }    },
 
     handleFilterClearance: function(message, data){

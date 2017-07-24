@@ -117,7 +117,6 @@ html, body {
     position: relative;
     display: block;
 }
-
 .main-view {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
@@ -490,7 +489,7 @@ a.active {
 /*Clear filter pillboxes*/
 .ui.label.clear-single {
     background-color: rgba(253,126,35,0.7);
-    display: block !important;
+    display: inline-block !important;
     position: relative;
     font-size: .95em;
     margin-top:5px;
