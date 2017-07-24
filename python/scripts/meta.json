@@ -3511,7 +3511,7 @@
     "replace_table": true
   },
   "topa": {
-    "cleaner": "topa_cleaner",
+    "cleaner": "TopaCleaner",
     "fields": [
       {
         "display_name": "Unique Data ID",
@@ -3632,6 +3632,14 @@
         "source_name": "ADDRESS_ID",
         "sql_name": "address_id",
         "type": "decimal"
+      },
+      {
+        "display_name": "NLIHC_id",
+        "display_text": "The NLIHC ID as matched from project table.",
+        "required_in_source": false,
+        "source_name": "nlihc_id",
+        "sql_name": "nlihc_id",
+        "type": "text"
       },
       {
         "display_name": "ANC 2002",

@@ -581,7 +581,8 @@ class LoadData(object):
         return ingestionfunctions.get_cleaner_from_name(
             meta=self.meta,
             manifest_row=manifest_row,
-            name=cleaner_class_name)
+            name=cleaner_class_name,
+            engine=self.engine)
 
     def _get_meta_only_fields(self, table_name, data_fields):
         """
