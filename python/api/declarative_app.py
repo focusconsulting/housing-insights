@@ -1,3 +1,10 @@
+'''
+Needs to be refactored into Blueprint format so that it can be imported into application.py
+'''
+
+
+
+
 from datetime import datetime, date
 import json
 
