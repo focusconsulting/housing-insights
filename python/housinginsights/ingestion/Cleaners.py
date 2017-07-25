@@ -13,6 +13,7 @@ import os
 from housinginsights.ingestion.DataReader import HIReader
 from housinginsights.sources.mar import MarApiConn
 from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
+from housinginsights.sources.google_maps import GoogleMapsApiConn
 
 
 package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -344,13 +345,19 @@ class CleanerBase(object, metaclass=ABCMeta):
             if street_view_url is not None:
                 row['Proj_streetview_url'] = street_view_url
             else:
-                # create custom street view url based on info from this link
-                # http://web.archive.org/web/20110903160743/http://mapki.com/wiki/Google_Map_Parameters#Street_View
-                # note: using 180 degrees as default for rotation angle
-                url = 'http://maps.google.com/maps?z=16&layer=c&cbll={},{}' \
-                      '&cbp=11,{},,0,2.09'.format(row['Proj_lat'],
-                                                  row['Proj_lon'], 180)
-                row['Proj_streetview_url'] = url
+                map_api = GoogleMapsApiConn()
+                map_api_result = map_api.check_street_view(row['Proj_lat'],
+                                                   row['Proj_lon'])
+
+                if map_api_result:
+                    # create street view url per google maps api specs
+                    loc_data = map_api_result['Location']
+                    latitude = loc_data['original_lat']
+                    longitude = loc_data['original_lng']
+                    pano_id = loc_data['panoId']
+                    url = map_api.get_street_view_url(latitude, longitude,
+                                                      pano_id)
+                    row['Proj_streetview_url'] = url
 
         if image_url == self.null_value:
             img_url = result['IMAGEURL']
