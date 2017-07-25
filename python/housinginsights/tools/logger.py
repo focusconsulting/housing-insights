@@ -16,12 +16,12 @@ class HILogger():
     def __init__(self, name, logfile=None, fmt=DEFAULT_FORMAT, datefmt=DEFAULT_DATE_FORMAT,
                 level=logging.INFO):
         # Get config values
+
         if logfile:
             self.logfile = os.path.join(logging_path, logfile)
-            print("Logging to {}".format(self.logfile))
 
         # Create Logger, Formatter, and StreamHandler
-        logger = logging.getLogger(name)
+        logger = logging.getLogger(os.path.basename(name))
         logger.setLevel(level)
         formatter = logging.Formatter(  fmt=fmt,
                                         datefmt=datefmt)
@@ -29,7 +29,7 @@ class HILogger():
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
         if logfile:
-            file_handler = logging.FileHandler(logfile)
+            file_handler = logging.FileHandler(self.logfile)
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
 

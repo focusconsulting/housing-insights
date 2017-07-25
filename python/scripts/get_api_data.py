@@ -23,7 +23,7 @@ logger = HILogger(name=__file__, logfile="sources.log", level=10)
 #TODO is this import necessary?
 from housinginsights.config.base import HousingInsightsConfig
 from housinginsights.ingestion.Manifest import Manifest
-
+from housinginsights.tools.mailer import HIMailer
 
 def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 'csv', db=None, debug=False, module_list = None):
     '''
@@ -96,26 +96,35 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
 
 def send_log_file_to_admin():
     "At conclusion of process, send log file by email to admin and delete or archive from server."
-    pass
+    email = HIMailer()
+    email.recipients = ['speedyturkey@gmail.com']
+    email.cc_recipients = []
+    email.subject = "Housing Insights Test Subject"
+    email.message = "Housing Insights Tes Message"
+    email.attachments = [logger.logfile]
+    email.send_email()
+    os.unlink(logger.logfile)
 
 if __name__ == '__main__':
 
     logger.info("get api data")
 
-    # #Set up the appropriate settings for what you want to download
-    #
-    # debug = True            # Errors are raised when they occur instead of only logged.
-    # unique_data_ids = None   # Alternatively, pass a list of only the data sources you want to download
-    #                         # Available ids:
-    #                         # [ 'dchousing',"tax", "wmata_stops","wmata_dist"
-    #                         #  "building_permits_2013","building_permits_2014","building_permits_2015","building_permits_2016","building_permits_2017"
-    #                         #  "crime_2013","crime_2014","crime_2015","crime_2016","crime_2017",
-    #                         #  "mar"
-    #                         #  ]
-    #
-    # sample = False          # Some ApiConn classes can just grab a sample of the data for use during development / testing
-    # output_type = 'csv'     # Other option is stdout which just prints to console
-    # db = 'docker_database'  # Only used by connections that need to read from the database to get their job done (example: wmata)
-    # module_list = ["census"] # ["opendata","DCHousing", "census"] #["wmata_distcalc"]
-    #
-    # get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
+    debug = True            # Errors are raised when they occur instead of only logged.
+    #Set up the appropriate settings for what you want to download
+
+    unique_data_ids = None   # Alternatively, pass a list of only the data sources you want to download
+                            # Available ids:
+                            # [ 'dchousing',"tax", "wmata_stops","wmata_dist"
+                            #  "building_permits_2013","building_permits_2014","building_permits_2015","building_permits_2016","building_permits_2017"
+                            #  "crime_2013","crime_2014","crime_2015","crime_2016","crime_2017",
+                            #  "mar"
+                            #  ]
+
+    sample = False          # Some ApiConn classes can just grab a sample of the data for use during development / testing
+    output_type = 'csv'     # Other option is stdout which just prints to console
+    db = 'docker_database'  # Only used by connections that need to read from the database to get their job done (example: wmata)
+    module_list = ["census"] # ["opendata","DCHousing", "census"] #["wmata_distcalc"]
+
+    get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
+
+    send_log_file_to_admin()
