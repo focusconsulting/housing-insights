@@ -364,9 +364,10 @@ class LoadData(object):
             'non_violent_crime_count': ['count', 'crime', 'nonviolent'],
             'crime_rate': ['rate', 'crime', 'all'],
             'violent_crime_rate': ['rate', 'crime', 'violent'],
-            'non_violent_crime_rate':['rate', 'crime', 'nonviolent'],
+            'non_violent_crime_rate': ['rate', 'crime', 'nonviolent'],
             'building_permits': ['count', 'building_permits', 'all'],
-            'construction_permits': ['count', 'building_permits', 'all']
+            'construction_permits': ['count', 'building_permits',
+                                     'construction']
         }
 
         zone_types = ['census_tract', 'ward', 'neighborhood_cluster']
@@ -524,13 +525,6 @@ class LoadData(object):
         else:
             api_results = self._get_weighted_census_results(grouping, data_id,
                                                             pop_wt_prop=True)
-
-            # # transform items to dict with group/value instead of list of dict
-            # temp_items = {}
-            # for item in api_results['items']:
-            #     temp_items[item['group']] = item['value']
-            #
-            # api_results['items'] = temp_items
 
         return api_results
 
