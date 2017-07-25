@@ -13,6 +13,7 @@ import os
 from housinginsights.ingestion.DataReader import HIReader
 from housinginsights.sources.mar import MarApiConn
 from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
+from housinginsights.sources.google_maps import GoogleMapsApiConn
 
 
 package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -29,9 +30,10 @@ http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-str
 
 
 class CleanerBase(object, metaclass=ABCMeta):
-    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
+        self.engine = engine
 
         self.manifest_row = manifest_row
         self.tablename = manifest_row['destination_table']
@@ -343,13 +345,19 @@ class CleanerBase(object, metaclass=ABCMeta):
             if street_view_url is not None:
                 row['Proj_streetview_url'] = street_view_url
             else:
-                # create custom street view url based on info from this link
-                # http://web.archive.org/web/20110903160743/http://mapki.com/wiki/Google_Map_Parameters#Street_View
-                # note: using 180 degrees as default for rotation angle
-                url = 'http://maps.google.com/maps?z=16&layer=c&cbll={},{}' \
-                      '&cbp=11,{},,0,2.09'.format(row['Proj_lat'],
-                                                  row['Proj_lon'], 180)
-                row['Proj_streetview_url'] = url
+                map_api = GoogleMapsApiConn()
+                map_api_result = map_api.check_street_view(row['Proj_lat'],
+                                                   row['Proj_lon'])
+
+                if map_api_result:
+                    # create street view url per google maps api specs
+                    loc_data = map_api_result['Location']
+                    latitude = loc_data['original_lat']
+                    longitude = loc_data['original_lng']
+                    pano_id = loc_data['panoId']
+                    url = map_api.get_street_view_url(latitude, longitude,
+                                                      pano_id)
+                    row['Proj_streetview_url'] = url
 
         if image_url == self.null_value:
             img_url = result['IMAGEURL']
@@ -507,12 +515,31 @@ class dchousing_cleaner(CleanerBase):
 
         return row
 
-class topa_cleaner(CleanerBase):
+class TopaCleaner(CleanerBase):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        #Call the parent method and pass all the arguments as-is
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+
     def clean(self,row,row_num=None):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
         # character in one or two columns.  Leave here for now.
         row = self.replace_nulls(row, null_values=['', '\\', None])
+        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
+        row['nlihc_id'] = nlihc_id
         return row
+
+    def get_nlihc_id_if_exists(self, address_id):
+        "Checks for record in project table with matching MAR id."
+        query = "select nlihc_id from project where mar_id = '{}'".format(address_id)
+        if address_id == self.null_value:
+            return self.null_value
+        try:
+            result = self.engine.execute(query).fetchone()
+            if result:
+                return result[0]
+        except:
+            return self.null_value
+        return self.null_value
 
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):

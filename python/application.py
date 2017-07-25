@@ -32,6 +32,9 @@ import calendar
 from datetime import datetime, date
 import dateutil.parser as dateparser
 
+from api.utils import items_divide
+
+
 #######################
 # Setup
 #######################
@@ -67,7 +70,7 @@ if 'docker' in sys.argv:
 else:
     database_choice = 'remote_database'
 
-with open('secrets.json') as f:
+with open('housinginsights/secrets.json') as f:
     secrets = json.load(f)
     connect_str = secrets[database_choice]['connect_str']
 
@@ -90,9 +93,70 @@ logging.info(tables)
 # API Endpoints
 ##########################################
 
+#######################
+#Test endpoints - prove things work
+
+#Is the application running?
 @application.route('/')
 def hello():
     return("The Housing Insights API Rules!")
+
+#Can we access the housinginsights package folder?
+import housinginsights.tools.test_util as test_util
+@application.route('/housinginsights')
+def test_housinginsights_package():
+    return(test_util.api_demo_variable)
+
+#Can we use blueprints?
+from api.demo_blueprint import demo_blueprint
+application.register_blueprint(demo_blueprint)
+
+#Can we make blueprints with passed in arguments?
+from api.demo_blueprint_constructor import construct_demo_blueprint
+created_blueprint = construct_demo_blueprint("This is my choice")
+application.register_blueprint(created_blueprint)
+
+#What urls are available (NOTE must have default params)?
+from flask import url_for
+def has_no_empty_params(rule):
+    defaults = rule.defaults if rule.defaults is not None else ()
+    arguments = rule.arguments if rule.arguments is not None else ()
+    return len(defaults) >= len(arguments)
+
+@application.route("/site-map")
+def site_map():
+    links = []
+    for rule in application.url_map.iter_rules():
+        # Filter out rules we can't navigate to in a browser
+        # and rules that require parameters
+        if "GET" in rule.methods and has_no_empty_params(rule):
+            url = url_for(rule.endpoint, **(rule.defaults or {}))
+            links.append((url, rule.endpoint))
+    return str(links)
+
+#######################
+#Register blueprints
+#######################
+
+from api.summarize_observations import construct_summarize_observations
+sum_opp_blue = construct_summarize_observations('sum_opp',engine)
+application.register_blueprint(sum_opp_blue)
+
+
+
+
+#TODO Anything that is in /api folder should be registered here
+
+
+
+
+
+
+
+#######################
+#Real endpoints
+#TODO ALL THESE NEED TO BE BLUEPRINTS!!!
+#######################
 
 @application.route('/api/filter/', methods=['GET'])
 def filter_data():
@@ -158,205 +222,6 @@ def get_meta():
     result = conn.execute("SELECT meta FROM meta")
     row = result.fetchone()
     return row[0]
-
-@application.route('/api/<method>/<table_name>/<filter_name>/<months>/<grouping>', methods=['GET'])
-def summarize_observations(method,table_name,filter_name,months,grouping):
-    '''
-    This endpoint takes a table that has each record as list of observations 
-    (like our crime and building_permits tables) and returns summary statistics
-    either as raw counts or as a rate, optionally filtered. 
-
-    methods: "count" or "rate"
-    table_name: name of the table in the database, e.g. 'building_permits' or 'crime'
-    filter_name: code name of the filter to apply to the data, which varies by table
-                "all" - no filtering applied
-                "construction" - only building_permits with permit_type_name = 'CONSTRUCTION'
-                "violent" - only crimes where the offense type is a violent crime (note, not 100% match, need to compare DCPD definitions to official to verify)
-                "nonviolent" - the other crime incidents
-    months: The number of months of date to include. By default this is from now() but can be modified by an optional parameter
-    grouping: What to use for the 'GROUP BY' clause, e.g. 'ward', 'neighbourhood_cluster', 'zip', 'census_tract'. 
-            Can accept any valid column name, so 'offense' for crime or 'permit_type_name' for building_permits are also valid
-    
-    Optional params:
-    start: YYYYMMDD format start date to use instead of now() for the duration filter
-
-
-    replaces the count_all method that is deprecated
-
-    Example working URLS:
-    /api/count/crime/all/12/ward - count of all crime incidents
-    /api/count/building_permits/construction/12/neighborhood_cluster - all construction permits in the past year grouped by neighborhood_cluster
-    '''
-
-
-    ###########################
-    #Handle filters
-    ###########################
-    #Be sure concatenated 'AND' statements have a space in front of them
-    additional_wheres = ''
-    if filter_name == 'all':
-        additional_wheres += " "
-
-    # Filter options for building_permits
-    elif filter_name == 'construction':
-        additional_wheres += " AND permit_type_name = 'CONSTRUCTION' "
-    
-    # Filter options for crime
-    elif filter_name == 'violent':
-        additional_wheres += " AND OFFENSE IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
-    elif filter_name == 'nonviolent':
-        additional_wheres += " AND OFFENSE NOT IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
-
-
-    # Fallback for an invalid filter
-    else:
-        additional_wheres += " Incorrect filter name - this inserted SQL will cause query to fail"
-
-    ##########################
-    #Handle date range
-    ##########################
-    date_fields = {'building_permits': 'issue_date', 'crime': 'report_date'}
-    date_field = date_fields[table_name]
-
-    #method currently not implemented. 'count' or 'rate'
-
-
-    start_date = request.args.get('start')
-    print("Start_date found: {}".format(start_date))
-    if start_date == None:
-        start_date = "now()"
-    else:
-        start_date = dateparser.parse(start_date,dayfirst=False,yearfirst=False)
-        start_date = datetime.strftime(start_date,'%Y-%m-%d')
-        start_date = "'" + start_date + "'"
-
-    date_range_sql = ("({start_date}::TIMESTAMP - INTERVAL '{months} months')"
-                      " AND {start_date}::TIMESTAMP"
-                      ).format(start_date=start_date, months=months)
-
-
-    #########################
-    #Optional - validate other inputs
-    #########################
-    #Should we restrict the group by to a specific list, or allow whatever people want? 
-    #Ditto for table name
-
-
-    ###############
-    #Get results
-    ###############
-    api_results = count_observations(table_name, grouping, date_field, date_range_sql, additional_wheres)
-
-    #Edit the data_id. TODO this is not specific enough, need univeral system for handling unique data ids to be used on front end. 
-    #Is this better handled here in the API or front end exclusively?
-    api_results['data_id'] += '_' + filter_name
-
-
-    # Apply the normalization if needed
-    if method == 'rate':
-        if table_name in ['building_permits']:
-            denominator = get_residential_units(grouping)
-            api_results = items_divide(api_results, denominator)
-            api_results = scale(api_results, 1000) #per 1000 residential units
-        if table_name in ['crime']:
-            denominator = get_weighted_census_results(grouping, 'population')
-            api_results = items_divide(api_results, denominator)
-            api_results = scale(api_results, 100000) #crime incidents per 100,000 people
-    
-    #Output as JSON
-    return jsonify(api_results)
-
-
-def items_divide(numerator_data, denominator_data):
-    '''
-    Divides items in the numerator by items in the denominator by matching
-    the appropriate groupings. 
-
-    Takes data that is formatted for output the API, i.e. a dictionary 
-    with key "items", which contains a list of dictionaries each with 'grouping' 
-    and 'count'
-    '''
-    items = []
-    if numerator_data['items'] == None:
-        items=None
-    else:
-        for n in numerator_data['items']:
-            #TODO what should we do when a matching item isn't found?
-            matching_d = next((item for item in denominator_data['items'] if item['group'] == n['group']),{'group':'_unknown','count':None})
-            if matching_d['count'] == None or n['count']== None:
-                divided = None
-            else:
-                divided = n['count'] / matching_d['count']
-
-            item = dict({'group':n['group'], 'count':divided}) #TODO here and elsewhere need to change 'count' to 'value' for clarity, but need to fix front end to expect this first
-            items.append(item)
-
-    return {'items':items, 'grouping':numerator_data['grouping'], 'data_id':numerator_data['grouping']}
-
-
-def scale(data,factor):
-    '''
-    Multiplies each of the items 'count' entry by the factor
-    '''
-
-    for idx, d in enumerate(data['items']):
-        try:
-            data['items'][idx]['count'] = (data['items'][idx]['count'] * factor)
-        except Exception as e:
-            data['items'][idx]['count'] = None
-
-    return data
-
-def get_population(grouping):
-    '''
-    Returns the population count for each zone in the standard 'items' format
-    '''
-    #TODO implement me
-    return None
-
-def get_residential_units(grouping):
-    '''
-    Returns the number of residential units in the standard 'items' format
-    '''
-    #TODO implement me
-    return None
-
-def count_observations(table_name, grouping, date_field, date_range_sql, additional_wheres=''):
-    fallback = "'Unknown'"
-
-    try:
-        conn = engine.connect()
-
-        q = """
-            SELECT COALESCE({grouping},{fallback}) --'Unknown'
-            ,count(*) AS records
-            FROM {table_name}
-            where {date_field} between {date_range_sql}
-            {additional_wheres}
-            GROUP BY {grouping}
-            ORDER BY {grouping}
-            """.format(grouping=grouping,fallback=fallback,table_name=table_name,
-                date_field=date_field,date_range_sql=date_range_sql,additional_wheres=additional_wheres)
-
-        proxy = conn.execute(q)
-        results = proxy.fetchall()
-
-        #transform the results.
-        #TODO should come up with a better generic way to do this using column
-          #names for any arbitrary sql table results.
-        formatted = []
-        for x in results:
-            dictionary = dict({'group':x[0], 'count':x[1]})
-            formatted.append(dictionary)
-
-
-        conn.close()
-        return {'items': formatted, 'grouping':grouping, 'data_id':table_name}
-
-    #TODO do better error handling - for interim development purposes only
-    except Exception as e:
-        #conn.close()
-        return {'items': None, 'notes':"Query failed: {}".format(e), 'grouping':grouping, 'data_id':table_name}
 
 
 
