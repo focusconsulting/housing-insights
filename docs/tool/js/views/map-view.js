@@ -781,16 +781,61 @@
                     .remove()
 
             //Create the new container
-            var current = selection.enter()
+            mapView.showProjectPreview.current = selection.enter()
                         .append('div')
                         .classed("preview-contents",true)
                         .style('opacity',0)
-                        .text(function(d){return d.nlihc_id})
-            
-            current.append("div")       
+                        //.text(function(d){return d.nlihc_id})
+
+            //callback used to populate container since we need data loaded before it can run
+            //callback called after function definition
+            mapView.fillContainer = function(meta){
+                console.log("in fillContainer")
+                var current = mapView.showProjectPreview.current //alias for convenience
+
+                //Add fields that don't have the field name displayed
+                var headerFields =  ['proj_name','proj_addre','ward','neighborhood_cluster_desc']
+                for (var i = 0; i < headerFields.length; i++) {
+                    var field = getFieldFromMeta('project',headerFields[i])
+                    var value = project[0][headerFields[i]];
+                    value = (value === null) ? 'Unknown' : value;
+
+                    current.append('div')
+                        .classed('preview-field',true)
+                        .classed(headerFields[i],true)
+                        .text(value)
+                };
+
+                //Add line break 
+                current.append('br')
+
+                //Add a definition list of property: value
+                var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
+                                        'subsidy_end_last']
+                
+                var dl = current.append('dl')
+                        .classed("properties-list",true)
+                        .classed("inline",true);
+
+                for (var i = 0; i < previewFields.length; i++) {
+                    var field = getFieldFromMeta('project',previewFields[i])
+                    dl.append('dt').text(field['display_name'] + ': '); //todo use meta.json instead
+                    
+                    var value = project[0][previewFields[i]];
+                    value = (value === null) ? 'Unknown' : value;
+                    dl.append('dd').text(value)
+                }
+            };
+
+            controller.getData({
+                            name:'metaData',
+                            url: model.URLS.metaData,
+                            callback: mapView.fillContainer
+                            });
+
             //Make the new container appear after the old one is gone
             setTimeout(function(){
-                current.transition()
+                mapView.showProjectPreview.current.transition()
                     .duration(fadeDuration)
                     .style('opacity',1)
             },fadeDuration)
@@ -857,7 +902,7 @@
 
             var t = d3.transition()
                 .duration(750);
-            var preview = d3.select('#buildings-list')
+            var preview = d3.select('#projects-list')
 
             var listItems = preview.selectAll('div')
                 .data(data, function(d) {
@@ -871,8 +916,7 @@
                 .merge(listItems)
                 .html(function(d) {
                     return '<p> <span class="project-title">' + d.properties.proj_name + '</span><br />' +
-                        d.properties.proj_addre + '<br />' +
-                        'Owner: ' + d.properties.hud_own_name + '</p>';
+                        d.properties.proj_addre;
                 })
                 .on('mouseenter', function(d) {
                     mapView['highlight-timer-' + d.properties.nlihc_id] = setTimeout(function() {

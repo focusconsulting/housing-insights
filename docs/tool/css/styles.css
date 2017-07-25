@@ -82,7 +82,7 @@ html, body {
     overflow-y: auto;
 }
 
-#buildings-list {
+#projects-list {
     margin-top: 0px;
 }
 
@@ -275,7 +275,11 @@ Others are working correctly.
     height:350px;
 }
 
-#buildings-list>div {
+#project-preview .preview-field.proj_name{
+    font-weight:bold;
+    font-size:1.1em;
+}
+#projects-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
@@ -285,14 +289,15 @@ Others are working correctly.
     border-bottom: 1px solid gray;
 
 }
-#buildings-list>div .project-title {
+#projects-list>div .project-title {
     font-weight: bold;
     font-size: 1em;
 }
-#buildings-list>div:hover {
+
+#projects-list>div:hover {
     background-color: #ddebff;
 }
-#buildings-list>div.enter, #buildings-list>div.update {
+#projects-list>div.enter, #projects-list>div.update {
     padding: 5px 4px;
     max-height: 100px;
     opacity: 1;
@@ -565,3 +570,17 @@ a.active {
     margin-top: 20px;
 }
 
+
+
+dl.inline dd {
+  display: inline;
+  margin: 0;
+}
+dl.inline dd:after{
+  display: block;
+  content: '';
+}
+dl.inline dt{
+  display: inline-block;
+  min-width: 75px;
+}
