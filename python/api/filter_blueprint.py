@@ -4,10 +4,11 @@ from flask import jsonify
 
 import logging
 
+
 def construct_filter_blueprint(name, engine):
 
     blueprint = Blueprint(name, __name__, url_prefix='/api')
-    
+
     @blueprint.route('/filter/', methods=['GET'])
     def filter_data():
         q = """
@@ -38,7 +39,7 @@ def construct_filter_blueprint(name, engine):
         proxy = conn.execute(q)
         results = [dict(x) for x in proxy.fetchall()]
         conn.close()
-        output = {'items':results}
+        output = {'items': results}
         return jsonify(output)
 
     #End of the constructor returns the assembled blueprint

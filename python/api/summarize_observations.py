@@ -19,6 +19,7 @@ import dateutil.parser as dateparser
 
 from api.utils import items_divide
 
+
 def construct_summarize_observations(name, engine):
     '''
     This function returns a blueprint instance that was created using the 

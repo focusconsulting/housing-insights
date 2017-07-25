@@ -3,13 +3,13 @@ from flask import jsonify, request
 
 import math
 
-
 import logging
+
 
 def construct_project_view_blueprint(name, engine):
 
     blueprint = Blueprint(name, __name__, url_prefix='/api')
-    
+
     @blueprint.route('/wmata/<nlihc_id>',  methods=['GET'])
     def nearby_transit(nlihc_id):
         '''
@@ -254,16 +254,16 @@ def construct_project_view_blueprint(name, engine):
         good_results = [dict(r) for r in results if haversine(latitude, longitude, float(r.latitude), float(r.longitude)) <= dist]
 
         unit_counts = [r['proj_units_assist_max'] for r in good_results]
-        unit_counts = filter(None,unit_counts) #can't sum None
+        unit_counts = filter(None, unit_counts) #can't sum None
         unit_counts = [int(u) for u in unit_counts] #temporarily needed b/c accidentally stored as text
         tot_units = sum(unit_counts)
         tot_buildings = len(good_results)
 
         output = {
-            'items': good_results
-            ,'tot_units': tot_units
-            , 'tot_buildings':tot_buildings
-            , 'distance': dist
+            'items': good_results,
+            'tot_units': tot_units,
+            'tot_buildings': tot_buildings,
+            'distance': dist
         }
 
         conn.close()
@@ -280,7 +280,7 @@ def construct_project_view_blueprint(name, engine):
         on the earth (specified in decimal degrees)
         """
         # convert decimal degrees to radians
-        original_coords = (lat1,lon1,lat2,lon2) #for debugging
+        original_coords = (lat1, lon1, lat2, lon2) # for debugging
         lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
 
         # haversine formula
@@ -292,7 +292,6 @@ def construct_project_view_blueprint(name, engine):
         d = c * r
         #print("Haversine for {} = {}".format(original_coords,d))
         return c * r
-
 
     def bounding_box(dist, latitude, longitude):
         """ Cribbed from https://gis.stackexchange.com/questions/142326/calculating-longitude-length-in-miles """
@@ -306,7 +305,6 @@ def construct_project_view_blueprint(name, engine):
 
         return (latitude_tolerance, longitude_tolerance)
 
-
     @blueprint.route('/project/<nlihc_id>/subsidies/', methods=['GET'])
     def project_subsidies(nlihc_id):
         q = """
@@ -318,7 +316,7 @@ def construct_project_view_blueprint(name, engine):
         proxy = conn.execute(q)
         results = [dict(x) for x in proxy.fetchall()]
         conn.close()
-        output = {'items':results}
+        output = {'items': results}
         return jsonify(output)
 
     return blueprint
