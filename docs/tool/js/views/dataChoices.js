@@ -22,8 +22,6 @@
             "display_text": "Total count of units in the project, including both subsidized and market rate units.",
             "component_type": "continuous",
             "data_type":"integer",
-            "min": 0,
-            "max": 717,
             "num_decimals_displayed": 0, //0 if integer, 1 otherwise. Could also store data type instead. 
             "data_level": "project"
         },
@@ -33,8 +31,6 @@
             "display_text": "The number of subsidized units in the project. When a project participates in multiple subsidy programs, this number is the number of units subsidized by the program with the most units. Partially overlapping subsidies could result in more units than are reflected here.",
             "component_type": "continuous",
             "data_type":"integer",
-            "min":0,
-            "max":600,
             "num_decimals_displayed":0,
             "data_level": "project"
         },
@@ -58,8 +54,6 @@
             "display_text": "Filters to buildings with at least one subsidy whose start date falls between the selected dates.",
             "component_type": "date",
             "data_type": "timestamp",
-            "min": "1950-01-01", //just example, TODO change to date format
-            "max": "now",         //dummy example
             "data_level": "project"
         },
         {   "source":"poa_end",
@@ -67,8 +61,6 @@
             "display_text": "Filters to buildings with at least one subsidy whose end date falls between the selected dates.",
             "component_type": "date",
             "data_type": "timestamp",
-            "min": "1950-01-01", //just example, TODO change to date format
-            "max": "now",         //dummy example
             "data_level": "project"
         },
 
@@ -76,7 +68,6 @@
 //////////////////////////////////////////////////
 //Data choices formerly only available in 'layers', in progress of being available as filters
 //TODO display_texts and names need to be updated to reflect the combined behavior of layer/filter
-//TODO min/max should be set
 //TODO integer vs. decimal
 //////////////////////////////////////////////////
 
@@ -87,8 +78,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
@@ -101,8 +90,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
@@ -115,8 +102,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
@@ -129,8 +114,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
@@ -143,8 +126,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
@@ -158,8 +139,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
@@ -172,8 +151,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
@@ -186,8 +163,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
@@ -200,8 +175,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
@@ -214,8 +187,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
@@ -228,8 +199,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 1,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
@@ -242,8 +211,6 @@
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
-            "min": 0,
-            "max": 2500,
             "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/acs_median_rent/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
