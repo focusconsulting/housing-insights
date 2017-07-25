@@ -1,36 +1,49 @@
 "use strict";
-/*
-This file provides a copy-paste ready template for making a custom D3 chart that inherits from the chart-prototype. 
-It sets up the core object structure of _setup, _resize, and _update functions that every chart needs to implement
-Also included are some boiler plate examples of commonly needed attributes - these should be edited/removed as needed. 
-*/
 
-//Rename this variable to be your specific chart
 var DonutChart = function(container) { //
-    this.extendPrototype(myCustomChart.prototype, DonutChartExtension);
+    this.extendPrototype(DonutChart.prototype, DonutChartExtension);
     ChartProto.call(this, container); 
 }
 
-//Rename this prototype to match chart type above
-myCustomChart.prototype = Object.create(ChartProto.prototype);
+DonutChart.prototype = Object.create(ChartProto.prototype);
 
-//Rename this variable to be globally unique!
 var DonutChartExtension = {
     _setup: function(container){ 
-        /*
-        Add graph-specific defaults and insert one-time DOM elements like axes
-        This is called from ChartProto.setup()
-        */
-        //namespace assignment - allow access to 'this' inside child functions
         var chart = this 
+        chart._chart = this
+
+        chart._dataLabel = null;
+
+        chart.arcTween = function(newAngle) { // HT: http://bl.ocks.org/mbostock/5100636
+          return function(d){
+            var interpolate = d3.interpolate(d.endAngle, newAngle);
+            return function(t) {
+              d.endAngle = interpolate(t);
+              return chart.arc(d);
+            };
+          };    
+        }
 
 
-        //Assign defaults for all graph-specific items (others are set in ChartProto.setup())
-        //All assignable parameters should be prefixed with _ to distinguish them from the public getter/setter method
-        //Also, for every parameter added here, add a getter/setter at the bottom. 
-        //Adding getter/setter methods allows method chaining. 
-        chart._myCustomParameter //be sure to add a matching getter/setter below!
+        chart.background = chart.innerChart 
+            .append('path')
+            .classed("pie-background",true)
+            .datum({endAngle: 2 * Math.PI})
+            .style("fill", "#ddd")
 
+        chart.foreground = chart.innerChart.append('path')
+          .classed("values",true)
+          .datum({endAngle: Math.PI})       
+        
+        chart.percentage = chart.innerChart.append("text")
+            .attr("text-anchor", "middle")
+            .attr('class','pie_number')
+            .attr('y',5)
+            .text(d3.format(".0%")(1));
+
+        chart.labelElement = chart.svg.append('text')
+            .attr('class','pie_text')
+            .attr('text-anchor','middle'); 
 
     }, // end setupType
     _resize: function() {
@@ -42,7 +55,18 @@ var DonutChartExtension = {
 
         //namespace assignment - allow access to 'this' inside child functions
         var chart = this;
+        chart.innerChart.attr("transform", "translate(" + (chart.innerWidth()/2 + chart.margin().left) + "," + (chart.innerHeight()/2 + chart.margin().top) +")"); // Moving the center point
 
+        chart.arc = d3.arc()
+          .outerRadius(chart.radius())
+          .innerRadius(chart.radius() - chart.width() / 4)
+          .startAngle(0); 
+        
+        chart.background.attr("d", chart.arc);
+
+        chart.labelElement
+            .attr('y', chart.height() - 5 )
+            .attr('x', chart.width() / 2)
 
     },
     _update: function(){
@@ -51,66 +75,45 @@ var DonutChartExtension = {
         This should draw the graph the first time, and is always run after both '_setup' and '_resize' are run
         */
 
-        //namespace assignment - allow access to 'this' inside child functions, like in things like: function(d){return d[chart.field]}
         var chart = this;
         
-        //Scales translate from data value to pixels
-        chart.xScale = d3.scaleLinear()
-                .domain([0,1])
-                .range([0,chart.innerWidth()])
+        var percent = chart.data()[0][chart.field()] //assume data comes in form [{'field':0.9,'unusedfield':'unusedvalue'},{ignored objects after first}]
+        var angle = percent * (Math.PI * 2)
 
-        chart.yScale = d3.scaleLinear()
-                .domain([0,1])
-                .range([0,chart.innerHeight()])
+        chart.foreground
+            .transition()
+            .duration(chart.duration())
+            .attrTween("d", chart.arcTween(angle));
 
+        chart.percentage
+            .text(d3.format(".0%")(percent));
 
-        ////////////////////////
-        //SVG Elements bound to data
-        ///////////////////////
-
-        //General update pattern for D3
-        //Join data to DOM elements, including any DOM elements that already exist on the page
-        var shapes = this.innerChart.selectAll('rect.values')
-            .data(chart.data(), function(d) { return d[chart.label()];})    //A key function makes items match to some data property instead of the order in the DOM
-
-
-        //Add elements that are in the data but not the page yet
-        var newShapes = shapes.enter().append('rect')
-            .classed("values", true)    //starting position/state goes here - note that the allShapes transition below will animate to a new state!             
-            //.attr etc. here
-
-        //Make changes that need to happen to ALL elements staying on the page (existing + new)
-        var allShapes = newShapes.merge(shapes)
-                .transition()
-                    .delay(chart.delay())          
-                    .duration(chart.duration())
-                        //.attr stuff here
-                    
-        var leavingShapes = shapes.exit()
-                    .transition()
-                        .delay(chart.delay())
-                        .duration(chart.duration())
-                            //.attr stuff here
-
-            leavingShapes.remove()
-
-        
-
+        chart.labelElement
+            .text(chart.data()[0][chart.label()]);
     },
 
+   
 
-
-    /* 
-    Custom Getter/Setter functions for any attributes that were initialized in the _setup function
-    */
-    //Don't put _ in the getter/setter method name
-    myCustomParameter: function(_){
-        //Custom getter setter - if a value is passed in, it assigns the value and returns the chart so that another method can be chained on
-        //If no value is passed in, the currently set value is returned. This allows for one method instead of a getParam, setParam pair. 
-        if (!arguments.length) return this._myCustomParameter;
-        this._myCustomParameter = _;
+    dataLabel: function(_){ 
+        if (!arguments.length) {
+            if (this._dataLabel=== null) {
+                return this.field()
+            }
+            else {
+                return this._dataLabel; 
+            }
+        } 
+        this._dataLabel = _;
         return this;
-    }
+    },
+
+    radius: function(_) {
+        if (!arguments.length) {
+            return Math.min(this.innerWidth(), this.innerHeight()) / 2; 
+        }
+        console.log("can't set radius, it's calculated")
+        return this;
+    } 
 
     //Add more getter/setters as needed
 
