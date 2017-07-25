@@ -355,8 +355,12 @@ var filterView = {
             return item[c.source];
         });
         
-        var minDatum = d3.min(allDataValuesForThisSource) || c.min;
-        var maxDatum = d3.max(allDataValuesForThisSource) || c.max;
+        // Hardcoding the min and max if there's no d3.min or max 
+        // available. This is for filters that we don't have
+        // filterData for yet. Remove the magic number operands
+        // once we have all the filterData connected to the API.
+        var minDatum = d3.min(allDataValuesForThisSource) || 0;
+        var maxDatum = d3.max(allDataValuesForThisSource) || 1;
 
         var inputContainer = document.createElement('span');
         inputContainer.setAttribute('id', c.source + '-input');
