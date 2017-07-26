@@ -63,6 +63,111 @@ html, body {
     padding: 10px 0px 10px 10px;
 }
 
+/* Text input boxes within sidebars */
+div.filter.content input.filter-text{
+    display: inline-block;
+    position: relative;
+    height: 2em;
+    border: 1px solid rgb(230, 230, 230);
+    box-sizing: border-box;
+}
+
+div.filter.content input.year-text {
+    width: 40px;
+}
+div.filter.content input.month-text, 
+div.filter.content input.day-text {
+    width: 20px;
+}
+
+div.filter.content .continuous-input-text{
+    width: 40px;
+}
+
+.text-input.date span{
+    margin-left: .3em;
+    margin-right: .3em;
+}
+.text-input.continuous span{
+    margin-left: 3em;
+    margin-right: 3em;
+}
+
+.text-input{
+    margin-left: 25px;
+}
+
+button.nullValuesToggleSubmit{
+    height: 1.5em;
+    width: 1.5em;
+    background: rgb(100, 100, 100);
+    display: inline-block;
+    position: relative;
+    border: none;
+    border-radius: 5px;
+    vertical-align: middle;
+    margin-left:2px;
+}
+
+/* drawn from https://codepen.io/jonneal/pen/kptBs */
+button.nullValuesToggleSubmit::before {
+    border-style: solid;
+    border-width: .25em .25em 0 0;
+    content: '';
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    top: .3em;
+    left: -.1em;
+    transform: rotate(45deg);
+    width: .75em;
+    height: .75em;
+    border-color: white;
+}
+
+/* the toggle switches for filter controls */
+div.null-switch-area{
+    margin-top: 30px;
+    margin-left: 25px;
+}
+div.null-toggle-container{
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+}
+
+div.null-toggle-container div.null-toggle-background{
+    display: inline-block;
+    position: relative;
+    width: 30px;
+    height: 20px;
+    border-radius: 20%;
+    background: rgba(150, 150, 150, 1);
+}
+
+div.null-toggle-container div.null-toggle-switch{
+    display: inline-block;
+    position: relative;
+    left: -40px;
+    top: 3px;
+    width: 25px;
+    height: 25px;
+    transition: left 200ms;
+    border-radius: 50%;
+    background: rgb(253,126,35);
+    cursor: pointer;
+    box-shadow: 0px 1px 1px rgb(100, 100, 100);
+}
+
+div.null-toggle-container.switched-on div.null-toggle-switch{
+    left: -15px !important;
+}
+
+div.null-toggle-container.switched-on div.null-toggle-background{
+    background: rgba(253, 126, 35, .5) !important;
+
+}
+
 /*Color code the text for projects that match the specified filters*/
 .matching {
     color:rgba(253,126,35,0.7) !important;
