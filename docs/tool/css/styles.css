@@ -125,49 +125,6 @@ button.nullValuesToggleSubmit::before {
     border-color: white;
 }
 
-/* the toggle switches for filter controls */
-div.null-switch-area{
-    margin-top: 30px;
-    margin-left: 25px;
-}
-div.null-toggle-container{
-    display: inline-block;
-    position: relative;
-    vertical-align: middle;
-}
-
-div.null-toggle-container div.null-toggle-background{
-    display: inline-block;
-    position: relative;
-    width: 30px;
-    height: 20px;
-    border-radius: 20%;
-    background: rgba(150, 150, 150, 1);
-}
-
-div.null-toggle-container div.null-toggle-switch{
-    display: inline-block;
-    position: relative;
-    left: -40px;
-    top: 3px;
-    width: 25px;
-    height: 25px;
-    transition: left 200ms;
-    border-radius: 50%;
-    background: rgb(253,126,35);
-    cursor: pointer;
-    box-shadow: 0px 1px 1px rgb(100, 100, 100);
-}
-
-div.null-toggle-container.switched-on div.null-toggle-switch{
-    left: -15px !important;
-}
-
-div.null-toggle-container.switched-on div.null-toggle-background{
-    background: rgba(253, 126, 35, .5) !important;
-
-}
-
 /*Color code the text for projects that match the specified filters*/
 .matching {
     color:rgba(253,126,35,0.7) !important;
@@ -322,6 +279,17 @@ div.null-toggle-container.switched-on div.null-toggle-background{
     right: 15px;
     z-index:100;
     cursor: pointer;
+}
+
+.nullsToggleContainer{
+    margin-top: 5px;
+    margin-left: 25px;
+}
+
+.nullsToggleContainer input[type=checkbox]{
+    display: inline-block;
+    margin-right: 3px;
+    vertical-align: top;
 }
 
 #pie-charts {

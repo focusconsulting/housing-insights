@@ -163,28 +163,23 @@ var filterView = {
         this.component = component;
     },
     nullValuesToggle: function(component, filterControl){
-        this.element = document.createElement('div');
-        this.element.classList.add("null-switch-area");
+        var ths = this;
+        this.container = document.createElement('div');
+        this.container.classList.add('nullsToggleContainer');
+        this.element = document.createElement('input');
+        this.element.setAttribute('type', 'checkbox');
+        this.element.setAttribute('value', 'showNulls-' + component.source);
+        this.element.setAttribute('name', 'showNulls-' + component.source);
 
-        var switchContainer = document.createElement('div');
-        switchContainer.setAttribute('id', component.source + '-toggle-null');
-        switchContainer.classList.add('null-toggle-container');
-
-        var switchBackground = document.createElement('div');
-        switchBackground.classList.add('null-toggle-background');
-        var switchHandle = document.createElement('div');
-        switchHandle.classList.add('null-toggle-switch');
         if(filterControl.hasOwnProperty('nullsShown') && filterControl.nullsShown){
-            switchContainer.classList.add('switched-on');
+            this.element.checked = true;
         }
         var txt = document.createTextNode("Unknown values included");
 
         this.toDOM = function(parentElement){
-            parentElement.appendChild(this.element);
-            this.element.appendChild(switchContainer);
-            switchContainer.appendChild(switchBackground);
-            switchContainer.appendChild(switchHandle);
-            this.element.appendChild(txt);
+            parentElement.appendChild(this.container);
+            this.container.appendChild(this.element);
+            this.container.appendChild(txt);
         }
 
         // toggles between values 'true' and 'false' 
@@ -195,10 +190,9 @@ var filterView = {
                 object[property] = object[property] || false;
                 object[property] = !object[property];
 
-                switchContainer.classList.toggle('switched-on');
                 callback();
             }
-            switchContainer.addEventListener('click', toggleProperty);
+            this.element.addEventListener('change', toggleProperty);
         }
     },
     // filterTextInput takes as a parameter an array of keys.
