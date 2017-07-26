@@ -33,7 +33,7 @@
                     ['overlayRequest', mapView.updateZoneChoiceDisabling],
                     ['joinedToGeo', mapView.addOverlayLayer],
                     ['overlaySet', chloroplethLegend.init],
-                    ['previewBuilding', mapView.showPopup],
+                    ['hoverBuilding', mapView.showPopup],
                     ['previewBuilding', mapView.showProjectPreview],
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding],
@@ -701,10 +701,12 @@
                         }
                     });
                    
+
+                   //TODO with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
                     mapView.map.on('mousemove', function(e) {
                         //get the province feature underneath the mouse
                         var features = mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project','project-enter']
+                            layers: ['project','project-enter','project-exit', 'project-unmatched']
                         });
                         //if there's a point under our mouse, then do the following.
                         if (features.length > 0) {
@@ -718,15 +720,53 @@
                             mapView.map.getCanvas().style.cursor = '';
                         }
                     });
+
+
+
                     mapView.map.on('click', function(e) {
-                        console.log(e);
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
                             layers: ['project','project-enter','project-exit', 'project-unmatched']
                         }))[0];
-                        console.log(building);
-                        if (building === undefined) return;
-                        setState('previewBuilding', building);
+
+                        //If you click but not on a building, remove any tooltips
+                        if (building === undefined) {
+                            //Remove any existing popups
+                            if (document.querySelector('.mapboxgl-popup')) {
+                                d3.select('.mapboxgl-popup')
+                                    .remove();
+                            }
+                        } else {
+                        //If you click on a building, show that building in the side panel
+                            setState('previewBuilding', building);
+                            setState('subNav.right', 'buildings');
+                        }
+
+                        console.log("Developers note: the 'removeChild' error that appears next seems to be something wrong in MapboxGL, can't find source in our code. Safe to ignore?")
                     });
+
+                    //Callbacks for hovering over any of the four project layers
+                    mapView.map.on('mouseenter', 'project', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+                    mapView.map.on('mouseenter', 'project-enter', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+                    mapView.map.on('mouseenter', 'project-exit', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+                    mapView.map.on('mouseenter', 'project-unmatched', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+
+                    /* unwanted sideeffect: removes when mouseing over the popup. Better to let them clear by clicking.
+                    mapView.map.on('mouseout',function(e) {
+                        if (document.querySelector('.mapboxgl-popup')) {
+                                d3.select('.mapboxgl-popup')
+                                    .remove();
+                            }
+                    });
+                    */
+
                 } // end dataCallback
             } else {
                 console.log("ERROR data loaded === false");
@@ -734,9 +774,9 @@
 
         },
         
-        //TODO change this to respond to on hover and then go away
+        
         showPopup: function(msg, data) {
-            console.log(data);
+            //Removes any other existing popups, and reveals the one for the selected building
 
             if (document.querySelector('.mapboxgl-popup')) {
                 d3.select('.mapboxgl-popup')
@@ -751,13 +791,13 @@
                     'anchor': 'top-right'
                 })
                 .setLngLat(lngLat)
-                .setHTML('<a href="#">See more about ' + data.properties.proj_name + '</a>')
+                .setHTML('<div class="tooltip-field proj_name">' + data.properties.proj_name + '</div>' +
+                        '<div class="tooltip-field">' + data.properties.proj_addre + '</div>')
                 .addTo(mapView.map);
 
-            popup._container.querySelector('a').onclick = function(e) {
-                e.preventDefault();
-                setState('selectedBuilding', data);
-                setState('switchView', buildingView);
+            popup._container.onclick = function(e) {
+                setState('previewBuilding', data);
+                setState('subNav.right', 'buildings');
             };
 
         },
@@ -793,8 +833,21 @@
                 console.log("in fillContainer")
                 var current = mapView.showProjectPreview.current //alias for convenience
 
+                //Add the building name with a link to the project page
+                var field = getFieldFromMeta('project', 'proj_name') //field is the meta.json that has stuff like display_text
+                var value = project[0]['proj_name']
+
+                current.append('a')
+                    .classed('proj_name',true)
+                    .text(value)
+                    .on("click", function(e) {
+                        console.log("clicked")
+                        setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
+                        setState('switchView', buildingView);
+                    });
+
                 //Add fields that don't have the field name displayed
-                var headerFields =  ['proj_name','proj_addre','ward','neighborhood_cluster_desc']
+                var headerFields =  ['proj_addre','ward','neighborhood_cluster_desc']
                 for (var i = 0; i < headerFields.length; i++) {
                     var field = getFieldFromMeta('project',headerFields[i])
                     var value = project[0][headerFields[i]];

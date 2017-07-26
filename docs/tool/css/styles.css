@@ -290,6 +290,11 @@ Others are working correctly.
     font-weight:bold;
     font-size:1.1em;
 }
+#project-preview a.proj_name{
+    font-weight:bold;
+    font-size:1.2em;
+    cursor: pointer;
+}
 #projects-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
@@ -313,6 +318,21 @@ Others are working correctly.
     max-height: 100px;
     opacity: 1;
 }
+
+
+.mapboxgl-popup-content .tooltip-field {
+    font-weight: normal;
+    font-size:0.8em;
+}
+
+.mapboxgl-popup-content {
+    cursor: pointer;
+}
+.mapboxgl-popup-content .tooltip-field.proj_name {
+    font-weight: bold;
+    font-size:1em;
+}
+
 .sidebar-tab {
     width: 20px;
     height: 37px;
