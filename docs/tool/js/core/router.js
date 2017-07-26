@@ -66,7 +66,9 @@ var router = {
             }
             if ( dataChoice.component_type === 'categorical' ){
                 var values = eachArray[1].replace('_',' ').split('+');
-                setState('filterValues.' + dataChoice.source , values );
+                values.forEach(function(value){
+                    $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', value);
+                });
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here

@@ -294,6 +294,7 @@ var filterView = {
         console.log(component);
         filterView.filterControl.call(this, component);
         var c = this.component;
+
         var contentContainer = filterView.setupFilter(c);
 
         var uiSelector = contentContainer.append("select")
@@ -313,6 +314,7 @@ var filterView = {
         //Set callback for when user makes a change
         function makeSelectCallback(component){
             return function(){
+            console.log(component);
             var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
             var specific_state_code = 'filterValues.' + component.source
             setState(specific_state_code,selectedValues);
