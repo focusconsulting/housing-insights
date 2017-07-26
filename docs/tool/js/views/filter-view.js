@@ -24,6 +24,20 @@ var filterView = {
                 activeFilterIds.push(control)
             };
         }
+
+        var nullsShown = filterUtil.getNullsShown();
+        Object.keys(nullsShown).forEach(function(key){
+            var control = filterView.filterControls.find(function(obj){
+                return obj['component']['source'] === key;
+            })
+            // The default nullsShown value is 'true'. If it's different than the default,
+            // and the control hasn't already been added to activeFilterIds,
+            // add the data choice's associated control to the array that we're using
+            // to determine which filters to mark as altered.
+            if(nullsShown[key][0] === false && activeFilterIds.indexOf(control) === -1){
+                activeFilterIds.push(control);
+            }
+        });
         
         //Use d3 to bind the list of control objects to our html pillboxes
         var oldPills = d3.select('#clear-pillbox-holder')
@@ -61,8 +75,10 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
+                ['nullsShown', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
                 ['filterValues', filterView.addClearPillboxes],
+                ['nullsShown', filterView.addClearPillboxes],
                 ['dataLoaded.filterData', filterView.formatFilterDates],
                 ['filterDatesFormatted', filterView.buildFilterComponents],
                 ['subNavExpanded.right', filterView.expandSidebar],
@@ -172,9 +188,11 @@ var filterView = {
         this.element.setAttribute('name', 'showNulls-' + component.source);
 
         if(filterControl.hasOwnProperty('nullsShown') && filterControl.nullsShown){
-            this.element.checked = true;
+            this.element.checked = filterControl.nullsShown;
         }
         var txt = document.createTextNode("Unknown values included");
+
+        var toggleAction;
 
         this.toDOM = function(parentElement){
             parentElement.appendChild(this.container);
@@ -193,6 +211,14 @@ var filterView = {
                 callback();
             }
             this.element.addEventListener('change', toggleProperty);
+            toggleAction = toggleProperty;
+        }
+
+        this.triggerToggleWithoutClick = function(){
+            if(toggleAction){
+                toggleAction();
+                this.element.checked = filterControl.nullsShown;
+            }
         }
     },
     // filterTextInput takes as a parameter an array of keys.
@@ -467,11 +493,13 @@ var filterView = {
             slider.noUiSlider.reset();
             textInputs.reset();
             setState(specific_state_code, []);
+            toggle.triggerToggleWithoutClick();
+            setState('nullsShown.' + component.source, true);
         }
 
         this.isTouched = function(){
             var returnVals = textInputs.returnValues();
-            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum;
+            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
         }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
@@ -640,11 +668,13 @@ var filterView = {
             slider.noUiSlider.reset();
             dateInputs.reset();
             setState(specific_state_code, []);
+            toggle.triggerToggleWithoutClick();
+            setState('nullsShown.' + component.source, true);
         }
 
         this.isTouched = function(){
             var dateValues = getValuesAsDates();
-            return dateValues.min !== minDatum || dateValues.max !== maxDatum;
+            return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
         }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
@@ -967,22 +997,26 @@ var filterView = {
         //add/remove classes to the on-page elements that tell the users which filters are currently activated
         //e.g. the filter sidebar data name titles
         var filterValues = filterUtil.getFilterValues();
+        var nullsShown = filterUtil.getNullsShown();
         var filterStateIsActive = getState()['anyFilterActive'] && getState()['anyFilterActive'][0] == true;
-        var noRemainingFilters = ((Object.keys(filterValues)).filter(function(key){
-            // An 'empty' filterValues array has one element,
-            // the value of nullsShown.
-            return filterValues[key][0].length > 0;
-        })).length == 0;
 
-        for (key in filterValues){
-            // An 'empty' filterValues array has one element,
-            // the value of nullsShown.
-            var activated = filterValues[key][0].length == 0 ? false : true;
-            
+        var activeNullsShownKeys = Object.keys(nullsShown).filter(function(key){
+            return nullsShown[key][0] === false;
+        })
+
+        var activeFilterValuesKeys = Object.keys(filterValues).filter(function(key){
+            return filterValues[key][0].length > 0;
+        })
+
+        var allActiveKeys = activeFilterValuesKeys.concat(activeNullsShownKeys);
+
+        var noRemainingFilters = allActiveKeys.length === 0;
+
+        Object.keys(filterValues).forEach(function(key){
+            var activated = allActiveKeys.indexOf(key) !== -1
             d3.select('#filter-'+key)
                 .classed("filter-activated",activated);
-        
-        };
+        });
 
         if(noRemainingFilters && filterStateIsActive){
             setState('anyFilterActive', false);
