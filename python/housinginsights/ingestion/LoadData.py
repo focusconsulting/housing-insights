@@ -290,9 +290,102 @@ class LoadData(object):
             processed_data_ids.append(manifest_row['unique_data_id'])
 
         # build Zone Facts table
+        self._automap()
         self._create_zone_facts_table()
+        self._populate_calculated_project_fields()
 
         return processed_data_ids
+
+    def recalculate_database(self):
+        '''
+        An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but 
+        changes to the calculations are made, re-run the calculation routines. 
+        '''
+
+        self._automap()
+        self._create_zone_facts_table()
+        self._populate_calculated_project_fields()
+
+        return None
+
+    def _automap(self):
+        '''
+        Adding this in case it is useful for the update scripts for _populate_calculated_project_fields
+        Did not end up using it for REAC score, but leaving it in case it is useful for future. 
+        Mimics automap method used in api
+        '''
+        from sqlalchemy.ext.automap import automap_base
+
+        Base = automap_base()
+        Base.prepare(self.engine, reflect=True)
+
+        #self._BuildingPermits = Base.classes.building_permits
+        #self._Census = Base.classes.census
+        #self._CensusMarginOfError = Base.classes.census_margin_of_error
+        #self._Crime = Base.classes.crime
+        #self._DcTax = Base.classes.dc_tax
+        self._Project = Base.classes.project
+        self._ReacScore = Base.classes.reac_score
+        #self._RealProperty = Base.classes.real_property
+        #self._Subsidy = Base.classes.subsidy
+        #self._Topa = Base.classes.topa
+        #self._WmataDist = Base.classes.wmata_dist
+        #self._WmataInfo = Base.classes.wmata_info
+
+
+    def _populate_calculated_project_fields(self):
+        '''
+        Adds values for calculated fields to the project table
+        Assumes the columns have already been created due to meta.json
+        '''
+
+        conn = self.engine.connect()
+        
+
+        #########################
+        # Most recent REAC score
+        #########################
+
+        #HT on sql syntax for a bulk insert, for future reference. Also notes how to only replace if exists: https://stackoverflow.com/a/7918818
+        #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
+        stmt = '''
+            update project
+            set (most_recent_reac_score_num, most_recent_reac_score_date, most_recent_reac_score_id) = 
+            (select reac_score_num, last_score_date, reac_score_id from(
+                ---This creates a table of most recent scores
+                SELECT
+                    reac_score.id as reac_score_id
+                    , reac_score.nlihc_id as nlihc_id
+                    , reac_score.reac_score_num as reac_score_num
+                    , dates.last_score_date as last_score_date
+                FROM reac_score
+                INNER JOIN 
+                    (   SELECT 
+                            nlihc_id
+                            , MAX(reac_date) AS last_score_date
+                        FROM reac_score
+                        GROUP BY nlihc_id
+                    ) AS dates
+                ON reac_score.nlihc_id=dates.nlihc_id
+                AND reac_score.reac_date=dates.last_score_date
+                ) as most_recent_scores
+                
+             where project.nlihc_id = most_recent_scores.nlihc_id)
+             '''
+        conn.execute(stmt)
+
+
+        #########################
+        # Other calculated fields
+        #########################
+
+
+
+        #########################
+        # Teardown
+        #########################
+        conn.close()
+
 
     def _create_zone_facts_table(self):
         """
@@ -710,6 +803,10 @@ def main(passed_arguments):
         if not passed_arguments.update_only:
             database_choice = 'remote_database_master'
 
+    elif passed_arguments.database == 'codefordc':
+        database_choice = 'codefordc_remote_admin'
+        drop_tables = True
+
     # TODO: do we want to default to local or docker?
     elif passed_arguments.database == 'local':
         database_choice = 'local_database'
@@ -726,6 +823,8 @@ def main(passed_arguments):
 
     if passed_arguments.update_only:
         loader.update_database(passed_arguments.update_only)
+    elif passed_arguments.recalculate_only:
+        loader.recalculate_database()
     else:
         loader.rebuild()
 
@@ -750,12 +849,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("database", help='which database the data should be '
                                          'loaded to',
-                        choices=['docker', 'docker-local', 'local', 'remote'])
+                        choices=['docker', 'docker-local', 'local', 'remote', 'codefordc'])
     parser.add_argument('-s', '--sample', help='load with sample data',
                         action='store_true')
     parser.add_argument('--update-only', nargs='+',
                         help='only update tables with these unique_data_id '
                              'values')
+    parser.add_argument ('--recalculate-only',action='store_true',
+                    help="Don't update any data, just redo calculated fields")
 
     # handle passed arguments and options
     main(parser.parse_args())
