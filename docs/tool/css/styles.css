@@ -56,11 +56,13 @@ html, body {
     width: -webkit-calc(100% - 40px);
     width:    -moz-calc(100% - 40px);
     width:         calc(100% - 40px); 
+
+    padding: 10px 0px 10px 10px;
 }
-.sub-nav-heading h1 {
+.sub-nav-heading h1,
+.sub-nav-group h1 {
     font-size: 16px;
     font-weight: bold;
-    padding: 10px 0px 10px 10px;
 }
 
 /*Color code the text for projects that match the specified filters*/
@@ -75,12 +77,23 @@ html, body {
 
 .sub-nav-group {
     padding: 0px 10px 0px 10px;
+    overflow-y: auto;
+    
 }
+#project-preview-group{
+    flex: 0 1 auto;
+    height: 350px;
+}
+#projects-list-group{
+    flex: 1 1 auto; /*makes the list expand to fill rest of available space, while both preview and list shrink if needed*/
+    height: 350px; /*need some basis for flexbox to not oversquish the other container*/
+}
+
 .scroll-y {
     overflow-y: auto;
 }
 
-#buildings-list {
+#projects-list {
     margin-top: 0px;
 }
 
@@ -269,8 +282,20 @@ Others are working correctly.
     transition: max-width 0.2s linear;
 }
 
+#project-preview {
+    height:350px;
+}
 
-#buildings-list>div {
+#project-preview .preview-field.proj_name{
+    font-weight:bold;
+    font-size:1.1em;
+}
+#project-preview a.proj_name{
+    font-weight:bold;
+    font-size:1.2em;
+    cursor: pointer;
+}
+#projects-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
@@ -280,17 +305,37 @@ Others are working correctly.
     border-bottom: 1px solid gray;
 
 }
-#buildings-list>div .project-title {
+#projects-list>div .project-title {
     font-weight: bold;
     font-size: 1em;
 }
-#buildings-list>div:hover {
+
+#projects-list>div:hover {
     background-color: #ddebff;
 }
-#buildings-list>div.enter, #buildings-list>div.update {
+#projects-list>div.enter, #projects-list>div.update {
     padding: 5px 4px;
     max-height: 100px;
     opacity: 1;
+}
+
+
+.mapboxgl-popup-content .tooltip-field {
+    font-weight: normal;
+    font-size:0.8em;
+}
+
+.mapboxgl-popup-content {
+    cursor: pointer;
+}
+.mapboxgl-popup-content .tooltip-field.proj_name {
+    font-weight: bold;
+    font-size:1em;
+}
+
+.mapboxgl-popup-close-button {
+    font-size:2em !important;
+
 }
 .sidebar-tab {
     width: 20px;
@@ -402,7 +447,7 @@ a.active {
 /*Partially override semantic-ui styling, so some is inherited from there*/
 
 /*Mimics accordion title styling*/
-#filters .header {
+.sub-nav-container .header {
     font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
     font-size: 1.3em;
     background: #d69c93;
@@ -560,3 +605,17 @@ a.active {
     margin-top: 20px;
 }
 
+
+
+dl.inline dd {
+  display: inline;
+  margin: 0;
+}
+dl.inline dd:after{
+  display: block;
+  content: '';
+}
+dl.inline dt{
+  display: inline-block;
+  min-width: 75px;
+}

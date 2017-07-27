@@ -5,9 +5,9 @@
         <script src="js/external/offline-use/d3.min.js"></script>
 
         <style> /* set the CSS */
-        .bar-chart .values { fill:  rgba(234, 100, 2, 0.7); }
+        .chart .values { fill:  rgba(234, 100, 2, 0.7); }
 
-        .bar-chart .filler { fill: rgba(200,200,200,0.7); }
+        .chart .filler { fill: rgba(200,200,200,0.7); }
 
         </style>
     </head>
@@ -16,38 +16,31 @@
         <div class="demoChart"></div>
     <script src="js/charts/chart-prototype.js"></script>
     <script src="js/charts/template-inherited-chart.js"></script>
+    <script src="js/charts/donut-chart.js"></script>
     <script>
 
-        exampleData = [
-            {"value": 10, "group": "Ward 1"}, 
-            {"value": 112, "group": "Ward 2"}, 
-            {"value": 12,  "group": "Ward 3"}, 
-            {"value": 110, "group": "Ward 4"}, 
-            {"value": 157, "group": "Ward 5"}, 
-            {"value": 122, "group": "Ward 6"}, 
-            {"value": 75, "group": "Ward 7"}
-          ]
+        var data = [{"letter":"A","percent":0.8}];
 
-
-
-        var demoChart = new myCustomChart('.demoChart')
+        var demoChart = new DonutChart('.demoChart')
                     .width(400)
-                    .height(200)
-                    .margin({top: 20, right: 20, bottom: 20, left: 50})
-                    .data(exampleData)
-                    .field('value')
-                    .label('group')
+                    .height(400)
+                    .margin({top: 20, right: 20, bottom: 30, left: 20})
+                    .data(data)
+                    .field('percent')
+                    .label('letter')
+
+                    .duration(1000)
                     .create()
 
+
         setTimeout(function(){
-            var copiedData = JSON.parse(JSON.stringify(exampleData))
-            copiedData.pop(0)
-            copiedData.push({"value": 229, "group": "Ward 8"})
-
+            demoChart.width(200).height(200).resize()
+        },2000)
+        setTimeout(function(){
+            var copiedData = JSON.parse(JSON.stringify(data))
+            copiedData[0]['percent'] = 0.2
             demoChart.update(copiedData)
-
-
-        }, 2000)
+        }, 3000)
     </script>
     </body>
 

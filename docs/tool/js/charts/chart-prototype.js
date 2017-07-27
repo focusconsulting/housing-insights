@@ -53,7 +53,7 @@ ChartProto.prototype = {
         .attr('height', chart.height());
 
       chart.innerChart = this.svg.append('g')
-            .classed("bar-chart",true)
+            .classed("chart",true)
 
       //Call the chart-specific setup function for continued setup
       if (typeof chart._setup === "function"){ chart._setup(); }
