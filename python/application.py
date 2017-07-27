@@ -57,14 +57,14 @@ class CustomJSONEncoder(JSONEncoder):
             return list(iterable)
         return JSONEncoder.default(self, obj)
 
-#apply the custom encoder to the app. All jsonify calls will use this method
+# apply the custom encoder to the app. All jsonify calls will use this method
 application.json_encoder = CustomJSONEncoder
 
 
-#Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
+# Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
 CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
 
-#Allow us to test locally if desired
+# Allow us to test locally if desired
 if 'docker' in sys.argv:
     database_choice = 'docker_database'
 else:
@@ -75,11 +75,11 @@ with open('housinginsights/secrets.json') as f:
     connect_str = secrets[database_choice]['connect_str']
 
 
-#Should create a new connection each time a separate query is needed so that API can recover from bad queries
-#Engine is used to create connections in the below methods
+# Should create a new connection each time a separate query is needed so that API can recover from bad queries
+# Engine is used to create connections in the below methods
 engine = create_engine(connect_str)
 
-#Establish a list of tables so that we can validate queries before executing
+# Establish a list of tables so that we can validate queries before executing
 conn = engine.connect()
 q = "SELECT tablename FROM pg_catalog.pg_tables where schemaname = 'public'"
 proxy = conn.execute(q)
@@ -94,31 +94,32 @@ logging.info(tables)
 ##########################################
 
 #######################
-#Test endpoints - prove things work
+# Test endpoints - prove things work
 
-#Is the application running?
+# Is the application running?
 @application.route('/')
 def hello():
     return("The Housing Insights API Rules!")
 
-#Can we access the housinginsights package folder?
+# Can we access the housinginsights package folder?
 import housinginsights.tools.test_util as test_util
 @application.route('/housinginsights')
 def test_housinginsights_package():
     return(test_util.api_demo_variable)
 
 
-#Can we make blueprints with passed in arguments?
+ # an we make blueprints with passed in arguments?
 from api.demo_blueprint_constructor import construct_demo_blueprint
 created_blueprint = construct_demo_blueprint("This is my choice")
 application.register_blueprint(created_blueprint)
 
-#What urls are available (NOTE must have default params)?
+# What urls are available (NOTE must have default params)?
 from flask import url_for
 def has_no_empty_params(rule):
     defaults = rule.defaults if rule.defaults is not None else ()
     arguments = rule.arguments if rule.arguments is not None else ()
     return len(defaults) >= len(arguments)
+
 
 @application.route("/site-map")
 def site_map():
@@ -140,7 +141,7 @@ from api.project_view_blueprint import construct_project_view_blueprint
 from api.filter_blueprint import construct_filter_blueprint
 from api.zone_facts_blueprint import construct_zone_facts_blueprint
 
-#Generate blueprints w/ any needed arguments
+# Generate blueprints w/ any needed arguments
 sum_obs_blue = construct_summarize_observations('sum_obs',engine)
 project_view_blue = construct_project_view_blueprint('project_view',engine)
 filter_blue = construct_filter_blueprint('filter', engine)
@@ -180,9 +181,6 @@ def list_all(table):
     return jsonify(items=results)
 
 
-
-
-
 @application.route('/api/meta', methods=['GET'])
 def get_meta():
     '''
@@ -193,8 +191,6 @@ def get_meta():
     result = conn.execute("SELECT meta FROM meta")
     row = result.fetchone()
     return row[0]
-
-
 
 
 ##########################################
