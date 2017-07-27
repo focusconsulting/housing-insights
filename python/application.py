@@ -31,8 +31,10 @@ from flask.json import JSONEncoder
 import calendar
 from datetime import datetime, date
 import dateutil.parser as dateparser
-
-
+from flask_sqlalchemy import SQLAlchemy
+from flask_restless import APIManager
+from sqlalchemy import MetaData
+from sqlalchemy.ext.automap import automap_base
 
 
 #######################
@@ -40,6 +42,46 @@ import dateutil.parser as dateparser
 #######################
 logging.basicConfig(level=logging.DEBUG)
 application = Flask(__name__)
+
+
+#######################
+# Flask Restless Setup
+#######################
+with open('housinginsights/secrets.json') as f:
+    secrets = json.load(f)
+    connect_str = secrets['docker_database']['connect_str']
+
+application.config['SQLALCHEMY_DATABASE_URI'] = connect_str
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(application)
+Base = automap_base()
+
+metadata = MetaData(bind=db)
+
+Base.prepare(db.engine, reflect=True)
+
+db.session.commit()
+
+BuildingPermits = Base.classes.building_permits
+Census = Base.classes.census
+# This table is not importing correctly
+# CensusMarginOfError = Base.classes.census_margin_of_error
+Crime = Base.classes.crime
+DcTax = Base.classes.dc_tax
+Project = Base.classes.project
+ReacScore = Base.classes.reac_score
+RealProperty = Base.classes.real_property
+Subsidy = Base.classes.subsidy
+Topa = Base.classes.topa
+WmataDist = Base.classes.wmata_dist
+WmataInfo = Base.classes.wmata_info
+
+models = [BuildingPermits, Census, Crime, DcTax, Project, ReacScore,
+          RealProperty, Subsidy, Topa, WmataDist, WmataInfo
+          ]
+
+manager = APIManager(application, flask_sqlalchemy_db=db)
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -147,8 +189,15 @@ project_view_blue = construct_project_view_blueprint('project_view',engine)
 filter_blue = construct_filter_blueprint('filter', engine)
 zone_facts = construct_zone_facts_blueprint('zone_facts',engine)
 
-#Register all the blueprints
-for blueprint in [sum_obs_blue,project_view_blue, filter_blue, zone_facts]:
+# Register all the blueprints
+for blueprint in [sum_obs_blue, project_view_blue, filter_blue, zone_facts]:
+    application.register_blueprint(blueprint)
+
+# Register Flask Restless blueprints
+for model in models:
+    # https://github.com/jfinkels/flask-restless/pull/436
+    model.__tablename__ = model.__table__.name
+    blueprint = manager.create_api_blueprint(model, methods=['GET'])
     application.register_blueprint(blueprint)
 
 
