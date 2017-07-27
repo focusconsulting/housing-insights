@@ -247,6 +247,7 @@ class LoadData(object):
 
         # build Zone Facts table
         self._create_zone_facts_table()
+        self._populate_calculated_project_fields()
 
         return processed_data_ids
 
@@ -290,7 +291,7 @@ class LoadData(object):
             processed_data_ids.append(manifest_row['unique_data_id'])
 
         # build Zone Facts table
-        self._automap()
+        #self._automap() #not yet used - created for potential use by calculated fields
         self._create_zone_facts_table()
         self._populate_calculated_project_fields()
 
