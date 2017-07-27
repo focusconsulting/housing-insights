@@ -92,22 +92,35 @@ def get_multiple_api_sources(unique_data_ids = None,sample=False, output_type = 
     except Exception as e:
         logger.error("Failed to update manifest with error %s", e)
     logger.info("Completed get_multiple_api_sources.")
-    send_log_file_to_admin()
 
 def send_log_file_to_admin():
     "At conclusion of process, send log file by email to admin and delete or archive from server."
-    email = HIMailer()
-    email.recipients = ['speedyturkey@gmail.com']
-    email.cc_recipients = []
-    email.subject = "Housing Insights Test Subject"
-    email.message = "Housing Insights Tes Message"
-    email.attachments = [logger.logfile]
-    email.send_email()
-    os.unlink(logger.logfile)
+    if os.path.exists(logger.logfile):
+        level_counts = get_log_level_counts(logger.logfile)
+        error_count = level_counts.get('ERROR', 0)
+        email = HIMailer()
+        email.recipients.append('speedyturkey@gmail.com')
+        email.subject = "get_api_data logs, completed with {} errors".format(error_count)
+        email.message = "See attached for the logs from get_api_data.py. Log counts by level are as follows: {}".format(level_counts)
+        email.attachments = [logger.logfile]
+        email.send_email()
+        os.unlink(logger.logfile)
+
+def get_log_level_counts(logfile):
+    with open(logfile) as log:
+        logdata = log.readlines()
+        level_counts = {}
+        for record in logdata:
+            level = record.split(' ')[0]
+            if level_counts.get(level):
+                level_counts[level] += 1
+            else:
+                level_counts[level] = 1
+    return level_counts
 
 if __name__ == '__main__':
-
-    logger.info("get api data")
+    # test_send()
+    logger.info("running get api data")
 
     debug = True            # Errors are raised when they occur instead of only logged.
     #Set up the appropriate settings for what you want to download
@@ -124,7 +137,8 @@ if __name__ == '__main__':
     output_type = 'csv'     # Other option is stdout which just prints to console
     db = 'docker_database'  # Only used by connections that need to read from the database to get their job done (example: wmata)
     module_list = ["census"] # ["opendata","DCHousing", "census"] #["wmata_distcalc"]
-
-    get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
-
+    try:
+        get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
+    except Exception as e:
+        logger.error("get_api_data failed with error: %s", e)
     send_log_file_to_admin()

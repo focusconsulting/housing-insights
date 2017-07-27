@@ -15,9 +15,11 @@ COMMASPACE = ', '
 
 
 class HIMailer:
-    def __init__(self, debug_mode=False, **kwargs):
+    def __init__(self, recipients=[], cc_recipients=[], debug_mode=False, **kwargs):
         self.properties = kwargs
         self.debug_mode = debug_mode
+        self.recipients = recipients
+        self.cc_recipients = cc_recipients
         self.debug_recipient = secrets['email']['debug_recipient']
         self.send_from = secrets['email']['username']
         self.username = secrets['email']['username']
@@ -76,6 +78,7 @@ class HIMailer:
                            all_recipients,
                            composed)
                 s.close()
+                print("Email successfully sent.")
         except smtplib.SMTPConnectError as err:
             print("Unable to connect to the SMTP server to send email: {}".format(err))
             raise
