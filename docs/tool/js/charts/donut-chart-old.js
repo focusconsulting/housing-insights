@@ -60,7 +60,7 @@ var DonutChartOldExtension = {
   },
   updateSubscriber: function(msg,data){
     resultsView.charts.forEach(function(chart){
-      DonutChart.prototype.update.call(chart,data);
+      DonutChartOld.prototype.update.call(chart,data);
     })
   /*  var chart = this;
     chart.foreground

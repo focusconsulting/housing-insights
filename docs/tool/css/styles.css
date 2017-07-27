@@ -333,6 +333,10 @@ Others are working correctly.
     font-size:1em;
 }
 
+.mapboxgl-popup-close-button {
+    font-size:2em !important;
+
+}
 .sidebar-tab {
     width: 20px;
     height: 37px;

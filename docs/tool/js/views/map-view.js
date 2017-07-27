@@ -730,11 +730,7 @@
 
                         //If you click but not on a building, remove any tooltips
                         if (building === undefined) {
-                            //Remove any existing popups
-                            if (document.querySelector('.mapboxgl-popup')) {
-                                d3.select('.mapboxgl-popup')
-                                    .remove();
-                            }
+                            mapView.removeAllPopups();
                         } else {
                         //If you click on a building, show that building in the side panel
                             setState('previewBuilding', building);
@@ -756,16 +752,6 @@
                         setState('hoverBuilding', e.features[0])
                     });
 
-
-                    /* unwanted sideeffect: removes when mouseing over the popup. Better to let them clear by clicking.
-                    mapView.map.on('mouseout',function(e) {
-                        if (document.querySelector('.mapboxgl-popup')) {
-                                d3.select('.mapboxgl-popup')
-                                    .remove();
-                            }
-                    });
-                    */
-
                 } // end dataCallback
             } else {
                 console.log("ERROR data loaded === false");
@@ -773,14 +759,21 @@
 
         },
         
-        
+        removeAllPopups: function(){
+            for (var i = 0; i < mapView.popups.length; i++) {
+                if (mapView.popups[i].isOpen()) {
+                    mapView.popups[i].remove()
+                }
+            }
+            mapView.popups=[];
+        },
+
+        popups: [], //initialize empty
+
         showPopup: function(msg, data) {
             //Removes any other existing popups, and reveals the one for the selected building
 
-            if (document.querySelector('.mapboxgl-popup')) {
-                d3.select('.mapboxgl-popup')
-                    .remove();
-            }
+            mapView.removeAllPopups();
 
             var lngLat = {
                 lng: data.properties.longitude,
@@ -799,7 +792,15 @@
                 setState('previewBuilding', data);
                 setState('subNav.right', 'buildings');
             };
+
+            mapView.popups.push(popup);
             
+            //Close popup if it's open too long
+            setTimeout(function(){
+                if (popup.isOpen()) {
+                    popup.remove()
+                }
+            },5000);
 
         },
 
