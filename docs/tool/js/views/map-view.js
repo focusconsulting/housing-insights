@@ -702,7 +702,7 @@
                     });
                    
 
-                   //TODO with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
+                   //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
                     mapView.map.on('mousemove', function(e) {
                         //get the province feature underneath the mouse
                         var features = mapView.map.queryRenderedFeatures(e.point, {
@@ -721,7 +721,7 @@
                         }
                     });
 
-
+                   
 
                     mapView.map.on('click', function(e) {
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
@@ -740,8 +740,6 @@
                             setState('previewBuilding', building);
                             setState('subNav.right', 'buildings');
                         }
-
-                        console.log("Developers note: the 'removeChild' error that appears next seems to be something wrong in MapboxGL, can't find source in our code. Safe to ignore?")
                     });
 
                     //Callbacks for hovering over any of the four project layers
@@ -757,6 +755,7 @@
                     mapView.map.on('mouseenter', 'project-unmatched', function(e) {
                         setState('hoverBuilding', e.features[0])
                     });
+
 
                     /* unwanted sideeffect: removes when mouseing over the popup. Better to let them clear by clicking.
                     mapView.map.on('mouseout',function(e) {
@@ -788,7 +787,8 @@
                 lat: data.properties.latitude,
             }
             var popup = new mapboxgl.Popup({
-                    'anchor': 'top-right'
+                    'anchor': 'top-right',
+                    'closeOnClick':false    //We are manually handling the click event to remove this either on hovering elsewhere or click
                 })
                 .setLngLat(lngLat)
                 .setHTML('<div class="tooltip-field proj_name">' + data.properties.proj_name + '</div>' +
@@ -799,6 +799,7 @@
                 setState('previewBuilding', data);
                 setState('subNav.right', 'buildings');
             };
+            
 
         },
 
