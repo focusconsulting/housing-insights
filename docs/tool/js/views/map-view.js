@@ -800,7 +800,7 @@
                 if (popup.isOpen()) {
                     popup.remove()
                 }
-            },5000);
+            },3000);
 
         },
 
