@@ -135,7 +135,7 @@ def construct_project_view_blueprint(name, engine):
             routes = [x[0] for x in proxy.fetchall()]
             conn.close()
 
-            #Parse the : separated items
+            #Parse the : separated objects
             routes = ':'.join(routes)
             routes = routes.split(':')
             unique = list(set(routes))
@@ -199,7 +199,7 @@ def construct_project_view_blueprint(name, engine):
         tot_permits = len(good_results)
 
         output = {
-            'items': good_results
+            'objects': good_results
             , 'tot_permits':tot_permits
             , 'distance': dist
         }
@@ -260,7 +260,7 @@ def construct_project_view_blueprint(name, engine):
         tot_buildings = len(good_results)
 
         output = {
-            'items': good_results,
+            'objects': good_results,
             'tot_units': tot_units,
             'tot_buildings': tot_buildings,
             'distance': dist
@@ -316,7 +316,7 @@ def construct_project_view_blueprint(name, engine):
         proxy = conn.execute(q)
         results = [dict(x) for x in proxy.fetchall()]
         conn.close()
-        output = {'items': results}
+        output = {'objects': results}
         return jsonify(output)
 
     return blueprint

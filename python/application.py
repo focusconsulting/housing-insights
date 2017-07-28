@@ -197,7 +197,7 @@ for blueprint in [sum_obs_blue, project_view_blue, filter_blue, zone_facts]:
 for model in models:
     # https://github.com/jfinkels/flask-restless/pull/436
     model.__tablename__ = model.__table__.name
-    blueprint = manager.create_api_blueprint(model, methods=['GET'])
+    blueprint = manager.create_api_blueprint(model, url_prefix = '/api/raw', results_per_page=100, max_results_per_page=10000, methods=['GET'])
     application.register_blueprint(blueprint)
 
 
@@ -227,7 +227,7 @@ def list_all(table):
     #print(results)
     conn.close()
 
-    return jsonify(items=results)
+    return jsonify(objects=results)
 
 
 @application.route('/api/meta', methods=['GET'])

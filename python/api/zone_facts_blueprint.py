@@ -5,7 +5,7 @@ from flask import jsonify
 import logging
 
 
-from api.utils import items_divide
+from api.utils import objects_divide
 
 def construct_zone_facts_blueprint(name, engine):
 
@@ -59,7 +59,7 @@ def construct_zone_facts_blueprint(name, engine):
                 denominator = get_weighted_census_results(grouping, 'population')
                 numerator = get_weighted_census_results(grouping, 'population_single_mother')
 
-            api_results = items_divide(numerator,denominator)
+            api_results = objects_divide(numerator,denominator)
             #api_results = scale(api_results)
             api_results['data_id'] = 'poverty_rate'
 
@@ -72,7 +72,7 @@ def construct_zone_facts_blueprint(name, engine):
     def get_weighted_census_results(grouping, field):
         '''
         queries the census table for the relevant field and returns the results as a weighted count
-        returns the standard 'items' format
+        returns the standard 'objects' format
 
         Currently only implemented for the 'counts' weighting factor not for the proportion version
         '''
@@ -82,13 +82,13 @@ def construct_zone_facts_blueprint(name, engine):
         census_results = [dict(x) for x in proxy.fetchall()]
 
         #Transform the results
-        items = []  #For storing results as we go
+        objects = []  #For storing results as we go
 
         if grouping == 'census_tract':
             #No weighting required, data already in proper format
             for r in census_results:
                 output = dict({'group':r['census_tract'], 'count':r[field]})
-                items.append(output)
+                objects.append(output)
 
         elif grouping in ['ward', 'neighborhood_cluster']:
             proxy = conn.execute("SELECT DISTINCT {grouping} FROM census_tract_to_{grouping}".format(grouping=grouping))
@@ -103,7 +103,7 @@ def construct_zone_facts_blueprint(name, engine):
                 for result in results:
                     tract = result['census_tract']
                     factor = result['population_weight_counts']
-                    matching_data = next((item for item in census_results if item["census_tract"] == tract),{field:None})
+                    matching_data = next((obj for obj in census_results if obj["census_tract"] == tract),{field:None})
                     if matching_data[field] == None:
                         logging.warning("Missing data for census tract when calculating weightings: {}".format(tract))
                         matching_data[field] = 0
@@ -112,13 +112,13 @@ def construct_zone_facts_blueprint(name, engine):
                     count += (value * factor)
 
                 output = dict({'group':group, 'count':round(count,0)})
-                items.append(output)
+                objects.append(output)
         else:
             #Invalid grouping
-            items = None
+            objects = None
 
         conn.close()
-        return {'items': items, 'grouping':grouping, 'data_id':field}
+        return {'objects': objects, 'grouping':grouping, 'data_id':field}
 
 
 
