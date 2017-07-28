@@ -231,6 +231,7 @@ def list_all(table):
 
 
 @application.route('/api/meta', methods=['GET'])
+@cross_origin()
 def get_meta():
     '''
     Outputs the meta.json to the front end

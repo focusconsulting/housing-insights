@@ -1,6 +1,7 @@
 
 from flask import Blueprint
 from flask import jsonify
+from flask_cors import cross_origin
 
 import logging
 
@@ -27,6 +28,7 @@ def construct_zone_facts_blueprint(name, engine):
 
     # this method is deprecated in favor of the zone facts table. Should remove once that is finalized
     @blueprint.route('/census/<data_id>/<grouping>', methods=['GET'])
+    @cross_origin()
     def census_with_weighting(data_id,grouping):
         '''
         API Endpoint to get data from our census table. data_id can either be a column

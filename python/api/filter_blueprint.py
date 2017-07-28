@@ -4,12 +4,14 @@ from flask import jsonify
 
 import logging
 
+from flask_cors import cross_origin
 
 def construct_filter_blueprint(name, engine):
 
     blueprint = Blueprint(name, __name__, url_prefix='/api')
 
     @blueprint.route('/filter/', methods=['GET'])
+    @cross_origin()
     def filter_data():
         q = """
             select p.nlihc_id

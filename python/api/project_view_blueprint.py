@@ -4,6 +4,7 @@ from flask import jsonify, request
 import math
 
 import logging
+from flask_cors import cross_origin
 
 
 def construct_project_view_blueprint(name, engine):
@@ -11,6 +12,7 @@ def construct_project_view_blueprint(name, engine):
     blueprint = Blueprint(name, __name__, url_prefix='/api')
 
     @blueprint.route('/wmata/<nlihc_id>',  methods=['GET'])
+    @cross_origin()
     def nearby_transit(nlihc_id):
         '''
         Returns the nearby bus and metro routes and stops.
@@ -143,6 +145,7 @@ def construct_project_view_blueprint(name, engine):
 
 
     @blueprint.route('/building_permits/<dist>', methods=['GET'])
+    @cross_origin()
     def nearby_building_permits(dist):
 
         conn = engine.connect()
@@ -212,6 +215,7 @@ def construct_project_view_blueprint(name, engine):
 
 
     @blueprint.route('/projects/<dist>', methods=['GET'])
+    @cross_origin()
     def nearby_projects(dist):
 
         conn = engine.connect()
@@ -306,6 +310,7 @@ def construct_project_view_blueprint(name, engine):
         return (latitude_tolerance, longitude_tolerance)
 
     @blueprint.route('/project/<nlihc_id>/subsidies/', methods=['GET'])
+    @cross_origin()
     def project_subsidies(nlihc_id):
         q = """
             SELECT * FROM subsidy

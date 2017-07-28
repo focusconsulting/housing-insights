@@ -14,6 +14,7 @@ them registered in case they are needed.
 
 
 from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
 
 import dateutil.parser as dateparser
 
@@ -31,6 +32,7 @@ def construct_summarize_observations(name, engine):
     blueprint = Blueprint(name, __name__, url_prefix='/api')
 
     @blueprint.route('/<method>/<table_name>/<filter_name>/<months>/<grouping>', methods=['GET'])
+    @cross_origin()
     def summarize_observations(method,table_name,filter_name,months,grouping):
         '''
         This endpoint takes a table that has each record as list of observations 
