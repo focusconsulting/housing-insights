@@ -47,9 +47,19 @@ application = Flask(__name__)
 #######################
 # Flask Restless Setup
 #######################
+# Allow us to test locally if desired
+if 'docker' in sys.argv:
+    database_choice = 'docker_database'
+elif 'remote' in sys.argv:
+    database_choice = 'remote_database'
+else:
+    database_choice = 'codefordc_remote_admin'
+
 with open('housinginsights/secrets.json') as f:
     secrets = json.load(f)
-    connect_str = secrets['docker_database']['connect_str']
+    connect_str = secrets[database_choice]['connect_str']
+
+logging.info("Connecting to database {}".format(database_choice))
 
 application.config['SQLALCHEMY_DATABASE_URI'] = connect_str
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -105,16 +115,6 @@ application.json_encoder = CustomJSONEncoder
 
 # Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
 CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
-
-# Allow us to test locally if desired
-if 'docker' in sys.argv:
-    database_choice = 'docker_database'
-else:
-    database_choice = 'remote_database'
-
-with open('housinginsights/secrets.json') as f:
-    secrets = json.load(f)
-    connect_str = secrets[database_choice]['connect_str']
 
 
 # Should create a new connection each time a separate query is needed so that API can recover from bad queries
