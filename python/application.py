@@ -182,15 +182,17 @@ from api.summarize_observations import construct_summarize_observations
 from api.project_view_blueprint import construct_project_view_blueprint
 from api.filter_blueprint import construct_filter_blueprint
 from api.zone_facts_blueprint import construct_zone_facts_blueprint
+from api.project_extended_constructor import construct_project_extended_blueprint
 
 # Generate blueprints w/ any needed arguments
 sum_obs_blue = construct_summarize_observations('sum_obs',engine)
 project_view_blue = construct_project_view_blueprint('project_view',engine)
 filter_blue = construct_filter_blueprint('filter', engine)
 zone_facts = construct_zone_facts_blueprint('zone_facts',engine)
+project_extended = construct_project_extended_blueprint('project_extended',engine)
 
 # Register all the blueprints
-for blueprint in [sum_obs_blue, project_view_blue, filter_blue, zone_facts]:
+for blueprint in [sum_obs_blue, project_view_blue, filter_blue, zone_facts, project_extended]:
     application.register_blueprint(blueprint)
 
 # Register Flask Restless blueprints

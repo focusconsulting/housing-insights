@@ -1,6 +1,7 @@
 
 from flask import Blueprint
 from flask import jsonify
+from api.utils import get_zone_facts_select_columns
 
 import logging
 
@@ -14,22 +15,13 @@ def construct_filter_blueprint(name, engine):
     @cross_origin()
     def filter_data():
 
-        conn = engine.connect()
-        proxy = conn.execute("select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='zone_facts'")
-        zcolumns = [x[0] for x in proxy.fetchall()]
-
-        ward_selects = ''
-        cluster_selects = ''
-        tract_selects = ''
-
-        for c in zcolumns:
-            ward_selects += (',z1.' + c + ' AS ' + c + '_ward')
-            cluster_selects += (',z2.' + c + ' AS ' + c + '_neighborhood_cluster')
-            tract_selects += (',z3.' + c + ' AS ' + c + '_census_tract')
+        ward_selects, cluster_selects, tract_selects = get_zone_facts_select_columns(engine)
 
         q = """
                 select
                 p.nlihc_id
+                , p.proj_addre
+                , p.proj_name
                 , p.proj_units_tot
                 , p.proj_units_assist_max
                 , cast(p.proj_units_assist_max / p.proj_units_tot as decimal(3,2)) as percent_affordable_housing --TODO make this calculated field in projects table
@@ -65,7 +57,7 @@ def construct_filter_blueprint(name, engine):
                 left join subsidy as s on s.nlihc_id = p.nlihc_id
             """
 
-        
+        conn = engine.connect()
         proxy = conn.execute(q)
         results = [dict(x) for x in proxy.fetchall()]
         conn.close()
