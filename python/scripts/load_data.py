@@ -35,7 +35,7 @@ description = ('Loads our flat file data into the database of choice. You '
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument("database", help='which database the data should be '
                                      'loaded to',
-                    choices=['docker', 'docker_local', 'local', 'remote'])
+                    choices=['docker', 'docker_local', 'local', 'remote', 'codefordc'])
 parser.add_argument('-s', '--sample', help='load with sample data',
                     action='store_true')
 parser.add_argument('--update-only', nargs='+',
@@ -44,6 +44,8 @@ parser.add_argument('--update-only', nargs='+',
 parser.add_argument('--manual', help='Ignore all other arguments and use'
                     'what is hard coded here, for debugging/testing purposes',
                     action='store_true')
+parser.add_argument ('--recalculate-only',action='store_true',
+                    help="Don't update any data, just redo calculated fields")
 
 arguments = parser.parse_args()
 

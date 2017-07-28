@@ -2390,6 +2390,30 @@
         "type": "text"
       },
       {
+        "display_name": "Most Recent REAC Score",
+        "display_text": "From the REAC table, if there is an inspection corresponding to this project displays the most recent score.",
+        "required_in_source": false,
+        "source_name": "most_recent_reac_score_num",
+        "sql_name": "most_recent_reac_score_num",
+        "type": "integer"
+      }, 
+      {
+        "display_name": "Most Recent REAC Score Date",
+        "display_text": "From the matching record in the reac_score table",
+        "required_in_source": false,
+        "source_name": "most_recent_reac_score_date",
+        "sql_name": "most_recent_reac_score_date",
+        "type": "date"
+      }, 
+      {
+        "display_name": "Most Recent REAC Score ID",
+        "display_text": "ID in the reac_score to uniquely identify the record corresponding to the Most Recent REAC Score",
+        "required_in_source": false,
+        "source_name": "most_recent_reac_score_id",
+        "sql_name": "most_recent_reac_score_id",
+        "type": "text"
+      }, 
+      {
         "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,

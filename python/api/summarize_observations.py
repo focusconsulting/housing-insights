@@ -4,6 +4,12 @@ contains unique observations as each row of data. This includes the crime
 table, building permits table, etc, where each row represents one crime incident
 and the endpoint counts the number of instances that match the users
 criteria per the url params. 
+
+
+Note, this approach will not typically be needed as this method is being replaced by use
+of the ZoneFacts table, which calculates these stats on data load. These endpoints, however
+can calculate custom versions of this data (i.e. changing start/enddates etc), so keeping 
+them registered in case they are needed. 
 '''
 
 
@@ -13,6 +19,7 @@ import dateutil.parser as dateparser
 
 from api.utils import items_divide
 
+
 def construct_summarize_observations(name, engine):
     '''
     This function returns a blueprint instance that was created using the 
@@ -21,9 +28,9 @@ def construct_summarize_observations(name, engine):
     application.py, and make it accessible to all the endpoints that need it. 
     '''
 
-    sum_opp_blue = Blueprint(name, __name__, url_prefix='/api')
+    blueprint = Blueprint(name, __name__, url_prefix='/api')
 
-    @sum_opp_blue.route('/<method>/<table_name>/<filter_name>/<months>/<grouping>', methods=['GET'])
+    @blueprint.route('/<method>/<table_name>/<filter_name>/<months>/<grouping>', methods=['GET'])
     def summarize_observations(method,table_name,filter_name,months,grouping):
         '''
         This endpoint takes a table that has each record as list of observations 
@@ -195,4 +202,4 @@ def construct_summarize_observations(name, engine):
             #conn.close()
             return {'items': None, 'notes':"Query failed: {}".format(e), 'grouping':grouping, 'data_id':table_name}
 
-    return sum_opp_blue
+    return blueprint
