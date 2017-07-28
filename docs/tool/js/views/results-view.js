@@ -14,7 +14,7 @@ var resultsView = {
 
         instances.forEach(function(instance, i){
             console.log("trying to add donuts")
-            resultsView.charts[i] = new DonutChart({
+            resultsView.charts[i] = new DonutChartOld({
                 dataRequest: {
                     name: 'raw_project',
                     url: model.URLS.project
@@ -35,7 +35,7 @@ var resultsView = {
         });
 
         setSubs([
-          ['filteredData', DonutChart.prototype.updateSubscriber], //TODO - refactor donuts to use new chart proto, and then the update function should subscribe to 'filteredProjectsAvailable' instead, which put data on resultsView.filteredProjects
+          ['filteredData', DonutChartOld.prototype.updateSubscriber], //TODO - refactor donuts to use new chart proto, and then the update function should subscribe to 'filteredProjectsAvailable' instead, which put data on resultsView.filteredProjects
           ['filteredData',resultsView.updateFilteredProjects],
           ['filteredProjectsAvailable', resultsView.updateFilteredStats],
           ['filteredStatsAvailable',resultsView.makeBarChart]

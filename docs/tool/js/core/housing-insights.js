@@ -17,7 +17,7 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
         }
         controller.getData(metaDataRequest);
     },
-    // Here's where we keep hardcoded URLs. The aim is to make this as short as possible.
+    // Here's where we keep hardcoded URLs.
     //NOTE raw data sources have their urls included in the metaData
     URLS: {
       geoJSONPolygonsBase: "/tool/data/",
@@ -304,6 +304,17 @@ Math.roundTo = function(start, tensExample){
     return Math.round(numberToRound) * tensExample;
 }
 
+var getFieldFromMeta = function(table,sql_name){
+    var meta = model.dataCollection['metaData'] //todo this assumes the data is available already to avoid callback - relies on calling function to request meta first
+    var tableFields = meta[table]['fields']
+
+    for (var i = 0; i < tableFields.length; i++) {
+        if (tableFields[i]['sql_name'] == sql_name){
+            return tableFields[i]
+        }
+    };
+    return null
+}
  // HELPER get parameter by name
  var getParameterByName = function(name, url) { // HT http://stackoverflow.com/a/901144/5701184
       if (!url) {
