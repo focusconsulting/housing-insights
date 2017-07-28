@@ -2319,6 +2319,63 @@ class MyTestCase(unittest.TestCase):
         print(result)
         self.assertTrue(result)
 
+    def test__count_observations(self):
+        grouping = 'census_tract'
+        date_fields = {'building_permits': 'issue_date',
+                       'crime': 'report_date'}
+        date_range_sql = (
+            "({start_date}::TIMESTAMP - INTERVAL '{months} months')"
+            " AND {start_date}::TIMESTAMP"
+            ).format(start_date='now()', months=12)
+        table_name = 'building_permits'
+
+        # test case for all census_tract building permits
+        additional_wheres = ' '
+        result = self.loader._count_observations(table_name, grouping,
+                                                 date_field=date_fields[
+                                                     table_name],
+                                                 date_range_sql=date_range_sql,
+                                                 additional_wheres=
+                                                 additional_wheres)
+        self.assertIsNotNone(result['items'], 'should return db result not '
+                                              'None')
+
+        # test case for census_tract construction building permits
+        additional_wheres = " AND permit_type_name = 'CONSTRUCTION' "
+        result = self.loader._count_observations(table_name, grouping,
+                                                 date_field=date_fields[
+                                                     table_name],
+                                                 date_range_sql=date_range_sql,
+                                                 additional_wheres=
+                                                 additional_wheres)
+        self.assertIsNotNone(result['items'], 'should return db result not '
+                                              'None')
+
+        # test case for census_tract violent crime
+        table_name = 'crime'
+        additional_wheres = " AND OFFENSE IN ('ROBBERY','HOMICIDE','ASSAULT " \
+                            "W/DANGEROUS WEAPON','SEX ABUSE')"
+        result = self.loader._count_observations(table_name, grouping,
+                                                 date_field=date_fields[
+                                                     table_name],
+                                                 date_range_sql=date_range_sql,
+                                                 additional_wheres=
+                                                 additional_wheres)
+        self.assertIsNotNone(result['items'], 'should return db result not '
+                                              'None')
+
+        # test case for census_tract non-violent crime
+        additional_wheres = " AND OFFENSE NOT IN ('ROBBERY','HOMICIDE'," \
+                            "'ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
+        result = self.loader._count_observations(table_name, grouping,
+                                                 date_field=date_fields[
+                                                     table_name],
+                                                 date_range_sql=date_range_sql,
+                                                 additional_wheres=
+                                                 additional_wheres)
+        self.assertIsNotNone(result['items'], 'should return db result not '
+                                              'None')
+
 
 if __name__ == '__main__':
     unittest.main()

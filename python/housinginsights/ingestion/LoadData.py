@@ -358,7 +358,7 @@ class LoadData(object):
         ]
 
         # dict with key/list pairs for calling summarize_observations method
-        summarize_field_args = {  # [method, table_name, filter_name]
+        summarize_obs_field_args = {  # [method, table_name, filter_name]
             'crime_count': ['count', 'crime', 'all'],
             'violent_crime_count': ['count', 'crime', 'violent'],
             'non_violent_crime_count': ['count', 'crime', 'nonviolent'],
@@ -385,8 +385,8 @@ class LoadData(object):
                 field_values[field] = result['items']
 
             # get field value from building permits and crime table
-            for field in summarize_field_args:
-                method, table_name, filter_name = summarize_field_args[
+            for field in summarize_obs_field_args:
+                method, table_name, filter_name = summarize_obs_field_args[
                     field]
                 result = self._summarize_observations(method, table_name,
                                                       filter_name,
@@ -562,9 +562,6 @@ class LoadData(object):
             if grouping == 'census_tract':
                 # No weighting required, data already in proper format
                 for r in census_results:
-                    # output = dict({'group': r['census_tract'],
-                    #                'value': r[field]})
-                    # items.append(output)
                     items[r['census_tract']] = r[field]
 
             elif grouping in ['ward', 'neighborhood_cluster']:
@@ -734,6 +731,13 @@ class LoadData(object):
 
         try:
             with self.engine.connect() as conn:
+                override_group = False  # flag tracking if group is overridden
+
+                # prepare to handle census_tract not in building_permits table
+                if table_name == 'building_permits' and grouping == \
+                        'census_tract':
+                    override_group = True
+                    grouping = 'ward'
 
                 q = """
                     SELECT COALESCE({grouping},{fallback}) --'Unknown'
@@ -754,10 +758,30 @@ class LoadData(object):
                 #transform the results.
                 #TODO should come up with a better generic way to do this using column
                   #names for any arbitrary sql table results.
-                formatted = dict()
+                formatted = dict()  # TODO: use dict comprehension
                 for x in results:
                     # dictionary = dict({'group': x[0], 'value': x[1]})
                     formatted[x[0]] = x[1]
+
+                # handle census_tract not in building_permit table scenario
+                if override_group:
+                    # get census_tract to ward count factor
+                    q = """
+                        SELECT census_tract, ward, population_weight_counts
+                        FROM census_tract_to_ward
+                        """
+                    proxy = conn.execute(q)
+                    results = proxy.fetchall()
+
+                    # use factoring to get census_tract related counts
+                    items = dict()
+
+                    for row in results:
+                        tract, ward, factor = row
+                        count = items.get(tract, 0)
+                        items[tract] = count + formatted[ward] * factor
+
+                    formatted = items
 
             return {'items': formatted, 'grouping': grouping,
                     'data_id': table_name}
