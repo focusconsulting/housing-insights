@@ -25,6 +25,7 @@ import json
 
 from sqlalchemy import Table, Column, Integer, String, MetaData, Numeric
 from datetime import datetime
+from uuid import uuid4
 import dateutil.parser as dateparser
 
 # Needed to make relative package imports when running this file as a script
@@ -101,14 +102,14 @@ class LoadData(object):
         database_choice and then rebuilding.
         """
         logging.info("Dropping all tables from the database!")
-        db_conn = self.engine.connect()
-        query_result = list()
-        query_result.append(db_conn.execute(
-            "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
+        with self.engine.connect() as db_conn:
+            query_result = list()
+            query_result.append(db_conn.execute(
+                "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
 
-        if self.database_choice == 'remote_database' or self.database_choice \
-                == 'remote_database_master':
-            query_result.append(db_conn.execute('''
+            if self.database_choice == 'remote_database' or self.database_choice \
+                    == 'remote_database_master':
+                query_result.append(db_conn.execute('''
             GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
             GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
             GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;
@@ -129,9 +130,9 @@ class LoadData(object):
         sqlalchemy_metadata.create_all(self.engine)
         json_string = json.dumps(self.meta)
         ins = meta_table.insert().values(meta=json_string)
-        conn = self.engine.connect()
-        conn.execute("DELETE FROM meta;")
-        conn.execute(ins)
+        with self.engine.connect() as conn:
+            conn.execute("DELETE FROM meta;")
+            conn.execute(ins)
 
     def _remove_existing_data(self, uid, manifest_row):
         """
@@ -334,7 +335,6 @@ class LoadData(object):
         #self._WmataDist = Base.classes.wmata_dist
         #self._WmataInfo = Base.classes.wmata_info
 
-
     def _populate_calculated_project_fields(self):
         '''
         Adds values for calculated fields to the project table
@@ -388,16 +388,12 @@ class LoadData(object):
         #########################
         conn.close()
 
-
     def _create_zone_facts_table(self):
         """
         Creates the zone_facts table which is used as a master table for API
         endpoints. The purpose is to avoid recalculating fields adhoc and
         performing client-side reconfiguration of data into display fields.
         This is all now done in the backend whenever new data is loaded.
-
-        :return: a immutable dict that contains the tables structure of the
-        table and sqlAlchemy metadata object used.
         """
         # drop zone_facts table if already in db
         if 'zone_facts' in self.engine.table_names():
@@ -405,35 +401,13 @@ class LoadData(object):
                 conn.execute('DROP TABLE zone_facts;')
 
         # create empty zone_facts table
-        metadata = MetaData(bind=self.engine)
-        zone_facts = Table('zone_facts', metadata,
-                           Column('zone_type', String),
-                           Column('zone', String, primary_key=True),
-                           Column('poverty_rate', Numeric),
-                           Column('fraction_black', Numeric),
-                           Column('income_per_capita', Numeric),
-                           Column('labor_participation', Numeric),
-                           Column('fraction_foreign', Numeric),
-                           Column('fraction_single_mothers', Numeric),
-                           Column('acs_lower_rent_quartile', Numeric),
-                           Column('acs_median_rent', Numeric),
-                           Column('acs_upper_rent_quartile', Numeric),
-                           Column('crime_count', Numeric),
-                           Column('violent_crime_count', Numeric),
-                           Column('non_violent_crime_count', Numeric),
-                           Column('crime_rate', Numeric),
-                           Column('violent_crime_rate', Numeric),
-                           Column('non_violent_crime_rate', Numeric),
-                           Column('building_permits', Numeric),
-                           Column('construction_permits', Numeric))
-
-        # add to db
-        metadata.create_all(tables=[zone_facts])
+        sql_interface = HISql(meta=self.meta, manifest_row=None,
+                              engine=self.engine)
+        with self.engine.connect() as conn:
+            sql_interface.create_table(db_conn=conn, table='zone_facts')
 
         # populate table with calculated fields values
         self._populate_zone_facts_table()
-
-        return metadata.tables
 
     def _populate_zone_facts_table(self):
         """
@@ -490,7 +464,6 @@ class LoadData(object):
 
             zone_specifics = self._get_zone_specifics_for_zone_type(zone_type)
 
-            # TODO: add aggregate for each zone_type into table
             for zone in zone_specifics:
                 # skip 'Non-cluster area'
                 if zone == 'Non-cluster area':
@@ -513,10 +486,11 @@ class LoadData(object):
 
                 # derive column and values strings needed for sql query
                 columns = ', '.join(columns)
-                columns = 'zone_type, zone, ' + columns
+                columns = 'id, zone_type, zone, ' + columns
 
                 values = ', '.join(values)
-                values = "'" + zone_type + "', '" + zone + "', " + values
+                values = "'" + str(uuid4()) + "', '" + zone_type + "', '" + \
+                         zone + "', " "" + values
 
                 q = "INSERT INTO zone_facts ({cols}) VALUES ({vals})".format(
                     cols=columns, vals=values)
@@ -679,8 +653,9 @@ class LoadData(object):
                                              {field: None})
                         if matching_data[field] is None:
                             logging.warning(
-                                "Missing data for census tract when calculating weightings: {}".format(
-                                    tract))
+                                "Missing census_tract data for {} "
+                                "when calculating weightings: {}".format(
+                                    field, tract))
                             matching_data[field] = 0
 
                         value = matching_data[field]
@@ -825,13 +800,6 @@ class LoadData(object):
 
         try:
             with self.engine.connect() as conn:
-                override_group = False  # flag tracking if group is overridden
-
-                # prepare to handle census_tract not in building_permits table
-                if table_name == 'building_permits' and grouping == \
-                        'census_tract':
-                    override_group = True
-                    grouping = 'ward'
 
                 q = """
                     SELECT COALESCE({grouping},{fallback}) --'Unknown'
@@ -852,30 +820,7 @@ class LoadData(object):
                 #transform the results.
                 #TODO should come up with a better generic way to do this using column
                   #names for any arbitrary sql table results.
-                formatted = dict()  # TODO: use dict comprehension
-                for x in results:
-                    # dictionary = dict({'group': x[0], 'value': x[1]})
-                    formatted[x[0]] = x[1]
-
-                # handle census_tract not in building_permit table scenario
-                if override_group:
-                    # get census_tract to ward count factor
-                    q = """
-                        SELECT census_tract, ward, population_weight_counts
-                        FROM census_tract_to_ward
-                        """
-                    proxy = conn.execute(q)
-                    results = proxy.fetchall()
-
-                    # use factoring to get census_tract related counts
-                    items = dict()
-
-                    for row in results:
-                        tract, ward, factor = row
-                        count = items.get(tract, 0)
-                        items[tract] = count + formatted[ward] * factor
-
-                    formatted = items
+                formatted = {row[0]: row[1] for row in results}
 
             return {'items': formatted, 'grouping': grouping,
                     'data_id': table_name}
