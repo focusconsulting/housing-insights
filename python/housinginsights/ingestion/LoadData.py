@@ -102,14 +102,14 @@ class LoadData(object):
         database_choice and then rebuilding.
         """
         logging.info("Dropping all tables from the database!")
-        db_conn = self.engine.connect()
-        query_result = list()
-        query_result.append(db_conn.execute(
-            "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
+        with self.engine.connect() as db_conn:
+            query_result = list()
+            query_result.append(db_conn.execute(
+                "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
 
-        if self.database_choice == 'remote_database' or self.database_choice \
-                == 'remote_database_master':
-            query_result.append(db_conn.execute('''
+            if self.database_choice == 'remote_database' or self.database_choice \
+                    == 'remote_database_master':
+                query_result.append(db_conn.execute('''
             GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
             GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
             GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;
@@ -130,9 +130,9 @@ class LoadData(object):
         sqlalchemy_metadata.create_all(self.engine)
         json_string = json.dumps(self.meta)
         ins = meta_table.insert().values(meta=json_string)
-        conn = self.engine.connect()
-        conn.execute("DELETE FROM meta;")
-        conn.execute(ins)
+        with self.engine.connect() as conn:
+            conn.execute("DELETE FROM meta;")
+            conn.execute(ins)
 
     def _remove_existing_data(self, uid, manifest_row):
         """

@@ -94,7 +94,8 @@ class HISql(object):
             # assign defaults
             self.filename = 'temp_{}.psv'.format(self.unique_data_id) \
                 if filename is None else filename
-        except TypeError as e:
+        except TypeError:
+            # assume creating table directly from meta.json
             self.unique_data_id = None
             self.tablename = None
             self.filename = 'temp_{}.psv'.format('default') \
