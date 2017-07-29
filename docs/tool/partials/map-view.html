@@ -8,7 +8,6 @@
             <button class="sub-nav-button" id="button-filters">Data Choices</button>
         </div>
         <div id="options-spacer">
-            <div id="clear-pillbox-holder"></div><!--will be style positioned downwards-->
         </div>
         <div id="right-options">
             <button class="sub-nav-button" id="button-charts">Summary</button>
@@ -34,16 +33,17 @@
                     <!--<div id="layer-menu"></div>-->
                     </div>
                 </div>
-
+                <!--end deprecated-->
 
                 <div id="filters" class="sub-nav-container">
-                <div id="zone-choice-header" class="header">1) Select Zone Type</div>
-                <div id="layer-menu"></div>
-                <div class="static-content">
-                    <p id="zone-choice-description">This is a description</p>
-                </div>
-                <div id="zone-choice-header" class="header">2) Data choices</div>
+                    <div id="zone-choice-header" class="header">1) Select Zone Type</div>
+                    <div id="layer-menu"></div>
+                    <div class="static-content">
+                        <p id="zone-choice-description">Select a zone type to see a description of that zone.</p>
+                    </div>
+                    <div id="data-choice-header" class="header">2) Data choices</div>
                     <div id="filter-components">
+                        <div id="clear-pillbox-holder"></div><!--will be style positioned downwards-->
                     </div>                
                 </div>
 
@@ -93,8 +93,16 @@
                     <div class="sub-nav-heading">
                         <h1>Your filters match <span class="matching-count matching">0</span> / <span class="total-count total">0</span> projects.</h1>
                     </div>
-                    <div class="sub-nav-group">                   
-                        <div id="buildings-list">                       
+                    <div id="" class="header">Selected Project</div>
+                    <div id="project-preview-group" class="sub-nav-group">
+                        
+                        <div id="project-preview">
+                            <div class="preview-contents">There is no project selected</div>
+                        </div>
+                    </div>
+                    <div id="" class="header">Matching Projects</div>    
+                    <div id="projects-list-group" class="sub-nav-group">         
+                        <div id="projects-list">                       
                         </div>
                     </div>
                 </div>

@@ -3,15 +3,12 @@
 var filterView = {
 
     addClearPillboxes: function(msg,data){
-    
-        for (var i=0; i < filterView.filterControls.length; i++){
-            var x = filterView.filterControls[i]['component']['source'] //display_name
-        }
 
         //Compare our activated filterValues (from the state module) to the list of all 
         //possible filterControls to make a list containing only the activated filter objects. 
         //filterValues = obj with keys of the 'source' data id and values of current setpoint
         //filterControls = list of objects that encapsulates the actual component including its clear() method
+<<<<<<< HEAD
         var activeFilterIds = []
         var filterValues = filterUtil.getFilterValues()
         for (var key in filterValues){
@@ -39,29 +36,77 @@ var filterView = {
             }
         });
         
-        //Use d3 to bind the list of control objects to our html pillboxes
-        var oldPills = d3.select('#clear-pillbox-holder')
-                        .selectAll('.clear-single')
-                        .data(activeFilterIds)
-                        .classed("not-most-recent",true);
+=======
+        var filterValues = filterUtil.getFilterValues();
 
-        var allPills = oldPills.enter().append("div")
-            .attr("class","ui label transition visible")
-            .classed("clear-single",true)
-          .merge(oldPills)
-            .text(function(d) { return d['component']['display_name'];});
-
-        //Add the 'clear' x mark and its callback
-        allPills.each(function(d) {
-            d3.select(this).append("i")
-                .classed("delete icon",true)
-                .on("click", function(d) {
-                    d.clear();
-                })
+        var keysWithActiveFilterValues = Object.keys(filterValues).filter(function(key){
+            return filterValues[key][0].length !== 0;
         });
 
-        oldPills.exit().remove();
+        var activeFilterControls = filterView.filterControls.filter(function(filterControl){
+            return keysWithActiveFilterValues.indexOf(filterControl.component.source) !== -1;
+        });
+      
+>>>>>>> dev
+        //Use d3 to bind the list of control objects to our html pillboxes
+        var allPills = d3.select('#clear-pillbox-holder')
+                        .selectAll('.clear-single')
+                        .data(activeFilterControls, function(d){
+                            return d.component.source;
+                        })
+                        .classed("not-most-recent",true);
 
+        allPills.enter().append("div")
+            .attr("class","ui label transition hidden")
+            .classed("clear-single",true)
+            // Animate a label that 'flies' from the filter component
+            // to the pillbox.
+            .text(function(d) { return d['component']['display_name'];})
+            .each(function(d){
+                var originElement = document.getElementById("filter-content-"+d.component.source);
+                var destinationElement = this;
+                var flyLabel = document.createElement('div');
+                flyLabel.textContent = this.textContent;
+                console.log("flyer this", this);
+                flyLabel.classList.add('ui', 'label', 'transition', 'visible', 'clear-single-flier');
+                var originRect = originElement.getBoundingClientRect();
+                flyLabel.style.left = originRect.left + 'px';
+                flyLabel.style.top = ((originRect.top + originRect.bottom)/2) + 'px';
+                var flyLabelX = document.createElement('i');
+                flyLabelX.classList.add('delete', 'icon');
+                document.body.appendChild(flyLabel);
+                flyLabel.appendChild(flyLabelX);
+
+                // Change the 'top' and 'left' CSS properties of flyLabel,
+                // triggering its CSS transition.
+                window.setTimeout(function(){
+                    flyLabel.style.left = destinationElement.getBoundingClientRect().left + 'px';
+                    flyLabel.style.top = destinationElement.getBoundingClientRect().top + 'px';
+                }, 1);
+
+                // Remove flyLabel after its transition has elapsed.
+                window.setTimeout(function(){
+                    flyLabel.parentElement.removeChild(flyLabel);
+                    destinationElement.classList.remove('hidden');
+                    destinationElement.classList.add('visible');
+                }, 1500);
+
+            })
+        //Add the 'clear' x mark and its callback
+            .append('i')
+            .classed("delete icon",true)
+            .on("click", function(d) {
+                d.clear();
+            })
+                 
+        allPills.exit()
+        .transition()
+            .duration(750)
+            .style("opacity",0)
+            .remove();
+
+        
+        
     },
 
     init: function(msg, data) {
@@ -673,8 +718,14 @@ var filterView = {
         }
 
         this.isTouched = function(){
+<<<<<<< HEAD
             var dateValues = getValuesAsDates();
             return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
+=======
+            // Since the result of 'get()' is a string, coerce it into a number
+            // before determining equality.
+            return +slider.noUiSlider.get()[0] !== c.min || +slider.noUiSlider.get()[1] !== c.max;
+>>>>>>> dev
         }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
@@ -953,36 +1004,40 @@ var filterView = {
 
             this.pill = document.createElement('div');
             this.pill.id = 'clearFiltersPillbox';
-            this.pill.classList.add('ui', 'label', 'transition', 'visible');
+            this.pill.classList.add('ui', 'label', 'transition', 'visible', 'clear-all');
 
-            this.site = document.getElementById('button-filters');
-            this.replacedText = this.site.innerText;
+            this.site = document.getElementById('clear-pillbox-holder');
 
-            this.trigger = document.createElement('i');
-            this.trigger.id = 'clearFiltersTrigger';
-            this.trigger.classList.add('delete', 'icon');
-
-            this.site.innerText = "";
-
-            this.pill.innerText = this.replacedText;
-
-            this.site.appendChild(this.pill);
-            this.pill.appendChild(this.trigger);
+            this.site.insertBefore(this.pill, this.site.firstChild);
+            this.pill.textContent = "Clear all filters";
             
+<<<<<<< HEAD
             this.trigger.addEventListener('click', function(e){
                 e.stopPropagation();
+=======
+            this.pill.addEventListener('click', function(){
+>>>>>>> dev
                 filterView.clearAllFilters();
             });
         },
-        replacedText: undefined,
         site: undefined,
         tearDown: function(){
+<<<<<<< HEAD
             this.pill.parentElement.removeChild(this.pill);
             this.trigger.parentElement.removeChild(this.trigger);
             this.site.innerText = this.replacedText;
         },
         trigger: undefined
     },
+=======
+            d3.select('#'+this.pill.id)
+                .transition()
+                    .duration(750)
+                    .style("opacity",0)
+                    .remove();
+
+        }    },
+>>>>>>> dev
 
     handleFilterClearance: function(message, data){
         if(data === true){

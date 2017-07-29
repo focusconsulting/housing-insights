@@ -33,7 +33,8 @@
                     ['overlayRequest', mapView.updateZoneChoiceDisabling],
                     ['joinedToGeo', mapView.addOverlayLayer],
                     ['overlaySet', chloroplethLegend.init],
-                    ['previewBuilding', mapView.showPopup],
+                    ['hoverBuilding', mapView.showPopup],
+                    ['previewBuilding', mapView.showProjectPreview],
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
@@ -700,10 +701,12 @@
                         }
                     });
                    
+
+                   //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
                     mapView.map.on('mousemove', function(e) {
                         //get the province feature underneath the mouse
                         var features = mapView.map.queryRenderedFeatures(e.point, {
-                            layers: ['project','project-enter']
+                            layers: ['project','project-enter','project-exit', 'project-unmatched']
                         });
                         //if there's a point under our mouse, then do the following.
                         if (features.length > 0) {
@@ -717,15 +720,38 @@
                             mapView.map.getCanvas().style.cursor = '';
                         }
                     });
+
+                   
+
                     mapView.map.on('click', function(e) {
-                        console.log(e);
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
                             layers: ['project','project-enter','project-exit', 'project-unmatched']
                         }))[0];
-                        console.log(building);
-                        if (building === undefined) return;
-                        setState('previewBuilding', building);
+
+                        //If you click but not on a building, remove any tooltips
+                        if (building === undefined) {
+                            mapView.removeAllPopups();
+                        } else {
+                        //If you click on a building, show that building in the side panel
+                            setState('previewBuilding', building);
+                            setState('subNav.right', 'buildings');
+                        }
                     });
+
+                    //Callbacks for hovering over any of the four project layers
+                    mapView.map.on('mouseenter', 'project', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+                    mapView.map.on('mouseenter', 'project-enter', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+                    mapView.map.on('mouseenter', 'project-exit', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+                    mapView.map.on('mouseenter', 'project-unmatched', function(e) {
+                        setState('hoverBuilding', e.features[0])
+                    });
+
                 } // end dataCallback
             } else {
                 console.log("ERROR data loaded === false");
@@ -733,32 +759,144 @@
 
         },
         
-        showPopup: function(msg, data) {
-            console.log(data);
-
-            if (document.querySelector('.mapboxgl-popup')) {
-                d3.select('.mapboxgl-popup')
-                    .remove();
+        removeAllPopups: function(){
+            for (var i = 0; i < mapView.popups.length; i++) {
+                if (mapView.popups[i].isOpen()) {
+                    mapView.popups[i].remove()
+                }
             }
+            mapView.popups=[];
+        },
+
+        popups: [], //initialize empty
+
+        showPopup: function(msg, data) {
+            //Removes any other existing popups, and reveals the one for the selected building
+
+            mapView.removeAllPopups();
 
             var lngLat = {
                 lng: data.properties.longitude,
                 lat: data.properties.latitude,
             }
             var popup = new mapboxgl.Popup({
-                    'anchor': 'top-right'
+                    'anchor': 'top-right',
+                    'closeOnClick':false    //We are manually handling the click event to remove this either on hovering elsewhere or click
                 })
                 .setLngLat(lngLat)
-                .setHTML('<a href="#">See more about ' + data.properties.proj_name + '</a>')
+                .setHTML('<div class="tooltip-field proj_name">' + data.properties.proj_name + '</div>' +
+                        '<div class="tooltip-field">' + data.properties.proj_addre + '</div>')
                 .addTo(mapView.map);
 
-            popup._container.querySelector('a').onclick = function(e) {
-                e.preventDefault();
-                setState('selectedBuilding', data);
-                setState('switchView', buildingView);
+            popup._container.onclick = function(e) {
+                setState('previewBuilding', data);
+                setState('subNav.right', 'buildings');
             };
 
+            mapView.popups.push(popup);
+            
+            //Close popup if it's open too long
+            setTimeout(function(){
+                if (popup.isOpen()) {
+                    popup.remove()
+                }
+            },3000);
+
         },
+
+        showProjectPreview: function(msg, data) {
+            var project = [data.properties];    //defining as one-element array for d3 data binding
+            
+            //Bind the selected project to a div that will hold the preview graphics
+            var selection = d3.select('#project-preview')
+                            .selectAll("div.preview-contents")
+                                .data(project, function(d){
+                                    return typeof(d) !== "undefined" ? d.nlihc_id : null; //deals w/ initial div which has no bound data yet
+                                })
+            var fadeDuration = 500
+
+            //Transition the whole container of the previously previewed building
+            var leaving = selection.exit()
+                    .transition()
+                    .duration(fadeDuration)
+                    .style('opacity',0)
+                    .remove()
+
+            //Create the new container
+            mapView.showProjectPreview.current = selection.enter()
+                        .append('div')
+                        .classed("preview-contents",true)
+                        .style('opacity',0)
+                        //.text(function(d){return d.nlihc_id})
+
+            //callback used to populate container since we need data loaded before it can run
+            //callback called after function definition
+            mapView.fillContainer = function(meta){
+                console.log("in fillContainer")
+                var current = mapView.showProjectPreview.current //alias for convenience
+
+                //Add the building name with a link to the project page
+                var field = getFieldFromMeta('project', 'proj_name') //field is the meta.json that has stuff like display_text
+                var value = project[0]['proj_name']
+
+                current.append('a')
+                    .classed('proj_name',true)
+                    .text(value)
+                    .on("click", function(e) {
+                        console.log("clicked")
+                        setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
+                        setState('switchView', buildingView);
+                    });
+
+                //Add fields that don't have the field name displayed
+                var headerFields =  ['proj_addre','ward','neighborhood_cluster_desc']
+                for (var i = 0; i < headerFields.length; i++) {
+                    var field = getFieldFromMeta('project',headerFields[i])
+                    var value = project[0][headerFields[i]];
+                    value = (value === null) ? 'Unknown' : value;
+
+                    current.append('div')
+                        .classed('preview-field',true)
+                        .classed(headerFields[i],true)
+                        .text(value)
+                };
+
+                //Add line break 
+                current.append('br')
+
+                //Add a definition list of property: value
+                var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
+                                        'subsidy_end_last']
+                
+                var dl = current.append('dl')
+                        .classed("properties-list",true)
+                        .classed("inline",true);
+
+                for (var i = 0; i < previewFields.length; i++) {
+                    var field = getFieldFromMeta('project',previewFields[i])
+                    dl.append('dt').text(field['display_name'] + ': '); //todo use meta.json instead
+                    
+                    var value = project[0][previewFields[i]];
+                    value = (value === null) ? 'Unknown' : value;
+                    dl.append('dd').text(value)
+                }
+            };
+
+            controller.getData({
+                            name:'metaData',
+                            url: model.URLS.metaData,
+                            callback: mapView.fillContainer
+                            });
+
+            //Make the new container appear after the old one is gone
+            setTimeout(function(){
+                mapView.showProjectPreview.current.transition()
+                    .duration(fadeDuration)
+                    .style('opacity',1)
+            },fadeDuration)
+
+        },
+
         filterMap: function(msg, data) {
             
             mapView.convertedProjects.features.forEach(function(feature) {
@@ -819,7 +957,7 @@
 
             var t = d3.transition()
                 .duration(750);
-            var preview = d3.select('#buildings-list')
+            var preview = d3.select('#projects-list')
 
             var listItems = preview.selectAll('div')
                 .data(data, function(d) {
@@ -833,8 +971,7 @@
                 .merge(listItems)
                 .html(function(d) {
                     return '<p> <span class="project-title">' + d.properties.proj_name + '</span><br />' +
-                        d.properties.proj_addre + '<br />' +
-                        'Owner: ' + d.properties.hud_own_name + '</p>';
+                        d.properties.proj_addre;
                 })
                 .on('mouseenter', function(d) {
                     mapView['highlight-timer-' + d.properties.nlihc_id] = setTimeout(function() {
@@ -894,9 +1031,6 @@
             }
         },
         zoomToFilteredProjects: function(msg, data){
-            if (getState().filteredProjectsAvailable.length < 2 ) {
-                return; // disable function on first filter, which happens when the app first loads
-            }
             var maxLat = d3.max(data, function(d){
                 return d.latitude;
             });            
@@ -914,5 +1048,9 @@
             });
             console.log(minLon,minLat,maxLon,maxLat);
             mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], {linear: true, padding: 20});
+            if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
+                mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
+                mapView.map.originalZoom = mapView.map.getZoom();
+            }
         }
     };
