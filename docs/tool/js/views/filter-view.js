@@ -8,8 +8,7 @@ var filterView = {
         //possible filterControls to make a list containing only the activated filter objects. 
         //filterValues = obj with keys of the 'source' data id and values of current setpoint
         //filterControls = list of objects that encapsulates the actual component including its clear() method
-<<<<<<< HEAD
-        var activeFilterIds = []
+        var activeFilterControls = []
         var filterValues = filterUtil.getFilterValues()
         for (var key in filterValues){
             // An 'empty' filterValues array has a single element,
@@ -18,7 +17,7 @@ var filterView = {
                 var control = filterView.filterControls.find(function(obj){
                     return obj['component']['source'] === key;
                 })
-                activeFilterIds.push(control)
+                activeFilterControls.push(control)
             };
         }
 
@@ -28,26 +27,14 @@ var filterView = {
                 return obj['component']['source'] === key;
             })
             // The default nullsShown value is 'true'. If it's different than the default,
-            // and the control hasn't already been added to activeFilterIds,
+            // and the control hasn't already been added to activeFilterControls,
             // add the data choice's associated control to the array that we're using
             // to determine which filters to mark as altered.
-            if(nullsShown[key][0] === false && activeFilterIds.indexOf(control) === -1){
-                activeFilterIds.push(control);
+            if(nullsShown[key][0] === false && activeFilterControls.indexOf(control) === -1){
+                activeFilterControls.push(control);
             }
         });
         
-=======
-        var filterValues = filterUtil.getFilterValues();
-
-        var keysWithActiveFilterValues = Object.keys(filterValues).filter(function(key){
-            return filterValues[key][0].length !== 0;
-        });
-
-        var activeFilterControls = filterView.filterControls.filter(function(filterControl){
-            return keysWithActiveFilterValues.indexOf(filterControl.component.source) !== -1;
-        });
-      
->>>>>>> dev
         //Use d3 to bind the list of control objects to our html pillboxes
         var allPills = d3.select('#clear-pillbox-holder')
                         .selectAll('.clear-single')
@@ -718,14 +705,8 @@ var filterView = {
         }
 
         this.isTouched = function(){
-<<<<<<< HEAD
             var dateValues = getValuesAsDates();
             return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
-=======
-            // Since the result of 'get()' is a string, coerce it into a number
-            // before determining equality.
-            return +slider.noUiSlider.get()[0] !== c.min || +slider.noUiSlider.get()[1] !== c.max;
->>>>>>> dev
         }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
@@ -1011,25 +992,12 @@ var filterView = {
             this.site.insertBefore(this.pill, this.site.firstChild);
             this.pill.textContent = "Clear all filters";
             
-<<<<<<< HEAD
-            this.trigger.addEventListener('click', function(e){
-                e.stopPropagation();
-=======
             this.pill.addEventListener('click', function(){
->>>>>>> dev
                 filterView.clearAllFilters();
             });
         },
         site: undefined,
         tearDown: function(){
-<<<<<<< HEAD
-            this.pill.parentElement.removeChild(this.pill);
-            this.trigger.parentElement.removeChild(this.trigger);
-            this.site.innerText = this.replacedText;
-        },
-        trigger: undefined
-    },
-=======
             d3.select('#'+this.pill.id)
                 .transition()
                     .duration(750)
@@ -1037,7 +1005,6 @@ var filterView = {
                     .remove();
 
         }    },
->>>>>>> dev
 
     handleFilterClearance: function(message, data){
         if(data === true){
