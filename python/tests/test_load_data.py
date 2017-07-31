@@ -30,13 +30,6 @@ class MyTestCase(unittest.TestCase):
         except ProgrammingError as e:
             self.assertEqual(True, False, e)
 
-    def get_sig_figs(self, number):
-        """
-        Helpere function that returns the number significant digits for
-        decimal number.
-        """
-        return len(str(number).partition('.')[2])
-
     def test_update_only(self):
         # use the same sql engine for db lookup
         loader_engine = self.loader.engine
@@ -135,11 +128,10 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(self.loader.manifest.path, result_path)
 
     def test__get_zone_fact_zones(self):
-        # TODO: breaks because temp modified code to exclude original zone_type
         ward_types = self.loader._get_zone_specifics_for_zone_type('ward')
 
-        for idx in range(9):
-            ward = "Ward " + str(idx) if idx > 0 else 'ward'
+        for idx in range(1, 9):
+            ward = "Ward " + str(idx)
             self.assertTrue(ward in ward_types)
 
     def test__create_zone_facts_table(self):
@@ -152,10 +144,13 @@ class MyTestCase(unittest.TestCase):
         result = 'zone_facts' in self.loader.engine.table_names()
         self.assertFalse(result, 'zone_facts table is not in db')
 
-        # check returned metadata.tables contains 'zone_facts' table
-        result = self.loader._create_zone_facts_table().keys()
-        self.assertTrue('zone_facts' in result, 'zone_facts is in '
-                                                'metadata.tables object')
+        # # check returned metadata.tables contains 'zone_facts' table
+        # result = self.loader._create_zone_facts_table().keys()
+        # self.assertTrue('zone_facts' in result, 'zone_facts is in '
+        #                                         'metadata.tables object')
+
+        # create zone_facts table
+        self.loader._create_zone_facts_table()
 
         # confirm zone_facts table was loaded into db
         result = 'zone_facts' in self.loader.engine.table_names()
@@ -2337,10 +2332,13 @@ class MyTestCase(unittest.TestCase):
                                                  date_range_sql=date_range_sql,
                                                  additional_wheres=
                                                  additional_wheres)
-        self.assertIsNotNone(result['items'], 'should return db result not '
-                                              'None')
+        self.assertIsNone(result['items'], 'should return db result not None')
+        self.assertEqual(result['data_id'], table_name)
+        self.assertEqual(result['grouping'], grouping)
+        self.assertTrue('notes' in result, 'query should have failed')
 
         # test case for census_tract construction building permits
+        grouping = 'ward'
         additional_wheres = " AND permit_type_name = 'CONSTRUCTION' "
         result = self.loader._count_observations(table_name, grouping,
                                                  date_field=date_fields[
@@ -2350,6 +2348,9 @@ class MyTestCase(unittest.TestCase):
                                                  additional_wheres)
         self.assertIsNotNone(result['items'], 'should return db result not '
                                               'None')
+        self.assertEqual(result['data_id'], table_name)
+        self.assertEqual(result['grouping'], grouping)
+        self.assertTrue('notes' not in result, 'query executed successfully')
 
         # test case for census_tract violent crime
         table_name = 'crime'
@@ -2363,8 +2364,12 @@ class MyTestCase(unittest.TestCase):
                                                  additional_wheres)
         self.assertIsNotNone(result['items'], 'should return db result not '
                                               'None')
+        self.assertEqual(result['data_id'], table_name)
+        self.assertEqual(result['grouping'], grouping)
+        self.assertTrue('notes' not in result, 'query executed successfully')
 
         # test case for census_tract non-violent crime
+        grouping = 'neighborhood_cluster'
         additional_wheres = " AND OFFENSE NOT IN ('ROBBERY','HOMICIDE'," \
                             "'ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
         result = self.loader._count_observations(table_name, grouping,
@@ -2375,6 +2380,9 @@ class MyTestCase(unittest.TestCase):
                                                  additional_wheres)
         self.assertIsNotNone(result['items'], 'should return db result not '
                                               'None')
+        self.assertEqual(result['data_id'], table_name)
+        self.assertEqual(result['grouping'], grouping)
+        self.assertTrue('notes' not in result, 'query executed successfully')
 
 
 if __name__ == '__main__':

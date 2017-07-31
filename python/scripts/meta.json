@@ -3889,5 +3889,142 @@
       }
     ],
     "replace_table": true
+  },
+  "zone_facts": {
+    "fields": [
+      {
+        "display_name": "Zone Type",
+        "display_text": "Zone Type",
+        "source_name": "zone_type",
+        "sql_name": "zone_type",
+        "type": "text"
+      },
+      {
+        "display_name": "Zone",
+        "display_text": "Zone",
+        "source_name": "zone",
+        "sql_name": "zone",
+        "type": "text"
+      },
+      {
+        "display_name": "Poverty Rate",
+        "display_text": "Percent of people below poverty level in the zone",
+        "source_name": "poverty_rate",
+        "sql_name": "poverty_rate",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Fraction Black",
+        "display_text": "Percent of Black or African American in the zone",
+        "source_name": "fraction_black",
+        "sql_name": "fraction_black",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Income per Capita",
+        "display_text": "Average income per person in the zone",
+        "source_name": "income_per_capita",
+        "sql_name": "income_per_capita",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Labor Participation",
+        "display_text": "Percent of people in the zone that are part of the labor force",
+        "source_name": "labor_participation",
+        "sql_name": "labor_participation",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Fraction Foreign",
+        "display_text": "Percent of foreigners in the zone",
+        "source_name": "fraction_foreign",
+        "sql_name": "fraction_foreign",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Fraction Single Mothers",
+        "display_text": "Percent of single mothers in the zone",
+        "source_name": "fraction_single_mothers",
+        "sql_name": "fraction_single_mothers",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Lower Contract Rent Quartile",
+        "display_text": "Lower contract rent quartile (dollars)",
+        "source_name": "acs_lower_rent_quartile",
+        "sql_name": "acs_lower_rent_quartile",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Median Contract Rent",
+        "display_text": "Median contract rent (dollars)",
+        "source_name": "acs_median_rent",
+        "sql_name": "acs_median_rent",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Upper Contract Rent Quartile",
+        "display_text": "Upper contract rent quartile (dollars)",
+        "source_name": "acs_upper_rent_quartile",
+        "sql_name": "acs_upper_rent_quartile",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Crime Incidents",
+        "display_text": "Count of all criminal offenses that occurred in zone",
+        "source_name": "crime_count",
+        "sql_name": "crime_count",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Violent Crime",
+        "display_text": "Count of all violent offenses that occurred in zone",
+        "source_name": "violent_crime_count",
+        "sql_name": "violent_crime_count",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Non-violent Crime",
+        "display_text": "Count of all non-violent offenses that occurred in zone",
+        "source_name": "non_violent_crime_count",
+        "sql_name": "non_violent_crime_count",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Crime Rate",
+        "display_text": "Crime incidents in zone per 100,000 people",
+        "source_name": "crime_rate",
+        "sql_name": "crime_rate",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Violent Crime Rate",
+        "display_text": "Violent crime incidents in zone per 100,000 people",
+        "source_name": "violent_crime_rate",
+        "sql_name": "violent_crime_rate",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Non-violent Crime Rate",
+        "display_text": "Non-violent crime incidents in zone per 100,000 people",
+        "source_name": "non_violent_crime_rate",
+        "sql_name": "non_violent_crime_rate",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Building Permits",
+        "display_text": "Count of building permits in zone",
+        "source_name": "building_permits",
+        "sql_name": "building_permits",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Construction Building Permits",
+        "display_text": "Count of construction building permits in zone",
+        "source_name": "construction_permits",
+        "sql_name": "construction_permits",
+        "type": "decimal"
+      }
+    ]
   }
 }
