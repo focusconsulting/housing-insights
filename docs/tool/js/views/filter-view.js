@@ -194,7 +194,7 @@ var filterView = {
             return new Date(+dateSplit[0], +dateSplit[1] - 1, +dateSplit[2]);
         }
 
-        model.dataCollection.filterData.items.forEach(function(item){
+        model.dataCollection.filterData.objects.forEach(function(item){
             dateComponents.forEach(function(dateComponent){
                 if(item.hasOwnProperty(dateComponent.source)){
                     item[dateComponent.source] = makeDateFromString(item[dateComponent.source]);
@@ -403,7 +403,7 @@ var filterView = {
                 .classed("slider",true)
                 .attr("id",c.source);
 
-        var allDataValuesForThisSource = model.dataCollection.filterData.items.map(function(item){
+        var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
             return item[c.source];
         });
         
@@ -559,7 +559,7 @@ var filterView = {
         document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
 
         // this is used for d3.min and d3.max.
-        var componentValuesOnly = model.dataCollection.filterData.items.map(function(item){
+        var componentValuesOnly = model.dataCollection.filterData.objects.map(function(item){
             return item[c.source];
         });
             
