@@ -23,7 +23,8 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
       geoJSONPolygonsBase: "/tool/data/",
       metaData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta",
       filterData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter",
-      project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project"
+      project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
+      layerData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/zone_facts/<source_data_name>/<grouping>"
     }
     
 };
@@ -208,22 +209,24 @@ var controller = {
             }
         });
     },
-    joinToGeoJSON: function(overlay,grouping,activeLayer){
-        model.dataCollection[activeLayer].features.forEach(function(feature){
+    joinToGeoJSON: function(source_data_name,grouping){
+        model.dataCollection[grouping].features.forEach(function(feature){
             var zone = feature.properties.NAME;
-            var dataKey = overlay + '_' + grouping;
+            var dataKey = source_data_name + '_' + grouping;
             var zone_entry = model.dataCollection[dataKey].objects.find(function(obj){
-                            return obj.group === zone;
+                            return obj.zone === zone;
                         });
             //Handle case of a missing entry in the API
             if (zone_entry == undefined){
                 zone_entry = {}
-                zone_entry['count'] = null
+                zone_entry[source_data_name] = null
             };
 
-            feature.properties[overlay] = zone_entry.count;
+            feature.properties[source_data_name] = zone_entry[source_data_name];
+
         });
-        setState('joinedToGeo.' +  overlay + '_' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
+        setState('joinedToGeo.' +  source_data_name + '_' + grouping, {overlay:source_data_name, grouping:grouping, activeLayer:grouping}); //TODO change joinedToGeo to not need activeLayer
+
         // e.g. joinedToGeo.crime_neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
     },
     convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields

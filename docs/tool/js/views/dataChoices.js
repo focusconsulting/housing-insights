@@ -81,7 +81,7 @@
 //////////////////////////////////////////////////
 
         {
-            "source": "crime_violent_12",
+            "source": "violent_crime_count",
             "display_name": "Crime Rate: Violent 12 months",
             "display_text": "**Filter not working**<br>Number of violent crime incidents per 100,000 people reported in the past 12 months.",
             "data_level": "zone",
@@ -89,13 +89,12 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/violent/12/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
             "style": "number"
         },
         {
-            "source": "crime_nonviolent_12",
+            "source": "non_violent_crime_rate",
             "display_name": "Crime Rate: Non-Violent 12 months",
             "display_text": "**Filter not working**<br>Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
             "data_level": "zone",
@@ -103,13 +102,12 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/nonviolent/12/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
             "style": "number"
         },
         {
-            "source": "crime_all_3",
+            "source": "crime_rate",
             "display_name": "Crime Rate: All 3 months",
             "display_text": "**Filter not working**<br>Total number of crime incidents per 100,000 people reported in the past 12 months.",
             "data_level": "zone",
@@ -117,13 +115,12 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/rate/crime/all/3/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
             "style": "number"
         },
         {
-            "source": "building_permits_construction",
+            "source": "construction_permits",
             "display_name": "Building Permits: Construction 2016",
             "display_text": "**Filter not working**<br>Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
             "data_level": "zone",
@@ -131,13 +128,12 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/construction/12/<zone>?start=20161231", //TODO need to add start date
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
             "style": "number"
         },
         {
-            "source": "building_permits_all",
+            "source": "building_permits",
             "display_name": "Building Permits: All 2016",
             "display_text": "**Filter not working**<br>Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
             "data_level": "zone",
@@ -145,7 +141,6 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/count/building_permits/all/12/<zone>?start=20161231",
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
             "style": "number"
@@ -160,7 +155,6 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/poverty_rate/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent"
@@ -174,7 +168,6 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/income_per_capita/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "money"
@@ -188,7 +181,6 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/labor_participation/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent"
@@ -202,7 +194,6 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_single_mothers/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent"
@@ -216,7 +207,6 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_black/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent"
@@ -230,7 +220,6 @@
             "data_type":"decimal",
             "min": 0,
             "max": 1,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/fraction_foreign/<zone>",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent"
@@ -243,8 +232,7 @@
             "component_type": "continuous",
             "data_type":"decimal",
             "min": 0,
-            "max": 2500,
-            "url_format": "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/census/acs_median_rent/<zone>",
+            "max": 1,
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "number"

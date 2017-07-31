@@ -104,40 +104,13 @@
             setState('subNav.left', 'filters');
             setState('subNav.right', 'charts');
         },
-        ChloroplethColorRange: function(chloroData, style){
+        ChloroplethColorRange: function(source_data_name, chloroData, style){
             // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
             // make a chloropleth map with a single color, but if you try to,
             // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
             // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
-            var CHLOROPLETH_STOP_COUNT = 5;
-            var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
-            var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
 
-            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can 
-            //especially screw up the scale when using rates as they come back as a count instead of a rate
-            var currentLayer = getState().mapLayer[0]
-            var activeZones = []
-            model.dataCollection[currentLayer].features.forEach(function(feature){
-                var zone = feature.properties.NAME;
-                activeZones.push(zone)
-            });
-
-            var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
-                if (activeZones.includes(d.group)) {
-                    return d.count;
-                } else {
-                    return 0;
-                };
-            });
-
-            var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
-                return d.count;
-            });
-
-            var colorScale = d3.scaleLinear()
-                .domain([MIN_DOMAIN_VALUE, MAX_DOMAIN_VALUE])
-                .range([MIN_COLOR, MAX_COLOR]);
-
+            //Utility function for formatting stops cleanly
             var roundedVersionOf = function(val){
                 switch(style){
                     case "percent":
@@ -151,6 +124,41 @@
                 }
             }
 
+            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can 
+            //especially screw up the scale when using rates as they come back as a count instead of a rate
+            var currentLayer = getState().mapLayer[0]
+            var activeZones = []
+            model.dataCollection[currentLayer].features.forEach(function(feature){
+                var zone = feature.properties.NAME;
+                activeZones.push(zone)
+            });
+
+            //Determine values based on the data span
+            var MAX_DOMAIN_VALUE = d3.max(chloroData, function(d){
+                if (activeZones.includes(d.zone)) {
+                    return d[source_data_name];
+                } else {
+                    return 0;
+                };
+            });
+            var MIN_DOMAIN_VALUE = d3.min(chloroData, function(d){
+                return d[source_data_name];
+            });
+            var PIVOT_VALUE = ((MAX_DOMAIN_VALUE - MIN_DOMAIN_VALUE) / 3 ) + MIN_DOMAIN_VALUE
+
+            //Choose the colors
+            //TODO - loosely based on the PuBu 7-class scheme from colorbrewer2, but interpolation by d3 isn't the same. Could assign manually.
+            var CHLOROPLETH_STOP_COUNT = 6;
+            var MIN_COLOR = 'rgba(241,238,246,0.7)'// 
+            var PIVOT_COLOR = 'rgba(116,189,219,0.7)'
+            var MAX_COLOR = 'rgba(3,78,123,0.7)'//
+
+            //Assign values to colors
+            var colorScale = d3.scaleLinear()
+                .domain([MIN_DOMAIN_VALUE, PIVOT_VALUE, MAX_DOMAIN_VALUE])
+                .range([MIN_COLOR, PIVOT_COLOR, MAX_COLOR]);
+
+            //Create the range in the format expected
             this.stops = new Array(CHLOROPLETH_STOP_COUNT).fill(" ").map(function(el, i){
                 var stopIncrement = MAX_DOMAIN_VALUE/(CHLOROPLETH_STOP_COUNT - 1);
                 var domainValue = MAX_DOMAIN_VALUE - (stopIncrement * i);
@@ -324,7 +332,7 @@
                         var config = mapView.findOverlayConfig('source', data.overlay)
                         var default_layer = config.default_layer
 
-                        //Prevent an infinite loop
+                        //Prevent an infinite loop in case default layer isn't available
                         if (data.activeLayer == default_layer){
                             console.log("ERROR: request for data layer returned null")
                         } else {
@@ -334,12 +342,15 @@
                             });
                         };
                     } else {
-                        controller.joinToGeoJSON(data.overlay, grouping, data.activeLayer); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
+                        controller.joinToGeoJSON(data.overlay, grouping); // joins the overlay data to the geoJSON *in the dataCollection* not in the mapBox instance
                     };
                 }
 
-                var overlayConfig = mapView.findOverlayConfig('source', data.overlay)
-                var url = overlayConfig.url_format.replace('<zone>',data.activeLayer)
+                //var overlayConfig = mapView.findOverlayConfig('source', data.overlay)
+                //var url = overlayConfig.url_format.replace('<zone>',data.activeLayer)
+                var url = model.URLS.layerData;
+                url = url.replace('<grouping>', data.activeLayer)
+                url = url.replace('<source_data_name>', data.overlay)
 
                 var dataRequest = {
                     name: data.overlay + "_" + data.activeLayer, //e.g. crime
@@ -355,8 +366,10 @@
 
         addOverlayLayer: function(msg, data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Called after the data join from addOverlayData's callback
+            var source_data_name = data.overlay;
 
-            if (mapView.map.getLayer(data.activeLayer + '_' + data.overlay) === undefined) {
+            if (mapView.map.getLayer(data.activeLayer + '_' + source_data_name) === undefined) {
+                
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
@@ -366,7 +379,7 @@
         
                 // assign the chloropleth color range to the data so we can use it for other
                 // purposes when the state is changed
-                data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse, thisStyle);
+                data.chloroplethRange = new mapView.ChloroplethColorRange(source_data_name, dataToUse, thisStyle);
 
                     mapView.map.addLayer({
                         'id': data.activeLayer + '_' + data.overlay, //e.g. neighboorhood_crime
@@ -378,7 +391,8 @@
                         'paint': {
                             'fill-color': {
                                 'property': data.overlay,
-                                'stops': data.chloroplethRange.stopsAscending
+                                'stops': data.chloroplethRange.stopsAscending,
+                                'default': 'rgba(128,128,128,0.6)'
                             },
                             'fill-opacity': 1 //using rgba in the chloropleth color range instead
                         }
@@ -597,7 +611,6 @@
                 controller.getData(dataRequest);
 
                 function dataCallback() {
-                    console.log('in callback');
                     mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
                     mapView.convertedProjects.features.forEach(function(feature) {
                         feature.properties.matches_filters = true;
@@ -898,7 +911,10 @@
         },
 
         filterMap: function(msg, data) {
-            
+            //TODO sometimes this function produces a TypeError "Cannot read property 'features' of undefined" during load
+            //This is because filteredData state change on load is getting triggered before convertedProjects is finished loading
+            //Doesn't hurt anything, but would be nice to remove error by trigging first call to filteredData later in the load process
+
             mapView.convertedProjects.features.forEach(function(feature) {
                 feature.properties.previous_filters = feature.properties.matches_filters;
                 if (data.indexOf(feature.properties.nlihc_id) !== -1) {
