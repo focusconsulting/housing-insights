@@ -47,7 +47,7 @@ var resultsView = {
     updateFilteredProjects: function(msg, data){
         var runFilter = function(raw_projects){
             var filteredIds = getState()['filteredData'][0]
-            resultsView.filteredProjects = raw_projects.items.filter(function(d){
+            resultsView.filteredProjects = raw_projects.objects.filter(function(d){
                 return filteredIds.indexOf(d.nlihc_id) !== -1;
             });
             setState('filteredProjectsAvailable',resultsView.filteredProjects);         //Needed to make sure this fires every time. TODO is there a way we can setState that triggers even if the value is the same (i.e. true)?
@@ -76,7 +76,7 @@ var resultsView = {
         ]
 
         //Note, accessing data collection directly to avoid aysnc nature of callback - we know this data set has been loaded because it's required for this function to be called
-        var raw_projects = model.dataCollection['raw_project'].items; 
+        var raw_projects = model.dataCollection['raw_project'].objects; 
 
         //Update totals. TODO we only need to do this once, so we should move this elsewhere when we refactor this so it runs only on load. 
         for (var i = 0; i < raw_projects.length; i++) {

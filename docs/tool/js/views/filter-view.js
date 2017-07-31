@@ -402,7 +402,7 @@ var filterView = {
     buildFilterComponents: function(){
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
-        var workingData = model.dataCollection['filterData'].items; 
+        var workingData = model.dataCollection['filterData'].objects; 
         
         var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling

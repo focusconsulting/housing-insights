@@ -21,9 +21,9 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
     //NOTE raw data sources have their urls included in the metaData
     URLS: {
       geoJSONPolygonsBase: "/tool/data/",
-      metaData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta/",
-      filterData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter/",
-      project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project/"
+      metaData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta",
+      filterData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter",
+      project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project"
     }
     
 };
@@ -170,7 +170,7 @@ var controller = {
         if (model.dataCollection[dataRequest.name] === undefined) { // if data not in collection
             d3.json(dataRequest.url, function(error, data){
                 if ( error ) { console.log(error); }
-                if ( data.items !== null ) {
+                if ( data.objects !== null ) {
                     model.dataCollection[dataRequest.name] = data;
                     setState('dataLoaded.' + dataRequest.name, true );
                     if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
@@ -212,7 +212,7 @@ var controller = {
         model.dataCollection[activeLayer].features.forEach(function(feature){
             var zone = feature.properties.NAME;
             var dataKey = overlay + '_' + grouping;
-            var zone_entry = model.dataCollection[dataKey].items.find(function(obj){
+            var zone_entry = model.dataCollection[dataKey].objects.find(function(obj){
                             return obj.group === zone;
                         });
             //Handle case of a missing entry in the API
@@ -228,7 +228,7 @@ var controller = {
     },
     convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
                                       // and returns geoJSON with the original data in the properties field
-        var features = data.items.map(function(element){ 
+        var features = data.objects.map(function(element){ 
           return {
             'type': 'Feature',
             'geometry': {

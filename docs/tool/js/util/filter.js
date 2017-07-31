@@ -35,7 +35,7 @@ var filterUtil = {
 
 	filterData: function(data){ 	
         
-		var workingData = model.dataCollection['filterData'].items; 
+		var workingData = model.dataCollection['filterData'].objects; 
 		var filterValues = filterUtil.getFilterValues();
 
 		for (key in filterValues) { // iterate through registered filters
@@ -70,7 +70,7 @@ var filterUtil = {
 
 			if (component['component_type'] == 'categorical') {
 				workingData = workingData.filter(function(d){
-                    //If all items are removed from filter list, assume they want all items
+                    //If all objects are removed from filter list, assume they want all objects
                     if (filterValues[key][0].length == 0 ) {
                         return true;
                     }

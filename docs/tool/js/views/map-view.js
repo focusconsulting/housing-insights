@@ -360,7 +360,7 @@
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
-                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;    
+                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].objects;    
                                                                                  // dataCollection        
                 var thisStyle = mapView.initialOverlays.find(function(obj){return obj['source']==data.overlay}).style;
         
