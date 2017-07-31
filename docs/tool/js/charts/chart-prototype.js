@@ -285,7 +285,7 @@ ChartProtoCallback.prototype = {
 
       function chartCallback(data){
         console.log('chartProto callback',chart);
-        chart.data = data.items;
+        chart.data = data.objects;
         if (chartOptions.sort !== undefined ) {
           chart.data.sort(function(a, b) { 
             if (chartOptions.sort.direction === 'asc') return a[chartOptions.sort.field] - b[chartOptions.sort.field];
