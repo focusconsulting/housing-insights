@@ -17,6 +17,7 @@ var router = {
         if (data.length === 0) {
             delete router.stateObj[msg];
         }
+        console.log(router.stateObj);
         window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramify());
     },
     pushSidebar: function(msg, data) {
@@ -43,7 +44,15 @@ var router = {
                 paramsArray.push( dataChoice.short_name + '=' + router.stateObj[key].join('+'));
             }
             if ( dataChoice.component_type === 'date' ){
-                // handle encoding for date type filter here
+                console.log('date');
+                var dateStrings = [];
+                router.stateObj[key].forEach(function(dateObj,index){
+                    var date = dateObj.getDate();
+                    var month = dateObj.getMonth() + 1;
+                    var year = dateObj.getFullYear();
+                    dateStrings[index] = 'd' + date.toString() + 'm' + month.toString() + 'y' + year.toString(); 
+                });
+                paramsArray.push(dataChoice.short_name + '=' + dateStrings[0] + '-' + dateStrings[1]);
             }
         }
      //   console.log(paramsArray.join('&'));
@@ -76,6 +85,20 @@ var router = {
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here
+                var values = eachArray[1].split('-');
+                filterView.dateInputs[dataChoice.short_name].setValues(
+                    [
+                        [ 'year',  values[0].match(/\d{4}/)[0] ],
+                        [ 'month', values[0].match(/m(\d+)/)[1] ],
+                        [ 'day',   values[0].match(/d(\d+)/)[1]]
+                    ],
+                    [
+                        [ 'year',  values[1].match(/\d{4}/)[0] ],
+                        [ 'month', values[1].match(/m(\d+)/)[1] ],
+                        [ 'day',   values[1].match(/d(\d+)/)[1]]
+                    ]
+                );
+                filterView.dateInputs[dataChoice.short_name].callback();
             }
 
         });

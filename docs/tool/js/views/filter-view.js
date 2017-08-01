@@ -254,6 +254,7 @@ var filterView = {
         }
     },
     textInputs: {}, // adding text input object so we can access them later -JO
+    dateInputs: {}, // same for date inputs - JO
     // filterTextInput takes as a parameter an array of keys.
     // It produces text inputs corresponding to these keys and
     // tracks their values.
@@ -584,8 +585,9 @@ var filterView = {
             },
             step: 1
         });
-
-        var dateInputs = new filterView.filterTextInput(
+        // as with textInputs, adds each instance of dateInput to the filterView.dateInputs object, so it can be accessed
+        // later
+        filterView.dateInputs[this.component.short_name] = new filterView.filterTextInput(
             component,        
             [
                 ['day', minDatum.getDate()],
@@ -598,7 +600,7 @@ var filterView = {
                 ['year', maxDatum.getFullYear()]
             ]
         );
-
+        var dateInputs = filterView.dateInputs[this.component.short_name];
         function makeSliderCallback(component, doesItSetState){
 
             return function sliderCallback ( values, handle, unencoded, tap, positions ) {
