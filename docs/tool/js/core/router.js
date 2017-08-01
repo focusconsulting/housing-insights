@@ -53,6 +53,7 @@ var router = {
         document.getElementById('loading-state-screen').style.display = 'block';
     },
     decodeState: function(){
+        console.log('decodeState');
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
         stateArray.forEach(function(each){
             var eachArray = each.split('=');
@@ -62,17 +63,16 @@ var router = {
             });
             if ( dataChoice.component_type === 'continuous' ) {
                 var values = eachArray[1].split('-');
-                setState('filterValues.' + dataChoice.source , [+values[0], +values[1]]  );
-                /*
-                slider.noUiSlider.set(
-                    [returnVals['min']['min'], returnVals['max']['max']]
-                );
-                see filter-view.js line 444
-                */
+                // set the values of the corresponding textInput
+                filterView.textInputs[dataChoice.short_name].setValues([['min', +values[0]]],[['max', +values[1]]]);
+                // call the corresponding textInput's callback
+                filterView.textInputs[dataChoice.short_name].callback();
             }
             if ( dataChoice.component_type === 'categorical' ){
+                console.log('decoding categorical');
                 var values = eachArray[1].replace('_',' ').split('+');
-                $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', value);
+                console.log(values);
+                $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', values);
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here

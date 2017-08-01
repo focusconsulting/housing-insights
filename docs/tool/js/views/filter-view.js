@@ -253,6 +253,7 @@ var filterView = {
             }
         }
     },
+    textInputs: {}, // adding text input object so we can access them later -JO
     // filterTextInput takes as a parameter an array of keys.
     // It produces text inputs corresponding to these keys and
     // tracks their values.
@@ -320,7 +321,8 @@ var filterView = {
         }
 
         this.setInputCallback = function(callback){
-            
+            console.log(this);
+            this.callback = callback; // making callback function a property of the filterTextInput so we can access it later -JO
             var checkKeyPress = function(e){
                 if(e.charCode === 9 || e.charCode === 13){
                     callback();
@@ -436,12 +438,16 @@ var filterView = {
             },
             step: stepCount
         });
-
-        var textInputs = new filterView.filterTextInput(
+        // adds each new instance to the object created above under the global filterView so that each can be accessed again
+        // in router.js, when decoding the state in a url
+        filterView.textInputs[this.component.short_name] = new filterView.filterTextInput( 
             component,        
             [['min', minDatum]],
             [['max', maxDatum]]
         );
+        var textInputs = filterView.textInputs[this.component.short_name];
+        console.log(textInputs);
+        console.log(this);
 
         //Each slider needs its own copy of the sliderMove function so that it can use the current component
         function makeSliderCallback(component, doesItSetState){
@@ -493,6 +499,7 @@ var filterView = {
         slider.noUiSlider.on('slide', slideSliderCallback);
 
         var inputCallback = function(){
+            console.log('inputCallback');
             var specific_state_code = 'filterValues.' + component.source
 
             var returnVals = textInputs.returnValues();
