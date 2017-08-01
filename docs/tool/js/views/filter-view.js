@@ -3,16 +3,12 @@
 var filterView = {
 
     addClearPillboxes: function(msg,data){
-    
-        for (var i=0; i < filterView.filterControls.length; i++){
-            var x = filterView.filterControls[i]['component']['source'] //display_name
-        }
 
         //Compare our activated filterValues (from the state module) to the list of all 
         //possible filterControls to make a list containing only the activated filter objects. 
         //filterValues = obj with keys of the 'source' data id and values of current setpoint
         //filterControls = list of objects that encapsulates the actual component including its clear() method
-        var activeFilterIds = []
+        var activeFilterControls = []
         var filterValues = filterUtil.getFilterValues()
         for (var key in filterValues){
             // An 'empty' filterValues array has a single element,
@@ -21,33 +17,83 @@ var filterView = {
                 var control = filterView.filterControls.find(function(obj){
                     return obj['component']['source'] === key;
                 })
-                activeFilterIds.push(control)
+                activeFilterControls.push(control)
             };
         }
+
+        var nullsShown = filterUtil.getNullsShown();
+        Object.keys(nullsShown).forEach(function(key){
+            var control = filterView.filterControls.find(function(obj){
+                return obj['component']['source'] === key;
+            })
+            // The default nullsShown value is 'true'. If it's different than the default,
+            // and the control hasn't already been added to activeFilterControls,
+            // add the data choice's associated control to the array that we're using
+            // to determine which filters to mark as altered.
+            if(nullsShown[key][0] === false && activeFilterControls.indexOf(control) === -1){
+                activeFilterControls.push(control);
+            }
+        });
         
         //Use d3 to bind the list of control objects to our html pillboxes
-        var oldPills = d3.select('#clear-pillbox-holder')
+        var allPills = d3.select('#clear-pillbox-holder')
                         .selectAll('.clear-single')
-                        .data(activeFilterIds)
+                        .data(activeFilterControls, function(d){
+                            return d.component.source;
+                        })
                         .classed("not-most-recent",true);
 
-        var allPills = oldPills.enter().append("div")
-            .attr("class","ui label transition visible")
+        allPills.enter().append("div")
+            .attr("class","ui label transition hidden")
             .classed("clear-single",true)
-          .merge(oldPills)
-            .text(function(d) { return d['component']['display_name'];});
+            // Animate a label that 'flies' from the filter component
+            // to the pillbox.
+            .text(function(d) { return d['component']['display_name'];})
+            .each(function(d){
+                var originElement = document.getElementById("filter-content-"+d.component.source);
+                var destinationElement = this;
+                var flyLabel = document.createElement('div');
+                flyLabel.textContent = this.textContent;
+                console.log("flyer this", this);
+                flyLabel.classList.add('ui', 'label', 'transition', 'visible', 'clear-single-flier');
+                var originRect = originElement.getBoundingClientRect();
+                flyLabel.style.left = originRect.left + 'px';
+                flyLabel.style.top = ((originRect.top + originRect.bottom)/2) + 'px';
+                var flyLabelX = document.createElement('i');
+                flyLabelX.classList.add('delete', 'icon');
+                document.body.appendChild(flyLabel);
+                flyLabel.appendChild(flyLabelX);
 
+                // Change the 'top' and 'left' CSS properties of flyLabel,
+                // triggering its CSS transition.
+                window.setTimeout(function(){
+                    flyLabel.style.left = destinationElement.getBoundingClientRect().left + 'px';
+                    flyLabel.style.top = destinationElement.getBoundingClientRect().top + 'px';
+                }, 1);
+
+                // Remove flyLabel after its transition has elapsed.
+                window.setTimeout(function(){
+                    flyLabel.parentElement.removeChild(flyLabel);
+                    destinationElement.classList.remove('hidden');
+                    destinationElement.classList.add('visible');
+                }, 1500);
+
+            })
         //Add the 'clear' x mark and its callback
-        allPills.each(function(d) {
-            d3.select(this).append("i")
-                .classed("delete icon",true)
-                .on("click", function(d) {
-                    d.clear();
-                })
-        });
+            .append('i')
+            .classed("delete icon",true)
+            .on("click", function(d) {
+                d.clear();
+            })
+                 
+        allPills.exit()
+        .transition()
+            .duration(750)
+            .style("opacity",0)
+            .remove();
 
-        oldPills.exit().remove();
-
+        
+        
     },
 
     init: function(msg, data) {
@@ -61,8 +107,10 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
+                ['nullsShown', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
                 ['filterValues', filterView.addClearPillboxes],
+                ['nullsShown', filterView.addClearPillboxes],
                 ['dataLoaded.filterData', filterView.formatFilterDates],
                 ['filterDatesFormatted', filterView.buildFilterComponents],
                 ['subNavExpanded.right', filterView.expandSidebar],
@@ -146,7 +194,7 @@ var filterView = {
             return new Date(+dateSplit[0], +dateSplit[1] - 1, +dateSplit[2]);
         }
 
-        model.dataCollection.filterData.items.forEach(function(item){
+        model.dataCollection.filterData.objects.forEach(function(item){
             dateComponents.forEach(function(dateComponent){
                 if(item.hasOwnProperty(dateComponent.source)){
                     item[dateComponent.source] = makeDateFromString(item[dateComponent.source]);
@@ -163,28 +211,25 @@ var filterView = {
         this.component = component;
     },
     nullValuesToggle: function(component, filterControl){
-        this.element = document.createElement('div');
-        this.element.classList.add("null-switch-area");
+        var ths = this;
+        this.container = document.createElement('div');
+        this.container.classList.add('nullsToggleContainer');
+        this.element = document.createElement('input');
+        this.element.setAttribute('type', 'checkbox');
+        this.element.setAttribute('value', 'showNulls-' + component.source);
+        this.element.setAttribute('name', 'showNulls-' + component.source);
 
-        var switchContainer = document.createElement('div');
-        switchContainer.setAttribute('id', component.source + '-toggle-null');
-        switchContainer.classList.add('null-toggle-container');
-
-        var switchBackground = document.createElement('div');
-        switchBackground.classList.add('null-toggle-background');
-        var switchHandle = document.createElement('div');
-        switchHandle.classList.add('null-toggle-switch');
         if(filterControl.hasOwnProperty('nullsShown') && filterControl.nullsShown){
-            switchContainer.classList.add('switched-on');
+            this.element.checked = filterControl.nullsShown;
         }
         var txt = document.createTextNode("Unknown values included");
 
+        var toggleAction;
+
         this.toDOM = function(parentElement){
-            parentElement.appendChild(this.element);
-            this.element.appendChild(switchContainer);
-            switchContainer.appendChild(switchBackground);
-            switchContainer.appendChild(switchHandle);
-            this.element.appendChild(txt);
+            parentElement.appendChild(this.container);
+            this.container.appendChild(this.element);
+            this.container.appendChild(txt);
         }
 
         // toggles between values 'true' and 'false' 
@@ -195,10 +240,17 @@ var filterView = {
                 object[property] = object[property] || false;
                 object[property] = !object[property];
 
-                switchContainer.classList.toggle('switched-on');
                 callback();
             }
-            switchContainer.addEventListener('click', toggleProperty);
+            this.element.addEventListener('change', toggleProperty);
+            toggleAction = toggleProperty;
+        }
+
+        this.triggerToggleWithoutClick = function(){
+            if(toggleAction){
+                toggleAction();
+                this.element.checked = filterControl.nullsShown;
+            }
         }
     },
     // filterTextInput takes as a parameter an array of keys.
@@ -351,12 +403,16 @@ var filterView = {
                 .classed("slider",true)
                 .attr("id",c.source);
 
-        var allDataValuesForThisSource = model.dataCollection.filterData.items.map(function(item){
+        var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
             return item[c.source];
         });
         
-        var minDatum = d3.min(allDataValuesForThisSource) || c.min;
-        var maxDatum = d3.max(allDataValuesForThisSource) || c.max;
+        // Hardcoding the min and max if there's no d3.min or max 
+        // available. This is for filters that we don't have
+        // filterData for yet. Remove the magic number operands
+        // once we have all the filterData connected to the API.
+        var minDatum = d3.min(allDataValuesForThisSource) || 0;
+        var maxDatum = d3.max(allDataValuesForThisSource) || 1;
 
         var inputContainer = document.createElement('span');
         inputContainer.setAttribute('id', c.source + '-input');
@@ -469,11 +525,13 @@ var filterView = {
             slider.noUiSlider.reset();
             textInputs.reset();
             setState(specific_state_code, []);
+            toggle.triggerToggleWithoutClick();
+            setState('nullsShown.' + component.source, true);
         }
 
         this.isTouched = function(){
             var returnVals = textInputs.returnValues();
-            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum;
+            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
         }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
@@ -501,7 +559,7 @@ var filterView = {
         document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
 
         // this is used for d3.min and d3.max.
-        var componentValuesOnly = model.dataCollection.filterData.items.map(function(item){
+        var componentValuesOnly = model.dataCollection.filterData.objects.map(function(item){
             return item[c.source];
         });
             
@@ -642,11 +700,13 @@ var filterView = {
             slider.noUiSlider.reset();
             dateInputs.reset();
             setState(specific_state_code, []);
+            toggle.triggerToggleWithoutClick();
+            setState('nullsShown.' + component.source, true);
         }
 
         this.isTouched = function(){
             var dateValues = getValuesAsDates();
-            return dateValues.min !== minDatum || dateValues.max !== maxDatum;
+            return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
         }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
@@ -832,7 +892,7 @@ var filterView = {
     buildFilterComponents: function(){
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
-        var workingData = model.dataCollection['filterData'].items; 
+        var workingData = model.dataCollection['filterData'].objects; 
         
         var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
@@ -929,36 +989,26 @@ var filterView = {
 
             this.pill = document.createElement('div');
             this.pill.id = 'clearFiltersPillbox';
-            this.pill.classList.add('ui', 'label', 'transition', 'visible');
+            this.pill.classList.add('ui', 'label', 'transition', 'visible', 'clear-all');
 
-            this.site = document.getElementById('button-filters');
-            this.replacedText = this.site.innerText;
+            this.site = document.getElementById('clear-pillbox-holder');
 
-            this.trigger = document.createElement('i');
-            this.trigger.id = 'clearFiltersTrigger';
-            this.trigger.classList.add('delete', 'icon');
-
-            this.site.innerText = "";
-
-            this.pill.innerText = this.replacedText;
-
-            this.site.appendChild(this.pill);
-            this.pill.appendChild(this.trigger);
+            this.site.insertBefore(this.pill, this.site.firstChild);
+            this.pill.textContent = "Clear all filters";
             
-            this.trigger.addEventListener('click', function(e){
-                e.stopPropagation();
+            this.pill.addEventListener('click', function(){
                 filterView.clearAllFilters();
             });
         },
-        replacedText: undefined,
         site: undefined,
         tearDown: function(){
-            this.pill.parentElement.removeChild(this.pill);
-            this.trigger.parentElement.removeChild(this.trigger);
-            this.site.innerText = this.replacedText;
-        },
-        trigger: undefined
-    },
+            d3.select('#'+this.pill.id)
+                .transition()
+                    .duration(750)
+                    .style("opacity",0)
+                    .remove();
+
+        }    },
 
     handleFilterClearance: function(message, data){
         if(data === true){
@@ -973,22 +1023,26 @@ var filterView = {
         //add/remove classes to the on-page elements that tell the users which filters are currently activated
         //e.g. the filter sidebar data name titles
         var filterValues = filterUtil.getFilterValues();
+        var nullsShown = filterUtil.getNullsShown();
         var filterStateIsActive = getState()['anyFilterActive'] && getState()['anyFilterActive'][0] == true;
-        var noRemainingFilters = ((Object.keys(filterValues)).filter(function(key){
-            // An 'empty' filterValues array has one element,
-            // the value of nullsShown.
-            return filterValues[key][0].length > 0;
-        })).length == 0;
 
-        for (key in filterValues){
-            // An 'empty' filterValues array has one element,
-            // the value of nullsShown.
-            var activated = filterValues[key][0].length == 0 ? false : true;
-            
+        var activeNullsShownKeys = Object.keys(nullsShown).filter(function(key){
+            return nullsShown[key][0] === false;
+        })
+
+        var activeFilterValuesKeys = Object.keys(filterValues).filter(function(key){
+            return filterValues[key][0].length > 0;
+        })
+
+        var allActiveKeys = activeFilterValuesKeys.concat(activeNullsShownKeys);
+
+        var noRemainingFilters = allActiveKeys.length === 0;
+
+        Object.keys(filterValues).forEach(function(key){
+            var activated = allActiveKeys.indexOf(key) !== -1
             d3.select('#filter-'+key)
                 .classed("filter-activated",activated);
-        
-        };
+        });
 
         if(noRemainingFilters && filterStateIsActive){
             setState('anyFilterActive', false);

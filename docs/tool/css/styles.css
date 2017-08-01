@@ -56,11 +56,13 @@ html, body {
     width: -webkit-calc(100% - 40px);
     width:    -moz-calc(100% - 40px);
     width:         calc(100% - 40px); 
+
+    padding: 10px 0px 10px 10px;
 }
-.sub-nav-heading h1 {
+.sub-nav-heading h1,
+.sub-nav-group h1 {
     font-size: 16px;
     font-weight: bold;
-    padding: 10px 0px 10px 10px;
 }
 
 /* Text input boxes within sidebars */
@@ -94,7 +96,7 @@ div.filter.content .continuous-input-text{
 }
 
 .text-input{
-    margin-left: 25px;
+    margin-left: 20px;
 }
 
 button.nullValuesToggleSubmit{
@@ -125,49 +127,6 @@ button.nullValuesToggleSubmit::before {
     border-color: white;
 }
 
-/* the toggle switches for filter controls */
-div.null-switch-area{
-    margin-top: 30px;
-    margin-left: 25px;
-}
-div.null-toggle-container{
-    display: inline-block;
-    position: relative;
-    vertical-align: middle;
-}
-
-div.null-toggle-container div.null-toggle-background{
-    display: inline-block;
-    position: relative;
-    width: 30px;
-    height: 20px;
-    border-radius: 20%;
-    background: rgba(150, 150, 150, 1);
-}
-
-div.null-toggle-container div.null-toggle-switch{
-    display: inline-block;
-    position: relative;
-    left: -40px;
-    top: 3px;
-    width: 25px;
-    height: 25px;
-    transition: left 200ms;
-    border-radius: 50%;
-    background: rgb(253,126,35);
-    cursor: pointer;
-    box-shadow: 0px 1px 1px rgb(100, 100, 100);
-}
-
-div.null-toggle-container.switched-on div.null-toggle-switch{
-    left: -15px !important;
-}
-
-div.null-toggle-container.switched-on div.null-toggle-background{
-    background: rgba(253, 126, 35, .5) !important;
-
-}
-
 /*Color code the text for projects that match the specified filters*/
 .matching {
     color:rgba(253,126,35,0.7) !important;
@@ -180,12 +139,23 @@ div.null-toggle-container.switched-on div.null-toggle-background{
 
 .sub-nav-group {
     padding: 0px 10px 0px 10px;
+    overflow-y: auto;
+    
 }
+#project-preview-group{
+    flex: 0 1 auto;
+    height: 350px;
+}
+#projects-list-group{
+    flex: 1 1 auto; /*makes the list expand to fill rest of available space, while both preview and list shrink if needed*/
+    height: 350px; /*need some basis for flexbox to not oversquish the other container*/
+}
+
 .scroll-y {
     overflow-y: auto;
 }
 
-#buildings-list {
+#projects-list {
     margin-top: 0px;
 }
 
@@ -219,14 +189,9 @@ div.null-toggle-container.switched-on div.null-toggle-background{
 }
 
 #clear-pillbox-holder {
-    position: absolute;
-    z-index:10;
-    top: 50px;
-    flex-grow: 1;
-    padding-left: 10px;
-    padding-right: 50px; /*allows space for mapbox zoom control*/
+    position: relative;
+    display: block;
 }
-
 .main-view {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
@@ -311,7 +276,6 @@ div.null-toggle-container.switched-on div.null-toggle-background{
 }
 */
 
-
 .sidebar-inner-wrapper>div {
     flex-grow: 1;
 }
@@ -322,6 +286,17 @@ div.null-toggle-container.switched-on div.null-toggle-background{
     right: 15px;
     z-index:100;
     cursor: pointer;
+}
+
+.nullsToggleContainer{
+    margin-top: 5px;
+    margin-left: 25px;
+}
+
+.nullsToggleContainer input[type=checkbox]{
+    display: inline-block;
+    margin-right: 3px;
+    vertical-align: top;
 }
 
 #pie-charts {
@@ -379,8 +354,20 @@ Others are working correctly.
     transition: max-width 0.2s linear;
 }
 
+#project-preview {
+    height:350px;
+}
 
-#buildings-list>div {
+#project-preview .preview-field.proj_name{
+    font-weight:bold;
+    font-size:1.1em;
+}
+#project-preview a.proj_name{
+    font-weight:bold;
+    font-size:1.2em;
+    cursor: pointer;
+}
+#projects-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
@@ -390,17 +377,37 @@ Others are working correctly.
     border-bottom: 1px solid gray;
 
 }
-#buildings-list>div .project-title {
+#projects-list>div .project-title {
     font-weight: bold;
     font-size: 1em;
 }
-#buildings-list>div:hover {
+
+#projects-list>div:hover {
     background-color: #ddebff;
 }
-#buildings-list>div.enter, #buildings-list>div.update {
+#projects-list>div.enter, #projects-list>div.update {
     padding: 5px 4px;
     max-height: 100px;
     opacity: 1;
+}
+
+
+.mapboxgl-popup-content .tooltip-field {
+    font-weight: normal;
+    font-size:0.8em;
+}
+
+.mapboxgl-popup-content {
+    cursor: pointer;
+}
+.mapboxgl-popup-content .tooltip-field.proj_name {
+    font-weight: bold;
+    font-size:1em;
+}
+
+.mapboxgl-popup-close-button {
+    font-size:2em !important;
+
 }
 .sidebar-tab {
     width: 20px;
@@ -525,7 +532,7 @@ a.active {
 /*Partially override semantic-ui styling, so some is inherited from there*/
 
 /*Mimics accordion title styling*/
-#filters .header {
+.sub-nav-container .header {
     font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
     font-size: 1.3em;
     background: #d69c93;
@@ -612,10 +619,34 @@ a.active {
 /*Clear filter pillboxes*/
 .ui.label.clear-single {
     background-color: rgba(253,126,35,0.7);
+    display: inline-block !important;
+    position: relative;
     font-size: .95em;
     margin-top:5px;
 }
 
+.ui.label.clear-single-flier {
+    background-color: rgba(253,126,35,0.7);
+    display: block;
+    position: absolute !important;
+    font-size: .95em;
+    z-index: 99999;
+    transition: left 1.5s, top 1.5s;
+}
+
+.ui.label.clear-all {
+    background-color: rgba(150,150,150,0.7);
+    display: block !important;
+    position: relative;
+    font-size: .95em;
+    margin-top:5px;
+    margin-left: 2px;
+    cursor: pointer;
+}
+
+.ui.label.clear-all:hover {
+    color: rgb(50, 50, 50) !important;
+}
 
 /* chloroplath legend */
 
@@ -659,3 +690,17 @@ a.active {
     margin-top: 20px;
 }
 
+
+
+dl.inline dd {
+  display: inline;
+  margin: 0;
+}
+dl.inline dd:after{
+  display: block;
+  content: '';
+}
+dl.inline dt{
+  display: inline-block;
+  min-width: 75px;
+}
