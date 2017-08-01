@@ -65,6 +65,68 @@ html, body {
     font-weight: bold;
 }
 
+/* Text input boxes within sidebars */
+div.filter.content input.filter-text{
+    display: inline-block;
+    position: relative;
+    height: 2em;
+    border: 1px solid rgb(230, 230, 230);
+    box-sizing: border-box;
+}
+
+div.filter.content input.year-text {
+    width: 40px;
+}
+div.filter.content input.month-text, 
+div.filter.content input.day-text {
+    width: 20px;
+}
+
+div.filter.content .continuous-input-text{
+    width: 40px;
+}
+
+.text-input.date span{
+    margin-left: .3em;
+    margin-right: .3em;
+}
+.text-input.continuous span{
+    margin-left: 3em;
+    margin-right: 3em;
+}
+
+.text-input{
+    margin-left: 20px;
+}
+
+button.nullValuesToggleSubmit{
+    height: 1.5em;
+    width: 1.5em;
+    background: rgb(100, 100, 100);
+    display: inline-block;
+    position: relative;
+    border: none;
+    border-radius: 5px;
+    vertical-align: middle;
+    margin-left:2px;
+}
+
+/* drawn from https://codepen.io/jonneal/pen/kptBs */
+button.nullValuesToggleSubmit::before {
+    border-style: solid;
+    border-width: .25em .25em 0 0;
+    content: '';
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    top: .3em;
+    left: -.1em;
+    transform: rotate(45deg);
+    width: .75em;
+    height: .75em;
+    border-color: white;
+}
+
 /*Color code the text for projects that match the specified filters*/
 .matching {
     color:rgba(253,126,35,0.7) !important;
@@ -214,7 +276,6 @@ html, body {
 }
 */
 
-
 .sidebar-inner-wrapper>div {
     flex-grow: 1;
 }
@@ -225,6 +286,17 @@ html, body {
     right: 15px;
     z-index:100;
     cursor: pointer;
+}
+
+.nullsToggleContainer{
+    margin-top: 5px;
+    margin-left: 25px;
+}
+
+.nullsToggleContainer input[type=checkbox]{
+    display: inline-block;
+    margin-right: 3px;
+    vertical-align: top;
 }
 
 #pie-charts {

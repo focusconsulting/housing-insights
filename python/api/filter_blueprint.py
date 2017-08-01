@@ -1,86 +1,67 @@
 
 from flask import Blueprint
 from flask import jsonify
+from api.utils import get_zone_facts_select_columns
 
 import logging
 
+from flask_cors import cross_origin
 
 def construct_filter_blueprint(name, engine):
 
     blueprint = Blueprint(name, __name__, url_prefix='/api')
 
     @blueprint.route('/filter/', methods=['GET'])
+    @cross_origin()
     def filter_data():
+
+        ward_selects, cluster_selects, tract_selects = get_zone_facts_select_columns(engine)
+
         q = """
-            select p_z_w_nc.*,
-            poverty_rate as census_tract_poverty_rate,
-            fraction_black as census_tract_fraction_black,
-            income_per_capita as census_tract_income_per_capita,
-            labor_participation as census_tract_labor_participation,
-            fraction_foreign as census_tract_fraction_foreign,
-            fraction_single_mothers as census_tract_fraction_single_mothers,
-            acs_lower_rent_quartile as census_tract_acs_lower_rent_quartile,
-            acs_median_rent as census_tract_median_rent,
-            acs_upper_rent_quartile as census_tract_acs_upper_rent_quartile,
-            crime_count as census_tract_crime_count,
-            violent_crime_count as census_tract_violent_crime_count,
-            non_violent_crime_count as census_tract_non_violent_crime_count,
-            crime_rate as census_tract_crime_rate,
-            violent_crime_rate as census_tract_violent_crime_rate,
-            non_violent_crime_rate as census_tract_non_violent_crime_rate,
-            building_permits as census_tract_building_permits,
-            construction_permits as census_tract_construction_permits
-            from zone_facts
-            right join (  select p_z_w.*,
-              poverty_rate as neighborhood_cluster_poverty_rate,
-              fraction_black as neighborhood_cluster_fraction_black,
-              income_per_capita as neighborhood_cluster_income_per_capita,
-              labor_participation as neighborhood_cluster_labor_participation,
-              fraction_foreign as neighborhood_cluster_fraction_foreign,
-              fraction_single_mothers as neighborhood_cluster_fraction_single_mothers,
-              acs_lower_rent_quartile as neighborhood_cluster_acs_lower_rent_quartile,
-              acs_median_rent as neighborhood_cluster_median_rent,
-              acs_upper_rent_quartile as neighborhood_cluster_acs_upper_rent_quartile,
-              crime_count as neighborhood_cluster_crime_count,
-              violent_crime_count as neighborhood_cluster_violent_crime_count,
-              non_violent_crime_count as neighborhood_cluster_non_violent_crime_count,
-              crime_rate as neighborhood_cluster_crime_rate,
-              violent_crime_rate as neighborhood_cluster_violent_crime_rate,
-              non_violent_crime_rate as neighborhood_cluster_non_violent_crime_rate,
-              building_permits as neighborhood_cluster_building_permits,
-              construction_permits as neighborhood_cluster_construction_permits
-              from zone_facts
-              right join ( select project.*,
-                poverty_rate as ward_poverty_rate,
-                fraction_black as ward_fraction_black,
-                income_per_capita as ward_income_per_capita,
-                labor_participation as ward_labor_participation,
-                fraction_foreign as ward_fraction_foreign,
-                fraction_single_mothers as ward_fraction_single_mothers,
-                acs_lower_rent_quartile as ward_acs_lower_rent_quartile,
-                acs_median_rent as ward_median_rent,
-                acs_upper_rent_quartile as ward_acs_upper_rent_quartile,
-                crime_count as ward_crime_count,
-                violent_crime_count as ward_violent_crime_count,
-                non_violent_crime_count as ward_non_violent_crime_count,
-                crime_rate as ward_crime_rate,
-                violent_crime_rate as ward_violent_crime_rate,
-                non_violent_crime_rate as ward_non_violent_crime_rate,
-                building_permits as ward_building_permits,
-                construction_permits as ward_construction_permits
-                from project
-                left join zone_facts on project.ward = zone_facts.zone
-                ) as p_z_w
-              on p_z_w.neighborhood_cluster = zone_facts.zone
-              ) as p_z_w_nc
-            on p_z_w_nc.census_tract = zone_facts.zone;
+                select
+                p.nlihc_id
+                , p.proj_addre
+                , p.proj_name
+                , p.proj_units_tot
+                , p.proj_units_assist_max
+                , cast(p.proj_units_assist_max / p.proj_units_tot as decimal(3,2)) as percent_affordable_housing --TODO make this calculated field in projects table
+                , p.hud_own_type
+                , p.ward
+                , p.anc
+                , p.census_tract
+                , p.neighborhood_cluster
+                , p.neighborhood_cluster_desc
+                , p.zip
+
+                , s.portfolio
+                , s.agency
+                , to_char(s.poa_start, 'YYYY-MM-DD') as poa_start
+                , to_char(s.poa_end, 'YYYY-MM-DD') as poa_end
+                , to_char(s.poa_start_orig, 'YYYY-MM-DD') as poa_start_orig
+
+                , s.units_assist
+                , s.subsidy_id
+                
+            """
+        q += ward_selects
+        q += cluster_selects
+        q += tract_selects
+
+        q += """
+                from project as p
+                
+                left join zone_facts as z1 on z1.zone = p.ward
+                left join zone_facts as z2 on z2.zone = p.neighborhood_cluster
+                left join zone_facts as z3 on z3.zone = p.census_tract
+
+                left join subsidy as s on s.nlihc_id = p.nlihc_id
             """
 
         conn = engine.connect()
         proxy = conn.execute(q)
         results = [dict(x) for x in proxy.fetchall()]
         conn.close()
-        output = {'items': results}
+        output = {'objects': results}
         return jsonify(output)
 
     #End of the constructor returns the assembled blueprint

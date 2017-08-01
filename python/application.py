@@ -47,9 +47,19 @@ application = Flask(__name__)
 #######################
 # Flask Restless Setup
 #######################
+# Allow us to test locally if desired
+if 'docker' in sys.argv:
+    database_choice = 'docker_database'
+elif 'remote' in sys.argv:
+    database_choice = 'remote_database'
+else:
+    database_choice = 'codefordc_remote_admin'
+
 with open('housinginsights/secrets.json') as f:
     secrets = json.load(f)
-    connect_str = secrets['docker_database']['connect_str']
+    connect_str = secrets[database_choice]['connect_str']
+
+logging.info("Connecting to database {}".format(database_choice))
 
 application.config['SQLALCHEMY_DATABASE_URI'] = connect_str
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -105,16 +115,6 @@ application.json_encoder = CustomJSONEncoder
 
 # Allow cross-origin requests. TODO should eventually lock down the permissions on this a bit more strictly, though only allowing GET requests is a good start.
 CORS(application, resources={r"/api/*": {"origins": "*"}}, methods=['GET'])
-
-# Allow us to test locally if desired
-if 'docker' in sys.argv:
-    database_choice = 'docker_database'
-else:
-    database_choice = 'remote_database'
-
-with open('housinginsights/secrets.json') as f:
-    secrets = json.load(f)
-    connect_str = secrets[database_choice]['connect_str']
 
 
 # Should create a new connection each time a separate query is needed so that API can recover from bad queries
@@ -182,22 +182,24 @@ from api.summarize_observations import construct_summarize_observations
 from api.project_view_blueprint import construct_project_view_blueprint
 from api.filter_blueprint import construct_filter_blueprint
 from api.zone_facts_blueprint import construct_zone_facts_blueprint
+from api.project_extended_constructor import construct_project_extended_blueprint
 
 # Generate blueprints w/ any needed arguments
 sum_obs_blue = construct_summarize_observations('sum_obs',engine)
 project_view_blue = construct_project_view_blueprint('project_view',engine)
 filter_blue = construct_filter_blueprint('filter', engine)
 zone_facts = construct_zone_facts_blueprint('zone_facts',engine)
+project_extended = construct_project_extended_blueprint('project_extended',engine)
 
 # Register all the blueprints
-for blueprint in [sum_obs_blue, project_view_blue, filter_blue, zone_facts]:
+for blueprint in [sum_obs_blue, project_view_blue, filter_blue, zone_facts, project_extended]:
     application.register_blueprint(blueprint)
 
 # Register Flask Restless blueprints
 for model in models:
     # https://github.com/jfinkels/flask-restless/pull/436
     model.__tablename__ = model.__table__.name
-    blueprint = manager.create_api_blueprint(model, methods=['GET'])
+    blueprint = manager.create_api_blueprint(model, url_prefix = '/api/raw', results_per_page=100, max_results_per_page=10000, methods=['GET'])
     application.register_blueprint(blueprint)
 
 
@@ -206,31 +208,8 @@ for model in models:
 #Real endpoints
 #######################
 
-
-
-#TODO this should be deleted when the declarative method is brought in
-@application.route('/api/raw/<table>', methods=['GET'])
-@cross_origin()
-def list_all(table):
-    """ Generate endpoint to list all data in the tables. """
-
-    application.logger.debug('Table selected: {}'.format(table))
-    if table not in tables:
-        application.logger.error('Error:  Table does not exist.')
-        abort(404)
-
-    #Query the database
-    conn = engine.connect()
-    q = 'SELECT row_to_json({}) from {} limit 1000;'.format(table, table)
-    proxy = conn.execute(q)
-    results = [x[0] for x in proxy.fetchmany(1000)] # Only fetching 1000 for now, need to implement scrolling
-    #print(results)
-    conn.close()
-
-    return jsonify(items=results)
-
-
 @application.route('/api/meta', methods=['GET'])
+@cross_origin()
 def get_meta():
     '''
     Outputs the meta.json to the front end

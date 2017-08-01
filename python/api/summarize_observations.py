@@ -14,10 +14,11 @@ them registered in case they are needed.
 
 
 from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
 
 import dateutil.parser as dateparser
 
-from api.utils import items_divide
+from api.utils import objects_divide
 
 
 def construct_summarize_observations(name, engine):
@@ -31,6 +32,7 @@ def construct_summarize_observations(name, engine):
     blueprint = Blueprint(name, __name__, url_prefix='/api')
 
     @blueprint.route('/<method>/<table_name>/<filter_name>/<months>/<grouping>', methods=['GET'])
+    @cross_origin()
     def summarize_observations(method,table_name,filter_name,months,grouping):
         '''
         This endpoint takes a table that has each record as list of observations 
@@ -127,11 +129,11 @@ def construct_summarize_observations(name, engine):
         if method == 'rate':
             if table_name in ['building_permits']:
                 denominator = get_residential_units(grouping)
-                api_results = items_divide(api_results, denominator)
+                api_results = objets_divide(api_results, denominator)
                 api_results = scale(api_results, 1000) #per 1000 residential units
             if table_name in ['crime']:
                 denominator = get_weighted_census_results(grouping, 'population')
-                api_results = items_divide(api_results, denominator)
+                api_results = objects_divide(api_results, denominator)
                 api_results = scale(api_results, 100000) #crime incidents per 100,000 people
         
         #Output as JSON
@@ -140,27 +142,27 @@ def construct_summarize_observations(name, engine):
 
     def scale(data,factor):
         '''
-        Multiplies each of the items 'count' entry by the factor
+        Multiplies each of the objects 'count' entry by the factor
         '''
 
-        for idx, d in enumerate(data['items']):
+        for idx, d in enumerate(data['objects']):
             try:
-                data['items'][idx]['count'] = (data['items'][idx]['count'] * factor)
+                data['objects'][idx]['count'] = (data['objects'][idx]['count'] * factor)
             except Exception as e:
-                data['items'][idx]['count'] = None
+                data['objects'][idx]['count'] = None
 
         return data
 
     def get_population(grouping):
         '''
-        Returns the population count for each zone in the standard 'items' format
+        Returns the population count for each zone in the standard 'objects' format
         '''
         #TODO implement me
         return None
 
     def get_residential_units(grouping):
         '''
-        Returns the number of residential units in the standard 'items' format
+        Returns the number of residential units in the standard 'objects' format
         '''
         #TODO implement me
         return None
@@ -195,11 +197,11 @@ def construct_summarize_observations(name, engine):
 
 
             conn.close()
-            return {'items': formatted, 'grouping':grouping, 'data_id':table_name}
+            return {'objects': formatted, 'grouping':grouping, 'data_id':table_name}
 
         #TODO do better error handling - for interim development purposes only
         except Exception as e:
             #conn.close()
-            return {'items': None, 'notes':"Query failed: {}".format(e), 'grouping':grouping, 'data_id':table_name}
+            return {'objects': None, 'notes':"Query failed: {}".format(e), 'grouping':grouping, 'data_id':table_name}
 
     return blueprint

@@ -8,16 +8,33 @@ var filterView = {
         //possible filterControls to make a list containing only the activated filter objects. 
         //filterValues = obj with keys of the 'source' data id and values of current setpoint
         //filterControls = list of objects that encapsulates the actual component including its clear() method
-        var filterValues = filterUtil.getFilterValues();
+        var activeFilterControls = []
+        var filterValues = filterUtil.getFilterValues()
+        for (var key in filterValues){
+            // An 'empty' filterValues array has a single element,
+            // the value of nullsShown.
+            if (filterValues[key][0].length != 0){
+                var control = filterView.filterControls.find(function(obj){
+                    return obj['component']['source'] === key;
+                })
+                activeFilterControls.push(control)
+            };
+        }
 
-        var keysWithActiveFilterValues = Object.keys(filterValues).filter(function(key){
-            return filterValues[key][0].length !== 0;
+        var nullsShown = filterUtil.getNullsShown();
+        Object.keys(nullsShown).forEach(function(key){
+            var control = filterView.filterControls.find(function(obj){
+                return obj['component']['source'] === key;
+            })
+            // The default nullsShown value is 'true'. If it's different than the default,
+            // and the control hasn't already been added to activeFilterControls,
+            // add the data choice's associated control to the array that we're using
+            // to determine which filters to mark as altered.
+            if(nullsShown[key][0] === false && activeFilterControls.indexOf(control) === -1){
+                activeFilterControls.push(control);
+            }
         });
-
-        var activeFilterControls = filterView.filterControls.filter(function(filterControl){
-            return keysWithActiveFilterValues.indexOf(filterControl.component.source) !== -1;
-        });
-      
+        
         //Use d3 to bind the list of control objects to our html pillboxes
         var allPills = d3.select('#clear-pillbox-holder')
                         .selectAll('.clear-single')
@@ -90,8 +107,12 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
+                ['nullsShown', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
                 ['filterValues', filterView.addClearPillboxes],
+                ['nullsShown', filterView.addClearPillboxes],
+                ['dataLoaded.filterData', filterView.formatFilterDates],
+                ['filterDatesFormatted', filterView.buildFilterComponents],
                 ['subNavExpanded.right', filterView.expandSidebar],
                 ['mapLayer', filterView.updateLocationFilterControl],
                 ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
@@ -145,8 +166,7 @@ var filterView = {
             //Get the data and use it to dynamically apply configuration such as the list of categorical options
             controller.getData({
                         name: 'filterData',
-                        url: model.URLS.filterData, 
-                        callback: filterView.buildFilterComponents
+                        url: model.URLS.filterData
                     }) 
         } else {
             console.log("ERROR data loaded === false")
@@ -158,39 +178,273 @@ var filterView = {
         filterView.locationFilterControl.prototype = Object.create(filterView.categoricalFilterControl.prototype);
 
     }, //end init
+    // Iterate through dataCollection.filterData and, for any property
+    // that's of type 'date', turn the value into a JS date.
+    // This is necessary for comparing dates.
+    formatFilterDates: function(){
+        var dateComponents = filterView.components.filter(function(component){
+            return component.component_type === 'date';
+        });
+
+        // assumes the string is of the format yyyy-mm-dd.
+        function makeDateFromString(val){
+            if(val === null){ return null }
+            var dateSplit = val.split('-');
+            
+            return new Date(+dateSplit[0], +dateSplit[1] - 1, +dateSplit[2]);
+        }
+
+        model.dataCollection.filterData.objects.forEach(function(item){
+            dateComponents.forEach(function(dateComponent){
+                if(item.hasOwnProperty(dateComponent.source)){
+                    item[dateComponent.source] = makeDateFromString(item[dateComponent.source]);
+                }
+            });
+        });
+
+        setState("filterDatesFormatted", true);
+
+    },
     filterControls: [],
     filterControl: function(component){
         filterView.filterControls.push(this);
         this.component = component;
     },
+    nullValuesToggle: function(component, filterControl){
+        var ths = this;
+        this.container = document.createElement('div');
+        this.container.classList.add('nullsToggleContainer');
+        this.element = document.createElement('input');
+        this.element.setAttribute('type', 'checkbox');
+        this.element.setAttribute('value', 'showNulls-' + component.source);
+        this.element.setAttribute('name', 'showNulls-' + component.source);
+
+        if(filterControl.hasOwnProperty('nullsShown') && filterControl.nullsShown){
+            this.element.checked = filterControl.nullsShown;
+        }
+        var txt = document.createTextNode("Unknown values included");
+
+        var toggleAction;
+
+        this.toDOM = function(parentElement){
+            parentElement.appendChild(this.container);
+            this.container.appendChild(this.element);
+            this.container.appendChild(txt);
+        }
+
+        // toggles between values 'true' and 'false' 
+        // of object.property when the switch is clicked.
+        this.bindPropertyToToggleSwitch = function(object, property, callback){
+            function toggleProperty(){
+                // Assign the property if it hasn't been assigned.
+                object[property] = object[property] || false;
+                object[property] = !object[property];
+
+                callback();
+            }
+            this.element.addEventListener('change', toggleProperty);
+            toggleAction = toggleProperty;
+        }
+
+        this.triggerToggleWithoutClick = function(){
+            if(toggleAction){
+                toggleAction();
+                this.element.checked = filterControl.nullsShown;
+            }
+        }
+    },
+    // filterTextInput takes as a parameter an array of keys.
+    // It produces text inputs corresponding to these keys and
+    // tracks their values.
+    // sourceObj is one element in dataChoices.
+    // keyValuePairsArray takes the form, [[key, val], [key, val]...]
+    filterTextInput: function(sourceObj, keyValuePairsArrayMin, keyValuePairsArrayMax){
+        var output = {
+            min: {},
+            max: {}
+        };
+
+        var initialValues = {
+            min: keyValuePairsArrayMin,
+            max: keyValuePairsArrayMax
+        }
+
+        var submitButton = document.createElement('button');
+        submitButton.classList.add('nullValuesToggleSubmit');
+        submitButton.setAttribute('type', 'button');
+
+        // separatorCallback is a function that returns
+        // a JavaScript Node object to be appended after each
+        // input element.
+        this.toDOM = function(parentElement, separatorCallback){
+            var toSpan = document.createElement('span');
+            toSpan.textContent = 'to';
+            for(var pole in output){
+                for(var key in output[pole]){
+                    parentElement.appendChild(output[pole][key]);
+                    if(separatorCallback && Object.keys(output[pole]).indexOf(key) < Object.keys(output[pole]).length - 1){
+                        parentElement.appendChild(separatorCallback());
+                    }
+                }
+                if(pole === 'min'){
+                    parentElement.appendChild(toSpan);
+                }
+            }
+            parentElement.appendChild(submitButton);
+        }
+
+        this.setValues = function(keyValuePairsArrayMin, keyValuePairsArrayMax){
+            for(var i = 0; i < keyValuePairsArrayMin.length; i++){
+                output.min[keyValuePairsArrayMin[i][0]].value = keyValuePairsArrayMin[i][1];
+            }
+            for(var i = 0; i < keyValuePairsArrayMax.length; i++){
+                output.max[keyValuePairsArrayMax[i][0]].value = keyValuePairsArrayMax[i][1];
+            }
+        }
+
+        this.reset = function(){
+            this.setValues(initialValues.min, initialValues.max);
+        }
+
+        this.returnValues = function(){
+            var valueOutput = {
+                min: {},
+                max: {}
+            };
+            for(var pole in valueOutput){
+                for(var key in output[pole]){
+                    valueOutput[pole][key] = output[pole][key].value;
+                }
+            }
+            return valueOutput;
+        }
+
+        this.setInputCallback = function(callback){
+            
+            var checkKeyPress = function(e){
+                if(e.charCode === 9 || e.charCode === 13){
+                    callback();
+                }
+            }
+
+            submitButton.addEventListener('click', callback);
+
+            var setUpInputEventListeners = function (element){
+
+                function setUpKeyPressListener(e){
+                    element.addEventListener('keypress', checkKeyPress);
+                }
+
+                function tearDownKeyPressListener(e){
+                    element.removeEventListener('keypress', checkKeyPress)
+                }
+
+                element.addEventListener('focus', setUpKeyPressListener);
+                element.addEventListener('blur', function(e){
+                   callback();
+                   tearDownKeyPressListener(e);
+                });
+            }
+            for(var pole in output){
+                for(var key in output[pole]){
+                    setUpInputEventListeners(output[pole][key]);
+                }
+            }
+
+        }
+
+        this.allInputElements = function(){
+            var minInputs = Object.keys(output['min']).map(function(key){
+                return output['min'][key];
+            });
+
+            var maxInputs = Object.keys(output['max']).map(function(key){
+                return output['max'][key];
+            });
+            return minInputs.concat(maxInputs);
+        }
+
+        for (var i = 0; i < keyValuePairsArrayMin.length; i++){
+            output['min'][keyValuePairsArrayMin[i][0]] = document.createElement('input');
+            output['min'][keyValuePairsArrayMin[i][0]].setAttribute(
+                'id', sourceObj.source + '-' + keyValuePairsArrayMin[i][0] + '-text'
+            );
+            output['min'][keyValuePairsArrayMin[i][0]].classList.add('filter-text');
+            output['min'][keyValuePairsArrayMin[i][0]].classList.add(keyValuePairsArrayMin[i][0] + '-text');
+            output['min'][keyValuePairsArrayMin[i][0]].setAttribute('name', keyValuePairsArrayMin[i][0]);
+            output['min'][keyValuePairsArrayMin[i][0]].value = keyValuePairsArrayMin[i][1];
+        }
+        for (var i = 0; i < keyValuePairsArrayMax.length; i++){
+            output['max'][keyValuePairsArrayMax[i][0]] = document.createElement('input');
+            output['max'][keyValuePairsArrayMax[i][0]].setAttribute(
+                'id', sourceObj.source + '-' + keyValuePairsArrayMax[i][0] + '-text'
+            );
+            output['max'][keyValuePairsArrayMax[i][0]].classList.add('filter-text');
+            output['max'][keyValuePairsArrayMax[i][0]].classList.add(keyValuePairsArrayMax[i][0] + '-text');
+            output['max'][keyValuePairsArrayMax[i][0]].setAttribute('name', keyValuePairsArrayMax[i][0]);
+            output['max'][keyValuePairsArrayMax[i][0]].value = keyValuePairsArrayMax[i][1];
+        }
+
+    },
     continuousFilterControl: function(component){
         filterView.filterControl.call(this, component);
         var c = this.component;
-        var contentContainer = filterView.setupFilter(c);
 
+        var ths = this;
+
+        this.nullsShown = true;
+
+        var contentContainer = filterView.setupFilter(c);
+        
+        // Begin code common to continuousFilterControl and dateFilterControl
+        // TODO: Consider extracting this to setupFilter
         var slider = contentContainer.append("div")
                 .classed("filter", true)
                 .classed("slider",true)
                 .attr("id",c.source);
 
+        var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
+            return item[c.source];
+        });
+        
+        // Hardcoding the min and max if there's no d3.min or max 
+        // available. This is for filters that we don't have
+        // filterData for yet. Remove the magic number operands
+        // once we have all the filterData connected to the API.
+        var minDatum = d3.min(allDataValuesForThisSource) || 0;
+        var maxDatum = d3.max(allDataValuesForThisSource) || 1;
+
+        var inputContainer = document.createElement('span');
+        inputContainer.setAttribute('id', c.source + '-input');
+        inputContainer.classList.add('text-input', 'continuous');
+
+        document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
+
+        var stepCount = Math.max(1, parseInt((maxDatum - minDatum)/500));
 
         slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
         noUiSlider.create(slider, {
-            start: [c.min, c.max],
+            start: [minDatum, maxDatum],
             connect: true,
 
             //the wNumb is a number formatting library. This is what was recommended by noUiSlider; we should consider using elsewhere.
             //order of the two wNumb calls corresponds to left and right slider respectively.
-            tooltips: [ wNumb({ decimals: c.num_decimals_displayed }), wNumb({ decimals: c.num_decimals_displayed }) ],
+            tooltips: [ false, false ],
             range: {
-                'min': c.min,
-                'max': c.max
-            }
-
+                'min': minDatum,
+                'max': maxDatum
+            },
+            step: stepCount
         });
 
+        var textInputs = new filterView.filterTextInput(
+            component,        
+            [['min', minDatum]],
+            [['max', maxDatum]]
+        );
+
         //Each slider needs its own copy of the sliderMove function so that it can use the current component
-        function makeSliderCallback(component){
+        function makeSliderCallback(component, doesItSetState){
             return function sliderCallback ( values, handle, unencoded, tap, positions ) {
                 // This is the custom binding module used by the noUiSlider.on() callback.
 
@@ -202,30 +456,262 @@ var filterView = {
                 var specific_state_code = 'filterValues.' + component.source
                 
                 //If the sliders have been 'reset', remove the filter
-                if (component.min == unencoded[0] && component.max == unencoded[1]){
-                    unencoded = [];
+                // if (component.min == unencoded[0] && component.max == unencoded[1]){
+                //     unencoded = [];
+                // }
+
+                // For any non-integer numbers resulting
+                // from the filter that are greater than zero,
+                // return the ceiling of that number.
+                unencoded = unencoded.map(function(el){
+                    return el >= 0 ? Math.ceil(el) : el;
+                });
+
+                textInputs.setValues([['min', unencoded[0]]],[['max', unencoded[1]]]);
+
+                unencoded.push(ths.nullsShown);
+
+                if(doesItSetState){
+                    setState(specific_state_code,unencoded);
                 }
-                setState(specific_state_code,unencoded);
+
             }
         }
 
         //Construct a new copy of the function with access to the current c variable
-        var currentSliderCallback = makeSliderCallback(c)
+        var currentSliderCallback = makeSliderCallback(c, true)
+        var slideSliderCallback = makeSliderCallback(c, false)
 
-        //Using 'set' only updates on release. Probably better to use the 'update' method for continuous updates.
-        //using 'set' for now for easier development (less console logging of state changes)
-        slider.noUiSlider.on('set', currentSliderCallback);
+        // Binding currentSliderCallback to 'change'
+        // so that it doesn't trigger when the user changes
+        // the filter values through the text input boxes
+        // (which then move the slider to a certain position)
+        slider.noUiSlider.on('change', currentSliderCallback);
+
+        // Change the value of the text input elements without
+        // setting state
+        slider.noUiSlider.on('slide', slideSliderCallback);
+
+        var inputCallback = function(){
+            var specific_state_code = 'filterValues.' + component.source
+
+            var returnVals = textInputs.returnValues();
+
+            slider.noUiSlider.set(
+                [returnVals['min']['min'], returnVals['max']['max']]
+            );
+
+            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max']]);
+        }
+
+        textInputs.setInputCallback(inputCallback);
+        textInputs.toDOM(
+            document.getElementById(c.source + '-input')
+        );
+
+        textInputs.allInputElements().forEach(function(el){
+            el.classList.add('continuous-input-text');
+        });
+
+        var toggle = new filterView.nullValuesToggle(c, ths);
+        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
+            setState('nullsShown.' + c.source, ths.nullsShown);
+        });
+        toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
         this.clear = function(){
+            var specific_state_code = 'filterValues.' + component.source;
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
+            textInputs.reset();
+            setState(specific_state_code, []);
+            toggle.triggerToggleWithoutClick();
+            setState('nullsShown.' + component.source, true);
         }
 
         this.isTouched = function(){
-            // Since the result of 'get()' is a string, coerce it into a number
-            // before determining equality.
-            return +slider.noUiSlider.get()[0] !== c.min || +slider.noUiSlider.get()[1] !== c.max;
+            var returnVals = textInputs.returnValues();
+            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
         }
+
+        // At the very end of setup, set the 'nullsShown' state so that it's available for
+        // use by code in filter.js that iterates through filterValues.
+        setState('nullsShown.' + c.source, ths.nullsShown);
+    },
+    dateFilterControl: function(component){
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+        var ths = this;
+
+        this.nullsShown = true;
+
+        var contentContainer = filterView.setupFilter(c);
+
+        var slider = contentContainer.append('div')
+            .classed('filter', true)
+            .classed('slider', true)
+            .attr('id', c.source);
+
+        var inputContainer = document.createElement('span');
+        inputContainer.setAttribute('id', c.source + '-input');
+        inputContainer.classList.add('text-input', 'date');
+
+        document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
+
+        // this is used for d3.min and d3.max.
+        var componentValuesOnly = model.dataCollection.filterData.objects.map(function(item){
+            return item[c.source];
+        });
+            
+        var minDatum = d3.min(componentValuesOnly);
+        var maxDatum = d3.max(componentValuesOnly);
+
+        slider = document.getElementById(c.source);
+        noUiSlider.create(slider, {
+            start: [minDatum, maxDatum],
+            connect: true,
+            tooltips: [ false, false ],
+            range: {
+                'min': minDatum.getFullYear(),
+                'max': maxDatum.getFullYear()
+            },
+            step: 1
+        });
+
+        var dateInputs = new filterView.filterTextInput(
+            component,        
+            [
+                ['day', minDatum.getDate()],
+                ['month', minDatum.getMonth() + 1],
+                ['year', minDatum.getFullYear()]
+            ],
+            [
+                ['day', maxDatum.getDate()],
+                ['month', maxDatum.getMonth() + 1],
+                ['year', maxDatum.getFullYear()]
+            ]
+        );
+
+        function makeSliderCallback(component, doesItSetState){
+
+            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
+                // This is the custom binding module used by the noUiSlider.on() callback.
+
+                // values: Current slider values;
+                // handle: Handle that caused the event;
+                // unencoded: Slider values without formatting;
+                // tap: Event was caused by the user tapping the slider (boolean);
+                // positions: Left offset of the handles in relation to the slider
+                var specific_state_code = 'filterValues.' + component.source
+
+                var dateForYear = function(minOrMax, year){
+                    var minOrMaxObj = {
+                        'min': minDatum,
+                        'max': maxDatum
+                    }
+                    if(year === minOrMaxObj[minOrMax].getFullYear()){
+                        return minOrMaxObj[minOrMax];
+                    }
+                    else{
+                        return new Date(year, 0, 1);
+                    }
+                }
+
+                var newMinDate = dateForYear('min', +unencoded[0]);
+                var newMaxDate = dateForYear('max', +unencoded[1]);
+
+                dateInputs.setValues(
+                    [
+                        ['year', newMinDate.getFullYear()],
+                        ['month', newMinDate.getMonth() + 1],
+                        ['day', newMinDate.getDate()]
+                    ],
+                    [
+                        ['year', newMaxDate.getFullYear()],
+                        ['month', newMaxDate.getMonth() + 1],
+                        ['day', newMaxDate.getDate()]
+                    ]
+                );
+
+                if(doesItSetState){
+                    setState(specific_state_code,[newMinDate, newMaxDate]);
+                }
+            }
+        }
+
+        var currentSliderCallback = makeSliderCallback(c, true);
+        var slideSliderCallback = makeSliderCallback(c, false);
+        
+        // Binding currentSliderCallback to 'change'
+        // so that it doesn't trigger when the user changes
+        // the filter values through the text input boxes
+        // (which then move the slider to a certain position)
+        slider.noUiSlider.on('change', currentSliderCallback);
+        
+        // Change the value of the text input elements without
+        // setting state
+        slider.noUiSlider.on('slide', slideSliderCallback);
+
+        function getValuesAsDates(){
+
+            var minVals = dateInputs.returnValues()['min'];
+            var maxVals = dateInputs.returnValues()['max'];
+
+            return {
+                min: new Date(minVals.year, minVals.month - 1, minVals.day),
+                max: new Date(maxVals.year, maxVals.month - 1, maxVals.day)
+            }
+
+        }
+
+        var inputCallback = function(){
+            var specific_state_code = 'filterValues.' + component.source
+
+            var dateValues = getValuesAsDates();
+            
+            slider.noUiSlider.set(
+                [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
+            );
+
+            setState(specific_state_code, [dateValues.min, dateValues.max]);
+        }
+
+        // For separating date inputs with a '/'
+        function addSlash(){
+            return document.createTextNode('/');
+        }
+
+        dateInputs.setInputCallback(inputCallback);
+        dateInputs.toDOM(
+            document.getElementById(c.source + '-input'),
+            addSlash
+        );
+
+        var toggle = new filterView.nullValuesToggle(c, ths);
+        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
+            setState('nullsShown.' + c.source, ths.nullsShown);
+        });
+        toggle.toDOM(document.getElementById('filter-content-' + c.source));
+
+
+        this.clear = function(){
+            var specific_state_code = 'filterValues.' + component.source;
+            // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
+            slider.noUiSlider.reset();
+            dateInputs.reset();
+            setState(specific_state_code, []);
+            toggle.triggerToggleWithoutClick();
+            setState('nullsShown.' + component.source, true);
+        }
+
+        this.isTouched = function(){
+            var dateValues = getValuesAsDates();
+            return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
+        }
+
+        // At the very end of setup, set the 'nullsShown' state so that it's available for
+        // use by code in filter.js that iterates through filterValues.
+        setState('nullsShown.' + c.source, ths.nullsShown);
 
     },
     setupFilter: function(c){
@@ -318,7 +804,7 @@ var filterView = {
                 };
             }; //end clickCallback
 
-            return content
+            return content;
 
     },  
 
@@ -402,7 +888,7 @@ var filterView = {
     buildFilterComponents: function(){
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
-        var workingData = model.dataCollection['filterData'].items; 
+        var workingData = model.dataCollection['filterData'].objects; 
         
         var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
@@ -414,10 +900,18 @@ var filterView = {
             console.log("building filter component: " + filterView.components[i].source);
             
             //Set up sliders
-            if (filterView.components[i].component_type == 'continuous'){
+            if (filterView.components[i].component_type === 'continuous'){
                 
                 new filterView.continuousFilterControl(filterView.components[i]);
             }
+
+            if (filterView.components[i].component_type === 'date'){
+                new filterView.dateFilterControl(filterView.components[i]);
+            }
+                           
+            var parent = d3.select('#filter-components')
+                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
+            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
 
             
             //set up categorical pickers
@@ -468,10 +962,6 @@ var filterView = {
                 
             };
 
-            if (filterView.components[i].component_type == 'date'){
-                //Add a div with label and select element
-                //Bind user changes to a setState function
-            };
 
         }; //end for loop. All components on page.
 
@@ -529,18 +1019,26 @@ var filterView = {
         //add/remove classes to the on-page elements that tell the users which filters are currently activated
         //e.g. the filter sidebar data name titles
         var filterValues = filterUtil.getFilterValues();
+        var nullsShown = filterUtil.getNullsShown();
         var filterStateIsActive = getState()['anyFilterActive'] && getState()['anyFilterActive'][0] == true;
-        var noRemainingFilters = ((Object.keys(filterValues)).filter(function(key){
-            return filterValues[key][0].length > 0;
-        })).length == 0;
 
-        for (key in filterValues){
-            var activated = filterValues[key][0].length == 0 ? false : true;
-            
+        var activeNullsShownKeys = Object.keys(nullsShown).filter(function(key){
+            return nullsShown[key][0] === false;
+        })
+
+        var activeFilterValuesKeys = Object.keys(filterValues).filter(function(key){
+            return filterValues[key][0].length > 0;
+        })
+
+        var allActiveKeys = activeFilterValuesKeys.concat(activeNullsShownKeys);
+
+        var noRemainingFilters = allActiveKeys.length === 0;
+
+        Object.keys(filterValues).forEach(function(key){
+            var activated = allActiveKeys.indexOf(key) !== -1
             d3.select('#filter-'+key)
                 .classed("filter-activated",activated);
-        
-        };
+        });
 
         if(noRemainingFilters && filterStateIsActive){
             setState('anyFilterActive', false);
