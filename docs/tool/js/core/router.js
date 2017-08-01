@@ -63,12 +63,16 @@ var router = {
             if ( dataChoice.component_type === 'continuous' ) {
                 var values = eachArray[1].split('-');
                 setState('filterValues.' + dataChoice.source , [+values[0], +values[1]]  );
+                /*
+                slider.noUiSlider.set(
+                    [returnVals['min']['min'], returnVals['max']['max']]
+                );
+                see filter-view.js line 444
+                */
             }
             if ( dataChoice.component_type === 'categorical' ){
                 var values = eachArray[1].replace('_',' ').split('+');
-                values.forEach(function(value){
-                    $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', value);
-                });
+                $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', value);
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here
