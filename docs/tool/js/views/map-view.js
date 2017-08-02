@@ -35,6 +35,7 @@
                     ['overlaySet', chloroplethLegend.init],
                     ['previewBuilding', mapView.showPopup],
                     ['filteredData', mapView.filterMap],
+                    ['filteredData',mapView.exportCsv],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects]
@@ -104,7 +105,7 @@
             setState('subNav.right', 'charts');
         },
         ChloroplethColorRange: function(chloroData, style){
-            // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
+            // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd
             // make a chloropleth map with a single color, but if you try to,
             // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
             // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
@@ -112,7 +113,7 @@
             var MIN_COLOR = 'rgba(255,255,255,0.6)'// "#fff";
             var MAX_COLOR = 'rgba(30,92,223,0.6)'//"#1e5cdf";
 
-            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can 
+            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can
             //especially screw up the scale when using rates as they come back as a count instead of a rate
             var currentLayer = getState().mapLayer[0]
             var activeZones = []
@@ -185,7 +186,7 @@
 
 
 
-        //No longer used - we are moving this into the combined filter/layer setup. 
+        //No longer used - we are moving this into the combined filter/layer setup.
         //Keep this code here until we confirm the removal of separate layers menu with user tests around 7/25
         //TODO remove once confirmed
         /*
@@ -223,8 +224,8 @@
 
             var legendLocation = content.append("div")
                 .attr("id", "overlay-" + overlay.source + "-legend") // TODO need to change this to different variable after changing meta logic structure
-                .style("height", "150px"); 
-                
+                .style("height", "150px");
+
             $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
 
             //Set it up to trigger the layer when title is clicked
@@ -311,7 +312,7 @@
 
             //If we haven't loaded the data yet, need to get it
             if (getState()['joinedToGeo.' + data.overlay + '_' + data.activeLayer] === undefined) {
-                
+
                 //When data is loaded, display the layer if possible or switch to the default zone type instead.
                 function dataCallback(d) {
                     var loadSuccessful = getState()['dataLoaded.' + data.overlay + '_' + data.activeLayer][0]
@@ -319,7 +320,7 @@
                         console.log("Grouping not available, switching to default")
                         //If the data returned is null that aggregation is not available. Use default aggregation instead
                         //Using setState here means that after the data is loaded, the addOverlayData function will be called
-                        //again. 
+                        //again.
                         var config = mapView.findOverlayConfig('source', data.overlay)
                         var default_layer = config.default_layer
 
@@ -359,10 +360,10 @@
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
-                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;    
-                                                                                 // dataCollection        
+                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].items;
+                                                                                 // dataCollection
                 var thisStyle = mapView.initialOverlays.find(function(obj){return obj['source']==data.overlay}).style;
-        
+
                 // assign the chloropleth color range to the data so we can use it for other
                 // purposes when the state is changed
                 data.chloroplethRange = new mapView.ChloroplethColorRange(dataToUse, thisStyle);
@@ -437,7 +438,7 @@
                 color: '#0D5C7D',
                 visibility: 'none'
             }
-            
+
             //TODO add ANC? Need weighting factors in database first
 
         ],
@@ -497,7 +498,7 @@
                         'visibility': layer.visibility
                     }
                 });
-                
+
             }
         },
 
@@ -510,14 +511,14 @@
                 .append('button')
                 .classed("ui toggle button", true)
                 .attr('id', function() {
-                    return layer.source + '-menu-item'; 
+                    return layer.source + '-menu-item';
                 })
                 .classed('active', (layer.visibility === 'visible'))
                 .text(function() {
                     return layer.display_name;
                 })
                 .on('click', function() {
-                    setState('mapLayer', layer.source);  
+                    setState('mapLayer', layer.source);
                 });
         },
 
@@ -552,7 +553,7 @@
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay
             //If so, use the 'zones' to enable/disable zone selection buttons
-            
+
             var layerMenu = d3.select('#layer-menu-buttons')
             layerMenu.selectAll('button')
                 .each(function(d) {
@@ -600,9 +601,10 @@
                     mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
                     mapView.convertedProjects.features.forEach(function(feature) {
                         feature.properties.matches_filters = true;
-                        feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'                                           
+                        feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'
                      });
                     mapView.listBuildings();
+                    mapView.exportCsv();
                     mapView.map.addSource('project', {
                         'type': 'geojson',
                         'data': mapView.convertedProjects
@@ -610,7 +612,7 @@
                     mapView.circleStrokeWidth = 1;
                     mapView.circleStrokeOpacity = 1;
                     mapView.map.addLayer({
-                        'id': 'project-unmatched', 
+                        'id': 'project-unmatched',
                         'type': 'circle',
                         'source': 'project',
                         'filter': ['==', 'klass', 'none'],
@@ -624,12 +626,12 @@
                                 ]
                             },
 
-                            'circle-stroke-opacity': 0.5,                          
+                            'circle-stroke-opacity': 0.5,
                             'circle-opacity': 0.5,
-                            'circle-stroke-width': 2, 
+                            'circle-stroke-width': 2,
                             'circle-color': '#aaaaaa',
                             'circle-stroke-color': '#aaaaaa'
-                            
+
                         }
                     });
                     mapView.map.addLayer({
@@ -645,12 +647,12 @@
                                     [12, 4],
                                     [15, 15]
                                 ]
-                            },                         
+                            },
                             'circle-opacity': 0.5,
                             'circle-color': '#aaaaaa',
 
                             'circle-stroke-opacity': 0.7,
-                            'circle-stroke-width': 2, 
+                            'circle-stroke-width': 2,
                             'circle-stroke-color': '#626262'
                         }
                     });
@@ -671,7 +673,7 @@
                             'circle-opacity': 0.5,
                             'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2,                  
+                            'circle-stroke-width': 2,
                             'circle-stroke-opacity': 0.5,
                             'circle-stroke-color': '#fd8d3c'    //same as circle for existing
                         }
@@ -692,14 +694,14 @@
                             },
 
                             'circle-opacity': 0.5,
-                            'circle-color': '#fd8d3c', 
+                            'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it          
+                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it
                             'circle-stroke-opacity': 0.7,
                             'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
-                   
+
                     mapView.map.on('mousemove', function(e) {
                         //get the province feature underneath the mouse
                         var features = mapView.map.queryRenderedFeatures(e.point, {
@@ -732,7 +734,7 @@
             }
 
         },
-        
+
         showPopup: function(msg, data) {
             console.log(data);
 
@@ -760,7 +762,7 @@
 
         },
         filterMap: function(msg, data) {
-            
+
             mapView.convertedProjects.features.forEach(function(feature) {
                 feature.properties.previous_filters = feature.properties.matches_filters;
                 if (data.indexOf(feature.properties.nlihc_id) !== -1) {
@@ -775,17 +777,17 @@
                                                                           // so that previous exits don't show when the opacity is set back to 1
             mapView.map.getSource('project').setData(mapView.convertedProjects);
             mapView.animateEnterExit();
-            mapView.listBuildings();        
+            mapView.listBuildings();
         },
         animateEnterExit: function(){
             var delayAnimation = setTimeout(function(){
-                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);                
+                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);
                 var shrinkCircles = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);                     
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);
                 },300);
              /*   var exitColor = setTimeout(function(){
                     mapView.map.setPaintProperty('project-exit','circle-color', '#767676');
-                    mapView.map.setPaintProperty('project-exit','circle-stroke-color', '#767676');                                           
+                    mapView.map.setPaintProperty('project-exit','circle-stroke-color', '#767676');
                 },500);*/
                /* setTimeout(function(){
                     mapView.map.setFilter('project-exit', ['==','klass','doesnotexist']); // sets filter to nonexistant klass to clear the layer
@@ -795,8 +797,8 @@
             },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
                     // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
                     // would be nicer with a callback, but I don't htink that's available -JO
-            
-         
+
+
         },
         /*
         The listBuildings function controls the right sidebar in the main map view.
@@ -851,7 +853,7 @@
                     }
                 })
                 .on('click', function(d) {
-
+                  console.log("here")
                     mapView.map.flyTo({
                         center: [d.properties.longitude, d.properties.latitude],
                         zoom: 15
@@ -869,6 +871,42 @@
                 .remove();
 
         },
+        exportCsv: function() {
+          // if (data){
+            d3.select('#csvExport')
+              .on('click', function(d) {
+                  console.log("YOU CLICKED EXPORT CSV");
+                  var preview = d3.select('#buildings-list');
+                  var listItems = preview.selectAll('div');
+                  var projectNames = [];
+                  listItems._groups[0].forEach( function(project){
+                    projectNames.push(project.innerText);
+                  })
+                  var allData = mapView.convertedProjects.features;
+                  var data = allData.filter(function(feature) {
+                    console.log(feature)
+                      return feature.properties.matches_filters === true;
+                  });
+
+                  //Create a csv from the data
+                  var csvContent = "data:text/csv;charset=utf-8,";
+                  var keys = "";
+                  for (key in data[0].properties){
+                    keys += key + ",";
+                  }
+                  csvContent += keys + '\n';
+                  data.forEach( function(project){
+                    for (key in project.properties){
+                      csvContent += project.properties[key] + ",";
+                    }
+                    csvContent += '\n';
+                  })
+                  // var encodedUri = encodeURI(csvContent);
+                  // window.open(encodedUri);
+              });
+          // }
+        },
+
         highlightBuilding(msg, data) {
             if (data) {
                 mapView.map.addLayer({
@@ -896,14 +934,14 @@
         zoomToFilteredProjects: function(msg, data){
             var maxLat = d3.max(data, function(d){
                 return d.latitude;
-            });            
+            });
             var minLat = d3.min(data, function(d){
                 return d.latitude;
             });
             var maxLon = d3.max(data, function(d){
                 if (d.longitude < 0 ) {
                     return d.longitude; // workaround of data error where one project has positive longitude instead of positive
-                                        // can remove `if` statement when resolved (issue 405)                    
+                                        // can remove `if` statement when resolved (issue 405)
                 }
             });
             var minLon = d3.min(data, function(d){

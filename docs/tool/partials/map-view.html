@@ -44,16 +44,16 @@
                 <div id="zone-choice-header" class="header">2) Data choices</div>
                     <div id="filter-components">
                         <div id="clear-pillbox-holder"></div><!--will be style positioned downwards-->
-                    </div>                
+                    </div>
                 </div>
 
             </div>
         </div>
         <div id="sidebar-right" class="sidebar right">
-            
+
 
             <!--<button class="sidebar-tab" style="visibility:hidden"><div class="triangle left"></div></button>-->
-            
+
 
             <div class="sidebar-inner-wrapper">
                 <div id="sidebar-control-right">
@@ -62,8 +62,8 @@
                 </div>
 
                 <div id="charts" class="sub-nav-container">
-                    
-                    
+
+
 
                     <div class="sub-nav-heading">
                         <h1>Your filters match <span class="matching-count matching">0</span> / <span class="total-count total">0</span> projects.</h1>
@@ -73,7 +73,7 @@
                      <div class="sub-nav-group">
                         <div id="pie-charts">
                             <div id="pie-0"></div>
-                            <div id="pie-1"></div>                       
+                            <div id="pie-1"></div>
                         </div>
                         <div id="bar-charts">
                             <br/>
@@ -83,24 +83,27 @@
                             <div id="unitPercentChart"></div>
                         </div>
                     </div>
-                    <div class="sub-nav-group">                    
-                        
-                                              
+                    <div class="sub-nav-group">
+
+
                     </div>
 
                 </div>
                 <div id="buildings" class="sub-nav-container">
+                    <div class="export-button">
+                      <button id="csvExport" type="button" name="csv-export">Export CSV</button>
+                    </div>
                     <div class="sub-nav-heading">
                         <h1>Your filters match <span class="matching-count matching">0</span> / <span class="total-count total">0</span> projects.</h1>
                     </div>
-                    <div class="sub-nav-group">                   
-                        <div id="buildings-list">                       
+                    <div class="sub-nav-group">
+                        <div id="buildings-list">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
         <div id="map-wrapper">
             <div id="map"></div>
             <div id="category-legend" class="legend">
@@ -108,13 +111,13 @@
                     <div><span class="square" style="background-color: rgba(253, 141, 60,0.5)"></span>Matches filters</div>
                     <div><span class="square" style="background-color: #aaa"></span>Does not match filters</div>
                     <div><span style="background-color: rgba(170,170,170,0.5); border: 2px solid #767676;"></span> or <span style="background-color: rgba(253, 141, 60,0.5); border: 2px solid #fc4203;"></span> Change since last filter</div>
-                </div>    
+                </div>
             </div>
 
             <div id="chloroplethLegend-wrapper" class="legend"></div>
-           
+
             <button id="reset-zoom">Reset zoom</button>
-        </div> 
+        </div>
 
     </div>
 </div>
