@@ -1,32 +1,42 @@
 "use strict";
 
 var router = {
-    isInitialized: false,
+    isFilterInitialized: false,
     stateObj: {},
-    init: function(msg,data){
-        if ( router.isInitialized ) return;
+    initFilters: function(msg,data){
+        if ( router.isFilterInitialized ) return;
         setSubs([
             ['filterValues', router.pushFilter]
         ]);        
-        router.isInitialized = true;
-        if ( router.hasInitialState ) router.decodeState();
+        router.isFilterInitialized = true;
+        if ( router.hasInitialFilterState ) router.decodeState();
+    },
+    initBuilding: function() {
+        console.log('building in hash');
+        router.initialView = 'building';
+        router.buildingID = window.location.hash.match(/building=([\w\d-]+)/)[1];
+        console.log(router.buildingID);
     },
     pushFilter: function(msg, data){
         // TO DO: add handling for sidebar and preview pusher
+        console.log(data);
         router.stateObj[msg] = data;
         if (data.length === 0) {
             delete router.stateObj[msg];
+            window.history.replaceState(router.stateObj, 'newState', '#');
+        } else {
+            window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramifyFilter());        
         }
         console.log(router.stateObj);
-        window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramify());
     },
-    pushSidebar: function(msg, data) {
-        // handle above?
+    pushViewChange: function(msg, data){
+        if (data.el === 'building-view'){
+            console.log('push view change');
+            var buildingID = getState().selectedBuilding[0].properties.nlihc_id;
+            window.history.pushState(router.stateObj, 'newState', '#/HI/building=' + buildingID);
+        }
     },
-    pushPreview: function(msg, data) {
-        // handle above?
-    },
-    paramify: function(){
+    paramifyFilter: function(){
         var paramsArray = [];
         for (var key in router.stateObj) {
             if (!router.stateObj.hasOwnProperty(key)) continue;
@@ -103,14 +113,27 @@ var router = {
 
         });
 
+        this.clearScreen();
+    },
+    clearScreen: function(){
         document.getElementById('loading-state-screen').style.display = 'none';
+    },
+    hashChangeHandler: function(){
+        console.log('hash change');
+        controller.goBack();
     }
 
 };
-
+window.onhashchange = function() {
+ router.hashChangeHandler();
+}
 if ( window.location.hash.indexOf('#/HI/') !== -1 ) {
-    router.hasInitialState = true;
+    if ( window.location.hash.indexOf('building=') !== -1 ){
+        router.initBuilding();
+    } else {
+        router.hasInitialFilterState = true;
+    }
     router.screenLoad();
 } else {
-    router.hasInitialState = false;
+    router.hasInitialFilterState = false;
 }

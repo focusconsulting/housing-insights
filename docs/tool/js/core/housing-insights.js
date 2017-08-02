@@ -160,11 +160,16 @@ var controller = {
     controlSubs: SubscribeModule(),
     init: function(){
         setSubs([
-            ['switchView', controller.switchView]
+            ['switchView', controller.switchView],
+            ['switchView', router.pushViewChange]
         ]);
-        setState('activeView',mapView);
-        
-        mapView.init();        
+        if ( router.initialView === 'building' ){
+            setState('activeView', buildingView);
+            buildingView.init(router.buildingID); // parameter distinguishes actions taken in buildingView.init()     
+        } else {
+            setState('activeView',mapView);        
+            mapView.init();  
+        }
     },
     // dataRequest is an object with the properties 'name', 'url' and 'callback'. The 'callback' is a function
     // that takes as an argument the data returned from getData.                             
@@ -249,7 +254,7 @@ var controller = {
     },
     // ** NOTE re: classList: not supported in IE9; partial support in IE 10
     switchView: function(msg,data) {
-
+console.log(msg,data);
         var container = document.getElementById(getState().activeView[0].el);
         container.classList.add('fade');
         console.log( data === getState().activeView[1]);
@@ -278,8 +283,9 @@ var controller = {
         }, 500);
     },
     backToggle: 0,
-    goBack: function(){
-        setState('switchView', getState().activeView[1])
+    goBack: function(hideFromHistory){
+       
+            setState('switchView', getState().activeView[1])
     }
 
 }

@@ -59,61 +59,92 @@ var buildingView = {
                     return output
                 });
     },
-    getRelevantData: function(){
-        var dataRequestCount = 0;
-        var dataRequests = [
+    getRelevantData: function(buildingID){ // buildingID is passed in only when the initial view is building    
+        if ( buildingID !== undefined ) {
+            console.log(buildingID);
+            var dataURL = model.URLS.project;
+            var dataRequest = {
+                    name: 'raw_project',
+                    url: dataURL,
+                    callback: dataCallback
+                };
+            controller.getData(dataRequest);
 
-            {
-                name: "raw_metro_stations",
-                url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
-                callback: dataBatchCallback
-            },
-            {
-                name: "transit_stats",
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + getState()['selectedBuilding'][0]['properties']['nlihc_id'],
-                callback: dataBatchCallback
-            },
-            {
-                name: "nearby_projects",
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
-                callback: dataBatchCallback
-            },
-            {
-                name: "raw_bus_stops",
-                url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
-                callback: dataBatchCallback
+            function dataCallback() {
+                
+                var selectedBuildingGeoJSON = controller.convertToGeoJSON(model.dataCollection.raw_project).features.find(function(each){
+                  
+                        return each.properties.nlihc_id === buildingID;
+                  
+                });
+                console.log(selectedBuildingGeoJSON);
+                setState('selectedBuilding', selectedBuildingGeoJSON);
+                continueDataRequest();
+                
             }
-        ]
-        for(var i = 0; i < dataRequests.length; i++){
-            console.log(dataRequests[i]);
-            console.log(getState()['selectedBuilding'][0]['properties']['nlihc_id']);
-            controller.getData(dataRequests[i]);
+        } else {
+            continueDataRequest();
         }
-        function dataBatchCallback(){
-            dataRequestCount++;
-            console.log("dataRequestCount", dataRequestCount);
-            if(dataRequestCount === dataRequests.length){
-                new Accordion();
-                buildingView.prepareHeader();
-                buildingView.prepareMapsAndCharts();
-                buildingView.prepareSidebar();
+
+        function continueDataRequest(){
+
+            var dataRequestCount = 0;
+            var dataRequests = [
+
+                {
+                    name: "raw_metro_stations",
+                    url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
+                    callback: dataBatchCallback
+                },
+                {
+                    name: "transit_stats",
+                    url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + getState()['selectedBuilding'][0]['properties']['nlihc_id'],
+                    callback: dataBatchCallback
+                },
+                {
+                    name: "nearby_projects",
+                    url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
+                    callback: dataBatchCallback
+                },
+                {
+                    name: "raw_bus_stops",
+                    url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
+                    callback: dataBatchCallback
+                }
+            ]
+            for(var i = 0; i < dataRequests.length; i++){
+                console.log(dataRequests[i]);
+                console.log(getState()['selectedBuilding'][0]['properties']['nlihc_id']);
+                controller.getData(dataRequests[i]);
+            }
+            function dataBatchCallback(){
+                dataRequestCount++;
+                console.log("dataRequestCount", dataRequestCount);
+                if(dataRequestCount === dataRequests.length){
+                    new Accordion();
+                    buildingView.prepareHeader();
+                    buildingView.prepareMapsAndCharts();
+                    buildingView.prepareSidebar();
+                    router.clearScreen();
+                }
             }
         }
     },
     el:'building-view',
-    init: function(){    
-        
+    init: function(buildingID){ // buildingID is passed in only when the initial view is building    
+        console.log(buildingID);
+        var transition = buildingID !== undefined ? true : false;
         var partialRequest = {
             partial: this.el,
             container: null, // will default to '#body-wrapper'
-            transition: true,
+            transition: transition,
             callback: appendCallback
         };
         
         controller.appendPartial(partialRequest, this);
         
         function appendCallback() {
-            buildingView.getRelevantData();
+            buildingView.getRelevantData(buildingID); // buildingID is passed in only when the initial view is building    
         }
     },
 
@@ -131,7 +162,7 @@ var buildingView = {
         document.getElementById('owner-name').innerText = d.hud_own_name == 0 ? 'not in data file' : d.hud_own_name;
     },
     prepareMapsAndCharts: function(){
-          
+        mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';  
         var affordableHousingMap = new mapboxgl.Map({
             container: 'affordable-housing-map',
             style: 'mapbox://styles/mapbox/light-v9',
