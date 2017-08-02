@@ -144,6 +144,9 @@ var buildingView = {
         controller.appendPartial(partialRequest, this);
         
         function appendCallback() {
+            if ( getState().activeView.length > 1 ){
+                document.getElementById('button-back').innerHTML = '&lt; Back to Map View';
+            }
             buildingView.getRelevantData(buildingID); // buildingID is passed in only when the initial view is building    
         }
     },

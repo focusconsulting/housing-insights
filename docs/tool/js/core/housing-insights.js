@@ -254,6 +254,10 @@ var controller = {
     },
     // ** NOTE re: classList: not supported in IE9; partial support in IE 10
     switchView: function(msg,data) {
+        if ( data === undefined ) {
+            location.reload();
+            return;
+        }
 console.log(msg,data);
         var container = document.getElementById(getState().activeView[0].el);
         container.classList.add('fade');

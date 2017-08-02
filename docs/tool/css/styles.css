@@ -201,7 +201,7 @@ button.nullValuesToggleSubmit::before {
 
 .main-view:not(#map-view) {
     position: relative;
-    top: 20px;
+    top: 40px;
 }
 
 .main-view.fade {

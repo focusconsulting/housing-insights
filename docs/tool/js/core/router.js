@@ -118,6 +118,16 @@ var router = {
     clearScreen: function(){
         document.getElementById('loading-state-screen').style.display = 'none';
     },
+    inAppBack: function(){
+        if ( getState().activeView.length > 1 ) {
+            window.history.back(); // if there's a previously active view, use history.back() function. router will pick up
+                                   // on the hash change
+        } else { // if not, need custom handling; otherwise the in-app back button will navigate to whatever the previous page
+                 // is, outside of the domain. ok for browser's back button to do that, but not the in-app back
+            location.hash = ' ';
+            location.reload();
+        }
+    },
     hashChangeHandler: function(){
         console.log('hash change');
         controller.goBack();
