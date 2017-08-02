@@ -901,8 +901,8 @@
                     }
                     csvContent += '\n';
                   })
-                  // var encodedUri = encodeURI(csvContent);
-                  // window.open(encodedUri);
+                  var encodedUri = encodeURI(csvContent);
+                  window.open(encodedUri);
               });
           // }
         },
