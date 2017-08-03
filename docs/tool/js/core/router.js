@@ -100,7 +100,7 @@ var router = {
             }
             if ( dataChoice.component_type === 'categorical' ){
                 console.log('decoding categorical');
-                var values = eachArray[1].replace('_',' ').split('+');
+                var values = eachArray[1].replace(/_/g,' ').split('+');
                 console.log(values);
                 $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', values);
             }   

@@ -1016,8 +1016,7 @@ var filterView = {
             this.pill.textContent = "Clear all filters";
             
             this.pill.addEventListener('click', function(){
-             //   filterView.clearAllFilters();
-             alert('disabled for debugging');
+                filterView.clearAllFilters();
             });
         },
         site: undefined,
