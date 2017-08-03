@@ -253,7 +253,7 @@ var filterView = {
             }
         }
     },
-    textInputs: {}, // adding text input object so we can access them later -JO
+    filterInputs: {}, // adding filterInputs object so we can access them later -JO
     dateInputs: {}, // same for date inputs - JO
     // filterTextInput takes as a parameter an array of keys.
     // It produces text inputs corresponding to these keys and
@@ -441,12 +441,12 @@ var filterView = {
         });
         // adds each new instance to the object created above under the global filterView so that each can be accessed again
         // in router.js, when decoding the state in a url
-        filterView.textInputs[this.component.short_name] = new filterView.filterTextInput( 
+        filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput( 
             component,        
             [['min', minDatum]],
             [['max', maxDatum]]
         );
-        var textInputs = filterView.textInputs[this.component.short_name];
+        var textInputs = filterView.filterInputs[this.component.short_name];
         console.log(textInputs);
         console.log(this);
 
@@ -509,7 +509,7 @@ var filterView = {
                 [returnVals['min']['min'], returnVals['max']['max']]
             );
 
-            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max']]);
+            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.nullsShown]);
         }
 
         textInputs.setInputCallback(inputCallback);
@@ -587,7 +587,7 @@ var filterView = {
         });
         // as with textInputs, adds each instance of dateInput to the filterView.dateInputs object, so it can be accessed
         // later
-        filterView.dateInputs[this.component.short_name] = new filterView.filterTextInput(
+        filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput(
             component,        
             [
                 ['day', minDatum.getDate()],
@@ -600,7 +600,7 @@ var filterView = {
                 ['year', maxDatum.getFullYear()]
             ]
         );
-        var dateInputs = filterView.dateInputs[this.component.short_name];
+        var dateInputs = filterView.filterInputs[this.component.short_name];
         function makeSliderCallback(component, doesItSetState){
 
             return function sliderCallback ( values, handle, unencoded, tap, positions ) {
@@ -641,9 +641,9 @@ var filterView = {
                         ['day', newMaxDate.getDate()]
                     ]
                 );
-
+                console.log(ths.nullsShown);
                 if(doesItSetState){
-                    setState(specific_state_code,[newMinDate, newMaxDate]);
+                    setState(specific_state_code,[newMinDate, newMaxDate, ths.nullsShown]);
                 }
             }
         }
@@ -682,7 +682,7 @@ var filterView = {
                 [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
             );
 
-            setState(specific_state_code, [dateValues.min, dateValues.max]);
+            setState(specific_state_code, [dateValues.min, dateValues.max, ths.nullsShown]);
         }
 
         // For separating date inputs with a '/'

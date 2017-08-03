@@ -39,7 +39,7 @@
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
-                    ['filteredProjectsAvailable',router.initFilters] // not 100% sure this trigger isn't later than we'd want
+                    ['filterViewLoaded',router.initFilters] // not 100% sure this trigger isn't later than we'd want
                                                               // but it shouln't be too early
                 ]);
 
