@@ -42,13 +42,14 @@ var router = {
         for (var key in router.stateObj) {
             if (!router.stateObj.hasOwnProperty(key)) continue;
             var dataChoice = dataChoices.find(function(obj){
-                return key.replace('filterValues.','') === obj.source;
+                return key.split('.')[1] === obj.source;
             });
             console.log(dataChoice);
+            var separator = getState()['nullsShown.' + dataChoice.source][0] ? '-' : '_';
             
             if ( dataChoice.component_type === 'continuous' ) {
                 console.log('continuous'); 
-                paramsArray.push(dataChoice.short_name + '=' + Math.round(router.stateObj[key][0]) + '-' + Math.round(router.stateObj[key][1])); 
+                paramsArray.push(dataChoice.short_name + '=' + Math.round(router.stateObj[key][0]) + separator + Math.round(router.stateObj[key][1])); 
             }
             if ( dataChoice.component_type === 'categorical' ){
                 console.log('categorical');
@@ -63,7 +64,7 @@ var router = {
                     var year = router.stateObj[key][i].getFullYear();
                     dateStrings[i] = 'd' + date.toString() + 'm' + month.toString() + 'y' + year.toString(); 
                 }
-                paramsArray.push(dataChoice.short_name + '=' + dateStrings[0] + '-' + dateStrings[1]);
+                paramsArray.push(dataChoice.short_name + '=' + dateStrings[0] + separator + dateStrings[1]);
             }
         }
      //   console.log(paramsArray.join('&'));
@@ -82,11 +83,18 @@ var router = {
                 return obj.short_name === eachArray[0];
             });
             if ( dataChoice.component_type === 'continuous' ) {
-                var values = eachArray[1].split('-');
+                var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
+                var values = eachArray[1].split(separator);
                 // set the values of the corresponding textInput
                 filterView.filterInputs[dataChoice.short_name].setValues([['min', +values[0]]],[['max', +values[1]]]);
-                // call the corresponding textInput's callback
-                filterView.filterInputs[dataChoice.short_name].callback();
+                if ( separator === '_') { // encoded nullShown == false
+                    document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = false;
+                    setState('nullsShown.' + dataChoice.source, false); // this will eventually trigger the callback
+                                                                        // so no need to trigger it here
+                } else { // call the corresponding textInput's callback
+                    filterView.filterInputs[dataChoice.short_name].callback();
+                }
+                
             }
             if ( dataChoice.component_type === 'categorical' ){
                 console.log('decoding categorical');
@@ -96,7 +104,8 @@ var router = {
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here
-                var values = eachArray[1].split('-');
+                var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
+                var values = eachArray[1].split(separator);
                 filterView.filterInputs[dataChoice.short_name].setValues(
                     [
                         [ 'year',  values[0].match(/\d{4}/)[0] ],
@@ -109,7 +118,13 @@ var router = {
                         [ 'day',   values[1].match(/d(\d+)/)[1]]
                     ]
                 );
-                filterView.filterInputs[dataChoice.short_name].callback();
+                 if ( separator === '_') { // encoded nullShown == false
+                    document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = false;
+                    setState('nullsShown.' + dataChoice.source, false); // this will eventually trigger the callback
+                                                                        // so no need to trigger it here
+                } else { // call the corresponding textInput's callback
+                    filterView.filterInputs[dataChoice.short_name].callback();
+                }
             }
 
         });
