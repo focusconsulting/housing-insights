@@ -20,10 +20,12 @@ var router = {
     },
     pushFilter: function(msg, data){
         // TO DO: add handling for sidebar and preview pusher
-        console.log(data);
-        router.stateObj[msg] = data;
         if (data.length === 0) {
             delete router.stateObj[msg];
+        } else {
+            router.stateObj[msg] = data;
+        }
+        if ( Object.keys(router.stateObj).length === 0 ) {
             window.history.replaceState(router.stateObj, 'newState', '#');
         } else {
             window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramifyFilter());        
@@ -45,7 +47,7 @@ var router = {
                 return key.split('.')[1] === obj.source;
             });
             console.log(dataChoice);
-            var separator = getState()['nullsShown.' + dataChoice.source][0] ? '-' : '_';
+            var separator = getState()['nullsShown.' + dataChoice.source] && getState()['nullsShown.' + dataChoice.source][0] ? '-' : '_';
             
             if ( dataChoice.component_type === 'continuous' ) {
                 console.log('continuous'); 

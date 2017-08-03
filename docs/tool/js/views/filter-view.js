@@ -529,12 +529,18 @@ var filterView = {
 
         this.clear = function(){
             var specific_state_code = 'filterValues.' + component.source;
+            console.log(specific_state_code);
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
             textInputs.reset();
-            setState(specific_state_code, []);
-            toggle.triggerToggleWithoutClick();
-            setState('nullsShown.' + component.source, true);
+            console.log(getState());
+            if ( !getState()['nullsShown.' + component.source][0] ) {
+                toggle.triggerToggleWithoutClick();
+            } 
+            setTimeout(function(){ // not sure why but forcing this to run async (with setTimeout hack) is the only
+                                   // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
+                setState(specific_state_code, []);
+            });
         }
 
         this.isTouched = function(){
@@ -708,9 +714,13 @@ var filterView = {
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
             dateInputs.reset();
-            setState(specific_state_code, []);
-            toggle.triggerToggleWithoutClick();
-            setState('nullsShown.' + component.source, true);
+            if ( !getState()['nullsShown.' + component.source][0] ) {
+                toggle.triggerToggleWithoutClick();
+            } 
+            setTimeout(function(){ // not sure why but forcing this to run async (with setTimeout hack) is the only
+                                   // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
+                setState(specific_state_code, []);
+            });
         }
 
         this.isTouched = function(){
@@ -1006,7 +1016,8 @@ var filterView = {
             this.pill.textContent = "Clear all filters";
             
             this.pill.addEventListener('click', function(){
-                filterView.clearAllFilters();
+             //   filterView.clearAllFilters();
+             alert('disabled for debugging');
             });
         },
         site: undefined,
