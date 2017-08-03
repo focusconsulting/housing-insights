@@ -38,7 +38,9 @@
                     ['filteredData', mapView.filterMap],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
-                    ['filteredProjectsAvailable',mapView.zoomToFilteredProjects]
+                    ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
+                    ['filterViewLoaded',router.initFilters] // not 100% sure this trigger isn't later than we'd want
+                                                              // but it shouln't be too early
                 ]);
 
 
@@ -753,6 +755,7 @@
 
                     //Callbacks for hovering over any of the four project layers
                     mapView.map.on('mouseenter', 'project', function(e) {
+                        console.log(e);
                         setState('hoverBuilding', e.features[0])
                     });
                     mapView.map.on('mouseenter', 'project-enter', function(e) {

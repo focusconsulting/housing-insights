@@ -201,7 +201,7 @@ button.nullValuesToggleSubmit::before {
 
 .main-view:not(#map-view) {
     position: relative;
-    top: 20px;
+    top: 40px;
 }
 
 .main-view.fade {
@@ -451,6 +451,19 @@ Others are working correctly.
 .triangle.left {
     border-right: 12px solid #fff;
 }
+
+#loading-state-screen {
+    background-color: rgba(0,0,0,0.8);
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 9999999;
+    color:#fff;
+    display: none;
+}
+
 
 /*
  * MAPBOX

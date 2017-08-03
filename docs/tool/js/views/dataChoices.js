@@ -2,6 +2,9 @@
 //TODO much of this ends up being duplicated with meta.json. We will combine the two after the ZoneFacts table is available, 
 //Can't do till then because many of the fields below are only available in this not-yet-available table
 
+// "short_names" below are the abbreviations for use in the URL encoding of the state of filters. should add unit test to
+// ensure no duplicates. -JO
+
  "use strict";
  var dataChoices = [
         //TODO this hard coded array of objects is just a temporary method.
@@ -14,7 +17,8 @@
             "display_text": "View only projects in a specific zone of the city. The choices in this filter depend on the Zone Type selected, and the filter is cleared when the Zone Type is changed.",
             "component_type": "location",
             "data_type": "text",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "l"
         },
 
         {   "source": "proj_units_tot",
@@ -23,7 +27,8 @@
             "component_type": "continuous",
             "data_type":"integer",
             "num_decimals_displayed": 0, //0 if integer, 1 otherwise. Could also store data type instead. 
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "pu"
         },
         
         {   "source": "proj_units_assist_max",
@@ -32,14 +37,16 @@
             "component_type": "continuous",
             "data_type":"integer",
             "num_decimals_displayed":0,
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "pa"
         },
         {   "source": "hud_own_type",
             "display_name":"Ownership Type (per HUD)",
             "display_text":"This field is only available for buildings participating in HUD programs; others are listed as 'Unknown'",
             "component_type": "categorical",
             "data_type":"text",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "hud"
         },
 
         {   "source": "portfolio",
@@ -47,21 +54,24 @@
             "display_text": "Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list",
             "component_type":"categorical",
             "data_type": "text",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "sp"
         },
         {   "source":"poa_start",
             "display_name":"Subsidy Start Date",
             "display_text": "Filters to buildings with at least one subsidy whose start date falls between the selected dates.",
             "component_type": "date",
             "data_type": "timestamp",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "ps"
         },
         {   "source":"poa_end",
             "display_name":"Subsidy End Date",
             "display_text": "Filters to buildings with at least one subsidy whose end date falls between the selected dates.",
             "component_type": "date",
             "data_type": "timestamp",
-            "data_level": "project"
+            "data_level": "project",
+            "short_name": "pe"
         },
 
 
@@ -80,7 +90,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "cv"
         },
         {
             "source": "non_violent_crime_rate",
@@ -91,7 +102,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "cn"
         },
         {
             "source": "crime_rate",
@@ -102,7 +114,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "ca"
         },
         {
             "source": "construction_permits",
@@ -113,7 +126,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "bpc"
         },
         {
             "source": "building_permits",
@@ -124,7 +138,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
-            "style": "number"
+            "style": "number",
+            "short_name": "bpa"
         },
         {
             "source": "poverty_rate",
@@ -136,7 +151,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "pov"
         },
         {
             "source": "income_per_capita",
@@ -147,7 +163,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "money"
+            "style": "money",
+            "short_name": "inc"
         },
         {
             "source": "labor_participation",
@@ -158,7 +175,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "lp"
         },
         {
             "source": "fraction_single_mothers",
@@ -169,7 +187,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "sm"
         },
         {
             "source": "fraction_black",
@@ -180,7 +199,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "fb"
         },
         {
             "source": "fraction_foreign",
@@ -191,7 +211,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "percent"
+            "style": "percent",
+            "short_name": "ff"
         },
         {
             "source": "acs_median_rent",
@@ -202,7 +223,8 @@
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
-            "style": "number"
+            "style": "number",
+            "short_name": "rnt"
         }
        
     ];

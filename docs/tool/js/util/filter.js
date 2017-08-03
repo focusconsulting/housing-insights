@@ -3,7 +3,9 @@ var filterUtil = {
 	init: function(){
 		setSubs([
             ['filterValues', filterUtil.publishFilteredData],
-            ['nullsShown', filterUtil.publishFilteredData]
+            ['nullsShown', filterUtil.nullsToggleHandler] // rather than subscribe publishFilteredData  to 
+                                                          // both filter change and null toggle events, I'm
+                                                          // making a null toggle event trigger a filter change -JO
 		]);
 
         // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
@@ -49,11 +51,13 @@ var filterUtil = {
         return filterValues;
     },
 
-	filterData: function(data){ 	
+	filterData: function(){
         
-	var workingData = model.dataCollection['filterData'].objects; 
-        var nullsShown = filterUtil.getNullsShown();
+    	var workingData = model.dataCollection['filterData'].objects; 
+        var nullsShown = filterUtil.getNullsShown(); // creates object with nullShown state ofall filters
+        console.log('nullsShown',nullsShown);
         var filterValues = filterUtil.getFilterValues();
+        console.log('filterValues',filterValues);
 
         for (var key in nullsShown){
             var component = (filterView.components.filter(function(obj){
@@ -62,7 +66,7 @@ var filterUtil = {
 
             if (component.component_type == 'continuous' || component.component_type == 'date'){
                 workingData = workingData.filter(function(d){
-                    return d[key] !== null || nullsShown[key][0];
+                    return d[key] !== null || nullsShown[key][0]; // nullsShown[key][0] is true or fals; if false returns when d[key] is not null
                 });
             }
         }
@@ -160,10 +164,17 @@ var filterUtil = {
 		filterUtil.filteredData = result;
 	},
 	
-	publishFilteredData: function(){
+	publishFilteredData: function(){ 
+                                        
         filterUtil.filterData();
 		filterUtil.deduplicate();
 		setState('filteredData', filterUtil.filteredData);
-	}
+	},
+    nullsToggleHandler: function(msg){
+        var dataChoice = dataChoices.find(function(each){
+            return each.source === msg.split('.')[1];
+        });
+        filterView.filterInputs[dataChoice.short_name].callback(); // fire callback as if the associated filter has been changed
+    }
 
 };

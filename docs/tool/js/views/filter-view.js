@@ -254,6 +254,8 @@ var filterView = {
             }
         }
     },
+    filterInputs: {}, // adding filterInputs object so we can access them later -JO
+    dateInputs: {}, // same for date inputs - JO
     // filterTextInput takes as a parameter an array of keys.
     // It produces text inputs corresponding to these keys and
     // tracks their values.
@@ -321,7 +323,8 @@ var filterView = {
         }
 
         this.setInputCallback = function(callback){
-            
+            console.log(this);
+            this.callback = callback; // making callback function a property of the filterTextInput so we can access it later -JO
             var checkKeyPress = function(e){
                 if(e.charCode === 9 || e.charCode === 13){
                     callback();
@@ -437,12 +440,16 @@ var filterView = {
             },
             step: stepCount
         });
-
-        var textInputs = new filterView.filterTextInput(
+        // adds each new instance to the object created above under the global filterView so that each can be accessed again
+        // in router.js, when decoding the state in a url
+        filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput( 
             component,        
             [['min', minDatum]],
             [['max', maxDatum]]
         );
+        var textInputs = filterView.filterInputs[this.component.short_name];
+        console.log(textInputs);
+        console.log(this);
 
         //Each slider needs its own copy of the sliderMove function so that it can use the current component
         function makeSliderCallback(component, doesItSetState){
@@ -494,6 +501,7 @@ var filterView = {
         slider.noUiSlider.on('slide', slideSliderCallback);
 
         var inputCallback = function(){
+            console.log('inputCallback');
             var specific_state_code = 'filterValues.' + component.source
 
             var returnVals = textInputs.returnValues();
@@ -502,7 +510,7 @@ var filterView = {
                 [returnVals['min']['min'], returnVals['max']['max']]
             );
 
-            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max']]);
+            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.nullsShown]);
         }
 
         textInputs.setInputCallback(inputCallback);
@@ -522,12 +530,18 @@ var filterView = {
 
         this.clear = function(){
             var specific_state_code = 'filterValues.' + component.source;
+            console.log(specific_state_code);
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
             textInputs.reset();
-            setState(specific_state_code, []);
-            toggle.triggerToggleWithoutClick();
-            setState('nullsShown.' + component.source, true);
+            console.log(getState());
+            if ( !getState()['nullsShown.' + component.source][0] ) {
+                toggle.triggerToggleWithoutClick();
+            } 
+            setTimeout(function(){ // not sure why but forcing this to run async (with setTimeout hack) is the only
+                                   // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
+                setState(specific_state_code, []);
+            });
         }
 
         this.isTouched = function(){
@@ -578,8 +592,9 @@ var filterView = {
             },
             step: 1
         });
-
-        var dateInputs = new filterView.filterTextInput(
+        // as with textInputs, adds each instance of dateInput to the filterView.dateInputs object, so it can be accessed
+        // later
+        filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput(
             component,        
             [
                 ['day', minDatum.getDate()],
@@ -592,7 +607,7 @@ var filterView = {
                 ['year', maxDatum.getFullYear()]
             ]
         );
-
+        var dateInputs = filterView.filterInputs[this.component.short_name];
         function makeSliderCallback(component, doesItSetState){
 
             return function sliderCallback ( values, handle, unencoded, tap, positions ) {
@@ -633,9 +648,9 @@ var filterView = {
                         ['day', newMaxDate.getDate()]
                     ]
                 );
-
+                console.log(ths.nullsShown);
                 if(doesItSetState){
-                    setState(specific_state_code,[newMinDate, newMaxDate]);
+                    setState(specific_state_code,[newMinDate, newMaxDate, ths.nullsShown]);
                 }
             }
         }
@@ -674,7 +689,7 @@ var filterView = {
                 [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
             );
 
-            setState(specific_state_code, [dateValues.min, dateValues.max]);
+            setState(specific_state_code, [dateValues.min, dateValues.max, ths.nullsShown]);
         }
 
         // For separating date inputs with a '/'
@@ -700,9 +715,13 @@ var filterView = {
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
             dateInputs.reset();
-            setState(specific_state_code, []);
-            toggle.triggerToggleWithoutClick();
-            setState('nullsShown.' + component.source, true);
+            if ( !getState()['nullsShown.' + component.source][0] ) {
+                toggle.triggerToggleWithoutClick();
+            } 
+            setTimeout(function(){ // not sure why but forcing this to run async (with setTimeout hack) is the only
+                                   // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
+                setState(specific_state_code, []);
+            });
         }
 
         this.isTouched = function(){
@@ -810,8 +829,11 @@ var filterView = {
     },  
 
     categoricalFilterControl: function(component){
+        console.log(this);
+        console.log(component);
         filterView.filterControl.call(this, component);
         var c = this.component;
+
         var contentContainer = filterView.setupFilter(c);
 
         var uiSelector = contentContainer.append("select")
@@ -831,6 +853,7 @@ var filterView = {
         //Set callback for when user makes a change
         function makeSelectCallback(component){
             return function(){
+            console.log(component);
             var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
             var specific_state_code = 'filterValues.' + component.source
             setState(specific_state_code,selectedValues);
