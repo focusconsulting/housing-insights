@@ -981,15 +981,20 @@ var filterView = {
     },
     clearLocationBasedFilters: function(){
         function isLocationBased(filterControl){
-            return (
-                filterControl.component.hasOwnProperty('zones') || 
-                filterControl.component.component_type === 'location'
-            );
+            return filterControl.component.component_type === 'location';
+        }
+        function isZoneBased(filterControl){
+            return filterControl.component.data_level === 'zone';
         }
         for(var i = 0; i < filterView.filterControls.length; i++){
             if(isLocationBased(filterView.filterControls[i]) && filterView.filterControls[i].isTouched()){
                 filterView.filterControls[i].clear();
             }
+            /*
+            if(isZoneBased(filterControl)){
+                filterControl.adjustContentToCurrentMapLayer();
+            }
+            */
         }
     },
     clearAllButton: {
