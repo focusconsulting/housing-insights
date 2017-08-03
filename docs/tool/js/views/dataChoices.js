@@ -11,7 +11,7 @@
         //  the same meaning in both places (e.g. "ward" and "ward" can appear in two tables but should have same name/format)
         {   "source":"location",
             "display_name": "Location",
-            "display_text": "Dropdown menu updates when selecting a new zone type. <br><br>Logic Incomplete: still need to a) clear the existing filter when new zone is selected and b) writecallback for the locationFilterControl",
+            "display_text": "View only projects in a specific zone of the city. The choices in this filter depend on the Zone Type selected, and the filter is cleared when the Zone Type is changed.",
             "component_type": "location",
             "data_type": "text",
             "data_level": "project"

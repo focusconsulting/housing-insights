@@ -130,7 +130,16 @@ var filterUtil = {
                     //otherwise use the list of chosen categories
 					return filterValues[key][0].includes(d[key]);
 				})
-			}
+            }
+            
+            if (component['component_type'] == 'location') {
+                workingData = workingData.filter(function(d){
+                    if(filterValues.location[0].length === 0){
+                        return true;
+                    }
+                    return filterValues['location'][0].indexOf(d[getState().mapLayer[0]]) !== -1;
+                });
+            }
 		}
 
         //Convert the workingData to a list of ids to be published

@@ -114,6 +114,7 @@ var filterView = {
                 ['dataLoaded.filterData', filterView.formatFilterDates],
                 ['filterDatesFormatted', filterView.buildFilterComponents],
                 ['subNavExpanded.right', filterView.expandSidebar],
+                ['mapLayer', filterView.clearLocationBasedFilters],
                 ['mapLayer', filterView.updateLocationFilterControl],
                 ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
             ]);
@@ -866,17 +867,17 @@ var filterView = {
 
     updateLocationFilterControl: function(msg,data){
         //Find out what layer is active. (using getState so we can subscribe to any event type)
-        var layerType = getState()['mapLayer'][0]
-        var choices = filterView.locationFilterChoices[layerType]
+        var layerType = getState()['mapLayer'][0];
+        var choices = filterView.locationFilterChoices[layerType];
 
         //remove all existing choices
-        d3.selectAll("#location option").remove()
+        d3.selectAll("#location option").remove();
 
         //Add the new ones in
         for(var j = 0; j < choices.length; j++){
             d3.select('#location').append("option")
                 .attr("value", choices[j])
-                .text(choices[j])
+                .text(choices[j]);
         }
         
     },
@@ -978,7 +979,24 @@ var filterView = {
         }
         filterView.indicateActivatedFilters();
     },
-
+    clearLocationBasedFilters: function(){
+        function isLocationBased(filterControl){
+            return filterControl.component.component_type === 'location';
+        }
+        function isZoneBased(filterControl){
+            return filterControl.component.data_level === 'zone';
+        }
+        for(var i = 0; i < filterView.filterControls.length; i++){
+            if(isLocationBased(filterView.filterControls[i]) && filterView.filterControls[i].isTouched()){
+                filterView.filterControls[i].clear();
+            }
+            /*
+            if(isZoneBased(filterControl)){
+                filterControl.adjustContentToCurrentMapLayer();
+            }
+            */
+        }
+    },
     clearAllButton: {
         init: function(){
             var thisButton = this;
