@@ -397,8 +397,6 @@ var filterView = {
 
         var contentContainer = filterView.setupFilter(c);
         
-        // Begin code common to continuousFilterControl and dateFilterControl
-        // TODO: Consider extracting this to setupFilter
         var slider = contentContainer.append("div")
                 .classed("filter", true)
                 .classed("slider",true)
@@ -408,12 +406,8 @@ var filterView = {
             return item[c.source];
         });
         
-        // Hardcoding the min and max if there's no d3.min or max 
-        // available. This is for filters that we don't have
-        // filterData for yet. Remove the magic number operands
-        // once we have all the filterData connected to the API.
-        var minDatum = d3.min(allDataValuesForThisSource) || 0;
-        var maxDatum = d3.max(allDataValuesForThisSource) || 1;
+        var minDatum = d3.min(allDataValuesForThisSource);
+        var maxDatum = d3.max(allDataValuesForThisSource);
 
         var inputContainer = document.createElement('span');
         inputContainer.setAttribute('id', c.source + '-input');
@@ -427,9 +421,6 @@ var filterView = {
         noUiSlider.create(slider, {
             start: [minDatum, maxDatum],
             connect: true,
-
-            //the wNumb is a number formatting library. This is what was recommended by noUiSlider; we should consider using elsewhere.
-            //order of the two wNumb calls corresponds to left and right slider respectively.
             tooltips: [ false, false ],
             range: {
                 'min': minDatum,
@@ -715,6 +706,188 @@ var filterView = {
         setState('nullsShown.' + c.source, ths.nullsShown);
 
     },
+    zoneAggregateFilterControl: function(component){
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+        var ths = this;
+        this.nullsShown = true;
+
+        var contentContainer = filterView.setupFilter(c);
+        var contentContainerNode = document.getElementById("filter-content-"+c.source);
+
+        var slider, toggle;
+
+        function clearAllContent(){
+            while(contentContainerNode.childNodes.length > 0){
+                contentContainerNode.removeChild(contentContainerNode.firstChild);
+            }
+        }
+
+        this.setContentToDisableFilter = function(message){
+            clearAllContent();
+            var disabledText = document.createElement('span');
+            disabledText.textContent = message;
+            contentContainerNode.appendChild(disabledText);
+        }
+
+        this.setContentToEnableFilter = function(currentMapLayer){
+            clearAllContent();
+            slider = contentContainer.append("div")
+                .classed("filter", true)
+                .classed("slider",true)
+                .attr("id",c.source);
+            
+            var referenceDataName = c.source + '_' + currentMapLayer;
+            var referenceData = model.dataCollection[referenceDataName].objects;
+            
+            var allDataValuesForThisSource = referenceData.map(function(datum){
+                return datum[referenceDataName];
+            })
+
+            var minDatum = d3.min(allDataValuesForThisSource);
+            var maxDatum = d3.max(allDataValuesForThisSource);
+
+            var inputContainer = document.createElement('span');
+            inputContainer.setAttribute('id', c.source + '-input');
+            inputContainer.classList.add('text-input', 'continuous');
+
+            document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
+
+            var stepCount = Math.max(1, parseInt((maxDatum - minDatum)/500));
+
+            slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
+            
+            noUiSlider.create(slider, {
+                start: [minDatum, maxDatum],
+                connect: true,
+                tooltips: [ false, false ],
+                range: {
+                    'min': minDatum,
+                    'max': maxDatum
+                },
+                step: stepCount
+            });
+
+            var textInputs = new filterView.filterTextInput(
+                component,        
+                [['min', minDatum]],
+                [['max', maxDatum]]
+            );
+
+
+            //Each slider needs its own copy of the sliderMove function so that it can use the current component
+            function makeSliderCallback(component, doesItSetState){
+                return function sliderCallback ( values, handle, unencoded, tap, positions ) {
+                    // This is the custom binding module used by the noUiSlider.on() callback.
+
+                    // values: Current slider values;
+                    // handle: Handle that caused the event;
+                    // unencoded: Slider values without formatting;
+                    // tap: Event was caused by the user tapping the slider (boolean);
+                    // positions: Left offset of the handles in relation to the slider
+                    var specific_state_code = 'filterValues.' + component.source
+                    
+                    //If the sliders have been 'reset', remove the filter
+                    // if (component.min == unencoded[0] && component.max == unencoded[1]){
+                    //     unencoded = [];
+                    // }
+
+                    // For any non-integer numbers resulting
+                    // from the filter that are greater than zero,
+                    // return the ceiling of that number.
+                    unencoded = unencoded.map(function(el){
+                        return el >= 0 ? Math.ceil(el) : el;
+                    });
+
+                    textInputs.setValues([['min', unencoded[0]]],[['max', unencoded[1]]]);
+
+                    unencoded.push(ths.nullsShown);
+
+                    if(doesItSetState){
+                        setState(specific_state_code,unencoded);
+                    }
+
+                }
+            }
+
+            //Construct a new copy of the function with access to the current c variable
+            var currentSliderCallback = makeSliderCallback(c, true)
+            var slideSliderCallback = makeSliderCallback(c, false)
+
+            // Binding currentSliderCallback to 'change'
+            // so that it doesn't trigger when the user changes
+            // the filter values through the text input boxes
+            // (which then move the slider to a certain position)
+            slider.noUiSlider.on('change', currentSliderCallback);
+
+            // Change the value of the text input elements without
+            // setting state
+            slider.noUiSlider.on('slide', slideSliderCallback);
+
+            var inputCallback = function(){
+                var specific_state_code = 'filterValues.' + component.source
+
+                var returnVals = textInputs.returnValues();
+
+                slider.noUiSlider.set(
+                    [returnVals['min']['min'], returnVals['max']['max']]
+                );
+
+                setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max']]);
+            }
+
+            textInputs.setInputCallback(inputCallback);
+            textInputs.toDOM(
+                document.getElementById(c.source + '-input')
+            );
+
+            textInputs.allInputElements().forEach(function(el){
+                el.classList.add('continuous-input-text');
+            });
+
+            toggle = new filterView.nullValuesToggle(c, ths);
+            toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
+                setState('nullsShown.' + c.source, ths.nullsShown);
+            });
+            toggle.toDOM(document.getElementById('filter-content-' + c.source));
+
+        }
+
+        this.clear = function(){
+            var specific_state_code = 'filterValues.' + component.source;
+            // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
+            slider.noUiSlider.reset();
+            textInputs.reset();
+            setState(specific_state_code, []);
+            toggle.triggerToggleWithoutClick();
+            setState('nullsShown.' + component.source, true);
+        }
+
+        this.isTouched = function(){
+            var returnVals = textInputs.returnValues();
+            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
+        }
+
+        this.adjustContentToCurrentMapLayer = function(){
+            var currentMapLayer = getState().mapLayer[0];
+            var acceptsCurrentMapLayer = c.zones.indexOf(currentMapLayer) !== -1;
+            if(acceptsCurrentMapLayer){
+                this.setContentToEnableFilter(currentMapLayer);
+            }
+            else {
+                this.setContentToDisableFilter(
+                    "This filter is not available for this zone: " + currentMapLayer
+                );
+            }
+        }
+
+        this.adjustContentToCurrentMapLayer();
+        
+        // At the very end of setup, set the 'nullsShown' state so that it's available for
+        // use by code in filter.js that iterates through filterValues.
+        setState('nullsShown.' + c.source, ths.nullsShown);
+
+    },
     setupFilter: function(c){
     //This function does all the stuff needed for each filter regardless of type. 
     //It returns the "content" div, which is where the actual UI element for doing
@@ -901,9 +1074,11 @@ var filterView = {
             console.log("building filter component: " + filterView.components[i].source);
             
             //Set up sliders
-            if (filterView.components[i].component_type === 'continuous'){
-                
+            if (filterView.components[i].component_type === 'continuous' && !filterView.components[i].hasOwnProperty('zones')){
                 new filterView.continuousFilterControl(filterView.components[i]);
+            }
+            if (filterView.components[i].component_type === 'continuous' && filterView.components[i].hasOwnProperty('zones')){
+                new filterView.zoneAggregateFilterControl(filterView.components[i]);
             }
 
             if (filterView.components[i].component_type === 'date'){
@@ -981,14 +1156,17 @@ var filterView = {
     },
     clearLocationBasedFilters: function(){
         function isLocationBased(filterControl){
-            return (
-                filterControl.component.hasOwnProperty('zones') || 
-                filterControl.component.component_type === 'location'
-            );
+            returnfilterControl.component.component_type === 'location';
+        }
+        function isZoneBased(filterControl){
+            return filterControl.component.hasOwnProperty('zones');
         }
         for(var i = 0; i < filterView.filterControls.length; i++){
             if(isLocationBased(filterView.filterControls[i]) && filterView.filterControls[i].isTouched()){
                 filterView.filterControls[i].clear();
+            }
+            if(isZoneBased(filterControl)){
+                filterControl.adjustContentToCurrentMapLayer();
             }
         }
     },
