@@ -883,21 +883,38 @@
                     projectNames.push(project.innerText);
                   })
                   var allData = mapView.convertedProjects.features;
-                  var data = allData.filter(function(feature) {
-                    console.log(feature)
+                  // console.log(mapView.convertedProjects);
+                  var matchesData = allData.filter(function(feature) {
                       return feature.properties.matches_filters === true;
+                  });
+                  var notMatchesData = allData.filter(function(feature) {
+                      return feature.properties.matches_filters === false;
                   });
 
                   //Create a csv from the data
                   var csvContent = "data:text/csv;charset=utf-8,";
-                  var keys = "";
-                  for (key in data[0].properties){
-                    keys += key + ",";
+                  var keys = "matches_filters,";
+                  for (key in allData[0].properties){
+                    if ( key !== "matches_filters"){
+                      keys += key + ",";
+                    }
                   }
                   csvContent += keys + '\n';
-                  data.forEach( function(project){
+                  matchesData.forEach( function(project){
+                    csvContent += String(project.properties['matches_filters']) + ",";
                     for (key in project.properties){
-                      csvContent += project.properties[key] + ",";
+                      if ( key !== "matches_filters"){
+                        csvContent += String(project.properties[key]).replace(/,/g,' ') + ",";
+                      }
+                    }
+                    csvContent += '\n';
+                  })
+                  notMatchesData.forEach( function(project){
+                    csvContent += String(project.properties['matches_filters']) + ",";
+                    for (key in project.properties){
+                      if ( key !== "matches_filters"){
+                        csvContent += String(project.properties[key]).replace(/,/g,' ') + ",";
+                      }
                     }
                     csvContent += '\n';
                   })
