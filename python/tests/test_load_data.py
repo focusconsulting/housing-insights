@@ -157,6 +157,32 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(result, 'zone_facts table is in db')
 
     def test__get_weighted_census_results(self):
+        """ SQL Code used to validate results:
+
+        -- validate acs_lower_rent_quartile calculations
+        select round(sum(population_weight_proportions * acs_lower_rent_quartile)) as val
+        from census_tract_to_neighborhood_cluster as ctn, census where ctn.neighborhood_cluster = 'Cluster 33'
+        and census.census_tract = ctn.census_tract;
+
+        -- validate acs_median_rent calculations
+        select round(sum(population_weight_proportions * acs_median_rent))
+        from census_tract_to_ward as ctw, census where ctw.ward = 'Ward 1' and census.census_tract = ctw.census_tract;
+
+        -- validate aggregate_income calculations
+        select round(sum(val)) / round(sum(pop)) as calc_val, round(sum(val)) as total_val,
+        round(sum(pop)) as total_weight from (
+          select ctn.census_tract, population_weight_counts * aggregate_income as val,
+          population_weight_counts * population as pop, population
+          from census_tract_to_neighborhood_cluster as ctn, census where ctn.neighborhood_cluster = 'Cluster 4'
+          and census.census_tract = ctn.census_tract) as result;
+
+        -- validate population_black calculations
+        select round(sum(val)) / round(sum(pop)) as calc_val, round(sum(val)) as total_val,
+        round(sum(pop)) as total_weight from (
+          select ctw.census_tract, population_weight_counts * population_black as val,
+          population_weight_counts * population as pop, population
+          from census_tract_to_ward as ctw, census where ctw.ward = 'Ward 1' and census.census_tract = ctw.census_tract) as result;
+                """
         # expected calculated results for test cases
         poverty_rate_census_tract = {
             "items": [
@@ -877,35 +903,35 @@ class MyTestCase(unittest.TestCase):
         fraction_black_ward = {
             "items": [
                 {
-                    "count": 0.9274251201774929126093923333,
+                    "count": 0.92742512017749291261,
                     "group": "Ward 8"
                 },
                 {
-                    "count": 0.5632595824244312870052976005,
+                    "count": 0.56325958242443128701,
                     "group": "Ward 4"
                 },
                 {
-                    "count": 0.3513903680037865341379718377,
+                    "count": 0.35139036800378653414,
                     "group": "Ward 6"
                 },
                 {
-                    "count": 0.06884871735725819179545702874,
+                    "count": 0.06884871735725819180,
                     "group": "Ward 3"
                 },
                 {
-                    "count": 0.7020809052059052059052059052,
+                    "count": 0.70208090520590520591,
                     "group": "Ward 5"
                 },
                 {
-                    "count": 0.09383433961214212181074538828,
+                    "count": 0.08835013166258058658,
                     "group": "Ward 2"
                 },
                 {
-                    "count": 0.9417320685183921381287108442,
+                    "count": 0.94173206851839213813,
                     "group": "Ward 7"
                 },
                 {
-                    "count": 0.3025432984865033546575128725,
+                    "count": 0.30254329848650335466,
                     "group": "Ward 1"
                 }
             ]
@@ -913,19 +939,19 @@ class MyTestCase(unittest.TestCase):
         income_per_capita_cluster = {
             "items": [
                 {
-                    "count": 14491.26097495286830056558039,
+                    "count": 14491.2609749528683006,
                     "group": "Cluster 38"
                 },
                 {
-                    "count": 19264.25656373282546592300367,
+                    "count": 19264.256563732825,
                     "group": "Cluster 31"
                 },
                 {
-                    "count": 75794.72876022655758338577722,
+                    "count": 75794.728760226558,
                     "group": "Cluster 11"
                 },
                 {
-                    "count": 17215.36796536796536796536797,
+                    "count": 17215.367965367965,
                     "group": "Cluster 30"
                 },
                 {
@@ -1001,7 +1027,7 @@ class MyTestCase(unittest.TestCase):
                     "group": "Cluster 23"
                 },
                 {
-                    "count": 51332.50667945468246900047955,
+                    "count": 70922.649702110472,
                     "group": "Cluster 4"
                 },
                 {
@@ -1079,83 +1105,83 @@ class MyTestCase(unittest.TestCase):
         lower_rent_cluster = {
             "items": [
                 {
-                    "count": 1648,
+                    "count": 531,
                     "group": "Cluster 38"
                 },
                 {
-                    "count": 2543,
+                    "count": 480,
                     "group": "Cluster 31"
                 },
                 {
-                    "count": 2666,
+                    "count": 1308,
                     "group": "Cluster 11"
                 },
                 {
-                    "count": 1026,
+                    "count": 513,
                     "group": "Cluster 30"
                 },
                 {
-                    "count": 5832,
+                    "count": 1561,
                     "group": "Cluster 13"
                 },
                 {
-                    "count": 6252,
+                    "count": 958,
                     "group": "Cluster 7"
                 },
                 {
-                    "count": 1503,
+                    "count": 752,
                     "group": "Cluster 35"
                 },
                 {
-                    "count": 1972,
+                    "count": 615,
                     "group": "Cluster 22"
                 },
                 {
-                    "count": 5458,
+                    "count": 540,
                     "group": "Cluster 39"
                 },
                 {
-                    "count": 4007,
+                    "count": 1318,
                     "group": "Cluster 14"
                 },
                 {
-                    "count": 3558,
+                    "count": 1455,
                     "group": "Cluster 5"
                 },
                 {
-                    "count": 5651,
+                    "count": 2273,
                     "group": "Cluster 10"
                 },
                 {
-                    "count": 6839,
+                    "count": 1332,
                     "group": "Cluster 1"
                 },
                 {
-                    "count": 1876,
+                    "count": 924,
                     "group": "Cluster 27"
                 },
                 {
-                    "count": 12626,
+                    "count": 1169,
                     "group": "Cluster 25"
                 },
                 {
-                    "count": 2631,
+                    "count": 874,
                     "group": "Cluster 20"
                 },
                 {
-                    "count": 8598,
+                    "count": 798,
                     "group": "Cluster 2"
                 },
                 {
-                    "count": 5795,
+                    "count": 1130,
                     "group": "Cluster 8"
                 },
                 {
-                    "count": 4031,
+                    "count": 1068,
                     "group": "Cluster 9"
                 },
                 {
-                    "count": 3357,
+                    "count": 822,
                     "group": "Cluster 19"
                 },
                 {
@@ -1163,23 +1189,23 @@ class MyTestCase(unittest.TestCase):
                     "group": "Cluster 16"
                 },
                 {
-                    "count": 3167,
+                    "count": 622,
                     "group": "Cluster 23"
                 },
                 {
-                    "count": 3133,
+                    "count": 1246,
                     "group": "Cluster 4"
                 },
                 {
-                    "count": 4299,
+                    "count": 1446,
                     "group": "Cluster 12"
                 },
                 {
-                    "count": 6957,
+                    "count": 1446,
                     "group": "Cluster 6"
                 },
                 {
-                    "count": 2527,
+                    "count": 848,
                     "group": "Cluster 3"
                 },
                 {
@@ -1187,55 +1213,55 @@ class MyTestCase(unittest.TestCase):
                     "group": "Cluster 29"
                 },
                 {
-                    "count": 1352,
+                    "count": 482,
                     "group": "Cluster 24"
                 },
                 {
-                    "count": 6096,
+                    "count": 1438,
                     "group": "Cluster 15"
                 },
                 {
-                    "count": 7109,
+                    "count": 659,
                     "group": "Cluster 18"
                 },
                 {
-                    "count": 5125,
+                    "count": 659,
                     "group": "Cluster 21"
                 },
                 {
-                    "count": 774,
+                    "count": 387,
                     "group": "Cluster 28"
                 },
                 {
-                    "count": 5539,
+                    "count": 922,
                     "group": "Cluster 17"
                 },
                 {
-                    "count": 7739,
+                    "count": 940,
                     "group": "Cluster 26"
                 },
                 {
-                    "count": 899,
+                    "count": 430,
                     "group": "Cluster 36"
                 },
                 {
-                    "count": 1956,
+                    "count": 675,
                     "group": "Cluster 37"
                 },
                 {
-                    "count": 4076,
+                    "count": 1520,
                     "group": "Non-cluster area"
                 },
                 {
-                    "count": 3105,
+                    "count": 631,
                     "group": "Cluster 34"
                 },
                 {
-                    "count": 2577,
+                    "count": 603,
                     "group": "Cluster 32"
                 },
                 {
-                    "count": 2966,
+                    "count": 498,
                     "group": "Cluster 33"
                 }
             ]
@@ -1243,35 +1269,35 @@ class MyTestCase(unittest.TestCase):
         median_rent_ward = {
             "items": [
                 {
-                    "count": 21400,
+                    "count": 896,
                     "group": "Ward 8"
                 },
                 {
-                    "count": 26435,
+                    "count": 1272,
                     "group": "Ward 4"
                 },
                 {
-                    "count": 40998,
+                    "count": 1432,
                     "group": "Ward 6"
                 },
                 {
-                    "count": 33674,
+                    "count": 1911,
                     "group": "Ward 3"
                 },
                 {
-                    "count": 27622,
+                    "count": 1093,
                     "group": "Ward 5"
                 },
                 {
-                    "count": 29791,
+                    "count": 1739,
                     "group": "Ward 2"
                 },
                 {
-                    "count": 19117,
+                    "count": 756,
                     "group": "Ward 7"
                 },
                 {
-                    "count": 24208,
+                    "count": 1344,
                     "group": "Ward 1"
                 }
             ]
@@ -2022,13 +2048,6 @@ class MyTestCase(unittest.TestCase):
             result_value = result['items'][zone]
             result_value = float(
                 result_value) if result_value is not None else None
-
-            # # compare values at the same figs
-            # min_sig_fig = min(len(str(value).partition('.')[2]),
-            #                   len(str(result_value).partition('.')[2]))
-            # value = round(value, min_sig_fig)
-            # result_value = round(result_value, min_sig_fig)
-
             self.assertEqual(value, result_value,
                              'incorrect fraction_black for ward: {} - '
                              'expected: {}, actual: {}'.format(
@@ -2103,9 +2122,6 @@ class MyTestCase(unittest.TestCase):
         print(result)
 
         self.assertEqual(True, False)
-
-    def test__add_census_acs_quartiles_to_zone_facts_table(self):
-        pass
 
     def test__summarize_observations(self):
         building_permits_all_ward = {
