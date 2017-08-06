@@ -154,7 +154,7 @@ class HISql(object):
         # TODO make sure data is synced or appended properly
         sql_manifest_row = self.get_sql_manifest_row(db_conn=conn,
                                                      close_conn=False)
-        if sql_manifest_row is None:
+        if sql_manifest_row is not None:
             logging.info("  deleting existing manifest row for {}".format(
                 self.unique_data_id))
             delete_command = \
