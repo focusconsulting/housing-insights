@@ -190,6 +190,7 @@
             "style": "percent",
             "short_name": "sm"
         },
+        /*
         {
             "source": "fraction_black",
             "display_name": "ACS: Fraction Black",
@@ -202,6 +203,7 @@
             "style": "percent",
             "short_name": "fb"
         },
+        */
         {
             "source": "fraction_foreign",
             "display_name": "ACS: Fraction Foreign",

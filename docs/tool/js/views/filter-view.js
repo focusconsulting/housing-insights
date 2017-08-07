@@ -317,12 +317,29 @@ var filterView = {
         
         //Find initial values for controls
         this.nullsShown = true;
-        var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
-            return item[c.source];
-        });
-        var minDatum = d3.min(allDataValuesForThisSource) || 0;
-        var maxDatum = d3.max(allDataValuesForThisSource) || 1;
-        var stepCount = Math.max(1, parseInt((maxDatum - minDatum)/500));
+
+        this.calculateParams = function(){
+            var modifier = c.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
+            var data_field = c.source + modifier
+            console.log(data_field);
+            var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
+                return item[data_field];
+            });
+            this.minDatum = d3.min(allDataValuesForThisSource) || 0;
+            this.maxDatum = d3.max(allDataValuesForThisSource) || 1;
+            this.stepCount = Math.max(1, parseInt((this.maxDatum - this.minDatum)/500));
+
+            if (c.style === "percent") {
+                console.log("formatted as percent")
+                this.minDatum = Math.round(this.minDatum * 100) / 100;
+                this.maxDatum = Math.round(this.maxDatum * 100) / 100;
+            } else { //"number", "money"
+                this.minDatum = Math.round(this.minDatum);
+                this.maxDatum = Math.round(this.maxDatum);
+            }
+        }
+        
+        this.calculateParams();
 
         //Make the slider itself
         var slider = contentContainer.append("div")
@@ -332,14 +349,14 @@ var filterView = {
 
         slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
         noUiSlider.create(slider, {
-            start: [minDatum, maxDatum],
+            start: [this.minDatum, this.maxDatum],
             connect: true,
             tooltips: [ false, false ], //using textboxes instead
             range: {
-                'min': minDatum,
-                'max': maxDatum
+                'min': this.minDatum,
+                'max': this.maxDatum
             },
-            step: stepCount
+            step: this.stepCount
         });
         
         ////////////////////////
@@ -349,8 +366,8 @@ var filterView = {
         //Create object instance
         var textBoxes = new filterView.filterTextInput( 
             c,        
-            [['min', minDatum]],
-            [['max', maxDatum]]
+            [['min', this.minDatum]],
+            [['max', this.maxDatum]]
         );
         filterView.filterInputs[this.component.short_name] = textBoxes;
  
