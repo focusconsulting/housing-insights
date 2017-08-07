@@ -1,15 +1,15 @@
 "use strict"; 
 
+
+/*
+
+Note, this chart does not inherit from the newer chart prototype - see template-inherited-chart for the preferred approach
+
+*/
+
+
+
 var SubsidyTimelineChart = function(chartOptions) { 
-                                                                                     // First step of inheriting from Chart.
-                                                                                     // Call() calls a function. first param is
-                                                                                     // the owner / context of the function
-                                                                                     // (the `this`). "With call() or apply() 
-                                                                                     // you can set the value of this, and 
-                                                                                     // invoke a function as a new method of
-                                                                                     // an existing object."
-                                                                                     // https://www.w3schools.com/js/js_function_invocation.asp
-        // extend prototype is a method of Chart, defined in housing-insights.js
                               // param1 = what to extend      param2 = with what
     this.extendPrototype(SubsidyTimelineChart.prototype, subsidyTimelineExtension);
 
@@ -22,9 +22,8 @@ var SubsidyTimelineChart = function(chartOptions) {
     this.initialize(chartOptions);    
 };
 
-SubsidyTimelineChart.prototype = Object.create(ChartProto.prototype); // Second step of inheriting from Chart. I can't remember why you
-                                                             // have to use Object.create instead of just assignment (=), but
-                                                             // you do 
+//TODO this chart is inheriting from the callback prototype - should consider refactoring to use the newer ChartProto instead. 
+SubsidyTimelineChart.prototype = Object.create(ChartProtoCallback.prototype); 
 
 var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines the object with which to extend the prototype
                              // as called in this.extendPrototype(...) above 

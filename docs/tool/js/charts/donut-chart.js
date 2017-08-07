@@ -1,93 +1,124 @@
 "use strict";
 
-var DonutChart = function(chartOptions) { 
+var DonutChart = function(container) { //
     this.extendPrototype(DonutChart.prototype, DonutChartExtension);
-    PieChartProto.call(this, chartOptions); 
+    ChartProto.call(this, container); 
 }
 
-DonutChart.prototype = Object.create(PieChartProto.prototype);
+DonutChart.prototype = Object.create(ChartProto.prototype);
 
-var DonutChartExtension = { 
-  
-  setup: function(chartOptions){
-    
-    var chart = this;
+var DonutChartExtension = {
+    _setup: function(container){ 
+        var chart = this 
+        chart._chart = this
 
-    this.countType = chartOptions.count; 
+        chart._dataLabel = null;
 
-    this.totalUnits = this.countTotalUnits();
+        chart.arcTween = function(newAngle) { // HT: http://bl.ocks.org/mbostock/5100636
+          return function(d){
+            var interpolate = d3.interpolate(d.endAngle, newAngle);
+            return function(t) {
+              d.endAngle = interpolate(t);
+              return chart.arc(d);
+            };
+          };    
+        }
 
-    
-    chart.foreground = chart.svgCentered.append('path')
-      .style("fill", '#fd8d3c')
-      .datum({endAngle: Math.PI});
 
-    chart.percentage = chart.svgCentered.append("text")
-        .attr("text-anchor", "middle")
-        .attr('class','pie_number')
-        .attr('y',5)
-        .text(d3.format(".0%")(1));
+        chart.background = chart.innerChart 
+            .append('path')
+            .classed("pie-background",true)
+            .datum({endAngle: 2 * Math.PI})
+            .style("fill", "#ddd")
 
-    chart.label 
-        .text(chart.countType);
+        chart.foreground = chart.innerChart.append('path')
+          .classed("values",true)
+          .datum({endAngle: Math.PI})       
+        
+        chart.percentage = chart.innerChart.append("text")
+            .attr("text-anchor", "middle")
+            .attr('class','pie_number')
+            .attr('y',5)
+            .text(d3.format(".0%")(1));
 
-    chart.foreground.transition().duration(750)
-      .attrTween("d", chart.arcTween(Math.PI * 2));
+        chart.labelElement = chart.svg.append('text')
+            .attr('class','pie_text')
+            .attr('text-anchor','middle'); 
 
-    
-  },
-  countTotalUnits: function(){
-      var units = 0;
-      this.data.forEach(function(datum){
-        units += datum.proj_units_tot;
-      });
-      return units;
-  },
-  returnTextPercent: function(){
-    /*var chart = this;    
-    var textPercent;
-        textPercent = d3.format(".0%")((chart.pieVariable[0].value)/(chart.pieVariable[1].value+chart.pieVariable[0].value));        
-    return textPercent; */
-  },
-  updateSubscriber: function(msg,data){
-    resultsView.charts.forEach(function(chart){
-      DonutChart.prototype.update.call(chart,data);
-    })
-  /*  var chart = this;
-    chart.foreground
-      .transition().duration(750)
-      .attrTween("d", chart.arcTween(chart.pieVariable[2].value * Math.PI * 2));
-    chart.percentage
-        .text(this.returnTextPercent());
-    chart.label 
-        .text(chart.field); // TODO: use meta.json to provide readable field names, or arrange for API to return them*/
-  },
-  update: function(filterData){
-    var chart = this;
-    var factor;
-    if ( this.countType === 'Buildings' ) {
-      factor = filterData.length / this.data.length;
-    } else {
-      factor = returnUnitFactor();
-    }
+    }, // end setupType
+    _resize: function() {
+        /*
+        Perform graph specific resize functions, like adjusting axes
+        This should also work to initialize the attributes the first time
+        DOM elements will typically be created in the _setup function
+        */
 
-    this.foreground.transition().duration(750)
-      .attrTween("d", this.arcTween(factor * Math.PI * 2));
+        //namespace assignment - allow access to 'this' inside child functions
+        var chart = this;
+        chart.innerChart.attr("transform", "translate(" + (chart.innerWidth()/2 + chart.margin().left) + "," + (chart.innerHeight()/2 + chart.margin().top) +")"); // Moving the center point
 
-    this.percentage
-      .text(d3.format(".0%")(factor));
+        chart.arc = d3.arc()
+          .outerRadius(chart.radius())
+          .innerRadius(chart.radius() - chart.width() / 4)
+          .startAngle(0); 
+        
+        chart.background.attr("d", chart.arc);
 
-    function returnUnitFactor(){
-      var filteredProjects = chart.data.filter(function(datum){
-        return filterData.indexOf(datum.nlihc_id) !== -1;
-      });
-      var unitCounts = 0;
-      filteredProjects.forEach(function(project){
-        unitCounts += project.proj_units_tot;
-      });
-      return unitCounts / chart.totalUnits;
-    }
-  }
+        chart.labelElement
+            .attr('y', chart.height() - 5 )
+            .attr('x', chart.width() / 2)
 
-};
+    },
+    _update: function(){
+        /*
+        Draw the graph using the current data and settings. 
+        This should draw the graph the first time, and is always run after both '_setup' and '_resize' are run
+        */
+
+        var chart = this;
+        
+        var percent = chart.data()[0][chart.field()] //assume data comes in form [{'field':0.9,'unusedfield':'unusedvalue'},{ignored objects after first}]
+        var angle = percent * (Math.PI * 2)
+
+        chart.foreground
+            .transition()
+            .duration(chart.duration())
+            .attrTween("d", chart.arcTween(angle));
+
+        chart.percentage
+            .text(d3.format(".0%")(percent));
+
+        chart.labelElement
+            .text(chart.data()[0][chart.label()]);
+    },
+
+   
+
+    dataLabel: function(_){ 
+        if (!arguments.length) {
+            if (this._dataLabel=== null) {
+                return this.field()
+            }
+            else {
+                return this._dataLabel; 
+            }
+        } 
+        this._dataLabel = _;
+        return this;
+    },
+
+    radius: function(_) {
+        if (!arguments.length) {
+            return Math.min(this.innerWidth(), this.innerHeight()) / 2; 
+        }
+        console.log("can't set radius, it's calculated")
+        return this;
+    } 
+
+    //Add more getter/setters as needed
+
+
+}; //end specific chart Extension
+
+
 

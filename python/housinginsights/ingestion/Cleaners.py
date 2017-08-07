@@ -8,10 +8,12 @@ from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
 import logging
+import os
 
 from housinginsights.ingestion.DataReader import HIReader
 from housinginsights.sources.mar import MarApiConn
-import os
+from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
+from housinginsights.sources.google_maps import GoogleMapsApiConn
 
 
 package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -28,9 +30,10 @@ http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-str
 
 
 class CleanerBase(object, metaclass=ABCMeta):
-    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
+        self.engine = engine
 
         self.manifest_row = manifest_row
         self.tablename = manifest_row['destination_table']
@@ -184,15 +187,31 @@ class CleanerBase(object, metaclass=ABCMeta):
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
-    def rename_ward(self,row):
-        if row['WARD'] == self.null_value:
+    def rename_ward(self, row, ward_key='WARD'):
+        """
+        Standardize ward field to be 'Ward #' - where # represents the numeric
+        ward value.
+        :param row: the current data row to be cleaned
+        :param ward_key: optional parameter for specifying ward field name
+        :return: cleaned row data
+        """
+        if row[ward_key] == self.null_value:
             return row
         else:
-            row['WARD'] = "Ward " + str(row['WARD'])
+            ward = row[ward_key]
+            if ward.isnumeric():  # add text if only number
+                row[ward_key] = "Ward " + str(ward)
+            else:  # make sure text is 'Ward #'
+                row[ward_key] = ward.lower().capitalize()
             return row
 
-    def rename_lat_lon(self, row):
-        pass
+    def rename_status(self, row):
+        """
+        Standardize status field to have first letter capitalized and
+        remaining letters lowercase.
+        """
+        row['Status'] = row['Status'].lower().capitalize()
+        return row
 
     def add_mar_id(self, row, address_id_col_name='ADDRESS_ID'):
         """
@@ -243,6 +262,116 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return row
 
+    def add_geocode_from_mar(self, row):
+        """
+        Uses mar api lookup to populate geographic zones are missing for
+        buildings in the project table. The following zones are validated:
+
+        ward
+        neighborhood_cluster (e.g. 'cluster 1'
+        neighborhood_cluster_desc (eg. 'woodley park and zoo')
+        zip
+        anc
+        census_tract
+        status
+        """
+        # populate proj_city & proj_st accordingly
+        if row['Proj_City'] == self.null_value:
+            row['Proj_City'] = 'Washington'
+
+        if row['Proj_ST'] == self.null_value:
+            row['Proj_ST'] = 'DC'
+
+        # don't do anything if mar_id doesn't exist for the building
+        # this is assuming 'add_mar_id' was called first
+        if row['mar_id'] == self.null_value:
+            return row
+
+        ward = row['Ward2012']
+        neighbor_cluster = row['Cluster_tr2000']
+        neighborhood_cluster_desc = row['Cluster_tr2000_name']
+        zipcode = row['Proj_Zip']
+        anc = row['Anc2012']
+        census_tract = row['Geo2010']
+        status = row['Status']
+        full_address = row['Proj_addre']
+        image_url = row['Proj_image_url']
+        street_view_url = row['Proj_streetview_url']
+        psa = row['Psa2012']
+
+        # only do mar api lookup if we have a null geocode value
+        if self.null_value in [ward, neighbor_cluster,
+                               neighborhood_cluster_desc, zipcode, anc,
+                               census_tract, status, full_address, image_url,
+                               street_view_url, psa]:
+            mar_api = MarApiConn()
+            result = mar_api.reverse_address_id(aid=row['mar_id'])
+            result = result['returnDataset']['Table1'][0]
+        else:
+            return row
+
+        # update missing geocode values accordingly
+        if ward == self.null_value:
+            row['Ward2012'] = result['WARD'].lower().capitalize()
+
+        if neighbor_cluster == self.null_value:
+            cluster = result['CLUSTER_']
+            if cluster is not None:
+                row['Cluster_tr2000'] = cluster
+
+        if neighborhood_cluster_desc == self.null_value:
+            row['Cluster_tr2000_name'] = CLUSTER_DESC_MAP.get(
+                row['Cluster_tr2000'], self.null_value)
+
+        if zipcode == self.null_value:
+            zip_code = result['ZIPCODE']
+            row['Proj_Zip'] = zip_code
+            row['Zip'] = 'ZIP ' + str(zip_code)
+
+        if anc == self.null_value:
+            row['Anc2012'] = result['ANC_2012']
+
+        if census_tract == self.null_value:
+            row['Geo2010'] = result['CENSUS_TRACT']
+
+        if status == self.null_value:
+            row['Status'] = result['STATUS']
+
+        if full_address == self.null_value:
+            row['Proj_addre'] = result['FULLADDRESS']
+
+        if street_view_url == self.null_value:
+            street_view_url = result['STREETVIEWURL']
+            if street_view_url is not None:
+                row['Proj_streetview_url'] = street_view_url
+            else:
+                map_api = GoogleMapsApiConn()
+                map_api_result = map_api.check_street_view(row['Proj_lat'],
+                                                   row['Proj_lon'])
+
+                if map_api_result:
+                    # create street view url per google maps api specs
+                    loc_data = map_api_result['Location']
+                    latitude = loc_data['original_lat']
+                    longitude = loc_data['original_lng']
+                    pano_id = loc_data['panoId']
+                    url = map_api.get_street_view_url(latitude, longitude,
+                                                      pano_id)
+                    row['Proj_streetview_url'] = url
+
+        if image_url == self.null_value:
+            img_url = result['IMAGEURL']
+            img_dir = result['IMAGEDIR']
+            img_name = result['IMAGENAME']
+            row['Proj_image_url'] = '{}/{}/{}'.format(img_url, img_dir, img_name)
+
+        if psa == self.null_value:
+            psa = result['PSA']
+            if psa is not None:
+                row['Psa2012'] = 'PSA ' + psa.split(' ')[-1]
+
+        return row
+
 
 #############################################
 # Custom Cleaners
@@ -258,10 +387,13 @@ class GenericCleaner(CleanerBase):
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num = None):
-        row = self.replace_nulls(row, null_values=['N','', None])
+        row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
-        row = self.rename_census_tract(row,row_num,column_name='Geo2010')
         row = self.add_mar_id(row, 'Proj_address_id')
+        row = self.add_geocode_from_mar(row=row)
+        row = self.rename_ward(row, ward_key='Ward2012')
+        row = self.rename_status(row)
+        row = self.rename_census_tract(row, row_num, column_name='Geo2010')
         return row
 
 
@@ -383,16 +515,39 @@ class dchousing_cleaner(CleanerBase):
 
         return row
 
-class topa_cleaner(CleanerBase):
+class TopaCleaner(CleanerBase):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        #Call the parent method and pass all the arguments as-is
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+
     def clean(self,row,row_num=None):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
         # character in one or two columns.  Leave here for now.
         row = self.replace_nulls(row, null_values=['', '\\', None])
+        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
+        row['nlihc_id'] = nlihc_id
         return row
+
+    def get_nlihc_id_if_exists(self, address_id):
+        "Checks for record in project table with matching MAR id."
+        query = "select nlihc_id from project where mar_id = '{}'".format(address_id)
+        if address_id == self.null_value:
+            return self.null_value
+        try:
+            result = self.engine.execute(query).fetchone()
+            if result:
+                return result[0]
+        except:
+            return self.null_value
+        return self.null_value
 
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
+
+        if row['zone_type'] == 'census_tract':
+            row = self.rename_census_tract(row, column_name = 'zone')
+
         return row
 
 

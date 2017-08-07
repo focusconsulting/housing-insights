@@ -14,7 +14,7 @@ from housinginsights.tools import dbtools
 import requests
 import csv
 import os
-
+import logging
 
 class BaseApiConn(object):
     """
@@ -95,6 +95,8 @@ class BaseApiConn(object):
         else:
             url = urlpath
 
+        logging.debug("Url requested: {}".format(url))
+        logging.debug("params: {}".format(params))
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):
@@ -184,6 +186,15 @@ class BaseApiConn(object):
                     data[field] = None
             else:
                 data[field] = line[value]
+
+            # NOTE - only needed if using data downloaded from api call
+            # instead of batch csv download
+            # clean opendata 'GIS_DTTM' formatting - convert milliseconds
+            # if value == 'GIS_LAST_MOD_DTTM':
+            #     milli_sec = int(line[value])
+            #     data[field] = \
+            #         datetime.fromtimestamp(milli_sec / 1000.0).strftime(
+            #             '%m/%d/%Y')
         return data
 
     def _get_nlihc_id_from_db(self, db_conn, address_id):
@@ -204,7 +215,6 @@ class BaseApiConn(object):
             return result[0]['nlihc_id'], True
         else:
             return str(uuid4()), False
-
 
     def create_project_subsidy_csv(self, uid, project_fields_map,
                                    subsidy_fields_map, database_choice=None):

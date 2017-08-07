@@ -2,14 +2,15 @@
 
 var chloroplethLegend = {
   init: function(message,data){
+
     var joinedToGeoName = "joinedToGeo." + data.overlay + "_" + data.activeLayer;
     var chloroplethRange = getState()[joinedToGeoName][0].chloroplethRange;
-    var overlayConfig = mapView.initialOverlays.find(function(obj){return obj['name']==data.overlay});
+    var overlayConfig = mapView.initialOverlays.find(function(obj){return obj['source']==data.overlay});
 
     chloroplethLegend.tearDownPrevious();
 
-    var wrapperId = 'overlay-about-' + data.overlay;
-
+    //var wrapperId = 'overlay-' + data.overlay + '-legend';    //old way- when it was located within the sidebar
+    var wrapperId = 'chloroplethLegend-wrapper';
     var partialRequest = {
         partial: 'chloropleth-legend',
         container: wrapperId,
@@ -36,11 +37,9 @@ var chloroplethLegend = {
           return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); //adds thousands separators, from https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
         }
         if (style == "percent") {
-          x = Math.round(x * 100) + "%"
-          return x
+          return Math.round(x * 100) + "%";
         }
         if (style == "money"){
-          x = Math.round(x)
           x = x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); //adds thousands separators
           x = "$" + x
           return x

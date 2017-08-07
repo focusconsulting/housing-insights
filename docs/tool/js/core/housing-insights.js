@@ -17,13 +17,14 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
         }
         controller.getData(metaDataRequest);
     },
-    // Here's where we keep hardcoded URLs. The aim is to make this as short as possible.
+    // Here's where we keep hardcoded URLs.
     //NOTE raw data sources have their urls included in the metaData
     URLS: {
       geoJSONPolygonsBase: "/tool/data/",
-      metaData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/meta",
-      filterData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/filter",
-      project: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/project"
+      metaData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta",
+      filterData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter",
+      project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
+      layerData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/zone_facts/<source_data_name>/<grouping>"
     }
     
 };
@@ -62,6 +63,9 @@ function StateModule() {
             if ( state[key].length > 2 ) {
                 state[key].length = 2;
             }
+        } else {
+            //TODO do we want for there to be another 'announceState' method that publishes every time it fires, even if the value remains the same??
+            console.log("State value is the same as previous:", key, value);
         }
         
     }
@@ -156,10 +160,16 @@ var controller = {
     controlSubs: SubscribeModule(),
     init: function(){
         setSubs([
-            ['switchView', controller.switchView]
+            ['switchView', controller.switchView],
+            ['switchView', router.pushViewChange]
         ]);
-        setState('activeView',mapView);        
-        mapView.init();        
+        if ( router.initialView === 'building' ){
+            setState('activeView', buildingView);
+            buildingView.init(router.buildingID); // parameter distinguishes actions taken in buildingView.init()     
+        } else {
+            setState('activeView',mapView);        
+            mapView.init();  
+        }
     },
     // dataRequest is an object with the properties 'name', 'url' and 'callback'. The 'callback' is a function
     // that takes as an argument the data returned from getData.                             
@@ -167,7 +177,7 @@ var controller = {
         if (model.dataCollection[dataRequest.name] === undefined) { // if data not in collection
             d3.json(dataRequest.url, function(error, data){
                 if ( error ) { console.log(error); }
-                if ( data.items !== null ) {
+                if ( data.objects !== null ) {
                     model.dataCollection[dataRequest.name] = data;
                     setState('dataLoaded.' + dataRequest.name, true );
                     if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
@@ -186,7 +196,6 @@ var controller = {
         } else {
             // TODO publish that data is available every time it's requested or only on first load?
             if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
-                console.log(model.dataCollection[dataRequest.name]);
                 dataRequest.callback(model.dataCollection[dataRequest.name]);
             }              
         }
@@ -206,27 +215,29 @@ var controller = {
             }
         });
     },
-    joinToGeoJSON: function(overlay,grouping,activeLayer){
-        model.dataCollection[activeLayer].features.forEach(function(feature){
+    joinToGeoJSON: function(source_data_name,grouping){
+        model.dataCollection[grouping].features.forEach(function(feature){
             var zone = feature.properties.NAME;
-            var dataKey = overlay + '_' + grouping;
-            var zone_entry = model.dataCollection[dataKey].items.find(function(obj){
-                            return obj.group === zone;
+            var dataKey = source_data_name + '_' + grouping;
+            var zone_entry = model.dataCollection[dataKey].objects.find(function(obj){
+                            return obj.zone === zone;
                         });
             //Handle case of a missing entry in the API
             if (zone_entry == undefined){
                 zone_entry = {}
-                zone_entry['count'] = null
+                zone_entry[source_data_name] = null
             };
 
-            feature.properties[overlay] = zone_entry.count;
+            feature.properties[source_data_name] = zone_entry[source_data_name];
+
         });
-        setState('joinedToGeo.' +  overlay + '_' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
+        setState('joinedToGeo.' +  source_data_name + '_' + grouping, {overlay:source_data_name, grouping:grouping, activeLayer:grouping}); //TODO change joinedToGeo to not need activeLayer
+
         // e.g. joinedToGeo.crime_neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
     },
     convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
                                       // and returns geoJSON with the original data in the properties field
-        var features = data.items.map(function(element){ 
+        var features = data.objects.map(function(element){ 
           return {
             'type': 'Feature',
             'geometry': {
@@ -243,7 +254,11 @@ var controller = {
     },
     // ** NOTE re: classList: not supported in IE9; partial support in IE 10
     switchView: function(msg,data) {
-
+        if ( data === undefined ) {
+            location.reload();
+            return;
+        }
+console.log(msg,data);
         var container = document.getElementById(getState().activeView[0].el);
         container.classList.add('fade');
         console.log( data === getState().activeView[1]);
@@ -272,8 +287,9 @@ var controller = {
         }, 500);
     },
     backToggle: 0,
-    goBack: function(){
-        setState('switchView', getState().activeView[1])
+    goBack: function(hideFromHistory){
+       
+            setState('switchView', getState().activeView[1])
     }
 
 }
@@ -296,7 +312,23 @@ var setSubs = controller.controlSubs.setSubs,
 
  //TODO should these be wrapped up into a 'helpers' namespace? Or maybe the new utils section?
 
+// HELPER roundTo
+Math.roundTo = function(start, tensExample){
+    var numberToRound = start/tensExample;
+    return Math.round(numberToRound) * tensExample;
+}
 
+var getFieldFromMeta = function(table,sql_name){
+    var meta = model.dataCollection['metaData'] //todo this assumes the data is available already to avoid callback - relies on calling function to request meta first
+    var tableFields = meta[table]['fields']
+
+    for (var i = 0; i < tableFields.length; i++) {
+        if (tableFields[i]['sql_name'] == sql_name){
+            return tableFields[i]
+        }
+    };
+    return null
+}
  // HELPER get parameter by name
  var getParameterByName = function(name, url) { // HT http://stackoverflow.com/a/901144/5701184
       if (!url) {
