@@ -321,7 +321,7 @@ var filterView = {
         var maxDatum = d3.max(allDataValuesForThisSource) || 1;
         var stepCount = Math.max(1, parseInt((maxDatum - minDatum)/500));
 
-
+        //Make the slider itself
         var slider = contentContainer.append("div")
                 .classed("filter", true)
                 .classed("slider",true)
@@ -339,62 +339,52 @@ var filterView = {
             step: stepCount
         });
         
-        // adds each new instance to the object created above under the global filterView so that each can be accessed again
-        // in router.js, when decoding the state in a url
+        ////////////////////////
+        //Set up the text boxes
+        ////////////////////////
+
+        //Create object instance
         var textBoxes = new filterView.filterTextInput( 
             c,        
             [['min', minDatum]],
             [['max', maxDatum]]
         );
         filterView.filterInputs[this.component.short_name] = textBoxes;
+ 
+        //Append a 'span' that will hold the text input boxes
+        var inputContainer = document.createElement('span');
+        inputContainer.setAttribute('id', c.source + '-input');
+        inputContainer.classList.add('text-input', 'continuous');
+        document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
 
-        //Each slider needs its own copy of the sliderMove function so that it can use the current component
-        function makeSliderCallback(component, doesItSetState){
-            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
-                // This is the custom binding module used by the noUiSlider.on() callback.
+        //Add it to the DOM
+        textBoxes.toDOM(
+            document.getElementById(c.source + '-input')//parent dom object
+        );
+        textBoxes.allInputElements().forEach(function(el){
+            el.classList.add('continuous-input-text');
+        });
 
-                // values: Current slider values;
-                // handle: Handle that caused the event;
-                // unencoded: Slider values without formatting;
-                // tap: Event was caused by the user tapping the slider (boolean);
-                // positions: Left offset of the handles in relation to the slider
-                var specific_state_code = 'filterValues.' + component.source
-                
-                //If the sliders have been 'reset', remove the filter
-                // if (component.min == unencoded[0] && component.max == unencoded[1]){
-                //     unencoded = [];
-                // }
 
-                // For any non-integer numbers resulting
-                // from the filter that are greater than zero,
-                // return the ceiling of that number.
-                unencoded = unencoded.map(function(el){
-                    return el >= 0 ? Math.ceil(el) : el;
-                });
+        ////////////////////////
+        //Set up nulls toggle
+        ////////////////////////
+        //Set up the toggle button for nulls
+        var toggle = new filterView.nullValuesToggle(c, ths);
+        toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
-                textBoxes.setValues([['min', unencoded[0]]],[['max', unencoded[1]]]);
 
-                unencoded.push(ths.nullsShown);
+        ////////////////////////
+        //Link UI components to state and each other
+        ////////////////////////
+        
+        //Toggle
+        //TODO this binding needs to be rewritten - currently it switches back and forth, so can break if set to wrong initial state
+        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
+            setState('nullsShown.' + c.source, ths.nullsShown);
+        });
 
-                if(doesItSetState){
-                    setState(specific_state_code,unencoded);
-                }
-
-            }
-        }
-
-        // Binding currentSliderCallback to 'change'
-        // so that it doesn't trigger when the user changes
-        // the filter values through the text input boxes
-        // (which then move the slider to a certain position)
-        var currentSliderCallback = makeSliderCallback(c, true)
-        slider.noUiSlider.on('change', currentSliderCallback);
-
-        // Change the value of the text input elements without
-        // setting state
-        var slideSliderCallback = makeSliderCallback(c, false)
-        slider.noUiSlider.on('slide', slideSliderCallback);
-
+        //Textbox
         var inputCallback = function(){
         //When textbox inputs change - need to adjust the slider and setState. 
 
@@ -408,29 +398,48 @@ var filterView = {
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.nullsShown]);
         }
 
-        //Set up the text boxes
-        //Append a 'span' that will hold the text input boxes
-        var inputContainer = document.createElement('span');
-        inputContainer.setAttribute('id', c.source + '-input');
-        inputContainer.classList.add('text-input', 'continuous');
-        document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
-
-        //Add it to the DOM
         textBoxes.setInputCallback(inputCallback);
-        textBoxes.toDOM(
-            document.getElementById(c.source + '-input')//parent dom object
-        );
-        textBoxes.allInputElements().forEach(function(el){
-            el.classList.add('continuous-input-text');
-        });
+
+        //slider
+        function makeSliderCallback(component, doesItSetState){
+            //Make a copy of the callback with access to current variables
+
+            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
+                /*  This is the custom binding module used by the noUiSlider.on() callback.
+                    values: Current slider values;
+                    handle: Handle that caused the event;
+                    unencoded: Slider values without formatting;
+                    tap: Event was caused by the user tapping the slider (boolean);
+                    positions: Left offset of the handles in relation to the slider
+                */
+
+                // Round the filter up
+                unencoded = unencoded.map(function(el){
+                    return el >= 0 ? Math.ceil(el) : el;
+                });
+
+                //Bind the slider values to the textboxes
+                textBoxes.setValues([['min', unencoded[0]]],[['max', unencoded[1]]]);
+
+                //Set the filterValues state
+                if(doesItSetState){
+                    var specific_state_code = 'filterValues.' + component.source
+                    unencoded.push(ths.nullsShown);
+                    setState(specific_state_code,unencoded);
+                }
+
+            }
+        }
+
+        // Changing value should trigger map update
+        var currentSliderCallback = makeSliderCallback(c, true)
+        slider.noUiSlider.on('change', currentSliderCallback);
+
+        // Sliding slider should update textboxes only
+        var slideSliderCallback = makeSliderCallback(c, false)
+        slider.noUiSlider.on('slide', slideSliderCallback);
 
 
-        //Set up the toggle button for nulls
-        var toggle = new filterView.nullValuesToggle(c, ths);
-        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
-            setState('nullsShown.' + c.source, ths.nullsShown);
-        });
-        toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
         //Public methods
         this.clear = function(){
