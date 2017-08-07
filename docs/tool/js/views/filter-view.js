@@ -22,6 +22,7 @@ var filterView = {
                 ['subNavExpanded.right', filterView.expandSidebar],
                 ['mapLayer', filterView.clearLocationBasedFilters],
                 ['mapLayer', filterView.updateLocationFilterControl],
+                ['mapLayer', filterView.resetZoneFilters],
                 ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
             ]);
 
@@ -316,12 +317,17 @@ var filterView = {
         var contentContainer = filterView.setupFilter(c);
         
         //Find initial values for controls
-        this.nullsShown = true;
-
         this.calculateParams = function(){
+        //Uses the current data set to define min/max levels for the UI. 
+        //Can be re-run to find new values if the zone type is changed
+            
+            //If calculating params, reset nullsShown checkbox
+            this.nullsShown = true;
+
+            //If it's a zone-level data set, need to choose the right column
             var modifier = c.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
             var data_field = c.source + modifier
-            console.log(data_field);
+            
             var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
                 return item[data_field];
             });
@@ -330,7 +336,6 @@ var filterView = {
             this.stepCount = Math.max(1, parseInt((this.maxDatum - this.minDatum)/500));
 
             if (c.style === "percent") {
-                console.log("formatted as percent")
                 this.minDatum = Math.round(this.minDatum * 100) / 100;
                 this.maxDatum = Math.round(this.maxDatum * 100) / 100;
             } else { //"number", "money"
@@ -342,13 +347,14 @@ var filterView = {
         this.calculateParams();
 
         //Make the slider itself
-        var slider = contentContainer.append("div")
-                .classed("filter", true)
-                .classed("slider",true)
-                .attr("id",c.source);
+        contentContainer.append("div")
+            .classed("filter", true)
+            .classed("slider",true)
+            .attr("id",c.source);
 
-        slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
-        noUiSlider.create(slider, {
+        this.slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
+        
+        noUiSlider.create(this.slider, {
             start: [this.minDatum, this.maxDatum],
             connect: true,
             tooltips: [ false, false ], //using textboxes instead
@@ -411,7 +417,7 @@ var filterView = {
             var specific_state_code = 'filterValues.' + component.source
             var returnVals = textBoxes.returnValues();
 
-            slider.noUiSlider.set(
+            this.slider.noUiSlider.set(
                 [returnVals['min']['min'], returnVals['max']['max']]
             );
 
@@ -455,11 +461,11 @@ var filterView = {
 
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
-        slider.noUiSlider.on('change', currentSliderCallback);
+        this.slider.noUiSlider.on('change', currentSliderCallback);
 
         // Sliding slider should update textboxes only
         var slideSliderCallback = makeSliderCallback(c, false)
-        slider.noUiSlider.on('slide', slideSliderCallback);
+        this.slider.noUiSlider.on('slide', slideSliderCallback);
 
 
 
@@ -467,9 +473,8 @@ var filterView = {
         this.clear = function(){
             var specific_state_code = 'filterValues.' + component.source;
 
-            // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
-            slider.noUiSlider.reset();
-            textBoxes.reset();
+            this.slider.noUiSlider.set([this.minDatum,this.maxDatum])
+            textBoxes.setValues([['min', this.minDatum]],[['max', this.maxDatum]]);
 
             if ( !getState()['nullsShown.' + component.source][0] ) {
                 toggle.triggerToggleWithoutClick();
@@ -488,13 +493,25 @@ var filterView = {
         this.set = function(min,max,nullValue){
 
             textBoxes.setValues([['min', min]],[['max', max]]);
-            slider.noUiSlider.set([min, max]);
+            this.slider.noUiSlider.set([min, max]);
             //TODO set toggle in better way
             document.querySelector('[name="showNulls-' + c.source + '"]').checked = nullValue;
 
             setState('filterValues.' + c.source,[min,max,nullValue]);
         };
 
+
+        this.rebuild = function() {
+            this.calculateParams()
+            this.slider.noUiSlider.updateOptions({
+                start: [this.minDatum, this.maxDatum],
+                range: {
+                    'min': this.minDatum,
+                    'max': this.maxDatum
+                }
+            });
+            this.clear()
+        }
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
         // use by code in filter.js that iterates through filterValues.
@@ -1098,7 +1115,14 @@ var filterView = {
             filterView.clearAllButton.tearDown();
         }
     },
-    
+    resetZoneFilters: function(){
+        for (var i=0; i < filterView.filterControls.length; i++) {
+            var control = filterView.filterControls[i];
+            if (control.component.data_level === 'zone') {
+                control.rebuild();
+            }  
+        }
+    },
     indicateActivatedFilters: function(){
         //add/remove classes to the on-page elements that tell the users which filters are currently activated
         //e.g. the filter sidebar data name titles
