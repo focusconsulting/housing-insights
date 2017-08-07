@@ -72,12 +72,13 @@ var filterUtil = {
 		for (key in filterValues) { // iterate through registered filters
 			
             //need to get the matching component out of a list of objects
-            var component = filterView.components.filter(function(obj) {
+            var component = dataChoices.filter(function(obj) {
               return obj.source == key;
             });
-            component = component[0] //the most recent filter (current and previous are returned in a list)
+            component = component[0]
+
                         
-			if (component['component_type'] == 'continuous') { //filter data for a 'continuous' filter
+			if (component['component_type'] == 'continuous') {
                 
                 if (filterValues[key][0].length == 0){
                     // don't filter because the filter has been removed.
@@ -86,17 +87,19 @@ var filterUtil = {
                     //javascript rounding is weird
                     var decimalPlaces = component['data_type'] == 'integer' ? 0 : 2 //ternary operator
                     var min = Number(Math.round(filterValues[key][0][0]+'e'+decimalPlaces) +'e-'+decimalPlaces);
-                    var max =Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
-
+                    var max = Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
+                    //If it's a zone-level data set, need to choose the right column
+                    var modifier = component.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
+                    
                     //filter it
                     workingData = workingData.filter(function(d){
                     // Refer to the third element of the most recent value of
                     // filterValues, which is a boolean indicating whether
                     // null values will be shown.
-                        if(d[key] === null){
+                        if(d[(key + modifier)] === null){
                             return nullsShown[key];
                         }
-    					return (d[key] >= min && d[key] <= max);
+    					return (d[(key + modifier)] >= min && d[(key + modifier)] <= max);
     				});
                 };
 			}

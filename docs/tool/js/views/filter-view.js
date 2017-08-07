@@ -13,10 +13,10 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
-                ['nullsShown', filterView.indicateActivatedFilters],
+                //['nullsShown', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
                 ['filterValues', filterView.addClearPillboxes],
-                ['nullsShown', filterView.addClearPillboxes],
+                //['nullsShown', filterView.addClearPillboxes],
                 ['dataLoaded.filterData', filterView.formatFilterDates],
                 ['filterDatesFormatted', filterView.buildFilterComponents],
                 ['subNavExpanded.right', filterView.expandSidebar],
@@ -352,7 +352,7 @@ var filterView = {
             .classed("slider",true)
             .attr("id",c.source);
 
-        this.slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
+        this.slider = document.getElementById(c.source);
         
         noUiSlider.create(this.slider, {
             start: [this.minDatum, this.maxDatum],
@@ -487,7 +487,7 @@ var filterView = {
 
         this.isTouched = function(){
             var returnVals = textBoxes.returnValues();
-            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
+            return returnVals.min.min !== this.minDatum || returnVals.max.max !== this.maxDatum || this.nullsShown === false;
         };
 
         this.set = function(min,max,nullValue){
