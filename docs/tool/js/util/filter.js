@@ -55,9 +55,7 @@ var filterUtil = {
         
     	var workingData = model.dataCollection['filterData'].objects; 
         var nullsShown = filterUtil.getNullsShown(); // creates object with nullShown state ofall filters
-        console.log('nullsShown',nullsShown);
         var filterValues = filterUtil.getFilterValues();
-        console.log('filterValues',filterValues);
 
         for (var key in nullsShown){
             var component = (filterView.components.filter(function(obj){

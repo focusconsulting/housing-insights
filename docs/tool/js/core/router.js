@@ -13,10 +13,8 @@ var router = {
         if ( router.hasInitialFilterState ) router.decodeState();
     },
     initBuilding: function() {
-        console.log('building in hash');
         router.initialView = 'building';
         router.buildingID = window.location.hash.match(/building=([\w\d-]+)/)[1];
-        console.log(router.buildingID);
     },
     pushFilter: function(msg, data){
         // TO DO: add handling for sidebar and preview pusher
@@ -30,11 +28,9 @@ var router = {
         } else {
             window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramifyFilter());        
         }
-        console.log(router.stateObj);
     },
     pushViewChange: function(msg, data){
         if (data.el === 'building-view'){
-            console.log('push view change');
             var buildingID = getState().selectedBuilding[0].properties.nlihc_id;
             window.history.pushState(router.stateObj, 'newState', '#/HI/building=' + buildingID);
         }
@@ -46,19 +42,15 @@ var router = {
             var dataChoice = dataChoices.find(function(obj){
                 return key.split('.')[1] === obj.source;
             });
-            console.log(dataChoice);
             var separator = getState()['nullsShown.' + dataChoice.source] && getState()['nullsShown.' + dataChoice.source][0] ? '-' : '_';
             
             if ( dataChoice.component_type === 'continuous' ) {
-                console.log('continuous'); 
                 paramsArray.push(dataChoice.short_name + '=' + Math.round(router.stateObj[key][0]) + separator + Math.round(router.stateObj[key][1])); 
             }
             if ( dataChoice.component_type === 'categorical' ){
-                console.log('categorical');
                 paramsArray.push( dataChoice.short_name + '=' + router.stateObj[key].join('+'));
             }
             if ( dataChoice.component_type === 'date' ){
-                console.log('date');
                 var dateStrings = [];
                 for ( var i = 0; i < 2; i++ ){ // i < 2 bc index 2 is true/false of nullsShown
                     var date = router.stateObj[key][i].getDate();
@@ -76,11 +68,9 @@ var router = {
         document.getElementById('loading-state-screen').style.display = 'block';
     },
     decodeState: function(){
-        console.log('decodeState');
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
         stateArray.forEach(function(each){
             var eachArray = each.split('=');
-            console.log(eachArray);
             var dataChoice = dataChoices.find(function(obj){
                 return obj.short_name === eachArray[0];
             });
@@ -99,9 +89,7 @@ var router = {
                 
             }
             if ( dataChoice.component_type === 'categorical' ){
-                console.log('decoding categorical');
                 var values = eachArray[1].replace(/_/g,' ').split('+');
-                console.log(values);
                 $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', values);
             }   
             if ( dataChoice.component_type === 'date' ){
@@ -147,18 +135,15 @@ var router = {
         }
     },
     hashChangeHandler: function(){
-        console.log('hash change');
         controller.goBack();
     },
     nullsHandler: function (msg,data) { // for handling when a nullsShown checkbox is toggled. needs to grab values of the filter
-        console.log(msg, data);
         var component = msg.split('.')[1];
         var dataChoice = dataChoices.find(function(each){
             return each.source === component;
         });
         var type = dataChoice.component_type;
         var shortName = dataChoice.short_name;
-        console.log(type,shortName);
         if ( type === 'categorical' ) {
             // i think this is a null set; no unknowns in categorical filters
         }

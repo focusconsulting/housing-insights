@@ -54,7 +54,6 @@ var filterView = {
                 var destinationElement = this;
                 var flyLabel = document.createElement('div');
                 flyLabel.textContent = this.textContent;
-                console.log("flyer this", this);
                 flyLabel.classList.add('ui', 'label', 'transition', 'visible', 'clear-single-flier');
                 var originRect = originElement.getBoundingClientRect();
                 flyLabel.style.left = originRect.left + 'px';
@@ -276,10 +275,12 @@ var filterView = {
         submitButton.classList.add('nullValuesToggleSubmit');
         submitButton.setAttribute('type', 'button');
 
-        // separatorCallback is a function that returns
-        // a JavaScript Node object to be appended after each
-        // input element.
+        //function that creates the text boxes on the page
         this.toDOM = function(parentElement, separatorCallback){
+            // separatorCallback is a function that returns
+            // a JavaScript Node object to be appended after each
+            // input element.
+
             var toSpan = document.createElement('span');
             toSpan.textContent = 'to';
             for(var pole in output){
@@ -323,7 +324,7 @@ var filterView = {
         }
 
         this.setInputCallback = function(callback){
-            console.log(this);
+            
             this.callback = callback; // making callback function a property of the filterTextInput so we can access it later -JO
             var checkKeyPress = function(e){
                 if(e.charCode === 9 || e.charCode === 13){
@@ -391,6 +392,10 @@ var filterView = {
 
     },
     continuousFilterControl: function(component){
+        //Creates a new filterControl on the sidebar. 
+        //component is the variable of configuration settings pulled from dataChoices.js
+
+
         filterView.filterControl.call(this, component);
         var c = this.component;
 
@@ -440,6 +445,7 @@ var filterView = {
             },
             step: stepCount
         });
+
         // adds each new instance to the object created above under the global filterView so that each can be accessed again
         // in router.js, when decoding the state in a url
         filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput( 
@@ -448,8 +454,6 @@ var filterView = {
             [['max', maxDatum]]
         );
         var textInputs = filterView.filterInputs[this.component.short_name];
-        console.log(textInputs);
-        console.log(this);
 
         //Each slider needs its own copy of the sliderMove function so that it can use the current component
         function makeSliderCallback(component, doesItSetState){
@@ -486,24 +490,22 @@ var filterView = {
             }
         }
 
-        //Construct a new copy of the function with access to the current c variable
-        var currentSliderCallback = makeSliderCallback(c, true)
-        var slideSliderCallback = makeSliderCallback(c, false)
-
         // Binding currentSliderCallback to 'change'
         // so that it doesn't trigger when the user changes
         // the filter values through the text input boxes
         // (which then move the slider to a certain position)
+        var currentSliderCallback = makeSliderCallback(c, true)
         slider.noUiSlider.on('change', currentSliderCallback);
 
         // Change the value of the text input elements without
         // setting state
+        var slideSliderCallback = makeSliderCallback(c, false)
         slider.noUiSlider.on('slide', slideSliderCallback);
 
         var inputCallback = function(){
-            console.log('inputCallback');
-            var specific_state_code = 'filterValues.' + component.source
+        //When textbox inputs change - need to adjust the slider and setState. 
 
+            var specific_state_code = 'filterValues.' + component.source
             var returnVals = textInputs.returnValues();
 
             slider.noUiSlider.set(
@@ -513,28 +515,30 @@ var filterView = {
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.nullsShown]);
         }
 
+        //Set up the text boxes
         textInputs.setInputCallback(inputCallback);
         textInputs.toDOM(
-            document.getElementById(c.source + '-input')
+            document.getElementById(c.source + '-input')//parent dom object
         );
-
         textInputs.allInputElements().forEach(function(el){
             el.classList.add('continuous-input-text');
         });
 
+        //Set up the toggle button for nulls
         var toggle = new filterView.nullValuesToggle(c, ths);
         toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
             setState('nullsShown.' + c.source, ths.nullsShown);
         });
         toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
+        //Public methods
         this.clear = function(){
             var specific_state_code = 'filterValues.' + component.source;
-            console.log(specific_state_code);
+
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
             textInputs.reset();
-            console.log(getState());
+
             if ( !getState()['nullsShown.' + component.source][0] ) {
                 toggle.triggerToggleWithoutClick();
             } 
@@ -554,6 +558,10 @@ var filterView = {
         setState('nullsShown.' + c.source, ths.nullsShown);
     },
     dateFilterControl: function(component){
+        //Creates a new filterControl on the sidebar. 
+        //component is the variable of configuration settings pulled from dataChoices.js
+
+
         filterView.filterControl.call(this, component);
         var c = this.component;
         var ths = this;
@@ -648,7 +656,7 @@ var filterView = {
                         ['day', newMaxDate.getDate()]
                     ]
                 );
-                console.log(ths.nullsShown);
+                
                 if(doesItSetState){
                     setState(specific_state_code,[newMinDate, newMaxDate, ths.nullsShown]);
                 }
@@ -829,8 +837,9 @@ var filterView = {
     },  
 
     categoricalFilterControl: function(component){
-        console.log(this);
-        console.log(component);
+        //Creates a new filterControl on the sidebar. 
+        //component is the variable of configuration settings pulled from dataChoices.js
+
         filterView.filterControl.call(this, component);
         var c = this.component;
 
@@ -853,7 +862,6 @@ var filterView = {
         //Set callback for when user makes a change
         function makeSelectCallback(component){
             return function(){
-            console.log(component);
             var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
             var specific_state_code = 'filterValues.' + component.source
             setState(specific_state_code,selectedValues);

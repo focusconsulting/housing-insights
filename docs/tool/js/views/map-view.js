@@ -7,7 +7,6 @@
             // the view is loaded. things that need to happen every time the view is made active should be in
             // the onReturn methods. nothing needs to be there so far for mapView, but buildingView for instance
             // should load the specific building info every time it's made active.
-            console.log(this);
             var partialRequest = {
                 partial: this.el,
                 container: null, // will default to '#body-wrapper'
@@ -17,7 +16,6 @@
             controller.appendPartial(partialRequest, this);
 
             function appendCallback() {
-                console.log(this);
                 setSubs([
                     ['mapLayer', mapView.showLayer],
                     ['mapLayer', mapView.layerOverlayToggle],
@@ -181,15 +179,11 @@
             })[0];
         },
         buildOverlayOptions: function() {
-
-            console.log(location.hostname);
-
+            console.log("TODO this needs attention")
             var test = dataChoices.filter(function(d){
                 return d['data_level'] === "zone";
             })
 
-            console.log("overlay choices:")
-            console.log(test);
             //TODO we want to move this config data into it's own file or to the api
             mapView.initialOverlays = test//TODO load this from dataChoices
         },
@@ -603,7 +597,6 @@
             if (data === true) {
                 //msg and data are from the pubsub module that this init is subscribed to.
                 //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
-                console.log(msg, data);
                 var dataURL = model.URLS.project
                 var dataRequest = {
                     name: 'raw_project',
@@ -755,7 +748,6 @@
 
                     //Callbacks for hovering over any of the four project layers
                     mapView.map.on('mouseenter', 'project', function(e) {
-                        console.log(e);
                         setState('hoverBuilding', e.features[0])
                     });
                     mapView.map.on('mouseenter', 'project-enter', function(e) {
@@ -848,7 +840,6 @@
             //callback used to populate container since we need data loaded before it can run
             //callback called after function definition
             mapView.fillContainer = function(meta){
-                console.log("in fillContainer")
                 var current = mapView.showProjectPreview.current //alias for convenience
 
                 //Add the building name with a link to the project page
@@ -859,7 +850,6 @@
                     .classed('proj_name',true)
                     .text(value)
                     .on("click", function(e) {
-                        console.log("clicked")
                         setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
                         setState('switchView', buildingView);
                     });
@@ -1065,7 +1055,6 @@
             var minLon = d3.min(data, function(d){
                 return d.longitude;
             });
-            console.log(minLon,minLat,maxLon,maxLat);
             mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], {linear: true, padding: 20});
             if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
                 mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
