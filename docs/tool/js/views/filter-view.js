@@ -2,99 +2,6 @@
 
 var filterView = {
 
-    addClearPillboxes: function(msg,data){
-
-        //Compare our activated filterValues (from the state module) to the list of all 
-        //possible filterControls to make a list containing only the activated filter objects. 
-        //filterValues = obj with keys of the 'source' data id and values of current setpoint
-        //filterControls = list of objects that encapsulates the actual component including its clear() method
-        var activeFilterControls = []
-        var filterValues = filterUtil.getFilterValues()
-        for (var key in filterValues){
-            // An 'empty' filterValues array has a single element,
-            // the value of nullsShown.
-            if (filterValues[key][0].length != 0){
-                var control = filterView.filterControls.find(function(obj){
-                    return obj['component']['source'] === key;
-                })
-                activeFilterControls.push(control)
-            };
-        }
-
-        var nullsShown = filterUtil.getNullsShown();
-        Object.keys(nullsShown).forEach(function(key){
-            var control = filterView.filterControls.find(function(obj){
-                return obj['component']['source'] === key;
-            })
-            // The default nullsShown value is 'true'. If it's different than the default,
-            // and the control hasn't already been added to activeFilterControls,
-            // add the data choice's associated control to the array that we're using
-            // to determine which filters to mark as altered.
-            if(nullsShown[key][0] === false && activeFilterControls.indexOf(control) === -1){
-                activeFilterControls.push(control);
-            }
-        });
-        
-        //Use d3 to bind the list of control objects to our html pillboxes
-        var allPills = d3.select('#clear-pillbox-holder')
-                        .selectAll('.clear-single')
-                        .data(activeFilterControls, function(d){
-                            return d.component.source;
-                        })
-                        .classed("not-most-recent",true);
-
-        allPills.enter().append("div")
-            .attr("class","ui label transition hidden")
-            .classed("clear-single",true)
-            // Animate a label that 'flies' from the filter component
-            // to the pillbox.
-            .text(function(d) { return d['component']['display_name'];})
-            .each(function(d){
-                var originElement = document.getElementById("filter-content-"+d.component.source);
-                var destinationElement = this;
-                var flyLabel = document.createElement('div');
-                flyLabel.textContent = this.textContent;
-                flyLabel.classList.add('ui', 'label', 'transition', 'visible', 'clear-single-flier');
-                var originRect = originElement.getBoundingClientRect();
-                flyLabel.style.left = originRect.left + 'px';
-                flyLabel.style.top = ((originRect.top + originRect.bottom)/2) + 'px';
-                var flyLabelX = document.createElement('i');
-                flyLabelX.classList.add('delete', 'icon');
-                document.body.appendChild(flyLabel);
-                flyLabel.appendChild(flyLabelX);
-
-                // Change the 'top' and 'left' CSS properties of flyLabel,
-                // triggering its CSS transition.
-                window.setTimeout(function(){
-                    flyLabel.style.left = destinationElement.getBoundingClientRect().left + 'px';
-                    flyLabel.style.top = destinationElement.getBoundingClientRect().top + 'px';
-                }, 1);
-
-                // Remove flyLabel after its transition has elapsed.
-                window.setTimeout(function(){
-                    flyLabel.parentElement.removeChild(flyLabel);
-                    destinationElement.classList.remove('hidden');
-                    destinationElement.classList.add('visible');
-                }, 1500);
-
-            })
-        //Add the 'clear' x mark and its callback
-            .append('i')
-            .classed("delete icon",true)
-            .on("click", function(d) {
-                d.clear();
-            })
-                 
-        allPills.exit()
-        .transition()
-            .duration(750)
-            .style("opacity",0)
-            .remove();
-
-        
-        
-    },
-
     init: function(msg, data) {
         //msg and data are from the pubsub module that this init is subscribed to. 
         //when called from dataLoaded.metaData, 'data' is boolean of whether data load was successful
@@ -206,8 +113,11 @@ var filterView = {
 
     },
     filterControls: [],
+    filterControlsDict: {},
     filterControl: function(component){
+        //TODO refactor to use Dict instead of list version. Keeping both for now
         filterView.filterControls.push(this);
+        filterView.filterControlsDict[component.short_name] = this;
         this.component = component;
     },
     nullValuesToggle: function(component, filterControl){
@@ -369,6 +279,8 @@ var filterView = {
             return minInputs.concat(maxInputs);
         }
 
+
+        //Create the element and put it 
         for (var i = 0; i < keyValuePairsArrayMin.length; i++){
             output['min'][keyValuePairsArrayMin[i][0]] = document.createElement('input');
             output['min'][keyValuePairsArrayMin[i][0]].setAttribute(
@@ -395,118 +307,109 @@ var filterView = {
         //Creates a new filterControl on the sidebar. 
         //component is the variable of configuration settings pulled from dataChoices.js
 
-
-        filterView.filterControl.call(this, component);
-        var c = this.component;
-
+        //Aliases
+        var c = component;
         var ths = this;
 
-        this.nullsShown = true;
-
+        //Setup
+        filterView.filterControl.call(this, component);
         var contentContainer = filterView.setupFilter(c);
         
-        // Begin code common to continuousFilterControl and dateFilterControl
-        // TODO: Consider extracting this to setupFilter
+        //Find initial values for controls
+        this.nullsShown = true;
+
+        this.calculateParams = function(){
+            var modifier = c.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
+            var data_field = c.source + modifier
+            console.log(data_field);
+            var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
+                return item[data_field];
+            });
+            this.minDatum = d3.min(allDataValuesForThisSource) || 0;
+            this.maxDatum = d3.max(allDataValuesForThisSource) || 1;
+            this.stepCount = Math.max(1, parseInt((this.maxDatum - this.minDatum)/500));
+
+            if (c.style === "percent") {
+                console.log("formatted as percent")
+                this.minDatum = Math.round(this.minDatum * 100) / 100;
+                this.maxDatum = Math.round(this.maxDatum * 100) / 100;
+            } else { //"number", "money"
+                this.minDatum = Math.round(this.minDatum);
+                this.maxDatum = Math.round(this.maxDatum);
+            }
+        }
+        
+        this.calculateParams();
+
+        //Make the slider itself
         var slider = contentContainer.append("div")
                 .classed("filter", true)
                 .classed("slider",true)
                 .attr("id",c.source);
 
-        var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
-            return item[c.source];
+        slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
+        noUiSlider.create(slider, {
+            start: [this.minDatum, this.maxDatum],
+            connect: true,
+            tooltips: [ false, false ], //using textboxes instead
+            range: {
+                'min': this.minDatum,
+                'max': this.maxDatum
+            },
+            step: this.stepCount
         });
         
-        // Hardcoding the min and max if there's no d3.min or max 
-        // available. This is for filters that we don't have
-        // filterData for yet. Remove the magic number operands
-        // once we have all the filterData connected to the API.
-        var minDatum = d3.min(allDataValuesForThisSource) || 0;
-        var maxDatum = d3.max(allDataValuesForThisSource) || 1;
+        ////////////////////////
+        //Set up the text boxes
+        ////////////////////////
 
+        //Create object instance
+        var textBoxes = new filterView.filterTextInput( 
+            c,        
+            [['min', this.minDatum]],
+            [['max', this.maxDatum]]
+        );
+        filterView.filterInputs[this.component.short_name] = textBoxes;
+ 
+        //Append a 'span' that will hold the text input boxes
         var inputContainer = document.createElement('span');
         inputContainer.setAttribute('id', c.source + '-input');
         inputContainer.classList.add('text-input', 'continuous');
-
         document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
 
-        var stepCount = Math.max(1, parseInt((maxDatum - minDatum)/500));
-
-        slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
-        noUiSlider.create(slider, {
-            start: [minDatum, maxDatum],
-            connect: true,
-
-            //the wNumb is a number formatting library. This is what was recommended by noUiSlider; we should consider using elsewhere.
-            //order of the two wNumb calls corresponds to left and right slider respectively.
-            tooltips: [ false, false ],
-            range: {
-                'min': minDatum,
-                'max': maxDatum
-            },
-            step: stepCount
+        //Add it to the DOM
+        textBoxes.toDOM(
+            document.getElementById(c.source + '-input')//parent dom object
+        );
+        textBoxes.allInputElements().forEach(function(el){
+            el.classList.add('continuous-input-text');
         });
 
-        // adds each new instance to the object created above under the global filterView so that each can be accessed again
-        // in router.js, when decoding the state in a url
-        filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput( 
-            component,        
-            [['min', minDatum]],
-            [['max', maxDatum]]
-        );
-        var textInputs = filterView.filterInputs[this.component.short_name];
 
-        //Each slider needs its own copy of the sliderMove function so that it can use the current component
-        function makeSliderCallback(component, doesItSetState){
-            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
-                // This is the custom binding module used by the noUiSlider.on() callback.
+        ////////////////////////
+        //Set up nulls toggle
+        ////////////////////////
+        //Set up the toggle button for nulls
+        var toggle = new filterView.nullValuesToggle(c, ths);
+        toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
-                // values: Current slider values;
-                // handle: Handle that caused the event;
-                // unencoded: Slider values without formatting;
-                // tap: Event was caused by the user tapping the slider (boolean);
-                // positions: Left offset of the handles in relation to the slider
-                var specific_state_code = 'filterValues.' + component.source
-                
-                //If the sliders have been 'reset', remove the filter
-                // if (component.min == unencoded[0] && component.max == unencoded[1]){
-                //     unencoded = [];
-                // }
 
-                // For any non-integer numbers resulting
-                // from the filter that are greater than zero,
-                // return the ceiling of that number.
-                unencoded = unencoded.map(function(el){
-                    return el >= 0 ? Math.ceil(el) : el;
-                });
+        ////////////////////////
+        //Link UI components to state and each other
+        ////////////////////////
+        
+        //Toggle
+        //TODO this binding needs to be rewritten - currently it switches back and forth, so can break if set to wrong initial state
+        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
+            setState('nullsShown.' + c.source, ths.nullsShown);
+        });
 
-                textInputs.setValues([['min', unencoded[0]]],[['max', unencoded[1]]]);
-
-                unencoded.push(ths.nullsShown);
-
-                if(doesItSetState){
-                    setState(specific_state_code,unencoded);
-                }
-
-            }
-        }
-
-        // Binding currentSliderCallback to 'change'
-        // so that it doesn't trigger when the user changes
-        // the filter values through the text input boxes
-        // (which then move the slider to a certain position)
-        var currentSliderCallback = makeSliderCallback(c, true)
-        slider.noUiSlider.on('change', currentSliderCallback);
-
-        // Change the value of the text input elements without
-        // setting state
-        var slideSliderCallback = makeSliderCallback(c, false)
-        slider.noUiSlider.on('slide', slideSliderCallback);
-
+        //Textbox
         var inputCallback = function(){
         //When textbox inputs change - need to adjust the slider and setState. 
 
             var specific_state_code = 'filterValues.' + component.source
-            var returnVals = textInputs.returnValues();
+            var returnVals = textBoxes.returnValues();
 
             slider.noUiSlider.set(
                 [returnVals['min']['min'], returnVals['max']['max']]
@@ -515,21 +418,50 @@ var filterView = {
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.nullsShown]);
         }
 
-        //Set up the text boxes
-        textInputs.setInputCallback(inputCallback);
-        textInputs.toDOM(
-            document.getElementById(c.source + '-input')//parent dom object
-        );
-        textInputs.allInputElements().forEach(function(el){
-            el.classList.add('continuous-input-text');
-        });
+        textBoxes.setInputCallback(inputCallback);
 
-        //Set up the toggle button for nulls
-        var toggle = new filterView.nullValuesToggle(c, ths);
-        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
-            setState('nullsShown.' + c.source, ths.nullsShown);
-        });
-        toggle.toDOM(document.getElementById('filter-content-' + c.source));
+        //slider
+        function makeSliderCallback(component, doesItSetState){
+            //Make a copy of the callback with access to current variables
+
+            return function sliderCallback ( values, handle, unencoded, tap, positions ) {
+                /*  This is the custom binding module used by the noUiSlider.on() callback.
+                    values: Current slider values;
+                    handle: Handle that caused the event;
+                    unencoded: Slider values without formatting;
+                    tap: Event was caused by the user tapping the slider (boolean);
+                    positions: Left offset of the handles in relation to the slider
+                */
+
+                // Round the filter up
+                unencoded = unencoded.map(function(el){
+                    return el >= 0 ? Math.ceil(el) : el;
+                });
+
+                //Bind the slider values to the textboxes
+                var min = unencoded[0]
+                var max = unencoded[1]
+                textBoxes.setValues([['min', min]],[['max', max]]);
+
+                //Set the filterValues state
+                if(doesItSetState){
+                    var specific_state_code = 'filterValues.' + component.source
+                    unencoded.push(ths.nullsShown);
+                    setState(specific_state_code,unencoded);
+                }
+
+            }
+        }
+
+        // Changing value should trigger map update
+        var currentSliderCallback = makeSliderCallback(c, true)
+        slider.noUiSlider.on('change', currentSliderCallback);
+
+        // Sliding slider should update textboxes only
+        var slideSliderCallback = makeSliderCallback(c, false)
+        slider.noUiSlider.on('slide', slideSliderCallback);
+
+
 
         //Public methods
         this.clear = function(){
@@ -537,7 +469,7 @@ var filterView = {
 
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
-            textInputs.reset();
+            textBoxes.reset();
 
             if ( !getState()['nullsShown.' + component.source][0] ) {
                 toggle.triggerToggleWithoutClick();
@@ -546,12 +478,23 @@ var filterView = {
                                    // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
                 setState(specific_state_code, []);
             });
-        }
+        };
 
         this.isTouched = function(){
-            var returnVals = textInputs.returnValues();
+            var returnVals = textBoxes.returnValues();
             return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
-        }
+        };
+
+        this.set = function(min,max,nullValue){
+
+            textBoxes.setValues([['min', min]],[['max', max]]);
+            slider.noUiSlider.set([min, max]);
+            //TODO set toggle in better way
+            document.querySelector('[name="showNulls-' + c.source + '"]').checked = nullValue;
+
+            setState('filterValues.' + c.source,[min,max,nullValue]);
+        };
+
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
         // use by code in filter.js that iterates through filterValues.
@@ -1053,8 +996,100 @@ var filterView = {
                     .style("opacity",0)
                     .remove();
 
-        }    },
+        }    
+    },
+    addClearPillboxes: function(msg,data){
 
+        //Compare our activated filterValues (from the state module) to the list of all 
+        //possible filterControls to make a list containing only the activated filter objects. 
+        //filterValues = obj with keys of the 'source' data id and values of current setpoint
+        //filterControls = list of objects that encapsulates the actual component including its clear() method
+        var activeFilterControls = []
+        var filterValues = filterUtil.getFilterValues()
+        for (var key in filterValues){
+            // An 'empty' filterValues array has a single element,
+            // the value of nullsShown.
+            if (filterValues[key][0].length != 0){
+                var control = filterView.filterControls.find(function(obj){
+                    return obj['component']['source'] === key;
+                })
+                activeFilterControls.push(control)
+            };
+        }
+
+        var nullsShown = filterUtil.getNullsShown();
+        Object.keys(nullsShown).forEach(function(key){
+            var control = filterView.filterControls.find(function(obj){
+                return obj['component']['source'] === key;
+            })
+            // The default nullsShown value is 'true'. If it's different than the default,
+            // and the control hasn't already been added to activeFilterControls,
+            // add the data choice's associated control to the array that we're using
+            // to determine which filters to mark as altered.
+            if(nullsShown[key][0] === false && activeFilterControls.indexOf(control) === -1){
+                activeFilterControls.push(control);
+            }
+        });
+        
+        //Use d3 to bind the list of control objects to our html pillboxes
+        var allPills = d3.select('#clear-pillbox-holder')
+                        .selectAll('.clear-single')
+                        .data(activeFilterControls, function(d){
+                            return d.component.source;
+                        })
+                        .classed("not-most-recent",true);
+
+        allPills.enter().append("div")
+            .attr("class","ui label transition hidden")
+            .classed("clear-single",true)
+            // Animate a label that 'flies' from the filter component
+            // to the pillbox.
+            .text(function(d) { return d['component']['display_name'];})
+            .each(function(d){
+                var originElement = document.getElementById("filter-content-"+d.component.source);
+                var destinationElement = this;
+                var flyLabel = document.createElement('div');
+                flyLabel.textContent = this.textContent;
+                flyLabel.classList.add('ui', 'label', 'transition', 'visible', 'clear-single-flier');
+                var originRect = originElement.getBoundingClientRect();
+                flyLabel.style.left = originRect.left + 'px';
+                flyLabel.style.top = ((originRect.top + originRect.bottom)/2) + 'px';
+                var flyLabelX = document.createElement('i');
+                flyLabelX.classList.add('delete', 'icon');
+                document.body.appendChild(flyLabel);
+                flyLabel.appendChild(flyLabelX);
+
+                // Change the 'top' and 'left' CSS properties of flyLabel,
+                // triggering its CSS transition.
+                window.setTimeout(function(){
+                    flyLabel.style.left = destinationElement.getBoundingClientRect().left + 'px';
+                    flyLabel.style.top = destinationElement.getBoundingClientRect().top + 'px';
+                }, 1);
+
+                // Remove flyLabel after its transition has elapsed.
+                window.setTimeout(function(){
+                    flyLabel.parentElement.removeChild(flyLabel);
+                    destinationElement.classList.remove('hidden');
+                    destinationElement.classList.add('visible');
+                }, 1500);
+
+            })
+        //Add the 'clear' x mark and its callback
+            .append('i')
+            .classed("delete icon",true)
+            .on("click", function(d) {
+                d.clear();
+            })
+                 
+        allPills.exit()
+        .transition()
+            .duration(750)
+            .style("opacity",0)
+            .remove();
+
+        
+        
+    },
     handleFilterClearance: function(message, data){
         if(data === true){
             filterView.clearAllButton.init();

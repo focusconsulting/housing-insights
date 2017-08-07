@@ -68,24 +68,23 @@ var router = {
         document.getElementById('loading-state-screen').style.display = 'block';
     },
     decodeState: function(){
+        console.log("decoding state from URL");
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
         stateArray.forEach(function(each){
             var eachArray = each.split('=');
             var dataChoice = dataChoices.find(function(obj){
                 return obj.short_name === eachArray[0];
             });
+            var filterControlObj = filterView.filterControlsDict[dataChoice.short_name]
+
             if ( dataChoice.component_type === 'continuous' ) {
                 var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
                 var values = eachArray[1].split(separator);
-                // set the values of the corresponding textInput
-                filterView.filterInputs[dataChoice.short_name].setValues([['min', +values[0]]],[['max', +values[1]]]);
-                if ( separator === '_') { // encoded nullShown == false
-                    document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = false;
-                    setState('nullsShown.' + dataChoice.source, false); // this will eventually trigger the callback
-                                                                        // so no need to trigger it here
-                } else { // call the corresponding textInput's callback
-                    filterView.filterInputs[dataChoice.short_name].callback();
-                }
+                var min = +values[0]
+                var max = +values[1]
+                var nullsShown = separator === '_' ? false : true;
+                
+                filterControlObj.set(min,max,nullsShown);
                 
             }
             if ( dataChoice.component_type === 'categorical' ){
