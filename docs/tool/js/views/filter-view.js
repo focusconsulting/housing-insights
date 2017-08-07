@@ -113,8 +113,11 @@ var filterView = {
 
     },
     filterControls: [],
+    filterControlsDict: {},
     filterControl: function(component){
+        //TODO refactor to use Dict instead of list version. Keeping both for now
         filterView.filterControls.push(this);
+        filterView.filterControlsDict[component.short_name] = this;
         this.component = component;
     },
     nullValuesToggle: function(component, filterControl){
@@ -419,7 +422,9 @@ var filterView = {
                 });
 
                 //Bind the slider values to the textboxes
-                textBoxes.setValues([['min', unencoded[0]]],[['max', unencoded[1]]]);
+                var min = unencoded[0]
+                var max = unencoded[1]
+                textBoxes.setValues([['min', min]],[['max', max]]);
 
                 //Set the filterValues state
                 if(doesItSetState){
@@ -456,12 +461,23 @@ var filterView = {
                                    // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
                 setState(specific_state_code, []);
             });
-        }
+        };
 
         this.isTouched = function(){
             var returnVals = textBoxes.returnValues();
             return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
-        }
+        };
+
+        this.set = function(min,max,nullValue){
+
+            textBoxes.setValues([['min', min]],[['max', max]]);
+            slider.noUiSlider.set([min, max]);
+            //TODO set toggle in better way
+            document.querySelector('[name="showNulls-' + c.source + '"]').checked = nullValue;
+
+            setState('filterValues.' + c.source,[min,max,nullValue]);
+        };
+
 
         // At the very end of setup, set the 'nullsShown' state so that it's available for
         // use by code in filter.js that iterates through filterValues.
