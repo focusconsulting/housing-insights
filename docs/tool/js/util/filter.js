@@ -90,25 +90,28 @@ var filterUtil = {
 			}
 
 			if (component['component_type']== 'date') {
-                
-                workingData = workingData.filter(function(d){
-                   // Refer to the third element of the most recent value of
-                   // filterValues, which is a boolean indicating whether
-                   // null values will be shown.
-                    if(d[key] === null){
-                        return filterValues[key][0][2];
-                    }
+                if (filterValues[key][0].length == 0){
+                    // don't filter because the filter has been removed.
+                    // The length would be '1' because nullsShown is always included.
+                } else {
+                    workingData = workingData.filter(function(d){
+                       // Refer to the third element of the most recent value of
+                       // filterValues, which is a boolean indicating whether
+                       // null values will be shown.
+                        if(d[key] === null){
+                            return filterValues[key][0][2];
+                        }
 
-                    // If the filter is 'empty' and the value isn't null,
-                    // show the project.
-                    if(filterValues[key][0].length === 0){
-                        return true;
-                    }
-                    
-                    return d[key].valueOf() >= filterValues[key][0][0].valueOf() 
-                        && d[key].valueOf() <= filterValues[key][0][1].valueOf();
-                });
-
+                        // If the filter is 'empty' and the value isn't null,
+                        // show the project.
+                        if(filterValues[key][0].length === 0){
+                            return true;
+                        }
+                        
+                        return d[key].valueOf() >= filterValues[key][0][0].valueOf() 
+                            && d[key].valueOf() <= filterValues[key][0][1].valueOf();
+                    });
+                }
 			}
 
 			if (component['component_type'] == 'categorical') {
