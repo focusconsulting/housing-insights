@@ -52,11 +52,12 @@ function StateModule() {
         var stateIsNew = (state[key] === undefined);
 
         
-
+        console.groupCollapsed("setState:", key, value)
         if ( stateIsNew ) {
             state[key] = [value];
             PubSub.publish(key, value);
             console.log('STATE CREATED', key, value);
+            console.trace("Stack trace for state " + key);
 
         } else {
             //If it's a string or array and values are the same, stateChanged=False+
@@ -75,14 +76,17 @@ function StateModule() {
                 PubSub.publish(key, value);
 
                 console.log('STATE CHANGE', key, value);
+                console.trace("Stack trace for state " + key);
                 if ( state[key].length > 2 ) {
                     state[key].length = 2;
                 }
             } else {
                 //TODO do we want for there to be another 'announceState' method that publishes every time it fires, even if the value remains the same??
                 console.log("STATE UNCHANGED, NO PUB:", key, value);
+                console.trace("Stack trace for state " + key);
             }
         }
+        console.groupEnd()
     }
 
     function clearState(key) {

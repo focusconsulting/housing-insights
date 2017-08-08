@@ -13,15 +13,14 @@ var filterView = {
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
-                ['nullsShown', filterView.indicateActivatedFilters],
                 ['anyFilterActive', filterView.handleFilterClearance],
                 ['filterValues', filterView.addClearPillboxes],
-                ['nullsShown', filterView.addClearPillboxes],
                 ['dataLoaded.filterData', filterView.formatFilterDates],
                 ['filterDatesFormatted', filterView.buildFilterComponents],
                 ['subNavExpanded.right', filterView.expandSidebar],
                 ['mapLayer', filterView.clearLocationBasedFilters],
                 ['mapLayer', filterView.updateLocationFilterControl],
+                ['mapLayer', filterView.resetZoneFilters],
                 ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
             ]);
 
@@ -121,20 +120,22 @@ var filterView = {
         this.component = component;
     },
     nullValuesToggle: function(component, filterControl){
+        //component: the configuration data from dataChoice.js
+        //filterControl: the parent control object
+
+        //Alias
         var ths = this;
+
+        //Add the element and set to default value
         this.container = document.createElement('div');
         this.container.classList.add('nullsToggleContainer');
         this.element = document.createElement('input');
         this.element.setAttribute('type', 'checkbox');
         this.element.setAttribute('value', 'showNulls-' + component.source);
         this.element.setAttribute('name', 'showNulls-' + component.source);
+        this.element.checked = true;
 
-        if(filterControl.hasOwnProperty('nullsShown') && filterControl.nullsShown){
-            this.element.checked = filterControl.nullsShown;
-        }
-        var txt = document.createTextNode("Unknown values included");
-
-        var toggleAction;
+        var txt = document.createTextNode("Include projects with null data?");
 
         this.toDOM = function(parentElement){
             parentElement.appendChild(this.container);
@@ -142,29 +143,10 @@ var filterView = {
             this.container.appendChild(txt);
         }
 
-        // toggles between values 'true' and 'false' 
-        // of object.property when the switch is clicked.
-        this.bindPropertyToToggleSwitch = function(object, property, callback){
-            function toggleProperty(){
-                // Assign the property if it hasn't been assigned.
-                object[property] = object[property] || false;
-                object[property] = !object[property];
-
-                callback();
-            }
-            this.element.addEventListener('change', toggleProperty);
-            toggleAction = toggleProperty;
-        }
-
-        this.triggerToggleWithoutClick = function(){
-            if(toggleAction){
-                toggleAction();
-                this.element.checked = filterControl.nullsShown;
-            }
-        }
     },
-    filterInputs: {}, // adding filterInputs object so we can access them later -JO
-    dateInputs: {}, // same for date inputs - JO
+    filterInputs: {}, // adding filterInputs object so we can access them later -JO //TODO should switch to filterControls instead -NH
+    dateInputs: {}, // same for date inputs - JO //TODO same -NH
+
     // filterTextInput takes as a parameter an array of keys.
     // It produces text inputs corresponding to these keys and
     // tracks their values.
@@ -316,39 +298,41 @@ var filterView = {
         var contentContainer = filterView.setupFilter(c);
         
         //Find initial values for controls
-        this.nullsShown = true;
-
         this.calculateParams = function(){
+        //Uses the current data set to define min/max levels for the UI. 
+        //Can be re-run to find new values if the zone type is changed
+
+            //If it's a zone-level data set, need to choose the right column
             var modifier = c.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
             var data_field = c.source + modifier
-            console.log(data_field);
+            
             var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(function(item){
                 return item[data_field];
             });
-            this.minDatum = d3.min(allDataValuesForThisSource) || 0;
-            this.maxDatum = d3.max(allDataValuesForThisSource) || 1;
-            this.stepCount = Math.max(1, parseInt((this.maxDatum - this.minDatum)/500));
+            ths.minDatum = d3.min(allDataValuesForThisSource) || 0;
+            ths.maxDatum = d3.max(allDataValuesForThisSource) || 1;
+            ths.stepCount = Math.max(1, parseInt((this.maxDatum - this.minDatum)/500));
 
             if (c.style === "percent") {
-                console.log("formatted as percent")
-                this.minDatum = Math.round(this.minDatum * 100) / 100;
-                this.maxDatum = Math.round(this.maxDatum * 100) / 100;
+                ths.minDatum = Math.round(ths.minDatum * 100) / 100;
+                ths.maxDatum = Math.round(ths.maxDatum * 100) / 100;
             } else { //"number", "money"
-                this.minDatum = Math.round(this.minDatum);
-                this.maxDatum = Math.round(this.maxDatum);
+                ths.minDatum = Math.round(ths.minDatum);
+                ths.maxDatum = Math.round(ths.maxDatum);
             }
         }
         
-        this.calculateParams();
+        this.calculateParams(); //initialize minDatum and maxDatum (based on current zone if applicable)
 
         //Make the slider itself
-        var slider = contentContainer.append("div")
-                .classed("filter", true)
-                .classed("slider",true)
-                .attr("id",c.source);
+        contentContainer.append("div")
+            .classed("filter", true)
+            .classed("slider",true)
+            .attr("id",c.source);
 
-        slider = document.getElementById(c.source); //d3 select method wasn't working, override variable
-        noUiSlider.create(slider, {
+        this.slider = document.getElementById(c.source);
+        
+        noUiSlider.create(this.slider, {
             start: [this.minDatum, this.maxDatum],
             connect: true,
             tooltips: [ false, false ], //using textboxes instead
@@ -364,12 +348,12 @@ var filterView = {
         ////////////////////////
 
         //Create object instance
-        var textBoxes = new filterView.filterTextInput( 
+        this.textBoxes = new filterView.filterTextInput( 
             c,        
             [['min', this.minDatum]],
             [['max', this.maxDatum]]
         );
-        filterView.filterInputs[this.component.short_name] = textBoxes;
+        filterView.filterInputs[this.component.short_name] = this.textBoxes; //TODO remove this once we refactor out filterInputs
  
         //Append a 'span' that will hold the text input boxes
         var inputContainer = document.createElement('span');
@@ -378,10 +362,10 @@ var filterView = {
         document.getElementById('filter-content-' + c.source).appendChild(inputContainer);
 
         //Add it to the DOM
-        textBoxes.toDOM(
+        this.textBoxes.toDOM(
             document.getElementById(c.source + '-input')//parent dom object
         );
-        textBoxes.allInputElements().forEach(function(el){
+        this.textBoxes.allInputElements().forEach(function(el){
             el.classList.add('continuous-input-text');
         });
 
@@ -390,8 +374,8 @@ var filterView = {
         //Set up nulls toggle
         ////////////////////////
         //Set up the toggle button for nulls
-        var toggle = new filterView.nullValuesToggle(c, ths);
-        toggle.toDOM(document.getElementById('filter-content-' + c.source));
+        this.toggle = new filterView.nullValuesToggle(c, ths);
+        this.toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
 
         ////////////////////////
@@ -399,26 +383,27 @@ var filterView = {
         ////////////////////////
         
         //Toggle
-        //TODO this binding needs to be rewritten - currently it switches back and forth, so can break if set to wrong initial state
-        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
-            setState('nullsShown.' + c.source, ths.nullsShown);
+        this.toggle.element.addEventListener('change',function(){
+            var specificCode = 'filterValues.' + component.source;
+            var checkboxValue = ths.toggle.element.checked;
+            var textboxValues = ths.textBoxes.returnValues();
+            var newState = [textboxValues['min']['min'], textboxValues['max']['max'],checkboxValue]
+            setState(specificCode, newState);
         });
 
         //Textbox
         var inputCallback = function(){
         //When textbox inputs change - need to adjust the slider and setState. 
-
             var specific_state_code = 'filterValues.' + component.source
-            var returnVals = textBoxes.returnValues();
+            var returnVals = ths.textBoxes.returnValues();
 
-            slider.noUiSlider.set(
+            ths.slider.noUiSlider.set(
                 [returnVals['min']['min'], returnVals['max']['max']]
             );
 
-            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.nullsShown]);
+            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
         }
-
-        textBoxes.setInputCallback(inputCallback);
+        this.textBoxes.setInputCallback(inputCallback);
 
         //slider
         function makeSliderCallback(component, doesItSetState){
@@ -441,12 +426,12 @@ var filterView = {
                 //Bind the slider values to the textboxes
                 var min = unencoded[0]
                 var max = unencoded[1]
-                textBoxes.setValues([['min', min]],[['max', max]]);
+                ths.textBoxes.setValues([['min', min]],[['max', max]]);
 
                 //Set the filterValues state
                 if(doesItSetState){
                     var specific_state_code = 'filterValues.' + component.source
-                    unencoded.push(ths.nullsShown);
+                    unencoded.push(ths.toggle.element.checked);
                     setState(specific_state_code,unencoded);
                 }
 
@@ -455,61 +440,66 @@ var filterView = {
 
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
-        slider.noUiSlider.on('change', currentSliderCallback);
+        this.slider.noUiSlider.on('change', currentSliderCallback);
 
         // Sliding slider should update textboxes only
         var slideSliderCallback = makeSliderCallback(c, false)
-        slider.noUiSlider.on('slide', slideSliderCallback);
-
+        this.slider.noUiSlider.on('slide', slideSliderCallback);
 
 
         //Public methods
         this.clear = function(){
             var specific_state_code = 'filterValues.' + component.source;
 
-            // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
-            slider.noUiSlider.reset();
-            textBoxes.reset();
+            ths.slider.noUiSlider.set([ths.minDatum,ths.maxDatum])
+            ths.textBoxes.setValues([['min', ths.minDatum]],[['max', ths.maxDatum]]);
+            ths.toggle.element.checked = true;
+            setState(specific_state_code, []);
 
-            if ( !getState()['nullsShown.' + component.source][0] ) {
-                toggle.triggerToggleWithoutClick();
-            } 
-            setTimeout(function(){ // not sure why but forcing this to run async (with setTimeout hack) is the only
-                                   // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
-                setState(specific_state_code, []);
-            });
         };
 
         this.isTouched = function(){
-            var returnVals = textBoxes.returnValues();
-            return returnVals.min.min !== minDatum || returnVals.max.max !== maxDatum || this.nullsShown === false;
+            var returnVals = ths.textBoxes.returnValues();
+            return returnVals.min.min !== this.minDatum || returnVals.max.max !== this.maxDatum || this.nullsShown === false;
         };
 
         this.set = function(min,max,nullValue){
 
-            textBoxes.setValues([['min', min]],[['max', max]]);
-            slider.noUiSlider.set([min, max]);
-            //TODO set toggle in better way
-            document.querySelector('[name="showNulls-' + c.source + '"]').checked = nullValue;
+            ths.textBoxes.setValues([['min', min]],[['max', max]]);
+            ths.slider.noUiSlider.set([min, max]);
+            ths.toggle.element.checked = nullValue;
 
             setState('filterValues.' + c.source,[min,max,nullValue]);
         };
 
-
-        // At the very end of setup, set the 'nullsShown' state so that it's available for
-        // use by code in filter.js that iterates through filterValues.
-        setState('nullsShown.' + c.source, ths.nullsShown);
+        this.rebuild = function() {
+            ths.calculateParams()
+            ths.element.checked = true;
+            ths.slider.noUiSlider.updateOptions({
+                start: [ths.minDatum, ths.maxDatum],
+                range: {
+                    'min': ths.minDatum,
+                    'max': ths.maxDatum
+                }
+            });
+            ths.clear() //also refills textboxes
+        }
     },
     dateFilterControl: function(component){
         //Creates a new filterControl on the sidebar. 
         //component is the variable of configuration settings pulled from dataChoices.js
 
 
+        //TODO Most of this code is duplicative to the continuousFilterControl. The continuous
+        //control has also been refactored while this one hasn't. 
+
+        //Should hoist the logic up a level so that the two types can share code. 
+
+
+        
         filterView.filterControl.call(this, component);
         var c = this.component;
         var ths = this;
-
-        this.nullsShown = true;
 
         var contentContainer = filterView.setupFilter(c);
 
@@ -601,7 +591,8 @@ var filterView = {
                 );
                 
                 if(doesItSetState){
-                    setState(specific_state_code,[newMinDate, newMaxDate, ths.nullsShown]);
+                    ths.toggle.element.checked
+                    setState(specific_state_code,[newMinDate, newMaxDate, ths.toggle.element.checked]);
                 }
             }
         }
@@ -640,7 +631,7 @@ var filterView = {
                 [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
             );
 
-            setState(specific_state_code, [dateValues.min, dateValues.max, ths.nullsShown]);
+            setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
         }
 
         // For separating date inputs with a '/'
@@ -654,35 +645,35 @@ var filterView = {
             addSlash
         );
 
-        var toggle = new filterView.nullValuesToggle(c, ths);
-        toggle.bindPropertyToToggleSwitch(ths, 'nullsShown', function(){
-            setState('nullsShown.' + c.source, ths.nullsShown);
-        });
-        toggle.toDOM(document.getElementById('filter-content-' + c.source));
+        ////////////////////////
+        //Set up nulls toggle
+        ////////////////////////
+        this.toggle = new filterView.nullValuesToggle(c, ths);
+        this.toggle.toDOM(document.getElementById('filter-content-' + c.source));
 
+        //Link toggle action to click
+        this.toggle.element.addEventListener('change',function(){
+            var specificCode = 'filterValues.' + component.source;
+            var checkboxValue = ths.toggle.element.checked;
+            var dateValues = getValuesAsDates();
+            var newState = [dateValues.min, dateValues.max,checkboxValue]
+            setState(specificCode, newState);
+        });
 
         this.clear = function(){
             var specific_state_code = 'filterValues.' + component.source;
             // noUISlider native 'reset' method is a wrapper for the valueSet/set method that uses the original options.
             slider.noUiSlider.reset();
             dateInputs.reset();
-            if ( !getState()['nullsShown.' + component.source][0] ) {
-                toggle.triggerToggleWithoutClick();
-            } 
-            setTimeout(function(){ // not sure why but forcing this to run async (with setTimeout hack) is the only
-                                   // way it works. as if otherwise it fires before toggle.triggerToggleWithoutClick finished
-                setState(specific_state_code, []);
-            });
+            ths.toggle.element.checked = true
+
+            setState(specific_state_code, []);
         }
 
         this.isTouched = function(){
             var dateValues = getValuesAsDates();
             return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
         }
-
-        // At the very end of setup, set the 'nullsShown' state so that it's available for
-        // use by code in filter.js that iterates through filterValues.
-        setState('nullsShown.' + c.source, ths.nullsShown);
 
     },
     setupFilter: function(c){
@@ -1098,7 +1089,14 @@ var filterView = {
             filterView.clearAllButton.tearDown();
         }
     },
-    
+    resetZoneFilters: function(){
+        for (var i=0; i < filterView.filterControls.length; i++) {
+            var control = filterView.filterControls[i];
+            if (control.component.data_level === 'zone') {
+                control.rebuild();
+            }  
+        }
+    },
     indicateActivatedFilters: function(){
         //add/remove classes to the on-page elements that tell the users which filters are currently activated
         //e.g. the filter sidebar data name titles
