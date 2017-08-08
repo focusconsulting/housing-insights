@@ -484,7 +484,18 @@ var filterView = {
                 unencoded.push(ths.nullsShown);
 
                 if(doesItSetState){
+                    console.log('min',minDatum);
+                    console.log('max',maxDatum);
+                    console.log(this);
+                    console.log(unencoded);
                     setState(specific_state_code,unencoded);
+                    if ( unencoded[0] === minDatum && unencoded[1] === maxDatum && unencoded[2] === true ){
+                        console.log('back to original');
+                        var filterControl = filterView.filterControls.find(function(each){
+                            return each.component.short_name === c.short_name;
+                        });
+                        filterControl.clear();
+                    }                    
                 }
 
             }
