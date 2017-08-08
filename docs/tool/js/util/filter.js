@@ -54,20 +54,7 @@ var filterUtil = {
 	filterData: function(){
         
     	var workingData = model.dataCollection['filterData'].objects; 
-        var nullsShown = filterUtil.getNullsShown(); // creates object with nullShown state ofall filters
         var filterValues = filterUtil.getFilterValues();
-
-        for (var key in nullsShown){
-            var component = (filterView.components.filter(function(obj){
-                return obj.source == key;
-            }))[0];
-
-            if (component.component_type == 'continuous' || component.component_type == 'date'){
-                workingData = workingData.filter(function(d){
-                    return d[key] !== null || nullsShown[key][0]; // nullsShown[key][0] is true or fals; if false returns when d[key] is not null
-                });
-            }
-        }
 
 		for (key in filterValues) { // iterate through registered filters
 			
@@ -88,16 +75,14 @@ var filterUtil = {
                     var decimalPlaces = component['data_type'] == 'integer' ? 0 : 2 //ternary operator
                     var min = Number(Math.round(filterValues[key][0][0]+'e'+decimalPlaces) +'e-'+decimalPlaces);
                     var max = Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
+
                     //If it's a zone-level data set, need to choose the right column
                     var modifier = component.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
                     
                     //filter it
                     workingData = workingData.filter(function(d){
-                    // Refer to the third element of the most recent value of
-                    // filterValues, which is a boolean indicating whether
-                    // null values will be shown.
                         if(d[(key + modifier)] === null){
-                            return nullsShown[key];
+                            return filterValues[key][0][2]; //third element in array is true/false for nulls shown
                         }
     					return (d[(key + modifier)] >= min && d[(key + modifier)] <= max);
     				});
@@ -111,7 +96,7 @@ var filterUtil = {
                    // filterValues, which is a boolean indicating whether
                    // null values will be shown.
                     if(d[key] === null){
-                        return nullsShown[key];
+                        return filterValues[key][0][2];
                     }
 
                     // If the filter is 'empty' and the value isn't null,
