@@ -611,7 +611,7 @@
         "display_text": "",
         "required_in_source": true,
         "source_name": "MARADDRESSREPOSITORYID",
-        "sql_name": "maraddressrepositoryid",
+        "sql_name": "mar_id",
         "type": "text"
       },
       {
@@ -628,6 +628,14 @@
         "required_in_source": true,
         "source_name": "DCSTATLOCATIONKEY",
         "sql_name": "dcstatlocationkey",
+        "type": "text"
+      },
+      {
+        "display_name": "Census Tract",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "census_tract",
+        "sql_name": "census_tract",
         "type": "text"
       },
       {

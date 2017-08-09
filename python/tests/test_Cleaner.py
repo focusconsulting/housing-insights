@@ -21,8 +21,6 @@ class CleanerTestCase(unittest.TestCase):
         # get rows for test cases
         dchousing_manifest_row = self.manifest.get_manifest_row(
             unique_data_id='dchousing_project')
-        building_permits_2017_manifest_row = self.manifest.get_manifest_row(
-            unique_data_id='building_permits_2017')
 
         # mar_id test cases - except for ward other fields are typically Null
         mar_ids = [148655, 289735, 311058, 308201]

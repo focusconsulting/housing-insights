@@ -3,7 +3,7 @@
     "cleaner": "BuildingPermitsCleaner",
     "fields": [
       {
-        "display_name": "x",
+        "display_name": "X",
         "display_text": "Longitude field should be used instead",
         "required_in_source": true,
         "source_name": "X",
@@ -11,7 +11,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "y",
+        "display_name": "Y",
         "display_text": "Latitude field should be used instead",
         "required_in_source": true,
         "source_name": "Y",
@@ -19,7 +19,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "objectid",
+        "display_name": "Object ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "OBJECTID",
@@ -27,7 +27,7 @@
         "type": "text"
       },
       {
-        "display_name": "dcrainternalnumber",
+        "display_name": "DCRA Internal Number",
         "display_text": "",
         "required_in_source": true,
         "source_name": "DCRAINTERNALNUMBER",
@@ -35,7 +35,7 @@
         "type": "text"
       },
       {
-        "display_name": "issue_date",
+        "display_name": "Issue Date",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ISSUE_DATE",
@@ -43,7 +43,7 @@
         "type": "timestamp"
       },
       {
-        "display_name": "permit_id",
+        "display_name": "Permit ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PERMIT_ID",
@@ -51,7 +51,7 @@
         "type": "text"
       },
       {
-        "display_name": "permit_type_name",
+        "display_name": "Permit Type Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PERMIT_TYPE_NAME",
@@ -59,7 +59,7 @@
         "type": "text"
       },
       {
-        "display_name": "permit_subtype_name",
+        "display_name": "Permit Subtype Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PERMIT_SUBTYPE_NAME",
@@ -67,7 +67,7 @@
         "type": "text"
       },
       {
-        "display_name": "permit_category_name",
+        "display_name": "Permit Category Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PERMIT_CATEGORY_NAME",
@@ -75,7 +75,7 @@
         "type": "text"
       },
       {
-        "display_name": "application_status_name",
+        "display_name": "Application Status Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "APPLICATION_STATUS_NAME",
@@ -83,7 +83,7 @@
         "type": "text"
       },
       {
-        "display_name": "full_address",
+        "display_name": "Full Address",
         "display_text": "",
         "required_in_source": true,
         "source_name": "FULL_ADDRESS",
@@ -91,7 +91,7 @@
         "type": "text"
       },
       {
-        "display_name": "desc_of_work",
+        "display_name": "Description of Work",
         "display_text": "",
         "required_in_source": true,
         "source_name": "DESC_OF_WORK",
@@ -99,7 +99,7 @@
         "type": "text"
       },
       {
-        "display_name": "ssl",
+        "display_name": "SSL",
         "display_text": "",
         "required_in_source": true,
         "source_name": "SSL",
@@ -107,7 +107,7 @@
         "type": "text"
       },
       {
-        "display_name": "zoning",
+        "display_name": "Zoning",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ZONING",
@@ -115,7 +115,7 @@
         "type": "text"
       },
       {
-        "display_name": "permit_applicant",
+        "display_name": "Permit Applicant",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PERMIT_APPLICANT",
@@ -123,7 +123,7 @@
         "type": "text"
       },
       {
-        "display_name": "fee_type",
+        "display_name": "Fee Type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "FEE_TYPE",
@@ -131,7 +131,7 @@
         "type": "text"
       },
       {
-        "display_name": "fees_paid",
+        "display_name": "Fees Paid",
         "display_text": "",
         "required_in_source": true,
         "source_name": "FEES_PAID",
@@ -139,7 +139,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "owner_name",
+        "display_name": "Owner Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "OWNER_NAME",
@@ -155,7 +155,7 @@
         "type": "timestamp"
       },
       {
-        "display_name": "city",
+        "display_name": "City",
         "display_text": "",
         "required_in_source": true,
         "source_name": "CITY",
@@ -163,7 +163,7 @@
         "type": "text"
       },
       {
-        "display_name": "state",
+        "display_name": "State",
         "display_text": "",
         "required_in_source": true,
         "source_name": "STATE",
@@ -171,7 +171,7 @@
         "type": "text"
       },
       {
-        "display_name": "latitude",
+        "display_name": "Latitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "LATITUDE",
@@ -179,7 +179,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "longitude",
+        "display_name": "Longitude",
         "display_text": "",
         "required_in_source": true,
         "source_name": "LONGITUDE",
@@ -187,7 +187,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "xcoord",
+        "display_name": "Xcoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "XCOORD",
@@ -195,7 +195,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "ycoord",
+        "display_name": "Ycoord",
         "display_text": "",
         "required_in_source": true,
         "source_name": "YCOORD",
@@ -203,23 +203,23 @@
         "type": "decimal"
       },
       {
-        "display_name": "zipcode",
+        "display_name": "Zip code",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ZIPCODE",
-        "sql_name": "zipcode",
+        "sql_name": "zip",
         "type": "text"
       },
       {
-        "display_name": "maraddressrepositoryid",
+        "display_name": "Mar Address Repository ID",
         "display_text": "",
         "required_in_source": true,
         "source_name": "MARADDRESSREPOSITORYID",
-        "sql_name": "maraddressrepositoryid",
+        "sql_name": "mar_id",
         "type": "text"
       },
       {
-        "display_name": "dcstataddresskey",
+        "display_name": "DC Stat Address Key",
         "display_text": "",
         "required_in_source": true,
         "source_name": "DCSTATADDRESSKEY",
@@ -227,7 +227,7 @@
         "type": "text"
       },
       {
-        "display_name": "dcstatlocationkey",
+        "display_name": "DC Stat Location Key",
         "display_text": "",
         "required_in_source": true,
         "source_name": "DCSTATLOCATIONKEY",
@@ -235,7 +235,15 @@
         "type": "text"
       },
       {
-        "display_name": "ward",
+        "display_name": "Census Tract",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "census_tract",
+        "sql_name": "census_tract",
+        "type": "text"
+      },
+      {
+        "display_name": "Ward",
         "display_text": "",
         "required_in_source": true,
         "source_name": "WARD",
@@ -251,7 +259,7 @@
         "type": "text"
       },
       {
-        "display_name": "smd",
+        "display_name": "SMD",
         "display_text": "",
         "required_in_source": true,
         "source_name": "SMD",
@@ -259,7 +267,7 @@
         "type": "text"
       },
       {
-        "display_name": "district",
+        "display_name": "District",
         "display_text": "",
         "required_in_source": true,
         "source_name": "DISTRICT",
@@ -267,7 +275,7 @@
         "type": "text"
       },
       {
-        "display_name": "psa",
+        "display_name": "PSA",
         "display_text": "",
         "required_in_source": true,
         "source_name": "PSA",
@@ -275,7 +283,7 @@
         "type": "text"
       },
       {
-        "display_name": "neighborhoodcluster",
+        "display_name": "Neighborhood Cluster",
         "display_text": "",
         "required_in_source": true,
         "source_name": "NEIGHBORHOODCLUSTER",
@@ -283,7 +291,7 @@
         "type": "text"
       },
       {
-        "display_name": "hotspot2006name",
+        "display_name": "Hot Spot 2006 Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "HOTSPOT2006NAME",
@@ -291,7 +299,7 @@
         "type": "text"
       },
       {
-        "display_name": "hotspot2005name",
+        "display_name": "Hot Spot 2005 Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "HOTSPOT2005NAME",
@@ -299,7 +307,7 @@
         "type": "text"
       },
       {
-        "display_name": "hotspot2004name",
+        "display_name": "Hot Spot 2004 Name",
         "display_text": "",
         "required_in_source": true,
         "source_name": "HOTSPOT2004NAME",
@@ -307,7 +315,7 @@
         "type": "text"
       },
       {
-        "display_name": "businessimprovementdistrict",
+        "display_name": "Business Improvement District",
         "display_text": "",
         "required_in_source": true,
         "source_name": "BUSINESSIMPROVEMENTDISTRICT",
@@ -315,7 +323,7 @@
         "type": "text"
       },
       {
-        "display_name": "Unique data ID",
+        "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
         "source_name": "unique_data_id",

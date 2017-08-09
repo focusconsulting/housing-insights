@@ -3,7 +3,7 @@ skip,building_permits,building_permits_2013,api,2017-02-02,utf-8,../../../data,h
 skip,building_permits,building_permits_2014,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2014.csv,
 skip,building_permits,building_permits_2015,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2015.csv,
 use,building_permits,building_permits_2016,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2016.csv,
-skip,building_permits,building_permits_2017,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2017.csv,This is still incomplete due to broken opendata.dc.gov . Excluding so we can cleanly say our database is 100% 2016 for clarity until opendata.dc.gov gets fixed
+use,building_permits,building_permits_2017,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housinginsights/,raw/apis/20170606/building_permits_2017.csv,This is still incomplete due to broken opendata.dc.gov . Excluding so we can cleanly say our database is 100% 2016 for clarity until opendata.dc.gov gets fixed
 needs cleaner,parcel,parcel_Mar2017,manual,2017-03-15,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Parcel.csv,
 use,project,project,manual,2017-03-15,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Project.csv,
 use,reac_score,reac_score_Mar2017,manual,2017-03-15,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,raw/preservation_catalog/20170315/Reac_score.csv,

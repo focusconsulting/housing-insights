@@ -16,11 +16,8 @@ from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
 from housinginsights.sources.google_maps import GoogleMapsApiConn
 
 
-package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
                                            os.pardir))
-# TODO - add in manifest but don't load in db so the path isn't hard coded?
-mar_path = os.path.join(package_dir, os.pardir, 'data', 'raw', 'apis',
-                        '20170528', 'mar.csv')
 
 '''
 Usage:
@@ -30,7 +27,8 @@ http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-str
 
 
 class CleanerBase(object, metaclass=ABCMeta):
-    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='',
+                 engine=None):
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
         self.engine = engine
@@ -44,7 +42,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         #Flatten the census mapping file so that every potential name of a census tract can be translated to its standard format
         self.census_mapping = {}
-        census_reader = HIReader(os.path.join(package_dir,'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
+        census_reader = HIReader(os.path.join(PYTHON_PATH, 'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
         for row in census_reader:
             for key, value in row.items():
                 self.census_mapping[value] = row['census_tract']
@@ -372,6 +370,18 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return row
 
+    def add_census_tract_from_mar(self, row, column_name='mar_id'):
+        """Returns the census tract for given mar_id using the mar api."""
+        mar_api = MarApiConn()
+        result = mar_api.reverse_address_id(aid=row[column_name])
+
+        if result['returnDataset']:
+            tract = result['returnDataset']['Table1'][0]['CENSUS_TRACT']
+            row['census_tract'] = '11001' + str(tract)
+            return row
+        else:
+            return row
+
 
 #############################################
 # Custom Cleaners
@@ -381,12 +391,12 @@ class CleanerBase(object, metaclass=ABCMeta):
 # TODO: map to specific cleaner methods including option to pass custom methods
 
 class GenericCleaner(CleanerBase):
-    def clean(self,row, row_num = None):
+    def clean(self,row, row_num=None):
         return row
 
 
 class ProjectCleaner(CleanerBase):
-    def clean(self, row, row_num = None):
+    def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
         row = self.add_mar_id(row, 'Proj_address_id')
@@ -407,13 +417,15 @@ class SubsidyCleaner(CleanerBase):
 
 
 class BuildingPermitsCleaner(CleanerBase):
-    def clean(self, row, row_num = None):
+    def clean(self, row, row_num=None):
 
-        row = self.replace_nulls(row, null_values=['NONE','', None])
+        row = self.replace_nulls(row, null_values=['NONE', '', None])
         row = self.parse_dates(row)
         row = self.remove_line_breaks(row)
         row = self.rename_cluster(row)
         row = self.rename_ward(row)
+        row = self.add_census_tract_from_mar(
+            row, column_name='MARADDRESSREPOSITORYID')
         return row
 
     def rename_cluster(self,row):
@@ -447,13 +459,16 @@ class CensusCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
+
 class CensusTractToNeighborhoodClusterCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
 
+
 class CensusTractToWardCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
+
 
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
@@ -498,10 +513,12 @@ class reac_score_cleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', None])
         return row
 
+
 class real_property_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row, null_values=['', None])
         return row
+
 
 class dchousing_cleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -514,6 +531,7 @@ class dchousing_cleaner(CleanerBase):
             datetime.fromtimestamp(milli_sec / 1000.0).strftime('%m/%d/%Y')
 
         return row
+
 
 class TopaCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
