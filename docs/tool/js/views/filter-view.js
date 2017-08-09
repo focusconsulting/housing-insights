@@ -404,6 +404,7 @@ var filterView = {
             );
 
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
+            ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
         }
         this.textBoxes.setInputCallback(inputCallback);
 
@@ -642,6 +643,7 @@ var filterView = {
             );
 
             setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
+            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
         }
 
         // For separating date inputs with a '/'
