@@ -7,7 +7,6 @@ var router = {
         if ( router.isFilterInitialized ) return;
         setSubs([
             ['filterValues', router.pushFilter]
-    //        ['nullsShown', router.nullsHandler] // triggered when the nullsShown check is toggled. not when a filter range is adjusted
         ]);        
         router.isFilterInitialized = true;
         if ( router.hasInitialFilterState ) router.decodeState();
@@ -42,15 +41,16 @@ var router = {
             var dataChoice = dataChoices.find(function(obj){
                 return key.split('.')[1] === obj.source;
             });
-            var separator = getState()['nullsShown.' + dataChoice.source] && getState()['nullsShown.' + dataChoice.source][0] ? '-' : '_';
             
             if ( dataChoice.component_type === 'continuous' ) {
+                var separator = router.stateObj[key] && router.stateObj[key][2] ? '-' : '_';
                 paramsArray.push(dataChoice.short_name + '=' + Math.round(router.stateObj[key][0]) + separator + Math.round(router.stateObj[key][1])); 
             }
             if ( dataChoice.component_type === 'categorical' ){
                 paramsArray.push( dataChoice.short_name + '=' + router.stateObj[key].join('+'));
             }
             if ( dataChoice.component_type === 'date' ){
+                var separator = router.stateObj[key] && router.stateObj[key][2] ? '-' : '_';
                 var dateStrings = [];
                 for ( var i = 0; i < 2; i++ ){ // i < 2 bc index 2 is true/false of nullsShown
                     var date = router.stateObj[key][i].getDate();
@@ -68,24 +68,23 @@ var router = {
         document.getElementById('loading-state-screen').style.display = 'block';
     },
     decodeState: function(){
+        console.log("decoding state from URL");
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
         stateArray.forEach(function(each){
             var eachArray = each.split('=');
             var dataChoice = dataChoices.find(function(obj){
                 return obj.short_name === eachArray[0];
             });
+            var filterControlObj = filterView.filterControlsDict[dataChoice.short_name]
+
             if ( dataChoice.component_type === 'continuous' ) {
                 var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
                 var values = eachArray[1].split(separator);
-                // set the values of the corresponding textInput
-                filterView.filterInputs[dataChoice.short_name].setValues([['min', +values[0]]],[['max', +values[1]]]);
-                if ( separator === '_') { // encoded nullShown == false
-                    document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = false;
-                    setState('nullsShown.' + dataChoice.source, false); // this will eventually trigger the callback
-                                                                        // so no need to trigger it here
-                } else { // call the corresponding textInput's callback
-                    filterView.filterInputs[dataChoice.short_name].callback();
-                }
+                var min = +values[0]
+                var max = +values[1]
+                var nullsShown = separator === '_' ? false : true;
+                
+                filterControlObj.set(min,max,nullsShown);
                 
             }
             if ( dataChoice.component_type === 'categorical' ){
@@ -95,7 +94,10 @@ var router = {
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here
                 var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
+                var nullsShown = separator === '_' ? false : true;
                 var values = eachArray[1].split(separator);
+
+                //Set the values on the input boxes
                 filterView.filterInputs[dataChoice.short_name].setValues(
                     [
                         [ 'year',  values[0].match(/\d{4}/)[0] ],
@@ -108,13 +110,10 @@ var router = {
                         [ 'day',   values[1].match(/d(\d+)/)[1]]
                     ]
                 );
-                 if ( separator === '_') { // encoded nullShown == false
-                    document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = false;
-                    setState('nullsShown.' + dataChoice.source, false); // this will eventually trigger the callback
-                                                                        // so no need to trigger it here
-                } else { // call the corresponding textInput's callback
-                    filterView.filterInputs[dataChoice.short_name].callback();
-                }
+                document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = nullsShown;
+                
+                //Commit the values using callback(), which will update slider to match. 
+                filterView.filterInputs[dataChoice.short_name].callback();
             }
 
         });
@@ -137,26 +136,6 @@ var router = {
     hashChangeHandler: function(){
         controller.goBack();
     },
-    nullsHandler: function (msg,data) { // for handling when a nullsShown checkbox is toggled. needs to grab values of the filter
-        var component = msg.split('.')[1];
-        var dataChoice = dataChoices.find(function(each){
-            return each.source === component;
-        });
-        var type = dataChoice.component_type;
-        var shortName = dataChoice.short_name;
-        if ( type === 'categorical' ) {
-            // i think this is a null set; no unknowns in categorical filters
-        }
-        if ( type === 'continuous' ) {
-
-        }
-        if ( type === 'date' ) {
-
-        }
-        if ( type === 'location' ) {
-            // to come
-        }
-    }
 
 };
 window.onhashchange = function() {

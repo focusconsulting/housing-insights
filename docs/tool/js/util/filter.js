@@ -54,30 +54,18 @@ var filterUtil = {
 	filterData: function(){
         
     	var workingData = model.dataCollection['filterData'].objects; 
-        var nullsShown = filterUtil.getNullsShown(); // creates object with nullShown state ofall filters
         var filterValues = filterUtil.getFilterValues();
-
-        for (var key in nullsShown){
-            var component = (filterView.components.filter(function(obj){
-                return obj.source == key;
-            }))[0];
-
-            if (component.component_type == 'continuous' || component.component_type == 'date'){
-                workingData = workingData.filter(function(d){
-                    return d[key] !== null || nullsShown[key][0]; // nullsShown[key][0] is true or fals; if false returns when d[key] is not null
-                });
-            }
-        }
 
 		for (key in filterValues) { // iterate through registered filters
 			
             //need to get the matching component out of a list of objects
-            var component = filterView.components.filter(function(obj) {
+            var component = dataChoices.filter(function(obj) {
               return obj.source == key;
             });
-            component = component[0] //the most recent filter (current and previous are returned in a list)
+            component = component[0]
+
                         
-			if (component['component_type'] == 'continuous') { //filter data for a 'continuous' filter
+			if (component['component_type'] == 'continuous') {
                 
                 if (filterValues[key][0].length == 0){
                     // don't filter because the filter has been removed.
@@ -86,41 +74,44 @@ var filterUtil = {
                     //javascript rounding is weird
                     var decimalPlaces = component['data_type'] == 'integer' ? 0 : 2 //ternary operator
                     var min = Number(Math.round(filterValues[key][0][0]+'e'+decimalPlaces) +'e-'+decimalPlaces);
-                    var max =Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
+                    var max = Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
 
+                    //If it's a zone-level data set, need to choose the right column
+                    var modifier = component.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
+                    
                     //filter it
                     workingData = workingData.filter(function(d){
-                    // Refer to the third element of the most recent value of
-                    // filterValues, which is a boolean indicating whether
-                    // null values will be shown.
-                        if(d[key] === null){
-                            return nullsShown[key];
+                        if(d[(key + modifier)] === null){
+                            return filterValues[key][0][2]; //third element in array is true/false for nulls shown
                         }
-    					return (d[key] >= min && d[key] <= max);
+    					return (d[(key + modifier)] >= min && d[(key + modifier)] <= max);
     				});
                 };
 			}
 
 			if (component['component_type']== 'date') {
-                
-                workingData = workingData.filter(function(d){
-                   // Refer to the third element of the most recent value of
-                   // filterValues, which is a boolean indicating whether
-                   // null values will be shown.
-                    if(d[key] === null){
-                        return nullsShown[key];
-                    }
+                if (filterValues[key][0].length == 0){
+                    // don't filter because the filter has been removed.
+                    // The length would be '1' because nullsShown is always included.
+                } else {
+                    workingData = workingData.filter(function(d){
+                       // Refer to the third element of the most recent value of
+                       // filterValues, which is a boolean indicating whether
+                       // null values will be shown.
+                        if(d[key] === null){
+                            return filterValues[key][0][2];
+                        }
 
-                    // If the filter is 'empty' and the value isn't null,
-                    // show the project.
-                    if(filterValues[key][0].length === 0){
-                        return true;
-                    }
-                    
-                    return d[key].valueOf() >= filterValues[key][0][0].valueOf() 
-                        && d[key].valueOf() <= filterValues[key][0][1].valueOf();
-                });
-
+                        // If the filter is 'empty' and the value isn't null,
+                        // show the project.
+                        if(filterValues[key][0].length === 0){
+                            return true;
+                        }
+                        
+                        return d[key].valueOf() >= filterValues[key][0][0].valueOf() 
+                            && d[key].valueOf() <= filterValues[key][0][1].valueOf();
+                    });
+                }
 			}
 
 			if (component['component_type'] == 'categorical') {
