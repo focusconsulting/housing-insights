@@ -49,26 +49,46 @@ function StateModule() {
 
     function setState(key,value) { // making all state properties arrays so that previous value is held on to
                                    // current state to be accessed as state[key][0].
-        if ( state[key] === undefined ) {
+        var stateIsNew = (state[key] === undefined);
+
+        
+        console.groupCollapsed("setState:", key, value)
+        if ( stateIsNew ) {
             state[key] = [value];
             PubSub.publish(key, value);
-            console.log('STATE CHANGE', key, value);
-        } else if ( state[key][0] !== value ) { // only for when `value` is a string or number. doesn't seem
-                                                // to cause an issue when value is an object, but it does duplicate
-                                                // the state. i.e. key[0] and key[1] will be equivalent. avoid that
-                                                // with logic before making the setState call.
-            state[key].unshift(value);
-            PubSub.publish(key, value);
-            console.log('STATE CHANGE', key, value);
-            if ( state[key].length > 2 ) {
-                state[key].length = 2;
-            }
+            console.log('STATE CREATED', key, value);
+            console.trace("Stack trace for state " + key);
+
         } else {
-            //TODO do we want for there to be another 'announceState' method that publishes every time it fires, even if the value remains the same??
-            console.log("State value is the same as previous:", key, value);
+            //If it's a string or array and values are the same, stateChanged=False+
+            var stateChanged = true;
+            if (typeof value === 'string') {
+                stateChanged = (state[key][0] !== value)
+            } else if (Array.isArray(value) && Array.isArray(state[key][0])) {
+                stateChanged = !value.compare(state[key][0])
+            } else {
+                stateChanged = true; //assume it's changed if we can't verify
+            }
+
+            //Only publish if we've changed state
+            if (stateChanged ) { 
+                state[key].unshift(value);
+                PubSub.publish(key, value);
+
+                console.log('STATE CHANGE', key, value);
+                console.trace("Stack trace for state " + key);
+                if ( state[key].length > 2 ) {
+                    state[key].length = 2;
+                }
+            } else {
+                //TODO do we want for there to be another 'announceState' method that publishes every time it fires, even if the value remains the same??
+                console.log("STATE UNCHANGED, NO PUB:", key, value);
+                console.trace("Stack trace for state " + key);
+            }
         }
-        
+        console.groupEnd()
     }
+
     function clearState(key) {
         delete state[key];
          PubSub.publish('clearState', key);
@@ -362,6 +382,20 @@ var getFieldFromMeta = function(table,sql_name){
     this.splice(new_index, 0, this.splice(old_index, 1)[0]);
     return this; // for testing purposes
 };
+
+//array.compare(otherArray) //HT https://stackoverflow.com/questions/6229197/how-to-know-if-two-arrays-have-the-same-values
+Array.prototype.compare = function(testArr) {
+    if (this.length != testArr.length) return false;
+    if (this.length === 0 && testArr.length === 0) return true;
+    console.log("in compare");
+    console.log(this);
+    for (var i = 0; i < testArr.length; i++) {
+        if (this[i] !== testArr[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 // HELPER String.hashCode()
 
