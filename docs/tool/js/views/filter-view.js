@@ -602,6 +602,7 @@ var filterView = {
                 if(doesItSetState){
                     ths.toggle.element.checked
                     setState(specific_state_code,[newMinDate, newMaxDate, ths.toggle.element.checked]);
+                    ths.checkAgainstOriginalValues(newMinDate, newMaxDate, ths.toggle.element.checked)
                 }
             }
         }
@@ -667,6 +668,7 @@ var filterView = {
             var dateValues = getValuesAsDates();
             var newState = [dateValues.min, dateValues.max,checkboxValue]
             setState(specificCode, newState);
+            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, checkboxValue)
         });
 
         this.clear = function(){
@@ -682,6 +684,14 @@ var filterView = {
         this.isTouched = function(){
             var dateValues = getValuesAsDates();
             return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
+        }
+
+        this.checkAgainstOriginalValues = function(min,max,showNulls){
+            console.log(min.getTime(),max.getTime(),showNulls);console.log(minDatum.getTime(),maxDatum.getTime());            
+            if ( min.getTime() === minDatum.getTime() && max.getTime() === maxDatum.getTime() && showNulls === true ){
+                console.log('match');
+                ths.clear();
+            } 
         }
 
     },
