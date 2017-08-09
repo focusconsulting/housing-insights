@@ -389,6 +389,8 @@ var filterView = {
             var textboxValues = ths.textBoxes.returnValues();
             var newState = [textboxValues['min']['min'], textboxValues['max']['max'],checkboxValue]
             setState(specificCode, newState);
+            ths.checkAgainstOriginalValues(+textboxValues['min']['min'], +textboxValues['max']['max'], checkboxValue);
+
         });
 
         //Textbox
@@ -433,20 +435,18 @@ var filterView = {
 
                     var specific_state_code = 'filterValues.' + component.source
                     unencoded.push(ths.toggle.element.checked);
-
                     setState(specific_state_code,unencoded);
-                    if ( unencoded[0] === minDatum && unencoded[1] === maxDatum && unencoded[2] === true ){
-                        console.log('back to original');
-                        var filterControl = filterView.filterControls.find(function(each){
-                            return each.component.short_name === c.short_name;
-                        });
-                        filterControl.clear();
-                    }                    
+                    ths.checkAgainstOriginalValues(min,max,unencoded[2]);
+                                       
                 }
 
             }
         }
-
+        this.checkAgainstOriginalValues = function(min,max,showNulls){
+            if ( min === this.minDatum && max === this.maxDatum && showNulls === true ){
+                ths.clear();
+            } 
+        }
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
         this.slider.noUiSlider.on('change', currentSliderCallback);
