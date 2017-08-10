@@ -389,6 +389,8 @@ var filterView = {
             var textboxValues = ths.textBoxes.returnValues();
             var newState = [textboxValues['min']['min'], textboxValues['max']['max'],checkboxValue]
             setState(specificCode, newState);
+            ths.checkAgainstOriginalValues(+textboxValues['min']['min'], +textboxValues['max']['max'], checkboxValue);
+
         });
 
         //Textbox
@@ -402,6 +404,7 @@ var filterView = {
             );
 
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
+            ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
         }
         this.textBoxes.setInputCallback(inputCallback);
 
@@ -430,14 +433,21 @@ var filterView = {
 
                 //Set the filterValues state
                 if(doesItSetState){
+
                     var specific_state_code = 'filterValues.' + component.source
                     unencoded.push(ths.toggle.element.checked);
                     setState(specific_state_code,unencoded);
+                    ths.checkAgainstOriginalValues(min,max,unencoded[2]);
+                                       
                 }
 
             }
         }
-
+        this.checkAgainstOriginalValues = function(min,max,showNulls){
+            if ( min === this.minDatum && max === this.maxDatum && showNulls === true ){
+                ths.clear();
+            } 
+        }
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
         this.slider.noUiSlider.on('change', currentSliderCallback);
@@ -593,6 +603,7 @@ var filterView = {
                 if(doesItSetState){
                     ths.toggle.element.checked
                     setState(specific_state_code,[newMinDate, newMaxDate, ths.toggle.element.checked]);
+                    ths.checkAgainstOriginalValues(newMinDate, newMaxDate, ths.toggle.element.checked)
                 }
             }
         }
@@ -632,6 +643,7 @@ var filterView = {
             );
 
             setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
+            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
         }
 
         // For separating date inputs with a '/'
@@ -658,6 +670,7 @@ var filterView = {
             var dateValues = getValuesAsDates();
             var newState = [dateValues.min, dateValues.max,checkboxValue]
             setState(specificCode, newState);
+            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, checkboxValue)
         });
 
         this.clear = function(){
@@ -673,6 +686,14 @@ var filterView = {
         this.isTouched = function(){
             var dateValues = getValuesAsDates();
             return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
+        }
+
+        this.checkAgainstOriginalValues = function(min,max,showNulls){
+            console.log(min.getTime(),max.getTime(),showNulls);console.log(minDatum.getTime(),maxDatum.getTime());            
+            if ( min.getTime() === minDatum.getTime() && max.getTime() === maxDatum.getTime() && showNulls === true ){
+                console.log('match');
+                ths.clear();
+            } 
         }
 
     },
