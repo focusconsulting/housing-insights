@@ -107,8 +107,6 @@ var resultsView = {
             };  
 
         setState('filteredStatsAvailable',resultsView.filteredStats['ward']);
-        console.log(resultsView.filteredStats);
-
         
     },
     makeBarChart:function(){

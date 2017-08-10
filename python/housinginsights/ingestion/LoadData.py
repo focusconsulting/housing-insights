@@ -623,6 +623,7 @@ class LoadData(object):
             pop_wt = 'population_weight_proportions'
 
         with self.engine.connect() as conn:
+            # get the field population value for each census_tract
             q = "SELECT census_tract, {field} FROM census".format(
                 field=field)  # TODO need to add 'year' column for multiple census years when this is added to the data
             proxy = conn.execute(q)
@@ -637,17 +638,22 @@ class LoadData(object):
                     items[r['census_tract']] = r[field]
 
             elif grouping in ['ward', 'neighborhood_cluster']:
+                # get zone_specifics for grouping zone_type
                 proxy = conn.execute(
                     "SELECT DISTINCT {grouping} FROM census_tract_to_{grouping}".format(
                         grouping=grouping))
                 groups = [x[0] for x in proxy.fetchall()]
 
+                # get the weighted sum for each zone_specific for grouping
                 for group in groups:
+                    # get only the rows that match group
                     proxy = conn.execute(
                         "SELECT * FROM census_tract_to_{grouping} WHERE {grouping} = '{group}'".format(
                             grouping=grouping, group=group))
                     results = [dict(x) for x in proxy.fetchall()]
 
+                    # for the census_tract for each row: field_value * pop_wt
+                    # and sum all to get total group field_value
                     count = 0
                     for result in results:
                         tract = result['census_tract']

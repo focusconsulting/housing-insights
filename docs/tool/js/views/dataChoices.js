@@ -84,7 +84,7 @@
         {
             "source": "violent_crime_count",
             "display_name": "Crime Rate: Violent 12 months",
-            "display_text": "**Filter not working**<br>Number of violent crime incidents per 100,000 people reported in the past 12 months.",
+            "display_text": "Number of violent crime incidents per 100,000 people reported in the past 12 months.",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -96,7 +96,7 @@
         {
             "source": "non_violent_crime_rate",
             "display_name": "Crime Rate: Non-Violent 12 months",
-            "display_text": "**Filter not working**<br>Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
+            "display_text": "Number of non-violent crime incidents per 100,000 people reported in this zone in the past 12 months.",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -108,7 +108,7 @@
         {
             "source": "crime_rate",
             "display_name": "Crime Rate: All 3 months",
-            "display_text": "**Filter not working**<br>Total number of crime incidents per 100,000 people reported in the past 12 months.",
+            "display_text": "Total number of crime incidents per 100,000 people reported in the past 12 months.",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -120,7 +120,7 @@
         {
             "source": "construction_permits",
             "display_name": "Building Permits: Construction 2016",
-            "display_text": "**Filter not working**<br>Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+            "display_text": "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -132,7 +132,7 @@
         {
             "source": "building_permits",
             "display_name": "Building Permits: All 2016",
-            "display_text": "**Filter not working**<br>Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+            "display_text": "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -144,7 +144,7 @@
         {
             "source": "poverty_rate",
             "display_name": "ACS: Poverty Rate",
-            "display_text": "**Filter not working**<br>Fraction of residents below the poverty rate.",
+            "display_text": "Fraction of residents below the poverty rate.",
             
             "data_level": "zone",
             "component_type": "continuous",
@@ -157,7 +157,7 @@
         {
             "source": "income_per_capita",
             "display_name": "ACS: Income Per Capita",
-            "display_text": "**Filter not working**<br>Average income per resident",
+            "display_text": "Average income per resident",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -169,7 +169,7 @@
         {
             "source": "labor_participation",
             "display_name": "ACS: Labor Participation",
-            "display_text": "**Filter not working**<br>Percent of the population that is working",
+            "display_text": "Percent of the population that is working",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -181,7 +181,7 @@
         {
             "source": "fraction_single_mothers",
             "display_name": "ACS: Fraction Single Mothers",
-            "display_text": "**Filter not working**<br>Percent of the total population that is a single mother",
+            "display_text": "Percent of the total population that is a single mother",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -190,10 +190,11 @@
             "style": "percent",
             "short_name": "sm"
         },
+        /*
         {
             "source": "fraction_black",
             "display_name": "ACS: Fraction Black",
-            "display_text": "**Filter not working**<br>Proportion of residents that are black or African American",
+            "display_text": "Proportion of residents that are black or African American",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -202,10 +203,11 @@
             "style": "percent",
             "short_name": "fb"
         },
+        */
         {
             "source": "fraction_foreign",
             "display_name": "ACS: Fraction Foreign",
-            "display_text": "**Filter not working**<br>Percent of the population that is foreign born",
+            "display_text": "Percent of the population that is foreign born",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -217,7 +219,7 @@
         {
             "source": "acs_median_rent",
             "display_name": "ACS: Median Rent",
-            "display_text": "**Filter not working**<br>Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.",
+            "display_text": "Filters to buildings that are in a census tract that has a median rent between the indicated levels, per the American Community Survey. ACS rent combines both subsidized and market rate rent.",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
