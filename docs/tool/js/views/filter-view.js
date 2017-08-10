@@ -484,7 +484,7 @@ var filterView = {
 
         this.rebuild = function() {
             ths.calculateParams()
-            ths.element.checked = true;
+            ths.toggle.element.checked = true;
             ths.slider.noUiSlider.updateOptions({
                 start: [ths.minDatum, ths.maxDatum],
                 range: {
