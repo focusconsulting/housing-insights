@@ -382,6 +382,22 @@ class CleanerBase(object, metaclass=ABCMeta):
         else:
             return row
 
+    def filter_row_by(self, row, criteria=None):
+        """
+        Returns empty dict for rows that meet filter criteria.
+
+        :param row: the row to be verified
+        :param criteria: dict where each key is a field in the row dict and the
+        values for which you want filter for. The values for each key should
+        be a list of values you don't want to get loaded into the database.
+        """
+        if criteria is not None:
+            for key in criteria:
+                if row[key] in criteria[key]:
+                    return dict()
+
+        return row
+
 
 #############################################
 # Custom Cleaners
@@ -391,7 +407,8 @@ class CleanerBase(object, metaclass=ABCMeta):
 # TODO: map to specific cleaner methods including option to pass custom methods
 
 class GenericCleaner(CleanerBase):
-    def clean(self,row, row_num=None):
+    def clean(self, row, row_num=None):
+        row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         return row
 
 
@@ -618,4 +635,16 @@ class ZillowCleaner(CleanerBase):
         '121693', '121695', '121702', '121704', '121709', '121718', '121727', '121729', '121736', '121743', '121745', '403135', '403134', 
         '121816', '121815', '403139', '403116', '273767', '403478', '273489', '268811', '121808', '121807', '121806', '121791', '121788', 
         '121774', '121772', '121754', '121759', '121761', '121777', '121779', '121786', '268815', '268831', '272818', '273159', '275465', 
-        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']       
+        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']
+
+
+class MarCleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        criteria = {
+            'TYPE_': ['PLACE']
+        }
+        row = self.filter_row_by(row, criteria)
+        if not row:  # skip other cleaning steps if filtered out
+            return None
+        row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
+        return row

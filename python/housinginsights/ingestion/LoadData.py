@@ -951,48 +951,48 @@ class LoadData(object):
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
             start_time = time()
-            # meta_only_fields = self._get_meta_only_fields(
-            #     table_name=table_name, data_fields=csv_reader.keys)
-            # # TODO - concurrency can be handled here: row at a time
-            # # TODO - while cleaning one row, start cleaning the next
-            # # TODO - once cleaning is done, write row to psv file
-            # # TODO - consider using queue: once empty update db with psv data
-            # for idx, data_row in enumerate(csv_reader):
-            #     data_row.update(meta_only_fields)  # insert other field dict
-            #     clean_data_row = cleaner.clean(data_row, idx)
-            #     if clean_data_row is not None:
-            #         csv_writer.write(clean_data_row)
+            meta_only_fields = self._get_meta_only_fields(
+                table_name=table_name, data_fields=csv_reader.keys)
+            # TODO - concurrency can be handled here: row at a time
+            # TODO - while cleaning one row, start cleaning the next
+            # TODO - once cleaning is done, write row to psv file
+            # TODO - consider using queue: once empty update db with psv data
+            for idx, data_row in enumerate(csv_reader):
+                data_row.update(meta_only_fields)  # insert other field dict
+                clean_data_row = cleaner.clean(data_row, idx)
+                if clean_data_row is not None:
+                    csv_writer.write(clean_data_row)
 
-            with concurrent.futures.ThreadPoolExecutor(
-                    max_workers=100) as executor:
-                future_data = {executor.submit(
-                    self._clean_data, idx, data_row, cleaner, table_name,
-                    csv_reader.keys): (
-                    idx, data_row) for idx, data_row in enumerate(csv_reader)}
-                for future in concurrent.futures.as_completed(future_data):
-                    clean_data_row = future.result()
-                    if clean_data_row is not None:
-                        csv_writer.write(clean_data_row)
-
-                csv_writer.close()
-
-                # write the data to the database
-                self._update_database(sql_interface=sql_interface)
-
-                if not self._keep_temp_files:
-                    csv_writer.remove_file()
-                end_time = time()
-                print("\nRun time= %s" % (end_time - start_time))
-
-            # csv_writer.close()
+            # with concurrent.futures.ThreadPoolExecutor(
+            #         max_workers=100) as executor:
+            #     future_data = {executor.submit(
+            #         self._clean_data, idx, data_row, cleaner, table_name,
+            #         csv_reader.keys): (
+            #         idx, data_row) for idx, data_row in enumerate(csv_reader)}
+            #     for future in concurrent.futures.as_completed(future_data):
+            #         clean_data_row = future.result()
+            #         if clean_data_row is not None:
+            #             csv_writer.write(clean_data_row)
             #
-            # # write the data to the database
-            # self._update_database(sql_interface=sql_interface)
+            #     csv_writer.close()
             #
-            # if not self._keep_temp_files:
-            #     csv_writer.remove_file()
-            # end_time = time()
-            # print("\nRun time= %s" % (end_time - start_time))
+            #     # write the data to the database
+            #     self._update_database(sql_interface=sql_interface)
+            #
+            #     if not self._keep_temp_files:
+            #         csv_writer.remove_file()
+            #     end_time = time()
+            #     print("\nRun time= %s" % (end_time - start_time))
+
+            csv_writer.close()
+
+            # write the data to the database
+            self._update_database(sql_interface=sql_interface)
+
+            if not self._keep_temp_files:
+                csv_writer.remove_file()
+            end_time = time()
+            print("\nRun time= %s" % (end_time - start_time))
 
     def _clean_data(self, idx, data_row, cleaner, table_name, data_fields):
         """
@@ -1008,6 +1008,9 @@ class LoadData(object):
         :param data_fields: the column headers required in the database
         :return: the processed clean data row
         """
+        if data_row is None:  # skip empty rows
+            return None
+
         meta_only_fields = self._get_meta_only_fields(
             table_name=table_name, data_fields=data_fields)
         data_row.update(meta_only_fields)  # insert other field dict keys
