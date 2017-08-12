@@ -311,14 +311,24 @@ var filterView = {
             });
             ths.minDatum = d3.min(allDataValuesForThisSource) || 0;
             ths.maxDatum = d3.max(allDataValuesForThisSource) || 1;
-            ths.stepCount = Math.max(1, parseInt((this.maxDatum - this.minDatum)/500));
+            ths.datumRange = (ths.maxDatum - ths.minDatum);
+
+            function orderOfMagnitude(n) {
+                var order = Math.floor(Math.log(n) / Math.LN10
+                                   + 0.000000001); // because float math sucks like that
+                return Math.pow(10,order);
+            }
+
+            ths.orderOfMagnitude = orderOfMagnitude(ths.datumRange);
+            ths.stepSize = ths.orderOfMagnitude / 10
+            ths.firstRoundedStep = Math.ceil(ths.minDatum/ths.orderOfMagnitude)*ths.orderOfMagnitude
 
             if (c.style === "percent") {
-                ths.minDatum = Math.round(ths.minDatum * 100) / 100;
-                ths.maxDatum = Math.round(ths.maxDatum * 100) / 100;
+                ths.minDatum = Math.floor(ths.minDatum * 100) / 100;
+                ths.maxDatum = Math.ceil(ths.maxDatum * 100) / 100;
             } else { //"number", "money"
-                ths.minDatum = Math.round(ths.minDatum);
-                ths.maxDatum = Math.round(ths.maxDatum);
+                ths.minDatum = Math.floor(ths.minDatum);
+                ths.maxDatum = Math.ceil(ths.maxDatum);
             }
         }
         
@@ -335,12 +345,11 @@ var filterView = {
         noUiSlider.create(this.slider, {
             start: [this.minDatum, this.maxDatum],
             connect: true,
-            tooltips: [ false, false ], //using textboxes instead
             range: {
-                'min': this.minDatum,
-                'max': this.maxDatum
-            },
-            step: this.stepCount
+                'min': [ths.minDatum],
+                '5%': [ths.firstRoundedStep, ths.stepSize],
+                'max': [ths.maxDatum]
+            }
         });
         
         ////////////////////////
@@ -421,11 +430,11 @@ var filterView = {
                     positions: Left offset of the handles in relation to the slider
                 */
 
-                // Round the filter up
+                //Deal with floating values
                 unencoded = unencoded.map(function(el){
-                    return el >= 0 ? Math.ceil(el) : el;
+                    return el >= 1 ? Math.round(el) : Math.round(el*100)/100; 
                 });
-
+                
                 //Bind the slider values to the textboxes
                 var min = unencoded[0]
                 var max = unencoded[1]
@@ -433,12 +442,10 @@ var filterView = {
 
                 //Set the filterValues state
                 if(doesItSetState){
-
                     var specific_state_code = 'filterValues.' + component.source
                     unencoded.push(ths.toggle.element.checked);
                     setState(specific_state_code,unencoded);
-                    ths.checkAgainstOriginalValues(min,max,unencoded[2]);
-                                       
+                    ths.checkAgainstOriginalValues(min,max,unencoded[2]);                
                 }
 
             }
@@ -488,8 +495,9 @@ var filterView = {
             ths.slider.noUiSlider.updateOptions({
                 start: [ths.minDatum, ths.maxDatum],
                 range: {
-                    'min': ths.minDatum,
-                    'max': ths.maxDatum
+                    'min': [ths.minDatum],
+                    '5%': [ths.firstRoundedStep, ths.stepSize],
+                    'max': [ths.maxDatum]
                 }
             });
             ths.clear() //also refills textboxes
