@@ -18,8 +18,6 @@ python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir, os.pardir))
 sys.path.append(python_filepath)
 
-from housinginsights.ingestion.DataReader import ManifestReader
-
 
 #configuration
 #See /logs/example-logging.py for usage examples
@@ -253,8 +251,9 @@ def duplicateTable(new_table, new_json, master_json):
 if __name__ == '__main__':
     #
     # Edit these values before running!
-    csv_filename = os.path.abspath("../../../data/raw/apis/20170613/acs5_2015.csv")#"../../../data/sample/project_sample.csv"
-    table_name = "census"
+    csv_filename = os.path.abspath("../../../data/raw/apis/20170728/mar.csv")#"../../../data/sample
+    # /project_sample.csv"
+    table_name = "mar_geocode"
     encoding = "utf-8" #Try utf-8 or latin1. Put the successful value into manifest.csv
     #print('main(): {}, {}, {}'.format())
     # import ipdb; ipdb.set_trace()

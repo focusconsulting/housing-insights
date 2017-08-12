@@ -16,11 +16,8 @@ from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
 from housinginsights.sources.google_maps import GoogleMapsApiConn
 
 
-package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
                                            os.pardir))
-# TODO - add in manifest but don't load in db so the path isn't hard coded?
-mar_path = os.path.join(package_dir, os.pardir, 'data', 'raw', 'apis',
-                        '20170528', 'mar.csv')
 
 '''
 Usage:
@@ -30,7 +27,8 @@ http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-str
 
 
 class CleanerBase(object, metaclass=ABCMeta):
-    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='',
+                 engine=None):
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
         self.engine = engine
@@ -44,7 +42,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         #Flatten the census mapping file so that every potential name of a census tract can be translated to its standard format
         self.census_mapping = {}
-        census_reader = HIReader(os.path.join(package_dir,'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
+        census_reader = HIReader(os.path.join(PYTHON_PATH, 'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
         for row in census_reader:
             for key, value in row.items():
                 self.census_mapping[value] = row['census_tract']
@@ -68,7 +66,7 @@ class CleanerBase(object, metaclass=ABCMeta):
                 row[key] = self.null_value
         return row
 
-    def remove_line_breaks(self,row):
+    def remove_line_breaks(self, row):
         #TODO see if it's possible to not do this by getting the copy_from to be ok with breaks
         for key in row:
             row[key] = row[key].replace('\r','__')
@@ -90,7 +88,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return date
 
-    def convert_boolean(self,value):
+    def convert_boolean(self, value):
         mapping = {
             'Yes': True,
             'No': False,
@@ -117,7 +115,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             row[source_name] = self.format_date(row[source_name])
         return row
 
-    def remove_non_dc_tracts(self,row,column_name):
+    def remove_non_dc_tracts(self, row, column_name):
         '''
         TODO change to use self.census_mapping
         '''
@@ -146,7 +144,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         else:
             return None
 
-    def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
+    def rename_census_tract(self, row, column_name='census_tract'):
             '''
             Make all census tract names follow a consistent format. 
             column_name corresponds to the key of the row, which depends on 
@@ -160,7 +158,7 @@ class CleanerBase(object, metaclass=ABCMeta):
                 row[column_name] = self.census_mapping[row[column_name]]
                 return row
 
-    def replace_tracts(self,row,row_num,column_name='census_tract'):
+    def replace_tracts(self, row, row_num, column_name='census_tract'):
         '''
         Converts the raw census tract code to the more readable format used by PresCat
         '''
@@ -173,7 +171,8 @@ class CleanerBase(object, metaclass=ABCMeta):
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
-    def append_tract_label(self,row,row_num,column_name='census_tract_number'):
+    def append_tract_label(self, row, row_num,
+                           column_name='census_tract_number'):
         '''
         Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value
         consistent with the more readable format used by PresCat
@@ -372,6 +371,38 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return row
 
+    def add_state_county_to_tract(self):
+        pass
+
+    def add_census_tract_from_mar(self, row, column_name='mar_id'):
+        """Returns the census tract for given mar_id using the mar api."""
+        mar_api = MarApiConn()
+        result = mar_api.reverse_address_id(aid=row[column_name])
+
+        if result['returnDataset']:
+            tract = result['returnDataset']['Table1'][0]['CENSUS_TRACT']
+            # TODO - use self.rename_census_tract()
+            row['census_tract'] = '11001' + str(tract)
+            return row
+        else:
+            return row
+
+    def filter_row_by(self, row, criteria=None):
+        """
+        Returns empty dict for rows that meet filter criteria.
+
+        :param row: the row to be verified
+        :param criteria: dict where each key is a field in the row dict and the
+        values for which you want filter for. The values for each key should
+        be a list of values you don't want to get loaded into the database.
+        """
+        if criteria is not None:
+            for key in criteria:
+                if row[key] in criteria[key]:
+                    return dict()
+
+        return row
+
 
 #############################################
 # Custom Cleaners
@@ -381,12 +412,13 @@ class CleanerBase(object, metaclass=ABCMeta):
 # TODO: map to specific cleaner methods including option to pass custom methods
 
 class GenericCleaner(CleanerBase):
-    def clean(self,row, row_num = None):
+    def clean(self, row, row_num=None):
+        row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         return row
 
 
 class ProjectCleaner(CleanerBase):
-    def clean(self, row, row_num = None):
+    def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
         row = self.add_mar_id(row, 'Proj_address_id')
@@ -407,13 +439,15 @@ class SubsidyCleaner(CleanerBase):
 
 
 class BuildingPermitsCleaner(CleanerBase):
-    def clean(self, row, row_num = None):
+    def clean(self, row, row_num=None):
 
-        row = self.replace_nulls(row, null_values=['NONE','', None])
+        row = self.replace_nulls(row, null_values=['NONE', '', None])
         row = self.parse_dates(row)
         row = self.remove_line_breaks(row)
         row = self.rename_cluster(row)
         row = self.rename_ward(row)
+        row = self.add_census_tract_from_mar(
+            row, column_name='MARADDRESSREPOSITORYID')
         return row
 
     def rename_cluster(self,row):
@@ -426,6 +460,7 @@ class BuildingPermitsCleaner(CleanerBase):
 
 class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
+        # TODO - use self.rename_census_tract()
         row['census_tract'] = ""+row['state']+row['county']+row['tract']
         #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
         row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
@@ -447,13 +482,16 @@ class CensusCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
+
 class CensusTractToNeighborhoodClusterCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
 
+
 class CensusTractToWardCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
+
 
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
@@ -498,10 +536,12 @@ class reac_score_cleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', None])
         return row
 
+
 class real_property_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row, null_values=['', None])
         return row
+
 
 class dchousing_cleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -514,6 +554,7 @@ class dchousing_cleaner(CleanerBase):
             datetime.fromtimestamp(milli_sec / 1000.0).strftime('%m/%d/%Y')
 
         return row
+
 
 class TopaCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
@@ -600,4 +641,18 @@ class ZillowCleaner(CleanerBase):
         '121693', '121695', '121702', '121704', '121709', '121718', '121727', '121729', '121736', '121743', '121745', '403135', '403134', 
         '121816', '121815', '403139', '403116', '273767', '403478', '273489', '268811', '121808', '121807', '121806', '121791', '121788', 
         '121774', '121772', '121754', '121759', '121761', '121777', '121779', '121786', '268815', '268831', '272818', '273159', '275465', 
-        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']       
+        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']
+
+
+class MarCleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        # only add real addressed into the db, not places
+        criteria = {
+            'TYPE_': ['PLACE']
+        }
+        row = self.filter_row_by(row, criteria)
+        if not row:  # skip other cleaning steps if filtered out
+            return None
+        row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
+        row = self.rename_census_tract(row, column_name='CENSUS_TRACT')
+        return row
