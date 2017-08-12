@@ -118,6 +118,34 @@ class LoadData(object):
             '''))
         return query_result
 
+    def remove_tables(self, tables):
+        '''
+        Used when you want to update only part of the database. Drops the table
+        and deletes all associated rows in the sql manifest. Run this before
+        updating data in tables that have added or removed columns. 
+
+        tables: a list of table names to be deleted
+        '''
+        for table in tables:
+            try:
+                logging.info("Dropping the {} table and all associated manifest rows".format(table))
+                #Delete all the relevant rows of the sql manifest table
+                q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
+                conn = self.engine.connect()
+                proxy = conn.execute(q)
+                results = proxy.fetchall()
+                for row in results:
+                    q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                        row[0])
+                    conn.execute(q)
+
+                #And drop the table itself
+                q = "DROP TABLE {}".format(table)
+                conn.execute(q)
+            except ProgrammingError:
+                logging.error("Couldn't remove table {}".format(table))
+
+
     def _meta_json_to_database(self):
         """
         Makes sure we have a meta table in the database.
@@ -1087,6 +1115,11 @@ def main(passed_arguments):
                       keep_temp_files=keep_temp_files,
                       drop_tables=drop_tables)
 
+    #Remove tables before starting ingestion process
+    if passed_arguments.remove_tables:
+        loader.remove_tables(passed_arguments.remove_tables)
+
+    #Decide which load method to use
     if passed_arguments.update_only:
         loader.update_database(passed_arguments.update_only)
     elif passed_arguments.recalculate_only:
@@ -1121,6 +1154,11 @@ if __name__ == '__main__':
     parser.add_argument('--update-only', nargs='+',
                         help='only update tables with these unique_data_id '
                              'values')
+
+    parser.add_argument('--remove-tables', nargs='+',
+                    help='Drops tables before running the load data code. '
+                    ' Add the name of each table to drop in format "table1 table2"')
+
     parser.add_argument ('--recalculate-only',action='store_true',
                     help="Don't update any data, just redo calculated fields")
 
