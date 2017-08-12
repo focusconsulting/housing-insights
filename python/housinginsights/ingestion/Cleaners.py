@@ -66,7 +66,7 @@ class CleanerBase(object, metaclass=ABCMeta):
                 row[key] = self.null_value
         return row
 
-    def remove_line_breaks(self,row):
+    def remove_line_breaks(self, row):
         #TODO see if it's possible to not do this by getting the copy_from to be ok with breaks
         for key in row:
             row[key] = row[key].replace('\r','__')
@@ -88,7 +88,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return date
 
-    def convert_boolean(self,value):
+    def convert_boolean(self, value):
         mapping = {
             'Yes': True,
             'No': False,
@@ -115,7 +115,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             row[source_name] = self.format_date(row[source_name])
         return row
 
-    def remove_non_dc_tracts(self,row,column_name):
+    def remove_non_dc_tracts(self, row, column_name):
         '''
         TODO change to use self.census_mapping
         '''
@@ -144,7 +144,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         else:
             return None
 
-    def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
+    def rename_census_tract(self, row, column_name='census_tract'):
             '''
             Make all census tract names follow a consistent format. 
             column_name corresponds to the key of the row, which depends on 
@@ -158,7 +158,7 @@ class CleanerBase(object, metaclass=ABCMeta):
                 row[column_name] = self.census_mapping[row[column_name]]
                 return row
 
-    def replace_tracts(self,row,row_num,column_name='census_tract'):
+    def replace_tracts(self, row, row_num, column_name='census_tract'):
         '''
         Converts the raw census tract code to the more readable format used by PresCat
         '''
@@ -171,7 +171,8 @@ class CleanerBase(object, metaclass=ABCMeta):
             logging.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
-    def append_tract_label(self,row,row_num,column_name='census_tract_number'):
+    def append_tract_label(self, row, row_num,
+                           column_name='census_tract_number'):
         '''
         Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value
         consistent with the more readable format used by PresCat
@@ -370,6 +371,9 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return row
 
+    def add_state_county_to_tract(self):
+        pass
+
     def add_census_tract_from_mar(self, row, column_name='mar_id'):
         """Returns the census tract for given mar_id using the mar api."""
         mar_api = MarApiConn()
@@ -377,6 +381,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         if result['returnDataset']:
             tract = result['returnDataset']['Table1'][0]['CENSUS_TRACT']
+            # TODO - use self.rename_census_tract()
             row['census_tract'] = '11001' + str(tract)
             return row
         else:
@@ -455,6 +460,7 @@ class BuildingPermitsCleaner(CleanerBase):
 
 class CensusCleaner(CleanerBase):
     def clean(self,row, row_num = None):
+        # TODO - use self.rename_census_tract()
         row['census_tract'] = ""+row['state']+row['county']+row['tract']
         #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
         row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
@@ -640,6 +646,7 @@ class ZillowCleaner(CleanerBase):
 
 class MarCleaner(CleanerBase):
     def clean(self, row, row_num=None):
+        # only add real addressed into the db, not places
         criteria = {
             'TYPE_': ['PLACE']
         }
@@ -647,4 +654,5 @@ class MarCleaner(CleanerBase):
         if not row:  # skip other cleaning steps if filtered out
             return None
         row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
+        row = self.rename_census_tract(row, column_name='CENSUS_TRACT')
         return row

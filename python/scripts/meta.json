@@ -4103,19 +4103,19 @@
         "type": "text"
       },
       {
-        "display_name": "type_",
+        "display_name": "Address type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "TYPE_",
-        "sql_name": "type_",
+        "sql_name": "address_type",
         "type": "text"
       },
       {
-        "display_name": "entrancetype",
+        "display_name": "Entrance type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "ENTRANCETYPE",
-        "sql_name": "entrancetype",
+        "sql_name": "entrance_type",
         "type": "text"
       },
       {
@@ -4211,7 +4211,7 @@
         "display_text": "",
         "required_in_source": true,
         "source_name": "NATIONALGRID",
-        "sql_name": "nationalgrid",
+        "sql_name": "national_grid",
         "type": "text"
       },
       {
@@ -4295,11 +4295,11 @@
         "type": "text"
       },
       {
-        "display_name": "vote_prcnct",
+        "display_name": "Voting precinct",
         "display_text": "",
         "required_in_source": true,
         "source_name": "VOTE_PRCNCT",
-        "sql_name": "vote_prcnct",
+        "sql_name": "vote_precinct",
         "type": "text"
       },
       {
@@ -4343,7 +4343,7 @@
         "type": "text"
       },
       {
-        "display_name": "census_block",
+        "display_name": "Census block",
         "display_text": "",
         "required_in_source": true,
         "source_name": "CENSUS_BLOCK",
@@ -4351,11 +4351,11 @@
         "type": "text"
       },
       {
-        "display_name": "census_blockgroup",
+        "display_name": "Census block group",
         "display_text": "",
         "required_in_source": true,
         "source_name": "CENSUS_BLOCKGROUP",
-        "sql_name": "census_blockgroup",
+        "sql_name": "census_block_group",
         "type": "text"
       },
       {
@@ -4399,7 +4399,7 @@
         "type": "decimal"
       },
       {
-        "display_name": "res_type",
+        "display_name": "Residential type",
         "display_text": "",
         "required_in_source": true,
         "source_name": "RES_TYPE",
