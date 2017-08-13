@@ -33,3 +33,4 @@ Werkzeug==0.12.2
 #This is only used in local dev, not production (large memory usage and only used for make_draft_json)
 # numpy==1.11.2
 # pandas==0.19.0
+# xmljson==0.1.6
