@@ -197,24 +197,69 @@ class BaseApiConn(object):
             #             '%m/%d/%Y')
         return data
 
-    def _get_nlihc_id_from_db(self, db_conn, address_id):
+    def _get_nlihc_id_from_db(self, db_conn, mar_id):
         """
         Returns a tuple nlihc_id, in_proj_table_flag pair for a given address
         id by performing a lookup on the project table in the database using
         the mar_id column.
 
-        If the address id doesn't map to an existing building in the table,
+        If there doesn't map to an existing building in the table,
         a randomly generated uuid is returned as nlihc_id.
         """
-        query = "select nlihc_id from project where mar_id = " \
-                "'{}';".format(address_id)
-        query_result = db_conn.execute(query)
-        result = [dict(x) for x in query_result.fetchall()]
+        result = None
+        if mar_id != None:
+            query = "select nlihc_id from project where mar_id = " \
+                    "'{}';".format(mar_id)
+            query_result = db_conn.execute(query)
+            result = [dict(x) for x in query_result.fetchall()]
 
         if result:
             return result[0]['nlihc_id'], True
         else:
             return str(uuid4()), False
+
+    def _check_mar_for_address(self,addr, conn):
+        '''
+        Looks for a matching address in the MAR
+        Currently just uses a 
+        '''
+
+        #Used to perform common string replacements in addresses. 
+        #The key is original, value is what we want it to become
+        #values match format typically found in the mar table
+        #Allows first-pass matching of address strings to the MAR
+            # (failed matches are then bumped up to more robust methods)
+        self.address_string_mapping = {
+            "Northeast":"NE",
+            "Northwest":"NW",
+            "Southeast":"SE",
+            "Southwest":"SW",
+            "St ":"Street ",
+            "St. ":"Street ",
+            "Pl ":"Place ",
+            "Pl. ":"Place ",
+            "Ave ":"Avenue ",
+            "Ave. ":"Avenue "
+        }
+
+        # Format addr by matching the conventions of the MAR
+        for key, value in self.address_string_mapping.items():
+            addr = addr.replace(key,value)
+
+        query = """
+                select mar_id from mar
+                where full_address ='{}'
+                """.format(addr.upper()) #MAR uses upper case in the full_address field
+                
+        query_result = conn.execute(query)
+
+        result = [dict(x) for x in query_result.fetchall()]
+
+        if result:
+            return result[0]['mar_id']
+
+        #If no match found:
+        return None
 
     def create_project_subsidy_csv(self, uid, project_fields_map,
                                    subsidy_fields_map, database_choice=None):
@@ -252,22 +297,50 @@ class BaseApiConn(object):
             # project already exists in the database, link it to the project
             # using the nlihc_id; if not, link it to the record that was added
             # to the proj_writer output file."
-            for building in source_csv_reader:
+            for source_row in source_csv_reader:
+
+                #First, perform data-source appropriate transformations to the data
+                if uid == 'dhcd_dfd_properties':
+                    addr = source_row['address__street_1']
+                    
+                    #The DHCD data often has multiple addresses separated by semicolon
+                    #  for now, let's search only for the first one
+                    try:
+                        first_semi = addr.index(';')
+                        addr = addr[0:first_semi]
+                    except ValueError:
+                        addr = addr
+
+                    #Assign these updated values to the dictionary
+                    source_row['address_single'] = addr
+                    source_row['mar_id'] = self._check_mar_for_address(addr=addr, conn=db_conn)
+                    
+
+                #Try to find the project in the database
+                col_options = {'dchousing':'ADDRESS_ID','dhcd_dfd_properties':"mar_id"}
+                addr_col = col_options[uid]
+
                 nlihc_id, in_proj_table = self._get_nlihc_id_from_db(
-                    db_conn=db_conn, address_id=building['ADDRESS_ID'])
+                            db_conn=db_conn, 
+                            mar_id=source_row[addr_col])
+                
+                #for debugging
+                if uid == 'dhcd_dfd_properties':
+                    print(source_row['mar_id'],source_row['address_single'],'\t',in_proj_table,nlihc_id)
+                
 
                 if not in_proj_table:
                     data = self._map_data_for_row(nlihc_id=nlihc_id,
                                                   fields=PROJ_FIELDS,
                                                   fields_map=project_fields_map,
-                                                  line=building)
+                                                  line=source_row)
                     proj_writer.writerow(data)
 
                 # add all to subsidy table
                 data = self._map_data_for_row(nlihc_id=nlihc_id,
                                               fields=SUBSIDY_FIELDS,
                                               fields_map=subsidy_fields_map,
-                                              line=building)
+                                              line=source_row)
                 subsidy_writer.writerow(data)
 
 

@@ -29,7 +29,10 @@ from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         APP_METADATA_FIELDS, \
                                                         TABLE_METADATA_FIELDS, \
-                                                        DhcdResult
+                                                        DhcdResult, \
+                                                        PROJECT_FIELDS_MAP,\
+                                                        SUBSIDY_FIELDS_MAP
+
 INCLUDE_ALL_FIELDS = True
 
 
@@ -290,6 +293,7 @@ class DhcdApiConn(BaseApiConn):
 
         """
         data_json = None
+        db = kwargs.get('db', None)
 
         if unique_data_ids is None:
             unique_data_ids = self._available_unique_data_ids
@@ -317,9 +321,10 @@ class DhcdApiConn(BaseApiConn):
                     results = [ DhcdResult({e.tag: e.text for e in list(r)}, self._fields[u]).data for r in data_xml_records ]
 
                     self.result_to_csv(self._fields[u], results, self.output_paths[u])
+                    
+                    self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, db)
 
-        # Return last result data set as JSON object
-        return data_json
+
 
 
 # For testing purposes (running this as a script):
