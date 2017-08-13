@@ -17,6 +17,7 @@ import os
 import logging
 
 class BaseApiConn(object):
+
     """
     Base API Connection to inherit from. Proxy support built in.
 
@@ -166,6 +167,26 @@ class BaseApiConn(object):
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(data)
 
+    
+#import moved here since misctools needs BaseApiConn
+from housinginsights.tools import misc as misctools
+
+class ProjectBaseApiConn(BaseApiConn):
+    '''
+    Adds additional methods needed for anything that deals with the project
+    table, e.g. the DCHousingApiConn and the DhcdApiConn. Provides
+    methods for splitting downloaded data into necessary 'projects'
+    and 'subsidy' files. 
+
+    Separated from the base class to avoid circular inheritance with 
+    the MarApiConn that we use for entity resolution. 
+
+    TODO could also make this a cleaning step instead of a download
+    data step? But this would require refactor due to creation of
+    two files from one, while ingestion process is set up with the 
+    concept of one file = one table.
+    '''
+
     def _map_data_for_row(self, nlihc_id, fields, fields_map, line):
         """
         Returns a dictionary that represents the values in line mapped to
@@ -217,49 +238,6 @@ class BaseApiConn(object):
             return result[0]['nlihc_id'], True
         else:
             return str(uuid4()), False
-
-    def _check_mar_for_address(self,addr, conn):
-        '''
-        Looks for a matching address in the MAR
-        Currently just uses a 
-        '''
-
-        #Used to perform common string replacements in addresses. 
-        #The key is original, value is what we want it to become
-        #values match format typically found in the mar table
-        #Allows first-pass matching of address strings to the MAR
-            # (failed matches are then bumped up to more robust methods)
-        self.address_string_mapping = {
-            "Northeast":"NE",
-            "Northwest":"NW",
-            "Southeast":"SE",
-            "Southwest":"SW",
-            "St ":"Street ",
-            "St. ":"Street ",
-            "Pl ":"Place ",
-            "Pl. ":"Place ",
-            "Ave ":"Avenue ",
-            "Ave. ":"Avenue "
-        }
-
-        # Format addr by matching the conventions of the MAR
-        for key, value in self.address_string_mapping.items():
-            addr = addr.replace(key,value)
-
-        query = """
-                select mar_id from mar
-                where full_address ='{}'
-                """.format(addr.upper()) #MAR uses upper case in the full_address field
-                
-        query_result = conn.execute(query)
-
-        result = [dict(x) for x in query_result.fetchall()]
-
-        if result:
-            return result[0]['mar_id']
-
-        #If no match found:
-        return None
 
     def create_project_subsidy_csv(self, uid, project_fields_map,
                                    subsidy_fields_map, database_choice=None):
@@ -313,7 +291,7 @@ class BaseApiConn(object):
 
                     #Assign these updated values to the dictionary
                     source_row['address_single'] = addr
-                    source_row['mar_id'] = self._check_mar_for_address(addr=addr, conn=db_conn)
+                    source_row['mar_id'] = misctools.check_mar_for_address(addr=addr, conn=db_conn)
                     
 
                 #Try to find the project in the database

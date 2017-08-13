@@ -25,7 +25,7 @@ from xmljson import parker as xml_to_json
 import json
 
 
-from housinginsights.sources.base import BaseApiConn
+from housinginsights.sources.base import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         APP_METADATA_FIELDS, \
                                                         TABLE_METADATA_FIELDS, \
@@ -36,7 +36,7 @@ from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
 INCLUDE_ALL_FIELDS = True
 
 
-class DhcdApiConn(BaseApiConn):
+class DhcdApiConn(ProjectBaseApiConn):
     """
     API Interface to the DHCD DFD data on projects
     pending funding and development.

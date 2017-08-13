@@ -13,7 +13,7 @@ from housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
     SUBSIDY_FIELDS_MAP
 
 
-class DCHousingApiConn(BaseApiConn):
+class DCHousingApiConn(ProjectBaseApiConn):
     """
     API Interface to the Affordable Housing data set on opendata.dc.gov.
 
