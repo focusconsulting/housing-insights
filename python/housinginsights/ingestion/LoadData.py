@@ -22,6 +22,10 @@ import os
 import logging
 import argparse
 import json
+import concurrent.futures
+from time import time, sleep
+from requests.packages.urllib3.exceptions import NewConnectionError
+from requests.packages.urllib3.exceptions import MaxRetryError
 
 from sqlalchemy import Table, Column, Integer, String, MetaData, Numeric
 from datetime import datetime
@@ -946,13 +950,39 @@ class LoadData(object):
         # if it doesn't have a 'loaded' status in the database manifest
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
+            start_time = time()
             meta_only_fields = self._get_meta_only_fields(
                 table_name=table_name, data_fields=csv_reader.keys)
+            # TODO - concurrency can be handled here: row at a time
+            # TODO - while cleaning one row, start cleaning the next
+            # TODO - once cleaning is done, write row to psv file
+            # TODO - consider using queue: once empty update db with psv data
             for idx, data_row in enumerate(csv_reader):
                 data_row.update(meta_only_fields)  # insert other field dict
                 clean_data_row = cleaner.clean(data_row, idx)
                 if clean_data_row is not None:
                     csv_writer.write(clean_data_row)
+
+            # with concurrent.futures.ThreadPoolExecutor(
+            #         max_workers=100) as executor:
+            #     future_data = {executor.submit(
+            #         self._clean_data, idx, data_row, cleaner, table_name,
+            #         csv_reader.keys): (
+            #         idx, data_row) for idx, data_row in enumerate(csv_reader)}
+            #     for future in concurrent.futures.as_completed(future_data):
+            #         clean_data_row = future.result()
+            #         if clean_data_row is not None:
+            #             csv_writer.write(clean_data_row)
+            #
+            #     csv_writer.close()
+            #
+            #     # write the data to the database
+            #     self._update_database(sql_interface=sql_interface)
+            #
+            #     if not self._keep_temp_files:
+            #         csv_writer.remove_file()
+            #     end_time = time()
+            #     print("\nRun time= %s" % (end_time - start_time))
 
             csv_writer.close()
 
@@ -961,6 +991,40 @@ class LoadData(object):
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
+            end_time = time()
+            print("\nRun time= %s" % (end_time - start_time))
+
+    def _clean_data(self, idx, data_row, cleaner, table_name, data_fields):
+        """
+        Helper function that actually does the cleaning processing of each
+        row in the raw data file. To improve performance, each row is
+        processess currently by n number of threads determined in
+        _load_single_file method.
+
+        :param idx: the index of the data row
+        :param data_row: the data row to be processed
+        :param cleaner: an object representing the cleaner class to be used
+        :param table_name: the name of the table the data should go in
+        :param data_fields: the column headers required in the database
+        :return: the processed clean data row
+        """
+        if data_row is None:  # skip empty rows
+            return None
+
+        meta_only_fields = self._get_meta_only_fields(
+            table_name=table_name, data_fields=data_fields)
+        data_row.update(meta_only_fields)  # insert other field dict keys
+
+        # handle connection timeouts by pausing then trying again
+        while True:
+            try:
+                clean_data_row = cleaner.clean(data_row, idx)
+                break
+            except Exception:
+                logging.warning("_clean_data(): %s" % data_row)
+                sleep(1)
+
+        return clean_data_row
 
     def _update_database(self, sql_interface):
         """
