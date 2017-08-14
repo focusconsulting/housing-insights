@@ -289,7 +289,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         ward = row['Ward2012']
         neighbor_cluster = row['Cluster_tr2000']
         neighborhood_cluster_desc = row['Cluster_tr2000_name']
-        zipcode = row['Proj_Zip']
+        zipcode = row['Proj_zip']
         anc = row['Anc2012']
         census_tract = row['Geo2010']
         status = row['Status']
@@ -324,7 +324,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         if zipcode == self.null_value:
             zip_code = result['ZIPCODE']
-            row['Proj_Zip'] = zip_code
+            row['Proj_zip'] = zip_code
             row['Zip'] = 'ZIP ' + str(zip_code)
 
         if anc == self.null_value:
@@ -425,7 +425,7 @@ class ProjectCleaner(CleanerBase):
         row = self.add_geocode_from_mar(row=row)
         row = self.rename_ward(row, ward_key='Ward2012')
         row = self.rename_status(row)
-        row = self.rename_census_tract(row, row_num, column_name='Geo2010')
+        row = self.rename_census_tract(row, column_name='Geo2010')
         return row
 
 

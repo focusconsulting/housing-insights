@@ -25,7 +25,7 @@ from xmljson import parker as xml_to_json
 import json
 
 
-from housinginsights.sources.base import ProjectBaseApiConn
+from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         APP_METADATA_FIELDS, \
                                                         TABLE_METADATA_FIELDS, \

@@ -6,7 +6,7 @@ web site.
 from pprint import pprint
 import logging
 
-from housinginsights.sources.base import BaseApiConn
+from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.DCHousing import FIELDS,\
     DCHousingResult
 from housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
