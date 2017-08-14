@@ -155,6 +155,7 @@ class ProjectBaseApiConn(BaseApiConn):
                     print(source_row['mar_id'],source_row['address_single'],'\t',in_proj_table,nlihc_id)
                 
 
+                #Add values to the project table output file if necessary
                 if not in_proj_table:
                     data = self._map_data_for_row(nlihc_id=nlihc_id,
                                                   fields=PROJ_FIELDS,
@@ -167,7 +168,23 @@ class ProjectBaseApiConn(BaseApiConn):
                                               fields=SUBSIDY_FIELDS,
                                               fields_map=subsidy_fields_map,
                                               line=source_row)
+                data = self._add_calculated_subsidy_data(uid,data)
                 subsidy_writer.writerow(data)
+
+    def _add_calculated_subsidy_data(self, uid,data):
+        '''
+        Fields that are not directly mapped from their source need to be
+        calculated before adding them to the output data. 
+        '''
+
+        if uid == 'dhcd_dfd_properties':
+            data['Program'] = 'DHCD Quickbase - Unknown'
+            data['Portfolio'] = 'DHCD Quickbase - Funding Status Unknown' #Need to get the 'project' table of quickbase working to determine this better
+
+        if uid == 'dchousing':
+            data['Portfolio'] = 'DC Government - Unknown' #Not enough info in the source data currently to differentiate. 'Program' has a little more info.
+
+        return data
 
 
 class BaseApiManager(object):
