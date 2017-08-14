@@ -256,7 +256,15 @@ class CleanerBase(object, metaclass=ABCMeta):
             except ValueError:
                 result = None
 
-        if result is not None:
+        #Handle case of mar_api returning something but it not being an address
+        if (result == None or 
+            result['returnDataset'] == None or 
+            result['returnDataset'] == {} or
+            result['sourceOperation'] == 'DC Intersection'):
+            
+            result = None
+
+        if result:
             row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
 
         return row
@@ -344,19 +352,23 @@ class CleanerBase(object, metaclass=ABCMeta):
             if street_view_url is not None:
                 row['Proj_streetview_url'] = street_view_url
             else:
-                map_api = GoogleMapsApiConn()
-                map_api_result = map_api.check_street_view(row['Proj_lat'],
-                                                   row['Proj_lon'])
+                # TODO - should be able to search for lat/lon from the 
+                #   address if they are not available here
+                #print(row)
+                if (row['Proj_lat'] != self.null_value and row['Proj_lon'] != self.null_value):
+                    map_api = GoogleMapsApiConn()
+                    map_api_result = map_api.check_street_view(row['Proj_lat'],
+                                                       row['Proj_lon'])
 
-                if map_api_result:
-                    # create street view url per google maps api specs
-                    loc_data = map_api_result['Location']
-                    latitude = loc_data['original_lat']
-                    longitude = loc_data['original_lng']
-                    pano_id = loc_data['panoId']
-                    url = map_api.get_street_view_url(latitude, longitude,
-                                                      pano_id)
-                    row['Proj_streetview_url'] = url
+                    if map_api_result:
+                        # create street view url per google maps api specs
+                        loc_data = map_api_result['Location']
+                        latitude = loc_data['original_lat']
+                        longitude = loc_data['original_lng']
+                        pano_id = loc_data['panoId']
+                        url = map_api.get_street_view_url(latitude, longitude,
+                                                          pano_id)
+                        row['Proj_streetview_url'] = url
 
         if image_url == self.null_value:
             img_url = result['IMAGEURL']

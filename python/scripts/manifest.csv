@@ -2,8 +2,10 @@ include_flag,destination_table,unique_data_id,update_method,data_date,encoding,l
 use,mar,mar,api,2017-08-12,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170812/mar.csv,BUILD FIRST - other tables depend on it
 use,project,prescat_project,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170724/Project.csv,
 use,subsidy,prescat_subsidy,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170724/Subsidy.csv,
-use,project,dchousing_project,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dchousing_project.csv,append to 20170315/project.csv
-use,subsidy,dchousing_subsidy,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dchousing_subsidy.csv,append to 20170315/Subsidy.csv
+use,project,dchousing_project,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dchousing_project.csv,
+use,subsidy,dchousing_subsidy,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dchousing_subsidy.csv,
+use,project,dhcd_dfd_properties_project,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dhcd_dfd_properties_project.csv,
+use,subsidy,dhcd_dfd_properties_subsidy,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dhcd_dfd_properties_subsidy.csv,
 skip,building_permits,building_permits_2013,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170606/building_permits_2013.csv,
 skip,building_permits,building_permits_2014,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170606/building_permits_2014.csv,
 skip,building_permits,building_permits_2015,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170606/building_permits_2015.csv,
