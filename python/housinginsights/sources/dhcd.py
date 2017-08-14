@@ -58,7 +58,8 @@ class DhcdApiConn(ProjectBaseApiConn):
         super().__init__(DhcdApiConn.BASEURL)
 
         # unique_data_id format: 'dhcd_dfd_' + <lowercase_table_name>
-        self._available_unique_data_ids = [ 'dhcd_dfd_projects', 'dhcd_dfd_properties' #,
+        self._available_unique_data_ids = [ 'dhcd_dfd_projects', 
+                                            'dhcd_dfd_properties' #,
 #                                            'dhcd_dfd_units', 'dhcd_dfd_loans', 'dhcd_dfd_modifications',
 #                                            'dhcd_dfd_lihtc_allocations', 'dhcd_dfd_construction_activity',
 #                                            'dhcd_dfd_funding_sources', 'dhcd_dfd_8609s', 'dhcd_dfd_8610s',
@@ -97,6 +98,8 @@ class DhcdApiConn(ProjectBaseApiConn):
                             }
         self._urls = { unique_data_id: '/' + TABLE_ID_MAPPING[self._table_names[unique_data_id]] \
                         for unique_data_id in self._available_unique_data_ids }
+        print("self._urls:")
+        print(self._urls)
 
         identifier_unallowed_chars = string.punctuation + string.whitespace
         replacement_underscores = ''.join('_' * len(identifier_unallowed_chars))
@@ -322,7 +325,9 @@ class DhcdApiConn(ProjectBaseApiConn):
 
                     self.result_to_csv(self._fields[u], results, self.output_paths[u])
                     
-                    self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, db)
+                    #Convert to format expected by database
+                    if u == 'dhcd_dfd_properties':
+                        self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, db)
 
 
 
