@@ -7,8 +7,10 @@ if __name__ == '__main__':
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir)))
 
 
-import logging
 from housinginsights.sources.base import BaseApiConn
+from housinginsights.tools.logger import HILogger
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class CensusApiConn(BaseApiConn):
     """
@@ -90,16 +92,17 @@ class CensusApiConn(BaseApiConn):
         for u in unique_data_ids:
             if (u not in self._available_unique_data_ids):
                 #TODO Change this error type to a more specific one that should be handled by calling function inproduction
-                #We will want the calling function to continue with other data sources instead of erroring out. 
-                logging.info("  The unique_data_id '{}' is not supported by the CensusApiConn".format(u))
+                #We will want the calling function to continue with other data sources instead of erroring out.
+                logger.info("  The unique_data_id '%s' is not supported by the CensusApiConn", u)
             else:
                 result = self.get(self._urls[u], params={'key':self.census_api_key, 'get':self._fields[u], 'for': 'tract:*', 'in': 'state:11'})
-                
+
                 if result.status_code != 200:
-                    err = "An error occurred during request: status {0}"
+                    err = "An error occurred during request: status {0}".format(result.status_code)
+                    logger.error(err)
                     #TODO change this error type to be handleable by caller
-                    raise Exception(err.format(result.status_code))
-                
+                    raise Exception(err)
+
                 content = result.text
 
                 if output_type == 'stdout':
@@ -108,20 +111,17 @@ class CensusApiConn(BaseApiConn):
                 elif output_type == 'csv':
                     jsondata=json.loads(content)
                     self.result_to_csv(jsondata[0], jsondata[1:],  self.output_paths[u])
-                
+
                 #Can't yield content if we get multiple sources at once
                 if len(unique_data_ids) == 1:
                     return content
 
 
-
+                
 if __name__ == '__main__':
-    
-    # Pushes everything from the logger to the command line output as well.
-    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir,"logs","sources.log"))
-    logging.basicConfig(filename=log_path, level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
 
+    # Pushes everything from the logger to the command line output as well.
+    
     api_conn = CensusApiConn()
     unique_data_ids = None 
     api_conn.get_data(unique_data_ids)
