@@ -243,9 +243,15 @@ class CleanerBase(object, metaclass=ABCMeta):
         if lat != self.null_value and lon != self.null_value:
             result = mar_api.reverse_lat_lng_geocode(latitude=lat,
                                                      longitude=lon)
+            if result:
+                row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
         elif x_coord != self.null_value and y_coord != self.null_value:
             result = mar_api.reverse_geocode(xcoord=x_coord,
                                              ycoord=y_coord)
+            if result:
+                row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
         elif address != self.null_value:
             # check whether address is valid - it has street number
             try:
@@ -256,16 +262,15 @@ class CleanerBase(object, metaclass=ABCMeta):
             except ValueError:
                 result = None
 
-        #Handle case of mar_api returning something but it not being an address
-        if (result == None or 
-            result['returnDataset'] == None or 
-            result['returnDataset'] == {} or
-            result['sourceOperation'] == 'DC Intersection'):
-            
-            result = None
+            #Handle case of mar_api returning something but it not being an address
+            if (result['returnDataset'] == None or 
+                result['returnDataset'] == {} or
+                result['sourceOperation'] == 'DC Intersection'):
+                
+                result = None
 
-        if result:
-            row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+            if result:
+                row['mar_id'] = result['returnDataset']['Table1'][0]["ADDRESS_ID"]
 
         return row
 
