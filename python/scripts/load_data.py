@@ -41,6 +41,10 @@ parser.add_argument('-s', '--sample', help='load with sample data',
 parser.add_argument('--update-only', nargs='+',
                     help='only update tables with these unique_data_id '
                          'values')
+parser.add_argument('--remove-tables', nargs='+',
+                    help='Drops tables before running the load data code. '
+                    ' Add the name of each table to drop in format "table1 table2"')
+
 parser.add_argument('--manual', help='Ignore all other arguments and use'
                     'what is hard coded here, for debugging/testing purposes',
                     action='store_true')
@@ -73,4 +77,5 @@ if arguments.manual:
 #typically we use the approach that is coded into LoadData.py
 else:
     # Let the main method handle it
+    print(arguments)
     main(arguments)
