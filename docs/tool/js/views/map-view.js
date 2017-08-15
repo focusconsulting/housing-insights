@@ -930,15 +930,10 @@
                 var shrinkCircles = setTimeout(function(){
                     mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);                     
                 },300);
-             /*   var exitColor = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-exit','circle-color', '#767676');
-                    mapView.map.setPaintProperty('project-exit','circle-stroke-color', '#767676');                                           
-                },500);*/
-               /* setTimeout(function(){
-                    mapView.map.setFilter('project-exit', ['==','klass','doesnotexist']); // sets filter to nonexistant klass to clear the layer
-                    mapView.map.setPaintProperty('project-exit','circle-opacity', 1); // put the empty exit layer back to opacity 1, read for next filtering
-
-                },1000); */
+                mapView.map.setPaintProperty('project-exit','circle-stroke-width', 6);                
+                var expandCircles = setTimeout(function(){
+                    mapView.map.setPaintProperty('project-exit','circle-stroke-width', 2);                     
+                },300);
             },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
                     // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
                     // would be nicer with a callback, but I don't htink that's available -JO
