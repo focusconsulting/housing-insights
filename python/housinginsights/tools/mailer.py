@@ -36,6 +36,7 @@ class HIMailer:
         if self.debug_mode:
             outer['To'] = self.debug_recipient
         else:
+            self.recipients.append(self.admin_email)
             outer['To'] = COMMASPACE.join(self.recipients)
             outer['CC'] = COMMASPACE.join(self.cc_recipients)
 
@@ -67,7 +68,6 @@ class HIMailer:
         else:
             all_recipients = set(self.recipients + self.cc_recipients)
             all_recipients = list(filter(None, all_recipients))
-            all_recipients.append(self.admin_email)
 
         try:
             with smtplib.SMTP(host=self.host, port='587') as s:
