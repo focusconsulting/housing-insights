@@ -807,13 +807,13 @@ var filterView = {
         var c = this.component;
 
         var contentContainer = filterView.setupFilter(c);
-
+        
         var uiSelector = contentContainer.append("select")
             .classed("ui fluid search dropdown",true)
             .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
             .attr("multiple", " ")
             .attr("id", c.source);
-
+    
         //Add the dropdown menu choices
         for(var j = 0; j < c.options.length; j++){
             uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
@@ -830,6 +830,11 @@ var filterView = {
             setState(specific_state_code,selectedValues);
         }};
         var currentSelectCallback = makeSelectCallback(c)
+
+        // Add the search box placeholder text
+        var searchBox = contentContainer.select('input')
+            .attr('placeholder', "Type here to search.")
+            .style('width', '100%');
         
         //TODO change this to a click event instead of any change
         $(".dropdown-"+c.source).change(currentSelectCallback);
