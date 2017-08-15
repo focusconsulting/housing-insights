@@ -260,17 +260,21 @@ class CleanerBase(object, metaclass=ABCMeta):
                 first_address = address.split(';')[0]
                 result = mar_api.find_location(first_address)
             except ValueError:
+                logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None
 
-            #Handle case of mar_api returning something but it not being an address
-            if (result['returnDataset'] == None or 
-                result['returnDataset'] == {} or
-                result['sourceOperation'] == 'DC Intersection'):
-                
-                result = None
-
+            print(result);
+            
             if result:
-                row['mar_id'] = result['returnDataset']['Table1'][0]["ADDRESS_ID"]
+                #Handle case of mar_api returning something but it not being an address
+                if (result['returnDataset'] == None or 
+                    result['returnDataset'] == {} or
+                    result['sourceOperation'] == 'DC Intersection'):
+                
+                    result = None
+
+                if result:
+                    row['mar_id'] = result['returnDataset']['Table1'][0]["ADDRESS_ID"]
 
         return row
 
