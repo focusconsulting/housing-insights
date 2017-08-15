@@ -477,7 +477,7 @@ var filterView = {
 
         this.isTouched = function(){
             var returnVals = ths.textBoxes.returnValues();
-            return returnVals.min.min !== this.minDatum || returnVals.max.max !== this.maxDatum || this.nullsShown === false;
+            return returnVals.min.min != this.minDatum || returnVals.max.max != this.maxDatum || this.nullsShown === false;
         };
 
         this.set = function(min,max,nullValue){
@@ -693,7 +693,7 @@ var filterView = {
 
         this.isTouched = function(){
             var dateValues = getValuesAsDates();
-            return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
+            return dateValues.min.valueOf() !== minDatum.valueOf() || dateValues.max.valueOf() !== maxDatum.valueOf() || this.nullsShown === false;
         }
 
         this.checkAgainstOriginalValues = function(min,max,showNulls){
