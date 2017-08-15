@@ -6,14 +6,14 @@ web site.
 from pprint import pprint
 import logging
 
-from housinginsights.sources.base import BaseApiConn
+from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.DCHousing import FIELDS,\
     DCHousingResult
 from housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
     SUBSIDY_FIELDS_MAP
 
 
-class DCHousingApiConn(BaseApiConn):
+class DCHousingApiConn(ProjectBaseApiConn):
     """
     API Interface to the Affordable Housing data set on opendata.dc.gov.
 
@@ -38,8 +38,6 @@ class DCHousingApiConn(BaseApiConn):
     def get_data(self, unique_data_ids=None, sample=False, output_type='csv',
                  **kwargs):
         """
-        Returns JSON object of the entire data set.
-
         """
         if unique_data_ids is None:
             unique_data_ids = self._available_unique_data_ids
@@ -68,3 +66,8 @@ class DCHousingApiConn(BaseApiConn):
                         self._available_unique_data_ids[0], PROJECT_FIELDS_MAP,
                         SUBSIDY_FIELDS_MAP, db)
 
+
+if __name__ == '__main__':
+    
+    apiConn = DCHousingApiConn()
+    apiConn.create_project_subsidy_csv()

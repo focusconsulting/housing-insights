@@ -2104,7 +2104,7 @@
         "display_name": "Zip Code",
         "display_text": "",
         "required_in_source": true,
-        "source_name": "Proj_Zip",
+        "source_name": "Proj_zip",
         "sql_name": "zip",
         "type": "text"
       },
@@ -2333,6 +2333,30 @@
         "type": "integer"
       },
       {
+        "display_name": "Project year built (original)",
+        "display_text": "This is the original year built for the earliest part of structure – it should not change over time",
+        "required_in_source": true,
+        "source_name": "Proj_ayb",
+        "sql_name": "proj_ayb",
+        "type": "integer"
+      },
+      {
+        "display_name": "Project year built (improvements)",
+        "display_text": "This is the year for the latest building improvements made",
+        "required_in_source": true,
+        "source_name": "Proj_eyb",
+        "sql_name": "proj_eyb",
+        "type": "integer"
+      },
+      {
+        "display_name": "Project owner type (majority of parcels)",
+        "display_text": "Type of ownership, from the Preservation Catalog",
+        "required_in_source": true,
+        "source_name": "Proj_owner_type",
+        "sql_name": "proj_owner_type",
+        "type": "text"
+      },
+      {
         "_comment": "TODO This needs to be parsed and converted to date format (need to write appropriate parser)",
         "display_name": "Update Dtm",
         "display_text": "",
@@ -2421,6 +2445,32 @@
         "sql_name": "most_recent_reac_score_id",
         "type": "text"
       }, 
+      {
+        "display_name": "In Preservation Catalog",
+        "display_text": "Whether the project is included in the Preservation Catalog data set",
+        "required_in_source": false,
+        "source_name": "in_prescat",
+        "sql_name": "in_prescat",
+        "type": "text"
+      }, 
+      {
+        "display_name": "In opendata.dc.gov",
+        "display_text": "Whether the project is included in the Affordable Housing data set published by opendata.dc.gov",
+        "required_in_source": false,
+        "source_name": "in_dchousing",
+        "sql_name": "in_dchousing",
+        "type": "text"
+      }, 
+      {
+        "display_name": "In DHCD Quickbase",
+        "display_text": "Whether the project is included in the Quickbase database maintained by the DC Department of Housing and Community Development",
+        "required_in_source": false,
+        "source_name": "in_dhcd",
+        "sql_name": "in_dhcd",
+        "type": "text"
+      }, 
+
+
       {
         "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",

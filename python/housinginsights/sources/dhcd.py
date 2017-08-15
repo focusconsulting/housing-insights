@@ -25,15 +25,18 @@ from xmljson import parker as xml_to_json
 import json
 
 
-from housinginsights.sources.base import BaseApiConn
+from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         APP_METADATA_FIELDS, \
                                                         TABLE_METADATA_FIELDS, \
-                                                        DhcdResult
+                                                        DhcdResult, \
+                                                        PROJECT_FIELDS_MAP,\
+                                                        SUBSIDY_FIELDS_MAP
+
 INCLUDE_ALL_FIELDS = True
 
 
-class DhcdApiConn(BaseApiConn):
+class DhcdApiConn(ProjectBaseApiConn):
     """
     API Interface to the DHCD DFD data on projects
     pending funding and development.
@@ -55,7 +58,8 @@ class DhcdApiConn(BaseApiConn):
         super().__init__(DhcdApiConn.BASEURL)
 
         # unique_data_id format: 'dhcd_dfd_' + <lowercase_table_name>
-        self._available_unique_data_ids = [ 'dhcd_dfd_projects', 'dhcd_dfd_properties' #,
+        self._available_unique_data_ids = [ 'dhcd_dfd_projects', 
+                                            'dhcd_dfd_properties' #,
 #                                            'dhcd_dfd_units', 'dhcd_dfd_loans', 'dhcd_dfd_modifications',
 #                                            'dhcd_dfd_lihtc_allocations', 'dhcd_dfd_construction_activity',
 #                                            'dhcd_dfd_funding_sources', 'dhcd_dfd_8609s', 'dhcd_dfd_8610s',
@@ -94,6 +98,8 @@ class DhcdApiConn(BaseApiConn):
                             }
         self._urls = { unique_data_id: '/' + TABLE_ID_MAPPING[self._table_names[unique_data_id]] \
                         for unique_data_id in self._available_unique_data_ids }
+        print("self._urls:")
+        print(self._urls)
 
         identifier_unallowed_chars = string.punctuation + string.whitespace
         replacement_underscores = ''.join('_' * len(identifier_unallowed_chars))
@@ -290,6 +296,7 @@ class DhcdApiConn(BaseApiConn):
 
         """
         data_json = None
+        db = kwargs.get('db', None)
 
         if unique_data_ids is None:
             unique_data_ids = self._available_unique_data_ids
@@ -317,9 +324,12 @@ class DhcdApiConn(BaseApiConn):
                     results = [ DhcdResult({e.tag: e.text for e in list(r)}, self._fields[u]).data for r in data_xml_records ]
 
                     self.result_to_csv(self._fields[u], results, self.output_paths[u])
+                    
+                    #Convert to format expected by database
+                    if u == 'dhcd_dfd_properties':
+                        self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, db)
 
-        # Return last result data set as JSON object
-        return data_json
+
 
 
 # For testing purposes (running this as a script):

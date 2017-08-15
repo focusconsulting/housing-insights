@@ -243,9 +243,15 @@ class CleanerBase(object, metaclass=ABCMeta):
         if lat != self.null_value and lon != self.null_value:
             result = mar_api.reverse_lat_lng_geocode(latitude=lat,
                                                      longitude=lon)
+            if result:
+                row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
         elif x_coord != self.null_value and y_coord != self.null_value:
             result = mar_api.reverse_geocode(xcoord=x_coord,
                                              ycoord=y_coord)
+            if result:
+                row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
         elif address != self.null_value:
             # check whether address is valid - it has street number
             try:
@@ -254,10 +260,21 @@ class CleanerBase(object, metaclass=ABCMeta):
                 first_address = address.split(';')[0]
                 result = mar_api.find_location(first_address)
             except ValueError:
+                logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None
 
-        if result is not None:
-            row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+            print(result);
+            
+            if result:
+                #Handle case of mar_api returning something but it not being an address
+                if (result['returnDataset'] == None or 
+                    result['returnDataset'] == {} or
+                    result['sourceOperation'] == 'DC Intersection'):
+                
+                    result = None
+
+                if result:
+                    row['mar_id'] = result['returnDataset']['Table1'][0]["ADDRESS_ID"]
 
         return row
 
@@ -289,7 +306,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         ward = row['Ward2012']
         neighbor_cluster = row['Cluster_tr2000']
         neighborhood_cluster_desc = row['Cluster_tr2000_name']
-        zipcode = row['Proj_Zip']
+        zipcode = row['Proj_zip']
         anc = row['Anc2012']
         census_tract = row['Geo2010']
         status = row['Status']
@@ -324,7 +341,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         if zipcode == self.null_value:
             zip_code = result['ZIPCODE']
-            row['Proj_Zip'] = zip_code
+            row['Proj_zip'] = zip_code
             row['Zip'] = 'ZIP ' + str(zip_code)
 
         if anc == self.null_value:
@@ -344,19 +361,23 @@ class CleanerBase(object, metaclass=ABCMeta):
             if street_view_url is not None:
                 row['Proj_streetview_url'] = street_view_url
             else:
-                map_api = GoogleMapsApiConn()
-                map_api_result = map_api.check_street_view(row['Proj_lat'],
-                                                   row['Proj_lon'])
+                # TODO - should be able to search for lat/lon from the 
+                #   address if they are not available here
+                #print(row)
+                if (row['Proj_lat'] != self.null_value and row['Proj_lon'] != self.null_value):
+                    map_api = GoogleMapsApiConn()
+                    map_api_result = map_api.check_street_view(row['Proj_lat'],
+                                                       row['Proj_lon'])
 
-                if map_api_result:
-                    # create street view url per google maps api specs
-                    loc_data = map_api_result['Location']
-                    latitude = loc_data['original_lat']
-                    longitude = loc_data['original_lng']
-                    pano_id = loc_data['panoId']
-                    url = map_api.get_street_view_url(latitude, longitude,
-                                                      pano_id)
-                    row['Proj_streetview_url'] = url
+                    if map_api_result:
+                        # create street view url per google maps api specs
+                        loc_data = map_api_result['Location']
+                        latitude = loc_data['original_lat']
+                        longitude = loc_data['original_lng']
+                        pano_id = loc_data['panoId']
+                        url = map_api.get_street_view_url(latitude, longitude,
+                                                          pano_id)
+                        row['Proj_streetview_url'] = url
 
         if image_url == self.null_value:
             img_url = result['IMAGEURL']
@@ -425,7 +446,7 @@ class ProjectCleaner(CleanerBase):
         row = self.add_geocode_from_mar(row=row)
         row = self.rename_ward(row, ward_key='Ward2012')
         row = self.rename_status(row)
-        row = self.rename_census_tract(row, row_num, column_name='Geo2010')
+        row = self.rename_census_tract(row, column_name='Geo2010')
         return row
 
 

@@ -71,6 +71,80 @@ TABLE_METADATA_FIELDS = [
 ]
 
 
+SUBSIDY_FIELDS_MAP = {'Nlihc_id': None, 
+                        'Subsidy_id': None,
+                        'Units_Assist': 'units__total_number_of_affordable_units',
+                        'POA_start': None, 
+                        'POA_end': None,
+                        'contract_number': None, 
+                        'rent_to_fmr_description': None,
+                        'Subsidy_Active': None, 
+                        'Subsidy_Info_Source_ID': None,
+                        'Subsidy_Info_Source': None,
+                        'Subsidy_Info_Source_Date': None, 
+                        'Update_Dtm': None,
+                        'Program': None, 
+                        'Compl_end': None, 
+                        'POA_end_prev': None,
+                        'Agency': None, 
+                        'POA_start_orig': None, 
+                        'Portfolio': None,
+                        'Subsidy_info_source_property': None,
+                        'POA_end_actual': None
+                      }
+
+PROJECT_FIELDS_MAP = {  'Nlihc_id': None,
+                        'Status': None, 
+                        'Subsidized': None,
+                        'Cat_Expiring': None,
+                        'Cat_Failing_Insp': None,
+                        'Proj_Name': 'property_name', 
+                        'Proj_City': None,
+                        'Proj_ST': None, 
+                        'Proj_zip': None, 
+                        'Proj_Units_Tot': None,
+                        'Proj_Units_Assist_Min': "units__total_number_of_affordable_units",
+                        'Proj_Units_Assist_Max': "units__total_number_of_affordable_units",
+                        'Hud_Own_Effect_dt': None, 
+                        'Hud_Own_Name': None,
+                        'Hud_Own_Type': None, 
+                        'Hud_Mgr_Name': None,
+                        'Hud_Mgr_Type': None, 
+                        'Subsidy_Start_First': None,
+                        'Subsidy_Start_Last': None, 
+                        'Subsidy_End_First': None,
+                        'Subsidy_End_Last': None, 
+                        'Ward2012': None,
+                        'PBCA': None, 
+                        'Anc2012': None, 
+                        'Psa2012': None,
+                        'Geo2010': None, 
+                        'Cluster_tr2000': None,
+                        'Cluster_tr2000_name': None, 
+                        'Zip': None,
+                        'Proj_image_url': None, 
+                        'Proj_streetview_url': None,
+                        'Proj_address_id': 'mar_id', #calculated during create_project_subsidy_csv
+                        'Proj_x': None,
+                        'Proj_y': None, 
+                        'Proj_lat': None,
+                        'Proj_lon': None,
+                        'Update_Dtm': None, #date_modified but wrong format
+                        'Subsidy_info_source_property': None,
+                        'contract_number': None, 
+                        'Proj_addre': 'address_single', #calculated during create_project_subsidy_csv
+                        'Proj_ayb': None,
+                        'Proj_eyb': None,
+                        'Proj_owner_type':None,
+                        'Bldg_count': None, 
+                        'Category_Code': None,
+                        'Cat_At_Risk': None, 
+                        'Cat_More_Info': None,
+                        'Cat_Lost': None, 
+                        'Cat_Replaced': None
+                        }
+
+
 class DhcdResult(object):
 
     def __init__(self, result, fields):
