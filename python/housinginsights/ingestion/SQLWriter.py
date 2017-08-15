@@ -87,20 +87,19 @@ class HISql(object):
         self.engine = engine
 
         # extract some values for convenience
-        self.unique_data_id = self.manifest_row["unique_data_id"]
-        self.tablename = self.manifest_row["destination_table"]
-        self.metafields = meta[self.tablename]['fields']
+        try:
+            self.unique_data_id = self.manifest_row["unique_data_id"]
+            self.tablename = self.manifest_row["destination_table"]
 
-        # assign defaults
-        self.filename = 'temp_{}.psv'.format(manifest_row['unique_data_id']) \
-            if filename is None else filename
-
-        # get list of 'sql_name' and 'type' from fields for database updating
-        self.sql_fields = []
-        self.sql_field_types = []
-        for field in self.metafields:
-            self.sql_fields.append(field['sql_name'])
-            self.sql_field_types.append(field['type'])
+            # assign defaults
+            self.filename = 'temp_{}.psv'.format(self.unique_data_id) \
+                if filename is None else filename
+        except TypeError:
+            # assume creating table directly from meta.json
+            self.unique_data_id = None
+            self.tablename = None
+            self.filename = 'temp_{}.psv'.format('default') \
+                if filename is None else filename
 
     def write_file_to_sql(self):
         #TODO let this use existing session/connection/engine instead?
@@ -131,7 +130,7 @@ class HISql(object):
         
         #TODO need to find out what types of expected errors might actually occur here  
         #For now, assume that SQLAlchemy will raise a programmingerror
-        except (ProgrammingError, DataError) as e:
+        except (ProgrammingError, DataError, TypeError) as e:
             trans.rollback()
 
             logging.warning("  FAIL: something went wrong loading {}".format(self.unique_data_id))
@@ -153,10 +152,15 @@ class HISql(object):
 
         # Remove the row if it exists
         # TODO make sure data is synced or appended properly
-        sql_manifest_row = self.get_sql_manifest_row(db_conn=conn,close_conn=False)
-        if sql_manifest_row != None:
-            logging.info("  deleting existing manifest row for {}".format(self.unique_data_id))
-            delete_command = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(self.unique_data_id)
+        sql_manifest_row = self.get_sql_manifest_row(db_conn=conn,
+                                                     close_conn=False)
+
+        if sql_manifest_row is not None:
+            logging.info("  deleting existing manifest row for {}".format(
+                self.unique_data_id))
+            delete_command = \
+                "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                    self.unique_data_id)
             conn.execute(delete_command)
 
         columns = []
@@ -198,9 +202,12 @@ class HISql(object):
 
     def create_table(self, db_conn, table):
 
+        sql_fields, sql_field_types = self.get_sql_fields_and_type_from_meta(
+            table_name=table)
+
         field_statements = []
-        for idx, field in enumerate(self.sql_fields):
-            field_statements.append(field + " " + self.sql_field_types[idx])
+        for idx, field in enumerate(sql_fields):
+            field_statements.append(field + " " + sql_field_types[idx])
         field_command = ",".join(field_statements)
         create_command = "CREATE TABLE {}({});".format(table, field_command)
         db_conn.execute(create_command)
@@ -209,9 +216,9 @@ class HISql(object):
         # Create an id column and make it a primary key
         create_id = "ALTER TABLE {} ADD COLUMN {} text;".format(table, 'id')
         db_conn.execute(create_id)
-        set_primary_key = "ALTER TABLE {} ADD PRIMARY KEY ({});".format(table, 'id')
+        set_primary_key = "ALTER TABLE {} ADD PRIMARY KEY ({});".format(table,
+                                                                        'id')
         db_conn.execute(set_primary_key)
-
 
     def create_primary_key_table(self, db_conn, table):
         pass
@@ -266,4 +273,27 @@ class HISql(object):
             return results[0]
 
         if len(results) == 0:
+            logging.info("  Couldn't find sql_manifest_row for {}".format(self.unique_data_id))
             return None
+
+    def get_sql_fields_and_type_from_meta(self, table_name=None):
+        """
+        Get list of 'sql_name' and 'type' from fields for database updating
+
+        :param table_name: the name of the table to be referenced in meta
+        :return: a tuple - 'sql_name, sql_name_type'
+        """
+
+        if table_name is None:
+            table_name = self.tablename
+
+        meta_fields = self.meta[table_name]['fields']
+
+        sql_fields = list()
+        sql_field_types = list()
+
+        for field in meta_fields:
+            sql_fields.append(field['sql_name'])
+            sql_field_types.append(field['type'])
+
+        return sql_fields, sql_field_types

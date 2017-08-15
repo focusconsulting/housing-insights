@@ -1,0 +1,12 @@
+
+- Install the Elastic Beanstalk Command Line Interface: `$ pip install awsebcli`
+- Configure a profile that uses the AWS credentials for our Code for DC API account: `aws configure --profile housinginsights_api`
+- Enter the public and secret keys; default location and output format can be None (just press enter)
+
+
+One-time configuration of the server:
+- Run `eb init --profile housinginsights_api` to set up the instance. This also saves the profile to use in the config.
+- Run `eb create`
+
+Normal use:
+Run `eb deploy` from within the folder to be deployed

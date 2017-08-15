@@ -1,6 +1,7 @@
 name: housing-insights
 channels:
 - defaults
+#- gramener
 dependencies:
 - libpq=9.5.4
 - mkl=11.3.3
@@ -17,8 +18,10 @@ dependencies:
 - nose=1.3.7=py35_1
 
 # These should only be used in local dev (i.e. make_draft_json), and commented out for production. Large memory requirements breaks AWS free tier. 
-- numpy=1.11.2=py35_0
-- pandas=0.19.0=np111py35_0
+#- numpy=1.11.2=py35_0
+#- pandas=0.19.0=np111py35_0
+# Note: Package xmljson v0.1.6 requires channel gramener ( Ref: https://anaconda.org/gramener/xmljson )
+#- xmljson=0.1.6
 
 - pip:
   - awscli==1.11.66
@@ -38,8 +41,8 @@ dependencies:
   - MarkupSafe==1.0
   - mimerender==0.6.0
   - nose==1.3.7
-  - numpy==1.11.2
-  - pandas==0.19.0
+#  - numpy==1.11.2
+#  - pandas==0.19.0
   - psycopg2==2.7.1
   - pyasn1==0.2.3
   - python-mimeparse==1.6.0

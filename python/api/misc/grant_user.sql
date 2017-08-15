@@ -1,3 +1,4 @@
+--Used to deal with some quirky AWS deploy stuff. Just saved here for reference
 CREATE USER hi_readonly WITH ENCRYPTED PASSWORD 'hireader';
 GRANT CONNECT ON DATABASE housing_insights_raw TO hi_readonly;
 GRANT USAGE ON SCHEMA public TO hi_readonly;
