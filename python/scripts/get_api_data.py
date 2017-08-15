@@ -113,7 +113,8 @@ if __name__ == '__main__':
                             #  'acs5_2013','acs5_2014','acs5_2015',
                             #  'acs5_2009_moe','acs5_2010_moe','acs5_2011_moe','acs5_2012_moe',
                             #  'acs5_2013_moe','acs5_2014_moe','acs5_2015_moe',
-                            #  'wmata_stops','wmata_dist'
+                            #  'wmata_stops','wmata_dist',
+                            #  'mar'
                             # ]
     sample = False          # Some ApiConn classes can just grab a sample of the data for dev/testing
     output_type = 'csv'     # Other option is 'stdout' which just prints to console
