@@ -125,7 +125,7 @@ if __name__ == '__main__':
     logger.info("running get api data")
 
     # Set up the appropriate settings for what you want to download
-    debug = False            # Raise errors instead of only logging them
+    debug = True            # Raise errors instead of only logging them
     unique_data_ids = ['crime_2017'] #None  # Alternatively, pass a list of only the
                             # data sources you want to download:
                             # Supported ids:
@@ -151,7 +151,11 @@ if __name__ == '__main__':
     module_list = ['opendata'] # ['opendata','DCHousing','dhcd','census'] #['wmata_distcalc']
     try:
         get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
+        send_log_file_to_admin(debug=debug)
     except Exception as e:
         logger.error("get_api_data failed with error: %s", e)
-    
-    send_log_file_to_admin(debug=debug)
+        send_log_file_to_admin(debug=debug)
+        if debug:
+            raise e
+
+
