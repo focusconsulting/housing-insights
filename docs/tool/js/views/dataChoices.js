@@ -12,9 +12,8 @@
         //""source"" is the column name from the filter table, which should match the table in the original database table.
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. "ward" and "ward" can appear in two tables but should have same name/format)
-        
-        //TOODO this source should be converted to 'proj_name_addre' when it is available from the api
-        {   "source":"proj_name", //change to proj_name_addre
+
+        {   "source":"proj_name_addre",
             "display_name": "Search",
             "display_text": "This is the searchbar",
             "component_type": "searchbar",
@@ -31,7 +30,6 @@
             "data_level": "project",
             "short_name": "l"
         },
-        /* TODO enable this once proj_name_addre is available above (don't want two of same filter controls)
         {   "source":"proj_name",
             "display_name": "Project name",
             "display_text": "Filter to a specific building by searching for its name",
@@ -40,7 +38,6 @@
             "data_level": "project",
             "short_name": "n"
         },
-        */
         {   "source":"proj_addre",
             "display_name": "Project address",
             "display_text": "Filter to a specific building by searching for its address",
