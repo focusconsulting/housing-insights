@@ -11,7 +11,7 @@ global:
   instance_profile: null
   platform_name: null
   platform_version: null
-  profile: housinginsights_api  #Tells which credentials to use; needs to be set up in your awscli config
+  profile: codefordc  #Tells which credentials to use; needs to be set up in your awscli config
   repository: null
   sc: null
   workspace_type: Application
