@@ -1050,7 +1050,11 @@
             var minLon = d3.min(data, function(d){
                 return d.longitude;
             });
-            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], {linear: true, padding: 20});
+            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], 
+                            {linear: true, 
+                            padding: {top: 20, bottom: 20, left: 320, right: 370}, //to accomodate sidebars + 20 px
+                            maxZoom: 14  //far enough to see whole neighborhood cluster
+                            });
             if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
                 mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
                 mapView.map.originalZoom = mapView.map.getZoom();
