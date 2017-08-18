@@ -89,7 +89,8 @@ var router = {
             }
             if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'searchbar' ){
                 var values = eachArray[1].replace(/_/g,' ').split('+');
-                $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', values);
+                var dropdown_element = $('.ui.dropdown.'+'dropdown-' + dataChoice.source)
+                    dropdown_element.dropdown('set selected', values);
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here
