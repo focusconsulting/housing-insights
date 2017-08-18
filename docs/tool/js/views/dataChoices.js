@@ -14,7 +14,7 @@
         //  the same meaning in both places (e.g. "ward" and "ward" can appear in two tables but should have same name/format)
         
         //TOODO this source should be converted to 'proj_name_addre' when it is available from the api
-        {   "source":"proj_name",
+        {   "source":"proj_name", //change to proj_name_addre
             "display_name": "Search",
             "display_text": "This is the searchbar",
             "component_type": "searchbar",
