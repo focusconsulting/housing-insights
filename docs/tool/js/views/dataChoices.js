@@ -12,15 +12,43 @@
         //""source"" is the column name from the filter table, which should match the table in the original database table.
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. "ward" and "ward" can appear in two tables but should have same name/format)
+        
+        //TOODO this source should be converted to 'proj_name_addre' when it is available from the api
+        {   "source":"proj_name",
+            "display_name": "Search",
+            "display_text": "This is the searchbar",
+            "component_type": "searchbar",
+            "data_type": "text",
+            "data_level": "project",
+            "short_name": "na"
+        },
+        
         {   "source":"location",
-            "display_name": "Location",
+            "display_name": "Specific Zone",
             "display_text": "View only projects in a specific zone of the city. The choices in this filter depend on the Zone Type selected, and the filter is cleared when the Zone Type is changed.",
             "component_type": "location",
             "data_type": "text",
             "data_level": "project",
             "short_name": "l"
         },
-
+        /* TODO enable this once proj_name_addre is available above (don't want two of same filter controls)
+        {   "source":"proj_name",
+            "display_name": "Project name",
+            "display_text": "Filter to a specific building by searching for its name",
+            "component_type": "categorical",
+            "data_type": "text",
+            "data_level": "project",
+            "short_name": "n"
+        },
+        */
+        {   "source":"proj_addre",
+            "display_name": "Project address",
+            "display_text": "Filter to a specific building by searching for its address",
+            "component_type": "categorical",
+            "data_type": "text",
+            "data_level": "project",
+            "short_name": "a"
+        },
         {   "source": "proj_units_tot",
             "display_name": "Total units in project",
             "display_text": "Total count of units in the project, including both subsidized and market rate units.",

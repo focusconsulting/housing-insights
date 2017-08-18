@@ -851,6 +851,63 @@ var filterView = {
 
     },
 
+     searchFilterControl: function(component){
+        //Creates the search bar used with the name_addre field
+        //Note, this is currently only configured to be used for one searchbar with the div id=searchbar
+        //TODO fair amount of copy-modified code between this and the categorical one, would be good to consolidate
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+        var contentContainer = d3.select('#searchbar')
+                        .append('div')
+                        .attr('id','filter-content-'+c.source);
+
+        var uiSelector = contentContainer.append("select")
+            .classed("ui fluid multiple search selection dropdown",true)
+            .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
+            .attr("multiple", " ")
+            .attr("id", c.source + '-searchbar');
+        
+        //Add the dropdown menu choices
+        for(var j = 0; j < c.options.length; j++){
+            uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
+        }
+
+        //Allow mid-string searches
+        $('#'+c.source + '-searchbar').dropdown({ 
+                fullTextSearch: 'exact'
+                });
+
+        //Change the icon
+        d3.select('#searchbar').select('.icon')
+            .classed('dropdown',false)
+            .classed('search',true)
+
+        //Set callback for when user makes a change
+        function makeSelectCallback(component){
+            return function(){
+            var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
+            var specific_state_code = 'filterValues.' + component.source
+            setState(specific_state_code,selectedValues);
+        }};
+        var currentSelectCallback = makeSelectCallback(c)
+
+        // Add the search box placeholder text
+        d3.select('#searchbar').select('input')
+            .attr('placeholder', "Search for a project...")
+            .style('width', '100%');
+        
+        //TODO change this to a click event instead of any change
+        $(".dropdown-"+c.source).change(currentSelectCallback);
+
+        this.clear = function(){
+            $('.dropdown-' + c.source).dropdown('restore defaults');
+        }
+        
+        this.isTouched = function(){
+           return $('.dropdown-' + c.source).dropdown('get value').length > 0;
+        }
+
+    },
 
     locationFilterControl: function(component){
         filterView.categoricalFilterControl.call(this, component);
@@ -908,11 +965,6 @@ var filterView = {
             if (filterView.components[i].component_type === 'date'){
                 new filterView.dateFilterControl(filterView.components[i]);
             }
-                           
-            var parent = d3.select('#filter-components')
-                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
-
             
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
@@ -929,6 +981,22 @@ var filterView = {
                 new filterView.categoricalFilterControl(filterView.components[i]);
                   
             };
+
+            //search by name and address
+            if (filterView.components[i].component_type == 'searchbar'){
+
+                //First find the unique list of categories
+                var result = [];
+                for (var dataRow = 0; dataRow < workingData.length; dataRow++) {
+                    if(!result.includes(workingData[dataRow][filterView.components[i].source])){
+                        result.push(workingData[dataRow][filterView.components[i].source]);
+                    }
+                };
+                filterView.components[i]['options'] = result;
+
+                new filterView.searchFilterControl(filterView.components[i]);
+
+            }
 
             //set up location picker
             if (filterView.components[i].component_type == 'location'){
