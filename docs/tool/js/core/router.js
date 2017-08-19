@@ -16,11 +16,13 @@ var router = {
         router.buildingID = window.location.hash.match(/building=([\w\d-]+)/)[1];
     },
     pushFilter: function(msg, data){
+        console.log(msg,data);
         // TO DO: add handling for sidebar and preview pusher
         if (data.length === 0) {
             delete router.stateObj[msg];
         } else {
             router.stateObj[msg] = data;
+            console.log(router.stateObj);
         }
         if ( Object.keys(router.stateObj).length === 0 ) {
             window.history.replaceState(router.stateObj, 'newState', '#');
@@ -46,7 +48,7 @@ var router = {
                 var separator = router.stateObj[key] && router.stateObj[key][2] ? '-' : '_';
                 paramsArray.push(dataChoice.short_name + '=' + Math.round(router.stateObj[key][0]) + separator + Math.round(router.stateObj[key][1])); 
             }
-            if ( dataChoice.component_type === 'categorical' ){
+            if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'location'  ){
                 paramsArray.push( dataChoice.short_name + '=' + router.stateObj[key].join('+'));
             }
             if ( dataChoice.component_type === 'date' ){
@@ -75,8 +77,9 @@ var router = {
             var dataChoice = dataChoices.find(function(obj){
                 return obj.short_name === eachArray[0];
             });
+            console.log('datachoice', dataChoice);
             var filterControlObj = filterView.filterControlsDict[dataChoice.short_name]
-
+            console.log('filterControlObj', filterControlObj);
             if ( dataChoice.component_type === 'continuous' ) {
                 var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
                 var values = eachArray[1].split(separator);
@@ -87,9 +90,22 @@ var router = {
                 filterControlObj.set(min,max,nullsShown);
                 
             }
-            if ( dataChoice.component_type === 'categorical' ){
+            if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'location' ){
+                console.log('categorical or location');
                 var values = eachArray[1].replace(/_/g,' ').split('+');
-                $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', values);
+                console.log(values);
+                if ( dataChoice.component_type === 'location' ) {
+                    /* below is very hard-coded to match the options of the location drodown with the association mapLayer */
+                    var expectedLayer = values[0].indexOf('Ward') !== -1 ? 'ward' : values[0].indexOf('Cluster') !== -1 ? 'neighborhood_cluster' : 'census_tract';
+                    if ( expectedLayer !== getState().mapLayer ) {
+                        setState('mapLayer',expectedLayer);
+                    }
+                }
+                setTimeout(function(){
+                    $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', values);
+                }); // decoding location won't without the setTimeout trick, which asyncs the function, to be fired
+                    // in the next open slot in the queue. especially true if the mapLaye needs to be changed first, because then
+                    // probably a lot of async stuff is triggered but the setState call above. 
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here
