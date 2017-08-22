@@ -31,7 +31,7 @@ var projectView = {
   },
   renderSegments: function(){
     for(var segmentName in this.layout){
-      this.layout[segmentName].render(getState()['selectedBuilding'][0]);
+      this.wrapAndAppendSegment(this.layout[segmentName]);
     }
   },
   onReturn: function(){
@@ -96,11 +96,40 @@ var projectView = {
         function dataBatchCallback(){
             dataRequestCount++;
             if(dataRequestCount === dataRequests.length){
-                new Accordion();
                 projectView.renderSegments();
+                projectView.navSidebar.render();
                 router.clearScreen();
             }
         }
+    }
+  },
+  wrapAndAppendSegment: function(layoutSegment){
+    var outerWrapper = document.createElement('section');
+    var titleElement = document.createElement('h2');
+    titleElement.textContnet = layoutSegment.title;
+    document.getElementById('building-view-container').appendChild(outerWrapper);
+    outerWrapper.appendChild(titleElement);
+    d3.html(layoutSegment.wrapperPartial, function(html){
+      outerWrapper.appendChild(html);
+      layoutSegment.render(getState()['selectedBuilding'][0]);
+    });
+  },
+  navSidebar: {
+    id: 'building-view-segments',
+    render: function(){
+      var container = document.getElementById('building-view-segments');
+      for(var segmentName in projectView.layout){
+        (new projectView.NavSidebarButton(projectView.layout[segmentName])).render();
+      }
+    }
+  },
+  NavSidebarButton: function(objectWithinLayout){
+    this.layoutObj =  objectWithinLayout;
+
+    this.render = function(){
+      var button = document.createElement('div');
+      button.textContent = this.layoutObj.title;
+      document.getElementById(projectView.navSidebar.id).appendChild(button);
     }
   },
   // layout represents the structure of the Project View. Each top-level value
@@ -108,9 +137,15 @@ var projectView = {
   // processes for each segment within the Project View. We add a layout to the 
   // Project View by calling the Segment constructor. This allows us to reuse
   // certain methods, like addRoutes.
-  // TODO: Think about extracting this to a separate file, like DataChoices.
+  // Each 'render' method first grabs the partial corresponding to the 
+  // segment from the given folder and adds the content to a set of standard
+  // wrapper tags.
+  // The value of each top-level key is an object that must have values for
+  // the keys, 'title', 'wrapperPartial' and 'render'.
   layout: {
     header: {
+      title: 'Basic information',
+      wrapperPartial: 'partials/building-view/header.html',
       render: function(projectGeoJSON){
         var d = projectGeoJSON['properties'];
         document.getElementById('building-name').innerText = d.proj_name;
@@ -121,6 +156,8 @@ var projectView = {
       },
     },
     affordableHousingMap:{
+      title: 'Nearby affordable housing',
+      wrapperPartial: 'partials/building-view/affordable-housing.html',
       render: function(projectGeoJSON){
         var affordableHousingMap = new mapboxgl.Map({
           container: 'affordable-housing-map',
@@ -177,6 +214,8 @@ var projectView = {
       }
     },
     metroStationsAndBusStops: {
+      title: "Nearby transit stops",
+      wrapperPartial: "partials/building-view/transit.html",
       render: function(projectGeoJSON){
         var metroStationsMap = new mapboxgl.Map({
           container: 'metro-stations-map',
@@ -285,6 +324,8 @@ var projectView = {
       }
     },
     subsidyTimelineChart: {
+      title: "Building Subsidy Status",
+      wrapperPartial: "partials/building-view/subsidy.html",
       render: function(projectGeoJSON){
         var currentNlihc = projectGeoJSON['properties']['nlihc_id'];
         
@@ -297,6 +338,14 @@ var projectView = {
             width: 1000,
             height: 300
         }); 
+      }
+    },
+    surroundingAreaDevelopment: {
+      title: "Surrounding area development",
+      wrapperPartial: "partials/building-view/surrounding-dev.html",
+      render: function(projectGeoJSON){
+        // Nothing to do yet
+        return;
       }
     }
   },
