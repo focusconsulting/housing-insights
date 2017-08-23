@@ -102,11 +102,19 @@ var router = {
         console.log("decoding state from URL");
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
         stateArray.forEach(function(each){
+            var dataChoice;
             var eachArray = each.split('=');
             if ( eachArray[0] === 'ml' ) { // ie if it's a mapLayer encoding
                  setState('mapLayer',eachArray[1]);
+            } else if ( eachArray[0] === 'ol' ) { // ie if it's a overLay encoding
+                dataChoice = dataChoices.find(function(obj){
+                    return obj.short_name === eachArray[1];
+                });
+                router.openFilterControl(dataChoice.source); // can be replicated for non-overLay filters if
+                                                             // we decide to url encode them and want them (or the
+                                                             // last) opened on load
             } else {
-                var dataChoice = dataChoices.find(function(obj){
+                dataChoice = dataChoices.find(function(obj){
                     return obj.short_name === eachArray[0];
                 });
                 console.log('datachoice', dataChoice);
@@ -160,6 +168,10 @@ var router = {
         });
 
         this.clearScreen();
+    },
+    openFilterControl: function(id){
+        $('#filter-' + id).click(); // programmatically "click" open the accordion. with overLays, the clicking will
+                                    // lead to the setState so no need to setState directly
     },
     clearScreen: function(){
         document.getElementById('loading-state-screen').style.display = 'none';
