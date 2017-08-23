@@ -7,7 +7,9 @@ var router = {
         if ( router.isFilterInitialized ) return;
         setSubs([
             ['filterValues', router.pushFilter],
-            ['mapLayer', router.pushFilter]
+            ['mapLayer', router.pushFilter],
+            ['overlaySet', router.pushFilter],
+            ['clearState', router.clearOverlayURL]
         ]);        
         router.isFilterInitialized = true;
         if ( router.hasInitialFilterState ) router.decodeState();
@@ -15,6 +17,12 @@ var router = {
     initBuilding: function() {
         router.initialView = 'building';
         router.buildingID = window.location.hash.match(/building=([\w\d-]+)/)[1];
+    },
+    clearOverlayURL: function(msg, data){
+        if ( data === 'overlaySet' ){
+            delete router.stateObj[data];
+            router.setHash();
+        }
     },
     pushFilter: function(msg, data){
         console.log(msg,data);
@@ -25,6 +33,9 @@ var router = {
             router.stateObj[msg] = data;
             console.log(router.stateObj);
         }
+        router.setHash()
+    },
+    setHash: function () {
         if ( Object.keys(router.stateObj).length === 0 || ( Object.keys(router.stateObj).length === 1 && router.stateObj.mapLayer === mapView.initialLayers[0].source ) ) {
             // clear location has if state obj is empty  OR if it's only property is mapLayer equal to initial mapLayer (ward for now)
             window.history.replaceState(router.stateObj, 'newState', '#');
@@ -73,6 +84,12 @@ var router = {
                                                                        // some other component seems to already ensure
                                                                        // this, but no harm done to do again.
                 }
+            } else if ( key === 'overlaySet') {
+                
+                var dataChoice = dataChoices.find(function(obj){
+                    return router.stateObj.overlaySet.overlay === obj.source;
+                });
+                paramsArray.push( 'ol=' + dataChoice.short_name);
             }
         }
      //   console.log(paramsArray.join('&'));
