@@ -105,10 +105,13 @@ var projectView = {
   },
   wrapAndAppendSegment: function(layoutSegment){
     var outerWrapper = document.createElement('section');
-    var titleElement = document.createElement('h2');
-    titleElement.textContnet = layoutSegment.title;
+    if(!layoutSegment.hideTitle){
+      var titleElement = document.createElement('h2');
+      titleElement.textContent = layoutSegment.title;
+      outerWrapper.appendChild(titleElement);
+    }
+    layoutSegment.outerWrapper = outerWrapper;
     document.getElementById('building-view-container').appendChild(outerWrapper);
-    outerWrapper.appendChild(titleElement);
     d3.html(layoutSegment.wrapperPartial, function(html){
       outerWrapper.appendChild(html);
       layoutSegment.render(getState()['selectedBuilding'][0]);
@@ -127,9 +130,36 @@ var projectView = {
     this.layoutObj =  objectWithinLayout;
 
     this.render = function(){
+      var ths = this;
       var button = document.createElement('div');
+      button.classList.add('enter');
       button.textContent = this.layoutObj.title;
       document.getElementById(projectView.navSidebar.id).appendChild(button);
+      button.addEventListener('click', function(){
+        // Manually animating scrolling given spotty support for a smooth
+        // scrollIntoView()
+        var upperEdgeOfSegment = ths.layoutObj.outerWrapper.getBoundingClientRect().top;
+        var maxScrollY = document.body.scrollHeight - window.innerHeight;
+        var destinationY = Math.min(upperEdgeOfSegment, maxScrollY);
+
+        window.requestAnimationFrame(animateScroll);
+        function animateScroll(){
+          var scrollInterval = 20;
+          var pxToDestinationY = destinationY - window.pageYOffset;
+          var scrollDirection = pxToDestinationY/Math.abs(pxToDestinationY);
+          // The below is so the window doesn't keep trying to scroll
+          // if pxToDestinationY % scrollInterval > 0.
+          var pxToScrollNow = Math.min(Math.abs(pxToDestinationY), Math.abs(scrollInterval));
+          if(destinationY != window.pageYOffset){
+            window.scrollBy(0, pxToScrollNow * scrollDirection);
+            window.requestAnimationFrame(animateScroll);
+          }
+          else{
+            return;
+          }
+        }
+
+      });
     }
   },
   // layout represents the structure of the Project View. Each top-level value
@@ -142,9 +172,14 @@ var projectView = {
   // wrapper tags.
   // The value of each top-level key is an object that must have values for
   // the keys, 'title', 'wrapperPartial' and 'render'.
+  // There's also an outerWrapper property that's added to each object within
+  // wrapAndAppendSegment(). This is used for scrolling.
+  // There's also a 'hideTitle' key, indicating whether the title will
+  // appear in the segment itself, or just within the navigation sidebar.
   layout: {
     header: {
       title: 'Basic information',
+      hideTitle: true,
       wrapperPartial: 'partials/building-view/header.html',
       render: function(projectGeoJSON){
         var d = projectGeoJSON['properties'];
@@ -156,7 +191,7 @@ var projectView = {
       },
     },
     affordableHousingMap:{
-      title: 'Nearby affordable housing',
+      title: 'Affordable Housing Nearby',
       wrapperPartial: 'partials/building-view/affordable-housing.html',
       render: function(projectGeoJSON){
         var affordableHousingMap = new mapboxgl.Map({
@@ -214,7 +249,7 @@ var projectView = {
       }
     },
     metroStationsAndBusStops: {
-      title: "Nearby transit stops",
+      title: "Public Transit Accessibility",
       wrapperPartial: "partials/building-view/transit.html",
       render: function(projectGeoJSON){
         var metroStationsMap = new mapboxgl.Map({
@@ -341,7 +376,7 @@ var projectView = {
       }
     },
     surroundingAreaDevelopment: {
-      title: "Surrounding area development",
+      title: "Surrounding Area Development",
       wrapperPartial: "partials/building-view/surrounding-dev.html",
       render: function(projectGeoJSON){
         // Nothing to do yet
