@@ -51,7 +51,7 @@ def get_multiple_api_sources(unique_data_ids=None, sample=False, output_type='cs
             'wmata_distcalc': 'WmataApiConn'
     }
 
-    #If no module list is provided, use them all
+    # If no module list is provided, use them all
     if module_list is None:
         module_list = list(modules.keys())
 
@@ -65,9 +65,9 @@ def get_multiple_api_sources(unique_data_ids=None, sample=False, output_type='cs
             api_class = getattr(module, class_name)
 
             api_instance = api_class()
-            api_method = getattr(api_instance, 'get_data') #Every class should have a get_data method!
+            api_method = getattr(api_instance, 'get_data') # Every class should have a get_data method!
 
-            #Get the data
+            # Get the data
             api_method(unique_data_ids, sample, output_type, db=db)
 
         except Exception as e:
@@ -94,19 +94,21 @@ def get_multiple_api_sources(unique_data_ids=None, sample=False, output_type='cs
         logger.error("Failed to update manifest with error %s", e)
     logger.info("Completed get_multiple_api_sources.")
 
+
 def send_log_file_to_admin(debug=True):
     "At conclusion of process, send log file by email to admin and delete or archive from server."
     if os.path.exists(logger.logfile):
         level_counts = get_log_level_counts(logger.logfile)
         error_count = level_counts.get('ERROR', 0)
         email = HIMailer(debug_mode=debug)
-        #email.recipients.append('neal@nhumphrey.com')
+        # email.recipients.append('neal@nhumphrey.com')
         email.subject = "get_api_data logs, completed with {} errors".format(error_count)
         email.message = "See attached for the logs from get_api_data.py. Log counts by level are as follows: {}".format(level_counts)
         email.attachments = [logger.logfile]
         email.send_email()
-        #This line is throwing a file busy error. TODO we should archive these log files instead of deleting. 
-        #os.unlink(logger.logfile)
+        # This line is throwing a file busy error. TODO we should archive these log files instead of deleting.
+        # os.unlink(logger.logfile)
+
 
 def get_log_level_counts(logfile):
     with open(logfile) as log:
@@ -126,6 +128,7 @@ if __name__ == '__main__':
 
     # Set up the appropriate settings for what you want to download
     debug = True            # Raise errors instead of only logging them
+    send_log = True         # Choose whether to email the log file.
     unique_data_ids = ['crime_2017'] #None  # Alternatively, pass a list of only the
                             # data sources you want to download:
                             # Supported ids:
@@ -148,14 +151,14 @@ if __name__ == '__main__':
     sample = False          # Some ApiConn classes can just grab a sample of the data for dev/testing
     output_type = 'csv'     # Other option is 'stdout' which just prints to console
     db = 'docker_database'  # Only used by connections that need to read from the database to get their job done (example: wmata)
-    module_list = ['opendata'] # ['opendata','DCHousing','dhcd','census'] #['wmata_distcalc']
+    module_list = None # ['opendata','DCHousing','dhcd','census'] #['wmata_distcalc']
     try:
-        get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
-        send_log_file_to_admin(debug=debug)
+        # get_multiple_api_sources(unique_data_ids,sample,output_type,db,debug, module_list)
+        get_multiple_api_sources(db=db)
     except Exception as e:
         logger.error("get_api_data failed with error: %s", e)
-        send_log_file_to_admin(debug=debug)
         if debug:
             raise e
-
-
+    finally:
+        if send_log:
+            send_log_file_to_admin(debug=debug)

@@ -24,6 +24,9 @@ from xmljson import parker as xml_to_json
 
 import json
 
+from housinginsights.tools.logger import HILogger
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
@@ -303,14 +306,15 @@ class DhcdApiConn(ProjectBaseApiConn):
 
         for u in unique_data_ids:
             if (u not in self._available_unique_data_ids):
-                logging.info("  The unique_data_id '{}' is not supported by the DhcdApiConn".format(u))
+                logger.info("  The unique_data_id '{}' is not supported by the DhcdApiConn".format(u))
 
             else:
                 result = self.get(self._urls[u], params=self._params[u])
 
                 if result.status_code != 200:
                     err = "An error occurred during request: status {0}"
-                    raise Exception(err.format(result.status_code))
+                    logger.exception(err.format(result.status_code))
+                    continue
 
                 data_xml_root = xml_fromstring(result.text)
                 data_xml_records = data_xml_root.findall('record')

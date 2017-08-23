@@ -54,8 +54,8 @@ class DCHousingApiConn(ProjectBaseApiConn):
                 result = self.get(DCHousingApiConn.DATA_URL)
                 if result.status_code != 200:
                     err = "An error occurred during request: status {0}".format(result.status_code)
-                    logger.error(err)
-                    raise Exception(err)
+                    logger.exception(err)
+                    continue
 
                 content = result.text
 

@@ -3,6 +3,9 @@ from pprint import pprint
 
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.mar import MarResult, FIELDS
+from housinginsights.tools.logger import HILogger
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 
 class MarApiConn(BaseApiConn):
@@ -40,6 +43,7 @@ class MarApiConn(BaseApiConn):
         result = self.get('/findLocation2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
+            logger.exception(err.format(result.status_code))
             raise Exception(err.format(result.status_code))
         if output_type == 'stdout':
             pprint(result.json())

@@ -1,5 +1,7 @@
 from housinginsights.sources.base import BaseApiConn
+from housinginsights.tools.logger import HILogger
 
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class GoogleMapsApiConn(BaseApiConn):
     """
@@ -38,7 +40,8 @@ class GoogleMapsApiConn(BaseApiConn):
 
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
-            raise Exception(err.format(result.status_code))
+            logger.exception(err.format(result.status_code))
+            raise
 
         return result.json()
 

@@ -41,31 +41,33 @@ from sqlalchemy.exc import ProgrammingError
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            os.pardir, os.pardir))
 
-logging_path = os.path.abspath(os.path.join(PYTHON_PATH, "logs"))
-logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
 
-#append to path if running this file directly, otherwise assume it's already been appended. 
+logging_path = os.path.abspath(os.path.join(PYTHON_PATH, "logs"))
+
+#append to path if running this file directly, otherwise assume it's already been appended.
 if __name__ == "__main__":
     sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
+from housinginsights.logger import HILogger
 
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 from housinginsights.ingestion.Manifest import Manifest
 
+logger = HILogger(name=__file__, logfile="ingestion.log", level=10)
 
 class LoadData(object):
 
     def __init__(self, database_choice=None, meta_path=None,
                  manifest_path=None, keep_temp_files=True, drop_tables=False):
         """
-        Initializes the class with optional arguments. The default behaviour 
-        is to load the local database with data tracked from meta.json 
+        Initializes the class with optional arguments. The default behaviour
+        is to load the local database with data tracked from meta.json
         and manifest.csv within the 'python/scripts' folder.
-        
-        :param database_choice: choice of 'local_database', 
+
+        :param database_choice: choice of 'local_database',
         'docker_database', and 'remote_database'
         :param meta_path: the path of the meta.json to be used
         :param manifest_path: the path of the manifest_path.csv to be used
@@ -103,10 +105,10 @@ class LoadData(object):
 
     def _drop_tables(self):
         """
-        Returns the outcome of dropping all the tables from the 
+        Returns the outcome of dropping all the tables from the
         database_choice and then rebuilding.
         """
-        logging.info("Dropping all tables from the database!")
+        logger.info("Dropping all tables from the database!")
         with self.engine.connect() as db_conn:
             query_result = list()
             query_result.append(db_conn.execute(
@@ -126,13 +128,13 @@ class LoadData(object):
         '''
         Used when you want to update only part of the database. Drops the table
         and deletes all associated rows in the sql manifest. Run this before
-        updating data in tables that have added or removed columns. 
+        updating data in tables that have added or removed columns.
 
         tables: a list of table names to be deleted
         '''
         for table in tables:
             try:
-                logging.info("Dropping the {} table and all associated manifest rows".format(table))
+                logger.info("Dropping the {} table and all associated manifest rows".format(table))
                 #Delete all the relevant rows of the sql manifest table
                 q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
                 conn = self.engine.connect()
@@ -147,7 +149,7 @@ class LoadData(object):
                 q = "DROP TABLE {}".format(table)
                 conn.execute(q)
             except ProgrammingError:
-                logging.error("Couldn't remove table {}".format(table))
+                logger.error("Couldn't remove table {}".format(table))
 
 
     def _meta_json_to_database(self):
@@ -195,32 +197,32 @@ class LoadData(object):
             logging.info("    No sql_manifest exists! Proceed with adding"
                          " new data to the database!")
             return None
-        
+
         try:
             query = "DELETE FROM {} WHERE unique_data_id =" \
                     " '{}'".format(table_name, uid)
-            logging.info("    Deleting {} data from {}!".format(
+            logger.info("    Deleting {} data from {}!".format(
                 uid, table_name))
             result = self.engine.execute(query)
             # change status = deleted in sql_manifest
-            logging.info("    Resetting status in sql manifest row!")
+            logger.info("    Resetting status in sql manifest row!")
             sql_interface.update_manifest_row(conn=self.engine,
                                               status='deleted')
         except ProgrammingError:
-            logging.warning("Problem executing DELETE query for table {} and uid {}. Manifest row exists"
+            logger.warning("Problem executing DELETE query for table {} and uid {}. Manifest row exists"
                         " but table does not. You should check validity of"
                         " table and data".format(table_name,uid))
             return None
-            
+
         return result
-        
+
     def _remove_table_if_empty(self, manifest_row):
         """
         If a table is empty (all data has been removed, e.g. using _remove_existing_data),
         delete the table itself. This allows the table to be rebuilt from scratch using
-        meta.json when new data is loaded - for example, if additional columns have been added. 
+        meta.json when new data is loaded - for example, if additional columns have been added.
 
-        :param manifest_row: the row for the uid in the manifest as a dictionary, which 
+        :param manifest_row: the row for the uid in the manifest as a dictionary, which
         supplies the name of the table to be checked/dropped
 
         returns: result from executing delete qurey
@@ -233,19 +235,19 @@ class LoadData(object):
             proxy = conn.execute("SELECT COUNT(*) FROM {}".format(table_name))
             result = proxy.fetchall()
         except ProgrammingError:
-            logging.info("    Couldn't find table {} in the database".format(table_name))
+            logger.info("    Couldn't find table {} in the database".format(table_name))
             conn.close()
             return None
 
         #If the table is empty
         if result[0][0] == 0: #result format is [(count,)] i.e. list of tuples with each tuple = one row of result
             try:
-                logging.info("    Dropping table from database: {}".format(table_name))
+                logger.info("    Dropping table from database: {}".format(table_name))
                 proxy = conn.execute("DROP TABLE {}".format(table_name))
                 conn.close()
                 return proxy
             except ProgrammingError:
-                logging.warning("Problem dropping table")
+                logger.warning("Problem dropping table")
 
     def _get_most_recent_timestamp_subfolder(self, root_folder_path):
         """
@@ -297,7 +299,7 @@ class LoadData(object):
 
         Returns a list of unique_data_ids that were successfully updated.
         """
-        logging.info("update_only(): attempting to update {} data".format(
+        logger.info("update_only(): attempting to update {} data".format(
             unique_data_id_list))
         processed_data_ids = []
 
@@ -306,16 +308,16 @@ class LoadData(object):
 
             # process manifest row for requested data_id if flagged for use
             if manifest_row is None:
-                logging.info("  Skipping: {} not found in manifest!".format(
+                logger.info("  Skipping: {} not found in manifest!".format(
                     uid))
             else:
-                logging.info("  Manifest row found for {} - preparing to "
+                logger.info("  Manifest row found for {} - preparing to "
                              "remove data.".format(uid))
                 self._remove_existing_data(uid=uid, manifest_row=manifest_row)
                 self._remove_table_if_empty(manifest_row = manifest_row)
 
                 # follow normal workflow and load data_id
-                logging.info(
+                logger.info(
                     "  Loading {} data!".format(uid))
                 self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
@@ -356,14 +358,15 @@ class LoadData(object):
             # TODO: of manifest
 
             # only clean and validate data files flagged for use in database
-            if manifest_row['include_flag'] == 'use':
-                logging.info("{}: preparing to load row {} from the manifest".
-                             format(manifest_row['unique_data_id'],
-                                    len(self.manifest)))
-
-                self._process_data_file(manifest_row=manifest_row)
-
-            processed_data_ids.append(manifest_row['unique_data_id'])
+            try:
+                if manifest_row['include_flag'] == 'use':
+                    logger.info("{}: preparing to load row {} from the manifest".
+                                 format(manifest_row['unique_data_id'],
+                                        len(self.manifest)))
+                    self._process_data_file(manifest_row=manifest_row)
+                processed_data_ids.append(manifest_row['unique_data_id'])
+            except:
+                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))
 
         # build Zone Facts table
         #self._automap() #not yet used - created for potential use by calculated fields
@@ -374,8 +377,8 @@ class LoadData(object):
 
     def recalculate_database(self):
         '''
-        An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but 
-        changes to the calculations are made, re-run the calculation routines. 
+        An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but
+        changes to the calculations are made, re-run the calculation routines.
         '''
 
         self._automap()
@@ -387,7 +390,7 @@ class LoadData(object):
     def _automap(self):
         '''
         Adding this in case it is useful for the update scripts for _populate_calculated_project_fields
-        Did not end up using it for REAC score, but leaving it in case it is useful for future. 
+        Did not end up using it for REAC score, but leaving it in case it is useful for future.
         Mimics automap method used in api
         '''
         from sqlalchemy.ext.automap import automap_base
@@ -415,7 +418,7 @@ class LoadData(object):
         '''
 
         conn = self.engine.connect()
-        
+
 
         #########################
         # Most recent REAC score
@@ -425,7 +428,7 @@ class LoadData(object):
         #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
         stmt = '''
             update project
-            set (most_recent_reac_score_num, most_recent_reac_score_date, most_recent_reac_score_id) = 
+            set (most_recent_reac_score_num, most_recent_reac_score_date, most_recent_reac_score_id) =
             (select reac_score_num, last_score_date, reac_score_id from(
                 ---This creates a table of most recent scores
                 SELECT
@@ -434,8 +437,8 @@ class LoadData(object):
                     , reac_score.reac_score_num as reac_score_num
                     , dates.last_score_date as last_score_date
                 FROM reac_score
-                INNER JOIN 
-                    (   SELECT 
+                INNER JOIN
+                    (   SELECT
                             nlihc_id
                             , MAX(reac_date) AS last_score_date
                         FROM reac_score
@@ -444,7 +447,7 @@ class LoadData(object):
                 ON reac_score.nlihc_id=dates.nlihc_id
                 AND reac_score.reac_date=dates.last_score_date
                 ) as most_recent_scores
-                
+
              where project.nlihc_id = most_recent_scores.nlihc_id)
              '''
         conn.execute(stmt)
@@ -526,8 +529,8 @@ class LoadData(object):
                                                          grouping=zone_type)
                     field_values[field] = result['items']
                 except Exception as e:
-                    logging.error("Couldn't get census data for {}".format(field))
-                    logging.error(e)
+                    logger.error("Couldn't get census data for {}".format(field))
+                    logger.error(e)
 
             # get field value from building permits and crime table
             for field in summarize_obs_field_args:
@@ -540,8 +543,8 @@ class LoadData(object):
                                                           grouping=zone_type)
                     field_values[field] = result['items']
                 except Exception as e:
-                    logging.error("Couldn't summarize data for {}".format(field))
-                    logging.error(e)
+                    logger.error("Couldn't summarize data for {}".format(field))
+                    logger.error(e)
 
 
             try:
@@ -582,7 +585,7 @@ class LoadData(object):
                         result = conn.execute(q)
                         query_results.append(result)
             except Exception as e:
-                logging.error("Couldn't load data for {} into zone_facts".format(zone_type))
+                logger.error("Couldn't load data for {} into zone_facts".format(zone_type))
 
 
         return query_results
@@ -744,7 +747,7 @@ class LoadData(object):
                                               item["census_tract"] == tract),
                                              {field: None})
                         if matching_data[field] is None:
-                            logging.warning(
+                            logger.warning(
                                 "Missing census_tract data for {} "
                                 "when calculating weightings: {}".format(
                                     field, tract))
@@ -961,9 +964,9 @@ class LoadData(object):
 
     def _get_cleaner(self, table_name, manifest_row):
         """
-        Returns the custom cleaner class that is to be used to clean the 
+        Returns the custom cleaner class that is to be used to clean the
         specific data for use in database.
-        
+
         :param table_name: the table name for that data being processed
         :param manifest_row: the row representing the data being loaded
         :return: instance of custom cleaner class
@@ -977,9 +980,9 @@ class LoadData(object):
 
     def _get_meta_only_fields(self, table_name, data_fields):
         """
-        Returns fields that exist in meta.json but not CSV so we can add 
+        Returns fields that exist in meta.json but not CSV so we can add
         them to the row as it is cleaned and written to PSV file.
-        
+
         :param table_name: the table name for the data being processed
         :param data_fields: the fields for the data being processed
         :return: additional fields as dict
@@ -994,14 +997,14 @@ class LoadData(object):
     def _configure_db_interface(self, manifest_row, temp_filepath):
         """
         Returns an interface object for the sql database
-        
+
         :param manifest_row: a given row in the manifest
         :param temp_filepath: the file path where PSV will be saved
         """
         # check for database manifest - create it if it doesn't exist
         sql_manifest_exists = \
             ingestionfunctions.check_or_create_sql_manifest(engine=self.engine)
-        logging.info("  sql_manifest_exists: {}".format(sql_manifest_exists))
+        logger.info("  sql_manifest_exists: {}".format(sql_manifest_exists))
 
         # configure database interface object and get matching manifest row
         interface = HISql(meta=self.meta, manifest_row=manifest_row,
@@ -1011,8 +1014,8 @@ class LoadData(object):
     def _load_single_file(self, table_name, manifest_row, csv_reader,
                           temp_filepath):
         """
-        Cleans the data for the table name in the given manifest row, writes 
-        the clean data to PSV file, and then passes on that information so 
+        Cleans the data for the table name in the given manifest row, writes
+        the clean data to PSV file, and then passes on that information so
         the database can be updated accordingly.
         """
         # get database interface and it's equivalent manifest row
@@ -1102,7 +1105,7 @@ class LoadData(object):
                 clean_data_row = cleaner.clean(data_row, idx)
                 break
             except Exception:
-                logging.warning("_clean_data(): %s" % data_row)
+                logger.warning("_clean_data(): %s" % data_row)
                 sleep(1)
 
         return clean_data_row
@@ -1197,14 +1200,9 @@ def main(passed_arguments):
 
 if __name__ == '__main__':
     """
-    Continue to honor command line feature after refactoring to encapsulate 
-    the module as a class. 
+    Continue to honor command line feature after refactoring to encapsulate
+    the module as a class.
     """
-
-    # configuration: see /logs/example-logging.py for usage examples
-    logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
-    # Pushes everything from the logger to the command line output as well.
-    logging.getLogger().addHandler(logging.StreamHandler())
 
     description = 'Loads our flat file data into the database of choice. You ' \
                   'can load sample or real data and/or rebuild or update only '\
