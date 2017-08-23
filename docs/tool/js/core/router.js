@@ -49,7 +49,7 @@ var router = {
                 
                 if ( dataChoice.component_type === 'continuous' ) {
                     var separator = router.stateObj[key] && router.stateObj[key][2] ? '-' : '_';
-                    paramsArray.push(dataChoice.short_name + '=' + Math.round(router.stateObj[key][0]) + separator + Math.round(router.stateObj[key][1])); 
+                    paramsArray.push(dataChoice.short_name + '=' + router.stateObj[key][0] + separator + router.stateObj[key][1]);
                 }
                 if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'location'  ){
                     paramsArray.push( dataChoice.short_name + '=' + router.stateObj[key].join('+'));
