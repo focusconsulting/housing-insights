@@ -22,6 +22,7 @@ def construct_filter_blueprint(name, engine):
                 p.nlihc_id
                 , p.proj_addre
                 , p.proj_name
+                , CONCAT(p.proj_name, ': ', p.proj_addre) as proj_name_addre
                 , p.proj_units_tot
                 , p.proj_units_assist_max
                 , cast(p.proj_units_assist_max / p.proj_units_tot as decimal(3,2)) as percent_affordable_housing --TODO make this calculated field in projects table

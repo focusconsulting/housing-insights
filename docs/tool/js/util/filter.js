@@ -114,7 +114,7 @@ var filterUtil = {
                 }
 			}
 
-			if (component['component_type'] == 'categorical') {
+			if (component['component_type'] == 'categorical' || component['component_type'] == 'searchbar') {
 				workingData = workingData.filter(function(d){
                     //If all objects are removed from filter list, assume they want all objects
                     if (filterValues[key][0].length == 0 ) {

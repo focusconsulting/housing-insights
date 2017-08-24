@@ -46,7 +46,7 @@ var router = {
                 var separator = router.stateObj[key] && router.stateObj[key][2] ? '-' : '_';
                 paramsArray.push(dataChoice.short_name + '=' + Math.round(router.stateObj[key][0]) + separator + Math.round(router.stateObj[key][1])); 
             }
-            if ( dataChoice.component_type === 'categorical' ){
+            if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'searchbar' ){
                 paramsArray.push( dataChoice.short_name + '=' + router.stateObj[key].join('+'));
             }
             if ( dataChoice.component_type === 'date' ){
@@ -87,9 +87,10 @@ var router = {
                 filterControlObj.set(min,max,nullsShown);
                 
             }
-            if ( dataChoice.component_type === 'categorical' ){
+            if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'searchbar' ){
                 var values = eachArray[1].replace(/_/g,' ').split('+');
-                $('.ui.dropdown.'+'dropdown-' + dataChoice.source).dropdown('set selected', values);
+                var dropdown_element = $('.ui.dropdown.'+'dropdown-' + dataChoice.source)
+                    dropdown_element.dropdown('set selected', values);
             }   
             if ( dataChoice.component_type === 'date' ){
                 // handle decoding for date type filter here
