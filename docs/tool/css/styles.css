@@ -165,11 +165,13 @@ button.nullValuesToggleSubmit::before {
     margin-top: 0px;
 }
 
-#left-options .sub-nav-button {
+#left-options .sub-nav-button,
+#left-options-building .sub-nav-button {
     border-right: 2px solid rgb(189, 54, 33);
 }
 
-#right-options .sub-nav-button {
+#right-options .sub-nav-button,
+#right-options-building .sub-nav-button {
     border-left: 2px solid rgb(189, 54, 33);
 }
 
@@ -178,17 +180,17 @@ button.nullValuesToggleSubmit::before {
     border-bottom-width: 0;
 }
 
-#left-options {
+#left-options, #left-options-building {
     width: 300px;
     display: flex;
 }
 
-#right-options {
+#right-options, #right-options-building {
     width: 350px;
     display: flex;
 }
 
-#options-spacer {
+#options-spacer, #options-spacer-building {
     flex-grow: 1;
     border-bottom: 2px solid rgb(189, 54, 33);
     position: relative; /*so pillboxes can be appended*/
@@ -683,10 +685,6 @@ a.active {
 
 
 /* building view */
-#button-back {
-    background-color: #fff;
-    border-bottom-width: 0;
-}
 
 #sub-nav-building {
     width: 100%;
