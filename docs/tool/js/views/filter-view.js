@@ -135,7 +135,7 @@ var filterView = {
         this.element.setAttribute('name', 'showNulls-' + component.source);
         this.element.checked = true;
 
-        var txt = document.createTextNode("Include projects with null data?");
+        var txt = document.createTextNode("Include projects with missing " + component.display_name + " data?");
 
         this.toDOM = function(parentElement){
             parentElement.appendChild(this.container);
