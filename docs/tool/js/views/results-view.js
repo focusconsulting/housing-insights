@@ -14,7 +14,7 @@ var resultsView = {
 
         instances.forEach(function(instance, i){
             console.log("trying to add donuts")
-            resultsView.charts[i] = new DonutChart({
+            resultsView.charts[i] = new DonutChartOld({
                 dataRequest: {
                     name: 'raw_project',
                     url: model.URLS.project
@@ -35,7 +35,7 @@ var resultsView = {
         });
 
         setSubs([
-          ['filteredData', DonutChart.prototype.updateSubscriber], //TODO - refactor donuts to use new chart proto, and then the update function should subscribe to 'filteredProjectsAvailable' instead, which put data on resultsView.filteredProjects
+          ['filteredData', DonutChartOld.prototype.updateSubscriber], //TODO - refactor donuts to use new chart proto, and then the update function should subscribe to 'filteredProjectsAvailable' instead, which put data on resultsView.filteredProjects
           ['filteredData',resultsView.updateFilteredProjects],
           ['filteredProjectsAvailable', resultsView.updateFilteredStats],
           ['filteredStatsAvailable',resultsView.makeBarChart]
@@ -47,7 +47,7 @@ var resultsView = {
     updateFilteredProjects: function(msg, data){
         var runFilter = function(raw_projects){
             var filteredIds = getState()['filteredData'][0]
-            resultsView.filteredProjects = raw_projects.items.filter(function(d){
+            resultsView.filteredProjects = raw_projects.objects.filter(function(d){
                 return filteredIds.indexOf(d.nlihc_id) !== -1;
             });
             setState('filteredProjectsAvailable',resultsView.filteredProjects);         //Needed to make sure this fires every time. TODO is there a way we can setState that triggers even if the value is the same (i.e. true)?
@@ -76,7 +76,7 @@ var resultsView = {
         ]
 
         //Note, accessing data collection directly to avoid aysnc nature of callback - we know this data set has been loaded because it's required for this function to be called
-        var raw_projects = model.dataCollection['raw_project'].items; 
+        var raw_projects = model.dataCollection['raw_project'].objects; 
 
         //Update totals. TODO we only need to do this once, so we should move this elsewhere when we refactor this so it runs only on load. 
         for (var i = 0; i < raw_projects.length; i++) {
@@ -107,8 +107,6 @@ var resultsView = {
             };  
 
         setState('filteredStatsAvailable',resultsView.filteredStats['ward']);
-        console.log(resultsView.filteredStats);
-
         
     },
     makeBarChart:function(){

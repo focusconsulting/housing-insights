@@ -56,11 +56,81 @@ html, body {
     width: -webkit-calc(100% - 40px);
     width:    -moz-calc(100% - 40px);
     width:         calc(100% - 40px); 
+
+    padding: 10px 0px 10px 10px;
 }
-.sub-nav-heading h1 {
+.sub-nav-heading h1,
+.sub-nav-group h1 {
     font-size: 16px;
     font-weight: bold;
-    padding: 10px 0px 10px 10px;
+}
+
+/* Ensure there's no extra scroll bar within
+the container for categorical filters */
+div.filter.categorical.content.active {
+    overflow: visible;
+}
+
+/* Text input boxes within sidebars */
+div.filter.content input.filter-text{
+    display: inline-block;
+    position: relative;
+    height: 2em;
+    border: 1px solid rgb(230, 230, 230);
+    box-sizing: border-box;
+}
+
+div.filter.content input.year-text {
+    width: 40px;
+}
+div.filter.content input.month-text, 
+div.filter.content input.day-text {
+    width: 20px;
+}
+
+div.filter.content .continuous-input-text{
+    width: 40px;
+}
+
+.text-input.date span{
+    margin-left: .3em;
+    margin-right: .3em;
+}
+.text-input.continuous span{
+    margin-left: 3em;
+    margin-right: 3em;
+}
+
+.text-input{
+    margin-left: 20px;
+}
+
+button.nullValuesToggleSubmit{
+    height: 1.5em;
+    width: 1.5em;
+    background: rgb(100, 100, 100);
+    display: inline-block;
+    position: relative;
+    border: none;
+    border-radius: 5px;
+    vertical-align: middle;
+    margin-left:2px;
+}
+
+/* drawn from https://codepen.io/jonneal/pen/kptBs */
+button.nullValuesToggleSubmit::before {
+    border-style: solid;
+    border-width: .25em .25em 0 0;
+    content: '';
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    top: .3em;
+    left: -.1em;
+    transform: rotate(45deg);
+    width: .75em;
+    height: .75em;
+    border-color: white;
 }
 
 /*Color code the text for projects that match the specified filters*/
@@ -75,12 +145,23 @@ html, body {
 
 .sub-nav-group {
     padding: 0px 10px 0px 10px;
+    overflow-y: auto;
+    
 }
+#project-preview-group{
+    flex: 0 1 auto;
+    height: 350px;
+}
+#projects-list-group{
+    flex: 1 1 auto; /*makes the list expand to fill rest of available space, while both preview and list shrink if needed*/
+    height: 350px; /*need some basis for flexbox to not oversquish the other container*/
+}
+
 .scroll-y {
     overflow-y: auto;
 }
 
-#buildings-list {
+#projects-list {
     margin-top: 0px;
 }
 
@@ -126,7 +207,7 @@ html, body {
 
 .main-view:not(#map-view) {
     position: relative;
-    top: 20px;
+    top: 40px;
 }
 
 .main-view.fade {
@@ -201,7 +282,6 @@ html, body {
 }
 */
 
-
 .sidebar-inner-wrapper>div {
     flex-grow: 1;
 }
@@ -212,6 +292,17 @@ html, body {
     right: 15px;
     z-index:100;
     cursor: pointer;
+}
+
+.nullsToggleContainer{
+    margin-top: 5px;
+    margin-left: 25px;
+}
+
+.nullsToggleContainer input[type=checkbox]{
+    display: inline-block;
+    margin-right: 3px;
+    vertical-align: top;
 }
 
 #pie-charts {
@@ -269,8 +360,20 @@ Others are working correctly.
     transition: max-width 0.2s linear;
 }
 
+#project-preview {
+    height:350px;
+}
 
-#buildings-list>div {
+#project-preview .preview-field.proj_name{
+    font-weight:bold;
+    font-size:1.1em;
+}
+#project-preview a.proj_name{
+    font-weight:bold;
+    font-size:1.2em;
+    cursor: pointer;
+}
+#projects-list>div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
@@ -280,17 +383,37 @@ Others are working correctly.
     border-bottom: 1px solid gray;
 
 }
-#buildings-list>div .project-title {
+#projects-list>div .project-title {
     font-weight: bold;
     font-size: 1em;
 }
-#buildings-list>div:hover {
+
+#projects-list>div:hover {
     background-color: #ddebff;
 }
-#buildings-list>div.enter, #buildings-list>div.update {
+#projects-list>div.enter, #projects-list>div.update {
     padding: 5px 4px;
     max-height: 100px;
     opacity: 1;
+}
+
+
+.mapboxgl-popup-content .tooltip-field {
+    font-weight: normal;
+    font-size:0.8em;
+}
+
+.mapboxgl-popup-content {
+    cursor: pointer;
+}
+.mapboxgl-popup-content .tooltip-field.proj_name {
+    font-weight: bold;
+    font-size:1em;
+}
+
+.mapboxgl-popup-close-button {
+    font-size:2em !important;
+
 }
 .sidebar-tab {
     width: 20px;
@@ -334,6 +457,19 @@ Others are working correctly.
 .triangle.left {
     border-right: 12px solid #fff;
 }
+
+#loading-state-screen {
+    background-color: rgba(0,0,0,0.8);
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 9999999;
+    color:#fff;
+    display: none;
+}
+
 
 /*
  * MAPBOX
@@ -402,7 +538,7 @@ a.active {
 /*Partially override semantic-ui styling, so some is inherited from there*/
 
 /*Mimics accordion title styling*/
-#filters .header {
+.sub-nav-container .header {
     font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
     font-size: 1.3em;
     background: #d69c93;
@@ -560,3 +696,36 @@ a.active {
     margin-top: 20px;
 }
 
+
+
+dl.inline dd {
+  display: inline;
+  margin: 0;
+}
+dl.inline dd:after{
+  display: block;
+  content: '';
+}
+dl.inline dt{
+  display: inline-block;
+  min-width: 75px;
+}
+
+
+/*search bar*/
+#searchbar .dropdown {
+    border-radius:15px;
+    max-width:400px;
+    float:right;
+    margin-right:10px;
+    margin-left:50px;
+}
+
+#searchbar {
+    height:30px;
+}
+
+/*patches semantic ui bug that search helper text is cut off after clearing a pillbox*/
+input.search {
+    width:200px !important;
+}

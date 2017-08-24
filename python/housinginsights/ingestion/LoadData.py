@@ -22,9 +22,16 @@ import os
 import logging
 import argparse
 import json
-from audioop import bias
+import concurrent.futures
+from time import time, sleep
+from requests.packages.urllib3.exceptions import NewConnectionError
+from requests.packages.urllib3.exceptions import MaxRetryError
 
 from sqlalchemy import Table, Column, Integer, String, MetaData, Numeric
+from datetime import datetime
+from uuid import uuid4
+import dateutil.parser as dateparser
+from sqlalchemy.exc import ProgrammingError
 
 # Needed to make relative package imports when running this file as a script
 # (i.e. for testing purposes).
@@ -100,20 +107,48 @@ class LoadData(object):
         database_choice and then rebuilding.
         """
         logging.info("Dropping all tables from the database!")
-        db_conn = self.engine.connect()
-        query_result = list()
-        query_result.append(db_conn.execute(
-            "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
+        with self.engine.connect() as db_conn:
+            query_result = list()
+            query_result.append(db_conn.execute(
+                "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
 
-        if self.database_choice == 'remote_database' or self.database_choice \
-                == 'remote_database_master':
-            query_result.append(db_conn.execute('''
+            if self.database_choice == 'remote_database' or self.database_choice \
+                    == 'remote_database_master':
+                query_result.append(db_conn.execute('''
             GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
             GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
             GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;
             GRANT ALL ON SCHEMA public TO public;
             '''))
         return query_result
+
+    def remove_tables(self, tables):
+        '''
+        Used when you want to update only part of the database. Drops the table
+        and deletes all associated rows in the sql manifest. Run this before
+        updating data in tables that have added or removed columns. 
+
+        tables: a list of table names to be deleted
+        '''
+        for table in tables:
+            try:
+                logging.info("Dropping the {} table and all associated manifest rows".format(table))
+                #Delete all the relevant rows of the sql manifest table
+                q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
+                conn = self.engine.connect()
+                proxy = conn.execute(q)
+                results = proxy.fetchall()
+                for row in results:
+                    q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                        row[0])
+                    conn.execute(q)
+
+                #And drop the table itself
+                q = "DROP TABLE {}".format(table)
+                conn.execute(q)
+            except ProgrammingError:
+                logging.error("Couldn't remove table {}".format(table))
+
 
     def _meta_json_to_database(self):
         """
@@ -128,9 +163,9 @@ class LoadData(object):
         sqlalchemy_metadata.create_all(self.engine)
         json_string = json.dumps(self.meta)
         ins = meta_table.insert().values(meta=json_string)
-        conn = self.engine.connect()
-        conn.execute("DELETE FROM meta;")
-        conn.execute(ins)
+        with self.engine.connect() as conn:
+            conn.execute("DELETE FROM meta;")
+            conn.execute(ins)
 
     def _remove_existing_data(self, uid, manifest_row):
         """
@@ -152,26 +187,65 @@ class LoadData(object):
             manifest_row=manifest_row, temp_filepath=temp_filepath)
         sql_manifest_row = sql_interface.get_sql_manifest_row()
 
+
         try:
             # delete only rows with data_id in respective table
             table_name = sql_manifest_row['destination_table']
+        except TypeError: #will occur if sql_manifest_row == None
+            logging.info("    No sql_manifest exists! Proceed with adding"
+                         " new data to the database!")
+            return None
+        
+        try:
             query = "DELETE FROM {} WHERE unique_data_id =" \
                     " '{}'".format(table_name, uid)
-            logging.info("\t\tDeleting {} data from {}!".format(
+            logging.info("    Deleting {} data from {}!".format(
                 uid, table_name))
             result = self.engine.execute(query)
-
             # change status = deleted in sql_manifest
-            logging.info("\t\tResetting status in sql manifest row!")
+            logging.info("    Resetting status in sql manifest row!")
             sql_interface.update_manifest_row(conn=self.engine,
                                               status='deleted')
+        except ProgrammingError:
+            logging.warning("Problem executing DELETE query for table {} and uid {}. Manifest row exists"
+                        " but table does not. You should check validity of"
+                        " table and data".format(table_name,uid))
+            return None
+            
+        return result
+        
+    def _remove_table_if_empty(self, manifest_row):
+        """
+        If a table is empty (all data has been removed, e.g. using _remove_existing_data),
+        delete the table itself. This allows the table to be rebuilt from scratch using
+        meta.json when new data is loaded - for example, if additional columns have been added. 
 
-            return result
-        except TypeError:
-            logging.info("\t\tNo sql_manifest exists! Proceed with adding"
-                         " new data to the database!")
+        :param manifest_row: the row for the uid in the manifest as a dictionary, which 
+        supplies the name of the table to be checked/dropped
 
-        return None
+        returns: result from executing delete qurey
+        """
+        table_name = manifest_row['destination_table']
+        conn = self.engine.connect()
+
+
+        try:
+            proxy = conn.execute("SELECT COUNT(*) FROM {}".format(table_name))
+            result = proxy.fetchall()
+        except ProgrammingError:
+            logging.info("    Couldn't find table {} in the database".format(table_name))
+            conn.close()
+            return None
+
+        #If the table is empty
+        if result[0][0] == 0: #result format is [(count,)] i.e. list of tuples with each tuple = one row of result
+            try:
+                logging.info("    Dropping table from database: {}".format(table_name))
+                proxy = conn.execute("DROP TABLE {}".format(table_name))
+                conn.close()
+                return proxy
+            except ProgrammingError:
+                logging.warning("Problem dropping table")
 
     def _get_most_recent_timestamp_subfolder(self, root_folder_path):
         """
@@ -232,21 +306,23 @@ class LoadData(object):
 
             # process manifest row for requested data_id if flagged for use
             if manifest_row is None:
-                logging.info("\tSkipping: {} not found in manifest!".format(
+                logging.info("  Skipping: {} not found in manifest!".format(
                     uid))
             else:
-                logging.info("\tManifest row found for {} - preparing to "
+                logging.info("  Manifest row found for {} - preparing to "
                              "remove data.".format(uid))
                 self._remove_existing_data(uid=uid, manifest_row=manifest_row)
+                self._remove_table_if_empty(manifest_row = manifest_row)
 
                 # follow normal workflow and load data_id
                 logging.info(
-                    "\tLoading {} data!".format(uid))
+                    "  Loading {} data!".format(uid))
                 self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
 
         # build Zone Facts table
         self._create_zone_facts_table()
+        self._populate_calculated_project_fields()
 
         return processed_data_ids
 
@@ -290,9 +366,100 @@ class LoadData(object):
             processed_data_ids.append(manifest_row['unique_data_id'])
 
         # build Zone Facts table
+        #self._automap() #not yet used - created for potential use by calculated fields
         self._create_zone_facts_table()
+        self._populate_calculated_project_fields()
 
         return processed_data_ids
+
+    def recalculate_database(self):
+        '''
+        An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but 
+        changes to the calculations are made, re-run the calculation routines. 
+        '''
+
+        self._automap()
+        self._create_zone_facts_table()
+        self._populate_calculated_project_fields()
+
+        return None
+
+    def _automap(self):
+        '''
+        Adding this in case it is useful for the update scripts for _populate_calculated_project_fields
+        Did not end up using it for REAC score, but leaving it in case it is useful for future. 
+        Mimics automap method used in api
+        '''
+        from sqlalchemy.ext.automap import automap_base
+
+        Base = automap_base()
+        Base.prepare(self.engine, reflect=True)
+
+        #self._BuildingPermits = Base.classes.building_permits
+        #self._Census = Base.classes.census
+        #self._CensusMarginOfError = Base.classes.census_margin_of_error
+        #self._Crime = Base.classes.crime
+        #self._DcTax = Base.classes.dc_tax
+        self._Project = Base.classes.project
+        self._ReacScore = Base.classes.reac_score
+        #self._RealProperty = Base.classes.real_property
+        #self._Subsidy = Base.classes.subsidy
+        #self._Topa = Base.classes.topa
+        #self._WmataDist = Base.classes.wmata_dist
+        #self._WmataInfo = Base.classes.wmata_info
+
+    def _populate_calculated_project_fields(self):
+        '''
+        Adds values for calculated fields to the project table
+        Assumes the columns have already been created due to meta.json
+        '''
+
+        conn = self.engine.connect()
+        
+
+        #########################
+        # Most recent REAC score
+        #########################
+
+        #HT on sql syntax for a bulk insert, for future reference. Also notes how to only replace if exists: https://stackoverflow.com/a/7918818
+        #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
+        stmt = '''
+            update project
+            set (most_recent_reac_score_num, most_recent_reac_score_date, most_recent_reac_score_id) = 
+            (select reac_score_num, last_score_date, reac_score_id from(
+                ---This creates a table of most recent scores
+                SELECT
+                    reac_score.id as reac_score_id
+                    , reac_score.nlihc_id as nlihc_id
+                    , reac_score.reac_score_num as reac_score_num
+                    , dates.last_score_date as last_score_date
+                FROM reac_score
+                INNER JOIN 
+                    (   SELECT 
+                            nlihc_id
+                            , MAX(reac_date) AS last_score_date
+                        FROM reac_score
+                        GROUP BY nlihc_id
+                    ) AS dates
+                ON reac_score.nlihc_id=dates.nlihc_id
+                AND reac_score.reac_date=dates.last_score_date
+                ) as most_recent_scores
+                
+             where project.nlihc_id = most_recent_scores.nlihc_id)
+             '''
+        conn.execute(stmt)
+
+
+        #########################
+        # Other calculated fields
+        #########################
+
+
+
+        #########################
+        # Teardown
+        #########################
+        conn.close()
 
     def _create_zone_facts_table(self):
         """
@@ -300,9 +467,6 @@ class LoadData(object):
         endpoints. The purpose is to avoid recalculating fields adhoc and
         performing client-side reconfiguration of data into display fields.
         This is all now done in the backend whenever new data is loaded.
-
-        :return: a immutable dict that contains the tables structure of the
-        table and sqlAlchemy metadata object used.
         """
         # drop zone_facts table if already in db
         if 'zone_facts' in self.engine.table_names():
@@ -310,26 +474,13 @@ class LoadData(object):
                 conn.execute('DROP TABLE zone_facts;')
 
         # create empty zone_facts table
-        metadata = MetaData(bind=self.engine)
-        zone_facts = Table('zone_facts', metadata,
-                           Column('zone', String, primary_key=True),
-                           Column('poverty_rate', Numeric),
-                           Column('fraction_black', Numeric),
-                           Column('income_per_capita', Numeric),
-                           Column('labor_participation', Numeric),
-                           Column('fraction_foreign', Numeric),
-                           Column('fraction_single_mothers', Numeric),
-                           Column('acs_lower_rent_quartile', Numeric),
-                           Column('acs_median_rent', Numeric),
-                           Column('acs_upper_rent_quartile', Numeric))
-
-        # add to db
-        metadata.create_all(tables=[zone_facts])
+        sql_interface = HISql(meta=self.meta, manifest_row=None,
+                              engine=self.engine)
+        with self.engine.connect() as conn:
+            sql_interface.create_table(db_conn=conn, table='zone_facts')
 
         # populate table with calculated fields values
         self._populate_zone_facts_table()
-
-        return metadata.tables
 
     def _populate_zone_facts_table(self):
         """
@@ -339,6 +490,7 @@ class LoadData(object):
         :return: list of SQLAlchemy query result objects from inserting the
         calculated fields data into the zone_facts table.
         """
+        # list of zone_fact headers created from census table
         census_fields = [
             'poverty_rate', 'fraction_black', 'income_per_capita',
             'labor_participation', 'fraction_foreign',
@@ -346,7 +498,20 @@ class LoadData(object):
             'acs_median_rent', 'acs_upper_rent_quartile'
         ]
 
-        zone_types = ['ward', 'neighborhood_cluster', 'census_tract']
+        # dict with key/list pairs for calling summarize_observations method
+        summarize_obs_field_args = {  # [method, table_name, filter_name]
+            'crime_count': ['count', 'crime', 'all'],
+            'violent_crime_count': ['count', 'crime', 'violent'],
+            'non_violent_crime_count': ['count', 'crime', 'nonviolent'],
+            'crime_rate': ['rate', 'crime', 'all'],
+            'violent_crime_rate': ['rate', 'crime', 'violent'],
+            'non_violent_crime_rate': ['rate', 'crime', 'nonviolent'],
+            'building_permits': ['count', 'building_permits', 'all'],
+            'construction_permits': ['count', 'building_permits',
+                                     'construction']
+        }
+
+        zone_types = ['census_tract', 'ward', 'neighborhood_cluster']
 
         query_results = list()
 
@@ -354,39 +519,71 @@ class LoadData(object):
         for zone_type in zone_types:
             field_values = dict()
 
-            # get field value for each zone_specific type
+            # get field value from census table
             for field in census_fields:
-                result = self._census_with_weighting(data_id=field,
-                                                     grouping=zone_type)
-                field_values[field] = result['items']
+                try:
+                    result = self._census_with_weighting(data_id=field,
+                                                         grouping=zone_type)
+                    field_values[field] = result['items']
+                except Exception as e:
+                    logging.error("Couldn't get census data for {}".format(field))
+                    logging.error(e)
 
-            zone_specifics = self._get_zone_specifics_for_zone_type(zone_type)
+            # get field value from building permits and crime table
+            for field in summarize_obs_field_args:
+                try:
+                    method, table_name, filter_name = summarize_obs_field_args[
+                        field]
+                    result = self._summarize_observations(method, table_name,
+                                                          filter_name,
+                                                          months=12,
+                                                          grouping=zone_type)
+                    field_values[field] = result['items']
+                except Exception as e:
+                    logging.error("Couldn't summarize data for {}".format(field))
+                    logging.error(e)
 
-            # TODO: add aggregate for each zone_type into table
-            for zone in zone_specifics:
-                # get not None values so we can added to db
-                columns = list()
-                values = list()
-                for field in census_fields:
-                    zone_value = field_values[field][zone]
 
-                    if zone_value is not None:
-                        columns.append(field)
-                        values.append("'" + str(zone_value) + "'")
+            try:
+                zone_specifics = self._get_zone_specifics_for_zone_type(zone_type)
 
-                # derive column and values strings needed for sql query
-                columns = ', '.join(columns)
-                columns = 'zone, ' + columns
+                for zone in zone_specifics: #list of zones in that zone type, i.e. ['Ward 1', 'Ward 2' etc.]
+                    # skip 'Non-cluster area'
+                    if zone == 'Non-cluster area':
+                        continue
 
-                values = ', '.join(values)
-                values = "'" + zone + "', " + values
+                    # get not None values so we can added to db
+                    columns = list()
+                    values = list()
 
-                q = "INSERT INTO zone_facts ({cols}) VALUES ({vals})".format(
-                    cols=columns, vals=values)
+                    for field in field_values:
+                        field_val = field_values[field]
 
-                with self.engine.connect() as conn:
-                    result = conn.execute(q)
-                    query_results.append(result)
+                        # only proc
+                        if field_val is not None and zone in field_val:
+                            zone_value = field_val[zone]
+
+                            if zone_value is not None:
+                                columns.append(field)
+                                values.append("'" + str(zone_value) + "'")
+
+                    # derive column and values strings needed for sql query
+                    columns = ', '.join(columns)
+                    columns = 'id, zone_type, zone, ' + columns
+
+                    values = ', '.join(values)
+                    values = "'" + str(uuid4()) + "', '" + zone_type + "', '" + \
+                             zone + "', " "" + values
+
+                    q = "INSERT INTO zone_facts ({cols}) VALUES ({vals})".format(
+                        cols=columns, vals=values)
+
+                    with self.engine.connect() as conn:
+                        result = conn.execute(q)
+                        query_results.append(result)
+            except Exception as e:
+                logging.error("Couldn't load data for {} into zone_facts".format(zone_type))
+
 
         return query_results
 
@@ -397,7 +594,7 @@ class LoadData(object):
         with self.engine.connect() as conn:
 
             if zone_type == 'ward':
-                table = 'project'
+                table = 'census_tract_to_ward'
             elif zone_type == 'neighborhood_cluster':
                 table = 'census_tract_to_neighborhood_cluster'
             else:
@@ -423,23 +620,24 @@ class LoadData(object):
         Returns items as dictionary with group and division result as
         key/value pairs instead of list of dictionaries.
         """
-        items = {}
+        items = dict()
         if numerator_data['items'] is None:
             items = None
         else:
             for n in numerator_data['items']:
                 # TODO what should we do when a matching item isn't found?
-                matching_d = next((item for item in denominator_data['items'] if
-                                   item['group'] == n['group']),
-                                  {'group': '_unknown', 'value': None})
-                if matching_d['value'] is None or n['value'] is None:
+
+                if n not in denominator_data['items'] or \
+                                numerator_data['items'][n] is None \
+                        or denominator_data['items'][n] is None:
                     divided = None
                 else:
-                    divided = n['value'] / matching_d['value']
+                    divided = numerator_data['items'][n] / denominator_data[
+                        'items'][n]
 
                 # item = dict({'group': n['group'],
                 #              'value': divided})
-                items[n['group']] = divided
+                items[n] = divided
 
         return {'items': items, 'grouping': numerator_data['grouping'],
                 'data_id': numerator_data['data_id']}
@@ -479,76 +677,269 @@ class LoadData(object):
 
         # If data_id isn't one of our custom ones, assume it is a column name
         else:
-            api_results = self._get_weighted_census_results(grouping, data_id)
-
-            # transform items to dict with group/value instead of list of dict
-            temp_items = {}
-            for item in api_results['items']:
-                temp_items[item['group']] = item['value']
-
-            api_results['items'] = temp_items
+            api_results = self._get_weighted_census_results(grouping, data_id,
+                                                            pop_wt_prop=True)
 
         return api_results
 
-    def _get_weighted_census_results(self, grouping, field):
+    def _get_weighted_census_results(self, grouping, field, pop_wt_prop=False):
         """
         Queries the census table for the relevant field and returns the results
         as a weighted count returns the standard 'items' format.
 
         Currently only implemented for the 'counts' weighting factor not for
         the proportion version.
+
+        :param pop_wt_prop: determine which weighting factor to use. 'False'
+        implies should use population_weight_counts - use for anything that is
+        a total sum for the zone (i.e. total income, total people working, etc.)
+
+        'True' implies should use population_weight_proportion - used for
+        weighting proportion, mean, and median. Note - not quite statistically
+        accurate and should be only used when the source data size is not
+        useful.
         """
+        # configure weighting factor to be used
+        pop_wt = 'population_weight_counts'
+        if pop_wt_prop:
+            pop_wt = 'population_weight_proportions'
+
         with self.engine.connect() as conn:
+            # get the field population value for each census_tract
             q = "SELECT census_tract, {field} FROM census".format(
                 field=field)  # TODO need to add 'year' column for multiple census years when this is added to the data
             proxy = conn.execute(q)
             census_results = [dict(x) for x in proxy.fetchall()]
 
             # Transform the results
-            items = []  # For storing results as we go
+            items = dict()  # For storing results as we go
 
             if grouping == 'census_tract':
                 # No weighting required, data already in proper format
                 for r in census_results:
-                    output = dict({'group': r['census_tract'],
-                                   'value': r[field]})
-                    items.append(output)
+                    items[r['census_tract']] = r[field]
 
             elif grouping in ['ward', 'neighborhood_cluster']:
+                # get zone_specifics for grouping zone_type
                 proxy = conn.execute(
                     "SELECT DISTINCT {grouping} FROM census_tract_to_{grouping}".format(
                         grouping=grouping))
                 groups = [x[0] for x in proxy.fetchall()]
 
+                # get the weighted sum for each zone_specific for grouping
                 for group in groups:
+                    # get only the rows that match group
                     proxy = conn.execute(
                         "SELECT * FROM census_tract_to_{grouping} WHERE {grouping} = '{group}'".format(
                             grouping=grouping, group=group))
                     results = [dict(x) for x in proxy.fetchall()]
 
+                    # for the census_tract for each row: field_value * pop_wt
+                    # and sum all to get total group field_value
                     count = 0
                     for result in results:
                         tract = result['census_tract']
-                        factor = result['population_weight_counts']
+                        factor = result[pop_wt]
                         matching_data = next((item for item in census_results if
                                               item["census_tract"] == tract),
                                              {field: None})
                         if matching_data[field] is None:
                             logging.warning(
-                                "Missing data for census tract when calculating weightings: {}".format(
-                                    tract))
+                                "Missing census_tract data for {} "
+                                "when calculating weightings: {}".format(
+                                    field, tract))
                             matching_data[field] = 0
 
                         value = matching_data[field]
                         count += (value * factor)
 
-                    output = dict({'group': group, 'value': round(count, 0)})
-                    items.append(output)
+                    # output = dict({'group': group, 'value': round(count, 0)})
+                    # items.append(output)
+                    items[group] = round(count, 0)
             else:
                 # Invalid grouping
                 items = None
 
         return {'items': items, 'grouping': grouping, 'data_id': field}
+
+    def _summarize_observations(self, method, table_name, filter_name, months,
+                                grouping):
+        """
+        This endpoint takes a table that has each record as list of observations
+        (like our crime and building_permits tables) and returns summary
+        statistics either as raw counts or as a rate, optionally filtered.
+
+        :param method: "count" or "rate"
+        :param table_name: name of the table in the database, e.g.
+        'building_permits' or 'crime'
+        :param filter_name: code name of the filter to apply to the data, which
+        varies by table
+                    "all" - no filtering applied
+                    "construction" - only building_permits with permit_type_name
+                        = 'CONSTRUCTION'
+                    "violent" - only crimes where the offense type is a violent
+                        crime (note, not 100% match, need to compare DCPD definitions to official to verify)
+                    "nonviolent" - the other crime incidents
+        :param months: The number of months of date to include. By default this
+        is from now() but can be modified by an optional parameter
+        :param grouping: What to use for the 'GROUP BY' clause, e.g. 'ward',
+        'neighbourhood_cluster', 'zip', 'census_tract'.
+
+        Can accept any valid column name, so 'offense' for crime or
+        'permit_type_name' for building_permits are also valid
+
+        Optional params:
+        start: YYYYMMDD format start date to use instead of now() for the duration filter
+
+
+        replaces the count_all method that is deprecated
+
+        Example working URLS:
+        /api/count/crime/all/12/ward - count of all crime incidents
+        /api/count/building_permits/construction/12/neighborhood_cluster - all
+        construction permits in the past year grouped by neighborhood_cluster
+
+        :return:
+        """
+
+
+        ###########################
+        #Handle filters
+        ###########################
+        #Be sure concatenated 'AND' statements have a space in front of them
+        additional_wheres = ''
+        if filter_name == 'all':
+            additional_wheres += " "
+
+        # Filter options for building_permits
+        elif filter_name == 'construction':
+            additional_wheres += " AND permit_type_name = 'CONSTRUCTION' "
+
+        # Filter options for crime
+        elif filter_name == 'violent':
+            additional_wheres += " AND OFFENSE IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
+        elif filter_name == 'nonviolent':
+            additional_wheres += " AND OFFENSE NOT IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
+
+
+        # Fallback for an invalid filter
+        else:
+            additional_wheres += " Incorrect filter name - this inserted SQL will cause query to fail"
+
+        ##########################
+        #Handle date range
+        ##########################
+        date_fields = {'building_permits': 'issue_date',
+                       'crime': 'report_date'}
+        date_field = date_fields[table_name]
+
+        #method currently not implemented. 'count' or 'rate'
+
+        start_date = None #request.args.get('start')
+        if start_date is None:
+            start_date = "now()"
+        else:
+            start_date = dateparser.parse(start_date, dayfirst=False,
+                                          yearfirst=False)
+            start_date = datetime.strftime(start_date, '%Y-%m-%d')
+            start_date = "'" + start_date + "'"
+
+        date_range_sql = (
+            "({start_date}::TIMESTAMP - INTERVAL '{months} months')"
+            " AND {start_date}::TIMESTAMP"
+            ).format(start_date=start_date, months=months)
+
+        #########################
+        # Optional - validate other inputs
+        #########################
+        # Should we restrict the group by to a specific list, or allow whatever
+        # people want?
+        # Ditto for table name
+
+        ###############
+        # Get results
+        ###############
+        api_results = self._count_observations(table_name, grouping, date_field,
+                                               date_range_sql,
+                                               additional_wheres)
+
+        # Edit the data_id. TODO this is not specific enough, need univeral system for handling unique data ids to be used on front end.
+        # Is this better handled here in the API or front end exclusively?
+        api_results['data_id'] += '_' + filter_name
+
+        # Apply the normalization if needed
+        if method == 'rate':
+            # TODO: need to complete get_residential_permits method
+            if table_name in ['building_permits']:
+                denominator = self._get_residential_units(grouping)
+                api_results = self._items_divide(api_results, denominator)
+                api_results = self._scale(api_results, 1000)  # per 1000
+                # residential units
+            if table_name in ['crime']:
+                denominator = self._get_weighted_census_results(grouping,
+                                                           'population')
+                api_results = self._items_divide(api_results, denominator)
+                api_results = self._scale(api_results,
+                                          100000)  # crime incidents per 100,000 people
+
+        # Output as JSON
+        return api_results
+
+    def _count_observations(self, table_name, grouping, date_field,
+                            date_range_sql, additional_wheres=''):
+        fallback = "'Unknown'"
+
+        try:
+            with self.engine.connect() as conn:
+
+                q = """
+                    SELECT COALESCE({grouping},{fallback}) --'Unknown'
+                    ,count(*) AS records
+                    FROM {table_name}
+                    where {date_field} between {date_range_sql}
+                    {additional_wheres}
+                    GROUP BY {grouping}
+                    ORDER BY {grouping}
+                    """.format(grouping=grouping, fallback=fallback,
+                               table_name=table_name, date_field=date_field,
+                               date_range_sql=date_range_sql,
+                               additional_wheres=additional_wheres)
+
+                proxy = conn.execute(q)
+                results = proxy.fetchall()
+
+                #transform the results.
+                #TODO should come up with a better generic way to do this using column
+                  #names for any arbitrary sql table results.
+                formatted = {row[0]: row[1] for row in results}
+
+            return {'items': formatted, 'grouping': grouping,
+                    'data_id': table_name}
+
+        #TODO do better error handling - for interim development purposes only
+        except Exception as e:
+            return {'items': None, 'notes': "Query failed: {}".format(e),
+                    'grouping': grouping, 'data_id': table_name}
+
+    def _scale(self, data, factor):
+        """
+        Multiplies each of the items 'count' entry by the factor
+        """
+
+        for zone in data['items']:
+            try:
+                data['items'][zone] *= factor
+            except Exception as e:
+                data['items'][zone] = None
+
+        return data
+
+    def _get_residential_units(self, grouping):
+        """
+        Returns the number of residential units in the standard 'items' format
+        """
+        # TODO implement me
+        return None
 
     def _process_data_file(self, manifest_row):
         """
@@ -610,7 +1001,7 @@ class LoadData(object):
         # check for database manifest - create it if it doesn't exist
         sql_manifest_exists = \
             ingestionfunctions.check_or_create_sql_manifest(engine=self.engine)
-        logging.info("sql_manifest_exists: {}".format(sql_manifest_exists))
+        logging.info("  sql_manifest_exists: {}".format(sql_manifest_exists))
 
         # configure database interface object and get matching manifest row
         interface = HISql(meta=self.meta, manifest_row=manifest_row,
@@ -640,13 +1031,39 @@ class LoadData(object):
         # if it doesn't have a 'loaded' status in the database manifest
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
+            start_time = time()
             meta_only_fields = self._get_meta_only_fields(
                 table_name=table_name, data_fields=csv_reader.keys)
+            # TODO - concurrency can be handled here: row at a time
+            # TODO - while cleaning one row, start cleaning the next
+            # TODO - once cleaning is done, write row to psv file
+            # TODO - consider using queue: once empty update db with psv data
             for idx, data_row in enumerate(csv_reader):
                 data_row.update(meta_only_fields)  # insert other field dict
                 clean_data_row = cleaner.clean(data_row, idx)
                 if clean_data_row is not None:
                     csv_writer.write(clean_data_row)
+
+            # with concurrent.futures.ThreadPoolExecutor(
+            #         max_workers=100) as executor:
+            #     future_data = {executor.submit(
+            #         self._clean_data, idx, data_row, cleaner, table_name,
+            #         csv_reader.keys): (
+            #         idx, data_row) for idx, data_row in enumerate(csv_reader)}
+            #     for future in concurrent.futures.as_completed(future_data):
+            #         clean_data_row = future.result()
+            #         if clean_data_row is not None:
+            #             csv_writer.write(clean_data_row)
+            #
+            #     csv_writer.close()
+            #
+            #     # write the data to the database
+            #     self._update_database(sql_interface=sql_interface)
+            #
+            #     if not self._keep_temp_files:
+            #         csv_writer.remove_file()
+            #     end_time = time()
+            #     print("\nRun time= %s" % (end_time - start_time))
 
             csv_writer.close()
 
@@ -655,6 +1072,40 @@ class LoadData(object):
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
+            end_time = time()
+            print("\nRun time= %s" % (end_time - start_time))
+
+    def _clean_data(self, idx, data_row, cleaner, table_name, data_fields):
+        """
+        Helper function that actually does the cleaning processing of each
+        row in the raw data file. To improve performance, each row is
+        processess currently by n number of threads determined in
+        _load_single_file method.
+
+        :param idx: the index of the data row
+        :param data_row: the data row to be processed
+        :param cleaner: an object representing the cleaner class to be used
+        :param table_name: the name of the table the data should go in
+        :param data_fields: the column headers required in the database
+        :return: the processed clean data row
+        """
+        if data_row is None:  # skip empty rows
+            return None
+
+        meta_only_fields = self._get_meta_only_fields(
+            table_name=table_name, data_fields=data_fields)
+        data_row.update(meta_only_fields)  # insert other field dict keys
+
+        # handle connection timeouts by pausing then trying again
+        while True:
+            try:
+                clean_data_row = cleaner.clean(data_row, idx)
+                break
+            except Exception:
+                logging.warning("_clean_data(): %s" % data_row)
+                sleep(1)
+
+        return clean_data_row
 
     def _update_database(self, sql_interface):
         """
@@ -710,6 +1161,10 @@ def main(passed_arguments):
         if not passed_arguments.update_only:
             database_choice = 'remote_database_master'
 
+    elif passed_arguments.database == 'codefordc':
+        database_choice = 'codefordc_remote_admin'
+        drop_tables = True
+
     # TODO: do we want to default to local or docker?
     elif passed_arguments.database == 'local':
         database_choice = 'local_database'
@@ -724,8 +1179,15 @@ def main(passed_arguments):
                       keep_temp_files=keep_temp_files,
                       drop_tables=drop_tables)
 
+    #Remove tables before starting ingestion process
+    if passed_arguments.remove_tables:
+        loader.remove_tables(passed_arguments.remove_tables)
+
+    #Decide which load method to use
     if passed_arguments.update_only:
         loader.update_database(passed_arguments.update_only)
+    elif passed_arguments.recalculate_only:
+        loader.recalculate_database()
     else:
         loader.rebuild()
 
@@ -750,12 +1212,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("database", help='which database the data should be '
                                          'loaded to',
-                        choices=['docker', 'docker-local', 'local', 'remote'])
+                        choices=['docker', 'docker-local', 'local', 'remote', 'codefordc'])
     parser.add_argument('-s', '--sample', help='load with sample data',
                         action='store_true')
     parser.add_argument('--update-only', nargs='+',
                         help='only update tables with these unique_data_id '
                              'values')
+
+    parser.add_argument('--remove-tables', nargs='+',
+                    help='Drops tables before running the load data code. '
+                    ' Add the name of each table to drop in format "table1 table2"')
+
+    parser.add_argument ('--recalculate-only',action='store_true',
+                    help="Don't update any data, just redo calculated fields")
 
     # handle passed arguments and options
     main(parser.parse_args())

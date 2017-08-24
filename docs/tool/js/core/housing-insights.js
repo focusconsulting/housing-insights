@@ -17,13 +17,14 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
         }
         controller.getData(metaDataRequest);
     },
-    // Here's where we keep hardcoded URLs. The aim is to make this as short as possible.
+    // Here's where we keep hardcoded URLs.
     //NOTE raw data sources have their urls included in the metaData
     URLS: {
       geoJSONPolygonsBase: "/tool/data/",
-      metaData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/meta",
-      filterData: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/filter",
-      project: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/raw/project"
+      metaData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta",
+      filterData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter",
+      project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
+      layerData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/zone_facts/<source_data_name>/<grouping>"
     }
     
 };
@@ -48,26 +49,46 @@ function StateModule() {
 
     function setState(key,value) { // making all state properties arrays so that previous value is held on to
                                    // current state to be accessed as state[key][0].
-        if ( state[key] === undefined ) {
+        var stateIsNew = (state[key] === undefined);
+
+        
+        console.groupCollapsed("setState:", key, value)
+        if ( stateIsNew ) {
             state[key] = [value];
             PubSub.publish(key, value);
-            console.log('STATE CHANGE', key, value);
-        } else if ( state[key][0] !== value ) { // only for when `value` is a string or number. doesn't seem
-                                                // to cause an issue when value is an object, but it does duplicate
-                                                // the state. i.e. key[0] and key[1] will be equivalent. avoid that
-                                                // with logic before making the setState call.
-            state[key].unshift(value);
-            PubSub.publish(key, value);
-            console.log('STATE CHANGE', key, value);
-            if ( state[key].length > 2 ) {
-                state[key].length = 2;
-            }
+            console.log('STATE CREATED', key, value);
+            console.trace("Stack trace for state " + key);
+
         } else {
-            //TODO do we want for there to be another 'announceState' method that publishes every time it fires, even if the value remains the same??
-            console.log("State value is the same as previous:", key, value);
+            //If it's a string or array and values are the same, stateChanged=False+
+            var stateChanged = true;
+            if (typeof value === 'string') {
+                stateChanged = (state[key][0] !== value)
+            } else if (Array.isArray(value) && Array.isArray(state[key][0])) {
+                stateChanged = !value.compare(state[key][0])
+            } else {
+                stateChanged = true; //assume it's changed if we can't verify
+            }
+
+            //Only publish if we've changed state
+            if (stateChanged ) { 
+                state[key].unshift(value);
+                PubSub.publish(key, value);
+
+                console.log('STATE CHANGE', key, value);
+                console.trace("Stack trace for state " + key);
+                if ( state[key].length > 2 ) {
+                    state[key].length = 2;
+                }
+            } else {
+                //TODO do we want for there to be another 'announceState' method that publishes every time it fires, even if the value remains the same??
+                console.log("STATE UNCHANGED, NO PUB:", key, value);
+                console.trace("Stack trace for state " + key);
+            }
         }
-        
+        console.groupEnd()
     }
+
     function clearState(key) {
         delete state[key];
          PubSub.publish('clearState', key);
@@ -159,10 +180,16 @@ var controller = {
     controlSubs: SubscribeModule(),
     init: function(){
         setSubs([
-            ['switchView', controller.switchView]
+            ['switchView', controller.switchView],
+            ['switchView', router.pushViewChange]
         ]);
-        setState('activeView',mapView);        
-        mapView.init();        
+        if ( router.initialView === 'building' ){
+            setState('activeView', buildingView);
+            buildingView.init(router.buildingID); // parameter distinguishes actions taken in buildingView.init()     
+        } else {
+            setState('activeView',mapView);        
+            mapView.init();  
+        }
     },
     // dataRequest is an object with the properties 'name', 'url' and 'callback'. The 'callback' is a function
     // that takes as an argument the data returned from getData.                             
@@ -170,7 +197,7 @@ var controller = {
         if (model.dataCollection[dataRequest.name] === undefined) { // if data not in collection
             d3.json(dataRequest.url, function(error, data){
                 if ( error ) { console.log(error); }
-                if ( data.items !== null ) {
+                if ( data.objects !== null ) {
                     model.dataCollection[dataRequest.name] = data;
                     setState('dataLoaded.' + dataRequest.name, true );
                     if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
@@ -208,27 +235,29 @@ var controller = {
             }
         });
     },
-    joinToGeoJSON: function(overlay,grouping,activeLayer){
-        model.dataCollection[activeLayer].features.forEach(function(feature){
+    joinToGeoJSON: function(source_data_name,grouping){
+        model.dataCollection[grouping].features.forEach(function(feature){
             var zone = feature.properties.NAME;
-            var dataKey = overlay + '_' + grouping;
-            var zone_entry = model.dataCollection[dataKey].items.find(function(obj){
-                            return obj.group === zone;
+            var dataKey = source_data_name + '_' + grouping;
+            var zone_entry = model.dataCollection[dataKey].objects.find(function(obj){
+                            return obj.zone === zone;
                         });
             //Handle case of a missing entry in the API
             if (zone_entry == undefined){
                 zone_entry = {}
-                zone_entry['count'] = null
+                zone_entry[source_data_name] = null
             };
 
-            feature.properties[overlay] = zone_entry.count;
+            feature.properties[source_data_name] = zone_entry[source_data_name];
+
         });
-        setState('joinedToGeo.' +  overlay + '_' + activeLayer, {overlay:overlay, grouping:grouping, activeLayer:activeLayer});
+        setState('joinedToGeo.' +  source_data_name + '_' + grouping, {overlay:source_data_name, grouping:grouping, activeLayer:grouping}); //TODO change joinedToGeo to not need activeLayer
+
         // e.g. joinedToGeo.crime_neighborhood, {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
     },
     convertToGeoJSON: function(data){ // thanks, Rich !!! JO. takes non-geoJSON data with latititude and longitude fields
                                       // and returns geoJSON with the original data in the properties field
-        var features = data.items.map(function(element){ 
+        var features = data.objects.map(function(element){ 
           return {
             'type': 'Feature',
             'geometry': {
@@ -245,7 +274,11 @@ var controller = {
     },
     // ** NOTE re: classList: not supported in IE9; partial support in IE 10
     switchView: function(msg,data) {
-
+        if ( data === undefined ) {
+            location.reload();
+            return;
+        }
+console.log(msg,data);
         var container = document.getElementById(getState().activeView[0].el);
         container.classList.add('fade');
         console.log( data === getState().activeView[1]);
@@ -274,8 +307,9 @@ var controller = {
         }, 500);
     },
     backToggle: 0,
-    goBack: function(){
-        setState('switchView', getState().activeView[1])
+    goBack: function(hideFromHistory){
+       
+            setState('switchView', getState().activeView[1])
     }
 
 }
@@ -304,6 +338,17 @@ Math.roundTo = function(start, tensExample){
     return Math.round(numberToRound) * tensExample;
 }
 
+var getFieldFromMeta = function(table,sql_name){
+    var meta = model.dataCollection['metaData'] //todo this assumes the data is available already to avoid callback - relies on calling function to request meta first
+    var tableFields = meta[table]['fields']
+
+    for (var i = 0; i < tableFields.length; i++) {
+        if (tableFields[i]['sql_name'] == sql_name){
+            return tableFields[i]
+        }
+    };
+    return null
+}
  // HELPER get parameter by name
  var getParameterByName = function(name, url) { // HT http://stackoverflow.com/a/901144/5701184
       if (!url) {
@@ -337,6 +382,20 @@ Math.roundTo = function(start, tensExample){
     this.splice(new_index, 0, this.splice(old_index, 1)[0]);
     return this; // for testing purposes
 };
+
+//array.compare(otherArray) //HT https://stackoverflow.com/questions/6229197/how-to-know-if-two-arrays-have-the-same-values
+Array.prototype.compare = function(testArr) {
+    if (this.length != testArr.length) return false;
+    if (this.length === 0 && testArr.length === 0) return true;
+    console.log("in compare");
+    console.log(this);
+    for (var i = 0; i < testArr.length; i++) {
+        if (this[i] !== testArr[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 // HELPER String.hashCode()
 
