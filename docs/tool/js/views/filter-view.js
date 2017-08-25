@@ -947,18 +947,25 @@ var filterView = {
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
         var workingData = model.dataCollection['filterData'].objects; 
-        
-   /*     var parent = d3.select('#filter-components')
+
+        var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':true,'onOpen':function(){
-                console.log($( this ).offset().top);
-                if ( $( this ).offset().top + $( this ).height > $('#filter').offset().top + $('#filters').height ) { 
-                  // if the accordion content extend below the bounds of the #filters container
-                    $('#filters').animate({
-                        scrollTop: $( this ).offset().top
-                    }, 500)
-                }
-            }});*/
+
+        $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
+            var difference = $( this ).offset().top + $( this ).height() - $('#filters').offset().top - $('#filters').height(); 
+            /* for debug:
+            console.log($( this ).offset().top + $( this ).height());
+            console.log('vs');
+            console.log($('#filters').offset().top + $('#filters').height() );
+            console.log(difference);
+            */
+            if ( $( this ).offset().top + $( this ).height() > $('#filters').offset().top + $('#filters').height() ) { 
+              // if the accordion content extend below the bounds of the #filters container
+                $('#filters').animate({
+                    scrollTop: $( '#filters' ).scrollTop() + difference + 30
+                }, 500)
+            }
+        }});
 
         //Add components to the navigation using the appropriate component type
         for (var i = 0; i < filterView.components.length; i++) {
@@ -975,22 +982,8 @@ var filterView = {
                 new filterView.dateFilterControl(filterView.components[i]);
             }
             
-                           
-            var parent = d3.select('#filter-components')
-                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
-                console.log($( this ).offset().top + $( this ).height());
-                console.log('vs');
-                console.log($('#filters').offset().top + $('#filters').height() );
-                var difference = $( this ).offset().top + $( this ).height() - $('#filters').offset().top - $('#filters').height(); 
-                console.log(difference);
-                if ( $( this ).offset().top + $( this ).height() > $('#filters').offset().top + $('#filters').height() ) { 
-                  // if the accordion content extend below the bounds of the #filters container
-                    $('#filters').animate({
-                        scrollTop: $( '#filters' ).scrollTop() + difference + 30
-                    }, 500)
-                }
-            }});
+            //note moved the .accordion settings out of for loop b/c only need to set once      
+            
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
 
@@ -1018,7 +1011,7 @@ var filterView = {
                     }
                 };
                 filterView.components[i]['options'] = result;
-
+                
                 new filterView.searchFilterControl(filterView.components[i]);
 
             }
