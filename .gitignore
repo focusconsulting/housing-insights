@@ -10,6 +10,7 @@
 
 !/data/readme.md
 !/data/processed
+!/data/**/*.gitkeep
 
 #######################
 # Notes files
