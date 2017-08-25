@@ -323,9 +323,12 @@ class CleanerBase(object, metaclass=ABCMeta):
                                neighborhood_cluster_desc, zipcode, anc,
                                census_tract, status, full_address, image_url,
                                street_view_url, psa]:
+       
             mar_api = MarApiConn()
             result = mar_api.reverse_address_id(aid=row['mar_id'])
             result = result['returnDataset']['Table1'][0]
+
+        #if there were no null values in the geocodable fields
         else:
             return row
 
@@ -383,10 +386,13 @@ class CleanerBase(object, metaclass=ABCMeta):
                         row['Proj_streetview_url'] = url
 
         if image_url == self.null_value:
-            img_url = result['IMAGEURL']
-            img_dir = result['IMAGEDIR']
-            img_name = result['IMAGENAME']
-            row['Proj_image_url'] = '{}/{}/{}'.format(img_url, img_dir, img_name)
+            try:
+                img_url = result['IMAGEURL']
+                img_dir = result['IMAGEDIR']
+                img_name = result['IMAGENAME']
+                row['Proj_image_url'] = '{}/{}/{}'.format(img_url, img_dir, img_name)
+            except KeyError:
+                row['Proj_image_url'] == self.null_value
 
         if psa == self.null_value:
             psa = result['PSA']
@@ -397,6 +403,54 @@ class CleanerBase(object, metaclass=ABCMeta):
 
     def add_state_county_to_tract(self):
         pass
+
+    def add_mar_full_lookup(self):
+        '''
+        Adds the self.mar_full_lookup dictionary to the object
+        that calls this function. Used in __init__ of any cleaner
+        that will need this mar geocoding available. 
+
+        Unlike mar_tract_lookup, stores all of the geocode
+        fields used by the project table. 
+        
+        NOTE This is currently unused - realized that the opendata.dc.gov 
+        MAR does not provide street view url or image urls. To recreate
+        streetviewurl, we need another MAR API call so using this method
+        does not save us any geocoding time. Saving here for future
+        use if other things need more extensive geocoding.
+        '''
+
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = """
+                select mar_id
+                    , ward
+                    , neighborhood_cluster
+                    , zipcode
+                    , anc
+                    , census_tract
+                    , status
+                    , full_address
+                    , psa 
+                from mar
+                """
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.mar_full_lookup = {d[0]:d[1:] for d in result}
+
+            #Create a mapping of the tuple order to the MAR API key names, so 
+            # that we can decode the results to look like MAR API results
+            self.mar_full_lookup_order = {
+                        'WARD': 0,
+                        'CLUSTER_': 1,
+                        'ZIPCODE': 2,
+                        'ANC_2012': 3,
+                        'CENSUS_TRACT': 4,
+                        'STATUS':5,
+                        'FULLADDRESS':6,
+                        'PSA':7,
+                        'STREETVIEWURL':8
+                    }
 
     def add_mar_tract_lookup(self):
         '''
@@ -412,7 +466,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             proxy = conn.execute(q)
             result = proxy.fetchall()
             self.mar_tract_lookup = {d[0]:d[1] for d in result}
-            
+
 
     def add_census_tract_from_mar(self, row, column_name='mar_id',
                                   lat_lon_col_names=('LATITUDE', 'LONGITUDE'),
@@ -534,7 +588,6 @@ class GenericCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         return row
 
-
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', '', None])
@@ -559,7 +612,6 @@ class SubsidyCleaner(CleanerBase):
 class BuildingPermitsCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
-
         self.add_mar_tract_lookup()
 
     def clean(self, row, row_num=None):
