@@ -773,6 +773,7 @@ var filterView = {
             //Set it up to trigger the layer when title is clicked
             document.getElementById("filter-" + c.source).addEventListener("click", clickCallback);
             function clickCallback() {
+                
                 //TODO this is hacked at the moment, need to restructure how a merged filter+overlay would work together
                 //Currently hacking by assuming the overlay.name is the same as c.source (these are essentially the code name of the data set). 
                 //True only for ACS median rent, the demo data set. 
@@ -947,9 +948,17 @@ var filterView = {
         //We need to read the actual data to get our categories, mins, maxes, etc. 
         var workingData = model.dataCollection['filterData'].objects; 
         
-        var parent = d3.select('#filter-components')
+   /*     var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
+            $('#filter-components').accordion({'exclusive':true,'onOpen':function(){
+                console.log($( this ).offset().top);
+                if ( $( this ).offset().top + $( this ).height > $('#filter').offset().top + $('#filters').height ) { 
+                  // if the accordion content extend below the bounds of the #filters container
+                    $('#filters').animate({
+                        scrollTop: $( this ).offset().top
+                    }, 500)
+                }
+            }});*/
 
         //Add components to the navigation using the appropriate component type
         for (var i = 0; i < filterView.components.length; i++) {
@@ -966,6 +975,22 @@ var filterView = {
                 new filterView.dateFilterControl(filterView.components[i]);
             }
             
+                           
+            var parent = d3.select('#filter-components')
+                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
+            $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
+                console.log($( this ).offset().top + $( this ).height());
+                console.log('vs');
+                console.log($('#filters').offset().top + $('#filters').height() );
+                var difference = $( this ).offset().top + $( this ).height() - $('#filters').offset().top - $('#filters').height(); 
+                console.log(difference);
+                if ( $( this ).offset().top + $( this ).height() > $('#filters').offset().top + $('#filters').height() ) { 
+                  // if the accordion content extend below the bounds of the #filters container
+                    $('#filters').animate({
+                        scrollTop: $( '#filters' ).scrollTop() + difference + 30
+                    }, 500)
+                }
+            }});
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
 

@@ -9,6 +9,12 @@
 
 
 /*Stuff for all filter components*/
+
+#filter-components {
+  padding-bottom: 150px;
+  
+}
+
 .filter-group {
     border-bottom: 1px solid black;
 }
