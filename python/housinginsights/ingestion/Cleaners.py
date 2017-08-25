@@ -15,7 +15,7 @@ from housinginsights.ingestion.DataReader import HIReader
 from housinginsights.sources.mar import MarApiConn
 from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
 from housinginsights.sources.google_maps import GoogleMapsApiConn
-from python.housinginsights.sources.models.mar import MAR_TO_TABLE_FIELDS
+from housinginsights.sources.models.mar import MAR_TO_TABLE_FIELDS
 
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -398,13 +398,39 @@ class CleanerBase(object, metaclass=ABCMeta):
     def add_state_county_to_tract(self):
         pass
 
+    def add_mar_tract_lookup(self):
+        '''
+        Adds the self.mar_tract_lookup dictionary to the object
+        that calls this function. Typically called in the __init__
+        function of a class that will use this lookup table while
+        cleaning
+        '''
+
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select mar_id, census_tract from mar"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.mar_tract_lookup = {d[0]:d[1] for d in result}
+            
+
     def add_census_tract_from_mar(self, row, column_name='mar_id',
                                   lat_lon_col_names=('LATITUDE', 'LONGITUDE'),
                                   x_y_coords_col_names=('X', 'Y'),
                                   address_col_name='FULL_ADDRESS'):
         """Returns the census tract for given mar_id using the mar api."""
-        # check internal database first
+        
         mar_id = row[column_name]
+
+        #Try to get it from memory first
+        try:
+            tract = self.mar_tract_lookup[mar_id]
+            row['census_tract'] = tract
+            return row
+        except KeyError:
+            pass
+
+        #Then check internal database directly
         with self.engine.connect() as conn:
             # do mar_id lookup
             q = "select census_tract from mar where mar_id = '{}'".format(
@@ -531,6 +557,11 @@ class SubsidyCleaner(CleanerBase):
 
 
 class BuildingPermitsCleaner(CleanerBase):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+
+        self.add_mar_tract_lookup()
+
     def clean(self, row, row_num=None):
 
         row = self.replace_nulls(row, null_values=['NONE', '', None])
