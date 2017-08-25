@@ -31,6 +31,7 @@ from sqlalchemy import Table, Column, Integer, String, MetaData, Numeric
 from datetime import datetime
 from uuid import uuid4
 import dateutil.parser as dateparser
+from sqlalchemy.exc import ProgrammingError
 
 # Needed to make relative package imports when running this file as a script
 # (i.e. for testing purposes).
@@ -121,6 +122,34 @@ class LoadData(object):
             '''))
         return query_result
 
+    def remove_tables(self, tables):
+        '''
+        Used when you want to update only part of the database. Drops the table
+        and deletes all associated rows in the sql manifest. Run this before
+        updating data in tables that have added or removed columns. 
+
+        tables: a list of table names to be deleted
+        '''
+        for table in tables:
+            try:
+                logging.info("Dropping the {} table and all associated manifest rows".format(table))
+                #Delete all the relevant rows of the sql manifest table
+                q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
+                conn = self.engine.connect()
+                proxy = conn.execute(q)
+                results = proxy.fetchall()
+                for row in results:
+                    q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                        row[0])
+                    conn.execute(q)
+
+                #And drop the table itself
+                q = "DROP TABLE {}".format(table)
+                conn.execute(q)
+            except ProgrammingError:
+                logging.error("Couldn't remove table {}".format(table))
+
+
     def _meta_json_to_database(self):
         """
         Makes sure we have a meta table in the database.
@@ -158,26 +187,65 @@ class LoadData(object):
             manifest_row=manifest_row, temp_filepath=temp_filepath)
         sql_manifest_row = sql_interface.get_sql_manifest_row()
 
+
         try:
             # delete only rows with data_id in respective table
             table_name = sql_manifest_row['destination_table']
+        except TypeError: #will occur if sql_manifest_row == None
+            logging.info("    No sql_manifest exists! Proceed with adding"
+                         " new data to the database!")
+            return None
+        
+        try:
             query = "DELETE FROM {} WHERE unique_data_id =" \
                     " '{}'".format(table_name, uid)
-            logging.info("\t\tDeleting {} data from {}!".format(
+            logging.info("    Deleting {} data from {}!".format(
                 uid, table_name))
             result = self.engine.execute(query)
-
             # change status = deleted in sql_manifest
-            logging.info("\t\tResetting status in sql manifest row!")
+            logging.info("    Resetting status in sql manifest row!")
             sql_interface.update_manifest_row(conn=self.engine,
                                               status='deleted')
+        except ProgrammingError:
+            logging.warning("Problem executing DELETE query for table {} and uid {}. Manifest row exists"
+                        " but table does not. You should check validity of"
+                        " table and data".format(table_name,uid))
+            return None
+            
+        return result
+        
+    def _remove_table_if_empty(self, manifest_row):
+        """
+        If a table is empty (all data has been removed, e.g. using _remove_existing_data),
+        delete the table itself. This allows the table to be rebuilt from scratch using
+        meta.json when new data is loaded - for example, if additional columns have been added. 
 
-            return result
-        except TypeError:
-            logging.info("\t\tNo sql_manifest exists! Proceed with adding"
-                         " new data to the database!")
+        :param manifest_row: the row for the uid in the manifest as a dictionary, which 
+        supplies the name of the table to be checked/dropped
 
-        return None
+        returns: result from executing delete qurey
+        """
+        table_name = manifest_row['destination_table']
+        conn = self.engine.connect()
+
+
+        try:
+            proxy = conn.execute("SELECT COUNT(*) FROM {}".format(table_name))
+            result = proxy.fetchall()
+        except ProgrammingError:
+            logging.info("    Couldn't find table {} in the database".format(table_name))
+            conn.close()
+            return None
+
+        #If the table is empty
+        if result[0][0] == 0: #result format is [(count,)] i.e. list of tuples with each tuple = one row of result
+            try:
+                logging.info("    Dropping table from database: {}".format(table_name))
+                proxy = conn.execute("DROP TABLE {}".format(table_name))
+                conn.close()
+                return proxy
+            except ProgrammingError:
+                logging.warning("Problem dropping table")
 
     def _get_most_recent_timestamp_subfolder(self, root_folder_path):
         """
@@ -238,16 +306,17 @@ class LoadData(object):
 
             # process manifest row for requested data_id if flagged for use
             if manifest_row is None:
-                logging.info("\tSkipping: {} not found in manifest!".format(
+                logging.info("  Skipping: {} not found in manifest!".format(
                     uid))
             else:
-                logging.info("\tManifest row found for {} - preparing to "
+                logging.info("  Manifest row found for {} - preparing to "
                              "remove data.".format(uid))
                 self._remove_existing_data(uid=uid, manifest_row=manifest_row)
+                self._remove_table_if_empty(manifest_row = manifest_row)
 
                 # follow normal workflow and load data_id
                 logging.info(
-                    "\tLoading {} data!".format(uid))
+                    "  Loading {} data!".format(uid))
                 self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
 
@@ -452,56 +521,69 @@ class LoadData(object):
 
             # get field value from census table
             for field in census_fields:
-                result = self._census_with_weighting(data_id=field,
-                                                     grouping=zone_type)
-                field_values[field] = result['items']
+                try:
+                    result = self._census_with_weighting(data_id=field,
+                                                         grouping=zone_type)
+                    field_values[field] = result['items']
+                except Exception as e:
+                    logging.error("Couldn't get census data for {}".format(field))
+                    logging.error(e)
 
             # get field value from building permits and crime table
             for field in summarize_obs_field_args:
-                method, table_name, filter_name = summarize_obs_field_args[
-                    field]
-                result = self._summarize_observations(method, table_name,
-                                                      filter_name,
-                                                      months=12,
-                                                      grouping=zone_type)
-                field_values[field] = result['items']
+                try:
+                    method, table_name, filter_name = summarize_obs_field_args[
+                        field]
+                    result = self._summarize_observations(method, table_name,
+                                                          filter_name,
+                                                          months=12,
+                                                          grouping=zone_type)
+                    field_values[field] = result['items']
+                except Exception as e:
+                    logging.error("Couldn't summarize data for {}".format(field))
+                    logging.error(e)
 
-            zone_specifics = self._get_zone_specifics_for_zone_type(zone_type)
 
-            for zone in zone_specifics:
-                # skip 'Non-cluster area'
-                if zone == 'Non-cluster area':
-                    continue
+            try:
+                zone_specifics = self._get_zone_specifics_for_zone_type(zone_type)
 
-                # get not None values so we can added to db
-                columns = list()
-                values = list()
+                for zone in zone_specifics: #list of zones in that zone type, i.e. ['Ward 1', 'Ward 2' etc.]
+                    # skip 'Non-cluster area'
+                    if zone == 'Non-cluster area':
+                        continue
 
-                for field in field_values:
-                    field_val = field_values[field]
+                    # get not None values so we can added to db
+                    columns = list()
+                    values = list()
 
-                    # only proc
-                    if field_val is not None and zone in field_val:
-                        zone_value = field_val[zone]
+                    for field in field_values:
+                        field_val = field_values[field]
 
-                        if zone_value is not None:
-                            columns.append(field)
-                            values.append("'" + str(zone_value) + "'")
+                        # only proc
+                        if field_val is not None and zone in field_val:
+                            zone_value = field_val[zone]
 
-                # derive column and values strings needed for sql query
-                columns = ', '.join(columns)
-                columns = 'id, zone_type, zone, ' + columns
+                            if zone_value is not None:
+                                columns.append(field)
+                                values.append("'" + str(zone_value) + "'")
 
-                values = ', '.join(values)
-                values = "'" + str(uuid4()) + "', '" + zone_type + "', '" + \
-                         zone + "', " "" + values
+                    # derive column and values strings needed for sql query
+                    columns = ', '.join(columns)
+                    columns = 'id, zone_type, zone, ' + columns
 
-                q = "INSERT INTO zone_facts ({cols}) VALUES ({vals})".format(
-                    cols=columns, vals=values)
+                    values = ', '.join(values)
+                    values = "'" + str(uuid4()) + "', '" + zone_type + "', '" + \
+                             zone + "', " "" + values
 
-                with self.engine.connect() as conn:
-                    result = conn.execute(q)
-                    query_results.append(result)
+                    q = "INSERT INTO zone_facts ({cols}) VALUES ({vals})".format(
+                        cols=columns, vals=values)
+
+                    with self.engine.connect() as conn:
+                        result = conn.execute(q)
+                        query_results.append(result)
+            except Exception as e:
+                logging.error("Couldn't load data for {} into zone_facts".format(zone_type))
+
 
         return query_results
 
@@ -754,7 +836,6 @@ class LoadData(object):
         #method currently not implemented. 'count' or 'rate'
 
         start_date = None #request.args.get('start')
-        print("Start_date found: {}".format(start_date))
         if start_date is None:
             start_date = "now()"
         else:
@@ -920,7 +1001,7 @@ class LoadData(object):
         # check for database manifest - create it if it doesn't exist
         sql_manifest_exists = \
             ingestionfunctions.check_or_create_sql_manifest(engine=self.engine)
-        logging.info("sql_manifest_exists: {}".format(sql_manifest_exists))
+        logging.info("  sql_manifest_exists: {}".format(sql_manifest_exists))
 
         # configure database interface object and get matching manifest row
         interface = HISql(meta=self.meta, manifest_row=manifest_row,
@@ -1098,6 +1179,11 @@ def main(passed_arguments):
                       keep_temp_files=keep_temp_files,
                       drop_tables=drop_tables)
 
+    #Remove tables before starting ingestion process
+    if passed_arguments.remove_tables:
+        loader.remove_tables(passed_arguments.remove_tables)
+
+    #Decide which load method to use
     if passed_arguments.update_only:
         loader.update_database(passed_arguments.update_only)
     elif passed_arguments.recalculate_only:
@@ -1132,6 +1218,11 @@ if __name__ == '__main__':
     parser.add_argument('--update-only', nargs='+',
                         help='only update tables with these unique_data_id '
                              'values')
+
+    parser.add_argument('--remove-tables', nargs='+',
+                    help='Drops tables before running the load data code. '
+                    ' Add the name of each table to drop in format "table1 table2"')
+
     parser.add_argument ('--recalculate-only',action='store_true',
                     help="Don't update any data, just redo calculated fields")
 

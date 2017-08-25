@@ -42,3 +42,6 @@ services:
         command: tail -f /dev/null
         ports:
             - "5000:5000"
+        environment:
+            - SET_CONTAINER_TIMEZONE=true
+            - CONTAINER_TIMEZONE=America/New_York

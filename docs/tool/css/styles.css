@@ -65,6 +65,12 @@ html, body {
     font-weight: bold;
 }
 
+/* Ensure there's no extra scroll bar within
+the container for categorical filters */
+div.filter.categorical.content.active {
+    overflow: visible;
+}
+
 /* Text input boxes within sidebars */
 div.filter.content input.filter-text{
     display: inline-block;
@@ -703,4 +709,23 @@ dl.inline dd:after{
 dl.inline dt{
   display: inline-block;
   min-width: 75px;
+}
+
+
+/*search bar*/
+#searchbar .dropdown {
+    border-radius:15px;
+    max-width:400px;
+    float:right;
+    margin-right:10px;
+    margin-left:50px;
+}
+
+#searchbar {
+    height:30px;
+}
+
+/*patches semantic ui bug that search helper text is cut off after clearing a pillbox*/
+input.search {
+    width:200px !important;
 }

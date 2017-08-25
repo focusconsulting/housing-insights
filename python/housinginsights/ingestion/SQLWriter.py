@@ -154,6 +154,7 @@ class HISql(object):
         # TODO make sure data is synced or appended properly
         sql_manifest_row = self.get_sql_manifest_row(db_conn=conn,
                                                      close_conn=False)
+
         if sql_manifest_row is not None:
             logging.info("  deleting existing manifest row for {}".format(
                 self.unique_data_id))
@@ -272,6 +273,7 @@ class HISql(object):
             return results[0]
 
         if len(results) == 0:
+            logging.info("  Couldn't find sql_manifest_row for {}".format(self.unique_data_id))
             return None
 
     def get_sql_fields_and_type_from_meta(self, table_name=None):

@@ -5,13 +5,15 @@ import requests
 import os
 import time
 import time
-import logging
 import traceback
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir)))
 from housinginsights.sources.base import BaseApiConn
 import housinginsights.tools.dbtools as dbtools
+from housinginsights.tools.logger import HILogger
 import sqlalchemy
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class WmataApiConn(BaseApiConn):
 
@@ -21,7 +23,7 @@ class WmataApiConn(BaseApiConn):
 
         self.meters_per_mile = 1609.344
         self.use_cached_distance = use_cached_distance
-        logging.info("Use cached distance: {}".format(use_cached_distance))
+        logger.info("Use cached distance: %s", use_cached_distance)
 
         #pull API keys
         secretsFileName =  os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -45,7 +47,7 @@ class WmataApiConn(BaseApiConn):
             elif u == 'wmata_dist':
                 self.get_dist(unique_data_ids=['wmata_dist'],sample=sample,output_type=output_type,db=db)
             else:
-                logging.info("  unique_data_id '{}' not supported by the WmataApiConn".format(u))
+                logger.info("  unique_data_id '%s' not supported by the WmataApiConn", u)
 
     def get_stops(self, unique_data_ids=None, sample=False, output_type ='csv'):
 
@@ -63,11 +65,11 @@ class WmataApiConn(BaseApiConn):
                 self._array_to_csv(self.stopsHeader,self.stopsOutput, self.output_paths[u])
 
             elif ( output_type == 'stdout'):
-                logging.info("==========================================================================\n")
-                logging.info(self.stopsHeader)
-                logging.info("--------------------------------------------------------------------------\n")
+                print("==========================================================================\n")
+                print(self.stopsHeader)
+                print("--------------------------------------------------------------------------\n")
                 for line in self.stopsOutput:
-                    logging.info(line)
+                    print(line)
 
             else:
                 self._array_to_csv(self.stopsHeader,self.stopsOutput,output_type)
@@ -89,7 +91,7 @@ class WmataApiConn(BaseApiConn):
                 #Configure the connection
                 engine = dbtools.get_database_engine(db)
                 conn = dbtools.get_database_connection(db)
-                logging.info("  Connected to Housing Insights database")
+                logger.info("  Connected to Housing Insights database")
                 columnset = conn.execute('select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME=\'project\'')
 
                 #Get the rows
@@ -101,8 +103,7 @@ class WmataApiConn(BaseApiConn):
                 conn.close()
                 engine.dispose()
             except Exception as e:
-                logging.warning(e)
-                logging.warning("I am unable to connect to the database")
+                logger.error("I am unable to connect to the database: %s", e)
 
             columns = []
             for c in columnset:
@@ -110,7 +111,7 @@ class WmataApiConn(BaseApiConn):
 
             numrow = 0
             total_rows = rows.rowcount
-            logging.info("  Total rows: {}".format(total_rows))
+            logger.info("Total rows: %s", total_rows)
 
             #Get the rail stations once (no option to only get closest ones provided by wmata)
             wmata_headers = self._get_wmata_headers()
@@ -126,31 +127,31 @@ class WmataApiConn(BaseApiConn):
                 lon = project_details['lon']
 
                 if lat == None or lon == None:
-                    logging.warning("  Lat or Lon not available for project {}".format(project_details['nlihcid']))
-                    
+                    logger.warning("  Lat or Lon not available for project {}".format(project_details['nlihcid']))
+
                 if lat != None and lon != None:
-                    logging.info("  Processing project {} of {}".format(numrow,total_rows))
+                    logger.info("  Processing project %s of %s", numrow,total_rows)
 
                     # find all metro stations within 0.5 miles
-                    logging.info("  Starting processing rail stations for {}".format(project_details['nlihcid']))
+                    logger.info("  Starting processing rail stations for %s", project_details['nlihcid'])
                     self._find_rail_stations(self.railStations,project_details,radius,sample=sample,db=db)
-                    logging.info("  Completed processing rail stations for project id {}".format(project_details['nlihcid']))
+                    logger.info("  Completed processing rail stations for project id %s", project_details['nlihcid'])
 
                     # find all bus stops within 0.5 miles
-                    logging.info("  Starting processing bus stations for project id {}".format(project_details['nlihcid']))
+                    logger.info("  Starting processing bus stations for project id %s", project_details['nlihcid'])
                     self._find_bus_stations(project_details, radius,sample=sample,db=db)
-                    logging.info("  Completed processing bus stations for project id {}".format(project_details['nlihcid']))
+                    logger.info("  Completed processing bus stations for project id %s", project_details['nlihcid'])
 
             #Save the data
             if ( output_type == 'csv'):
                 self._array_to_csv(self.distHeader, self.distOutput, self.output_paths[u])
 
             elif ( output_type == 'stdout'):
-                logging.info("==========================================================================\n")
-                logging.info(self.distHeader)
-                logging.info("==========================================================================\n")
+                print("==========================================================================\n")
+                print(self.distHeader)
+                print("==========================================================================\n")
                 for line in self.distOutput:
-                    logging.info(line)
+                    print(line)
 
             else:
                 self._array_to_csv(self.distHeader, self.distOutput,output_type)
@@ -166,7 +167,7 @@ class WmataApiConn(BaseApiConn):
            infoCsvWriter - csv writer
            wmata_api_key - api key for wmata REST services
            """
-        logging.info("Writing RAIL stops")
+        logger.info("Writing RAIL stops")
 
         wmata_headers = self._get_wmata_headers()
 
@@ -193,7 +194,7 @@ class WmataApiConn(BaseApiConn):
             wmata_api_key - api key for wmata REST services
             """
 
-        logging.info("Writing BUS stops")
+        logger.info("Writing BUS stops")
 
         wmata_headers = self._get_wmata_headers()
 
@@ -257,7 +258,7 @@ class WmataApiConn(BaseApiConn):
                     results = [dict(x) for x in proxy.fetchall()]
 
                     if ( len(results) != 0 ):
-                        logging.info("  Found cached row!")
+                        logger.info("  Found cached row!")
                         walking_distance = results[0]['dist_in_miles']
 
                         conn.close()
@@ -265,16 +266,14 @@ class WmataApiConn(BaseApiConn):
 
                         return float(walking_distance)*self.meters_per_mile
                     else:
-                        logging.info("  Couldn't find cached row for {}".format(proj_query))
+                        logger.info("  Couldn't find cached row for %s", proj_query)
                 else:
-                    logging.info("Couldn't find all columns")
+                    logger.info("Couldn't find all columns")
 
                 conn.close()
                 engine.dispose()
             except Exception as e:
-                logging.warning(e)
-                traceback.print_exc(file=sys.stdout)
-                logging.warning("I am unable to connect to the database")
+                logger.error("Unable to connect to the database: %s", e)
 
         distReqCoords = str(srcLon) + ',' + str(srcLat) + ';' + str(destLon) + ',' + str(destLat)
 
@@ -329,16 +328,16 @@ class WmataApiConn(BaseApiConn):
                 if crow_distance < (radiusinmeters / self.meters_per_mile):
                     walkDist = self._get_walking_distance(lat, lon, str(station['Lat']), str(station['Lon']),db=db)
                     walkDistMiles = walkDist / self.meters_per_mile
-                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                    logger.info("crow: %s. walking: %s", crow_distance, walkDistMiles)
                     if walkDist <=radiusinmeters:
                         self.distOutput.append([nlihc_id, 'rail', station['Code'], "{0:.2f}".format(walkDistMiles),crow_distance, lat,lon,str(station['Lat']),str(station['Lon'])])
 
                 else:
-                    logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
-            
+                    logger.info("crow: %s. %s is not close enough to calculate walking distance. ", crow_distance, station['Code'])
+
             except Exception as e:
                 #Main error encountered was 'Null' values for project lat/lon. Returning null value
-                logging.warning("Error calculating for {}".format(nlihc_id))
+                logger.error("Error calculating for %s", nlihc_id)
                 self.distOutput.append([nlihc_id, 'rail', station['Code'], "Null", "Null", lat,lon,str(station['Lat']),str(station['Lon'])])
 
     def _haversine(self, lat1, lon1, lat2,lon2):
@@ -383,15 +382,15 @@ class WmataApiConn(BaseApiConn):
                 if crow_distance < (radiusinmeters / self.meters_per_mile):
                     walkDist = self._get_walking_distance(lat, lon, str(stop['Lat']), str(stop['Lon']),db=db)
                     walkDistMiles = walkDist / self.meters_per_mile
-                    logging.info("crow: {}. walking: {}".format(crow_distance,walkDistMiles))
+                    logger.info("crow: %s. walking: %s", crow_distance, walkDistMiles)
                     if walkDist <= radiusinmeters: #within 0.5 miles walking
                         self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "{0:.2f}".format(walkDistMiles),crow_distance,lat,lon,str(stop['Lat']),str(stop['Lon'])])
 
                 else:
-                    logging.info("crow: {}. {} is not close enough to calculate walking distance. ".format(crow_distance,station['Code']))
+                    logger.info("crow: %s. %s is not close enough to calculate walking distance. ", crow_distance, station['Code'])
             except Exception as e:
                 #Main error encountered was 'Null' values for project lat/lon. Returning null value
-                logging.warning("Error calculating for {}".format(nlihc_id))
+                logger.error("Error calculating for %s", nlihc_id)
                 self.distOutput.append([nlihc_id, 'bus', stop['StopID'], "Null","Null",lat,lon,str(stop['Lat']),str(stop['Lon'])])
 
     def _array_to_csv(self, fields, list_of_lists, filepath):
