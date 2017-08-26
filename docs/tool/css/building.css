@@ -4,18 +4,31 @@
 
 #building-view-container{
 	position: relative;
+	padding-left: 30px;
 	height: 100%;
 	width: 80%;
-	top: 0%;
+	top: 20px;
 	left: 0%;
 }
 
+#building-view-container section:nth-of-type(1n+1){
+	margin-top: 40px;
+}
+
+#building-view-container section h1, 
+#building-view-container section h2{
+	margin-bottom: 15px;
+}
 #building-view-segments{
 	position: fixed;
 	height: 100%;
 	width: 20%;
+	max-width: 200px;
 	top: 80px;
-	left: 80%;
+}
+
+#building-view-segments div{
+	padding: 5px 10px 5px 10px !important;
 }
 
 .building-info-block {
