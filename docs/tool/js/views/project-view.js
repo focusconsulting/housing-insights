@@ -124,10 +124,6 @@ var projectView = {
       for(var segmentName in projectView.layout){
         (new projectView.NavSidebarButton(projectView.layout[segmentName])).render();
       }
-      document.getElementById('button-segments').addEventListener('click', function(){
-        document.getElementById('button-segments').classList.toggle('active');
-        document.getElementById(projectView.navSidebar.id).classList.toggle('active');
-      });
     }
   },
   NavSidebarButton: function(objectWithinLayout){

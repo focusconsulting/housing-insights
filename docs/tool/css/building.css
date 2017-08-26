@@ -2,6 +2,22 @@
   min-height: 300px;
 }
 
+#building-view-container{
+	position: relative;
+	height: 100%;
+	width: 80%;
+	top: 0%;
+	left: 0%;
+}
+
+#building-view-segments{
+	position: fixed;
+	height: 100%;
+	width: 20%;
+	top: 80px;
+	left: 80%;
+}
+
 .building-info-block {
   line-height: 1.2;
 }
