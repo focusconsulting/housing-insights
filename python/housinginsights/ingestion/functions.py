@@ -138,6 +138,63 @@ def join_paths(pieces=[]):
     '''
     return '/'.join(s.strip('/') for s in pieces)
 
+
+def identify_valid_unique_address(address_str=""):
+
+    def _trim_str(add_str):
+        """Helper function that does some simple string cleaning."""
+        add_str = add_str.lstrip()
+        add_str = add_str.rstrip()
+        return add_str
+
+    result = list()
+
+    # 1: identify all full address delimiters - ';', 'and'
+    temp_results = address_str.split(sep=';')
+    if len(temp_results) > 1:
+        for address in temp_results:
+            address = _trim_str(address)
+            result.append(address)
+
+    temp_results = address_str.split(sep='and')
+    if len(temp_results) > 1:
+        for address in temp_results:
+            address = _trim_str(address)
+            result.append(address)
+
+    # 2: identify address number range delimiters  - '&', '-'
+    temp_results = address_str.split(sep='&')
+    if len(temp_results) > 1:
+        num_1 = _trim_str(temp_results[0])
+        base = _trim_str(temp_results[1])
+        num_2, base = base.split(' ', 1)
+        num_2 = _trim_str(num_2)
+        base = _trim_str(base)
+
+        result.append('{} {}'.format(num_1, base))
+        result.append('{} {}'.format(num_2, base))
+
+    temp_results = address_str.split(sep='-')
+    if len(temp_results) > 1:
+        num_1 = _trim_str(temp_results[0])
+        base = _trim_str(temp_results[1])
+        num_2, base = base.split(' ', 1)
+        num_2 = _trim_str(num_2)
+        base = _trim_str(base)
+
+        # check whether odd, even, or ambiguous range
+        even = True if int(num_1) % 2 == 0 else False
+
+        if (int(num_2) % 2 == 0 and not even) or (int(num_2) % 2 != 0 and even):
+            even = None
+
+        # populate address number ranges
+        step = 1 if even is None else 2
+        for num in range(int(num_1), int(num_2) + 1, step):
+            result.append('{} {}'.format(num, base))
+
+    return result
+
 #Used for testing purposes
 if __name__ == '__main__':
 
