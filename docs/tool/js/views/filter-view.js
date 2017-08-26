@@ -1185,10 +1185,25 @@ var filterView = {
                 }, 1500);
 
             })
+            //Add pillbox click event to navigate to associated filter control
+            .on('click', function(d){
+                var $accordion = $('#filter-' + d.component.source);
+                if ( !$accordion.hasClass('active') ){
+                    $accordion.click();
+                } else {
+                    var $filterContent = $('#filter-content-' + d.component.source);
+                    var difference = $filterContent.offset().top + $filterContent.height() - $('#filters').offset().top - $('#filters').height(); 
+                    $('#filters').animate({
+                        scrollTop: $( '#filters' ).scrollTop() + difference + 30
+                    }, 500);
+                }
+            })
+
         //Add the 'clear' x mark and its callback
             .append('i')
             .classed("delete icon",true)
             .on("click", function(d) {
+                d3.event.stopPropagation();
                 d.clear();
             })
                  
