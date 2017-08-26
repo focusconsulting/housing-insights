@@ -1016,51 +1016,50 @@
           // if (data){
             d3.select('#csvExport')
               .on('click', function(d) {
-                  console.log("YOU CLICKED EXPORT CSV");
-                  var preview = d3.select('#buildings-list');
-                  var listItems = preview.selectAll('div');
-                  var projectNames = [];
-                  listItems._groups[0].forEach( function(project){
-                    projectNames.push(project.innerText);
-                  })
-                  var allData = mapView.convertedProjects.features;
-                  // console.log(mapView.convertedProjects);
-                  var matchesData = allData.filter(function(feature) {
-                      return feature.properties.matches_filters === true;
+                  console.log("INFO clicked export CSV");
+
+                  var allData = model.dataCollection['raw_project'];
+                  var matchesData = allData.objects.filter(function(feature) {
+                      return feature.matches_filters === true;
                   });
-                  var notMatchesData = allData.filter(function(feature) {
-                      return feature.properties.matches_filters === false;
+                  var notMatchesData = allData.objects.filter(function(feature) {
+                      return feature.matches_filters === false;
                   });
 
                   //Create a csv from the data
                   var csvContent = "data:text/csv;charset=utf-8,";
                   var keys = "matches_filters,";
-                  for (key in allData[0].properties){
+                  Object.keys(allData.objects[0]).forEach(function(key){
                     if ( key !== "matches_filters"){
                       keys += key + ",";
                     }
-                  }
+                  })
                   csvContent += keys + '\n';
                   matchesData.forEach( function(project){
-                    csvContent += String(project.properties['matches_filters']) + ",";
-                    for (key in project.properties){
+                    csvContent += String(project['matches_filters']) + ",";
+                    Object.keys(project).forEach( function(key){
                       if ( key !== "matches_filters"){
-                        csvContent += String(project.properties[key]).replace(/,/g,' ') + ",";
+                        csvContent += String(project[key]).replace(/,/g,' ') + ",";
                       }
-                    }
+                    })
                     csvContent += '\n';
                   })
                   notMatchesData.forEach( function(project){
-                    csvContent += String(project.properties['matches_filters']) + ",";
-                    for (key in project.properties){
+                    csvContent += String(project['matches_filters']) + ",";
+                    Object.keys(project).forEach( function(key){
                       if ( key !== "matches_filters"){
-                        csvContent += String(project.properties[key]).replace(/,/g,' ') + ",";
+                        csvContent += String(project[key]).replace(/,/g,' ') + ",";
                       }
-                    }
+                    })
                     csvContent += '\n';
                   })
                   var encodedUri = encodeURI(csvContent);
-                  window.open(encodedUri);
+                  var link = document.createElement("a");
+                  link.setAttribute("href", encodedUri);
+                  link.setAttribute("download", "projects.csv");
+                  document.body.appendChild(link); // Required for FF
+
+                  link.click(); // This will download the data file named "projects.csv".
               });
           // }
         },
