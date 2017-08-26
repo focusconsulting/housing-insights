@@ -617,11 +617,11 @@ a.active {
     color: rgba(0, 0, 30, 0.95);
 }
 
-/*
+
 .ui.styled.accordion .title.filter-title.filter-activated, .ui.styled.accordion .active.title.filter-title.filter-activated {
     background: rgba(234, 100, 2, 0.7);
 }
-*/
+
 /*Clear filter pillboxes*/
 .ui.label.clear-single {
     background-color: rgba(253,126,35,0.7);
@@ -629,6 +629,7 @@ a.active {
     position: relative;
     font-size: .95em;
     margin-top:5px;
+    cursor: pointer;
 }
 
 .ui.label.clear-single-flier {

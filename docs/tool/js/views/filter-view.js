@@ -1185,6 +1185,11 @@ var filterView = {
                 }, 1500);
 
             })
+            //Add pillbox click event to navigate to associated filter control
+            .on('click', function(d){
+                $('#filter-' + d.component.source).click();
+            })
+
         //Add the 'clear' x mark and its callback
             .append('i')
             .classed("delete icon",true)
