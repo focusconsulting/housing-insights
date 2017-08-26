@@ -5,9 +5,9 @@ Module contains helper functions used in loading data into database
 import logging
 import json
 from sqlalchemy.exc import ProgrammingError
-import sys, os
+import sys
+import os
 
-from importlib import import_module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir, os.pardir)))
 
@@ -137,6 +137,96 @@ def join_paths(pieces=[]):
     Alternative to os.path.join if the second argument might start with "/"
     '''
     return '/'.join(s.strip('/') for s in pieces)
+
+
+def get_unique_addresses_from_str(address_str=""):
+
+    def _trim_str(add_str):
+        """Helper function that does some simple string cleaning."""
+        add_str = add_str.lstrip()
+        add_str = add_str.rstrip()
+        return add_str
+
+    def _parse_semicolon_delimiter(address_list):
+        """Helper function that handles parsing semicolon delimiters"""
+        output = list()
+        for add_str in address_list:
+            temp_results = add_str.split(sep=';')
+            if len(temp_results) > 1:
+                for address in temp_results:
+                    output.append(_trim_str(address))
+            else:
+                output.append(add_str)
+        return output
+
+    def _parse_and_delimiter(address_list):
+        """Helper function that handles parsing 'and' delimiters"""
+        output = list()
+        for add_str in address_list:
+            temp_results = add_str.split(sep='and')
+            if len(temp_results) > 1:
+                for address in temp_results:
+                    output.append(_trim_str(address))
+            else:
+                output.append(add_str)
+        return output
+
+    def _parse_ampersand_delimiter(address_list):
+        """Helper function that handles parsing '&' delimiters"""
+        output = list()
+        for add_str in address_list:
+            temp_results = add_str.split(sep='&')
+            if len(temp_results) > 1:
+                num_1 = _trim_str(temp_results[0])
+                base = _trim_str(temp_results[1])
+                num_2, base = base.split(' ', 1)
+                num_2 = _trim_str(num_2)
+                base = _trim_str(base)
+
+                output.append('{} {}'.format(num_1, base))
+                output.append('{} {}'.format(num_2, base))
+            else:
+                output.append(add_str)
+        return output
+
+    def _parse_dash_delimiter(address_list):
+        """Helper function that handles parsing '-' delimiters"""
+        output = list()
+        for add_str in address_list:
+            temp_results = add_str.split(sep='-')
+            if len(temp_results) > 1:
+                num_1 = _trim_str(temp_results[0])
+                base = _trim_str(temp_results[1])
+                num_2, base = base.split(' ', 1)
+                num_2 = _trim_str(num_2)
+                base = _trim_str(base)
+
+                # check whether odd, even, or ambiguous range
+                even = True if int(num_1) % 2 == 0 else False
+
+                if (int(num_2) % 2 == 0 and not even) or (
+                            int(num_2) % 2 != 0 and even):
+                    even = None
+
+                # populate address number ranges
+                step = 1 if even is None else 2
+                for num in range(int(num_1), int(num_2) + 1, step):
+                    output.append('{} {}'.format(num, base))
+            else:
+                output.append(add_str)
+        return output
+
+    result = [address_str]  # tracks unique addresses from address_str
+
+    # 1: parse complete address delimiters - ';', 'and'
+    result = _parse_semicolon_delimiter(result)
+    result = _parse_and_delimiter(result)
+
+    # 2: parse address number range delimiters  - '&', '-'
+    result = _parse_ampersand_delimiter(result)
+    result = _parse_dash_delimiter(result)
+
+    return result
 
 #Used for testing purposes
 if __name__ == '__main__':
