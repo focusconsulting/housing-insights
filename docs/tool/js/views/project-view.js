@@ -140,29 +140,9 @@ var projectView = {
       button.textContent = this.layoutObj.title;
       document.getElementById(projectView.navSidebar.id).appendChild(button);
       button.addEventListener('click', function(){
-        // Manually animating scrolling given spotty support for a smooth
-        // scrollIntoView()
-        var upperEdgeOfSegment = ths.layoutObj.outerWrapper.getBoundingClientRect().top;
-        var maxScrollY = document.body.scrollHeight - window.innerHeight;
-        var destinationY = Math.min(upperEdgeOfSegment, maxScrollY);
-
-        window.requestAnimationFrame(animateScroll);
-        function animateScroll(){
-          var scrollInterval = 20;
-          var pxToDestinationY = destinationY - window.pageYOffset;
-          var scrollDirection = pxToDestinationY/Math.abs(pxToDestinationY);
-          // The below is so the window doesn't keep trying to scroll
-          // if pxToDestinationY % scrollInterval > 0.
-          var pxToScrollNow = Math.min(Math.abs(pxToDestinationY), Math.abs(scrollInterval));
-          if(destinationY != window.pageYOffset){
-            window.scrollBy(0, pxToScrollNow * scrollDirection);
-            window.requestAnimationFrame(animateScroll);
-          }
-          else{
-            return;
-          }
-        }
-
+        var topNavBarHeight = 100;
+        var destination = window.scrollY + ths.layoutObj.outerWrapper.getBoundingClientRect().top - topNavBarHeight;
+        window.scrollTo(0, destination);
       });
     }
   },
