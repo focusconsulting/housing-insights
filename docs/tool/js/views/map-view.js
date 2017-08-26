@@ -34,7 +34,7 @@
                     ['hoverBuilding', mapView.showPopup],
                     ['previewBuilding', mapView.showProjectPreview],
                     ['filteredData', mapView.filterMap],
-                    ['filteredData',mapView.exportCsv],
+                    ['filteredViewLoaded',mapView.addExportButton],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
@@ -613,7 +613,7 @@
                         feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'
                      });
                     mapView.listBuildings();
-                    mapView.exportCsv();
+                    mapView.addExportButton();
                     mapView.map.addSource('project', {
                         'type': 'geojson',
                         'data': mapView.convertedProjects
@@ -1013,9 +1013,8 @@
 
         },
         exportCsv: function() {
-          // if (data){
-            d3.select('#csvExport')
-              .on('click', function(d) {
+            // d3.select('#csvExport')
+            //   .on('click', function(d) {
                   console.log("INFO clicked export CSV");
 
                   var allData = model.dataCollection['raw_project'];
@@ -1060,8 +1059,13 @@
                   document.body.appendChild(link); // Required for FF
 
                   link.click(); // This will download the data file named "projects.csv".
-              });
-          // }
+              // });
+        },
+        addExportButton: function() {
+          d3.select('#csvExport')
+            .on('click', function(d) {
+              mapView.exportCsv();
+          });
         },
 
         highlightBuilding(msg, data) {
