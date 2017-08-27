@@ -37,7 +37,7 @@ class BaseApiConn(object):
 
 
     """
-    def __init__(self, baseurl, proxies=None):
+    def __init__(self, baseurl=None, proxies=None, database_choice=None):
         """
         :param baseurl: URL endpoint of the API.
         :type baseurl: String.
@@ -46,6 +46,10 @@ class BaseApiConn(object):
                         Example: {'http': 'socks5://user:pass@someip:port',
                                   'https': 'socks5://user:pass@someip:port'}
         :type  proxies: dict of String.
+
+        :param database_choice: String containing the name of the database to connect
+            when existing data needs to be used. String should match the one found in
+            secrets.json. Optional - not used by BaseApiConn, but sometimes used by others. 
         """
         self.session = requests.Session()
         self.baseurl = baseurl

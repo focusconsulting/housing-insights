@@ -3,13 +3,8 @@
 from housinginsights.sources.mar import MarApiConn
 import logging
 
-def check_mar_for_address(addr, conn):
-        '''
-        Looks for a matching address in the MAR
-        Currently just uses a 
-        '''
-
-        #Used to perform common string replacements in addresses. 
+def quick_address_cleanup(addr):
+     #Used to perform common string replacements in addresses. 
         #The key is original, value is what we want it to become
         #values match format typically found in the mar table
         #Allows first-pass matching of address strings to the MAR
@@ -19,17 +14,27 @@ def check_mar_for_address(addr, conn):
             "Northwest":"NW",
             "Southeast":"SE",
             "Southwest":"SW",
-            "St ":"Street ",
-            "St. ":"Street ",
-            "Pl ":"Place ",
-            "Pl. ":"Place ",
-            "Ave ":"Avenue ",
-            "Ave. ":"Avenue "
+            " St ":" Street ",
+            " St. ":" Street ",
+            " Pl ":" Place ",
+            " Pl. ":" Place ",
+            " Ave ":" Avenue ",
+            " Ave. ":" Avenue "
         }
 
         # Format addr by matching the conventions of the MAR
         for key, value in address_string_mapping.items():
             addr = addr.replace(key,value)
+
+        return addr
+
+def check_mar_for_address(addr, conn):
+        '''
+        Looks for a matching address in the MAR
+        Currently just uses a 
+        '''
+
+        quick_address_cleanup(addr)
 
         ###########################
         # Attempt #1 - direct match
@@ -37,7 +42,7 @@ def check_mar_for_address(addr, conn):
         query = """
                 select mar_id from mar
                 where full_address ='{}'
-                """.format(addr.upper()) #MAR uses upper case in the full_address field
+                """.format(addr.upper())  #MAR uses upper case in the full_address field 
 
         query_result = conn.execute(query)
 
@@ -128,6 +133,12 @@ def get_unique_addresses_from_str(address_str=""):
                 num_2, base = base.split(' ', 1)
                 num_2 = _trim_str(num_2)
                 base = _trim_str(base)
+
+                #TODO is this properly handling a bad address range situation??
+                if not isinstance(num_1,int) or not isinstance(num_2,int):
+                    #there was some parseing problem - throw it back
+                    output.append(add_str)
+                    continue
 
                 # check whether odd, even, or ambiguous range
                 even = True if int(num_1) % 2 == 0 else False

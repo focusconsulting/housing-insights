@@ -26,12 +26,12 @@ class PrescatApiConn(ProjectBaseApiConn):
     storage location that admins can put prescat files
     '''
 
-    def __init__(self, baseurl=None, proxies=None):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None):
         
         if baseurl==None:
             baseurl=os.path.abspath("../../../data/raw/preservation_catalog/20170724/Project.csv")
 
-        super().__init__(baseurl)
+        super().__init__(baseurl=baseurl, proxies=proxies, database_choice=database_choice)
 
         self._available_unique_data_ids = ['prescat']
 

@@ -2,6 +2,7 @@ include_flag,destination_table,unique_data_id,update_method,data_date,encoding,l
 use,mar,mar,api,2017-08-12,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170812/mar.csv,BUILD FIRST - other tables depend on it
 use,project,prescat_project,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170724/Project.csv,
 use,subsidy,prescat_subsidy,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170724/Subsidy.csv,
+use,proj_addre,prescat_addre,api,2017-08-27,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170827/prescat_addre.csv,Calculated by the PrescatApiConn
 use,project,dchousing_project,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dchousing_project.csv,
 use,subsidy,dchousing_subsidy,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dchousing_subsidy.csv,
 use,project,dhcd_dfd_properties_project,api,2017-08-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170814/dhcd_dfd_properties_project.csv,

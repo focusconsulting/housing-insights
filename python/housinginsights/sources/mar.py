@@ -13,8 +13,8 @@ class MarApiConn(BaseApiConn):
 
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
-    def __init__(self):
-        super().__init__(MarApiConn.BASEURL)
+    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+        super().__init__(baseurl=MarApiConn.BASEURL)
 
     
     def find_addr_string(self, address,output_type=None, output_file=None):

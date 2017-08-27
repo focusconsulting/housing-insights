@@ -768,7 +768,11 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 
         return row
 
-
+class ProjectAddressCleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row)
+        return row
+        
 class ZillowCleaner(CleanerBase):
     """
     Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)
