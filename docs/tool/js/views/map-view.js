@@ -34,6 +34,7 @@
                     ['hoverBuilding', mapView.showPopup],
                     ['previewBuilding', mapView.showProjectPreview],
                     ['filteredData', mapView.filterMap],
+                    ['filteredViewLoaded',mapView.addExportButton],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
@@ -612,6 +613,7 @@
                         feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'
                      });
                     mapView.listBuildings();
+                    mapView.addExportButton();
                     mapView.map.addSource('project', {
                         'type': 'geojson',
                         'data': mapView.convertedProjects
@@ -708,7 +710,6 @@
                             'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
-
 
                    //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
                     mapView.map.on('mousemove', function(e) {
@@ -932,6 +933,7 @@
                 var shrinkCircles = setTimeout(function(){
                     mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);
                 },300);
+
                 mapView.map.setPaintProperty('project-exit','circle-stroke-width', 6);
                 var expandCircles = setTimeout(function(){
                     mapView.map.setPaintProperty('project-exit','circle-stroke-width', 2);
@@ -994,7 +996,7 @@
                     }
                 })
                 .on('click', function(d) {
-
+                  console.log("here")
                     mapView.map.flyTo({
                         center: [d.properties.longitude, d.properties.latitude],
                         zoom: 15
@@ -1012,6 +1014,74 @@
                 .remove();
 
         },
+        exportCsv: function() {
+            console.log("INFO clicked export CSV");
+
+            var allData = model.dataCollection['raw_project'];
+            var matchesData = allData.objects.filter(function(feature) {
+                return feature.matches_filters === true;
+            });
+            var notMatchesData = allData.objects.filter(function(feature) {
+                return feature.matches_filters === false;
+            });
+            var orderedData = matchesData.concat(notMatchesData);
+
+            var keys = ["matches_filters"];
+            Object.keys(orderedData[0]).forEach(function(key){
+              if ( key !== "matches_filters"){
+                keys.push(key);
+              }
+            })
+            var csvContent = "data:text/csv;charset=utf-8,"
+            csvContent += Papa.unparse({
+              fields: keys,
+              data: orderedData
+            });
+
+            console.log(typeof csvContent)
+
+            // //Create a csv from the data manually
+            // var csvContent = "data:text/csv;charset=utf-8,";
+            // var keys = "matches_filters,";
+            // Object.keys(allData.objects[0]).forEach(function(key){
+            //   if ( key !== "matches_filters"){
+            //     keys += key + ",";
+            //   }
+            // })
+            // csvContent += keys + '\n';
+            // matchesData.forEach( function(project){
+            //   csvContent += String(project['matches_filters']) + ",";
+            //   Object.keys(project).forEach( function(key){
+            //     if ( key !== "matches_filters"){
+            //       csvContent += String(project[key]).replace(/,/g,' ') + ",";
+            //     }
+            //   })
+            //   csvContent += '\n';
+            // })
+            // notMatchesData.forEach( function(project){
+            //   csvContent += String(project['matches_filters']) + ",";
+            //   Object.keys(project).forEach( function(key){
+            //     if ( key !== "matches_filters"){
+            //       csvContent += String(project[key]).replace(/,/g,' ') + ",";
+            //     }
+            //   })
+            //   csvContent += '\n';
+            // })
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "projects.csv");
+            document.body.appendChild(link); // Required for FF
+
+            link.click(); // This will download the data file named "projects.csv".
+        },
+        addExportButton: function() {
+          d3.select('#csvExport')
+            .on('click', function(d) {
+              mapView.exportCsv();
+          });
+        },
+
         highlightBuilding(msg, data) {
             if (data) {
                 mapView.map.addLayer({
