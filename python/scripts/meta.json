@@ -1947,7 +1947,7 @@
     "replace_table": true
   },
   "parcel": {
-    "cleaner": "parcel_cleaner",
+    "cleaner": "ParcelCleaner",
     "fields": [
       {
         "display_name": "Nlihc ID",
@@ -1987,7 +1987,7 @@
         "required_in_source": true,
         "source_name": "Parcel_owner_date",
         "sql_name": "parcel_owner_date",
-        "type": "text"
+        "type": "date"
       },
       {
         "display_name": "Parcel Info Source Date",
@@ -1995,7 +1995,7 @@
         "required_in_source": true,
         "source_name": "Parcel_Info_Source_Date",
         "sql_name": "parcel_info_source_date",
-        "type": "text"
+        "type": "date"
       },
       {
         "display_name": "In Last Ownerpt",

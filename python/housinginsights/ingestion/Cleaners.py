@@ -837,3 +837,10 @@ class MarCleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         row = self.rename_census_tract(row, column_name='CENSUS_TRACT')
         return row
+
+
+class ParcelCleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        row = self.replace_nulls(row, null_values=['N', '', None, 'U'])
+        row = self.parse_dates(row)
+        return row
