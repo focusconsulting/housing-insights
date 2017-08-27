@@ -19,6 +19,7 @@ import logging
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.tools import misc as misctools
 
+
 class ProjectBaseApiConn(BaseApiConn):
     '''
     Adds additional methods needed for anything that deals with the project
@@ -34,6 +35,20 @@ class ProjectBaseApiConn(BaseApiConn):
     two files from one, while ingestion process is set up with the 
     concept of one file = one table.
     '''
+    def __init__(self,baseurl, proxies=None, database_choice=None):
+        
+        super().__init__(baseurl,proxies)
+
+        if database_choice is None:
+            database_choice = 'docker_database'
+
+        self.engine = dbtools.get_database_engine(database_choice)
+
+        #Get a dict mapping address to mar id from the database and store in memory
+        # for use in other methods.
+        self.add_mar_addr_lookup()
+
+
 
     def _map_data_for_row(self, nlihc_id, fields, fields_map, line):
         """
@@ -87,11 +102,74 @@ class ProjectBaseApiConn(BaseApiConn):
         else:
             return str(uuid4()), False
 
+    def create_address_csv_prescat(self,uid,proj_path=None, addre_path=None):
+        '''
+        Used for the project table only?
+
+        Can't think of a way to make the same function for both prescat (which 
+        already has proj/subsidy split) and the other data sets that don't and
+        therefore need the address splitting to happen during entity resolution. 
+
+        TODO this is incomplete.
+        '''
+
+
+
+        with open(proj_path, encoding='utf-8') as proj, \
+                open(addre_path, mode='w', encoding='utf-8') as addre:
+            proj_reader = csv.DictReader(proj)
+            addre_writer = csv.DictWriter(addre, fieldnames=['nlhic_id','address', 'mar_id']) #TODO make this an imported model
+            addre_writer.writeheader()
+
+            for proj_row in proj_reader:
+                address_data = proj_row['Proj_addre']
+                nlihc_id = proj_row['Nlihc_id']
+
+                addresses = misctools.get_unique_addresses_from_str(address_data)
+
+                self._append_addresses(addresses=addresses, nlihc_id = nlihc_id, addre_writer = addre_writer)
+
+    def _append_addresses(self, addresses, nlihc_id, addre_writer):
+        
+        db_conn = self.engine.connect()
+
+        for address in addresses:
+            data = {}
+            data['address'] = address
+            data['nlhic_id'] = nlihc_id
+            
+            #Find the mar_id if we can
+            if address=='others': #happens often in current prescat
+                data['mar_id'] = ''
+            else:
+                try: 
+                    #Faster, but only works if address is not messy
+                    data['mar_id'] = self.mar_addr_lookup[address.upper()] #MAR uses uppercase
+                except KeyError:
+                    #more robust method has common substitutions and MAR API fallback
+                    data['mar_id']= misctools.check_mar_for_address(addr=address, conn=db_conn)
+
+            addre_writer.writerow(data)
+
+
+    def add_mar_addr_lookup(self):
+        '''
+        
+        '''
+
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select full_address, mar_id from mar"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.mar_addr_lookup = {d[0]:d[1] for d in result}
+
+
     def create_project_subsidy_csv(self, uid, project_fields_map,
                                    subsidy_fields_map, database_choice=None):
         """
         Writes 'new_proj_data_file' and 'new_subsidy_data_file' raw files
-        from the source csv file. It then deletes the source file so it
+        from the source csv file. It then deletes (maybe not?) the source file so it
         doesn't get added to manifest and loaded into the database.
         """
         if database_choice is None:
@@ -104,6 +182,8 @@ class ProjectBaseApiConn(BaseApiConn):
         folder = os.path.dirname(source_csv)
         new_proj_data_file = os.path.join(folder, "{}_project.csv".format(uid))
         new_subsidy_data_file = os.path.join(folder, "{}_subsidy.csv".format(uid))
+        new_addre_data_file = os.path.join(folder, "{}_addre.csv".format(uid))
+
 
         # create dchousing_project/subsidy files from source
         with open(source_csv, encoding='utf-8') as f, \
@@ -111,10 +191,14 @@ class ProjectBaseApiConn(BaseApiConn):
                 open(new_subsidy_data_file, mode='w', encoding='utf-8') as subsidy:
 
             source_csv_reader = csv.DictReader(f)
+
             proj_writer = csv.DictWriter(proj, fieldnames=PROJ_FIELDS)
             proj_writer.writeheader()
             subsidy_writer = csv.DictWriter(subsidy, fieldnames=SUBSIDY_FIELDS)
             subsidy_writer.writeheader()
+            addre_writer = csv.DictWriter(addre, fieldnames=['nlhic_id','address', 'mar_id']) #TODO make this an imported model
+            addre_writer.writeheader()
+
 
             # If the project doesn't exists in the database, we want to add a
             # new record to the project table.
@@ -124,6 +208,27 @@ class ProjectBaseApiConn(BaseApiConn):
             # using the nlihc_id; if not, link it to the record that was added
             # to the proj_writer output file."
             for source_row in source_csv_reader:
+
+                #Split the addresses
+                addr_field_name = project_fields_map['Proj_addre'] 
+                address_data = source_row[addr_field_name]
+                addresses = misctools.get_unique_addresses_from_str(address_data)
+
+
+
+                #TODO need to change how we look for matches to use the newly available one to many address list
+
+                #WARNING this code is now broken - need to load the prescat_addre file into database. 
+
+
+
+                #Should write this out AFTER we have identified any matching nlihc_id
+                self._append_addresses(addresses=addresses, nlihc_id = nlihc_id, addre_writer = addre_writer)
+
+
+
+
+                #TODO the stuff below is what needs to be changed to use new workflow. 
 
                 #First, perform data-source appropriate transformations to the data
                 if uid == 'dhcd_dfd_properties':
@@ -150,10 +255,7 @@ class ProjectBaseApiConn(BaseApiConn):
                             db_conn=db_conn, 
                             mar_id=source_row[addr_col])
                 
-                #for debugging
-                if uid == 'dhcd_dfd_properties':
-                    print(source_row['mar_id'],source_row['address_single'],'\t',in_proj_table,nlihc_id)
-                
+
 
                 #Add values to the project table output file if necessary
                 if not in_proj_table:

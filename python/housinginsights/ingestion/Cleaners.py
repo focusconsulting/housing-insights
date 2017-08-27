@@ -261,7 +261,7 @@ class CleanerBase(object, metaclass=ABCMeta):
                 str_num = address.split(' ')[0]
                 int(str_num)
                 first_address = address.split(';')[0]
-                result = mar_api.find_location(first_address)
+                result = mar_api.find_addr_string(first_address)
             except ValueError:
                 logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None

@@ -69,6 +69,8 @@ class BaseApiConn(object):
             path = os.path.join(base,api_location,d,filename)
             paths[u] = path
 
+            #So output methods don't need to deal with missing dirs
+            self.create_directory_if_missing(path)
         return paths
 
     def get(self, urlpath, params=None, **kwargs):
