@@ -6,13 +6,13 @@ var projectView = {
 
   // 'el', 'init' and 'onReturn' conform projectView to the structure expected in the code for
   // changing partials.
-  el:'building-view',
-  init: function(buildingID){ // buildingID is passed in only when the initial view is building    
+  el:'project-view',
+  init: function(nlihcID){ // nlihcID is passed in only when the initial view is building    
   
     // TODO: Change this and use the one from secrets.json.
     mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';      
 
-    var transition = buildingID !== undefined ? true : false;
+    var transition = nlihcID !== undefined ? true : false;
     var partialRequest = {
         partial: this.el,
         container: null, // will default to '#body-wrapper'
@@ -26,7 +26,7 @@ var projectView = {
       if ( getState().activeView.length > 1 ){
           document.getElementById('button-back').innerHTML = '&lt; Back to Map View';
       }
-      projectView.getRelevantData(buildingID); // buildingID is passed in only when the initial view is building    
+      projectView.getRelevantData(nlihcID); // nlihcID is passed in only when the initial view is building    
     }                 
   },
   renderSegments: function(){
@@ -39,8 +39,8 @@ var projectView = {
     wrapperElement.parentElement.removeChild(wrapperElement);
     this.init();
   },
-  getRelevantData: function(buildingID){ // buildingID is passed in only when the initial view is building    
-    if ( buildingID !== undefined ) {
+  getRelevantData: function(nlihcID){ // nlihcID is passed in only when the initial view is building    
+    if ( nlihcID !== undefined ) {
         var dataURL = model.URLS.project;
         var dataRequest = {
                 name: 'raw_project',
@@ -53,7 +53,7 @@ var projectView = {
             
             var selectedBuildingGeoJSON = controller.convertToGeoJSON(model.dataCollection.raw_project).features.find(function(each){
               
-                    return each.properties.nlihc_id === buildingID;
+                    return each.properties.nlihc_id === nlihcID;
               
             });
             setState('selectedBuilding', selectedBuildingGeoJSON);
@@ -160,7 +160,7 @@ var projectView = {
     header: {
       title: 'Basic information',
       hideTitle: true,
-      wrapperPartial: 'partials/building-view/header.html',
+      wrapperPartial: 'partials/project-view/header.html',
       render: function(projectGeoJSON){
         var d = projectGeoJSON['properties'];
         document.getElementById('building-name').innerText = d.proj_name;
@@ -172,7 +172,7 @@ var projectView = {
     },
     affordableHousingMap:{
       title: 'Affordable Housing Nearby',
-      wrapperPartial: 'partials/building-view/affordable-housing.html',
+      wrapperPartial: 'partials/project-view/affordable-housing.html',
       render: function(projectGeoJSON){
         var affordableHousingMap = new mapboxgl.Map({
           container: 'affordable-housing-map',
@@ -230,7 +230,7 @@ var projectView = {
     },
     metroStationsAndBusStops: {
       title: "Public Transit Accessibility",
-      wrapperPartial: "partials/building-view/transit.html",
+      wrapperPartial: "partials/project-view/transit.html",
       render: function(projectGeoJSON){
         var metroStationsMap = new mapboxgl.Map({
           container: 'metro-stations-map',
@@ -340,7 +340,7 @@ var projectView = {
     },
     subsidyTimelineChart: {
       title: "Building Subsidy Status",
-      wrapperPartial: "partials/building-view/subsidy.html",
+      wrapperPartial: "partials/project-view/subsidy.html",
       render: function(projectGeoJSON){
         var currentNlihc = projectGeoJSON['properties']['nlihc_id'];
         
@@ -357,7 +357,7 @@ var projectView = {
     },
     surroundingAreaDevelopment: {
       title: "Surrounding Area Development",
-      wrapperPartial: "partials/building-view/surrounding-dev.html",
+      wrapperPartial: "partials/project-view/surrounding-dev.html",
       render: function(projectGeoJSON){
         // Nothing to do yet
         return;
