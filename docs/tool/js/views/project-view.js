@@ -179,83 +179,111 @@ var projectView = {
       render: function(full_project_data){
         console.log("full project data", full_project_data)
         var d = full_project_data;
-        document.getElementById('building-name').innerText = d.proj_name;
-        document.getElementById('building-street').innerText = d.proj_addre;
-        document.getElementById('building-ward').innerText = d.ward;
-        document.getElementById('building-cluster').innerText = d.neighborhood_cluster;
-        document.getElementById('owner-name').innerText = d.hud_own_name == 0 ? 'not in data file' : d.hud_own_name;
+        d3.select('#project-name').text(d.proj_name)
+        d3.select('#project-address').text(d.proj_addre)
+
+        //TODO add all matching addresses once proj_addre table is ready    
       },
     },
-    
-    example1: {
-      title: 'Header section',
-      wrapperPartial: 'partials/project-view/example.html',
-      hideTitle:false,
+    /*
+    ataglance: {
+      title:'Project At-A-Glance',
+      wrapperPartial: 'partials/project-view/at-a-glance.html',
+      hideTitle: true,
       render: function(full_project_data){
-        d3.select('#this-is-my-id')
+        //
       }
     },
-    example2: {
-      title: 'TOPA Notices',
-      wrapperPartial: 'partials/project-view/example.html',
+    */
+    location: {
+      //Several sections after this have title hidden, so this uses generic title above all of them
+      title:'Property Information',
+      wrapperPartial: 'partials/project-view/location.html',
+      hideTitle: false,
+      render: function(full_project_data){
+        //
+      }
+    },
+    ownership: {
+      title: 'Ownership',
+      wrapperPartial: 'partials/project-view/ownership.html',
       hideTitle:true,
       render: function(full_project_data){
-        d3.select('#this-is-my-id')
+        //
       }
     },
-
     topaNotices: {
       title: 'TOPA Notices',
       wrapperPartial: 'partials/project-view/topa-notices.html',
       hideTitle:false,
       render: function(full_project_data){
-
-
-        //TODO! Refactor this into a 'buildTable' function that is callable from wherever. 
-        //helpful examples:
-        //https://www.vis4.net/blog/posts/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
-        //https://gist.github.com/jfreels/6733593
         var topaTable =  d3.select('#topa-notice-table')
-        var headerTr = topaTable.append('tr')
-              .classed('heading', true)
-            headerTr.append('th')
-              .text('') //index number, no need to annotate
-            headerTr.append('th')
-              .text('Notice Date')
-            headerTr.append('th')
-              .text('Notice Type')
-            headerTr.append('th')
-              .text('Sale Price')
+        if (full_project_data.topa.length == 0 ) {
+          topaTable.append('p')
+            .text('No known TOPA notices!')
+        } else {
+          //TODO! Refactor this into a 'buildTable' function that is callable from wherever. 
+          //helpful examples:
+          //https://www.vis4.net/blog/posts/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
+          //https://gist.github.com/jfreels/6733593
+          
+          var headerTr = topaTable.append('tr')
+                .classed('heading', true)
+              headerTr.append('th')
+                .text('') //index number, no need to annotate
+              headerTr.append('th')
+                .text('Notice Date')
+              headerTr.append('th')
+                .text('Notice Type')
+              headerTr.append('th')
+                .text('Sale Price')
 
-        //Add rows for each topa notice
-        var topaRows = topaTable.selectAll('tr.data')
-              .data(full_project_data.topa, function(d) {return d.id})
+          //Add rows for each topa notice
+          var topaRows = topaTable.selectAll('tr.data')
+                .data(full_project_data.topa, function(d) {return d.id})
 
-        var trs = topaRows.enter().append('tr')
-              .attr('id',function(d){return d.id})
-              .classed('data',true) //to differentiate from headings
-            trs.append('td')
-              .classed('title',true)
-              .text(function(d,i){return (i+1) + ')'})
-            trs.append('td')
-              .classed('value', true)
-              .text(function(d){return d.notice_date})
-            trs.append('td')
-              .classed('value', true)
-              .text(function(d){return d.notice_type})
-            trs.append('td')
-              .classed('value',true)
-              .text(function(d){
-                  if (d.sale_price == null){
-                    return '-'}
-                  else {
-                    return d3.format('$,.0r')(d.sale_price)
-                  }
-                })
+          var trs = topaRows.enter().append('tr')
+                .attr('id',function(d){return d.id})
+                .classed('data',true) //to differentiate from headings
+              trs.append('td')
+                .classed('title',true)
+                .text(function(d,i){return (i+1) + ')'})
+              trs.append('td')
+                .classed('value', true)
+                .text(function(d){return d.notice_date})
+              trs.append('td')
+                .classed('value', true)
+                .text(function(d){return d.notice_type})
+              trs.append('td')
+                .classed('value',true)
+                .text(function(d){
+                    if (d.sale_price == null){
+                      return '-'}
+                    else {
+                      return d3.format('$,.0r')(d.sale_price)
+                    }
+                  })
+          }
 
       }
     },
-
+    subsidyTimelineChart: {
+      title: "Building Subsidy Status",
+      wrapperPartial: "partials/project-view/subsidy.html",
+      render: function(full_project_data){
+        var currentNlihc = full_project_data['nlihc_id'];
+        
+        new SubsidyTimelineChart({
+            dataRequest: {
+                name: currentNlihc + '_subsidy',
+                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
+            },
+            container: '#subsidy-timeline-chart',
+            width: 700,
+            height: 300
+        }); 
+      }
+    },
     affordableHousingMap:{
       title: 'Affordable Housing Nearby',
       wrapperPartial: 'partials/project-view/affordable-housing.html',
@@ -423,23 +451,6 @@ var projectView = {
                 .entries(model.dataCollection['transit_stats']['rail_routes_grouped']);
         projectView.addRoutes('#bus_routes_by_dist', brgSorted);
         projectView.addRoutes('#rail_routes_by_dist', rrgSorted);
-      }
-    },
-    subsidyTimelineChart: {
-      title: "Building Subsidy Status",
-      wrapperPartial: "partials/project-view/subsidy.html",
-      render: function(full_project_data){
-        var currentNlihc = full_project_data['nlihc_id'];
-        
-        new SubsidyTimelineChart({
-            dataRequest: {
-                name: currentNlihc + '_subsidy',
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
-            },
-            container: '#subsidy-timeline-chart',
-            width: 700,
-            height: 300
-        }); 
       }
     },
     surroundingAreaDevelopment: {

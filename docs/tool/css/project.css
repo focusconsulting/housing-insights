@@ -1,27 +1,37 @@
+#project-view h2 {
+	font-size:20px;
+	margin-top:10px;
+}
+
+#project-view h4 {
+	font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+.centered {
+	display: block;
+	margin: auto;
+}
+
+.centered h1,
+.centered h2,
+.centered h3,
+.centered h4,
+.centered p {
+	text-align:center;
+}
+
+.centered img {
+	display: block;
+	margin: auto;
+}
+
+
 .mapbox-portal{
   min-height: 300px;
 }
-/*
-#building-view-container{
-	position: relative;
-	padding-left: 30px;
-	height: 100%;
-	width: 80%;
-	top: 20px;
-	left: 0%;
-}
-*/
-/*
-#building-view-container section:nth-of-type(1n+1){
-	margin-top: 40px;
-}
-*/
-/*
-#building-view-container section h1, 
-#building-view-container section h2{
-	margin-bottom: 15px;
-}
-*/
+
 #building-view-segments{
 	position: fixed;
 	height: 100%;
@@ -135,3 +145,8 @@
 .project-dat-atable td.value {
 	font-weight:normal;
 }
+
+.ui.attached.header {
+	background-color: rgb(237, 241, 247);
+}
+
