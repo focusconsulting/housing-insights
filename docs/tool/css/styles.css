@@ -195,8 +195,9 @@ button.nullValuesToggleSubmit::before {
 }
 
 #clear-pillbox-holder {
-    position: relative;
+    position: absolute;
     display: block;
+    left: 100%;
 }
 .main-view {
     width: 100%;
@@ -481,6 +482,11 @@ Others are working correctly.
     bottom: 0;
 }
 
+
+#layer-menu-buttons button {
+        border: 5px solid #fff;
+    padding: 9px 3px;
+}
 
 /*
 Switched to semantic-ui buttons instead
