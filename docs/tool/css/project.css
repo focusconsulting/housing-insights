@@ -1,7 +1,7 @@
 .mapbox-portal{
   min-height: 300px;
 }
-
+/*
 #building-view-container{
 	position: relative;
 	padding-left: 30px;
@@ -10,15 +10,18 @@
 	top: 20px;
 	left: 0%;
 }
-
+*/
+/*
 #building-view-container section:nth-of-type(1n+1){
 	margin-top: 40px;
 }
-
+*/
+/*
 #building-view-container section h1, 
 #building-view-container section h2{
 	margin-bottom: 15px;
 }
+*/
 #building-view-segments{
 	position: fixed;
 	height: 100%;

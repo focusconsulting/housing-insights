@@ -107,16 +107,23 @@ var projectView = {
     var outerWrapper = document.createElement('section');
     if(!layoutSegment.hideTitle){
       var titleElement = document.createElement('h2');
+      titleElement.className = "ui attached header"
       titleElement.textContent = layoutSegment.title;
       outerWrapper.appendChild(titleElement);
     }
+    var segmentElement = document.createElement('div');
+      segmentElement.className = "ui attached segment"
+      outerWrapper.appendChild(segmentElement);
+
     layoutSegment.outerWrapper = outerWrapper;
     document.getElementById('building-view-container').appendChild(outerWrapper);
+
     d3.html(layoutSegment.wrapperPartial, function(html){
-      outerWrapper.appendChild(html);
+      segmentElement.appendChild(html);
       layoutSegment.render(getState()['selectedBuilding'][0]);
     });
   },
+  
   navSidebar: {
     id: 'building-view-segments',
     render: function(){
