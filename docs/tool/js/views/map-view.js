@@ -39,6 +39,8 @@
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['filterViewLoaded',router.initFilters] // not 100% sure this trigger isn't later than we'd want
+                    // ['exportJsonAsCsv',exportCsv.exportJsonAsCsv],
+                    // ['exportAllData',exportCsv.exportAllData]
                                                               // but it shouln't be too early
                 ]);
 
@@ -1014,71 +1016,10 @@
                 .remove();
 
         },
-        exportCsv: function() {
-            console.log("INFO clicked export CSV");
-
-            var allData = model.dataCollection['raw_project'];
-            var matchesData = allData.objects.filter(function(feature) {
-                return feature.matches_filters === true;
-            });
-            var notMatchesData = allData.objects.filter(function(feature) {
-                return feature.matches_filters === false;
-            });
-            var orderedData = matchesData.concat(notMatchesData);
-
-            var keys = ["matches_filters"];
-            Object.keys(orderedData[0]).forEach(function(key){
-              if ( key !== "matches_filters"){
-                keys.push(key);
-              }
-            })
-            var csvContent = "data:text/csv;charset=utf-8,"
-            csvContent += Papa.unparse({
-              fields: keys,
-              data: orderedData
-            });
-
-            console.log(typeof csvContent)
-
-            // //Create a csv from the data manually
-            // var csvContent = "data:text/csv;charset=utf-8,";
-            // var keys = "matches_filters,";
-            // Object.keys(allData.objects[0]).forEach(function(key){
-            //   if ( key !== "matches_filters"){
-            //     keys += key + ",";
-            //   }
-            // })
-            // csvContent += keys + '\n';
-            // matchesData.forEach( function(project){
-            //   csvContent += String(project['matches_filters']) + ",";
-            //   Object.keys(project).forEach( function(key){
-            //     if ( key !== "matches_filters"){
-            //       csvContent += String(project[key]).replace(/,/g,' ') + ",";
-            //     }
-            //   })
-            //   csvContent += '\n';
-            // })
-            // notMatchesData.forEach( function(project){
-            //   csvContent += String(project['matches_filters']) + ",";
-            //   Object.keys(project).forEach( function(key){
-            //     if ( key !== "matches_filters"){
-            //       csvContent += String(project[key]).replace(/,/g,' ') + ",";
-            //     }
-            //   })
-            //   csvContent += '\n';
-            // })
-            var encodedUri = encodeURI(csvContent);
-            var link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "projects.csv");
-            document.body.appendChild(link); // Required for FF
-
-            link.click(); // This will download the data file named "projects.csv".
-        },
         addExportButton: function() {
           d3.select('#csvExport')
             .on('click', function(d) {
-              mapView.exportCsv();
+              exportCsv.exportAllData();
           });
         },
 
