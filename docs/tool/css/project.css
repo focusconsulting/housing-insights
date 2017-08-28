@@ -115,3 +115,23 @@
 	border-bottom: 1em solid #555555;
 }
 
+
+
+.ui.segment {
+	font-size: 13px;
+}
+.project-data-table {
+
+}
+
+.project-data-table td {
+	padding-right:10px;
+}
+
+.project-data-table td.title {
+	font-weight:bold;
+}
+
+.project-dat-atable td.value {
+	font-weight:normal;
+}

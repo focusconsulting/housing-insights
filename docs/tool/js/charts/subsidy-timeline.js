@@ -54,7 +54,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
               }
               for(var i = 0; i < data.length; i++){
                 if(data[i]['poa_start'] === null || data[i]['poa_end'] === null){
-                  this.message = "We don't have enough information about subsidies for this property. Check back with our final tool version September 2017.";
+                  this.message = "Some subsidies have missing information for this property so the chart cannot be rendered. Check back with our final tool version September 2017.";
                   this.status = true;
                 }
               }

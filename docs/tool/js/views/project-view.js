@@ -30,8 +30,10 @@ var projectView = {
     }                 
   },
   renderSegments: function(){
+    var nlihc_id = getState()['selectedBuilding'][0]['properties']['nlihc_id']
+    var full_project_data = model.dataCollection['full_project_data_' + nlihc_id]['objects'][0]
     for(var segmentName in this.layout){
-      this.wrapAndAppendSegment(this.layout[segmentName]);
+      this.wrapAndAppendSegment(this.layout[segmentName], full_project_data);
     }
   },
   onReturn: function(){
@@ -51,10 +53,9 @@ var projectView = {
 
         function dataCallback() {
             
+            //setting state with geojson since that is how the map view sets it
             var selectedBuildingGeoJSON = controller.convertToGeoJSON(model.dataCollection.raw_project).features.find(function(each){
-              
                     return each.properties.nlihc_id === nlihcID;
-              
             });
             setState('selectedBuilding', selectedBuildingGeoJSON);
             continueDataRequest();
@@ -65,62 +66,69 @@ var projectView = {
     }
 
     function continueDataRequest(){
+      var nlihc_id = getState()['selectedBuilding'][0]['properties']['nlihc_id']
 
-        var dataRequestCount = 0;
-        var dataRequests = [
-
-            {
-                name: "raw_metro_stations",
-                url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
-                callback: dataBatchCallback
-            },
-            {
-                name: "transit_stats",
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + getState()['selectedBuilding'][0]['properties']['nlihc_id'],
-                callback: dataBatchCallback
-            },
-            {
-                name: "nearby_projects",
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
-                callback: dataBatchCallback
-            },
-            {
-                name: "raw_bus_stops",
-                url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
-                callback: dataBatchCallback
-            }
-        ]
-        for(var i = 0; i < dataRequests.length; i++){
-            controller.getData(dataRequests[i]);
-        }
-        function dataBatchCallback(){
-            dataRequestCount++;
-            if(dataRequestCount === dataRequests.length){
-                projectView.renderSegments();
-                projectView.navSidebar.render();
-                router.clearScreen();
-            }
-        }
+      var dataRequestCount = 0;
+      var dataRequests = [
+          {   name: "full_project_data_" + nlihc_id,
+              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project/" + nlihc_id,
+              callback: dataBatchCallback
+          },
+          {
+              name: "raw_metro_stations",
+              url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
+              callback: dataBatchCallback
+          },
+          {
+              name: "transit_stats",
+              url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
+              callback: dataBatchCallback
+          },
+          {
+              name: "nearby_projects",
+              url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
+              callback: dataBatchCallback
+          },
+          {
+              name: "raw_bus_stops",
+              url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
+              callback: dataBatchCallback
+          }
+      ]
+      for(var i = 0; i < dataRequests.length; i++){
+          controller.getData(dataRequests[i]);
+      }
+      function dataBatchCallback(){
+          dataRequestCount++;
+          if(dataRequestCount === dataRequests.length){
+              projectView.renderSegments();
+              projectView.navSidebar.render();
+              router.clearScreen();
+          }
+      }
     }
   },
-  wrapAndAppendSegment: function(layoutSegment){
-    var outerWrapper = document.createElement('section');
-    if(!layoutSegment.hideTitle){
-      var titleElement = document.createElement('h2');
-      titleElement.className = "ui attached header"
-      titleElement.textContent = layoutSegment.title;
-      outerWrapper.appendChild(titleElement);
-    }
-    var segmentElement = document.createElement('div');
-      segmentElement.className = "ui attached segment"
-      outerWrapper.appendChild(segmentElement);
+  wrapAndAppendSegment: function(layoutSegment, full_project_data){
+    var container = document.getElementById('building-view-container')
 
-    layoutSegment.outerWrapper = outerWrapper;
-    document.getElementById('building-view-container').appendChild(outerWrapper);
+    //Add the title
+    if(!layoutSegment.hideTitle){
+      d3.select('#building-view-container')
+        .append('div')
+        .classed('ui attached header',true)
+        .text(layoutSegment.title)
+    }
+    
+    var htmlSection = document.createElement('section');
+      htmlSection.classList = 'ui attached segment'
+      container.appendChild(htmlSection)
+
+    //Save for submenu navigation later
+    layoutSegment.htmlSection = htmlSection
 
     d3.html(layoutSegment.wrapperPartial, function(html){
-      segmentElement.appendChild(html);
-      layoutSegment.render(getState()['selectedBuilding'][0]);
+      htmlSection.appendChild(html);
+      layoutSegment.render(full_project_data);
     });
   },
   
@@ -143,8 +151,8 @@ var projectView = {
       button.textContent = this.layoutObj.title;
       document.getElementById(projectView.navSidebar.id).appendChild(button);
       button.addEventListener('click', function(){
-        var topNavBarHeight = 100;
-        var destination = window.scrollY + ths.layoutObj.outerWrapper.getBoundingClientRect().top - topNavBarHeight;
+        var topNavBarHeight = 120;
+        var destination = window.scrollY + ths.layoutObj.htmlSection.getBoundingClientRect().top - topNavBarHeight;
         window.scrollTo(0, destination);
       });
     }
@@ -159,7 +167,7 @@ var projectView = {
   // wrapper tags.
   // The value of each top-level key is an object that must have values for
   // the keys, 'title', 'wrapperPartial' and 'render'.
-  // There's also an outerWrapper property that's added to each object within
+  // There's also an htmlSection property that's added to each object within
   // wrapAndAppendSegment(). This is used for scrolling.
   // There's also a 'hideTitle' key, indicating whether the title will
   // appear in the segment itself, or just within the navigation sidebar.
@@ -168,8 +176,9 @@ var projectView = {
       title: 'Basic information',
       hideTitle: true,
       wrapperPartial: 'partials/project-view/header.html',
-      render: function(projectGeoJSON){
-        var d = projectGeoJSON['properties'];
+      render: function(full_project_data){
+        console.log("full project data", full_project_data)
+        var d = full_project_data;
         document.getElementById('building-name').innerText = d.proj_name;
         document.getElementById('building-street').innerText = d.proj_addre;
         document.getElementById('building-ward').innerText = d.ward;
@@ -177,15 +186,80 @@ var projectView = {
         document.getElementById('owner-name').innerText = d.hud_own_name == 0 ? 'not in data file' : d.hud_own_name;
       },
     },
+    
+    example1: {
+      title: 'Header section',
+      wrapperPartial: 'partials/project-view/example.html',
+      hideTitle:false,
+      render: function(full_project_data){
+        d3.select('#this-is-my-id')
+      }
+    },
+    example2: {
+      title: 'TOPA Notices',
+      wrapperPartial: 'partials/project-view/example.html',
+      hideTitle:true,
+      render: function(full_project_data){
+        d3.select('#this-is-my-id')
+      }
+    },
+
+    topaNotices: {
+      title: 'TOPA Notices',
+      wrapperPartial: 'partials/project-view/topa-notices.html',
+      hideTitle:false,
+      render: function(full_project_data){
+        var topaTable =  d3.select('#topa-notice-table')
+        var headerTr = topaTable.append('tr')
+              .classed('heading', true)
+            headerTr.append('th')
+              .text('') //index number, no need to annotate
+            headerTr.append('th')
+              .text('Notice Date')
+            headerTr.append('th')
+              .text('Notice Type')
+            headerTr.append('th')
+              .text('Sale Price')
+
+        //Add rows for each topa notice
+        var topaRows = topaTable.selectAll('tr.data')
+              .data(full_project_data.topa, function(d) {return d.id})
+
+        var trs = topaRows.enter().append('tr')
+              .attr('id',function(d){return d.id})
+              .classed('data',true) //to differentiate from headings
+            trs.append('td')
+              .classed('title',true)
+              .text(function(d,i){return (i+1) + ')'})
+            trs.append('td')
+              .classed('value', true)
+              .text(function(d){return d.notice_date})
+            trs.append('td')
+              .classed('value', true)
+              .text(function(d){return d.notice_type})
+            trs.append('td')
+              .classed('value',true)
+              .text(function(d){
+                  if (d.sale_price == null){
+                    return '-'}
+                  else {
+                    return d3.format('$,.0r')(d.sale_price)
+                  }
+                })
+
+      }
+    },
+
     affordableHousingMap:{
       title: 'Affordable Housing Nearby',
       wrapperPartial: 'partials/project-view/affordable-housing.html',
-      render: function(projectGeoJSON){
+      render: function(full_project_data){
         var affordableHousingMap = new mapboxgl.Map({
           container: 'affordable-housing-map',
           style: 'mapbox://styles/mapbox/light-v9',
-          center: [projectGeoJSON['properties']['longitude'],projectGeoJSON['properties']['latitude']],
-          zoom: 15
+          center: [full_project_data['longitude'],full_project_data['latitude']],
+          zoom: 15, 
+          trackResize: true
         });
           
         affordableHousingMap.on('load', function(){
@@ -238,11 +312,11 @@ var projectView = {
     metroStationsAndBusStops: {
       title: "Public Transit Accessibility",
       wrapperPartial: "partials/project-view/transit.html",
-      render: function(projectGeoJSON){
+      render: function(full_project_data){
         var metroStationsMap = new mapboxgl.Map({
           container: 'metro-stations-map',
           style: 'mapbox://styles/mapbox/light-v9',
-          center: [projectGeoJSON['properties']['longitude'], projectGeoJSON['properties']['latitude']],
+          center: [full_project_data['longitude'], full_project_data['latitude']],
           zoom: 15
         });
       
@@ -348,8 +422,8 @@ var projectView = {
     subsidyTimelineChart: {
       title: "Building Subsidy Status",
       wrapperPartial: "partials/project-view/subsidy.html",
-      render: function(projectGeoJSON){
-        var currentNlihc = projectGeoJSON['properties']['nlihc_id'];
+      render: function(full_project_data){
+        var currentNlihc = full_project_data['nlihc_id'];
         
         new SubsidyTimelineChart({
             dataRequest: {
@@ -357,7 +431,7 @@ var projectView = {
                 url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
             },
             container: '#subsidy-timeline-chart',
-            width: 1000,
+            width: 700,
             height: 300
         }); 
       }
@@ -365,7 +439,7 @@ var projectView = {
     surroundingAreaDevelopment: {
       title: "Surrounding Area Development",
       wrapperPartial: "partials/project-view/surrounding-dev.html",
-      render: function(projectGeoJSON){
+      render: function(full_project_data){
         // Nothing to do yet
         return;
       }
