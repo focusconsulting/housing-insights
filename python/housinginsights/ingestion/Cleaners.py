@@ -261,7 +261,7 @@ class CleanerBase(object, metaclass=ABCMeta):
                 str_num = address.split(' ')[0]
                 int(str_num)
                 first_address = address.split(';')[0]
-                result = mar_api.find_location(first_address)
+                result = mar_api.find_addr_string(first_address)
             except ValueError:
                 logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None
@@ -768,7 +768,11 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 
         return row
 
-
+class ProjectAddressCleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row)
+        return row
+        
 class ZillowCleaner(CleanerBase):
     """
     Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)

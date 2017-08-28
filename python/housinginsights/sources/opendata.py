@@ -15,11 +15,11 @@ class OpenDataApiConn(BaseApiConn):
     """
     
     """
-    def __init__(self, proxies=None):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None):
         #baseurl not actually used since we need the _urls property to hold many urls. 
         #Needed to get call to super() to work correctly. TODO refactor so this is optional.
         baseurl = 'https://opendata.arcgis.com/datasets/'
-        super(OpenDataApiConn, self).__init__(baseurl, proxies=None)
+        super(OpenDataApiConn, self).__init__(baseurl=baseurl, proxies=None)
 
         self._available_unique_data_ids = [
                         "tax",

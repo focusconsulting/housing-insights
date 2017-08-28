@@ -124,7 +124,7 @@ PROJECT_FIELDS_MAP = {  'Nlihc_id': None,
                         'Zip': None,
                         'Proj_image_url': None, 
                         'Proj_streetview_url': None,
-                        'Proj_address_id': 'mar_id', #calculated during create_project_subsidy_csv
+                        'Proj_address_id': None, #'mar_id', #calculated during create_project_subsidy_csv
                         'Proj_x': None,
                         'Proj_y': None, 
                         'Proj_lat': None,
@@ -132,7 +132,7 @@ PROJECT_FIELDS_MAP = {  'Nlihc_id': None,
                         'Update_Dtm': None, #date_modified but wrong format
                         'Subsidy_info_source_property': None,
                         'contract_number': None, 
-                        'Proj_addre': 'address_single', #calculated during create_project_subsidy_csv
+                        'Proj_addre': 'address__street_1',
                         'Proj_ayb': None,
                         'Proj_eyb': None,
                         'Proj_owner_type':None,

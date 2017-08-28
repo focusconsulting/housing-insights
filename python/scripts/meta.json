@@ -1,4 +1,43 @@
 {
+  "proj_addre": {
+    "cleaner": "ProjectAddressCleaner",
+    "replace_table":false,
+    "fields": [
+      {
+        "display_name": "NLIHC ID",
+        "display_text": "Unique identifier of the project as found in the project table.",
+        "required_in_source": true,
+        "source_name": "nlihc_id",
+        "sql_name": "nlihc_id",
+        "type": "text"
+      },
+      {
+        "display_name": "Address",
+        "display_text": "Full address of the property",
+        "required_in_source": true,
+        "source_name": "address",
+        "sql_name": "address",
+        "type": "text"
+      },
+      {
+        "display_name": "MAR ID",
+        "display_text": "Unique id in DC's Master Address Repository",
+        "required_in_source": true,
+        "source_name": "mar_id",
+        "sql_name": "mar_id",
+        "type": "text"
+      },
+      {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      }
+    ]
+  },
+
   "census": {
     "cleaner": "CensusCleaner",
     "fields": [

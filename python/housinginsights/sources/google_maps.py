@@ -12,8 +12,8 @@ class GoogleMapsApiConn(BaseApiConn):
     # init call to dictate which base url to use or make base url = 'http://'
     BASEURL = 'http://maps.google.com'
 
-    def __init__(self):
-        super().__init__(GoogleMapsApiConn.BASEURL)
+    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+        super().__init__(baseurl=GoogleMapsApiConn.BASEURL)
 
     def check_street_view(self, latitude, longitude, radius=50):
         """
