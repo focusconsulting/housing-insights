@@ -209,6 +209,12 @@ var projectView = {
       wrapperPartial: 'partials/project-view/topa-notices.html',
       hideTitle:false,
       render: function(full_project_data){
+
+
+        //TODO! Refactor this into a 'buildTable' function that is callable from wherever. 
+        //helpful examples:
+        //https://www.vis4.net/blog/posts/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
+        //https://gist.github.com/jfreels/6733593
         var topaTable =  d3.select('#topa-notice-table')
         var headerTr = topaTable.append('tr')
               .classed('heading', true)
