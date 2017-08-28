@@ -1,6 +1,16 @@
+/data/**
 /data/*
+/data/*/*
+/data/*/*/*
+/data/*/*/*/*
+/data/*/*/*/*/*
+/data/*/*/*/*/*/*
+/data/*/*/*/*/*/*/*
+/data/*/*/*/*/*/*/*/*
+
 !/data/readme.md
 !/data/processed
+!/data/**/*.gitkeep
 
 #######################
 # Notes files

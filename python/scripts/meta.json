@@ -1,4 +1,43 @@
 {
+  "proj_addre": {
+    "cleaner": "ProjectAddressCleaner",
+    "replace_table":false,
+    "fields": [
+      {
+        "display_name": "NLIHC ID",
+        "display_text": "Unique identifier of the project as found in the project table.",
+        "required_in_source": true,
+        "source_name": "nlihc_id",
+        "sql_name": "nlihc_id",
+        "type": "text"
+      },
+      {
+        "display_name": "Address",
+        "display_text": "Full address of the property",
+        "required_in_source": true,
+        "source_name": "address",
+        "sql_name": "address",
+        "type": "text"
+      },
+      {
+        "display_name": "MAR ID",
+        "display_text": "Unique id in DC's Master Address Repository",
+        "required_in_source": true,
+        "source_name": "mar_id",
+        "sql_name": "mar_id",
+        "type": "text"
+      },
+      {
+        "display_name": "Unique data ID",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "source_name": "unique_data_id",
+        "sql_name": "unique_data_id",
+        "type": "text"
+      }
+    ]
+  },
+
   "census": {
     "cleaner": "CensusCleaner",
     "fields": [
@@ -1908,7 +1947,7 @@
     "replace_table": true
   },
   "parcel": {
-    "cleaner": "parcel_cleaner",
+    "cleaner": "ParcelCleaner",
     "fields": [
       {
         "display_name": "Nlihc ID",
@@ -1948,7 +1987,7 @@
         "required_in_source": true,
         "source_name": "Parcel_owner_date",
         "sql_name": "parcel_owner_date",
-        "type": "text"
+        "type": "date"
       },
       {
         "display_name": "Parcel Info Source Date",
@@ -1956,7 +1995,7 @@
         "required_in_source": true,
         "source_name": "Parcel_Info_Source_Date",
         "sql_name": "parcel_info_source_date",
-        "type": "text"
+        "type": "date"
       },
       {
         "display_name": "In Last Ownerpt",
@@ -2428,7 +2467,7 @@
         "source_name": "most_recent_reac_score_num",
         "sql_name": "most_recent_reac_score_num",
         "type": "integer"
-      }, 
+      },
       {
         "display_name": "Most Recent REAC Score Date",
         "display_text": "From the matching record in the reac_score table",
@@ -2436,7 +2475,7 @@
         "source_name": "most_recent_reac_score_date",
         "sql_name": "most_recent_reac_score_date",
         "type": "date"
-      }, 
+      },
       {
         "display_name": "Most Recent REAC Score ID",
         "display_text": "ID in the reac_score to uniquely identify the record corresponding to the Most Recent REAC Score",
@@ -2444,7 +2483,7 @@
         "source_name": "most_recent_reac_score_id",
         "sql_name": "most_recent_reac_score_id",
         "type": "text"
-      }, 
+      },
       {
         "display_name": "In Preservation Catalog",
         "display_text": "Whether the project is included in the Preservation Catalog data set",
@@ -2611,7 +2650,7 @@
       },
       {
         "display_name": "Subsidy ID",
-        "display_text": "",
+        "display_text": "ID for the subsidy program",
         "required_in_source": true,
         "source_name": "Subsidy_id",
         "sql_name": "subsidy_id",
@@ -2619,7 +2658,7 @@
       },
       {
         "display_name": "Units Assist",
-        "display_text": "",
+        "display_text": "Number of units under the assistance program",
         "required_in_source": true,
         "source_name": "Units_Assist",
         "sql_name": "units_assist",
@@ -2627,7 +2666,7 @@
       },
       {
         "display_name": "POA Start",
-        "display_text": "",
+        "display_text": "Contract start date for period of affordability",
         "required_in_source": true,
         "source_name": "POA_start",
         "sql_name": "poa_start",
@@ -2635,7 +2674,7 @@
       },
       {
         "display_name": "POA End",
-        "display_text": "",
+        "display_text": "Contract end date for period of affordability",
         "required_in_source": true,
         "source_name": "POA_end",
         "sql_name": "poa_end",
@@ -2659,7 +2698,7 @@
       },
       {
         "display_name": "Subsidy Active",
-        "display_text": "",
+        "display_text": "True or false if subsidy is active",
         "required_in_source": true,
         "source_name": "Subsidy_Active",
         "sql_name": "subsidy_active",
@@ -2755,7 +2794,7 @@
       },
       {
         "display_name": "POA End Actual",
-        "display_text": "",
+        "display_text": "Contract end date for period of affordability if contract was actually terminated.",
         "required_in_source": true,
         "source_name": "POA_end_actual",
         "sql_name": "poa_end_actual",
@@ -2848,7 +2887,7 @@
         "sql_name": "stop_or_station_lon",
         "type": "decimal"
       },
-      
+
       {
         "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
