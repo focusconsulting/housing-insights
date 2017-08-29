@@ -42,7 +42,7 @@ html, body {
 .sub-nav-container {
     position: relative;
     display: none;
-    overflow-y: auto;
+    
 }
 
 .sub-nav-container.active {

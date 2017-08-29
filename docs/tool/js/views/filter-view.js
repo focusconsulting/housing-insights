@@ -952,19 +952,17 @@ var filterView = {
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
 
         $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
-            var difference = $( this ).offset().top + $( this ).height() - $('#filters').offset().top - $('#filters').height(); 
-            /* for debug:
-            console.log($( this ).offset().top + $( this ).height());
+            var difference = $( this ).offset().top - $('#filter-components').offset().top; 
+            
+            console.log($( this ).offset().top);
             console.log('vs');
-            console.log($('#filters').offset().top + $('#filters').height() );
+            console.log($('#filter-components').offset().top);
             console.log(difference);
-            */
-            if ( $( this ).offset().top + $( this ).height() > $('#filters').offset().top + $('#filters').height() ) { 
+            
               // if the accordion content extend below the bounds of the #filters container
-                $('#filters').animate({
-                    scrollTop: $( '#filters' ).scrollTop() + difference + 30
-                }, 500)
-            }
+            $('#filter-components').animate({
+                scrollTop: $( '#filter-components' ).scrollTop() + difference - 29
+            }, 500)
         }});
 
         //Add components to the navigation using the appropriate component type
@@ -1191,11 +1189,11 @@ var filterView = {
                 if ( !$accordion.hasClass('active') ){
                     $accordion.click();
                 } else {
-                    var $filterContent = $('#filter-content-' + d.component.source);
-                    var difference = $filterContent.offset().top + $filterContent.height() - $('#filters').offset().top - $('#filters').height(); 
-                    $('#filters').animate({
-                        scrollTop: $( '#filters' ).scrollTop() + difference + 30
-                    }, 500);
+                    
+                    var difference = $accordion.offset().top - $('#filter-components').offset().top; 
+                    $('#filter-components').animate({
+                        scrollTop: $( '#filter-components' ).scrollTop() + difference
+                    }, 500)
                 }
             })
 
@@ -1203,7 +1201,7 @@ var filterView = {
             .append('i')
             .classed("delete icon",true)
             .on("click", function(d) {
-                d3.event.stopPropagation();
+              //  d3.event.stopPropagation();
                 d.clear();
             })
                  
