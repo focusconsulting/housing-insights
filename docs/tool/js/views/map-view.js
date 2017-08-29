@@ -5,7 +5,7 @@
 
         init: function() { // as single page app, view init() functions should include only what should happen the first time
             // the view is loaded. things that need to happen every time the view is made active should be in
-            // the onReturn methods. nothing needs to be there so far for mapView, but buildingView for instance
+            // the onReturn methods. nothing needs to be there so far for mapView, but projectView for instance
             // should load the specific building info every time it's made active.
             var partialRequest = {
                 partial: this.el,
@@ -854,7 +854,7 @@
                     .style("text-decoration", "underline") // to indicate it is a link
                     .on("click", function(e) {
                         setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
-                        setState('switchView', buildingView);
+                        setState('switchView', projectView);
                     });
 
                 //Add fields that don't have the field name displayed

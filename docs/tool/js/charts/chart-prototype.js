@@ -300,7 +300,6 @@ ChartProtoCallback.prototype = {
               if (chartOptions.field) return d[chartOptions.field];
               return null;
         });
-        console.log(chart.setupType);
         // The below 'if' block is necessary because SubsidyTimlineChart cannot access its own setupType function during the necessary ChartProto.call() call.
         if (typeof chart.setupType === "function"){ console.log('calling setupType'); chart.setupType(chartOptions); }
       }

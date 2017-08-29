@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+li {
+    list-style-position:inside;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -161,15 +165,17 @@ button.nullValuesToggleSubmit::before {
     overflow-y: auto;
 }
 
-#projects-list {
+#projects-list, #building-view-segments {
     margin-top: 0px;
 }
 
-#left-options .sub-nav-button {
+#left-options .sub-nav-button,
+#left-options-building .sub-nav-button {
     border-right: 2px solid rgb(189, 54, 33);
 }
 
-#right-options .sub-nav-button {
+#right-options .sub-nav-button,
+#right-options-building .sub-nav-button {
     border-left: 2px solid rgb(189, 54, 33);
 }
 
@@ -178,17 +184,17 @@ button.nullValuesToggleSubmit::before {
     border-bottom-width: 0;
 }
 
-#left-options {
+#left-options, #left-options-building {
     width: 300px;
     display: flex;
 }
 
-#right-options {
+#right-options, #right-options-building {
     width: 350px;
     display: flex;
 }
 
-#options-spacer {
+#options-spacer, #options-spacer-building {
     flex-grow: 1;
     border-bottom: 2px solid rgb(189, 54, 33);
     position: relative; /*so pillboxes can be appended*/
@@ -373,7 +379,7 @@ Others are working correctly.
     font-size:1.2em;
     cursor: pointer;
 }
-#projects-list>div {
+#projects-list>div, #building-view-segments div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
@@ -388,13 +394,19 @@ Others are working correctly.
     font-size: 1em;
 }
 
-#projects-list>div:hover {
+#projects-list>div:hover, #building-view-segments div:hover {
     background-color: #ddebff;
 }
-#projects-list>div.enter, #projects-list>div.update {
+
+#projects-list>div.enter, #projects-list>div.update,
+#building-view-segments div.enter {
     padding: 5px 4px;
     max-height: 100px;
     opacity: 1;
+}
+
+#building-view-segments {
+    position: fixed;
 }
 
 
@@ -678,23 +690,20 @@ a.active {
 
 
 /* building view */
-#button-back {
-    background-color: #fff;
-    border-bottom-width: 0;
-}
 
 #sub-nav-building {
     width: 100%;
-    position: relative;
     color: inherit;
     background-color: #d69c93;
     height: 40px;
     display: flex;
     justify-content: space-between;
+    position: fixed;
+    z-index: 10000;
 }
 
 #building-view-container {
-    margin-top: 20px;
+    margin-top: 40px;
 }
 
 
