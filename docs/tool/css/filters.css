@@ -81,4 +81,8 @@
     color: rgba(234, 100, 2, 1);
   }
 
-/**/
+/*Styles for null data toggle tooltip*/
+
+.filter .tooltip .tooltip-inner {
+    text-transform: initial;
+}

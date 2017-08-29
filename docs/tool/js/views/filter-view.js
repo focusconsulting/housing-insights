@@ -129,6 +129,12 @@ var filterView = {
         //Add the element and set to default value
         this.container = document.createElement('div');
         this.container.classList.add('nullsToggleContainer');
+        this.container.setAttribute('data-toggle', 'tooltip');
+        this.container.setAttribute('data-placement', 'top');
+        this.container.setAttribute('title', 'Some projects might be missing data for this field. Do you wish to include them in the map view?');
+
+        $(this.container).tooltip();
+
         this.element = document.createElement('input');
         this.element.setAttribute('type', 'checkbox');
         this.element.setAttribute('value', 'showNulls-' + component.source);
@@ -142,7 +148,6 @@ var filterView = {
             this.container.appendChild(this.element);
             this.container.appendChild(txt);
         }
-
     },
     filterInputs: {}, // adding filterInputs object so we can access them later -JO //TODO should switch to filterControls instead -NH
     dateInputs: {}, // same for date inputs - JO //TODO same -NH
