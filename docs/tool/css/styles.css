@@ -688,6 +688,13 @@ a.active {
     cursor: pointer;
 }
 
+.ui.label.label-all {
+    background-color: rgba(253,126,35,0.7) !important;
+        display: inline !important;
+         font-size: .95em;
+    margin:5px 2px;
+}
+
 .ui.label.clear-all:hover {
     color: rgb(50, 50, 50) !important;
 }

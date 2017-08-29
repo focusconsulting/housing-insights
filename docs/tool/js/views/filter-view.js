@@ -1082,7 +1082,7 @@ var filterView = {
     },
     clearAllButton: {
         init: function(){
-            var thisButton = this;
+
 
             this.pill = document.createElement('div');
             this.pill.id = 'clearFiltersPillbox';
@@ -1096,10 +1096,26 @@ var filterView = {
             this.pill.addEventListener('click', function(){
                 filterView.clearAllFilters();
             });
+            this.appendLabelPill()
+        },
+        appendLabelPill: function() {
+            this.labelPill = document.createElement('div');
+            
+            this.labelPill.classList.add('label-all','ui','label');
+
+            this.site = document.getElementById('clear-pillbox-holder');
+
+            this.site.insertBefore(this.labelPill, this.site.firstChild);
+            this.labelPill.textContent = 'Filtered';
         },
         site: undefined,
         tearDown: function(){
-            d3.select('#'+this.pill.id)
+            d3.select('.clear-all')
+                .transition()
+                    .duration(750)
+                    .style("opacity",0)
+                    .remove();
+            d3.select('.label-all')
                 .transition()
                     .duration(750)
                     .style("opacity",0)
@@ -1125,7 +1141,7 @@ var filterView = {
                 activeFilterControls.push(control)
             };
         }
-
+        setState('numberOfFilters', activeFilterControls.length);
         var nullsShown = filterUtil.getNullsShown();
         Object.keys(nullsShown).forEach(function(key){
             var control = filterView.filterControls.find(function(obj){
@@ -1201,7 +1217,6 @@ var filterView = {
             .append('i')
             .classed("delete icon",true)
             .on("click", function(d) {
-              //  d3.event.stopPropagation();
                 d.clear();
             })
                  
