@@ -198,7 +198,39 @@ button.nullValuesToggleSubmit::before {
     position: absolute;
     display: block;
     left: 100%;
+    height: 40px;
+
 }
+
+#clear-pillbox-holder:hover {
+    height: initial;
+}
+
+.ui.label.clear-single {
+    transition: padding-top 0.2s linear, padding-bottom 0.2s linear, max-height 0.2s linear, background .1s ease;
+    overflow: hidden;
+}
+.ui.label.clear-single.visible {
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    margin-top: 0;
+
+ 
+}
+
+#clear-pillbox-holder:hover .clear-single.visible {
+    padding: 0.833em;
+    max-height: 72px;
+    position: relative;
+    top: initial;
+    opacity: 1;
+}
+
 .main-view {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
@@ -652,8 +684,7 @@ a.active {
     display: block !important;
     position: relative;
     font-size: .95em;
-    margin-top:5px;
-    margin-left: 2px;
+    margin:5px 2px;
     cursor: pointer;
 }
 
