@@ -5,9 +5,9 @@ Module contains helper functions used in loading data into database
 import logging
 import json
 from sqlalchemy.exc import ProgrammingError
-import sys, os
+import sys
+import os
 
-from importlib import import_module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir, os.pardir)))
 
@@ -137,6 +137,7 @@ def join_paths(pieces=[]):
     Alternative to os.path.join if the second argument might start with "/"
     '''
     return '/'.join(s.strip('/') for s in pieces)
+
 
 #Used for testing purposes
 if __name__ == '__main__':

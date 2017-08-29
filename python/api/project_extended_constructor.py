@@ -21,7 +21,8 @@ def construct_project_extended_blueprint(name, engine, tables, models):
         
         q = """
             select
-            p.*
+            p.*,
+            CONCAT(p.proj_name, ': ', p.proj_addre) as proj_name_addre
             """
         q += ward_selects
         q += cluster_selects
