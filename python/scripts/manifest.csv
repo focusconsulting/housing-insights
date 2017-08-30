@@ -17,8 +17,8 @@ skip,building_permits,building_permits_2013,api,2017-02-02,utf-8,../../../data,h
 skip,building_permits,building_permits_2014,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170815/building_permits_2014.csv,
 skip,building_permits,building_permits_2015,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170815/building_permits_2015.csv,
 skip,building_permits,building_permits_2016,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170815/building_permits_2016.csv,
-use,building_permits,building_permits_2017,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170815/building_permits_2017.csv,This is still incomplete due to broken opendata.dc.gov . Excluding so we can cleanly say our database is 100% 2016 for clarity until opendata.dc.gov gets fixed
-use,dc_tax,tax,api,2017-01-01,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170606/tax.csv,Same (?) as above with better names. Unclear which is authoritative
+use,building_permits,building_permits_2017,api,2017-02-02,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170815/building_permits_2017.csv,
+use,dc_tax,tax,api,2017-01-01,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170606/tax.csv,
 skip,hmda,hmda_all_dc,manual,2017-04-06,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
 use,topa,topa_rcasd_2017,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20170725/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
 use,topa,topa_rcasd_2016,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20170725/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.

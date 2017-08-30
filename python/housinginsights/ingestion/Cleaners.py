@@ -122,6 +122,19 @@ class CleanerBase(object, metaclass=ABCMeta):
                 row[key] = self.null_value
         return row
 
+    def remove_escape_char(self,row):
+        '''
+        The / character causes problems if it occurs at the end of a row, as it tricks 
+        the csv file into joining the two columns together. This occured in 
+        the 2017 building permits. Swapping it out for a similar but safer
+        \ character
+        '''
+        for key, value in row.items():
+            if isinstance(row[key],str):
+                row[key] = row[key].replace('\\','/')
+        
+        return row
+
     def remove_line_breaks(self, row):
         #TODO see if it's possible to not do this by getting the copy_from to be ok with breaks
         for key in row:
@@ -663,7 +676,7 @@ class BuildingPermitsCleaner(CleanerBase):
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
         self.add_mar_tract_lookup()
         self.add_ssl_nlihc_lookup()
-        
+
     def clean(self, row, row_num=None):
 
         row = self.replace_nulls(row, null_values=['NONE', '', None])
@@ -673,6 +686,7 @@ class BuildingPermitsCleaner(CleanerBase):
         row = self.rename_ward(row)
         row = self.add_census_tract_from_mar(
             row, column_name='MARADDRESSREPOSITORYID')
+        row = self.remove_escape_char(row)
         return row
 
     def rename_cluster(self, row):

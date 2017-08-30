@@ -1201,7 +1201,6 @@ class LoadData(object):
             self._failed_table_count += 1
             pass
 
-
 def main(passed_arguments):
     """
     Initializes load procedure based on passed command line arguments and
