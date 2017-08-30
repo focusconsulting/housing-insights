@@ -69,19 +69,35 @@ class CleanerBase(object, metaclass=ABCMeta):
             result = proxy.fetchall()
             self.proj_addre_lookup_from_mar = {d[0]:d[1] for d in result}
 
+    def add_ssl_nlihc_lookup(self):
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select ssl, nlihc_id from parcel"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.ssl_nlihc_lookup = {d[0]:d[1] for d in result}
 
-    def get_nlihc_id_if_exists(self, mar_ids):
+
+    def get_nlihc_id_if_exists(self, mar_ids_string, ssl=None):
         "Checks for record in project table with matching MAR id."
     
         #DC Tax has comma separated list of relevant mar ids
-        mar_id_list = mar_ids.split(',')
+        mar_id_list = mar_ids_string.split(',')
         for mar_id in mar_id_list:
             try:
                 #If we find a matching mar_id, assume the whole thing matches
                 nlihc_id = self.proj_addre_lookup_from_mar[mar_id]
                 return nlihc_id
+
             except KeyError:
                 pass #keep checking the rest of the list
+
+        #optionally, try searching SSLs - used only for dc tax
+        try:
+            nlihc_id = self.ssl_nlihc_lookup[ssl]
+            return nlihc_id
+        except KeyError:
+            pass #means didn't find match
 
         #If we don't find a match
         return self.null_value
@@ -716,6 +732,7 @@ class DCTaxCleaner(CleanerBase):
         #Call the parent method and pass all the arguments as-is
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
         self.add_proj_addre_lookup_from_mar()
+        self.add_ssl_nlihc_lookup()
 
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', '\\', None])
@@ -725,7 +742,7 @@ class DCTaxCleaner(CleanerBase):
         row['VACANT_USE'] = self.convert_boolean(row['VACANT_USE'].capitalize())
         row = self.parse_dates(row)
 
-        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
+        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'], row['SSL'])
         row['nlihc_id'] = nlihc_id
 
         return row
