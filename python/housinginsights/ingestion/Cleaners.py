@@ -49,6 +49,12 @@ class CleanerBase(object, metaclass=ABCMeta):
             for key, value in row.items():
                 self.census_mapping[value] = row['census_tract']
 
+        #List of all date fields for parsing purposes
+        self.date_fields = []
+        for field in self.fields:
+            if field['type'] == 'date':
+                self.date_fields.append(field['source_name'])
+
 
     @abstractmethod
     def clean(self, row, row_num):
@@ -156,12 +162,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         """
         Tries to automatically parse all dates that are of type:'date' in the meta
         """
-        date_fields = []
-        for field in self.fields:
-            if field['type'] == 'date':
-                date_fields.append(field['source_name'])
-
-        for source_name in date_fields:
+        for source_name in self.date_fields:
             row[source_name] = self.format_date(row[source_name])
         return row
 
@@ -661,7 +662,8 @@ class BuildingPermitsCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
         self.add_mar_tract_lookup()
-
+        self.add_ssl_nlihc_lookup()
+        
     def clean(self, row, row_num=None):
 
         row = self.replace_nulls(row, null_values=['NONE', '', None])
@@ -796,6 +798,7 @@ class TopaCleaner(CleanerBase):
         #Call the parent method and pass all the arguments as-is
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
         self.add_proj_addre_lookup_from_mar()
+        self.add_ssl_nlihc_lookup()
 
     def clean(self,row,row_num=None):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'

@@ -420,7 +420,7 @@ class LoadData(object):
         #########################
         # Most recent REAC score
         #########################
-
+        logging.info("  Calculating REAC statistics")
         #HT on sql syntax for a bulk insert, for future reference. Also notes how to only replace if exists: https://stackoverflow.com/a/7918818
         #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
         stmt = '''
@@ -453,6 +453,7 @@ class LoadData(object):
         #########################
         # Sum of tax assessment
         #########################
+        logging.info("  Calculating tax assessment statistics")
 
         stmt= '''
              update project
@@ -492,10 +493,43 @@ class LoadData(object):
         # proj_unit_tot_mar instead of normal _tot so that if we don't have all the records from the mar
         # (due to missing addresses in the proj_addre table) we'll be missing the same ones from numerator
         # and denominator so will get realistic average. 
+        logging.info("  Calculating TOPA statistics")
+        stmt =  """
+                update project
+                set (topa_count
+                     ,most_recent_topa_date)
+                    = 
+                (select topa_count
+                        , most_recent_topa_date
+                 from(
+                     select nlihc_id
+                            ,count(distinct nidc_rcasd_id) as topa_count
+                            ,count(nidc_rcasd_id) as topa_record_count
+                            ,max(notice_date) as most_recent_topa_date
+                        from(
+                            select project.nlihc_id as nlihc_id
+                                   , nidc_rcasd_id
+                                   , address
+                                   , notice_date
+                            from project
+                            left join topa
+                            on project.nlihc_id = topa.nlihc_id
+                            --for debugging:
+                            --where project.nlihc_id in ('NL000365','NL000046','NL000229')
+                            --order by project.nlihc_id desc, notice_date desc
+                            
+                        )
+                        AS joined_appraisals
+                        group by nlihc_id
+                        --order by most_recent_notice_date desc
+
+                ) as summed_appraisals
+                where summed_appraisals.nlihc_id = project.nlihc_id) 
+                """
+        conn.execute(stmt)
 
 
 
-        
         #########################
         # Other calculated fields
         #########################

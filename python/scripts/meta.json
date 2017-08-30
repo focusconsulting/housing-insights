@@ -2638,15 +2638,21 @@
       },
 
       {
-        "display_name": "TOPA notices",
+        "display_name": "TOPA notice count",
         "display_text": "The count of distinct TOPA notices associated with the property",
         "required_in_source": false,
         "source_name": "topa_count",
         "sql_name": "topa_count",
         "type": "integer"
       },
-
-
+      {
+        "display_name": "Most recent TOPA notice date",
+        "display_text": "The date of the most recent TOPA notice associated with the property",
+        "required_in_source": false,
+        "source_name": "most_recent_topa_date",
+        "sql_name": "most_recent_topa_date",
+        "type": "timestamp"
+      },
 
       {
         "display_name": "Total Units (MAR)",
@@ -3870,7 +3876,7 @@
         "required_in_source": true,
         "source_name": "Notice_date",
         "sql_name": "notice_date",
-        "type": "text"
+        "type": "timestamp"
       },
       {
         "display_name": "Number of Units",
