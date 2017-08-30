@@ -1,31 +1,151 @@
 {
   "proj_addre": {
     "cleaner": "ProjectAddressCleaner",
-    "replace_table":false,
+    "replace_table": false,
     "fields": [
       {
         "display_name": "NLIHC ID",
         "display_text": "Unique identifier of the project as found in the project table.",
         "required_in_source": true,
-        "source_name": "nlihc_id",
+        "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
+        "type": "text"
+      },
+      {
+        "display_name": "proj_name",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Proj_name",
+        "sql_name": "proj_name",
         "type": "text"
       },
       {
         "display_name": "Address",
         "display_text": "Full address of the property",
         "required_in_source": true,
-        "source_name": "address",
+        "source_name": "Bldg_addre",
         "sql_name": "address",
+        "type": "text"
+      },
+      {
+        "display_name": "bldg_image_url",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Bldg_image_url",
+        "sql_name": "bldg_image_url",
+        "type": "text"
+      },
+      {
+        "display_name": "bldg_streetview_url",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Bldg_streetview_url",
+        "sql_name": "bldg_streetview_url",
         "type": "text"
       },
       {
         "display_name": "MAR ID",
         "display_text": "Unique id in DC's Master Address Repository",
         "required_in_source": true,
-        "source_name": "mar_id",
+        "source_name": "Bldg_address_id",
         "sql_name": "mar_id",
         "type": "text"
+      },
+      {
+        "display_name": "anc2012",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Anc2012",
+        "sql_name": "anc2012",
+        "type": "text"
+      },
+      {
+        "display_name": "psa2012",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Psa2012",
+        "sql_name": "psa2012",
+        "type": "text"
+      },
+      {
+        "display_name": "geo2010",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Geo2010",
+        "sql_name": "geo2010",
+        "type": "text"
+      },
+      {
+        "display_name": "cluster_tr2000",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Cluster_tr2000",
+        "sql_name": "cluster_tr2000",
+        "type": "text"
+      },
+      {
+        "display_name": "cluster_tr2000_name",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Cluster_tr2000_name",
+        "sql_name": "cluster_tr2000_name",
+        "type": "text"
+      },
+      {
+        "display_name": "bldg_zip",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Bldg_zip",
+        "sql_name": "bldg_zip",
+        "type": "text"
+      },
+      {
+        "display_name": "ward2012",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Ward2012",
+        "sql_name": "ward2012",
+        "type": "text"
+      },
+      {
+        "display_name": "ssl",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Ssl",
+        "sql_name": "ssl",
+        "type": "text"
+      },
+      {
+        "display_name": "bldg_x",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Bldg_x",
+        "sql_name": "bldg_x",
+        "type": "decimal"
+      },
+      {
+        "display_name": "bldg_y",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Bldg_y",
+        "sql_name": "bldg_y",
+        "type": "decimal"
+      },
+      {
+        "display_name": "bldg_lon",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Bldg_lon",
+        "sql_name": "bldg_lon",
+        "type": "decimal"
+      },
+      {
+        "display_name": "bldg_lat",
+        "display_text": "",
+        "required_in_source": false,
+        "source_name": "Bldg_lat",
+        "sql_name": "bldg_lat",
+        "type": "decimal"
       },
       {
         "display_name": "Unique data ID",
