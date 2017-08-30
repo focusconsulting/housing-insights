@@ -1418,6 +1418,14 @@
         "type": "date"
       },
       {
+        "display_name": "NLIHC ID",
+        "display_text": "Used to uniquely identify a record in the Project table",
+        "required_in_source": false,
+        "source_name": "nlihc_id",
+        "sql_name": "nlihc_id",
+        "type": "text"
+      },
+      {
         "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,

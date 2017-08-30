@@ -55,6 +55,38 @@ class CleanerBase(object, metaclass=ABCMeta):
         # TODO: add replace_null method as required for an implementation (#176)
         pass
 
+
+    def add_proj_addre_lookup_from_mar(self):
+        """
+        Adds an in-memory lookup table of the contents of the current
+        proj_addre table but with the mar_id as key instead of address. Used for entity resolution
+        Result format: {'23105':'NL0000121', '23106':'NL0000223'} i.e. 'mar_id':'nlihc_id'
+        """
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select mar_id, nlihc_id from proj_addre"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.proj_addre_lookup_from_mar = {d[0]:d[1] for d in result}
+
+
+    def get_nlihc_id_if_exists(self, mar_ids):
+        "Checks for record in project table with matching MAR id."
+    
+        #DC Tax has comma separated list of relevant mar ids
+        mar_id_list = mar_ids.split(',')
+        for mar_id in mar_id_list:
+            try:
+                #If we find a matching mar_id, assume the whole thing matches
+                nlihc_id = self.proj_addre_lookup_from_mar[mar_id]
+                return nlihc_id
+            except KeyError:
+                pass #keep checking the rest of the list
+
+        #If we don't find a match
+        return self.null_value
+
+
     # TODO: figure out what is the point of this method...it looks incomplete
     def field_meta(self, field):
         for field_meta in self.fields:
@@ -680,6 +712,11 @@ class CrimeCleaner(CleanerBase):
 
 
 class DCTaxCleaner(CleanerBase):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        #Call the parent method and pass all the arguments as-is
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+        self.add_proj_addre_lookup_from_mar()
+
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', '\\', None])
         row['OWNER_ADDRESS_CITYSTZIP'] = self.null_value                            \
@@ -687,6 +724,10 @@ class DCTaxCleaner(CleanerBase):
                                             else row['OWNER_ADDRESS_CITYSTZIP']
         row['VACANT_USE'] = self.convert_boolean(row['VACANT_USE'].capitalize())
         row = self.parse_dates(row)
+
+        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
+        row['nlihc_id'] = nlihc_id
+
         return row
 
 
@@ -737,6 +778,7 @@ class TopaCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         #Call the parent method and pass all the arguments as-is
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+        self.add_proj_addre_lookup_from_mar()
 
     def clean(self,row,row_num=None):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
@@ -745,19 +787,6 @@ class TopaCleaner(CleanerBase):
         nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
         row['nlihc_id'] = nlihc_id
         return row
-
-    def get_nlihc_id_if_exists(self, address_id):
-        "Checks for record in project table with matching MAR id."
-        query = "select nlihc_id from project where mar_id = '{}'".format(address_id)
-        if address_id == self.null_value:
-            return self.null_value
-        try:
-            result = self.engine.execute(query).fetchone()
-            if result:
-                return result[0]
-        except:
-            return self.null_value
-        return self.null_value
 
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
