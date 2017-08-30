@@ -2613,6 +2613,60 @@
         "type": "text"
       },
       {
+        "display_name": "Sum of current tax assesment - Total",
+        "display_text": "The sum of all matching tax assessment records. A project can have multiple tax records due to matching multiple MAR IDs or SSLs",
+        "required_in_source": false,
+        "source_name": "sum_appraised_value_current_total",
+        "sql_name": "sum_appraised_value_current_total",
+        "type": "integer"
+      },
+      {
+        "display_name": "Sum of current tax assesment - Land",
+        "display_text": "The sum of all matching tax assessment records, land assessment value only. A project can have multiple tax records due to matching multiple MAR IDs or SSLs",
+        "required_in_source": false,
+        "source_name": "sum_appraised_value_current_land",
+        "sql_name": "sum_appraised_value_current_land",
+        "type": "integer"
+      },
+      {
+        "display_name": "Sum of current tax assesment - Improvements",
+        "display_text": "The sum of all matching tax assessment records, improvements value only. A project can have multiple tax records due to matching multiple MAR IDs or SSLs",
+        "required_in_source": false,
+        "source_name": "sum_appraised_value_current_impr",
+        "sql_name": "sum_appraised_value_current_impr",
+        "type": "integer"
+      },
+
+      {
+        "display_name": "TOPA notices",
+        "display_text": "The count of distinct TOPA notices associated with the property",
+        "required_in_source": false,
+        "source_name": "topa_count",
+        "sql_name": "topa_count",
+        "type": "integer"
+      },
+
+
+
+      {
+        "display_name": "Total Units (MAR)",
+        "display_text": "Total number of units (including market rate) as determined by the Master Address Repository",
+        "required_in_source": false,
+        "source_name": "proj_units_tot_mar",
+        "sql_name": "proj_units_tot_mar",
+        "type": "integer"
+      },
+      {
+        "display_name":"Total Units - Counts Match",
+        "display_text":"Whether or not the total number of units from the Preservation Catalog matches the count found in the Master Address Repository", 
+        "required_in_source":false,
+        "source_name":"proj_unit_tot_matches",
+        "sql_name":"proj_unit_tot_matches",
+        "type":"boolean"
+      },
+
+
+      {
         "display_name": "In Preservation Catalog",
         "display_text": "Whether the project is included in the Preservation Catalog data set",
         "required_in_source": false,

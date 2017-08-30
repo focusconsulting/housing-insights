@@ -451,10 +451,54 @@ class LoadData(object):
 
 
         #########################
-        # Other calculated fields
+        # Sum of tax assessment
         #########################
 
+        stmt= '''
+             update project
+             set (sum_appraised_value_current_total
+                , sum_appraised_value_current_land
+                , sum_appraised_value_current_impr) 
+                = 
+             (select sum_appraised_value_current_total
+                , sum_appraised_value_current_land
+                , sum_appraised_value_current_impr
+             from(
+                select nlihc_id
+                       ,sum(appraised_value_current_total) as sum_appraised_value_current_total
+                       ,sum(appraised_value_current_land) as sum_appraised_value_current_land
+                       ,sum(appraised_value_current_impr) as sum_appraised_value_current_impr
+                from(
+                    select ssl
+                           ,project.nlihc_id as nlihc_id
+                           ,appraised_value_current_total
+                           , appraised_value_current_land
+                           , appraised_value_current_impr
+                    from project
+                    left join dc_tax
+                    on project.nlihc_id = dc_tax.nlihc_id
+                    --for debugging:
+                    --where project.nlihc_id in ('NL000001','NL000004','NL000006','NL000008','NL000010')
+                )
+                AS joined_appraisals
+                group by nlihc_id
+            ) as summed_appraisals
+            where summed_appraisals.nlihc_id = project.nlihc_id)
+            '''
+        conn.execute(stmt)
 
+
+        # here should calculate the tax assessment per unit in the project; but, be sure to use the 
+        # proj_unit_tot_mar instead of normal _tot so that if we don't have all the records from the mar
+        # (due to missing addresses in the proj_addre table) we'll be missing the same ones from numerator
+        # and denominator so will get realistic average. 
+
+
+
+        
+        #########################
+        # Other calculated fields
+        #########################
 
         #########################
         # Teardown
