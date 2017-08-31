@@ -35,12 +35,11 @@
                     ['previewBuilding', mapView.showProjectPreview],
                     ['filteredData', mapView.filterMap],
                     ['filteredViewLoaded',mapView.addExportButton],
+                    ['filteredViewLoaded',mapView.exportButton],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['filterViewLoaded',router.initFilters] // not 100% sure this trigger isn't later than we'd want
-                    // ['exportJsonAsCsv',exportCsv.exportJsonAsCsv],
-                    // ['exportAllData',exportCsv.exportAllData]
                                                               // but it shouln't be too early
                 ]);
 
@@ -616,6 +615,7 @@
                      });
                     mapView.listBuildings();
                     mapView.addExportButton();
+                    mapView.exportButton();
                     mapView.map.addSource('project', {
                         'type': 'geojson',
                         'data': mapView.convertedProjects
@@ -1017,7 +1017,18 @@
 
         },
         addExportButton: function() {
-          d3.select('#csvExport')
+          // Get the modal
+          var modal = d3.select('#myModal');
+          // Get the <span> element that closes the modal
+          var span = d3.select(".close")[0];
+          d3.select('#csvExportButton')
+            .on('click', function(d) {
+              modal.style.display = "block";
+              modal.class = "modal-open";
+          });
+        },
+        exportButton: function() {
+          d3.select('#exportCsv')
             .on('click', function(d) {
               exportCsv.exportAllData();
           });
