@@ -296,12 +296,16 @@ class CleanerBase(object, metaclass=ABCMeta):
         # using mar api lookup instead of mar.csv because too slow - see to do^
         proj_address_id = row[address_id_col_name]
 
+
+        #TODO this is odd, find out why we have both ADDRESS_ID column and mar_id column
         if proj_address_id != self.null_value:
-            result = mar_api.reverse_address_id(aid=proj_address_id)
-            return_data_set = result['returnDataset']
-            if 'Table1' in return_data_set:
-                row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
-                return row
+            row['mar_id'] = proj_address_id
+            return row
+        #    result = mar_api.reverse_address_id(aid=proj_address_id)
+        #    return_data_set = result['returnDataset']
+        #    if 'Table1' in return_data_set:
+        #        row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
+        #        return row
 
         result = None # track result from reverse lookup api calls
 
@@ -327,8 +331,6 @@ class CleanerBase(object, metaclass=ABCMeta):
             except ValueError:
                 logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None
-
-            print(result);
             
             if result:
                 #Handle case of mar_api returning something but it not being an address
@@ -386,9 +388,12 @@ class CleanerBase(object, metaclass=ABCMeta):
                                census_tract, status, full_address, image_url,
                                street_view_url, psa]:
        
-            mar_api = MarApiConn()
-            result = mar_api.reverse_address_id(aid=row['mar_id'])
-            result = result['returnDataset']['Table1'][0]
+            try:
+                mar_api = MarApiConn()
+                result = mar_api.reverse_address_id(aid=row['mar_id'])
+                result = result['returnDataset']['Table1'][0]
+            except KeyError:
+                return row
 
         #if there were no null values in the geocodable fields
         else:

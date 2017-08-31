@@ -81,7 +81,7 @@ def weekly_update():
 
         #Start with MAR so that we can geocode things
         arguments = get_api_data.parser.parse_args([db_choice,'--modules','opendata','--ids','mar'])
-#        get_api_data.get_multiple_api_sources(arguments)
+        get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only','mar'])
         load_data.main(arguments)
 
@@ -97,17 +97,20 @@ def weekly_update():
                                                                             'prescat_parcel'])
         load_data.main(arguments)
 
+
         #then DHCD since it has better data when duplicate entries appear in DCHousing
         arguments = get_api_data.parser.parse_args([db_choice,'--modules','dhcd'])
         get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only','dhcd_dfd_properties_project','dhcd_dfd_properties_subsidy'])
         load_data.main(arguments)
 
+
         #Then DCHousing
         arguments = get_api_data.parser.parse_args([db_choice,'--modules','DCHousing'])
-#        get_api_data.get_multiple_api_sources(arguments)
+        get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only','dchousing_project','dchousing_subsidy'])
-#        load_data.main(arguments)
+        load_data.main(arguments)
+
 
         #Then everything else
         #TODO it's a little bit clunky to do it this way but to do "everything else" we'd need to modify load_data to accept a negative list
@@ -116,7 +119,7 @@ def weekly_update():
                                 #TODO temporarily skipped because it's slow: 'wmata_distcalc',
                                 'census'])
 
-#        get_api_data.get_multiple_api_sources(arguments)
+        get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only',
                             'tax',
                             'building_permits_2016',
@@ -126,7 +129,7 @@ def weekly_update():
                             'wmata_stops',
                             'wmata_dist'
                             ])
-#        load_data.main(arguments)
+        load_data.main(arguments)
 
 
         
