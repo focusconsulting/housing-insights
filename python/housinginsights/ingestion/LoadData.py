@@ -509,6 +509,8 @@ class LoadData(object):
             'building_permits': ['count', 'building_permits', 'all'],
             'building_permits_rate': ['rate', 'building_permits', 'all'],
             'construction_permits': ['count', 'building_permits',
+                                     'construction'],
+            'construction_permits_rate': ['rate', 'building_permits',
                                      'construction']
         }
 
