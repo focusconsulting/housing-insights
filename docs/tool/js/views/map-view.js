@@ -1018,13 +1018,14 @@
         },
         addExportButton: function() {
           // Get the modal
-          var modal = d3.select('#myModal');
+          var modal = d3.select('#exportDataModal');
           // Get the <span> element that closes the modal
           var span = d3.select(".close")[0];
           d3.select('#csvExportButton')
             .on('click', function(d) {
               modal.style.display = "block";
               modal.class = "modal-open";
+              console.log(model);
           });
         },
         exportButton: function() {
