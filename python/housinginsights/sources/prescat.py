@@ -51,8 +51,10 @@ class PrescatApiConn(ProjectBaseApiConn):
 
                 folder = os.path.dirname(self.output_paths[uid])
                 addre_path = os.path.join(folder, "{}_addre.csv".format(uid))
-                print(self.baseurl)
-                self.create_address_csv_prescat(uid,proj_path=self.baseurl, addre_path=addre_path)
+
+                #This is no longer used because we now have the proj_addre table from the prescat directly. 
+                #TODO remove this when confirmed that it is no longer needed. 
+                #self.create_address_csv_prescat(uid,proj_path=self.baseurl, addre_path=addre_path)
 
 if __name__ == '__main__':
     

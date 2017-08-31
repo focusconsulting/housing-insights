@@ -67,7 +67,7 @@ class BaseApiConn(object):
         for u in self._available_unique_data_ids:
             base = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir,os.pardir,os.pardir))
-            api_location = 'data/raw/apis'
+            api_location = 'data/raw/_downloads'
             filename = u + ".csv"
             d = datetime.now().strftime('%Y%m%d')
             path = os.path.join(base,api_location,d,filename)

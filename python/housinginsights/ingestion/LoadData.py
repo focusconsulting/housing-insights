@@ -49,7 +49,7 @@ if __name__ == "__main__":
     sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
-from housinginsights.logger import HILogger
+from housinginsights.tools.logger import HILogger
 
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
@@ -1172,15 +1172,6 @@ def main(passed_arguments):
         database_choice = 'docker_with_local_python'
         drop_tables = True
 
-    elif passed_arguments.database == 'remote':
-        database_choice = 'remote_database'
-        drop_tables = False #TODO this is a hacky way to avoid dropping tables because it's not working with RDS...
-
-        # Only users with additional admin privileges can rebuild the
-        # remote database
-        if not passed_arguments.update_only:
-            database_choice = 'remote_database_master'
-
     elif passed_arguments.database == 'codefordc':
         database_choice = 'codefordc_remote_admin'
         drop_tables = True
@@ -1215,31 +1206,26 @@ def main(passed_arguments):
 
     #TODO add in failures report here e.g. _failed_table_count
 
-if __name__ == '__main__':
-    """
-    Continue to honor command line feature after refactoring to encapsulate
-    the module as a class.
-    """
-
-    description = 'Loads our flat file data into the database of choice. You ' \
-                  'can load sample or real data and/or rebuild or update only '\
-                  'specific flat files based on unique_data_id values.'
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("database", help='which database the data should be '
-                                         'loaded to',
-                        choices=['docker', 'docker-local', 'local', 'remote', 'codefordc'])
-    parser.add_argument('-s', '--sample', help='load with sample data',
-                        action='store_true')
-    parser.add_argument('--update-only', nargs='+',
-                        help='only update tables with these unique_data_id '
-                             'values')
-
-    parser.add_argument('--remove-tables', nargs='+',
+#Add command line utility
+description = ('Loads our flat file data into the database of choice. You '
+              'can load sample or real data and/or rebuild or update only '
+              'specific flat files based on unique_data_id values.')
+parser = argparse.ArgumentParser(description=description)
+parser.add_argument("database", help='which database the data should be '
+                                     'loaded to',
+                    choices=['docker', 'docker_local', 'local', 'codefordc'])
+parser.add_argument('-s', '--sample', help='load with sample data',
+                    action='store_true')
+parser.add_argument('--update-only', nargs='+',
+                    help='only update tables with these unique_data_id '
+                         'values')
+parser.add_argument('--remove-tables', nargs='+',
                     help='Drops tables before running the load data code. '
                     ' Add the name of each table to drop in format "table1 table2"')
 
-    parser.add_argument ('--recalculate-only',action='store_true',
+parser.add_argument ('--recalculate-only',action='store_true',
                     help="Don't update any data, just redo calculated fields")
 
-    # handle passed arguments and options
+
+if __name__ == '__main__':
     main(parser.parse_args())
