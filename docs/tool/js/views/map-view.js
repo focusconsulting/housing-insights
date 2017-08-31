@@ -1025,7 +1025,6 @@
             .on('click', function(d) {
               modal.style.display = "block";
               modal.class = "modal-open";
-              console.log(model);
           });
         },
         exportButton: function() {
