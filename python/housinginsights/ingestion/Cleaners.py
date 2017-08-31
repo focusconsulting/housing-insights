@@ -659,8 +659,14 @@ class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
-        row = self.add_mar_id(row, 'Proj_address_id')
-        row = self.add_geocode_from_mar(row=row)
+        
+        #TODO need to better handle errors within these, i.e. the MAR API failing
+        try:
+            row = self.add_mar_id(row, 'Proj_address_id')
+            row = self.add_geocode_from_mar(row=row)
+        except Exception as e:
+            logging.error("Error geocoding {}, error was {}".format(row,e))
+
         row = self.rename_ward(row, ward_key='Ward2012')
         row = self.rename_status(row)
         row = self.rename_census_tract(row, column_name='Geo2010')
