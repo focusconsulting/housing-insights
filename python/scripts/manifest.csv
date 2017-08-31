@@ -17,9 +17,9 @@ use,building_permits,building_permits_2016,api,2017-08-31,utf-8,../../../data,ht
 use,building_permits,building_permits_2017,api,2017-08-31,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20170831/building_permits_2017.csv,
 use,dc_tax,tax,api,2017-08-31,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20170831/tax.csv,
 skip,hmda,hmda_all_dc,manual,2017-04-06,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
-use,topa,topa_rcasd_2017,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
-use,topa,topa_rcasd_2016,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
-use,topa,topa_rcasd_2015,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/Rcasd_2015.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2017,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20170725/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2016,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20170725/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
+use,topa,topa_rcasd_2015,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20170725/Rcasd_2015.csv,Parsed from DCHD data by Urban Institute staff.
 use,census,acs5_2015,api,2017-08-31,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20170831/acs5_2015.csv,
 use,census_tract_to_neighborhood_cluster,tract2010_cluster2000,manual,2013-07-01,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/geographic_data/Tract_weights/Wt_tr10_cltr00.csv,
 use,census_tract_to_ward,tract2010_ward2012,manual,2013-07-01,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/geographic_data/Tract_weights/Wt_tr10_ward12.csv,

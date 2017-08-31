@@ -423,7 +423,7 @@ class LoadData(object):
         #########################
         # Most recent REAC score
         #########################
-
+        logging.info("  Calculating REAC statistics")
         #HT on sql syntax for a bulk insert, for future reference. Also notes how to only replace if exists: https://stackoverflow.com/a/7918818
         #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
         stmt = '''
@@ -454,10 +454,88 @@ class LoadData(object):
 
 
         #########################
+        # Sum of tax assessment
+        #########################
+        logging.info("  Calculating tax assessment statistics")
+
+        stmt= '''
+             update project
+             set (sum_appraised_value_current_total
+                , sum_appraised_value_current_land
+                , sum_appraised_value_current_impr) 
+                = 
+             (select sum_appraised_value_current_total
+                , sum_appraised_value_current_land
+                , sum_appraised_value_current_impr
+             from(
+                select nlihc_id
+                       ,sum(appraised_value_current_total) as sum_appraised_value_current_total
+                       ,sum(appraised_value_current_land) as sum_appraised_value_current_land
+                       ,sum(appraised_value_current_impr) as sum_appraised_value_current_impr
+                from(
+                    select ssl
+                           ,project.nlihc_id as nlihc_id
+                           ,appraised_value_current_total
+                           , appraised_value_current_land
+                           , appraised_value_current_impr
+                    from project
+                    left join dc_tax
+                    on project.nlihc_id = dc_tax.nlihc_id
+                    --for debugging:
+                    --where project.nlihc_id in ('NL000001','NL000004','NL000006','NL000008','NL000010')
+                )
+                AS joined_appraisals
+                group by nlihc_id
+            ) as summed_appraisals
+            where summed_appraisals.nlihc_id = project.nlihc_id)
+            '''
+        conn.execute(stmt)
+
+
+        # here should calculate the tax assessment per unit in the project; but, be sure to use the 
+        # proj_unit_tot_mar instead of normal _tot so that if we don't have all the records from the mar
+        # (due to missing addresses in the proj_addre table) we'll be missing the same ones from numerator
+        # and denominator so will get realistic average. 
+        logging.info("  Calculating TOPA statistics")
+        stmt =  """
+                update project
+                set (topa_count
+                     ,most_recent_topa_date)
+                    = 
+                (select topa_count
+                        , most_recent_topa_date
+                 from(
+                     select nlihc_id
+                            ,count(distinct nidc_rcasd_id) as topa_count
+                            ,count(nidc_rcasd_id) as topa_record_count
+                            ,max(notice_date) as most_recent_topa_date
+                        from(
+                            select project.nlihc_id as nlihc_id
+                                   , nidc_rcasd_id
+                                   , address
+                                   , notice_date
+                            from project
+                            left join topa
+                            on project.nlihc_id = topa.nlihc_id
+                            --for debugging:
+                            --where project.nlihc_id in ('NL000365','NL000046','NL000229')
+                            --order by project.nlihc_id desc, notice_date desc
+                            
+                        )
+                        AS joined_appraisals
+                        group by nlihc_id
+                        --order by most_recent_notice_date desc
+
+                ) as summed_appraisals
+                where summed_appraisals.nlihc_id = project.nlihc_id) 
+                """
+        conn.execute(stmt)
+
+
+
+        #########################
         # Other calculated fields
         #########################
-
-
 
         #########################
         # Teardown
@@ -1142,7 +1220,6 @@ class LoadData(object):
             # currently write_file_to_sql() just writes in log that file failed
             self._failed_table_count += 1
             pass
-
 
 def main(passed_arguments):
     """
