@@ -16,7 +16,7 @@ class CensusApiConn(BaseApiConn):
     """
     
     """
-    def __init__(self, proxies=None):
+    def __init__(self,baseurl=None,proxies=None,database_choice=None):
         #baseurl not actually used since we need the _urls property to hold many urls. 
         #Needed to get call to super() to work correctly. TODO refactor so this is optional.
         baseurl = 'http://api.census.gov/data/'

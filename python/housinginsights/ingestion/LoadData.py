@@ -510,6 +510,7 @@ class LoadData(object):
             'violent_crime_rate': ['rate', 'crime', 'violent'],
             'non_violent_crime_rate': ['rate', 'crime', 'nonviolent'],
             'building_permits': ['count', 'building_permits', 'all'],
+            'building_permits_rate': ['rate', 'building_permits', 'all'],
             'construction_permits': ['count', 'building_permits',
                                      'construction']
         }
@@ -872,7 +873,6 @@ class LoadData(object):
 
         # Apply the normalization if needed
         if method == 'rate':
-            # TODO: need to complete get_residential_permits method
             if table_name in ['building_permits']:
                 denominator = self._get_residential_units(grouping)
                 api_results = self._items_divide(api_results, denominator)
@@ -941,8 +941,25 @@ class LoadData(object):
         """
         Returns the number of residential units in the standard 'items' format
         """
-        # TODO implement me
-        return None
+        
+        try:
+            with self.engine.connect() as conn:
+
+                q = """
+                    SELECT zone_specific AS zone, housing_unit_count AS total 
+                    FROM zone_housingunit_bedrm_count 
+                    WHERE zone_type = '{grouping}';
+                    """.format(grouping=grouping)
+
+                proxy = conn.execute(q)
+                zone_units = {row.zone: row.total for row in proxy}
+
+            return {'items':zone_units}
+
+        #TODO do better error handling - for interim development purposes only
+        except Exception as e:
+            return {'items': None, 'notes': "Query failed: {}".format(e),
+                    'grouping': grouping, 'data_id': "res_units_by_zone"}
 
     def _process_data_file(self, manifest_row):
         """

@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+li {
+    list-style-position:inside;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -161,15 +165,17 @@ button.nullValuesToggleSubmit::before {
     overflow-y: auto;
 }
 
-#projects-list {
+#projects-list, #building-view-segments {
     margin-top: 0px;
 }
 
-#left-options .sub-nav-button {
+#left-options .sub-nav-button,
+#left-options-building .sub-nav-button {
     border-right: 2px solid rgb(189, 54, 33);
 }
 
-#right-options .sub-nav-button {
+#right-options .sub-nav-button,
+#right-options-building .sub-nav-button {
     border-left: 2px solid rgb(189, 54, 33);
 }
 
@@ -178,17 +184,17 @@ button.nullValuesToggleSubmit::before {
     border-bottom-width: 0;
 }
 
-#left-options {
+#left-options, #left-options-building {
     width: 300px;
     display: flex;
 }
 
-#right-options {
+#right-options, #right-options-building {
     width: 350px;
     display: flex;
 }
 
-#options-spacer {
+#options-spacer, #options-spacer-building {
     flex-grow: 1;
     border-bottom: 2px solid rgb(189, 54, 33);
     position: relative; /*so pillboxes can be appended*/
@@ -373,7 +379,7 @@ Others are working correctly.
     font-size:1.2em;
     cursor: pointer;
 }
-#projects-list>div {
+#projects-list>div, #building-view-segments div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
@@ -388,13 +394,19 @@ Others are working correctly.
     font-size: 1em;
 }
 
-#projects-list>div:hover {
+#projects-list>div:hover, #building-view-segments div:hover {
     background-color: #ddebff;
 }
-#projects-list>div.enter, #projects-list>div.update {
+
+#projects-list>div.enter, #projects-list>div.update,
+#building-view-segments div.enter {
     padding: 5px 4px;
     max-height: 100px;
     opacity: 1;
+}
+
+#building-view-segments {
+    position: fixed;
 }
 
 
@@ -617,11 +629,11 @@ a.active {
     color: rgba(0, 0, 30, 0.95);
 }
 
-/*
+
 .ui.styled.accordion .title.filter-title.filter-activated, .ui.styled.accordion .active.title.filter-title.filter-activated {
     background: rgba(234, 100, 2, 0.7);
 }
-*/
+
 /*Clear filter pillboxes*/
 .ui.label.clear-single {
     background-color: rgba(253,126,35,0.7);
@@ -629,6 +641,7 @@ a.active {
     position: relative;
     font-size: .95em;
     margin-top:5px;
+    cursor: pointer;
 }
 
 .ui.label.clear-single-flier {
@@ -677,23 +690,20 @@ a.active {
 
 
 /* building view */
-#button-back {
-    background-color: #fff;
-    border-bottom-width: 0;
-}
 
 #sub-nav-building {
     width: 100%;
-    position: relative;
     color: inherit;
     background-color: #d69c93;
     height: 40px;
     display: flex;
     justify-content: space-between;
+    position: fixed;
+    z-index: 10000;
 }
 
 #building-view-container {
-    margin-top: 20px;
+    margin-top: 40px;
 }
 
 
@@ -709,4 +719,23 @@ dl.inline dd:after{
 dl.inline dt{
   display: inline-block;
   min-width: 75px;
+}
+
+
+/*search bar*/
+#searchbar .dropdown {
+    border-radius:15px;
+    max-width:400px;
+    float:right;
+    margin-right:10px;
+    margin-left:50px;
+}
+
+#searchbar {
+    height:30px;
+}
+
+/*patches semantic ui bug that search helper text is cut off after clearing a pillbox*/
+input.search {
+    width:200px !important;
 }

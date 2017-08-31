@@ -64,11 +64,11 @@ def get_multiple_api_sources(unique_data_ids=None, sample=False, output_type='cs
             class_name = modules[m]
             api_class = getattr(module, class_name)
 
-            api_instance = api_class()
+            api_instance = api_class(database_choice=db)
             api_method = getattr(api_instance, 'get_data') # Every class should have a get_data method!
 
             # Get the data
-            api_method(unique_data_ids, sample, output_type, db=db)
+            api_method(unique_data_ids, sample, output_type, db=db) #TODO refactor all the methods that need db to instead use self.engine() created in __init__(see base_project for example)
 
         except Exception as e:
             logger.error("The request for '%s' failed with error: %s", m, e)
@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # Set up the appropriate settings for what you want to download
     debug = True            # Raise errors instead of only logging them
     send_log = True         # Choose whether to email the log file.
-    unique_data_ids = ['crime_2017'] #None  # Alternatively, pass a list of only the
+    unique_data_ids = None #['dchousing'] #None  # Alternatively, pass a list of only the
                             # data sources you want to download:
                             # Supported ids:
                             # ['tax',

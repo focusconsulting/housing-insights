@@ -189,7 +189,7 @@ sum_obs_blue = construct_summarize_observations('sum_obs',engine)
 project_view_blue = construct_project_view_blueprint('project_view',engine)
 filter_blue = construct_filter_blueprint('filter', engine)
 zone_facts = construct_zone_facts_blueprint('zone_facts',engine)
-project_extended = construct_project_extended_blueprint('project_extended',engine)
+project_extended = construct_project_extended_blueprint('project_extended',engine, tables, models)
 
 # Register all the blueprints
 for blueprint in [sum_obs_blue, project_view_blue, filter_blue, zone_facts, project_extended]:
