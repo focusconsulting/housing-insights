@@ -1,6 +1,5 @@
 ---
-layout: http://dcpres.urban.org/dcp/
-https://otr.cfo.dc.gov/service/real-property-taxpayers
+layout: datasource
 tablename: real_property
 title: Office of Tax and Revenue's (OTR) Real Property Tax Database March 2017
 ---
@@ -12,4 +11,3 @@ The data source was downloaded from the [Urban Institute Preservation Catalog](h
 
 ##Remaining issues: 
 * Clarify the changes that Preservation Catalog made to the OTR data.  
-
