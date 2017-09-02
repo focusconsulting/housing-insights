@@ -534,9 +534,6 @@ a.active {
     padding: 10px;
     color: rgb(189, 54, 33);
 }
-.no-location-alert.loaded  {
-    color: magenta
-}
 
 #reset-zoom {
     display: none;
