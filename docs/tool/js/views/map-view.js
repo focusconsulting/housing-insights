@@ -1019,12 +1019,26 @@
         addExportButton: function() {
           // Get the modal
           var modal = d3.select('#exportDataModal');
+          var filtersText = d3.select('#exportFilters');
           // Get the <span> element that closes the modal
           var span = d3.select(".close")[0];
           d3.select('#csvExportButton')
             .on('click', function(d) {
               modal.style.display = "block";
               modal.class = "modal-open";
+              var activeFilters = filterUtil.getActiveFilterValues();
+              var activeFiltersString = "";
+              Object.keys(activeFilters).forEach(function(key){
+                activeFiltersString += key + ": ";
+                for (var i = 0; i < activeFilters[key].length; i++ ){
+                  activeFiltersString += activeFilters[key][i];
+                  if ( i < activeFilters[key].length - 1 ){
+                    activeFiltersString += ",";
+                  }
+                }
+                activeFiltersString += "\n";
+              });
+              filtersText._groups[0][0].innerText = activeFiltersString;
           });
         },
         exportButton: function() {
