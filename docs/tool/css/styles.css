@@ -199,11 +199,16 @@ button.nullValuesToggleSubmit::before {
     display: block;
     left: 100%;
     height: 40px;
+    width: 200px;
 
 }
 
 #clear-pillbox-holder:hover {
     height: initial;
+}
+
+#clear-pillbox-holder .ui.label {
+    min-height: 30px;   
 }
 
 .ui.label.clear-single {
@@ -586,6 +591,11 @@ a.active {
     font-weight: bold;
     border-top: 1px solid rgba(34, 36, 38, 0.15);
 }
+
+#filters {
+    overflow-y: hidden;
+}
+
 /*Mimics accordion content styling*/
 #filters .static-content {
     margin: 0;
