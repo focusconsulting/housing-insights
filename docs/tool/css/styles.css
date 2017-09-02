@@ -203,7 +203,7 @@ button.nullValuesToggleSubmit::before {
 
 }
 
-#clear-pillbox-holder:hover {
+#clear-pillbox-holder:hover, #clear-pillbox-holder.force-hover {
     height: initial;
 }
 
@@ -228,7 +228,11 @@ button.nullValuesToggleSubmit::before {
  
 }
 
-#clear-pillbox-holder:hover .clear-single.visible {
+.ui.label.clear-single.visible:last-child {
+    margin-bottom: 100px;
+}
+
+#clear-pillbox-holder:hover .clear-single.visible, #clear-pillbox-holder.force-hover .clear-single.visible {
     padding: 0.833em;
     max-height: 72px;
     position: relative;

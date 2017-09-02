@@ -1157,8 +1157,15 @@ var filterView = {
         });
         
         //Use d3 to bind the list of control objects to our html pillboxes
-        var allPills = d3.select('#clear-pillbox-holder')
-                        .selectAll('.clear-single')
+        var holder = d3.select('#clear-pillbox-holder')
+                        .classed('force-hover', true);
+
+        setTimeout(function(){
+            holder.classed('force-hover', false);
+        }, 2000);
+
+
+        var allPills = holder.selectAll('.clear-single')
                         .data(activeFilterControls, function(d){
                             return d.component.source;
                         })
