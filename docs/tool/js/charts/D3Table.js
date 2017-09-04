@@ -67,6 +67,7 @@ D3Table.prototype = {
       chart._data = []
       chart._columns = []
       chart._container = container
+      chart._hideTitle = false
       chart._delay = 200
       chart._duration = 1000
 
@@ -83,21 +84,24 @@ D3Table.prototype = {
       //Unused in this chart
       return this
     }, 
-    update: function(data){
+    update: function(){
       /*
       Put the data into the chart
       */
       var chart = this
-
+      console.log(chart._data)
       //Add column headers cells (hc)
-      var HC = chart._thead_row.selectAll('td')
-          .data(chart.columns())
-      var newHC = HC.enter()
-                    .append('td')
-      var allHC = newHC.merge(HC)
-          .html(function(d){return d.label})
+      //TODO need to refactor - adding hideTitle and updating won't remove the title
+      if (!chart.hideTitle()) {
+        var HC = chart._thead_row.selectAll('td')
+            .data(chart.columns())
+        var newHC = HC.enter()
+                      .append('td')
+        var allHC = newHC.merge(HC)
+            .html(function(d){return d.label})
 
-      HC.exit().remove()
+        HC.exit().remove()
+      }
 
       //Add the data rows and cells (DRs, DCs)
       var DRs = chart._tbody.selectAll('tr')
@@ -163,6 +167,11 @@ D3Table.prototype = {
     container: function(_){
         if (!arguments.length) return this._container;
         this._container = _;
+        return this;
+    },
+    hideTitle: function(_){
+        if (!arguments.length) return this._hideTitle;
+        this._hideTitle = _;
         return this;
     },
     delay: function(_){
