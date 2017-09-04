@@ -523,6 +523,18 @@ a.active {
 
 */
 
+.no-location-alert {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%);
+    font-size: 36px;
+    border: 1px solid rgb(189, 54, 33);
+    border-radius: 35px;
+    padding: 10px;
+    color: rgb(189, 54, 33);
+}
+
 #reset-zoom {
     display: none;
     position: absolute;

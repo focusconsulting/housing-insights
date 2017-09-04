@@ -998,11 +998,14 @@
                     }
                 })
                 .on('click', function(d) {
-                  console.log("here")
-                    mapView.map.flyTo({
-                        center: [d.properties.longitude, d.properties.latitude],
-                        zoom: 15
-                    });
+                    if ( d.properties.longitude !== null && d.properties.latitude !== null ) {
+                        mapView.map.flyTo({
+                            center: [d.properties.longitude, d.properties.latitude],
+                            zoom: 15
+                        });
+                    } else {
+                        mapView.alertNoLocationInfo()
+                    }
                     setState('previewBuilding', d);
                 })
 
@@ -1015,6 +1018,18 @@
                 .transition(t)
                 .remove();
 
+        },
+        alertNoLocationInfo: function(){
+            d3.select('#map-wrapper')
+              .append('div')
+              .classed('no-location-alert', true)
+              .style('opacity',0)
+              .text('No location available')
+              .transition().duration(1000)
+              .style('opacity',1)
+              .transition().duration(1000)
+              .style('opacity',0)
+              .remove();
         },
         addExportButton: function() {
           // Get the modal
