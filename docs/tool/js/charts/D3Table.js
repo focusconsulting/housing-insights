@@ -99,34 +99,30 @@ D3Table.prototype = {
 
       HC.exit().remove()
 
-      //Add the data cells
+      //Add the data rows and cells (DRs, DCs)
       var DRs = chart._tbody.selectAll('tr')
         .data(chart.data());
       var newDRs = DRs.enter()
         .append('tr')
       var allDRs = newDRs.merge(DRs)
-        .selectAll('td')
+      var DCs = allDRs.selectAll('td')
         .data(function(row,i){
           return chart.columns().map(function(column){
             return {column:column, value:row[column['field']]}
           })
         })
 
-        .enter()
+      var newDCs = DCs.enter()
         .append('td')
+      var allDCs = newDCs.merge(DCs)  
         .html(function(d){
             var func = d.column.html
             return func(d.value)
           })
-        .attr("class", function(d) {
-          var existing = d3.select(this).attr("class") 
-          if (existing == null){
-            return d.column.class
-          }else{
-            return existing + " " + d.column.class
-          }
-        })
+        .attr("class", function(d) {return d.column.class}) //overwrites anything existing
 
+      DRs.exit().remove(); //remove out of date rows
+      DCs.exit().remove(); //remove out of date cells
 
     },      
     //TODO not used currently

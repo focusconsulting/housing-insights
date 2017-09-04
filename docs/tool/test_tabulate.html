@@ -77,13 +77,26 @@
 
         var demoChart = new D3Table('.demoChart')
                             .data(data)
-                            .columns(['nlihc_id',{field:'rp_date', label:'Date of RP', class:'yoyo', html: function(d){return 'date: ' + d}}])
+                            .columns(['rp_type',{field:'rp_date', label:'Date of RP', class:'yoyo', html: function(d){return 'date: ' + d}}])
                             .create()
 
         setTimeout(function(){
-            demoChart.columns(['nlihc_id','ssl',{field:'rp_date', label:'Date of RP', class:'yoyo', html: function(d){return 'date: ' + d}}])
+            demoChart.columns(['rp_type','ssl',{field:'rp_date', label:'Date of RP', class:'yoyo', html: function(d){return 'date: ' + d}}])
                 .update()
         },2000)
+
+        setTimeout(function(){
+            demoChart.columns(['rp_type','ssl'])
+                .update()
+        },4000)
+
+
+        setTimeout(function(){
+            var copiedData = JSON.parse(JSON.stringify(data))
+            copiedData.splice(1,1)
+            demoChart.data(copiedData)
+                .update()
+        },6000)
     </script>
     </body>
 
