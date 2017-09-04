@@ -525,6 +525,9 @@
                 .attr('id', function() {
                     return layer.source + '-menu-item';
                 })
+                .attr('title', function(){
+                    return layer.display_text;
+                })
                 .classed('active', (layer.visibility === 'visible'))
                 .text(function() {
                     return layer.display_name;
@@ -558,9 +561,6 @@
                 .classed('active',false)
             d3.select('#' + data + '-menu-item')
                 .classed('active',true);
-            d3.select('#zone-choice-description')
-                .text(mapView.initialLayers.find(x => x.source === data).display_text)
-
         },
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay

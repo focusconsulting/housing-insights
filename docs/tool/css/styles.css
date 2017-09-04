@@ -46,7 +46,7 @@ html, body {
 .sub-nav-container {
     position: relative;
     display: none;
-    overflow-y: auto;
+    
 }
 
 .sub-nav-container.active {
@@ -201,9 +201,51 @@ button.nullValuesToggleSubmit::before {
 }
 
 #clear-pillbox-holder {
-    position: relative;
+    position: absolute;
     display: block;
+    left: 100%;
+    height: 40px;
+    width: 200px;
+
 }
+
+#clear-pillbox-holder:hover, #clear-pillbox-holder.force-hover {
+    height: initial;
+}
+
+#clear-pillbox-holder .ui.label {
+    min-height: 30px;   
+}
+
+.ui.label.clear-single {
+    transition: padding-top 0.2s linear, padding-bottom 0.2s linear, max-height 0.2s linear, background .1s ease;
+    overflow: hidden;
+}
+.ui.label.clear-single.visible {
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    margin-top: 0;
+
+ 
+}
+
+.ui.label.clear-single.visible:last-child {
+    margin-bottom: 100px;
+}
+
+#clear-pillbox-holder:hover .clear-single.visible, #clear-pillbox-holder.force-hover .clear-single.visible {
+    padding: 0.833em;
+    max-height: 72px;
+    position: relative;
+    top: initial;
+    opacity: 1;
+}
+
 .main-view {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
@@ -494,6 +536,11 @@ Others are working correctly.
 }
 
 
+#layer-menu-buttons button {
+        border: 5px solid #fff;
+    padding: 9px 3px;
+}
+
 /*
 Switched to semantic-ui buttons instead
 #layer-menu, #overlay-menu, #temp-filter-menu {
@@ -572,6 +619,11 @@ a.active {
     font-weight: bold;
     border-top: 1px solid rgba(34, 36, 38, 0.15);
 }
+
+#filters {
+    overflow-y: hidden;
+}
+
 /*Mimics accordion content styling*/
 #filters .static-content {
     margin: 0;
@@ -670,9 +722,15 @@ a.active {
     display: block !important;
     position: relative;
     font-size: .95em;
-    margin-top:5px;
-    margin-left: 2px;
+    margin:5px 2px;
     cursor: pointer;
+}
+
+.ui.label.label-all {
+    background-color: rgba(253,126,35,0.7) !important;
+        display: inline !important;
+         font-size: .95em;
+    margin:5px 2px;
 }
 
 .ui.label.clear-all:hover {

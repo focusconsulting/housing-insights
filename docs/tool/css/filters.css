@@ -12,7 +12,9 @@
 
 #filter-components {
   padding-bottom: 150px;
-  
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .filter-group {
