@@ -466,7 +466,7 @@ var filterView = {
         this.uncheckNullToggleOnInitialFilterSet = function(){
             var filterValues = filterUtil.getFilterValues();
 
-            if (!filterValues[component.source] || filterValues[component.source].length <= 1) {
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1 || filterValues[component.source][0].length == 0) {
                 console.log('Unchecking the null toggle for ', component.source);
                 ths.toggle.element.checked = false;
             }
@@ -727,7 +727,7 @@ var filterView = {
         this.uncheckNullToggleOnInitialFilterSet = function(){
             var filterValues = filterUtil.getFilterValues();
 
-            if (!filterValues[component.source] || filterValues[component.source].length <= 1) {
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1 || filterValues[component.source][0].length == 0) {
                 console.log('Unchecking the null toggle for ', component.source);
                 ths.toggle.element.checked = false;
             }
