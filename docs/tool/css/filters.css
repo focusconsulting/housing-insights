@@ -9,6 +9,14 @@
 
 
 /*Stuff for all filter components*/
+
+#filter-components {
+  padding-bottom: 150px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
 .filter-group {
     border-bottom: 1px solid black;
 }

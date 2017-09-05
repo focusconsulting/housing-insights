@@ -184,8 +184,8 @@ var controller = {
             ['switchView', router.pushViewChange]
         ]);
         if ( router.initialView === 'building' ){
-            setState('activeView', buildingView);
-            buildingView.init(router.buildingID); // parameter distinguishes actions taken in buildingView.init()     
+            setState('activeView', projectView);
+            projectView.init(router.buildingID); // parameter distinguishes actions taken in projectView.init()     
         } else {
             setState('activeView',mapView);        
             mapView.init();  

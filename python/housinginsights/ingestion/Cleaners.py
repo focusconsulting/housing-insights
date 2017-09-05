@@ -9,28 +9,28 @@ from datetime import datetime
 import dateutil.parser as dateparser
 import logging
 import os
+from uuid import uuid4
 
 from housinginsights.ingestion.DataReader import HIReader
 from housinginsights.sources.mar import MarApiConn
 from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
 from housinginsights.sources.google_maps import GoogleMapsApiConn
+from housinginsights.sources.models.mar import MAR_TO_TABLE_FIELDS
 
 
-package_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
                                            os.pardir))
-# TODO - add in manifest but don't load in db so the path isn't hard coded?
-mar_path = os.path.join(package_dir, os.pardir, 'data', 'raw', 'apis',
-                        '20170528', 'mar.csv')
 
-'''
+"""
 Usage:
 Dynamically import based on name of class in meta.json:
 http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-string-name-of-a-class-in-dynamically-imported
-'''
+"""
 
 
 class CleanerBase(object, metaclass=ABCMeta):
-    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='',
+                 engine=None):
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
         self.engine = engine
@@ -44,16 +44,70 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         #Flatten the census mapping file so that every potential name of a census tract can be translated to its standard format
         self.census_mapping = {}
-        census_reader = HIReader(os.path.join(package_dir,'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
+        census_reader = HIReader(os.path.join(PYTHON_PATH, 'housinginsights/config/crosswalks/DC_census_tract_crosswalk.csv'))
         for row in census_reader:
             for key, value in row.items():
                 self.census_mapping[value] = row['census_tract']
+
+        #List of all date fields for parsing purposes
+        self.date_fields = []
+        for field in self.fields:
+            if field['type'] == 'date':
+                self.date_fields.append(field['source_name'])
 
 
     @abstractmethod
     def clean(self, row, row_num):
         # TODO: add replace_null method as required for an implementation (#176)
         pass
+
+
+    def add_proj_addre_lookup_from_mar(self):
+        """
+        Adds an in-memory lookup table of the contents of the current
+        proj_addre table but with the mar_id as key instead of address. Used for entity resolution
+        Result format: {'23105':'NL0000121', '23106':'NL0000223'} i.e. 'mar_id':'nlihc_id'
+        """
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select mar_id, nlihc_id from proj_addre"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.proj_addre_lookup_from_mar = {d[0]:d[1] for d in result}
+
+    def add_ssl_nlihc_lookup(self):
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select ssl, nlihc_id from parcel"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.ssl_nlihc_lookup = {d[0]:d[1] for d in result}
+
+
+    def get_nlihc_id_if_exists(self, mar_ids_string, ssl=None):
+        "Checks for record in project table with matching MAR id."
+    
+        #DC Tax has comma separated list of relevant mar ids
+        mar_id_list = mar_ids_string.split(',')
+        for mar_id in mar_id_list:
+            try:
+                #If we find a matching mar_id, assume the whole thing matches
+                nlihc_id = self.proj_addre_lookup_from_mar[mar_id]
+                return nlihc_id
+
+            except KeyError:
+                pass #keep checking the rest of the list
+
+        #optionally, try searching SSLs - used only for dc tax
+        try:
+            nlihc_id = self.ssl_nlihc_lookup[ssl]
+            return nlihc_id
+        except KeyError:
+            pass #means didn't find match
+
+        #If we don't find a match
+        return self.null_value
+
 
     # TODO: figure out what is the point of this method...it looks incomplete
     def field_meta(self, field):
@@ -68,7 +122,20 @@ class CleanerBase(object, metaclass=ABCMeta):
                 row[key] = self.null_value
         return row
 
-    def remove_line_breaks(self,row):
+    def remove_escape_char(self,row):
+        '''
+        The / character causes problems if it occurs at the end of a row, as it tricks 
+        the csv file into joining the two columns together. This occured in 
+        the 2017 building permits. Swapping it out for a similar but safer
+        \ character
+        '''
+        for key, value in row.items():
+            if isinstance(row[key],str):
+                row[key] = row[key].replace('\\','/')
+        
+        return row
+
+    def remove_line_breaks(self, row):
         #TODO see if it's possible to not do this by getting the copy_from to be ok with breaks
         for key in row:
             row[key] = row[key].replace('\r','__')
@@ -90,7 +157,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         return date
 
-    def convert_boolean(self,value):
+    def convert_boolean(self, value):
         mapping = {
             'Yes': True,
             'No': False,
@@ -105,22 +172,17 @@ class CleanerBase(object, metaclass=ABCMeta):
         return mapping[value]
 
     def parse_dates(self, row):
-        '''
+        """
         Tries to automatically parse all dates that are of type:'date' in the meta
-        '''
-        date_fields = []
-        for field in self.fields:
-            if field['type'] == 'date':
-                date_fields.append(field['source_name'])
-
-        for source_name in date_fields:
+        """
+        for source_name in self.date_fields:
             row[source_name] = self.format_date(row[source_name])
         return row
 
-    def remove_non_dc_tracts(self,row,column_name):
-        '''
+    def remove_non_dc_tracts(self, row, column_name):
+        """
         TODO change to use self.census_mapping
-        '''
+        """
         dc_tracts=["11001000100","11001000201","11001000202","11001000300","11001000400","11001000501","11001000502","11001000600",
         "11001000701","11001000702","11001000801","11001000802","11001000901","11001000902","11001001001","11001001002","11001001100",
         "11001001200","11001001301","11001001302","11001001401","11001001402","11001001500","11001001600","11001001702","11001001803",
@@ -146,38 +208,40 @@ class CleanerBase(object, metaclass=ABCMeta):
         else:
             return None
 
-    def rename_census_tract(self,row,row_num=None,column_name='census_tract'):
-            '''
-            Make all census tract names follow a consistent format. 
-            column_name corresponds to the key of the row, which depends on 
-            the source file column name which may be different from the final
-            consistent name of census_tract
-            '''
-            # deal with null values
-            if row[column_name] == self.null_value:
-                return row
-            else:
-                row[column_name] = self.census_mapping[row[column_name]]
-                return row
+    def rename_census_tract(self, row, column_name='census_tract'):
+        """
+        Make all census tract names follow a consistent format.
+        column_name corresponds to the key of the row, which depends on
+        the source file column name which may be different from the final
+        consistent name of census_tract
+        """
+        # deal with null values
+        if row[column_name] == self.null_value:
+            return row
+        else:
+            row[column_name] = self.census_mapping[row[column_name]]
+            return row
 
-    def replace_tracts(self,row,row_num,column_name='census_tract'):
-        '''
+    def replace_tracts(self, row, row_num, column_name='census_tract'):
+        """
         Converts the raw census tract code to the more readable format used by PresCat
-        '''
+        """
         current = row[column_name]
         try:
             row[column_name] = self.census_mapping[current]
         except KeyError:
             pass
             #this prints error for many rows with nulls.
-            logging.warning('  no matching Tract found for row {}'.format(row_num,row))
+            logging.warning('  no matching Tract found for row {}'.format(
+                row_num, row))
         return row
 
-    def append_tract_label(self,row,row_num,column_name='census_tract_number'):
-        '''
+    def append_tract_label(self, row, row_num,
+                           column_name='census_tract_number'):
+        """
         Appends the value 'Tract ' to the raw numeric value in 'census_tract_number' in order to make the value
         consistent with the more readable format used by PresCat
-        '''
+        """
         current = row[column_name]
         try:
             row[column_name] = "Tract " + str(current)
@@ -232,33 +296,52 @@ class CleanerBase(object, metaclass=ABCMeta):
         # using mar api lookup instead of mar.csv because too slow - see to do^
         proj_address_id = row[address_id_col_name]
 
+
+        #TODO this is odd, find out why we have both ADDRESS_ID column and mar_id column
         if proj_address_id != self.null_value:
-            result = mar_api.reverse_address_id(aid=proj_address_id)
-            return_data_set = result['returnDataset']
-            if 'Table1' in return_data_set:
-                row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
-                return row
+            row['mar_id'] = proj_address_id
+            return row
+        #    result = mar_api.reverse_address_id(aid=proj_address_id)
+        #    return_data_set = result['returnDataset']
+        #    if 'Table1' in return_data_set:
+        #        row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
+        #        return row
 
         result = None # track result from reverse lookup api calls
 
         if lat != self.null_value and lon != self.null_value:
             result = mar_api.reverse_lat_lng_geocode(latitude=lat,
                                                      longitude=lon)
+            if result:
+                row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
         elif x_coord != self.null_value and y_coord != self.null_value:
             result = mar_api.reverse_geocode(xcoord=x_coord,
                                              ycoord=y_coord)
+            if result:
+                row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+
         elif address != self.null_value:
             # check whether address is valid - it has street number
             try:
                 str_num = address.split(' ')[0]
                 int(str_num)
                 first_address = address.split(';')[0]
-                result = mar_api.find_location(first_address)
+                result = mar_api.find_addr_string(first_address)
             except ValueError:
+                logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None
+            
+            if result:
+                #Handle case of mar_api returning something but it not being an address
+                if (result['returnDataset'] == None or 
+                    result['returnDataset'] == {} or
+                    result['sourceOperation'] == 'DC Intersection'):
+                
+                    result = None
 
-        if result is not None:
-            row['mar_id'] = result['Table1'][0]["ADDRESS_ID"]
+                if result:
+                    row['mar_id'] = result['returnDataset']['Table1'][0]["ADDRESS_ID"]
 
         return row
 
@@ -290,7 +373,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         ward = row['Ward2012']
         neighbor_cluster = row['Cluster_tr2000']
         neighborhood_cluster_desc = row['Cluster_tr2000_name']
-        zipcode = row['Proj_Zip']
+        zipcode = row['Proj_zip']
         anc = row['Anc2012']
         census_tract = row['Geo2010']
         status = row['Status']
@@ -304,9 +387,15 @@ class CleanerBase(object, metaclass=ABCMeta):
                                neighborhood_cluster_desc, zipcode, anc,
                                census_tract, status, full_address, image_url,
                                street_view_url, psa]:
-            mar_api = MarApiConn()
-            result = mar_api.reverse_address_id(aid=row['mar_id'])
-            result = result['returnDataset']['Table1'][0]
+       
+            try:
+                mar_api = MarApiConn()
+                result = mar_api.reverse_address_id(aid=row['mar_id'])
+                result = result['returnDataset']['Table1'][0]
+            except KeyError:
+                return row
+
+        #if there were no null values in the geocodable fields
         else:
             return row
 
@@ -325,7 +414,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         if zipcode == self.null_value:
             zip_code = result['ZIPCODE']
-            row['Proj_Zip'] = zip_code
+            row['Proj_zip'] = zip_code
             row['Zip'] = 'ZIP ' + str(zip_code)
 
         if anc == self.null_value:
@@ -345,30 +434,211 @@ class CleanerBase(object, metaclass=ABCMeta):
             if street_view_url is not None:
                 row['Proj_streetview_url'] = street_view_url
             else:
-                map_api = GoogleMapsApiConn()
-                map_api_result = map_api.check_street_view(row['Proj_lat'],
-                                                   row['Proj_lon'])
+                # TODO - should be able to search for lat/lon from the 
+                #   address if they are not available here
+                #print(row)
+                if (row['Proj_lat'] != self.null_value and row['Proj_lon'] != self.null_value):
+                    map_api = GoogleMapsApiConn()
+                    map_api_result = map_api.check_street_view(row['Proj_lat'],
+                                                       row['Proj_lon'])
 
-                if map_api_result:
-                    # create street view url per google maps api specs
-                    loc_data = map_api_result['Location']
-                    latitude = loc_data['original_lat']
-                    longitude = loc_data['original_lng']
-                    pano_id = loc_data['panoId']
-                    url = map_api.get_street_view_url(latitude, longitude,
-                                                      pano_id)
-                    row['Proj_streetview_url'] = url
+                    if map_api_result:
+                        # create street view url per google maps api specs
+                        loc_data = map_api_result['Location']
+                        latitude = loc_data['original_lat']
+                        longitude = loc_data['original_lng']
+                        pano_id = loc_data['panoId']
+                        url = map_api.get_street_view_url(latitude, longitude,
+                                                          pano_id)
+                        row['Proj_streetview_url'] = url
 
         if image_url == self.null_value:
-            img_url = result['IMAGEURL']
-            img_dir = result['IMAGEDIR']
-            img_name = result['IMAGENAME']
-            row['Proj_image_url'] = '{}/{}/{}'.format(img_url, img_dir, img_name)
+            try:
+                img_url = result['IMAGEURL']
+                img_dir = result['IMAGEDIR']
+                img_name = result['IMAGENAME']
+                row['Proj_image_url'] = '{}/{}/{}'.format(img_url, img_dir, img_name)
+            except KeyError:
+                row['Proj_image_url'] == self.null_value
 
         if psa == self.null_value:
             psa = result['PSA']
             if psa is not None:
                 row['Psa2012'] = 'PSA ' + psa.split(' ')[-1]
+
+        return row
+
+    def add_state_county_to_tract(self):
+        pass
+
+    def add_mar_full_lookup(self):
+        '''
+        Adds the self.mar_full_lookup dictionary to the object
+        that calls this function. Used in __init__ of any cleaner
+        that will need this mar geocoding available. 
+
+        Unlike mar_tract_lookup, stores all of the geocode
+        fields used by the project table. 
+        
+        NOTE This is currently unused - realized that the opendata.dc.gov 
+        MAR does not provide street view url or image urls. To recreate
+        streetviewurl, we need another MAR API call so using this method
+        does not save us any geocoding time. Saving here for future
+        use if other things need more extensive geocoding.
+        '''
+
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = """
+                select mar_id
+                    , ward
+                    , neighborhood_cluster
+                    , zipcode
+                    , anc
+                    , census_tract
+                    , status
+                    , full_address
+                    , psa 
+                from mar
+                """
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.mar_full_lookup = {d[0]:d[1:] for d in result}
+
+            #Create a mapping of the tuple order to the MAR API key names, so 
+            # that we can decode the results to look like MAR API results
+            self.mar_full_lookup_order = {
+                        'WARD': 0,
+                        'CLUSTER_': 1,
+                        'ZIPCODE': 2,
+                        'ANC_2012': 3,
+                        'CENSUS_TRACT': 4,
+                        'STATUS':5,
+                        'FULLADDRESS':6,
+                        'PSA':7,
+                        'STREETVIEWURL':8
+                    }
+
+    def add_mar_tract_lookup(self):
+        '''
+        Adds the self.mar_tract_lookup dictionary to the object
+        that calls this function. Typically called in the __init__
+        function of a class that will use this lookup table while
+        cleaning
+        '''
+
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select mar_id, census_tract from mar"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.mar_tract_lookup = {d[0]:d[1] for d in result}
+
+
+    def add_census_tract_from_mar(self, row, column_name='mar_id',
+                                  lat_lon_col_names=('LATITUDE', 'LONGITUDE'),
+                                  x_y_coords_col_names=('X', 'Y'),
+                                  address_col_name='FULL_ADDRESS'):
+        """Returns the census tract for given mar_id using the mar api."""
+        
+        mar_id = row[column_name]
+
+        #Try to get it from memory first
+        try:
+            tract = self.mar_tract_lookup[mar_id]
+            row['census_tract'] = tract
+            return row
+        except KeyError:
+            pass
+
+        #Then check internal database directly
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select census_tract from mar where mar_id = '{}'".format(
+                mar_id)
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            if result:
+                row['census_tract'] = result.pop()[0]
+                return row
+
+            # do lat/lon lookup
+            lat = row[lat_lon_col_names[0]]
+            lon = row[lat_lon_col_names[1]]
+            q = """select census_tract from mar 
+            where latitude = {} and longitude = {};""".format(lat, lon)
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            if result:
+                row['census_tract'] = result.pop()[0]
+                return row
+
+            # do x/y-coord lookup
+            xcoord = row[x_y_coords_col_names[0]]
+            ycoord = row[x_y_coords_col_names[1]]
+            q = """select census_tract from mar 
+                where xcoord = {} and ycoord = {};""".format(xcoord,
+                                                             ycoord)
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            if result:
+                row['census_tract'] = result.pop()[0]
+                return row
+
+            # mar api look up for missing data
+            mar_api = MarApiConn()
+            result = mar_api.reverse_address_id(aid=row[column_name])
+
+            if result['returnDataset']:
+                geocode_result = result['returnDataset']['Table1'][0]
+
+                # #  map mar table field names to api result field and values
+                # table_map = dict()
+                # for key, value in geocode_result.items():
+                #     col_name = MAR_TO_TABLE_FIELDS[key]
+                #     table_map[col_name] = value
+
+                # prepare new data for inserting into mar table
+                col = ['unique_data_id', 'mar_id', 'id']
+                val = ['mar', mar_id, uuid4()]
+
+                for key, value in geocode_result.items():
+                    col.append(MAR_TO_TABLE_FIELDS[key])
+                    val.append(value)
+
+                # derive column and values string needed for sql query
+                col = ', '.join(col)
+                val = ', '.join(val)
+
+                # insert into mar table
+                q = "INSERT INTO mar ({cols}) VALUES ({vals})".format(
+                    cols=col, vals=val)
+                conn.execute(q)
+
+                row['census_tract'] = '11001' + str(geocode_result[
+                                                        'CENSUS_TRACT'])
+                return row
+            else:
+                # don't repeat api call again if mar_id returns empty data
+                q = """INSERT INTO mar (unique_data_id, mar_id, id) VALUES
+                ('mar', {}, '{}')""".format(mar_id, uuid4())
+                conn.execute(q)
+
+                return row
+
+    def filter_row_by(self, row, criteria=None):
+        """
+        Returns empty dict for rows that meet filter criteria.
+
+        :param row: the row to be verified
+        :param criteria: dict where each key is a field in the row dict and the
+        values for which you want filter for. The values for each key should
+        be a list of values you don't want to get loaded into the database.
+        """
+        if criteria is not None:
+            for key in criteria:
+                if row[key] in criteria[key]:
+                    return dict()
 
         return row
 
@@ -381,19 +651,25 @@ class CleanerBase(object, metaclass=ABCMeta):
 # TODO: map to specific cleaner methods including option to pass custom methods
 
 class GenericCleaner(CleanerBase):
-    def clean(self,row, row_num = None):
+    def clean(self, row, row_num=None):
+        row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         return row
 
-
 class ProjectCleaner(CleanerBase):
-    def clean(self, row, row_num = None):
+    def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
-        row = self.add_mar_id(row, 'Proj_address_id')
-        row = self.add_geocode_from_mar(row=row)
+        
+        #TODO need to better handle errors within these, i.e. the MAR API failing
+        try:
+            row = self.add_mar_id(row, 'Proj_address_id')
+            row = self.add_geocode_from_mar(row=row)
+        except Exception as e:
+            logging.error("Error geocoding {}, error was {}".format(row,e))
+
         row = self.rename_ward(row, ward_key='Ward2012')
         row = self.rename_status(row)
-        row = self.rename_census_tract(row, row_num, column_name='Geo2010')
+        row = self.rename_census_tract(row, column_name='Geo2010')
         return row
 
 
@@ -407,16 +683,24 @@ class SubsidyCleaner(CleanerBase):
 
 
 class BuildingPermitsCleaner(CleanerBase):
-    def clean(self, row, row_num = None):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+        self.add_mar_tract_lookup()
+        self.add_ssl_nlihc_lookup()
 
-        row = self.replace_nulls(row, null_values=['NONE','', None])
+    def clean(self, row, row_num=None):
+
+        row = self.replace_nulls(row, null_values=['NONE', '', None])
         row = self.parse_dates(row)
         row = self.remove_line_breaks(row)
         row = self.rename_cluster(row)
         row = self.rename_ward(row)
+        row = self.add_census_tract_from_mar(
+            row, column_name='MARADDRESSREPOSITORYID')
+        row = self.remove_escape_char(row)
         return row
 
-    def rename_cluster(self,row):
+    def rename_cluster(self, row):
         if row['NEIGHBORHOODCLUSTER'] == self.null_value:
             return row
         else:
@@ -425,20 +709,23 @@ class BuildingPermitsCleaner(CleanerBase):
 
 
 class CensusCleaner(CleanerBase):
-    def clean(self,row, row_num = None):
+    def clean(self, row, row_num=None):
+        # TODO - use self.rename_census_tract()
         row['census_tract'] = ""+row['state']+row['county']+row['tract']
         #Note, we are losing data about statistical issues. Would be better to copy these to a new column.
-        row = self.replace_nulls(row,null_values=['N','**','***','****','*****','(X)','-','',None])
+        row = self.replace_nulls(row, null_values=['N', '**', '***', '****',
+                                                  '*****', '(X)', '-', '',
+                                                  None])
         return row
 
     def high_low_rent(self,row):
-        '''
+        """
         Rent higher than the max reportable value are suppressed
         e.g: instead of being reported as "3752", a plus sign is added
         and the values over the max value are suppressed eg. "3,500+"
         Rent lower than the lowest reportable is similar (e.g. "100-")
         We assume that the actual value is the max value, and strip out the , and +
-        '''
+        """
         if row['HD01_VD01'][-1] == "+":
             row['HD01_VD01'] = row['HD01_VD01'].replace(',','')
             row['HD01_VD01'] = row['HD01_VD01'].replace('+','')
@@ -447,13 +734,16 @@ class CensusCleaner(CleanerBase):
             row['HD01_VD01'] = row['HD01_VD01'].replace('-','')
         return row
 
+
 class CensusTractToNeighborhoodClusterCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
 
+
 class CensusTractToWardCleaner(CleanerBase):
     def clean(self,row, row_num = None):
         return row
+
 
 class CrimeCleaner(CleanerBase):
     def clean(self, row, row_num = None):
@@ -465,6 +755,12 @@ class CrimeCleaner(CleanerBase):
 
 
 class DCTaxCleaner(CleanerBase):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        #Call the parent method and pass all the arguments as-is
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+        self.add_proj_addre_lookup_from_mar()
+        self.add_ssl_nlihc_lookup()
+
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', '\\', None])
         row['OWNER_ADDRESS_CITYSTZIP'] = self.null_value                            \
@@ -472,6 +768,10 @@ class DCTaxCleaner(CleanerBase):
                                             else row['OWNER_ADDRESS_CITYSTZIP']
         row['VACANT_USE'] = self.convert_boolean(row['VACANT_USE'].capitalize())
         row = self.parse_dates(row)
+
+        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'], row['SSL'])
+        row['nlihc_id'] = nlihc_id
+
         return row
 
 
@@ -498,10 +798,12 @@ class reac_score_cleaner(CleanerBase):
         row = self.replace_nulls(row, null_values=['', None])
         return row
 
+
 class real_property_cleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row, null_values=['', None])
         return row
+
 
 class dchousing_cleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -515,10 +817,13 @@ class dchousing_cleaner(CleanerBase):
 
         return row
 
+
 class TopaCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         #Call the parent method and pass all the arguments as-is
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+        self.add_proj_addre_lookup_from_mar()
+        self.add_ssl_nlihc_lookup()
 
     def clean(self,row,row_num=None):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
@@ -527,19 +832,6 @@ class TopaCleaner(CleanerBase):
         nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
         row['nlihc_id'] = nlihc_id
         return row
-
-    def get_nlihc_id_if_exists(self, address_id):
-        "Checks for record in project table with matching MAR id."
-        query = "select nlihc_id from project where mar_id = '{}'".format(address_id)
-        if address_id == self.null_value:
-            return self.null_value
-        try:
-            result = self.engine.execute(query).fetchone()
-            if result:
-                return result[0]
-        except:
-            return self.null_value
-        return self.null_value
 
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
@@ -550,11 +842,15 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 
         return row
 
-
+class ProjectAddressCleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row)
+        return row
+        
 class ZillowCleaner(CleanerBase):
-    '''
+    """
     Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)
-    '''
+    """
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv=''):
         #Call the parent method and pass all the arguments as-is
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv)
@@ -600,4 +896,25 @@ class ZillowCleaner(CleanerBase):
         '121693', '121695', '121702', '121704', '121709', '121718', '121727', '121729', '121736', '121743', '121745', '403135', '403134', 
         '121816', '121815', '403139', '403116', '273767', '403478', '273489', '268811', '121808', '121807', '121806', '121791', '121788', 
         '121774', '121772', '121754', '121759', '121761', '121777', '121779', '121786', '268815', '268831', '272818', '273159', '275465', 
-        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']       
+        '403115', '403481', '403483', '403490', '403492', '403499', '403501', '403506', '121718', '121788', '403505']
+
+
+class MarCleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        # only add real addressed into the db, not places
+        criteria = {
+            'TYPE_': ['PLACE']
+        }
+        row = self.filter_row_by(row, criteria)
+        if not row:  # skip other cleaning steps if filtered out
+            return None
+        row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
+        row = self.rename_census_tract(row, column_name='CENSUS_TRACT')
+        return row
+
+
+class ParcelCleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        row = self.replace_nulls(row, null_values=['N', '', None, 'U'])
+        row = self.parse_dates(row)
+        return row

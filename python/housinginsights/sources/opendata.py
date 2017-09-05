@@ -6,18 +6,20 @@ if __name__ == '__main__':
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir)))
 
 
-import logging
 from housinginsights.sources.base import BaseApiConn
+from housinginsights.tools.logger import HILogger
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class OpenDataApiConn(BaseApiConn):
     """
     
     """
-    def __init__(self, proxies=None):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None):
         #baseurl not actually used since we need the _urls property to hold many urls. 
         #Needed to get call to super() to work correctly. TODO refactor so this is optional.
         baseurl = 'https://opendata.arcgis.com/datasets/'
-        super(OpenDataApiConn, self).__init__(baseurl, proxies=None)
+        super(OpenDataApiConn, self).__init__(baseurl=baseurl, proxies=None)
 
         self._available_unique_data_ids = [
                         "tax",
@@ -62,16 +64,16 @@ class OpenDataApiConn(BaseApiConn):
         for u in unique_data_ids:
             if (u not in self._available_unique_data_ids):
                 #TODO Change this error type to a more specific one that should be handled by calling function inproduction
-                #We will want the calling function to continue with other data sources instead of erroring out. 
-                logging.info("  The unique_data_id '{}' is not supported by the OpenDataApiConn".format(u))
+                #We will want the calling function to continue with other data sources instead of erroring out.
+                logger.info("  The unique_data_id '%s' is not supported by the OpenDataApiConn", u)
             else:
                 result = self.get(self._urls[u], params=None)
-                
+
                 if result.status_code != 200:
                     err = "An error occurred during request: status {0}"
-                    #TODO change this error type to be handleable by caller
-                    raise Exception(err.format(result.status_code))
-                
+                    logger.exception(err.format(result.status_code))
+                    continue
+
                 content = result.text
 
                 if output_type == 'stdout':
@@ -79,19 +81,14 @@ class OpenDataApiConn(BaseApiConn):
 
                 elif output_type == 'csv':
                     self.directly_to_file(content, self.output_paths[u])
-                
+
                 #Can't yield content if we get multiple sources at once
                 if len(unique_data_ids) == 1:
                     return content
 
 
-
+                
 if __name__ == '__main__':
-    
-    # Pushes everything from the logger to the command line output as well.
-    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir,"logs","sources.log"))
-    logging.basicConfig(filename=log_path, level=logging.DEBUG)
-    logging.getLogger().addHandler(logging.StreamHandler())
 
     api_conn = OpenDataApiConn()
     unique_data_ids = None #['crime_2013']

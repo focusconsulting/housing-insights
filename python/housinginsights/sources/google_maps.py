@@ -1,5 +1,7 @@
 from housinginsights.sources.base import BaseApiConn
+from housinginsights.tools.logger import HILogger
 
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class GoogleMapsApiConn(BaseApiConn):
     """
@@ -12,8 +14,8 @@ class GoogleMapsApiConn(BaseApiConn):
     # init call to dictate which base url to use or make base url = 'http://'
     BASEURL = 'http://maps.google.com'
 
-    def __init__(self):
-        super().__init__(GoogleMapsApiConn.BASEURL)
+    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+        super().__init__(baseurl=GoogleMapsApiConn.BASEURL)
 
     def check_street_view(self, latitude, longitude, radius=50):
         """
@@ -38,7 +40,8 @@ class GoogleMapsApiConn(BaseApiConn):
 
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
-            raise Exception(err.format(result.status_code))
+            logger.exception(err.format(result.status_code))
+            raise
 
         return result.json()
 

@@ -135,7 +135,7 @@ var filterView = {
         this.element.setAttribute('name', 'showNulls-' + component.source);
         this.element.checked = true;
 
-        var txt = document.createTextNode("Include projects with null data?");
+        var txt = document.createTextNode("Include projects with missing " + component.display_name + " data?");
 
         this.toDOM = function(parentElement){
             parentElement.appendChild(this.container);
@@ -311,14 +311,24 @@ var filterView = {
             });
             ths.minDatum = d3.min(allDataValuesForThisSource) || 0;
             ths.maxDatum = d3.max(allDataValuesForThisSource) || 1;
-            ths.stepCount = Math.max(1, parseInt((this.maxDatum - this.minDatum)/500));
+            ths.datumRange = (ths.maxDatum - ths.minDatum);
+
+            function orderOfMagnitude(n) {
+                var order = Math.floor(Math.log(n) / Math.LN10
+                                   + 0.000000001); // because float math sucks like that
+                return Math.pow(10,order);
+            }
+
+            ths.orderOfMagnitude = orderOfMagnitude(ths.datumRange);
+            ths.stepSize = ths.orderOfMagnitude / 10
+            ths.firstRoundedStep = Math.ceil(ths.minDatum/ths.orderOfMagnitude)*ths.orderOfMagnitude
 
             if (c.style === "percent") {
-                ths.minDatum = Math.round(ths.minDatum * 100) / 100;
-                ths.maxDatum = Math.round(ths.maxDatum * 100) / 100;
+                ths.minDatum = Math.floor(ths.minDatum * 100) / 100;
+                ths.maxDatum = Math.ceil(ths.maxDatum * 100) / 100;
             } else { //"number", "money"
-                ths.minDatum = Math.round(ths.minDatum);
-                ths.maxDatum = Math.round(ths.maxDatum);
+                ths.minDatum = Math.floor(ths.minDatum);
+                ths.maxDatum = Math.ceil(ths.maxDatum);
             }
         }
         
@@ -335,12 +345,11 @@ var filterView = {
         noUiSlider.create(this.slider, {
             start: [this.minDatum, this.maxDatum],
             connect: true,
-            tooltips: [ false, false ], //using textboxes instead
             range: {
-                'min': this.minDatum,
-                'max': this.maxDatum
-            },
-            step: this.stepCount
+                'min': [ths.minDatum],
+                '5%': [ths.firstRoundedStep, ths.stepSize],
+                'max': [ths.maxDatum]
+            }
         });
         
         ////////////////////////
@@ -389,6 +398,8 @@ var filterView = {
             var textboxValues = ths.textBoxes.returnValues();
             var newState = [textboxValues['min']['min'], textboxValues['max']['max'],checkboxValue]
             setState(specificCode, newState);
+            ths.checkAgainstOriginalValues(+textboxValues['min']['min'], +textboxValues['max']['max'], checkboxValue);
+
         });
 
         //Textbox
@@ -402,6 +413,7 @@ var filterView = {
             );
 
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
+            ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
         }
         this.textBoxes.setInputCallback(inputCallback);
 
@@ -418,11 +430,11 @@ var filterView = {
                     positions: Left offset of the handles in relation to the slider
                 */
 
-                // Round the filter up
+                //Deal with floating values
                 unencoded = unencoded.map(function(el){
-                    return el >= 0 ? Math.ceil(el) : el;
+                    return el >= 1 ? Math.round(el) : Math.round(el*100)/100; 
                 });
-
+                
                 //Bind the slider values to the textboxes
                 var min = unencoded[0]
                 var max = unencoded[1]
@@ -433,11 +445,16 @@ var filterView = {
                     var specific_state_code = 'filterValues.' + component.source
                     unencoded.push(ths.toggle.element.checked);
                     setState(specific_state_code,unencoded);
+                    ths.checkAgainstOriginalValues(min,max,unencoded[2]);                
                 }
 
             }
         }
-
+        this.checkAgainstOriginalValues = function(min,max,showNulls){
+            if ( min === this.minDatum && max === this.maxDatum && showNulls === true ){
+                ths.clear();
+            } 
+        }
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
         this.slider.noUiSlider.on('change', currentSliderCallback);
@@ -460,7 +477,7 @@ var filterView = {
 
         this.isTouched = function(){
             var returnVals = ths.textBoxes.returnValues();
-            return returnVals.min.min !== this.minDatum || returnVals.max.max !== this.maxDatum || this.nullsShown === false;
+            return returnVals.min.min != this.minDatum || returnVals.max.max != this.maxDatum || this.nullsShown === false;
         };
 
         this.set = function(min,max,nullValue){
@@ -474,12 +491,13 @@ var filterView = {
 
         this.rebuild = function() {
             ths.calculateParams()
-            ths.element.checked = true;
+            ths.toggle.element.checked = true;
             ths.slider.noUiSlider.updateOptions({
                 start: [ths.minDatum, ths.maxDatum],
                 range: {
-                    'min': ths.minDatum,
-                    'max': ths.maxDatum
+                    'min': [ths.minDatum],
+                    '5%': [ths.firstRoundedStep, ths.stepSize],
+                    'max': [ths.maxDatum]
                 }
             });
             ths.clear() //also refills textboxes
@@ -593,6 +611,7 @@ var filterView = {
                 if(doesItSetState){
                     ths.toggle.element.checked
                     setState(specific_state_code,[newMinDate, newMaxDate, ths.toggle.element.checked]);
+                    ths.checkAgainstOriginalValues(newMinDate, newMaxDate, ths.toggle.element.checked)
                 }
             }
         }
@@ -632,6 +651,7 @@ var filterView = {
             );
 
             setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
+            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
         }
 
         // For separating date inputs with a '/'
@@ -658,6 +678,7 @@ var filterView = {
             var dateValues = getValuesAsDates();
             var newState = [dateValues.min, dateValues.max,checkboxValue]
             setState(specificCode, newState);
+            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, checkboxValue)
         });
 
         this.clear = function(){
@@ -672,7 +693,15 @@ var filterView = {
 
         this.isTouched = function(){
             var dateValues = getValuesAsDates();
-            return dateValues.min !== minDatum || dateValues.max !== maxDatum || this.nullsShown === false;
+            return dateValues.min.valueOf() !== minDatum.valueOf() || dateValues.max.valueOf() !== maxDatum.valueOf() || this.nullsShown === false;
+        }
+
+        this.checkAgainstOriginalValues = function(min,max,showNulls){
+            console.log(min.getTime(),max.getTime(),showNulls);console.log(minDatum.getTime(),maxDatum.getTime());            
+            if ( min.getTime() === minDatum.getTime() && max.getTime() === maxDatum.getTime() && showNulls === true ){
+                console.log('match');
+                ths.clear();
+            } 
         }
 
     },
@@ -744,6 +773,7 @@ var filterView = {
             //Set it up to trigger the layer when title is clicked
             document.getElementById("filter-" + c.source).addEventListener("click", clickCallback);
             function clickCallback() {
+                
                 //TODO this is hacked at the moment, need to restructure how a merged filter+overlay would work together
                 //Currently hacking by assuming the overlay.name is the same as c.source (these are essentially the code name of the data set). 
                 //True only for ACS median rent, the demo data set. 
@@ -778,13 +808,13 @@ var filterView = {
         var c = this.component;
 
         var contentContainer = filterView.setupFilter(c);
-
+        
         var uiSelector = contentContainer.append("select")
             .classed("ui fluid search dropdown",true)
             .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
             .attr("multiple", " ")
             .attr("id", c.source);
-
+    
         //Add the dropdown menu choices
         for(var j = 0; j < c.options.length; j++){
             uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
@@ -801,6 +831,11 @@ var filterView = {
             setState(specific_state_code,selectedValues);
         }};
         var currentSelectCallback = makeSelectCallback(c)
+
+        // Add the search box placeholder text
+        var searchBox = contentContainer.select('input')
+            .attr('placeholder', "Type here to search.")
+            .style('width', '100%');
         
         //TODO change this to a click event instead of any change
         $(".dropdown-"+c.source).change(currentSelectCallback);
@@ -817,6 +852,63 @@ var filterView = {
 
     },
 
+     searchFilterControl: function(component){
+        //Creates the search bar used with the name_addre field
+        //Note, this is currently only configured to be used for one searchbar with the div id=searchbar
+        //TODO fair amount of copy-modified code between this and the categorical one, would be good to consolidate
+        filterView.filterControl.call(this, component);
+        var c = this.component;
+        var contentContainer = d3.select('#searchbar')
+                        .append('div')
+                        .attr('id','filter-content-'+c.source);
+
+        var uiSelector = contentContainer.append("select")
+            .classed("ui fluid multiple search selection dropdown",true)
+            .classed("dropdown-" + c.source,true)    //need to put a selector-specific class on the UI to run the 'get value' statement properly
+            .attr("multiple", " ")
+            .attr("id", c.source + '-searchbar');
+        
+        //Add the dropdown menu choices
+        for(var j = 0; j < c.options.length; j++){
+            uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
+        }
+
+        //Allow mid-string searches
+        $('#'+c.source + '-searchbar').dropdown({ 
+                fullTextSearch: 'exact'
+                });
+
+        //Change the icon
+        d3.select('#searchbar').select('.icon')
+            .classed('dropdown',false)
+            .classed('search',true)
+
+        //Set callback for when user makes a change
+        function makeSelectCallback(component){
+            return function(){
+            var selectedValues = $('.ui.dropdown.'+'dropdown-'+component.source).dropdown('get value');
+            var specific_state_code = 'filterValues.' + component.source
+            setState(specific_state_code,selectedValues);
+        }};
+        var currentSelectCallback = makeSelectCallback(c)
+
+        // Add the search box placeholder text
+        d3.select('#searchbar').select('input')
+            .attr('placeholder', "Search for a project...")
+            .style('width', '100%');
+        
+        //TODO change this to a click event instead of any change
+        $(".dropdown-"+c.source).change(currentSelectCallback);
+
+        this.clear = function(){
+            $('.dropdown-' + c.source).dropdown('restore defaults');
+        }
+        
+        this.isTouched = function(){
+           return $('.dropdown-' + c.source).dropdown('get value').length > 0;
+        }
+
+    },
 
     locationFilterControl: function(component){
         filterView.categoricalFilterControl.call(this, component);
@@ -855,10 +947,23 @@ var filterView = {
 
         //We need to read the actual data to get our categories, mins, maxes, etc. 
         var workingData = model.dataCollection['filterData'].objects; 
-        
+
         var parent = d3.select('#filter-components')
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
+
+        $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
+            var difference = $( this ).offset().top - $('#filter-components').offset().top; 
+            
+            console.log($( this ).offset().top);
+            console.log('vs');
+            console.log($('#filter-components').offset().top);
+            console.log(difference);
+            
+              // if the accordion content extend below the bounds of the #filters container
+            $('#filter-components').animate({
+                scrollTop: $( '#filter-components' ).scrollTop() + difference - 29
+            }, 500)
+        }});
 
         //Add components to the navigation using the appropriate component type
         for (var i = 0; i < filterView.components.length; i++) {
@@ -874,11 +979,8 @@ var filterView = {
             if (filterView.components[i].component_type === 'date'){
                 new filterView.dateFilterControl(filterView.components[i]);
             }
-                           
-            var parent = d3.select('#filter-components')
-                  .classed("ui styled fluid accordion", true)   //semantic-ui styling
-            $('#filter-components').accordion({'exclusive':true}) //allows multiple opened
-
+            
+            //note moved the .accordion settings out of for loop b/c only need to set once      
             
             //set up categorical pickers
             if (filterView.components[i].component_type == 'categorical'){
@@ -895,6 +997,22 @@ var filterView = {
                 new filterView.categoricalFilterControl(filterView.components[i]);
                   
             };
+
+            //search by name and address
+            if (filterView.components[i].component_type == 'searchbar'){
+
+                //First find the unique list of categories
+                var result = [];
+                for (var dataRow = 0; dataRow < workingData.length; dataRow++) {
+                    if(!result.includes(workingData[dataRow][filterView.components[i].source])){
+                        result.push(workingData[dataRow][filterView.components[i].source]);
+                    }
+                };
+                filterView.components[i]['options'] = result;
+                
+                new filterView.searchFilterControl(filterView.components[i]);
+
+            }
 
             //set up location picker
             if (filterView.components[i].component_type == 'location'){
@@ -964,7 +1082,7 @@ var filterView = {
     },
     clearAllButton: {
         init: function(){
-            var thisButton = this;
+
 
             this.pill = document.createElement('div');
             this.pill.id = 'clearFiltersPillbox';
@@ -978,10 +1096,26 @@ var filterView = {
             this.pill.addEventListener('click', function(){
                 filterView.clearAllFilters();
             });
+            this.appendLabelPill()
+        },
+        appendLabelPill: function() {
+            this.labelPill = document.createElement('div');
+            
+            this.labelPill.classList.add('label-all','ui','label');
+
+            this.site = document.getElementById('clear-pillbox-holder');
+
+            this.site.insertBefore(this.labelPill, this.site.firstChild);
+            this.labelPill.textContent = 'Filtered';
         },
         site: undefined,
         tearDown: function(){
-            d3.select('#'+this.pill.id)
+            d3.select('.clear-all')
+                .transition()
+                    .duration(750)
+                    .style("opacity",0)
+                    .remove();
+            d3.select('.label-all')
                 .transition()
                     .duration(750)
                     .style("opacity",0)
@@ -1007,7 +1141,7 @@ var filterView = {
                 activeFilterControls.push(control)
             };
         }
-
+        setState('numberOfFilters', activeFilterControls.length);
         var nullsShown = filterUtil.getNullsShown();
         Object.keys(nullsShown).forEach(function(key){
             var control = filterView.filterControls.find(function(obj){
@@ -1023,8 +1157,15 @@ var filterView = {
         });
         
         //Use d3 to bind the list of control objects to our html pillboxes
-        var allPills = d3.select('#clear-pillbox-holder')
-                        .selectAll('.clear-single')
+        var holder = d3.select('#clear-pillbox-holder')
+                        .classed('force-hover', true);
+
+        setTimeout(function(){
+            holder.classed('force-hover', false);
+        }, 2000);
+
+
+        var allPills = holder.selectAll('.clear-single')
                         .data(activeFilterControls, function(d){
                             return d.component.source;
                         })
@@ -1065,6 +1206,20 @@ var filterView = {
                 }, 1500);
 
             })
+            //Add pillbox click event to navigate to associated filter control
+            .on('click', function(d){
+                var $accordion = $('#filter-' + d.component.source);
+                if ( !$accordion.hasClass('active') ){
+                    $accordion.click();
+                } else {
+                    
+                    var difference = $accordion.offset().top - $('#filter-components').offset().top; 
+                    $('#filter-components').animate({
+                        scrollTop: $( '#filter-components' ).scrollTop() + difference
+                    }, 500)
+                }
+            })
+
         //Add the 'clear' x mark and its callback
             .append('i')
             .classed("delete icon",true)

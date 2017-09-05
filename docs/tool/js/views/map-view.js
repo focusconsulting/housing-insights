@@ -5,7 +5,7 @@
 
         init: function() { // as single page app, view init() functions should include only what should happen the first time
             // the view is loaded. things that need to happen every time the view is made active should be in
-            // the onReturn methods. nothing needs to be there so far for mapView, but buildingView for instance
+            // the onReturn methods. nothing needs to be there so far for mapView, but projectView for instance
             // should load the specific building info every time it's made active.
             var partialRequest = {
                 partial: this.el,
@@ -34,6 +34,8 @@
                     ['hoverBuilding', mapView.showPopup],
                     ['previewBuilding', mapView.showProjectPreview],
                     ['filteredData', mapView.filterMap],
+                    ['filteredViewLoaded',mapView.addExportButton],
+                    ['filteredViewLoaded',mapView.exportButton],
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
@@ -105,7 +107,7 @@
             setState('subNav.right', 'charts');
         },
         ChloroplethColorRange: function(source_data_name, chloroData, style){
-            // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd 
+            // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd
             // make a chloropleth map with a single color, but if you try to,
             // you'll end up dividing by 0 in 'this.stops'. Keep this in mind
             // if we ever want to make CHLOROPLETH_STOP_COUNT user-defined.
@@ -124,7 +126,7 @@
                 }
             }
 
-            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can 
+            //We only want the scale set based on zones actually displayed - the 'unknown' category returned by the api can
             //especially screw up the scale when using rates as they come back as a count instead of a rate
             var currentLayer = getState().mapLayer[0]
             var activeZones = []
@@ -149,7 +151,7 @@
             //Choose the colors
             //TODO - loosely based on the PuBu 7-class scheme from colorbrewer2, but interpolation by d3 isn't the same. Could assign manually.
             var CHLOROPLETH_STOP_COUNT = 6;
-            var MIN_COLOR = 'rgba(241,238,246,0.7)'// 
+            var MIN_COLOR = 'rgba(241,238,246,0.7)'//
             var PIVOT_COLOR = 'rgba(116,189,219,0.7)'
             var MAX_COLOR = 'rgba(3,78,123,0.7)'//
 
@@ -190,7 +192,7 @@
 
 
 
-        //No longer used - we are moving this into the combined filter/layer setup. 
+        //No longer used - we are moving this into the combined filter/layer setup.
         //Keep this code here until we confirm the removal of separate layers menu with user tests around 7/25
         //TODO remove once confirmed
         /*
@@ -228,8 +230,8 @@
 
             var legendLocation = content.append("div")
                 .attr("id", "overlay-" + overlay.source + "-legend") // TODO need to change this to different variable after changing meta logic structure
-                .style("height", "150px"); 
-                
+                .style("height", "150px");
+
             $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
 
             //Set it up to trigger the layer when title is clicked
@@ -316,7 +318,7 @@
 
             //If we haven't loaded the data yet, need to get it
             if (getState()['joinedToGeo.' + data.overlay + '_' + data.activeLayer] === undefined) {
-                
+
                 //When data is loaded, display the layer if possible or switch to the default zone type instead.
                 function dataCallback(d) {
                     var loadSuccessful = getState()['dataLoaded.' + data.overlay + '_' + data.activeLayer][0]
@@ -324,7 +326,7 @@
                         console.log("Grouping not available, switching to default")
                         //If the data returned is null that aggregation is not available. Use default aggregation instead
                         //Using setState here means that after the data is loaded, the addOverlayData function will be called
-                        //again. 
+                        //again.
                         var config = mapView.findOverlayConfig('source', data.overlay)
                         var default_layer = config.default_layer
 
@@ -365,14 +367,14 @@
             var source_data_name = data.overlay;
 
             if (mapView.map.getLayer(data.activeLayer + '_' + source_data_name) === undefined) {
-                
+
 
                 mapView.map.getSource(data.activeLayer + 'Layer').setData(model.dataCollection[data.activeLayer]); // necessary to update the map layer's data
                 // it is not dynamically connected to the dataCollection
-                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].objects;    
-                                                                                 // dataCollection        
+                var dataToUse = model.dataCollection[data.overlay + '_' + data.grouping].objects;
+                                                                                 // dataCollection
                 var thisStyle = mapView.initialOverlays.find(function(obj){return obj['source']==data.overlay}).style;
-        
+
                 // assign the chloropleth color range to the data so we can use it for other
                 // purposes when the state is changed
                 data.chloroplethRange = new mapView.ChloroplethColorRange(source_data_name, dataToUse, thisStyle);
@@ -448,7 +450,7 @@
                 color: '#0D5C7D',
                 visibility: 'none'
             }
-            
+
             //TODO add ANC? Need weighting factors in database first
 
         ],
@@ -508,7 +510,7 @@
                         'visibility': layer.visibility
                     }
                 });
-                
+
             }
         },
 
@@ -521,14 +523,17 @@
                 .append('button')
                 .classed("ui toggle button", true)
                 .attr('id', function() {
-                    return layer.source + '-menu-item'; 
+                    return layer.source + '-menu-item';
+                })
+                .attr('title', function(){
+                    return layer.display_text;
                 })
                 .classed('active', (layer.visibility === 'visible'))
                 .text(function() {
                     return layer.display_name;
                 })
                 .on('click', function() {
-                    setState('mapLayer', layer.source);  
+                    setState('mapLayer', layer.source);
                 });
         },
 
@@ -556,14 +561,11 @@
                 .classed('active',false)
             d3.select('#' + data + '-menu-item')
                 .classed('active',true);
-            d3.select('#zone-choice-description')
-                .text(mapView.initialLayers.find(x => x.source === data).display_text)
-
         },
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay
             //If so, use the 'zones' to enable/disable zone selection buttons
-            
+
             var layerMenu = d3.select('#layer-menu-buttons')
             layerMenu.selectAll('button')
                 .each(function(d) {
@@ -609,9 +611,11 @@
                     mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
                     mapView.convertedProjects.features.forEach(function(feature) {
                         feature.properties.matches_filters = true;
-                        feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'                                           
+                        feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'
                      });
                     mapView.listBuildings();
+                    mapView.addExportButton();
+                    mapView.exportButton();
                     mapView.map.addSource('project', {
                         'type': 'geojson',
                         'data': mapView.convertedProjects
@@ -619,7 +623,7 @@
                     mapView.circleStrokeWidth = 1;
                     mapView.circleStrokeOpacity = 1;
                     mapView.map.addLayer({
-                        'id': 'project-unmatched', 
+                        'id': 'project-unmatched',
                         'type': 'circle',
                         'source': 'project',
                         'filter': ['==', 'klass', 'none'],
@@ -633,12 +637,12 @@
                                 ]
                             },
 
-                            'circle-stroke-opacity': 0.5,                          
+                            'circle-stroke-opacity': 0.5,
                             'circle-opacity': 0.5,
-                            'circle-stroke-width': 2, 
+                            'circle-stroke-width': 2,
                             'circle-color': '#aaaaaa',
                             'circle-stroke-color': '#aaaaaa'
-                            
+
                         }
                     });
                     mapView.map.addLayer({
@@ -654,12 +658,12 @@
                                     [12, 4],
                                     [15, 15]
                                 ]
-                            },                         
+                            },
                             'circle-opacity': 0.5,
                             'circle-color': '#aaaaaa',
 
                             'circle-stroke-opacity': 0.7,
-                            'circle-stroke-width': 2, 
+                            'circle-stroke-width': 2,
                             'circle-stroke-color': '#626262'
                         }
                     });
@@ -680,7 +684,7 @@
                             'circle-opacity': 0.5,
                             'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2,                  
+                            'circle-stroke-width': 2,
                             'circle-stroke-opacity': 0.5,
                             'circle-stroke-color': '#fd8d3c'    //same as circle for existing
                         }
@@ -701,14 +705,13 @@
                             },
 
                             'circle-opacity': 0.5,
-                            'circle-color': '#fd8d3c', 
+                            'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it          
+                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it
                             'circle-stroke-opacity': 0.7,
                             'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
-                   
 
                    //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
                     mapView.map.on('mousemove', function(e) {
@@ -729,7 +732,7 @@
                         }
                     });
 
-                   
+
 
                     mapView.map.on('click', function(e) {
                         var building = (mapView.map.queryRenderedFeatures(e.point, {
@@ -766,7 +769,7 @@
             }
 
         },
-        
+
         removeAllPopups: function(){
             for (var i = 0; i < mapView.popups.length; i++) {
                 if (mapView.popups[i].isOpen()) {
@@ -802,7 +805,7 @@
             };
 
             mapView.popups.push(popup);
-            
+
             //Close popup if it's open too long
             setTimeout(function(){
                 if (popup.isOpen()) {
@@ -814,7 +817,7 @@
 
         showProjectPreview: function(msg, data) {
             var project = [data.properties];    //defining as one-element array for d3 data binding
-            
+
             //Bind the selected project to a div that will hold the preview graphics
             var selection = d3.select('#project-preview')
                             .selectAll("div.preview-contents")
@@ -844,14 +847,16 @@
 
                 //Add the building name with a link to the project page
                 var field = getFieldFromMeta('project', 'proj_name') //field is the meta.json that has stuff like display_text
-                var value = project[0]['proj_name']
+                var value = project[0]['proj_name'] + ' >>' // adding chevrons to indicate clicking for more, might not
+                                                            // even be necessary with underlining
 
                 current.append('a')
                     .classed('proj_name',true)
                     .text(value)
+                    .style("text-decoration", "underline") // to indicate it is a link
                     .on("click", function(e) {
                         setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
-                        setState('switchView', buildingView);
+                        setState('switchView', projectView);
                     });
 
                 //Add fields that don't have the field name displayed
@@ -859,7 +864,7 @@
                 for (var i = 0; i < headerFields.length; i++) {
                     var field = getFieldFromMeta('project',headerFields[i])
                     var value = project[0][headerFields[i]];
-                    value = (value === null) ? 'Unknown' : value;
+                    value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
 
                     current.append('div')
                         .classed('preview-field',true)
@@ -867,13 +872,13 @@
                         .text(value)
                 };
 
-                //Add line break 
+                //Add line break
                 current.append('br')
 
                 //Add a definition list of property: value
                 var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
                                         'subsidy_end_last']
-                
+
                 var dl = current.append('dl')
                         .classed("properties-list",true)
                         .classed("inline",true);
@@ -881,9 +886,9 @@
                 for (var i = 0; i < previewFields.length; i++) {
                     var field = getFieldFromMeta('project',previewFields[i])
                     dl.append('dt').text(field['display_name'] + ': '); //todo use meta.json instead
-                    
+
                     var value = project[0][previewFields[i]];
-                    value = (value === null) ? 'Unknown' : value;
+                    value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
                     dl.append('dd').text(value)
                 }
             };
@@ -922,28 +927,24 @@
                                                                           // so that previous exits don't show when the opacity is set back to 1
             mapView.map.getSource('project').setData(mapView.convertedProjects);
             mapView.animateEnterExit();
-            mapView.listBuildings();        
+            mapView.listBuildings();
         },
         animateEnterExit: function(){
             var delayAnimation = setTimeout(function(){
-                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);                
+                mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);
                 var shrinkCircles = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);                     
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);
                 },300);
-             /*   var exitColor = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-exit','circle-color', '#767676');
-                    mapView.map.setPaintProperty('project-exit','circle-stroke-color', '#767676');                                           
-                },500);*/
-               /* setTimeout(function(){
-                    mapView.map.setFilter('project-exit', ['==','klass','doesnotexist']); // sets filter to nonexistant klass to clear the layer
-                    mapView.map.setPaintProperty('project-exit','circle-opacity', 1); // put the empty exit layer back to opacity 1, read for next filtering
 
-                },1000); */
+                mapView.map.setPaintProperty('project-exit','circle-stroke-width', 6);
+                var expandCircles = setTimeout(function(){
+                    mapView.map.setPaintProperty('project-exit','circle-stroke-width', 2);
+                },300);
             },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
                     // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
                     // would be nicer with a callback, but I don't htink that's available -JO
-            
-         
+
+
         },
         /*
         The listBuildings function controls the right sidebar in the main map view.
@@ -997,11 +998,14 @@
                     }
                 })
                 .on('click', function(d) {
-
-                    mapView.map.flyTo({
-                        center: [d.properties.longitude, d.properties.latitude],
-                        zoom: 15
-                    });
+                    if ( d.properties.longitude !== null && d.properties.latitude !== null ) {
+                        mapView.map.flyTo({
+                            center: [d.properties.longitude, d.properties.latitude],
+                            zoom: 15
+                        });
+                    } else {
+                        mapView.alertNoLocationInfo()
+                    }
                     setState('previewBuilding', d);
                 })
 
@@ -1015,6 +1019,36 @@
                 .remove();
 
         },
+        alertNoLocationInfo: function(){
+            d3.select('#map-wrapper')
+              .append('div')
+              .classed('no-location-alert', true)
+              .style('opacity',0)
+              .text('No location available')
+              .transition().duration(1000)
+              .style('opacity',1)
+              .transition().duration(1000)
+              .style('opacity',0)
+              .remove();
+        },
+        addExportButton: function() {
+          // Get the modal
+          var modal = d3.select('#exportDataModal');
+          // Get the <span> element that closes the modal
+          var span = d3.select(".close")[0];
+          d3.select('#csvExportButton')
+            .on('click', function(d) {
+              modal.style.display = "block";
+              modal.class = "modal-open";
+          });
+        },
+        exportButton: function() {
+          d3.select('#exportCsv')
+            .on('click', function(d) {
+              exportCsv.exportAllData();
+          });
+        },
+
         highlightBuilding(msg, data) {
             if (data) {
                 mapView.map.addLayer({
@@ -1042,20 +1076,24 @@
         zoomToFilteredProjects: function(msg, data){
             var maxLat = d3.max(data, function(d){
                 return d.latitude;
-            });            
+            });
             var minLat = d3.min(data, function(d){
                 return d.latitude;
             });
             var maxLon = d3.max(data, function(d){
                 if (d.longitude < 0 ) {
                     return d.longitude; // workaround of data error where one project has positive longitude instead of positive
-                                        // can remove `if` statement when resolved (issue 405)                    
+                                        // can remove `if` statement when resolved (issue 405)
                 }
             });
             var minLon = d3.min(data, function(d){
                 return d.longitude;
             });
-            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]], {linear: true, padding: 20});
+            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]],
+                            {linear: true,
+                            padding: {top: 20, bottom: 20, left: 320, right: 370}, //to accomodate sidebars + 20 px
+                            maxZoom: 14  //far enough to see whole neighborhood cluster
+                            });
             if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
                 mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
                 mapView.map.originalZoom = mapView.map.getZoom();

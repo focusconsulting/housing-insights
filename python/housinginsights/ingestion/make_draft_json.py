@@ -18,8 +18,6 @@ python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir, os.pardir))
 sys.path.append(python_filepath)
 
-from housinginsights.ingestion.DataReader import ManifestReader
-
 
 #configuration
 #See /logs/example-logging.py for usage examples
@@ -253,9 +251,11 @@ def duplicateTable(new_table, new_json, master_json):
 if __name__ == '__main__':
     #
     # Edit these values before running!
-    csv_filename = os.path.abspath("../../../data/raw/apis/20170613/acs5_2015.csv")#"../../../data/sample/project_sample.csv"
-    table_name = "census"
-    encoding = "utf-8" #Try utf-8 or latin1. Put the successful value into manifest.csv
+    csv_filename = os.path.abspath("../../../data/raw/preservation_catalog/20170830/Building_geocode.csv")#"../../../data/sample
+    # /project_sample.csv"
+    table_name = "proj_addre_full"
+    encoding = "latin1" #Try utf-8 or latin1. Put the successful value into
+    # manifest.csv
     #print('main(): {}, {}, {}'.format())
     # import ipdb; ipdb.set_trace()
     #Make the table
@@ -264,18 +264,15 @@ if __name__ == '__main__':
 
     if 'add' in sys.argv:
         new_json_path = os.path.join(logging_path, (table_name+".json"))
-        json_filepath = python_filepath + "/scripts/meta.json"
+        json_filepath = os.path.join(python_filepath, "scripts/meta.json")
 
-        try:
-            if checkTable(table_name, json_filepath):
-                # the new table is already in table_info.json
-                print("table already in master json")
-                duplicateTable(table_name, new_json_path, json_filepath)
+        print(json_filepath)
+        if checkTable(table_name, json_filepath):
+            # the new table is already in table_info.json
+            print("table already in master json")
+            duplicateTable(table_name, new_json_path, json_filepath)
 
-            else:
-                # the new table will be appended
-                print("adding new table")
-                appendJSON(new_json_path, json_filepath)
-
-        except ValueError:
-            print("Path to meta.json is invalid")
+        else:
+            # the new table will be appended
+            print("adding new table")
+            appendJSON(new_json_path, json_filepath)
