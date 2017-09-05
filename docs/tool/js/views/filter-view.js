@@ -417,6 +417,7 @@ var filterView = {
                 [returnVals['min']['min'], returnVals['max']['max']]
             );
 
+            ths.uncheckNullToggleOnInitialFilterSet();
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
             ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
         }
@@ -444,6 +445,7 @@ var filterView = {
                 var min = unencoded[0]
                 var max = unencoded[1]
                 ths.textBoxes.setValues([['min', min]],[['max', max]]);
+                ths.uncheckNullToggleOnInitialFilterSet();
 
                 //Set the filterValues state
                 if(doesItSetState){
@@ -460,6 +462,16 @@ var filterView = {
                 ths.clear();
             } 
         }
+
+        this.uncheckNullToggleOnInitialFilterSet = function(){
+            var filterValues = filterUtil.getFilterValues();
+
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1) {
+                console.log('Unchecking the null toggle for ', component.source);
+                ths.toggle.element.checked = false;
+            }
+        };
+
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
         this.slider.noUiSlider.on('change', currentSliderCallback);
@@ -612,7 +624,9 @@ var filterView = {
                         ['day', newMaxDate.getDate()]
                     ]
                 );
-                
+
+                ths.uncheckNullToggleOnInitialFilterSet();
+
                 if(doesItSetState){
                     ths.toggle.element.checked
                     setState(specific_state_code,[newMinDate, newMaxDate, ths.toggle.element.checked]);
@@ -655,6 +669,7 @@ var filterView = {
                 [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
             );
 
+            ths.uncheckNullToggleOnInitialFilterSet();
             setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
             ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
         }
@@ -709,6 +724,14 @@ var filterView = {
             } 
         }
 
+        this.uncheckNullToggleOnInitialFilterSet = function(){
+            var filterValues = filterUtil.getFilterValues();
+
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1) {
+                console.log('Unchecking the null toggle for ', component.source);
+                ths.toggle.element.checked = false;
+            }
+        };
     },
     setupFilter: function(c){
     //This function does all the stuff needed for each filter regardless of type. 
