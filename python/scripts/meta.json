@@ -2653,7 +2653,22 @@
         "sql_name": "most_recent_topa_date",
         "type": "timestamp"
       },
-
+      {
+        "display_name": "Nearest Metro Station",
+        "display_text": "Distance to Nearest Metro Station within Half a Mile",
+        "required_in_source": false,
+        "source_name": "nearest_metro_station",
+        "sql_name": "nearest_metro_station",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Bus Routes Nearby",
+        "display_text": "Number of Bus Routes within Half a Mile",
+        "required_in_source": false,
+        "source_name": "bus_routes_nearby",
+        "sql_name": "bus_routes_nearby",
+        "type": "integer"
+      },
       {
         "display_name": "Total Units (MAR)",
         "display_text": "Total number of units (including market rate) as determined by the Master Address Repository",

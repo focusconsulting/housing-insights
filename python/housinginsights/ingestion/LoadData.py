@@ -453,9 +453,10 @@ class LoadData(object):
         conn.execute(stmt)
 
 
-        #########################
+        ########################
         # Sum of tax assessment
-        #########################
+        ########################
+        
         logging.info("  Calculating tax assessment statistics")
 
         stmt= '''
@@ -497,6 +498,7 @@ class LoadData(object):
         # (due to missing addresses in the proj_addre table) we'll be missing the same ones from numerator
         # and denominator so will get realistic average. 
         logging.info("  Calculating TOPA statistics")
+        
         stmt =  """
                 update project
                 set (topa_count
@@ -536,6 +538,71 @@ class LoadData(object):
         #########################
         # Other calculated fields
         #########################
+
+        # Miles (or Portion of) to Nearest Metro Station
+        
+        stmt =  """
+                UPDATE project
+                SET nearest_metro_station =
+                (
+                SELECT nearest_metro 
+                FROM 
+                    (
+                    SELECT wmata_dist.nlihc_id AS nlihc_id
+                        , MIN(dist_in_miles) AS nearest_metro
+                    FROM wmata_dist
+                    WHERE type = 'rail'
+                    GROUP BY nlihc_id
+                    ) AS nstation
+                WHERE nstation.nlihc_id = project.nlihc_id 
+                )
+                """
+        conn.execute(stmt)
+
+        # Bus Routes within Half a Mile of Each Project #
+        # 
+        # Presently an inelegant method for calculating the number of nearby 
+        # bus routes and updating the project table with those results.
+        # The number of routes is calculated individually, and then
+        # that number is added with a single-row update query. With some
+        # tinkering the results surely could be collected in a table or
+        # object which then could allow for a single update of the whole set. 
+
+        proj_ids = [] 
+        rproxy = conn.execute('SELECT DISTINCT nlihc_id AS id FROM wmata_dist')
+        for row in rproxy: proj_ids.append(row.id)
+
+        for proj in proj_ids:
+            stop_ids = []
+            stmt =  """
+                    SELECT DISTINCT stop_id_or_station_code AS stop
+                    FROM  wmata_dist
+                    WHERE nlihc_id = '{project}' 
+                    AND type = 'bus'
+                    """.format(project=proj)
+            rproxy = conn.execute(stmt)
+            for row in rproxy: stop_ids.append(row.stop)
+
+            q_list = str(stop_ids).replace('[','(').replace(']',')')
+            q = """
+                SELECT lines FROM wmata_info
+                WHERE stop_id_or_station_code in {}
+                """.format(q_list)
+            proxy = conn.execute(q)
+            routes = [x[0] for x in proxy.fetchall()]
+
+            #Parse the : separated objects
+            routes = ':'.join(routes)
+            routes = routes.split(':')
+            unique = list(set(routes))
+            num_routes = len(unique)
+
+            q = """
+                UPDATE project
+                SET bus_routes_nearby = {num_routes} 
+                WHERE project.nlihc_id = '{project}'
+                """.format(num_routes=num_routes,project=proj)
+            conn.execute(q)
 
         #########################
         # Teardown
