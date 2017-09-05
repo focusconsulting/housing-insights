@@ -24,15 +24,18 @@
     <script scr="js/util/polyfills.js"></script>
     <script src="js/util/filter.js"></script>
     <script src="js/util/accordion.js"></script>
+    <script src="js/util/exportCsv.js"></script>
     <script src="js/external/PubSub.js"></script>
     <script src="js/external/nouislider.js"></script>
     <script src="js/external/wNumb.js"></script>
     <script src="js/charts/chart-prototype.js"></script>
     <script src="js/views/map-view.js"></script>
+    <script src="js/views/project-view.js"></script>
     <script src="js/views/results-view.js"></script>
 
     <script src="js/views/dataChoices.js"></script>
     <script src="js/views/filter-view.js"></script>
+
 
     <script src="js/views/chloropleth-legend.js"></script>
     <script src="js/charts/pie-chart-proto.js"></script>
@@ -41,7 +44,6 @@
     <script src="js/charts/subsidy-timeline.js"></script>
     <script src="js/charts/bar-chart.js"></script>
 
-    <script src="js/views/project-view.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/external/semantic.min.css" />
     <link rel="stylesheet" type="text/css" href="css/external/icon.min.css" />
@@ -62,10 +64,31 @@ Housing Insights (banner content / menu to come)
 
     <div id="body-wrapper"></div>
 <div id="loading-state-screen">Loading saved state . . .</div>
-<script src="js/core/router.js"></script>    
-<script src="js/core/housing-insights.js"></script>
+<!-- Modal -->
+  <div class="modal fade" id="exportDataModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Export Projects to CSV</h4>
+        </div>
+        <div class="modal-body">
+          <p>Each row is one project and all projects are always included. Includes zone data. The 'matches_filters' is whether it matches the filters currently selected. 'matches_filters' will change each time the data is downloaded, but the rest of the data will be the same.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="exportCsv" class="btn btn-default">Export to CSV</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<script src="js/core/router.js"></script>
 <script src="js/external/bootstrap.min.js"></script>
 <script src="js/external/semantic.min.js"></script>
+<script src="js/core/housing-insights.js"></script>
 <script src="js/external/papaparse.min.js"></script>
 <!-- papaparse is used to create CSV export format. Can be removed if dont manually.  -->
 </body>

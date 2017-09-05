@@ -24,6 +24,9 @@ from xmljson import parker as xml_to_json
 
 import json
 
+from housinginsights.tools.logger import HILogger
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
@@ -312,7 +315,8 @@ class DhcdApiConn(ProjectBaseApiConn):
 
                 if result.status_code != 200:
                     err = "An error occurred during request: status {0}"
-                    raise Exception(err.format(result.status_code))
+                    logger.exception(err.format(result.status_code))
+                    continue
 
                 data_xml_root = xml_fromstring(result.text)
                 data_xml_records = data_xml_root.findall('record')

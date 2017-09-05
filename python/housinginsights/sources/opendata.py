@@ -71,8 +71,8 @@ class OpenDataApiConn(BaseApiConn):
 
                 if result.status_code != 200:
                     err = "An error occurred during request: status {0}"
-                    #TODO change this error type to be handleable by caller
-                    raise Exception(err.format(result.status_code))
+                    logger.exception(err.format(result.status_code))
+                    continue
 
                 content = result.text
 

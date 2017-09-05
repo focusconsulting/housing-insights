@@ -980,19 +980,17 @@ var filterView = {
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
 
         $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
-            var difference = $( this ).offset().top + $( this ).height() - $('#filters').offset().top - $('#filters').height(); 
-            /* for debug:
-            console.log($( this ).offset().top + $( this ).height());
+            var difference = $( this ).offset().top - $('#filter-components').offset().top; 
+            
+            console.log($( this ).offset().top);
             console.log('vs');
-            console.log($('#filters').offset().top + $('#filters').height() );
+            console.log($('#filter-components').offset().top);
             console.log(difference);
-            */
-            if ( $( this ).offset().top + $( this ).height() > $('#filters').offset().top + $('#filters').height() ) { 
+            
               // if the accordion content extend below the bounds of the #filters container
-                $('#filters').animate({
-                    scrollTop: $( '#filters' ).scrollTop() + difference + 30
-                }, 500)
-            }
+            $('#filter-components').animate({
+                scrollTop: $( '#filter-components' ).scrollTop() + difference - 29
+            }, 500)
         }});
 
         //Add components to the navigation using the appropriate component type
@@ -1112,7 +1110,7 @@ var filterView = {
     },
     clearAllButton: {
         init: function(){
-            var thisButton = this;
+
 
             this.pill = document.createElement('div');
             this.pill.id = 'clearFiltersPillbox';
@@ -1126,10 +1124,26 @@ var filterView = {
             this.pill.addEventListener('click', function(){
                 filterView.clearAllFilters();
             });
+            this.appendLabelPill()
+        },
+        appendLabelPill: function() {
+            this.labelPill = document.createElement('div');
+            
+            this.labelPill.classList.add('label-all','ui','label');
+
+            this.site = document.getElementById('clear-pillbox-holder');
+
+            this.site.insertBefore(this.labelPill, this.site.firstChild);
+            this.labelPill.textContent = 'Filtered';
         },
         site: undefined,
         tearDown: function(){
-            d3.select('#'+this.pill.id)
+            d3.select('.clear-all')
+                .transition()
+                    .duration(750)
+                    .style("opacity",0)
+                    .remove();
+            d3.select('.label-all')
                 .transition()
                     .duration(750)
                     .style("opacity",0)
@@ -1155,7 +1169,7 @@ var filterView = {
                 activeFilterControls.push(control)
             };
         }
-
+        setState('numberOfFilters', activeFilterControls.length);
         var nullsShown = filterUtil.getNullsShown();
         Object.keys(nullsShown).forEach(function(key){
             var control = filterView.filterControls.find(function(obj){
@@ -1171,8 +1185,15 @@ var filterView = {
         });
         
         //Use d3 to bind the list of control objects to our html pillboxes
-        var allPills = d3.select('#clear-pillbox-holder')
-                        .selectAll('.clear-single')
+        var holder = d3.select('#clear-pillbox-holder')
+                        .classed('force-hover', true);
+
+        setTimeout(function(){
+            holder.classed('force-hover', false);
+        }, 2000);
+
+
+        var allPills = holder.selectAll('.clear-single')
                         .data(activeFilterControls, function(d){
                             return d.component.source;
                         })
@@ -1219,11 +1240,11 @@ var filterView = {
                 if ( !$accordion.hasClass('active') ){
                     $accordion.click();
                 } else {
-                    var $filterContent = $('#filter-content-' + d.component.source);
-                    var difference = $filterContent.offset().top + $filterContent.height() - $('#filters').offset().top - $('#filters').height(); 
-                    $('#filters').animate({
-                        scrollTop: $( '#filters' ).scrollTop() + difference + 30
-                    }, 500);
+                    
+                    var difference = $accordion.offset().top - $('#filter-components').offset().top; 
+                    $('#filter-components').animate({
+                        scrollTop: $( '#filter-components' ).scrollTop() + difference
+                    }, 500)
                 }
             })
 
@@ -1231,7 +1252,6 @@ var filterView = {
             .append('i')
             .classed("delete icon",true)
             .on("click", function(d) {
-                d3.event.stopPropagation();
                 d.clear();
             })
                  
