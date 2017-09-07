@@ -39,7 +39,7 @@
                     ['hoverBuildingList', mapView.highlightBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
-                    ['filterViewLoaded',router.initFilters] // not 100% sure this trigger isn't later than we'd want
+                    ['initialProjectsRendered',router.initFilters] // not 100% sure this trigger isn't later than we'd want
                                                               // but it shouln't be too early
                 ]);
 
@@ -56,11 +56,23 @@
                     minZoom: 3,
                     preserveDrawingBuffer: true
                 });
-
                 this.map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
+                });
+                
+                // filter decoding was happening too quickly after initialLayers were added (ln 463),
+                // before they were fully rendered. code below uses mapBox's render' event, checks against state of
+                // initialLayersAdded and !isFilterInitialized to setState initialProjectsRendered. router.initFilters
+                // subscribes to that stateChange and turns isFilterInitialized to true so that this stateChange
+                // should fire only once
+
+                var theMap = this.map;
+                this.map.on('render', function() {
+                  if ( theMap.loaded() && getState().filteredProjectsAvailable !== undefined  && !router.isFilterInitialized ) {
+                      setState('initialProjectsRendered', true);
+                  }
                 });
 
                 this.map.on('zoomend', function() {
@@ -712,6 +724,8 @@
                             'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
+
+                    setState('initialLayersAdded', true);
 
                    //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
                     mapView.map.on('mousemove', function(e) {

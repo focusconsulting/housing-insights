@@ -12,7 +12,9 @@ var router = {
             ['clearState', router.clearOverlayURL]
         ]);        
         router.isFilterInitialized = true;
-        if ( router.hasInitialFilterState ) router.decodeState();
+        if ( router.hasInitialFilterState ) {
+            router.decodeState();
+        }
     },
     initBuilding: function() {
         router.initialView = 'building';

@@ -80,7 +80,6 @@ var resultsView = {
         console.log(raw_projects.length); // 1034
         //Update totals. TODO we only need to do this once, so we should move this elsewhere when we refactor this so it runs only on load. 
         for (var i = 0; i < raw_projects.length; i++) {
-            console.log(ward);
             if ( raw_projects[i]['ward'] !== null ) {
                 var ward = raw_projects[i]['ward']
                 var proj_units_assist_max = raw_projects[i]['proj_units_assist_max']
