@@ -436,7 +436,7 @@ Others are working correctly.
     font-size: 1em;
 }
 
-#projects-list>div:hover, #building-view-segments div:hover {
+#projects-list>div:hover, #building-view-segments div:hover, #projects-list>div.projects-list-selected {
     background-color: #ddebff;
 }
 

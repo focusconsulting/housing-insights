@@ -30,9 +30,10 @@ var router = {
     },
     pushFilter: function(msg, data){
         console.log(msg,data);
-        // TO DO: add handling for sidebar and preview pusher
-        if (data.length === 0) {
+        if (data.length === 0 || !data) {
             delete router.stateObj[msg];
+        } else if ( msg.split('.')[0] === 'previewBuilding' ) {
+            router.stateObj['previewBuilding'] = data;
         } else {
             router.stateObj[msg] = data;
         }
@@ -95,7 +96,7 @@ var router = {
                 paramsArray.push( 'ol=' + dataChoice.short_name);
             } else if ( key === 'subNav.right' && router.stateObj['subNav.right'] === 'buildings' ) {
                 paramsArray.push('sb=bdng');
-            } else if ( key === 'previewBuilding' ){
+            } else if ( key.split('.')[0] === 'previewBuilding' ){
                 paramsArray.push('pb=' + router.stateObj['previewBuilding'].properties.nlihc_id);
             }
         }

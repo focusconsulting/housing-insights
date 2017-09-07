@@ -756,6 +756,7 @@
                         //If you click but not on a building, remove any tooltips
                         if (building === undefined) {
                             mapView.removeAllPopups();
+                            setState('previewBuilding', false);
                         } else {
                         //If you click on a building, show that building in the side panel
                             setState('previewBuilding', building);
@@ -829,101 +830,123 @@
             },3000);
 
         },
+        scrollMatchingList: function(data){
+                var $listItem = $('#projects-list #' + data.properties.nlihc_id);
+                var difference = $listItem.offset().top - $('#projects-list-group').offset().top; 
+                $('#projects-list-group').animate({
+                    scrollTop: $( '#projects-list-group' ).scrollTop() + difference - 10
+                }, 500)
+        },  
 
         showProjectPreview: function(msg, data) {
-            if ( data.properties.longitude != null && data.properties.latitude ){
-                mapView.flyToProject([data.properties.longitude, data.properties.latitude]);
-            }
-            setState('hoverBuildingList', data.properties.nlihc_id);
-            var project = [data.properties];    //defining as one-element array for d3 data binding
+            if ( data ) {
 
-            //Bind the selected project to a div that will hold the preview graphics
-            var selection = d3.select('#project-preview')
-                            .selectAll("div.preview-contents")
-                                .data(project, function(d){
-                                    return typeof(d) !== "undefined" ? d.nlihc_id : null; //deals w/ initial div which has no bound data yet
-                                })
-            var fadeDuration = 500
+                $('#projects-list .projects-list-selected').removeClass('projects-list-selected');
+                var $listItem = $('#projects-list #' + data.properties.nlihc_id);
+                $listItem.addClass('projects-list-selected');
+                
+                if ( msg.indexOf('clickListItem') === -1 ) { // clicking on the list item in right navbar sends msg
+                                                             // previewBuilding.clickListItem. In that case, the container
+                                                             // should not scroll to the item; it's already visible and scrolling
+                                                             // would be unexpected
+                    mapView.scrollMatchingList(data);
+                    console.log('853',data);  
+                }
+                  
+                if ( data.properties.longitude != null && data.properties.latitude ){
+                    mapView.flyToProject([data.properties.longitude, data.properties.latitude]);
+                }
+                setState('hoverBuildingList', data.properties.nlihc_id);
+                var project = [data.properties];    //defining as one-element array for d3 data binding
 
-            //Transition the whole container of the previously previewed building
-            var leaving = selection.exit()
-                    .transition()
-                    .duration(fadeDuration)
-                    .style('opacity',0)
-                    .remove()
+                //Bind the selected project to a div that will hold the preview graphics
+                var selection = d3.select('#project-preview')
+                                .selectAll("div.preview-contents")
+                                    .data(project, function(d){
+                                        return typeof(d) !== "undefined" ? d.nlihc_id : null; //deals w/ initial div which has no bound data yet
+                                    })
+                var fadeDuration = 500
 
-            //Create the new container
-            mapView.showProjectPreview.current = selection.enter()
-                        .append('div')
-                        .classed("preview-contents",true)
+                //Transition the whole container of the previously previewed building
+                var leaving = selection.exit()
+                        .transition()
+                        .duration(fadeDuration)
                         .style('opacity',0)
-                        //.text(function(d){return d.nlihc_id})
+                        .remove()
 
-            //callback used to populate container since we need data loaded before it can run
-            //callback called after function definition
-            mapView.fillContainer = function(meta){
-                var current = mapView.showProjectPreview.current //alias for convenience
+                //Create the new container
+                mapView.showProjectPreview.current = selection.enter()
+                            .append('div')
+                            .classed("preview-contents",true)
+                            .style('opacity',0)
+                            //.text(function(d){return d.nlihc_id})
 
-                //Add the building name with a link to the project page
-                var field = getFieldFromMeta('project', 'proj_name') //field is the meta.json that has stuff like display_text
-                var value = project[0]['proj_name'] + ' >>' // adding chevrons to indicate clicking for more, might not
-                                                            // even be necessary with underlining
+                //callback used to populate container since we need data loaded before it can run
+                //callback called after function definition
+                mapView.fillContainer = function(meta){
+                    var current = mapView.showProjectPreview.current //alias for convenience
 
-                current.append('a')
-                    .classed('proj_name',true)
-                    .text(value)
-                    .style("text-decoration", "underline") // to indicate it is a link
-                    .on("click", function(e) {
-                        setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
-                        setState('switchView', projectView);
-                    });
+                    //Add the building name with a link to the project page
+                    var field = getFieldFromMeta('project', 'proj_name') //field is the meta.json that has stuff like display_text
+                    var value = project[0]['proj_name'] + ' >>' // adding chevrons to indicate clicking for more, might not
+                                                                // even be necessary with underlining
 
-                //Add fields that don't have the field name displayed
-                var headerFields =  ['proj_addre','ward','neighborhood_cluster_desc']
-                for (var i = 0; i < headerFields.length; i++) {
-                    var field = getFieldFromMeta('project',headerFields[i])
-                    var value = project[0][headerFields[i]];
-                    value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
-
-                    current.append('div')
-                        .classed('preview-field',true)
-                        .classed(headerFields[i],true)
+                    current.append('a')
+                        .classed('proj_name',true)
                         .text(value)
+                        .style("text-decoration", "underline") // to indicate it is a link
+                        .on("click", function(e) {
+                            setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
+                            setState('switchView', projectView);
+                        });
+
+                    //Add fields that don't have the field name displayed
+                    var headerFields =  ['proj_addre','ward','neighborhood_cluster_desc']
+                    for (var i = 0; i < headerFields.length; i++) {
+                        var field = getFieldFromMeta('project',headerFields[i])
+                        var value = project[0][headerFields[i]];
+                        value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
+
+                        current.append('div')
+                            .classed('preview-field',true)
+                            .classed(headerFields[i],true)
+                            .text(value)
+                    };
+
+                    //Add line break
+                    current.append('br')
+
+                    //Add a definition list of property: value
+                    var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
+                                            'subsidy_end_last']
+
+                    var dl = current.append('dl')
+                            .classed("properties-list",true)
+                            .classed("inline",true);
+
+                    for (var i = 0; i < previewFields.length; i++) {
+                        var field = getFieldFromMeta('project',previewFields[i])
+                        dl.append('dt').text(field['display_name'] + ': '); //todo use meta.json instead
+
+                        var value = project[0][previewFields[i]];
+                        value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
+                        dl.append('dd').text(value)
+                    }
                 };
 
-                //Add line break
-                current.append('br')
+                controller.getData({
+                                name:'metaData',
+                                url: model.URLS.metaData,
+                                callback: mapView.fillContainer
+                                });
 
-                //Add a definition list of property: value
-                var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
-                                        'subsidy_end_last']
-
-                var dl = current.append('dl')
-                        .classed("properties-list",true)
-                        .classed("inline",true);
-
-                for (var i = 0; i < previewFields.length; i++) {
-                    var field = getFieldFromMeta('project',previewFields[i])
-                    dl.append('dt').text(field['display_name'] + ': '); //todo use meta.json instead
-
-                    var value = project[0][previewFields[i]];
-                    value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
-                    dl.append('dd').text(value)
-                }
-            };
-
-            controller.getData({
-                            name:'metaData',
-                            url: model.URLS.metaData,
-                            callback: mapView.fillContainer
-                            });
-
-            //Make the new container appear after the old one is gone
-            setTimeout(function(){
-                mapView.showProjectPreview.current.transition()
-                    .duration(fadeDuration)
-                    .style('opacity',1)
-            },fadeDuration)
+                //Make the new container appear after the old one is gone
+                setTimeout(function(){
+                    mapView.showProjectPreview.current.transition()
+                        .duration(fadeDuration)
+                        .style('opacity',1)
+                },fadeDuration)
+            }
 
         },
 
@@ -997,6 +1020,9 @@
             var listItems = preview.selectAll('div')
                 .data(data, function(d) {
                     return d.properties.nlihc_id;
+                })
+                .attr('id', function(d) {
+                    return d.properties.nlihc_id;
                 });
 
             listItems.attr('class', 'update');
@@ -1022,7 +1048,7 @@
                     if ( d.properties.longitude == null || d.properties.latitude == null ) {
                         mapView.alertNoLocationInfo()
                     }
-                    setState('previewBuilding', d);
+                    setState('previewBuilding.clickListItem', d);
                 })
 
                 .attr('tabIndex', 0)
@@ -1034,6 +1060,9 @@
                 .transition(t)
                 .remove();
 
+            if ( getState().previewBuilding ) {
+                mapView.scrollMatchingList(getState().previewBuilding[0]);
+            }
         },
         alertNoLocationInfo: function(){
             d3.select('#map-wrapper')
