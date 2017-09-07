@@ -575,7 +575,7 @@
       },
       {
         "display_name": "Object ID",
-        "display_text": "",
+        "display_text": "Database ID from Open Data DC",
         "required_in_source": true,
         "source_name": "OBJECTID",
         "sql_name": "objectid",
@@ -583,7 +583,7 @@
       },
       {
         "display_name": "DCRA Internal Number",
-        "display_text": "",
+        "display_text": "Tracking ID from DC Departent of Consumer and Regulatory Affairs",
         "required_in_source": true,
         "source_name": "DCRAINTERNALNUMBER",
         "sql_name": "dcrainternalnumber",
@@ -591,7 +591,7 @@
       },
       {
         "display_name": "Issue Date",
-        "display_text": "",
+        "display_text": "Date the permit was issued",
         "required_in_source": true,
         "source_name": "ISSUE_DATE",
         "sql_name": "issue_date",
@@ -599,7 +599,7 @@
       },
       {
         "display_name": "Permit ID",
-        "display_text": "",
+        "display_text": "Permit ID",
         "required_in_source": true,
         "source_name": "PERMIT_ID",
         "sql_name": "permit_id",
@@ -607,7 +607,7 @@
       },
       {
         "display_name": "Permit Type Name",
-        "display_text": "",
+        "display_text": "Indicates the permit's primary type",
         "required_in_source": true,
         "source_name": "PERMIT_TYPE_NAME",
         "sql_name": "permit_type_name",
@@ -615,7 +615,7 @@
       },
       {
         "display_name": "Permit Subtype Name",
-        "display_text": "",
+        "display_text": "Indicates the permit's secondary type",
         "required_in_source": true,
         "source_name": "PERMIT_SUBTYPE_NAME",
         "sql_name": "permit_subtype_name",
@@ -623,7 +623,7 @@
       },
       {
         "display_name": "Permit Category Name",
-        "display_text": "",
+        "display_text": "Indicates specific category detail when available",
         "required_in_source": true,
         "source_name": "PERMIT_CATEGORY_NAME",
         "sql_name": "permit_category_name",
@@ -631,7 +631,7 @@
       },
       {
         "display_name": "Application Status Name",
-        "display_text": "",
+        "display_text": "Permit application status",
         "required_in_source": true,
         "source_name": "APPLICATION_STATUS_NAME",
         "sql_name": "application_status_name",
@@ -639,7 +639,7 @@
       },
       {
         "display_name": "Full Address",
-        "display_text": "",
+        "display_text": "Full street address associated with the permit",
         "required_in_source": true,
         "source_name": "FULL_ADDRESS",
         "sql_name": "full_address",
@@ -647,7 +647,7 @@
       },
       {
         "display_name": "Description of Work",
-        "display_text": "",
+        "display_text": "Description of work to be completed under the permit",
         "required_in_source": true,
         "source_name": "DESC_OF_WORK",
         "sql_name": "desc_of_work",
@@ -655,7 +655,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID associated with the permit address",
         "required_in_source": true,
         "source_name": "SSL",
         "sql_name": "ssl",
@@ -663,7 +663,7 @@
       },
       {
         "display_name": "Zoning",
-        "display_text": "",
+        "display_text": "The DC zone district associated with the permit address",
         "required_in_source": true,
         "source_name": "ZONING",
         "sql_name": "zoning",
@@ -671,7 +671,7 @@
       },
       {
         "display_name": "Permit Applicant",
-        "display_text": "",
+        "display_text": "Permit applicant name(s)",
         "required_in_source": true,
         "source_name": "PERMIT_APPLICANT",
         "sql_name": "permit_applicant",
@@ -679,7 +679,7 @@
       },
       {
         "display_name": "Fee Type",
-        "display_text": "",
+        "display_text": "The fee type(s) and cost(s) for the permit",
         "required_in_source": true,
         "source_name": "FEE_TYPE",
         "sql_name": "fee_type",
@@ -687,7 +687,7 @@
       },
       {
         "display_name": "Fees Paid",
-        "display_text": "",
+        "display_text": "Total amount of fees paid for the permit",
         "required_in_source": true,
         "source_name": "FEES_PAID",
         "sql_name": "fees_paid",
@@ -695,7 +695,7 @@
       },
       {
         "display_name": "Owner Name",
-        "display_text": "",
+        "display_text": "Property owner name",
         "required_in_source": true,
         "source_name": "OWNER_NAME",
         "sql_name": "owner_name",
@@ -703,7 +703,7 @@
       },
       {
         "display_name": "Last Modified Date",
-        "display_text": "",
+        "display_text": "Indicates the last time the permit application was modified",
         "required_in_source": true,
         "source_name": "LASTMODIFIEDDATE",
         "sql_name": "lastmodifieddate",
@@ -711,7 +711,7 @@
       },
       {
         "display_name": "City",
-        "display_text": "",
+        "display_text": "City of permit address",
         "required_in_source": true,
         "source_name": "CITY",
         "sql_name": "city",
@@ -719,7 +719,7 @@
       },
       {
         "display_name": "State",
-        "display_text": "",
+        "display_text": "State of permit address",
         "required_in_source": true,
         "source_name": "STATE",
         "sql_name": "state",
@@ -727,7 +727,7 @@
       },
       {
         "display_name": "Latitude",
-        "display_text": "",
+        "display_text": "Latitude associated with permit address",
         "required_in_source": true,
         "source_name": "LATITUDE",
         "sql_name": "latitude",
@@ -735,7 +735,7 @@
       },
       {
         "display_name": "Longitude",
-        "display_text": "",
+        "display_text": "Longitude associated with permit address",
         "required_in_source": true,
         "source_name": "LONGITUDE",
         "sql_name": "longitude",
@@ -759,7 +759,7 @@
       },
       {
         "display_name": "Zip code",
-        "display_text": "",
+        "display_text": "Zip code of permit address",
         "required_in_source": true,
         "source_name": "ZIPCODE",
         "sql_name": "zip",
@@ -791,7 +791,7 @@
       },
       {
         "display_name": "Census Tract",
-        "display_text": "",
+        "display_text": "Census tract associated with the permit address",
         "required_in_source": false,
         "source_name": "census_tract",
         "sql_name": "census_tract",
@@ -799,7 +799,7 @@
       },
       {
         "display_name": "Ward",
-        "display_text": "",
+        "display_text": "Ward associated with the permit address",
         "required_in_source": true,
         "source_name": "WARD",
         "sql_name": "ward",
@@ -807,7 +807,7 @@
       },
       {
         "display_name": "ANC",
-        "display_text": "",
+        "display_text": "Advisory Neighborhood Commission associated with the permit address",
         "required_in_source": true,
         "source_name": "ANC",
         "sql_name": "anc",
@@ -831,7 +831,7 @@
       },
       {
         "display_name": "PSA",
-        "display_text": "",
+        "display_text": "Police Service Area associated with the permit address",
         "required_in_source": true,
         "source_name": "PSA",
         "sql_name": "psa",
@@ -839,7 +839,7 @@
       },
       {
         "display_name": "Neighborhood Cluster",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster associated with the permit address",
         "required_in_source": true,
         "source_name": "NEIGHBORHOODCLUSTER",
         "sql_name": "neighborhood_cluster",
@@ -941,7 +941,7 @@
       },
       {
         "display_name": "Offense Category",
-        "display_text": "",
+        "display_text": "Indicates what type of offense occurred ",
         "required_in_source": true,
         "source_name": "OFFENSE",
         "sql_name": "offense",
@@ -973,7 +973,7 @@
       },
       {
         "display_name": "Ward",
-        "display_text": "",
+        "display_text": "Ward associated with the crime address",
         "required_in_source": true,
         "source_name": "WARD",
         "sql_name": "ward",
@@ -981,7 +981,7 @@
       },
       {
         "display_name": "ANC",
-        "display_text": "",
+        "display_text": "Advisory Neighborhood Commission associated with crime address",
         "required_in_source": true,
         "source_name": "ANC",
         "sql_name": "anc",
@@ -989,7 +989,7 @@
       },
       {
         "display_name": "Police District",
-        "display_text": "",
+        "display_text": "Police district associated with the crime address",
         "required_in_source": true,
         "source_name": "DISTRICT",
         "sql_name": "district",
@@ -997,7 +997,7 @@
       },
       {
         "display_name": "PSA",
-        "display_text": "",
+        "display_text": "Police Service Area associated witht the crime address",
         "required_in_source": true,
         "source_name": "PSA",
         "sql_name": "psa",
@@ -1005,7 +1005,7 @@
       },
       {
         "display_name": "Neighborhood Cluster",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster associated with the crime address",
         "required_in_source": true,
         "source_name": "NEIGHBORHOOD_CLUSTER",
         "sql_name": "neighborhood_cluster",
@@ -1021,7 +1021,7 @@
       },
       {
         "display_name": "Census Tract",
-        "display_text": "",
+        "display_text": "Full census tract ID associated with the crime address",
         "required_in_source": true,
         "source_name": "CENSUS_TRACT",
         "sql_name": "census_tract",
@@ -1029,7 +1029,7 @@
       },
       {
         "display_name": "Voting Precint",
-        "display_text": "",
+        "display_text": "Voting preceint associated with the crime address",
         "required_in_source": true,
         "source_name": "VOTING_PRECINCT",
         "sql_name": "voting_precinct",
@@ -1053,7 +1053,7 @@
       },
       {
         "display_name": "Latitude",
-        "display_text": "",
+        "display_text": "Latitude associated with the crime address",
         "required_in_source": true,
         "source_name": "LATITUDE",
         "sql_name": "latitude",
@@ -1061,7 +1061,7 @@
       },
       {
         "display_name": "Longitude",
-        "display_text": "",
+        "display_text": "Longitude associated with the crime address",
         "required_in_source": true,
         "source_name": "LONGITUDE",
         "sql_name": "longitude",
@@ -1069,7 +1069,7 @@
       },
       {
         "display_name": "BID",
-        "display_text": "",
+        "display_text": "Business Improvement District associated with the crime address",
         "required_in_source": true,
         "source_name": "BID",
         "sql_name": "bid",
@@ -1123,7 +1123,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID associated with the property address",
         "required_in_source": true,
         "source_name": "SSL",
         "sql_name": "ssl",
@@ -3920,7 +3920,7 @@
       },
       {
         "display_name": "Latitude",
-        "display_text": "Latitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
+        "display_text": "Latitude of address associated with TOPA notice confirmed by reverse geocoding.",
         "required_in_source": true,
         "source_name": "Y",
         "sql_name": "latitude",
@@ -3928,7 +3928,7 @@
       },
       {
         "display_name": "Longitude",
-        "display_text": "Longitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
+        "display_text": "Longitude of address associated with TOPA notice confirmed by reverse geocoding.",
         "required_in_source": true,
         "source_name": "X",
         "sql_name": "longitude",
@@ -4016,7 +4016,7 @@
       },
       {
         "display_name": "PSA 2012",
-        "display_text": "Police service area assoicated with the address of the TOPA notice as of 2004",
+        "display_text": "Police Service Area assoicated with the address of the TOPA notice as of 2012",
         "required_in_source": true,
         "source_name": "Psa2012",
         "sql_name": "psa2012",
@@ -4024,7 +4024,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "Square Suffix Lot ID for the address associated with the address of the TOPA notice.",
+        "display_text": "Square Suffix Lot ID for the address associated with the TOPA notice.",
         "required_in_source": true,
         "source_name": "SSL",
         "sql_name": "ssl",
