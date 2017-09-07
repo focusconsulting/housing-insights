@@ -1,20 +1,33 @@
 ---
 layout: datasource
-tablename:
-title: Census
+tablename: census
+title: U.S. Census American Community Survey Data
 ---
-<!--Need content on census data overall-->
 
+The [U.S. Census American Community Survey](https://www.census.gov/programs-surveys/acs/) provides useful data on rent that the Housing Insights project uses to create a meaningful estimate of 'market rent' for a given area, which in turn
+is useful for understanding how the supply of affordable housing inventory in that area compares to the demand.  
 
+Rent data is also useful for exploring whether or not rising rents in a given area may be an indicator that affordable housing inventory in that same area may be at a higher risk of loss, due to market 
+pressures that might create increased incentives for landlords to sell their buildings, thereby jeopardizing existing subsidies for those properties.
 
-## "Good Neighborhood" Variables
-Recent research on the Moving to Opportunity program shows the results of a long term longitudinal study looking at the effect on children of living in better neighborhoods.  This section describes the census-derived variables used in the study to define a "good neighborhood", and the associated ACS5 2015 fields and transformations used to replicate (as closely as we can) those variables.
+<br>
 
-### Background on the Study
+## "Good Neighborhood" Variables  
+
+ACS data is also useful for developing insight into neighborhood-level factors that are relevant to affordable housing preservation, beyond metrics related exclusively to rent.  
+
+By way of example, recent research on the Moving to Opportunity program shows the results of a long term longitudinal study looking at the effect on children of living in better neighborhoods.
+This section describes the census-derived variables used in the study to define a "good neighborhood", and the associated ACS5 2015 fields and transformations used to replicate (as closely as we can) those variables.
+
+### Background on the Study  
+
 - [Original paper, with table of variables at the very end](http://scholar.harvard.edu/files/hendren/files/nbhds_paper.pdf)
 - [New York Times article describing the report](https://www.nytimes.com/2015/05/05/upshot/why-the-new-research-on-mobility-matters-an-economists-view.html?_r=0)
 
-#### Fields from the U.S. Census's American Community Survey (ACS) Related to "Good Neighborhoods"
+<br>
+
+#### Fields from the U.S. Census's American Community Survey (ACS) Related to "Good Neighborhoods"  
+
 Census uses code names (like B02001_003E) to uniquely designate specific data fields they provide. We note those field names here, along with a more descriptive title, so that users of Housing Insights can find Census documentation on those fields.
 
 Except where noted, these fields refer to ACS data from 2009 through 2015.
@@ -29,7 +42,10 @@ Except where noted, these fields refer to ACS data from 2009 through 2015.
 |[B16008_019E](http://api.census.gov/data/2015/acs5/variables/B16008_019E.json) |Foreign-born population |B16008. Citizenship Status by Age by Language Spoken At Home and Ability to Speak English for the Population 5+ Yrs |
 |[B09002_015E](http://api.census.gov/data/2015/acs5/variables/B09002_015E.json) |In other families:!!Female householder, no husband present |B09002. OWN CHILDREN UNDER 18 YEARS BY FAMILY TYPE AND AGE |
 
-#### Housing Insights Fields Related to "Good Neighborhoods"
+<br>
+
+#### Housing Insights Fields Related to "Good Neighborhoods"  
+
 The following fields on Housing Insights correspond to some of the key variables used in the Harvard study cited above to identify what is a "good" neighborhood.
 
 Please note that the values in the "Calculation" column refers to U.S. Census ACS fields described above.  All of these fields are calculated as a fraction of the total population in the given geographic area, listed as: `B01003_001E`
