@@ -814,6 +814,7 @@
                 .addTo(mapView.map);
 
             popup._container.onclick = function(e) {
+
                 setState('previewBuilding', data);
                 setState('subNav.right', 'buildings');
             };
@@ -830,6 +831,10 @@
         },
 
         showProjectPreview: function(msg, data) {
+            if ( data.properties.longitude != null && data.properties.latitude ){
+                mapView.flyToProject([data.properties.longitude, data.properties.latitude]);
+            }
+            setState('hoverBuildingList', data.properties.nlihc_id);
             var project = [data.properties];    //defining as one-element array for d3 data binding
 
             //Bind the selected project to a div that will hold the preview graphics
@@ -960,6 +965,12 @@
 
 
         },
+        flyToProject: function(lngLatArray) {
+            mapView.map.flyTo({
+                center: lngLatArray,
+                zoom: 15
+            });
+        },
         /*
         The listBuildings function controls the right sidebar in the main map view.
         Unlike the filter-view side-bar, the buildings list side-bar does not have it's
@@ -1006,18 +1017,9 @@
                 .on('mouseleave', function(d) {
                     clearTimeout(mapView['highlight-timer-' + d.properties.nlihc_id]);
                     setState('hoverBuildingList', false);
-                    if (mapView.map.getLayer('project-highlight-' + d.properties.nlihc_id)) {
-                        mapView.map.setFilter('project-highlight-' + d.properties.nlihc_id, ['==', 'nlihc_id', '']);
-                        mapView.map.removeLayer('project-highlight-' + d.properties.nlihc_id);
-                    }
                 })
                 .on('click', function(d) {
-                    if ( d.properties.longitude !== null && d.properties.latitude !== null ) {
-                        mapView.map.flyTo({
-                            center: [d.properties.longitude, d.properties.latitude],
-                            zoom: 15
-                        });
-                    } else {
+                    if ( d.properties.longitude == null || d.properties.latitude == null ) {
                         mapView.alertNoLocationInfo()
                     }
                     setState('previewBuilding', d);
@@ -1064,6 +1066,10 @@
         },
 
         highlightBuilding(msg, data) {
+            if ( getState().hoverBuildingList[1] ){ // if there's a previous hoverBuildingList state, clear the highlight
+                mapView.map.setFilter('project-highlight-' + getState().hoverBuildingList[1], ['==', 'nlihc_id', '']);
+                mapView.map.removeLayer('project-highlight-' + getState().hoverBuildingList[1]);
+            }
             if (data) {
                 mapView.map.addLayer({
                     'id': 'project-highlight-' + data,
@@ -1086,6 +1092,7 @@
                     'filter': ['==', 'nlihc_id', data]
                 });
             }
+            
         },
         zoomToFilteredProjects: function(msg, data){
             var maxLat = d3.max(data, function(d){
