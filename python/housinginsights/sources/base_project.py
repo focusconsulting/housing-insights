@@ -19,6 +19,8 @@ import logging
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.tools import misc as misctools
 
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class ProjectBaseApiConn(BaseApiConn):
     '''
@@ -35,19 +37,18 @@ class ProjectBaseApiConn(BaseApiConn):
     two files from one, while ingestion process is set up with the 
     concept of one file = one table.
     '''
-    def __init__(self,baseurl, proxies=None, database_choice=None):
+    def __init__(self,baseurl, proxies=None, database_choice=None, debug=False):
         
         if database_choice is None:
             database_choice = 'docker_database'
 
-        super().__init__(baseurl,proxies,database_choice)
+        super().__init__(baseurl,proxies,database_choice, debug=debug)
 
         self.engine = dbtools.get_database_engine(database_choice)
 
         #Get a dict mapping address to mar id from the database and store in memory
         # for use in other methods.
         self.add_mar_addr_lookup()
-
 
 
     def _map_data_for_row(self, nlihc_id, fields, fields_map, line):
@@ -281,42 +282,46 @@ class ProjectBaseApiConn(BaseApiConn):
             # project already exists in the database, link it to the project
             # using the nlihc_id; if not, link it to the record that was added
             # to the proj_writer output file."
-            for source_row in source_csv_reader:
+            for idx, source_row in enumerate(source_csv_reader):
 
-                #Split the addresses
-                addr_field_name = project_fields_map['Proj_addre'] 
-                address_data = source_row[addr_field_name]
-                addresses = misctools.get_unique_addresses_from_str(address_data)
-                addresses = [misctools.quick_address_cleanup(a) for a in addresses]
+                try:
+                    #Split the addresses
+                    addr_field_name = project_fields_map['Proj_addre'] 
+                    address_data = source_row[addr_field_name]
+                    addresses = misctools.get_unique_addresses_from_str(address_data)
+                    addresses = [misctools.quick_address_cleanup(a) for a in addresses]
 
-                nlihc_id, in_proj_table = self._get_nlihc_id_from_db(addresses=addresses)
-                
-                print(in_proj_table,nlihc_id, addresses)
-                #Add values to the project table output file if necessary
-                if not in_proj_table:
+                    nlihc_id, in_proj_table = self._get_nlihc_id_from_db(addresses=addresses)
+                    
+                    print(in_proj_table,nlihc_id, addresses)
+                    #Add values to the project table output file if necessary
+                    if not in_proj_table:
+                        data = self._map_data_for_row(nlihc_id=nlihc_id,
+                                                      fields=PROJ_FIELDS,
+                                                      fields_map=project_fields_map,
+                                                      line=source_row)
+                        proj_writer.writerow(data)       
+
+                        # add all to the proj_addre table
+                        # TODO only doing this here means we are assuming that the new source 
+                        # does not have any additional addresses in its list. Should verify
+                        # that is typical. Otherwise, append_addresses will need to double 
+                        # check that it is not creating duplicate records - which will also 
+                        # be tricky since we will want duplicates from the same source that
+                        # have been loaded into the database previously. 
+                        self._append_addresses(addresses=addresses, nlihc_id = nlihc_id, addre_writer = addre_writer)            
+
+                    # add all to subsidy table
                     data = self._map_data_for_row(nlihc_id=nlihc_id,
-                                                  fields=PROJ_FIELDS,
-                                                  fields_map=project_fields_map,
+                                                  fields=SUBSIDY_FIELDS,
+                                                  fields_map=subsidy_fields_map,
                                                   line=source_row)
-                    proj_writer.writerow(data)       
-
-                    # add all to the proj_addre table
-                    # TODO only doing this here means we are assuming that the new source 
-                    # does not have any additional addresses in its list. Should verify
-                    # that is typical. Otherwise, append_addresses will need to double 
-                    # check that it is not creating duplicate records - which will also 
-                    # be tricky since we will want duplicates from the same source that
-                    # have been loaded into the database previously. 
-                    self._append_addresses(addresses=addresses, nlihc_id = nlihc_id, addre_writer = addre_writer)            
-
-                # add all to subsidy table
-                data = self._map_data_for_row(nlihc_id=nlihc_id,
-                                              fields=SUBSIDY_FIELDS,
-                                              fields_map=subsidy_fields_map,
-                                              line=source_row)
-                data = self._add_calculated_subsidy_data(uid,data)
-                subsidy_writer.writerow(data)
-
+                    data = self._add_calculated_subsidy_data(uid,data)
+                    subsidy_writer.writerow(data)
+                except Exception as e:
+                    logger.error("Failed to process {}".format(source_row))
+                    if self.debug == True:
+                        raise e
                 
 
     def _add_calculated_subsidy_data(self, uid,data):
