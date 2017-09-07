@@ -33,7 +33,7 @@ var router = {
         if (data.length === 0 || !data) {
             delete router.stateObj[msg];
         } else if ( msg.split('.')[0] === 'previewBuilding' ) {
-            router.stateObj['previewBuilding'] = data;
+            router.stateObj['previewBuilding'] = data[0];
         } else {
             router.stateObj[msg] = data;
         }
@@ -131,7 +131,7 @@ var router = {
                 .find(function(each){
                     return each.properties.nlihc_id === eachArray[1];
                 });
-                setState('previewBuilding', matchingRenderedProject);
+                setState('previewBuilding', [matchingRenderedProject]);
             
             } else {
                 dataChoice = dataChoices.find(function(obj){

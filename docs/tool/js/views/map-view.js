@@ -33,10 +33,11 @@
                     ['overlaySet', chloroplethLegend.init],
                     ['hoverBuilding', mapView.showPopup],
                     ['previewBuilding', mapView.showProjectPreview],
+                    ['previewBuilding', mapView.highlightPreviewBuilding],
                     ['filteredData', mapView.filterMap],
                     ['filteredViewLoaded',mapView.addExportButton],
                     ['filteredViewLoaded',mapView.exportButton],
-                    ['hoverBuildingList', mapView.highlightBuilding],
+                    ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['initialProjectsRendered',router.initFilters] // not 100% sure this trigger isn't later than we'd want
@@ -651,7 +652,7 @@
 
                             'circle-stroke-opacity': 0.5,
                             'circle-opacity': 0.5,
-                            'circle-stroke-width': 2,
+                            'circle-stroke-width': 0,
                             'circle-color': '#aaaaaa',
                             'circle-stroke-color': '#aaaaaa'
 
@@ -666,16 +667,16 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
                                 ]
                             },
                             'circle-opacity': 0.5,
                             'circle-color': '#aaaaaa',
 
-                            'circle-stroke-opacity': 0.7,
-                            'circle-stroke-width': 2,
+                            'circle-stroke-opacity': 0.5,
+                            'circle-stroke-width': 0,
                             'circle-stroke-color': '#626262'
                         }
                     });
@@ -688,15 +689,15 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
                                 ]
                             },
                             'circle-opacity': 0.5,
                             'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2,
+                            'circle-stroke-width': 0,
                             'circle-stroke-opacity': 0.5,
                             'circle-stroke-color': '#fd8d3c'    //same as circle for existing
                         }
@@ -710,17 +711,17 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
                                 ]
                             },
 
                             'circle-opacity': 0.5,
                             'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it
-                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-width': 0, //Warning, this is not actually set here - the animateEnterExit overrides it
+                            'circle-stroke-opacity': 0.5,
                             'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
@@ -756,10 +757,9 @@
                         //If you click but not on a building, remove any tooltips
                         if (building === undefined) {
                             mapView.removeAllPopups();
-                            setState('previewBuilding', false);
                         } else {
                         //If you click on a building, show that building in the side panel
-                            setState('previewBuilding', building);
+                            setState('previewBuilding', [building, true]); // true ie flag to scroll matchign list
                             setState('subNav.right', 'buildings');
                         }
                     });
@@ -816,7 +816,7 @@
 
             popup._container.onclick = function(e) {
 
-                setState('previewBuilding', data);
+                setState('previewBuilding', [data, true]); // tru ie flag to scroll matching list
                 setState('subNav.right', 'buildings');
             };
 
@@ -831,18 +831,24 @@
 
         },
         scrollMatchingList: function(data){
-                var $listItem = $('#projects-list #' + data.properties.nlihc_id);
-                var difference = $listItem.offset().top - $('#projects-list-group').offset().top; 
-                $('#projects-list-group').animate({
-                    scrollTop: $( '#projects-list-group' ).scrollTop() + difference - 10
-                }, 500)
+                var projectData = data[0];
+                var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
+                console.log($listItem.length);
+                if ( $listItem.length > 0 && data[1]) { // if the map has been filtered the listitem may no longer be in the DOM
+                                                        // data[1] == false is the flag to not scroll
+                    var difference = $listItem.offset().top - $('#projects-list-group').offset().top; 
+                    $('#projects-list-group').animate({
+                        scrollTop: $( '#projects-list-group' ).scrollTop() + difference - 10
+                    }, 500)
+                }
         },  
 
         showProjectPreview: function(msg, data) {
-            if ( data ) {
+            var projectData = data[0];
+            if ( projectData ) {
 
                 $('#projects-list .projects-list-selected').removeClass('projects-list-selected');
-                var $listItem = $('#projects-list #' + data.properties.nlihc_id);
+                var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
                 $listItem.addClass('projects-list-selected');
                 
                 if ( msg.indexOf('clickListItem') === -1 ) { // clicking on the list item in right navbar sends msg
@@ -850,14 +856,14 @@
                                                              // should not scroll to the item; it's already visible and scrolling
                                                              // would be unexpected
                     mapView.scrollMatchingList(data);
-                    console.log('853',data);  
+                    console.log('853',projectData);  
                 }
                   
-                if ( data.properties.longitude != null && data.properties.latitude ){
-                    mapView.flyToProject([data.properties.longitude, data.properties.latitude]);
+                if ( projectData.properties.longitude != null && projectData.properties.latitude ){
+                    mapView.flyToProject([projectData.properties.longitude, projectData.properties.latitude]);
                 }
-                setState('hoverBuildingList', data.properties.nlihc_id);
-                var project = [data.properties];    //defining as one-element array for d3 data binding
+                //setState('hoverBuildingList', projectData.properties.nlihc_id);
+                var project = [projectData.properties];    //defining as one-element array for d3 data binding
 
                 //Bind the selected project to a div that will hold the preview graphics
                 var selection = d3.select('#project-preview')
@@ -896,7 +902,7 @@
                         .text(value)
                         .style("text-decoration", "underline") // to indicate it is a link
                         .on("click", function(e) {
-                            setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
+                            setState('selectedBuilding', projectData); //data comes from state - it is the building that was clicked
                             setState('switchView', projectView);
                         });
 
@@ -975,16 +981,13 @@
             var delayAnimation = setTimeout(function(){
                 mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);
                 var shrinkCircles = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 0);
                 },300);
 
-                mapView.map.setPaintProperty('project-exit','circle-stroke-width', 6);
-                var expandCircles = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-exit','circle-stroke-width', 2);
-                },300);
             },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
                     // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
                     // would be nicer with a callback, but I don't htink that's available -JO
+
 
 
         },
@@ -1048,7 +1051,7 @@
                     if ( d.properties.longitude == null || d.properties.latitude == null ) {
                         mapView.alertNoLocationInfo()
                     }
-                    setState('previewBuilding.clickListItem', d);
+                    setState('previewBuilding', [d, false]); // false is flag to not scroll the list
                 })
 
                 .attr('tabIndex', 0)
@@ -1094,14 +1097,16 @@
           });
         },
 
-        highlightBuilding(msg, data) {
+        highlightHoveredBuilding(msg, data) {
+            console.log(msg,data);
+            console.log('highlightHoveredBuilding');
             if ( getState().hoverBuildingList[1] ){ // if there's a previous hoverBuildingList state, clear the highlight
-                mapView.map.setFilter('project-highlight-' + getState().hoverBuildingList[1], ['==', 'nlihc_id', '']);
-                mapView.map.removeLayer('project-highlight-' + getState().hoverBuildingList[1]);
+                mapView.map.setFilter('project-highlight-hovered-' + getState().hoverBuildingList[1], ['==', 'nlihc_id', '']);
+                mapView.map.removeLayer('project-highlight-hovered-' + getState().hoverBuildingList[1]);
             }
             if (data) {
                 mapView.map.addLayer({
-                    'id': 'project-highlight-' + data,
+                    'id': 'project-highlight-hovered-' + data,
                     'type': 'circle',
                     'source': 'project',
                     'paint': {
@@ -1119,6 +1124,37 @@
                         'circle-stroke-color': '#4D90FE'
                     },
                     'filter': ['==', 'nlihc_id', data]
+                });
+            }
+            
+        },
+        highlightPreviewBuilding(msg, data) {
+            var projectData = data[0];
+            console.log('highlightPreviewBuilding');
+            if ( getState().previewBuilding[1] ){ // if there's a previous previewBuilding state, clear the highlight
+                mapView.map.setFilter('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id, ['==', 'nlihc_id', '']);
+                mapView.map.removeLayer('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id);
+            }
+            if (projectData) {
+                mapView.map.addLayer({
+                    'id': 'project-highlight-preview-' + projectData.properties.nlihc_id,
+                    'type': 'circle',
+                    'source': 'project',
+                    'paint': {
+                        'circle-blur': 0.2,
+                        'circle-color': 'transparent',
+                        'circle-radius': {
+                            'base': 1.75,
+                            'stops': [
+                                [12, 5],
+                                [15, 20]
+                            ]
+                        },
+                        'circle-stroke-width': 4,
+                        'circle-stroke-opacity': 1,
+                        'circle-stroke-color': '#bd3621'
+                    },
+                    'filter': ['==', 'nlihc_id', projectData.properties.nlihc_id]
                 });
             }
             

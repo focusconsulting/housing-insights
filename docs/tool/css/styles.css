@@ -420,6 +420,7 @@ Others are working correctly.
     font-weight:bold;
     font-size:1.2em;
     cursor: pointer;
+    color: #bd3621;
 }
 #projects-list>div, #building-view-segments div {
     overflow: hidden;
@@ -429,6 +430,7 @@ Others are working correctly.
     opacity: 0;
     cursor: pointer;
     border-bottom: 1px solid gray;
+    transition: background-color 0.2s linear;
 
 }
 #projects-list>div .project-title {
@@ -436,8 +438,12 @@ Others are working correctly.
     font-size: 1em;
 }
 
-#projects-list>div:hover, #building-view-segments div:hover, #projects-list>div.projects-list-selected {
+#projects-list>div:hover, #building-view-segments div:hover {
     background-color: #ddebff;
+}
+
+#projects-list>div.projects-list-selected {
+    background-color: #d69c93;
 }
 
 #projects-list>div.enter, #projects-list>div.update,
