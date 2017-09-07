@@ -4316,6 +4316,13 @@
         "source_name": "construction_permits",
         "sql_name": "construction_permits",
         "type": "decimal"
+      },
+      {
+        "display_name": "Construction Building Permits Rate",
+        "display_text": "Construction permits in zone per 1,000 housing units",
+        "source_name": "construction_permits_rate",
+        "sql_name": "construction_permits_rate",
+        "type": "decimal"
       }
     ]
   },
