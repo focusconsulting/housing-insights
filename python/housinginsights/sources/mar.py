@@ -16,7 +16,7 @@ class MarApiConn(BaseApiConn):
 
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
-    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+    def __init__(self,baseurl=None,proxies=None,database_choice=None, debug=False):
         super().__init__(baseurl=MarApiConn.BASEURL)
 
     

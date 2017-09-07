@@ -17,9 +17,9 @@ logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class WmataApiConn(BaseApiConn):
 
-    def __init__(self, baseurl=None,proxies=None,database_choice=None, use_cached_distance=True):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None, debug=False, use_cached_distance=True):
         baseurl=None #more than one, so calls to self.get() must pass whole url
-        super().__init__(baseurl, proxies=None)
+        super().__init__(baseurl, proxies=proxies, debug=debug)
 
         self.meters_per_mile = 1609.344
         self.use_cached_distance = use_cached_distance

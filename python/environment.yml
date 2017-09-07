@@ -52,3 +52,4 @@ dependencies:
   - simplejson==3.10.0
   - sqlacodegen==1.1.6
   - Werkzeug==0.12.2
+  - xmljson==0.1.9

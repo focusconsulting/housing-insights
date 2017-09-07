@@ -37,7 +37,7 @@ class BaseApiConn(object):
 
 
     """
-    def __init__(self, baseurl=None, proxies=None, database_choice=None):
+    def __init__(self, baseurl=None, proxies=None, database_choice=None, debug=False):
         """
         :param baseurl: URL endpoint of the API.
         :type baseurl: String.
@@ -54,9 +54,12 @@ class BaseApiConn(object):
         self.session = requests.Session()
         self.baseurl = baseurl
         self.proxies = proxies
-
+        self.debug = debug
+        
         #A list of strings; this should be defined in the child class
         self._available_unique_data_ids = None
+        
+
 
     @property
     def output_paths(self):

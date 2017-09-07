@@ -16,11 +16,11 @@ class CensusApiConn(BaseApiConn):
     """
     
     """
-    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+    def __init__(self,baseurl=None,proxies=None,database_choice=None, debug=False):
         #baseurl not actually used since we need the _urls property to hold many urls. 
         #Needed to get call to super() to work correctly. TODO refactor so this is optional.
         baseurl = 'http://api.census.gov/data/'
-        super(CensusApiConn, self).__init__(baseurl, proxies=None)
+        super(CensusApiConn, self).__init__(baseurl, proxies=proxies,debug=debug)
         secretsFileName =  os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir,"secrets.json"))    
         self.api_keys = json.loads(open(secretsFileName).read())

@@ -31,8 +31,8 @@ class DCHousingApiConn(ProjectBaseApiConn):
     BASEURL = 'https://opendata.arcgis.com/datasets/'
     DATA_URL = '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
 
-    def __init__(self, baseurl=None,proxies=None,database_choice=None):
-        super().__init__(baseurl=DCHousingApiConn.BASEURL, proxies=proxies,database_choice=database_choice)
+    def __init__(self, baseurl=None,proxies=None,database_choice=None, debug=False):
+        super().__init__(baseurl=DCHousingApiConn.BASEURL, proxies=proxies,database_choice=database_choice, debug=debug)
 
         self._available_unique_data_ids = ['dchousing']
 
