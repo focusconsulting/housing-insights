@@ -1144,13 +1144,14 @@
                         'circle-blur': 0.2,
                         'circle-color': 'transparent',
                         'circle-radius': {
-                            'base': 1.75,
-                            'stops': [
-                                [12, 5],
-                                [15, 20]
-                            ]
-                        },
-                        'circle-stroke-width': 4,
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
+                                ]
+                            },
+                        'circle-stroke-width': 2,
                         'circle-stroke-opacity': 1,
                         'circle-stroke-color': '#bd3621'
                     },
