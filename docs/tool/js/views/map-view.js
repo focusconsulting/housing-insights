@@ -69,14 +69,12 @@
                 // checks it against state of the project layer and 
                 // !isFilterInitialized to setState initialProjectsRendered. router.initFilters
                 // subscribes to that stateChange and turns isFilterInitialized to true so that this stateChange
-                // fires only once. adds a small delay for assurance
+                // fires only once. 
 
                 var theMap = this.map;
                 this.map.on('render', function() {
                   if ( theMap.loaded() && theMap.getLayer('project-enter') !== undefined && !router.isFilterInitialized ) {
-                      setTimeout(function(){
-                        setState('initialProjectsRendered', true);
-                    },250);
+                      setState('initialProjectsRendered', true);
                   }
                 });
 
