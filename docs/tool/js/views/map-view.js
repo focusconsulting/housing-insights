@@ -834,12 +834,10 @@
         },
         scrollMatchingList: function(data){
                 var projectData = data[0];
-                console.log(projectData, projectData.properties.nlihc_id);
                 $('#projects-list .projects-list-selected').removeClass('projects-list-selected'); 
                 var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
                 $listItem.addClass('projects-list-selected');
                 
-                console.log($listItem.length);
                 if ( $listItem.length > 0 && data[1]) { // if the map has been filtered the listitem may no longer be in the DOM
                                                         // data[1] == false is the flag to not scroll
                     var difference = $listItem.offset().top - $('#projects-list-group').offset().top; 
@@ -1005,7 +1003,6 @@
             var data = allData.filter(function(feature) {
                 return feature.properties.matches_filters === true;
             });
-            console.log(data);
 
             d3.selectAll('.matching-count')
                 .text(data.length);
@@ -1063,7 +1060,6 @@
                 .remove();
 
             if ( getState().previewBuilding && getState().previewBuilding[0] ){
-                console.log('calling scroll from d3 append', getState().previewBuilding[0]);
                 setTimeout(function(){
                     mapView.scrollMatchingList(getState().previewBuilding[0]);
                 },1000);
@@ -1101,8 +1097,6 @@
         },
 
         highlightHoveredBuilding(msg, data) {
-            console.log(msg,data);
-            console.log('highlightHoveredBuilding');
             if ( getState().hoverBuildingList[1] ){ // if there's a previous hoverBuildingList state, clear the highlight
                 mapView.map.setFilter('project-highlight-hovered-' + getState().hoverBuildingList[1], ['==', 'nlihc_id', '']);
                 mapView.map.removeLayer('project-highlight-hovered-' + getState().hoverBuildingList[1]);
@@ -1133,7 +1127,6 @@
         },
         highlightPreviewBuilding(msg, data) {
             var projectData = data[0];
-            console.log('highlightPreviewBuilding');
             if ( getState().previewBuilding[1] ){ // if there's a previous previewBuilding state, clear the highlight
                 mapView.map.setFilter('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id, ['==', 'nlihc_id', '']);
                 mapView.map.removeLayer('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id);
