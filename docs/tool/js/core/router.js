@@ -100,7 +100,7 @@ var router = {
                 paramsArray.push('pb=' + router.stateObj['previewBuilding'].properties.nlihc_id);
             }
         }
-     //   console.log(paramsArray.join('&'));
+     
         return paramsArray.join('&').replace(/ /g,'_');
     },
     screenLoad: function(){
@@ -109,6 +109,7 @@ var router = {
     decodeState: function(){
         console.log("decoding state from URL");
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
+
         stateArray.forEach(function(each){
             var dataChoice;
             var eachArray = each.split('=');
@@ -125,13 +126,14 @@ var router = {
                 setState('subNav.right', 'buildings');
             
             } else if ( eachArray[0] === 'pb' ) {
-                var matchingRenderedProject = mapView.map.queryRenderedFeatures({
+                setState('subNav.right', 'buildings');
+                var renderedProjects = mapView.map.queryRenderedFeatures({
                     layers: ['project','project-enter','project-exit', 'project-unmatched']
-                })
-                .find(function(each){
+                });
+                var matchingRenderedProject = renderedProjects.find(function(each){
                     return each.properties.nlihc_id === eachArray[1];
                 });
-                setState('previewBuilding', [matchingRenderedProject]);
+                setState('previewBuilding', [matchingRenderedProject,true]); // true = flag to scroll matching projects list
             
             } else {
                 dataChoice = dataChoices.find(function(obj){

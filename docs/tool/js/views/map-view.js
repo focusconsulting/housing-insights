@@ -64,15 +64,19 @@
                 });
                 
                 // filter decoding was happening too quickly after initialLayers were added (ln 463),
-                // before they were fully rendered. code below uses mapBox's render' event, checks against state of
-                // initialLayersAdded and !isFilterInitialized to setState initialProjectsRendered. router.initFilters
+                // before they were fully rendered. even mapBox's 'render' was sometime too early. ussing instead
+                // getLayer('projects') to make sure the layers are indeed present. 'render' is fired often; function below
+                // checks it against state of the project layer and 
+                // !isFilterInitialized to setState initialProjectsRendered. router.initFilters
                 // subscribes to that stateChange and turns isFilterInitialized to true so that this stateChange
-                // should fire only once
+                // fires only once. adds a small delay for assurance
 
                 var theMap = this.map;
                 this.map.on('render', function() {
-                  if ( theMap.loaded() && getState().filteredProjectsAvailable !== undefined  && !router.isFilterInitialized ) {
-                      setState('initialProjectsRendered', true);
+                  if ( theMap.loaded() && theMap.getLayer('project-enter') !== undefined && !router.isFilterInitialized ) {
+                      setTimeout(function(){
+                        setState('initialProjectsRendered', true);
+                    },250);
                   }
                 });
 
@@ -759,8 +763,8 @@
                             mapView.removeAllPopups();
                         } else {
                         //If you click on a building, show that building in the side panel
-                            setState('previewBuilding', [building, true]); // true ie flag to scroll matchign list
                             setState('subNav.right', 'buildings');
+                            setState('previewBuilding', [building, true]); // true ie flag to scroll matchign list
                         }
                     });
 
@@ -816,8 +820,8 @@
 
             popup._container.onclick = function(e) {
 
-                setState('previewBuilding', [data, true]); // tru ie flag to scroll matching list
                 setState('subNav.right', 'buildings');
+                setState('previewBuilding', [data, true]); // tru ie flag to scroll matching list
             };
 
             mapView.popups.push(popup);
@@ -832,13 +836,14 @@
         },
         scrollMatchingList: function(data){
                 var projectData = data[0];
+                console.log(projectData, projectData.properties.nlihc_id);
                 var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
                 console.log($listItem.length);
                 if ( $listItem.length > 0 && data[1]) { // if the map has been filtered the listitem may no longer be in the DOM
                                                         // data[1] == false is the flag to not scroll
                     var difference = $listItem.offset().top - $('#projects-list-group').offset().top; 
                     $('#projects-list-group').animate({
-                        scrollTop: $( '#projects-list-group' ).scrollTop() + difference - 10
+                        scrollTop: $( '#projects-list-group' ).scrollTop() + difference - 7
                     }, 500)
                 }
         },  
@@ -1009,6 +1014,7 @@
             var data = allData.filter(function(feature) {
                 return feature.properties.matches_filters === true;
             });
+            console.log(data);
 
             d3.selectAll('.matching-count')
                 .text(data.length);
@@ -1022,13 +1028,12 @@
 
             var listItems = preview.selectAll('div')
                 .data(data, function(d) {
-                    return d.properties.nlihc_id;
-                })
-                .attr('id', function(d) {
-                    return d.properties.nlihc_id;
+                    return d.properties.nlihc_id; // needs key to do update
                 });
+                
 
             listItems.attr('class', 'update');
+
 
             listItems.enter().append('div')
                 //.attr('class','enter')
@@ -1056,16 +1061,17 @@
 
                 .attr('tabIndex', 0)
                 .transition().duration(100)
-                .attr('class', 'enter');
+                .attr('class', 'enter')
+                .attr('id', function(d){
+                    return d.properties.nlihc_id;
+                });
 
             listItems.exit()
                 .attr('class', 'exit')
                 .transition(t)
                 .remove();
 
-            if ( getState().previewBuilding ) {
-                mapView.scrollMatchingList(getState().previewBuilding[0]);
-            }
+         
         },
         alertNoLocationInfo: function(){
             d3.select('#map-wrapper')
