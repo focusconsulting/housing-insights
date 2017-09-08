@@ -30,7 +30,7 @@ var router = {
     },
     pushFilter: function(msg, data){
         console.log(msg,data);
-        if (data.length === 0 || !data) {
+        if (data.length === 0 || !data || ( msg === 'subNav.right' && msg === 'charts') ) {
             delete router.stateObj[msg];
         } else if ( msg.split('.')[0] === 'previewBuilding' ) {
             router.stateObj['previewBuilding'] = data[0];

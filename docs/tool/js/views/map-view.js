@@ -835,7 +835,10 @@
         scrollMatchingList: function(data){
                 var projectData = data[0];
                 console.log(projectData, projectData.properties.nlihc_id);
+                $('#projects-list .projects-list-selected').removeClass('projects-list-selected'); 
                 var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
+                $listItem.addClass('projects-list-selected');
+                
                 console.log($listItem.length);
                 if ( $listItem.length > 0 && data[1]) { // if the map has been filtered the listitem may no longer be in the DOM
                                                         // data[1] == false is the flag to not scroll
@@ -850,17 +853,7 @@
             var projectData = data[0];
             if ( projectData ) {
 
-                $('#projects-list .projects-list-selected').removeClass('projects-list-selected');
-                var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
-                $listItem.addClass('projects-list-selected');
-                
-                if ( msg.indexOf('clickListItem') === -1 ) { // clicking on the list item in right navbar sends msg
-                                                             // previewBuilding.clickListItem. In that case, the container
-                                                             // should not scroll to the item; it's already visible and scrolling
-                                                             // would be unexpected
-                    mapView.scrollMatchingList(data);
-                    console.log('853',projectData);  
-                }
+                mapView.scrollMatchingList(data);
                   
                 if ( projectData.properties.longitude != null && projectData.properties.latitude ){
                     mapView.flyToProject([projectData.properties.longitude, projectData.properties.latitude]);
@@ -1069,6 +1062,12 @@
                 .transition(t)
                 .remove();
 
+            if ( getState().previewBuilding && getState().previewBuilding[0] ){
+                console.log('calling scroll from d3 append', getState().previewBuilding[0]);
+                setTimeout(function(){
+                    mapView.scrollMatchingList(getState().previewBuilding[0]);
+                },1000);
+            }
          
         },
         alertNoLocationInfo: function(){
@@ -1165,29 +1164,31 @@
             
         },
         zoomToFilteredProjects: function(msg, data){
-            var maxLat = d3.max(data, function(d){
-                return d.latitude;
-            });
-            var minLat = d3.min(data, function(d){
-                return d.latitude;
-            });
-            var maxLon = d3.max(data, function(d){
-                if (d.longitude < 0 ) {
-                    return d.longitude; // workaround of data error where one project has positive longitude instead of positive
-                                        // can remove `if` statement when resolved (issue 405)
+            if ( getState().previewBuilding === undefined || !getState().previewBuilding[0] ) {
+                var maxLat = d3.max(data, function(d){
+                    return d.latitude;
+                });
+                var minLat = d3.min(data, function(d){
+                    return d.latitude;
+                });
+                var maxLon = d3.max(data, function(d){
+                    if (d.longitude < 0 ) {
+                        return d.longitude; // workaround of data error where one project has positive longitude instead of positive
+                                            // can remove `if` statement when resolved (issue 405)
+                    }
+                });
+                var minLon = d3.min(data, function(d){
+                    return d.longitude;
+                });
+                mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]],
+                                {linear: true,
+                                padding: {top: 20, bottom: 20, left: 320, right: 370}, //to accomodate sidebars + 20 px
+                                maxZoom: 14  //far enough to see whole neighborhood cluster
+                                });
+                if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
+                    mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
+                    mapView.map.originalZoom = mapView.map.getZoom();
                 }
-            });
-            var minLon = d3.min(data, function(d){
-                return d.longitude;
-            });
-            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]],
-                            {linear: true,
-                            padding: {top: 20, bottom: 20, left: 320, right: 370}, //to accomodate sidebars + 20 px
-                            maxZoom: 14  //far enough to see whole neighborhood cluster
-                            });
-            if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
-                mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
-                mapView.map.originalZoom = mapView.map.getZoom();
             }
         }
     };
