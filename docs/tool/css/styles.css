@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+li {
+    list-style-position:inside;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -42,7 +46,7 @@ html, body {
 .sub-nav-container {
     position: relative;
     display: none;
-    overflow-y: auto;
+    
 }
 
 .sub-nav-container.active {
@@ -161,15 +165,17 @@ button.nullValuesToggleSubmit::before {
     overflow-y: auto;
 }
 
-#projects-list {
+#projects-list, #building-view-segments {
     margin-top: 0px;
 }
 
-#left-options .sub-nav-button {
+#left-options .sub-nav-button,
+#left-options-building .sub-nav-button {
     border-right: 2px solid rgb(189, 54, 33);
 }
 
-#right-options .sub-nav-button {
+#right-options .sub-nav-button,
+#right-options-building .sub-nav-button {
     border-left: 2px solid rgb(189, 54, 33);
 }
 
@@ -178,26 +184,68 @@ button.nullValuesToggleSubmit::before {
     border-bottom-width: 0;
 }
 
-#left-options {
+#left-options, #left-options-building {
     width: 300px;
     display: flex;
 }
 
-#right-options {
+#right-options, #right-options-building {
     width: 350px;
     display: flex;
 }
 
-#options-spacer {
+#options-spacer, #options-spacer-building {
     flex-grow: 1;
     border-bottom: 2px solid rgb(189, 54, 33);
     position: relative; /*so pillboxes can be appended*/
 }
 
 #clear-pillbox-holder {
-    position: relative;
+    position: absolute;
     display: block;
+    left: 100%;
+    height: 40px;
+    width: 200px;
+
 }
+
+#clear-pillbox-holder:hover, #clear-pillbox-holder.force-hover {
+    height: initial;
+}
+
+#clear-pillbox-holder .ui.label {
+    min-height: 30px;   
+}
+
+.ui.label.clear-single {
+    transition: padding-top 0.2s linear, padding-bottom 0.2s linear, max-height 0.2s linear, background .1s ease;
+    overflow: hidden;
+}
+.ui.label.clear-single.visible {
+    padding-top: 0;
+    padding-bottom: 0;
+    max-height: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    margin-top: 0;
+
+ 
+}
+
+.ui.label.clear-single.visible:last-child {
+    margin-bottom: 100px;
+}
+
+#clear-pillbox-holder:hover .clear-single.visible, #clear-pillbox-holder.force-hover .clear-single.visible {
+    padding: 0.833em;
+    max-height: 72px;
+    position: relative;
+    top: initial;
+    opacity: 1;
+}
+
 .main-view {
     width: 100%;
     transition: opacity 0.5s linear, transform 0.5s ease-in;
@@ -373,7 +421,7 @@ Others are working correctly.
     font-size:1.2em;
     cursor: pointer;
 }
-#projects-list>div {
+#projects-list>div, #building-view-segments div {
     overflow: hidden;
     transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
     max-height: 0;
@@ -388,13 +436,19 @@ Others are working correctly.
     font-size: 1em;
 }
 
-#projects-list>div:hover {
+#projects-list>div:hover, #building-view-segments div:hover {
     background-color: #ddebff;
 }
-#projects-list>div.enter, #projects-list>div.update {
+
+#projects-list>div.enter, #projects-list>div.update,
+#building-view-segments div.enter {
     padding: 5px 4px;
     max-height: 100px;
     opacity: 1;
+}
+
+#building-view-segments {
+    position: fixed;
 }
 
 
@@ -482,6 +536,11 @@ Others are working correctly.
 }
 
 
+#layer-menu-buttons button {
+        border: 5px solid #fff;
+    padding: 9px 3px;
+}
+
 /*
 Switched to semantic-ui buttons instead
 #layer-menu, #overlay-menu, #temp-filter-menu {
@@ -510,6 +569,18 @@ a.active {
 }
 
 */
+
+.no-location-alert {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%);
+    font-size: 36px;
+    border: 1px solid rgb(189, 54, 33);
+    border-radius: 35px;
+    padding: 10px;
+    color: rgb(189, 54, 33);
+}
 
 #reset-zoom {
     display: none;
@@ -548,6 +619,11 @@ a.active {
     font-weight: bold;
     border-top: 1px solid rgba(34, 36, 38, 0.15);
 }
+
+#filters {
+    overflow-y: hidden;
+}
+
 /*Mimics accordion content styling*/
 #filters .static-content {
     margin: 0;
@@ -646,9 +722,15 @@ a.active {
     display: block !important;
     position: relative;
     font-size: .95em;
-    margin-top:5px;
-    margin-left: 2px;
+    margin:5px 2px;
     cursor: pointer;
+}
+
+.ui.label.label-all {
+    background-color: rgba(253,126,35,0.7) !important;
+        display: inline !important;
+         font-size: .95em;
+    margin:5px 2px;
 }
 
 .ui.label.clear-all:hover {
@@ -678,23 +760,20 @@ a.active {
 
 
 /* building view */
-#button-back {
-    background-color: #fff;
-    border-bottom-width: 0;
-}
 
 #sub-nav-building {
     width: 100%;
-    position: relative;
     color: inherit;
     background-color: #d69c93;
     height: 40px;
     display: flex;
     justify-content: space-between;
+    position: fixed;
+    z-index: 10000;
 }
 
 #building-view-container {
-    margin-top: 20px;
+    margin-top: 40px;
 }
 
 

@@ -49,11 +49,65 @@ class CleanerBase(object, metaclass=ABCMeta):
             for key, value in row.items():
                 self.census_mapping[value] = row['census_tract']
 
+        #List of all date fields for parsing purposes
+        self.date_fields = []
+        for field in self.fields:
+            if field['type'] == 'date':
+                self.date_fields.append(field['source_name'])
+
 
     @abstractmethod
     def clean(self, row, row_num):
         # TODO: add replace_null method as required for an implementation (#176)
         pass
+
+
+    def add_proj_addre_lookup_from_mar(self):
+        """
+        Adds an in-memory lookup table of the contents of the current
+        proj_addre table but with the mar_id as key instead of address. Used for entity resolution
+        Result format: {'23105':'NL0000121', '23106':'NL0000223'} i.e. 'mar_id':'nlihc_id'
+        """
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select mar_id, nlihc_id from proj_addre"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.proj_addre_lookup_from_mar = {d[0]:d[1] for d in result}
+
+    def add_ssl_nlihc_lookup(self):
+        with self.engine.connect() as conn:
+            # do mar_id lookup
+            q = "select ssl, nlihc_id from parcel"
+            proxy = conn.execute(q)
+            result = proxy.fetchall()
+            self.ssl_nlihc_lookup = {d[0]:d[1] for d in result}
+
+
+    def get_nlihc_id_if_exists(self, mar_ids_string, ssl=None):
+        "Checks for record in project table with matching MAR id."
+    
+        #DC Tax has comma separated list of relevant mar ids
+        mar_id_list = mar_ids_string.split(',')
+        for mar_id in mar_id_list:
+            try:
+                #If we find a matching mar_id, assume the whole thing matches
+                nlihc_id = self.proj_addre_lookup_from_mar[mar_id]
+                return nlihc_id
+
+            except KeyError:
+                pass #keep checking the rest of the list
+
+        #optionally, try searching SSLs - used only for dc tax
+        try:
+            nlihc_id = self.ssl_nlihc_lookup[ssl]
+            return nlihc_id
+        except KeyError:
+            pass #means didn't find match
+
+        #If we don't find a match
+        return self.null_value
+
 
     # TODO: figure out what is the point of this method...it looks incomplete
     def field_meta(self, field):
@@ -66,6 +120,19 @@ class CleanerBase(object, metaclass=ABCMeta):
         for key, value in row.items():
             if value in null_values:
                 row[key] = self.null_value
+        return row
+
+    def remove_escape_char(self,row):
+        '''
+        The / character causes problems if it occurs at the end of a row, as it tricks 
+        the csv file into joining the two columns together. This occured in 
+        the 2017 building permits. Swapping it out for a similar but safer
+        \ character
+        '''
+        for key, value in row.items():
+            if isinstance(row[key],str):
+                row[key] = row[key].replace('\\','/')
+        
         return row
 
     def remove_line_breaks(self, row):
@@ -108,12 +175,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         """
         Tries to automatically parse all dates that are of type:'date' in the meta
         """
-        date_fields = []
-        for field in self.fields:
-            if field['type'] == 'date':
-                date_fields.append(field['source_name'])
-
-        for source_name in date_fields:
+        for source_name in self.date_fields:
             row[source_name] = self.format_date(row[source_name])
         return row
 
@@ -234,12 +296,16 @@ class CleanerBase(object, metaclass=ABCMeta):
         # using mar api lookup instead of mar.csv because too slow - see to do^
         proj_address_id = row[address_id_col_name]
 
+
+        #TODO this is odd, find out why we have both ADDRESS_ID column and mar_id column
         if proj_address_id != self.null_value:
-            result = mar_api.reverse_address_id(aid=proj_address_id)
-            return_data_set = result['returnDataset']
-            if 'Table1' in return_data_set:
-                row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
-                return row
+            row['mar_id'] = proj_address_id
+            return row
+        #    result = mar_api.reverse_address_id(aid=proj_address_id)
+        #    return_data_set = result['returnDataset']
+        #    if 'Table1' in return_data_set:
+        #        row['mar_id'] = return_data_set['Table1'][0]["ADDRESS_ID"]
+        #        return row
 
         result = None # track result from reverse lookup api calls
 
@@ -261,12 +327,10 @@ class CleanerBase(object, metaclass=ABCMeta):
                 str_num = address.split(' ')[0]
                 int(str_num)
                 first_address = address.split(';')[0]
-                result = mar_api.find_location(first_address)
+                result = mar_api.find_addr_string(first_address)
             except ValueError:
                 logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None
-
-            print(result);
             
             if result:
                 #Handle case of mar_api returning something but it not being an address
@@ -324,9 +388,12 @@ class CleanerBase(object, metaclass=ABCMeta):
                                census_tract, status, full_address, image_url,
                                street_view_url, psa]:
        
-            mar_api = MarApiConn()
-            result = mar_api.reverse_address_id(aid=row['mar_id'])
-            result = result['returnDataset']['Table1'][0]
+            try:
+                mar_api = MarApiConn()
+                result = mar_api.reverse_address_id(aid=row['mar_id'])
+                result = result['returnDataset']['Table1'][0]
+            except KeyError:
+                return row
 
         #if there were no null values in the geocodable fields
         else:
@@ -592,8 +659,14 @@ class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', '', None])
         row = self.parse_dates(row)
-        row = self.add_mar_id(row, 'Proj_address_id')
-        row = self.add_geocode_from_mar(row=row)
+        
+        #TODO need to better handle errors within these, i.e. the MAR API failing
+        try:
+            row = self.add_mar_id(row, 'Proj_address_id')
+            row = self.add_geocode_from_mar(row=row)
+        except Exception as e:
+            logging.error("Error geocoding {}, error was {}".format(row,e))
+
         row = self.rename_ward(row, ward_key='Ward2012')
         row = self.rename_status(row)
         row = self.rename_census_tract(row, column_name='Geo2010')
@@ -613,6 +686,7 @@ class BuildingPermitsCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
         self.add_mar_tract_lookup()
+        self.add_ssl_nlihc_lookup()
 
     def clean(self, row, row_num=None):
 
@@ -623,6 +697,7 @@ class BuildingPermitsCleaner(CleanerBase):
         row = self.rename_ward(row)
         row = self.add_census_tract_from_mar(
             row, column_name='MARADDRESSREPOSITORYID')
+        row = self.remove_escape_char(row)
         return row
 
     def rename_cluster(self, row):
@@ -680,6 +755,12 @@ class CrimeCleaner(CleanerBase):
 
 
 class DCTaxCleaner(CleanerBase):
+    def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
+        #Call the parent method and pass all the arguments as-is
+        super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+        self.add_proj_addre_lookup_from_mar()
+        self.add_ssl_nlihc_lookup()
+
     def clean(self, row, row_num = None):
         row = self.replace_nulls(row, null_values=['', '\\', None])
         row['OWNER_ADDRESS_CITYSTZIP'] = self.null_value                            \
@@ -687,6 +768,10 @@ class DCTaxCleaner(CleanerBase):
                                             else row['OWNER_ADDRESS_CITYSTZIP']
         row['VACANT_USE'] = self.convert_boolean(row['VACANT_USE'].capitalize())
         row = self.parse_dates(row)
+
+        nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'], row['SSL'])
+        row['nlihc_id'] = nlihc_id
+
         return row
 
 
@@ -737,6 +822,8 @@ class TopaCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='', engine=None):
         #Call the parent method and pass all the arguments as-is
         super().__init__(meta, manifest_row, cleaned_csv, removed_csv, engine)
+        self.add_proj_addre_lookup_from_mar()
+        self.add_ssl_nlihc_lookup()
 
     def clean(self,row,row_num=None):
         # 2015 dataset provided by Urban Institute as provided in S3 has errant '\'
@@ -745,19 +832,6 @@ class TopaCleaner(CleanerBase):
         nlihc_id = self.get_nlihc_id_if_exists(row['ADDRESS_ID'])
         row['nlihc_id'] = nlihc_id
         return row
-
-    def get_nlihc_id_if_exists(self, address_id):
-        "Checks for record in project table with matching MAR id."
-        query = "select nlihc_id from project where mar_id = '{}'".format(address_id)
-        if address_id == self.null_value:
-            return self.null_value
-        try:
-            result = self.engine.execute(query).fetchone()
-            if result:
-                return result[0]
-        except:
-            return self.null_value
-        return self.null_value
 
 
 class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
@@ -768,7 +842,11 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 
         return row
 
-
+class ProjectAddressCleaner(CleanerBase):
+    def clean(self,row,row_num=None):
+        row = self.replace_nulls(row)
+        return row
+        
 class ZillowCleaner(CleanerBase):
     """
     Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)

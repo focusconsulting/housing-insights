@@ -5,13 +5,14 @@ import requests
 from collections import OrderedDict
 import csv
 import datetime
-import logging
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 sys.path.append(PYTHON_PATH)
 
 from housinginsights.sources.base import BaseApiConn
+from housinginsights.tools.logger import HILogger
 
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class MarApiConn_2(BaseApiConn):
     """
@@ -21,7 +22,7 @@ class MarApiConn_2(BaseApiConn):
 
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
-    def __init__(self):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None):
         super().__init__(MarApiConn_2.BASEURL)
 
     def get_data(self, square, lot, suffix):
@@ -50,7 +51,8 @@ class MarApiConn_2(BaseApiConn):
         result = self.get('/findAddFromSSL2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
-            raise Exception(err.format(result.status_code))
+            logger.exception(err.format(result.status_code))
+            raise
 
         mar_data = result.json()
         if mar_data['returnDataset'] == {}:
@@ -84,7 +86,7 @@ class CamaApiConn(BaseApiConn):
         Return the count data (in dictionary form) to be processed into csv
         by get_csv() method.
         """
-        logging.info("Starting CAMA")
+        logger.info("Starting CAMA")
         
         mar_api = MarApiConn_2()
         result = self.get(urlpath='/c5fb3fbe4c694a59a6eef7bf5f8bc49a_25.geojson', params=None)
@@ -93,7 +95,7 @@ class CamaApiConn(BaseApiConn):
             err = "An error occurred during request: status {0}"
             raise Exception(err.format(result.status_code))
         cama_data = result.json()
-        logging.info("  Got cama_data. Length:{}".format(len(cama_data['features'])))
+        logger.info("  Got cama_data. Length:{}".format(len(cama_data['features'])))
 
         """
         Example of: anc_count = [OrderedDict([('zone_type', 'anc'), ('zone', 'ANC 2B'),
@@ -211,9 +213,5 @@ class CamaApiConn(BaseApiConn):
 if __name__ == '__main__':
 
     # Pushes everything from the logger to the command line output as well.
-    log_path = os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir,os.pardir,"logs","sources.log"))
-    logging.basicConfig(filename=log_path, level=logging.INFO)
-    logging.getLogger().addHandler(logging.StreamHandler())
-
     my_api = CamaApiConn()
     csvfile = my_api.get_csv()

@@ -3,6 +3,9 @@ from pprint import pprint
 
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.mar import MarResult, FIELDS
+from housinginsights.tools.logger import HILogger
+
+logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 
 class MarApiConn(BaseApiConn):
@@ -13,13 +16,47 @@ class MarApiConn(BaseApiConn):
 
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
-    def __init__(self):
-        super().__init__(MarApiConn.BASEURL)
+    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+        super().__init__(baseurl=MarApiConn.BASEURL)
+
+    
+    def find_addr_string(self, address,output_type=None, output_file=None):
+        """
+        Get information about an address by using a complete address string
+
+        :param address: Full address in approx. form of 123 Main St NW
+        :type  address: String.
+
+        :param output_type: deprecated, always returns json
+        :type  output_type: String.
+
+        :param output_file: Output file specified by user.
+        :type  output_file: String
+
+        :returns: Json output from the api.
+        :rtype: String
+        """
+        params = {
+            'f': 'json',
+            'address': address
+        }
+
+        result = self.get('/verifyDCAddressThrouString2', params=params)  
+        if result.status_code != 200:
+            err = "An error occurred during request: status {0}"
+            raise Exception(err.format(result.status_code))
+       
+        return result.json()
 
     def find_location(self, location, output_type=None,
                       output_file=None):
+
         """
         Get information on a location based on a simple query string.
+        Warning - can return unintuitive results due to overly loose
+        string matching logic in the MAR server. 
+
+        Recommend using find_addr_string instead
 
         :param location: Location query.
         :type  location: String.
@@ -40,6 +77,7 @@ class MarApiConn(BaseApiConn):
         result = self.get('/findLocation2', params=params)
         if result.status_code != 200:
             err = "An error occurred during request: status {0}"
+            logger.exception(err.format(result.status_code))
             raise Exception(err.format(result.status_code))
         if output_type == 'stdout':
             pprint(result.json())

@@ -37,7 +37,7 @@
                 </div>
                 <aside class="col-xs-12  col-md-4">
                     {% include recent-blogs.html %}
-                    {% assign posts = site.posts where: "author", page.author %}
+                    {% assign posts = site.posts | where: "author", page.author %}
                     {% if posts.size > 1 %} <!-- only show same-author list if there's more than one post by author -->
                     <h3>More from {{ page.author }}</h3>
                     <ul>

@@ -69,6 +69,9 @@ class HIMailer:
             all_recipients = set(self.recipients + self.cc_recipients)
             all_recipients = list(filter(None, all_recipients))
 
+        if not all_recipients:
+            raise ValueError("No recipients provided, unable to send email.")
+
         try:
             with smtplib.SMTP(host=self.host, port='587') as s:
                 s.ehlo()

@@ -31,8 +31,8 @@ class DCHousingApiConn(ProjectBaseApiConn):
     BASEURL = 'https://opendata.arcgis.com/datasets/'
     DATA_URL = '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
 
-    def __init__(self):
-        super().__init__(DCHousingApiConn.BASEURL)
+    def __init__(self, baseurl=None,proxies=None,database_choice=None):
+        super().__init__(baseurl=DCHousingApiConn.BASEURL, proxies=proxies,database_choice=database_choice)
 
         self._available_unique_data_ids = ['dchousing']
 
@@ -54,8 +54,8 @@ class DCHousingApiConn(ProjectBaseApiConn):
                 result = self.get(DCHousingApiConn.DATA_URL)
                 if result.status_code != 200:
                     err = "An error occurred during request: status {0}".format(result.status_code)
-                    logger.error(err)
-                    raise Exception(err)
+                    logger.exception(err)
+                    continue
 
                 content = result.text
 

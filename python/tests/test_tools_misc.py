@@ -4,17 +4,18 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir)))
-import housinginsights.ingestion.functions as utility_funs
+
+import housinginsights.tools.misc as misc_tools
 
 
-class FunctionsTestCase(unittest.TestCase):
+class ToolsMiscTestCase(unittest.TestCase):
     def test_get_unique_addresses_from_str(self):
         # Cases for complete address delimiters #
         # case 1: ';' delimiter separated addresses
         address_str = '1110 Aspen Street NW; 6650 Georgia Avenue NW; 6656 Georgia Avenue NW; others'
         expected_result = ['1110 Aspen Street NW', '6650 Georgia Avenue NW',
                            '6656 Georgia Avenue NW', 'others']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -23,7 +24,7 @@ class FunctionsTestCase(unittest.TestCase):
         # case 2: 'and' delimiter separated address
         address_str = '1110 Aspen Street NW and 6650 Georgia Avenue NW'
         expected_result = ['1110 Aspen Street NW', '6650 Georgia Avenue NW']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -33,7 +34,7 @@ class FunctionsTestCase(unittest.TestCase):
         # case 3: '&' delimiter separated address
         address_str = '1521 & 1523 16th Street NW'
         expected_result = ['1521 16th Street NW', '1523 16th Street NW']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -45,7 +46,7 @@ class FunctionsTestCase(unittest.TestCase):
         address_str = '1309-1313 E Street SE'
         expected_result = ['1309 E Street SE', '1311 E Street SE',
                            '1313 E Street SE']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -56,7 +57,7 @@ class FunctionsTestCase(unittest.TestCase):
         expected_result = ['4000 8th Street NE', '4002 8th Street NE',
                            '4004 8th Street NE', '4006 8th Street NE',
                            '4008 8th Street NE']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -67,7 +68,7 @@ class FunctionsTestCase(unittest.TestCase):
         expected_result = ['4000 8th Street NE', '4002 8th Street NE',
                            '4004 8th Street NE', '4001 8th Street NE',
                            '4003 8th Street NE', '4005 8th Street NE']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -78,7 +79,7 @@ class FunctionsTestCase(unittest.TestCase):
         address_str = '1521 & 1523 16th Street NW and 1531 Church Street NW'
         expected_result = ['1521 16th Street NW', '1523 16th Street NW',
                            '1531 Church Street NW']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -95,7 +96,7 @@ class FunctionsTestCase(unittest.TestCase):
                            '2424 14th Street NE',
                            '2426 14th Street NE',
                            '2428 14th Street NE']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -108,7 +109,7 @@ class FunctionsTestCase(unittest.TestCase):
                            '4281 6th Street SE', '4283 6th Street SE',
                            '4285 6th Street SE', '1523 16th Street NW',
                            '1521 16th Street NW', '1531 Church Street NW']
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         for address in result:
             self.assertTrue(address in expected_result,
@@ -117,7 +118,7 @@ class FunctionsTestCase(unittest.TestCase):
         # clean up needed #
         # case 8: single address passed
         address_str = '1110 Aspen Street NW'
-        result = utility_funs.get_unique_addresses_from_str(address_str)
+        result = misc_tools.get_unique_addresses_from_str(address_str)
         self.assertTrue(result, 'Failed - returned empty list')
         self.assertEqual(len(result), 1, 'Incorrect number of addresses')
         self.assertEqual(address_str, result.pop(),

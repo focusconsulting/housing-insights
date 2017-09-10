@@ -5,7 +5,7 @@
 
         init: function() { // as single page app, view init() functions should include only what should happen the first time
             // the view is loaded. things that need to happen every time the view is made active should be in
-            // the onReturn methods. nothing needs to be there so far for mapView, but buildingView for instance
+            // the onReturn methods. nothing needs to be there so far for mapView, but projectView for instance
             // should load the specific building info every time it's made active.
             var partialRequest = {
                 partial: this.el,
@@ -525,6 +525,9 @@
                 .attr('id', function() {
                     return layer.source + '-menu-item';
                 })
+                .attr('title', function(){
+                    return layer.display_text;
+                })
                 .classed('active', (layer.visibility === 'visible'))
                 .text(function() {
                     return layer.display_name;
@@ -558,9 +561,6 @@
                 .classed('active',false)
             d3.select('#' + data + '-menu-item')
                 .classed('active',true);
-            d3.select('#zone-choice-description')
-                .text(mapView.initialLayers.find(x => x.source === data).display_text)
-
         },
         updateZoneChoiceDisabling: function(msg,data) { // e.g. data = {overlay:'crime',grouping:'neighborhood_cluster',activeLayer:'neighborhood_cluster'}
             //Checks to see if the current overlay is different from previous overlay
@@ -856,7 +856,7 @@
                     .style("text-decoration", "underline") // to indicate it is a link
                     .on("click", function(e) {
                         setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
-                        setState('switchView', buildingView);
+                        setState('switchView', projectView);
                     });
 
                 //Add fields that don't have the field name displayed
@@ -998,11 +998,14 @@
                     }
                 })
                 .on('click', function(d) {
-                  console.log("here")
-                    mapView.map.flyTo({
-                        center: [d.properties.longitude, d.properties.latitude],
-                        zoom: 15
-                    });
+                    if ( d.properties.longitude !== null && d.properties.latitude !== null ) {
+                        mapView.map.flyTo({
+                            center: [d.properties.longitude, d.properties.latitude],
+                            zoom: 15
+                        });
+                    } else {
+                        mapView.alertNoLocationInfo()
+                    }
                     setState('previewBuilding', d);
                 })
 
@@ -1015,6 +1018,18 @@
                 .transition(t)
                 .remove();
 
+        },
+        alertNoLocationInfo: function(){
+            d3.select('#map-wrapper')
+              .append('div')
+              .classed('no-location-alert', true)
+              .style('opacity',0)
+              .text('No location available')
+              .transition().duration(1000)
+              .style('opacity',1)
+              .transition().duration(1000)
+              .style('opacity',0)
+              .remove();
         },
         addExportButton: function() {
           // Get the modal

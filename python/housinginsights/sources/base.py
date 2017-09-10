@@ -37,7 +37,7 @@ class BaseApiConn(object):
 
 
     """
-    def __init__(self, baseurl, proxies=None):
+    def __init__(self, baseurl=None, proxies=None, database_choice=None):
         """
         :param baseurl: URL endpoint of the API.
         :type baseurl: String.
@@ -46,6 +46,10 @@ class BaseApiConn(object):
                         Example: {'http': 'socks5://user:pass@someip:port',
                                   'https': 'socks5://user:pass@someip:port'}
         :type  proxies: dict of String.
+
+        :param database_choice: String containing the name of the database to connect
+            when existing data needs to be used. String should match the one found in
+            secrets.json. Optional - not used by BaseApiConn, but sometimes used by others. 
         """
         self.session = requests.Session()
         self.baseurl = baseurl
@@ -63,12 +67,14 @@ class BaseApiConn(object):
         for u in self._available_unique_data_ids:
             base = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir,os.pardir,os.pardir))
-            api_location = 'data/raw/apis'
+            api_location = 'data/raw/_downloads'
             filename = u + ".csv"
             d = datetime.now().strftime('%Y%m%d')
             path = os.path.join(base,api_location,d,filename)
             paths[u] = path
 
+            #So output methods don't need to deal with missing dirs
+            self.create_directory_if_missing(path)
         return paths
 
     def get(self, urlpath, params=None, **kwargs):
@@ -98,8 +104,7 @@ class BaseApiConn(object):
         else:
             url = urlpath
 
-        logger.debug("Url requested: %s", url)
-        logger.debug("params: %s", params)
+        logger.debug("Requested URL %s with params %s", url, params)
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):
