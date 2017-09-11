@@ -129,10 +129,12 @@ var filterView = {
         //Add the element and set to default value
         this.container = document.createElement('div');
         this.container.classList.add('nullsToggleContainer');
+
+        //Add the tooltip on hover
+        var tooltipText = 'Some projects might be missing data for this field. Check this box to include projects with missing data in the map view.';
         this.container.setAttribute('data-toggle', 'tooltip');
         this.container.setAttribute('data-placement', 'top');
-        this.container.setAttribute('title', 'Some projects might be missing data for this field. Do you wish to include them in the map view?');
-
+        this.container.setAttribute('title', tooltipText);
         $(this.container).tooltip();
 
         this.element = document.createElement('input');
