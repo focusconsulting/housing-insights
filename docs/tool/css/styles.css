@@ -155,10 +155,13 @@ button.nullValuesToggleSubmit::before {
 #project-preview-group{
     flex: 0 1 auto;
     height: 350px;
+    padding-left: 16px;
+    padding-top: 10px;
 }
 #projects-list-group{
     flex: 1 1 auto; /*makes the list expand to fill rest of available space, while both preview and list shrink if needed*/
     height: 350px; /*need some basis for flexbox to not oversquish the other container*/
+    padding: 0;
 }
 
 .scroll-y {
@@ -420,6 +423,7 @@ Others are working correctly.
     font-weight:bold;
     font-size:1.2em;
     cursor: pointer;
+    color: #bd3621;
 }
 #projects-list>div, #building-view-segments div {
     overflow: hidden;
@@ -428,7 +432,7 @@ Others are working correctly.
     margin-bottom: 0;
     opacity: 0;
     cursor: pointer;
-    border-bottom: 1px solid gray;
+    position: relative;
 
 }
 #projects-list>div .project-title {
@@ -440,9 +444,18 @@ Others are working correctly.
     background-color: #ddebff;
 }
 
+
+#projects-list>div.projects-list-selected:before {
+    content: '\025B2';
+    color: #bd3621;
+    position: absolute;
+    left: 1px;
+    top: 4px;
+}
+
 #projects-list>div.enter, #projects-list>div.update,
 #building-view-segments div.enter {
-    padding: 5px 4px;
+    padding: 5px 4px 5px 16px;
     max-height: 100px;
     opacity: 1;
 }
