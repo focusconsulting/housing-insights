@@ -129,6 +129,14 @@ var filterView = {
         //Add the element and set to default value
         this.container = document.createElement('div');
         this.container.classList.add('nullsToggleContainer');
+
+        //Add the tooltip on hover
+        var tooltipText = 'Some projects might be missing data for this field. Check this box to include projects with missing data in the map view.';
+        this.container.setAttribute('data-toggle', 'tooltip');
+        this.container.setAttribute('data-placement', 'top');
+        this.container.setAttribute('title', tooltipText);
+        $(this.container).tooltip();
+
         this.element = document.createElement('input');
         this.element.setAttribute('type', 'checkbox');
         this.element.setAttribute('value', 'showNulls-' + component.source);
@@ -142,7 +150,6 @@ var filterView = {
             this.container.appendChild(this.element);
             this.container.appendChild(txt);
         }
-
     },
     filterInputs: {}, // adding filterInputs object so we can access them later -JO //TODO should switch to filterControls instead -NH
     dateInputs: {}, // same for date inputs - JO //TODO same -NH
@@ -412,6 +419,7 @@ var filterView = {
                 [returnVals['min']['min'], returnVals['max']['max']]
             );
 
+            ths.uncheckNullToggleOnInitialFilterSet();
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
             ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
         }
@@ -439,6 +447,7 @@ var filterView = {
                 var min = unencoded[0]
                 var max = unencoded[1]
                 ths.textBoxes.setValues([['min', min]],[['max', max]]);
+                ths.uncheckNullToggleOnInitialFilterSet();
 
                 //Set the filterValues state
                 if(doesItSetState){
@@ -455,6 +464,16 @@ var filterView = {
                 ths.clear();
             } 
         }
+
+        this.uncheckNullToggleOnInitialFilterSet = function(){
+            var filterValues = filterUtil.getFilterValues();
+
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1 || filterValues[component.source][0].length == 0) {
+                console.log('Unchecking the null toggle for ', component.source);
+                ths.toggle.element.checked = false;
+            }
+        };
+
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
         this.slider.noUiSlider.on('change', currentSliderCallback);
@@ -607,7 +626,9 @@ var filterView = {
                         ['day', newMaxDate.getDate()]
                     ]
                 );
-                
+
+                ths.uncheckNullToggleOnInitialFilterSet();
+
                 if(doesItSetState){
                     ths.toggle.element.checked
                     setState(specific_state_code,[newMinDate, newMaxDate, ths.toggle.element.checked]);
@@ -650,6 +671,7 @@ var filterView = {
                 [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
             );
 
+            ths.uncheckNullToggleOnInitialFilterSet();
             setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
             ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
         }
@@ -704,6 +726,14 @@ var filterView = {
             } 
         }
 
+        this.uncheckNullToggleOnInitialFilterSet = function(){
+            var filterValues = filterUtil.getFilterValues();
+
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1 || filterValues[component.source][0].length == 0) {
+                console.log('Unchecking the null toggle for ', component.source);
+                ths.toggle.element.checked = false;
+            }
+        };
     },
     setupFilter: function(c){
     //This function does all the stuff needed for each filter regardless of type. 
@@ -952,19 +982,18 @@ var filterView = {
                   .classed("ui styled fluid accordion", true)   //semantic-ui styling
 
         $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
-            var difference = $( this ).offset().top + $( this ).height() - $('#filters').offset().top - $('#filters').height(); 
-            /* for debug:
-            console.log($( this ).offset().top + $( this ).height());
+            var difference = $( this ).offset().top - $('#filter-components').offset().top; 
+            
+            /*for debug
+            console.log($( this ).offset().top);
             console.log('vs');
-            console.log($('#filters').offset().top + $('#filters').height() );
+            console.log($('#filter-components').offset().top);
             console.log(difference);
             */
-            if ( $( this ).offset().top + $( this ).height() > $('#filters').offset().top + $('#filters').height() ) { 
               // if the accordion content extend below the bounds of the #filters container
-                $('#filters').animate({
-                    scrollTop: $( '#filters' ).scrollTop() + difference + 30
-                }, 500)
-            }
+            $('#filter-components').animate({
+                scrollTop: $( '#filter-components' ).scrollTop() + difference - 29
+            }, 500)
         }});
 
         //Add components to the navigation using the appropriate component type
@@ -1084,7 +1113,7 @@ var filterView = {
     },
     clearAllButton: {
         init: function(){
-            var thisButton = this;
+
 
             this.pill = document.createElement('div');
             this.pill.id = 'clearFiltersPillbox';
@@ -1098,10 +1127,26 @@ var filterView = {
             this.pill.addEventListener('click', function(){
                 filterView.clearAllFilters();
             });
+            this.appendLabelPill()
+        },
+        appendLabelPill: function() {
+            this.labelPill = document.createElement('div');
+            
+            this.labelPill.classList.add('label-all','ui','label');
+
+            this.site = document.getElementById('clear-pillbox-holder');
+
+            this.site.insertBefore(this.labelPill, this.site.firstChild);
+            this.labelPill.textContent = 'Active Filters';
         },
         site: undefined,
         tearDown: function(){
-            d3.select('#'+this.pill.id)
+            d3.select('.clear-all')
+                .transition()
+                    .duration(750)
+                    .style("opacity",0)
+                    .remove();
+            d3.select('.label-all')
                 .transition()
                     .duration(750)
                     .style("opacity",0)
@@ -1127,7 +1172,7 @@ var filterView = {
                 activeFilterControls.push(control)
             };
         }
-
+        setState('numberOfFilters', activeFilterControls.length);
         var nullsShown = filterUtil.getNullsShown();
         Object.keys(nullsShown).forEach(function(key){
             var control = filterView.filterControls.find(function(obj){
@@ -1143,8 +1188,15 @@ var filterView = {
         });
         
         //Use d3 to bind the list of control objects to our html pillboxes
-        var allPills = d3.select('#clear-pillbox-holder')
-                        .selectAll('.clear-single')
+        var holder = d3.select('#clear-pillbox-holder')
+                        .classed('force-hover', true);
+
+        setTimeout(function(){
+            holder.classed('force-hover', false);
+        }, 2000);
+
+
+        var allPills = holder.selectAll('.clear-single')
                         .data(activeFilterControls, function(d){
                             return d.component.source;
                         })
@@ -1191,11 +1243,11 @@ var filterView = {
                 if ( !$accordion.hasClass('active') ){
                     $accordion.click();
                 } else {
-                    var $filterContent = $('#filter-content-' + d.component.source);
-                    var difference = $filterContent.offset().top + $filterContent.height() - $('#filters').offset().top - $('#filters').height(); 
-                    $('#filters').animate({
-                        scrollTop: $( '#filters' ).scrollTop() + difference + 30
-                    }, 500);
+                    
+                    var difference = $accordion.offset().top - $('#filter-components').offset().top; 
+                    $('#filter-components').animate({
+                        scrollTop: $( '#filter-components' ).scrollTop() + difference
+                    }, 500)
                 }
             })
 
@@ -1203,7 +1255,6 @@ var filterView = {
             .append('i')
             .classed("delete icon",true)
             .on("click", function(d) {
-                d3.event.stopPropagation();
                 d.clear();
             })
                  

@@ -17,7 +17,7 @@ If you are adding new data sources or writing code for our API, we want you to d
 
 Since installing each of these pieces of software and configuring their settings to talk to each other can be difficult on different computers, Docker provides a way for us to do the configuration once and then you can run our pre-configured combination. Docker creates a virtual machine - this is a virtual computer running Linux, so any software you run in the virtual machine thinks it has been installed on a Linux computer that is configured exactly the same as the one we used to make the setup files. While there are sometimes issues setting up Docker, once you have it installed properly it makes it much faster to start working with a new software stack.
 
-We have a Docker setup for all 4 of these components. Below the 'Full Docker' instructions describe how to use these 4 together. Optionally, you can also use your local installation of Python.
+We have a Docker setup for all 4 of these components.
 
 If you have problems installing or setting up Docker, you can also configure Postgres, Jekyll, and a database client independently - ask for help if this is the case.
 
@@ -30,7 +30,7 @@ This file stores configuration information, such as the url and password to our 
 * make a copy of the file `secrets.example.json`.
 * Rename this copy to `secrets.json`.
 
-This version only includes connection information for a local copy of the database. Later you may need the real version (for example, if you are updating our production server). Ask a project lead when you run into issues.
+This version only includes connection information for a local copy of the database. Later you may need the complete version (for example, if you are updating our production server). Ask a project lead when you run into issues.
 
 ## 1) Running Docker
 
@@ -38,41 +38,6 @@ This version only includes connection information for a local copy of the databa
 
 Start by installing Docker. If you're on Windows, [Docker Toolbox](https://www.docker.com/products/docker-toolbox) is best. Mac is better off using the native [Docker for Mac](https://docs.docker.com/docker-for-mac/install/) and Linux the [Docker for Linux](https://www.docker.com/community-edition)
 
-There are different ways to run our setup, depending on your preference.  Depending on how you chose to run the code, the connection string to the `docker_database` changes.  The easiest method is to run using the "Full Docker Compose" option, but the others will work as well.
-
-**Full Docker Compose (docker Python)**
-
-```
-    "docker_database": {
-        "connect_str": "postgresql://codefordc:codefordc@postgres:5432/housinginsights_docker"
-    },
-```
-
-**Docker Machine (local Python)**
-
-```
-$docker-machine ip
-```
-
-This will print the IP address of your local Docker instance. Open up `/python/housinginsights/secrets.json` and make sure you have a couple lines like this:
-
-```
-    "docker_database": {
-        "connect_str": "postgresql://codefordc:codefordc@192.168.99.100:5432/housinginsights_docker"
-    },
-```
-
-Substitute your IP address for the one that says `192.168.99.100` in this example (but keep `:5432` at the end).
-
-**Docker for Mac (local Python)**
-
-```
-    "docker_database": {
-        "connect_str": "postgresql://codefordc:codefordc@localhost:5432/housinginsights_docker"
-    },
-```
-
-**Troubleshooting note**: If you already have Postgres installed on your machine, it may be using the 5432 port. If you get an error message saying something related to a port in use, you'll need to change the port both here AND in the docker-compose.yml file.
 
 ### 1b) Day-to-day use
 
@@ -81,7 +46,7 @@ When you start each work session, navigate into wherever you keep your housing-i
 ```
 cd ..         //move up a level
 cd myfolder   //move down a level into "myfolder"
-ls            //lists all files and folders in your current directory
+ls            //lists all files and folders in your current directory.
 ```
 
 In your housing-insights repository folder, run this command:
@@ -89,14 +54,6 @@ In your housing-insights repository folder, run this command:
 ```
 docker-compose up -d
 ```
-<div class="panel panel-default">
-    <div class="panel-heading">
-        Changes as of May 2017
-    </div>
-    <div class="panel-body">
-    Note the addition of the -d in the command above, which is different than previous instructions. This makes the output of docker-compose up happen in the background, so you can use the command line for other things (like running Python commands).
-    </div>
-</div>
 
 Once it starts up (might take a moment), you can go to these web addresses:
 
@@ -104,17 +61,25 @@ Once it starts up (might take a moment), you can go to these web addresses:
 * `<yourip>:4000`: a local copy of our website, housinginsights.org. If you edit any file in the housing-insights/docs folder and save it, the website will be regenerated and you can see the changes when you reload the page.
 * `<yourip>:5432`: This one does not work in a browser, but you can use this IP address and port to connect to your local Docker database via your preferred SQL client ([Valentina Studio](https://valentina-db.com/en/get-free-valentina-studio) is a good one). This can sometimes be easier to use than the web version at 8081.
 
-You can press `ctrl+c` or `command+c` at any time to end the process. Give it about 10 seconds to shut down, if it hasn't shut down yet you can hit `ctrl+c` again to force it.
+Use `docker-compose stop` to terminate the processes. 
+
+### 1c) Updating your docker containers
+Sometimes if we make updates to the required Python packages, or if one of your containers gets corrupted, you will need to build new copies of the Docker containers. When you run `docker-compose up -d` the first time, new container copies are built - however, when you run it again, it uses the old copies. To force docker to build fresh copies, run these commands:
+
+```
+$ docker-compose down
+$ docker-compose build
+$ docker-compose up -d
+```
+
+After the final command you should see additional output saying that Docker is downloading and building each of the 4 containers. 
+
 
 ## 2) Add data to your local database copy
 
 If you've got Docker running, you should be able to see your database in the web browser at port `8081`. But there's nothing there!
 
-### 2a) One time setup
-
-Here again there is the option to run python inside the `docker-compose` environment or using your local python setup.  The easiest method is to run using the first option below, but the others will work as well.
-
-**Full Docker Compose (docker Python)**
+### Loading Data
 
 1)  `docker-compose ps` to see the containers that are running.  One of them should be **housinginsights_sandbox_1**.  This is the container that is running the miniconda3 python environment.  There is no need to activate or deactivate an virtualenv since it is already sourced.
 
@@ -124,7 +89,7 @@ Here again there is the option to run python inside the `docker-compose` environ
 
 4) `cd /repo/python/scripts` to get to the scripts directory.
 
-5) `python load_data.py docker` to load the data (or, `python load_data.py docker -s` for just the sample data).
+5) `python load_data.py docker` to load the data
 
 Alternatively, you can use this one liner to load in the data:
 
@@ -132,31 +97,19 @@ Alternatively, you can use this one liner to load in the data:
 docker-compose exec sandbox bash -c 'cd /repo/python/scripts && source activate /opt/conda/envs/housing-insights/ && python load_data.py docker'
 ```
 
-**Using your local Conda Python installation**
 
-1) Make sure you have Python installed (we're currently using Python 3.5). We recommend [Miniconda](https://conda.io/miniconda.html). Select the Python 3.6 version - you can use Miniconda to install any other Python version.
+You can also update just some parts of the data:
 
-2) Open a regular command line (not Docker) and navigate to `path\to\housing-insights\python`.
+```
+# Deletes all rows with the id 'prescat_project' and then loads new copies of this data from the file listed in manifest.csv
+$ python load_data.py docker --update-only prescat_project
 
-3) Run `conda env create`. This will create a virtual environment using the `environment.yml` file. (If you're not using Anaconda/Miniconda, we try to keep both requirements.txt and environment.yml in sync, but let us know if you have any problems)
+# Delete the whole project table, then add the prescat_project and dchousing_project data sources (useful when new columns are added)
+$ python load_data.py docker --remove-tables project --update-only prescat_project dchousing_project
 
+# Don't load any new data, but recalculate fields in zone_facts and project tables. 
+$ python load_data.py docker --recalculate-only
 
-### 2b) Regular use
+```
 
-**Full Docker Compose (docker Python)**
-
-1)  `docker-compose exec sandbox bash` to get into the sandbox.
-
-2)  `cd /repo` to get into the base directory.  You can run your code from here.
-
-**Using your local Conda Python installation**
-
-Open a regular command prompt in a new window/tab (the command prompt from 1b) should still be running in the background).
-
-Any time you need to recreate the database:
-
-1) Make sure you're using the virtual environment: `activate housing-insights`
-
-2) Navigate to `path\to\housing-insights\python\scripts`
-
-3) On the command line, run `python load_data.py docker rebuild sample`. This will use the docker version of the database (frome secrets.json), first delete any data in the repository, and then re-load a set of sample data into the repository. If you want to rebuild the data with actual data (i.e. what is in manifest.csv instead of manifest.csv), run the same command without 'sample' at the end.
+Typically, the data you've loaded previously should still be available after shutting down and starting up Docker again. To check, use your database client to view the contents of the Docker database (for example, visiting localhost:8081 and looking at the list of tables on the left). 

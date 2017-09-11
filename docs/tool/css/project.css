@@ -1,5 +1,48 @@
+#project-view h2 {
+	font-size:20px;
+	margin-top:10px;
+}
+
+#project-view h4 {
+	font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 0px;
+    color: rgb(54,82,124);
+}
+
+.centered {
+	display: block;
+	margin: auto;
+}
+
+.centered h1,
+.centered h2,
+.centered h3,
+.centered h4,
+.centered p {
+	text-align:center;
+}
+
+.centered img {
+	display: block;
+	margin: auto;
+}
+
+
 .mapbox-portal{
   min-height: 300px;
+}
+
+#building-view-segments{
+	position: fixed;
+	height: 100%;
+	width: 20%;
+	max-width: 200px;
+	top: 80px;
+}
+
+#building-view-segments div{
+	padding: 5px 10px 5px 10px !important;
 }
 
 .building-info-block {
@@ -83,3 +126,28 @@
 	border-bottom: 1em solid #555555;
 }
 
+
+
+.ui.segment {
+	font-size: 13px;
+}
+.project-data-table {
+
+}
+
+.project-data-table td {
+	padding-right:10px;
+}
+
+.project-data-table td.title,
+.project-data-table thead td {
+	font-weight:bold;
+}
+
+.project-data-table td.value {
+	font-weight:normal;
+}
+
+.ui.attached.header {
+	background-color: rgb(237, 241, 247);
+}

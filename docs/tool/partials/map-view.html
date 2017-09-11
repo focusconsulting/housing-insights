@@ -21,6 +21,7 @@
 
     <div id="outer-map-wrapper">
         <div id="sidebar-left" class="sidebar left">
+        <div id="clear-pillbox-holder"></div>
             <button class="sidebar-tab"><div class="triangle right"></div></button>
             <div class="sidebar-inner-wrapper">
 
@@ -41,12 +42,9 @@
                 <div id="filters" class="sub-nav-container">
                     <div id="zone-choice-header" class="header">1) Select Zone Type</div>
                     <div id="layer-menu"></div>
-                    <div class="static-content">
-                        <p id="zone-choice-description">Select a zone type to see a description of that zone.</p>
-                    </div>
                     <div id="data-choice-header" class="header">2) Data choices</div>
                     <div id="filter-components">
-                        <div id="clear-pillbox-holder"></div><!--will be style positioned downwards-->
+                        
                     </div>
                 </div>
 
@@ -93,9 +91,6 @@
 
                 </div>
                 <div id="buildings" class="sub-nav-container">
-                    <div class="export-button">
-                      <button id="csvExport" type="button" name="csv-export">Export CSV</button>
-                    </div>
                     <div class="sub-nav-heading">
                         <h1>Your filters match <span class="matching-count matching">0</span> / <span class="total-count total">0</span> projects.</h1>
                     </div>
@@ -106,9 +101,12 @@
                             <div class="preview-contents">There is no project selected</div>
                         </div>
                     </div>
-                    <div id="" class="header">Matching Projects</div>
+                    <div id="" class="header">
+                      Matching Projects
+                      <button id="csvExportButton" type="button" name="csv-export" data-toggle="modal" data-target="#exportDataModal">Export CSV</button> 
+                    </div>
                     <div id="projects-list-group" class="sub-nav-group">
-                        <div id="projects-list">  
+                        <div id="projects-list">
                         </div>
                     </div>
                 </div>
@@ -119,9 +117,9 @@
             <div id="map"></div>
             <div id="category-legend" class="legend">
                 <div id="legend-items">
-                    <div><span class="square" style="background-color: rgba(253, 141, 60,0.5)"></span>Matches filters</div>
-                    <div><span class="square" style="background-color: #aaa"></span>Does not match filters</div>
-                    <div><span style="background-color: rgba(170,170,170,0.5); border: 2px solid #767676;"></span> or <span style="background-color: rgba(253, 141, 60,0.5); border: 2px solid #fc4203;"></span> Change since last filter</div>
+                    <div><span style="background-color: rgba(253, 141, 60,0.5)"></span>Matches filters</div>
+                    <div><span style="background-color: #aaa"></span>Does not match filters</div>
+                    <div><span style="border: 2px solid #fc4203;"></span>Selected building</div>
                 </div>
             </div>
 

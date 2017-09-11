@@ -12,7 +12,9 @@
 
 #filter-components {
   padding-bottom: 150px;
-  
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .filter-group {
@@ -81,4 +83,29 @@
     color: rgba(234, 100, 2, 1);
   }
 
-/**/
+/*Styles for null data toggle tooltip*/
+.filter {
+    position: relative;
+}
+
+.filter .tooltip {
+    position: absolute;
+    margin-left: -15px;
+    text-transform: initial;
+    line-height: 1.8em;
+}
+
+.filter .tooltip.top {
+    padding: 0;
+}
+
+.filter .tooltip.top .tooltip-arrow {
+    left: 19px;
+    bottom: -5px;
+}
+
+.filter .tooltip .tooltip-inner {
+    text-align: start;
+    max-width: 245px;
+    min-height: 75px;
+}

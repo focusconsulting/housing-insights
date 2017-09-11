@@ -37,7 +37,7 @@ class BaseApiConn(object):
 
 
     """
-    def __init__(self, baseurl=None, proxies=None, database_choice=None):
+    def __init__(self, baseurl=None, proxies=None, database_choice=None, debug=False):
         """
         :param baseurl: URL endpoint of the API.
         :type baseurl: String.
@@ -54,9 +54,12 @@ class BaseApiConn(object):
         self.session = requests.Session()
         self.baseurl = baseurl
         self.proxies = proxies
-
+        self.debug = debug
+        
         #A list of strings; this should be defined in the child class
         self._available_unique_data_ids = None
+        
+
 
     @property
     def output_paths(self):
@@ -67,7 +70,7 @@ class BaseApiConn(object):
         for u in self._available_unique_data_ids:
             base = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir,os.pardir,os.pardir))
-            api_location = 'data/raw/apis'
+            api_location = 'data/raw/_downloads'
             filename = u + ".csv"
             d = datetime.now().strftime('%Y%m%d')
             path = os.path.join(base,api_location,d,filename)
@@ -104,8 +107,7 @@ class BaseApiConn(object):
         else:
             url = urlpath
 
-        logger.debug("Url requested: %s", url)
-        logger.debug("params: %s", params)
+        logger.debug("Requested URL %s with params %s", url, params)
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):

@@ -174,7 +174,7 @@ class HISql(object):
 
         insert_command = "INSERT INTO manifest {} VALUES {};".format(
             columns_string, values_string)
-        #print(insert_command)
+        
         conn.execute(insert_command)
 
     def create_table_if_necessary(self, table=None):

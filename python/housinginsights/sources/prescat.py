@@ -26,12 +26,12 @@ class PrescatApiConn(ProjectBaseApiConn):
     storage location that admins can put prescat files
     '''
 
-    def __init__(self, baseurl=None,proxies=None,database_choice=None):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None, debug=False):
         
         if baseurl==None:
             baseurl=os.path.abspath("../../../data/raw/preservation_catalog/20170724/Project.csv")
 
-        super().__init__(baseurl=baseurl, proxies=proxies, database_choice=database_choice)
+        super().__init__(baseurl=baseurl, proxies=proxies, database_choice=database_choice, debug=debug)
 
         self._available_unique_data_ids = ['prescat']
 
@@ -51,8 +51,10 @@ class PrescatApiConn(ProjectBaseApiConn):
 
                 folder = os.path.dirname(self.output_paths[uid])
                 addre_path = os.path.join(folder, "{}_addre.csv".format(uid))
-                print(self.baseurl)
-                self.create_address_csv_prescat(uid,proj_path=self.baseurl, addre_path=addre_path)
+
+                #This is no longer used because we now have the proj_addre table from the prescat directly. 
+                #TODO remove this when confirmed that it is no longer needed. 
+                #self.create_address_csv_prescat(uid,proj_path=self.baseurl, addre_path=addre_path)
 
 if __name__ == '__main__':
     

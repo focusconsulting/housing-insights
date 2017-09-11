@@ -77,33 +77,37 @@ var resultsView = {
 
         //Note, accessing data collection directly to avoid aysnc nature of callback - we know this data set has been loaded because it's required for this function to be called
         var raw_projects = model.dataCollection['raw_project'].objects; 
-
         //Update totals. TODO we only need to do this once, so we should move this elsewhere when we refactor this so it runs only on load. 
         for (var i = 0; i < raw_projects.length; i++) {
-            var ward = raw_projects[i]['ward']
-            var proj_units_assist_max = raw_projects[i]['proj_units_assist_max']
+            if ( raw_projects[i]['ward'] !== null ) {
+                var ward = raw_projects[i]['ward']
+                var proj_units_assist_max = raw_projects[i]['proj_units_assist_max']
 
-            var statEntry = resultsView.filteredStats['ward'].find(x => x.group === ward)
-                statEntry.total_projects++
-                statEntry.total_proj_units_assist_max = statEntry.total_proj_units_assist_max + proj_units_assist_max
+                var statEntry = resultsView.filteredStats['ward'].find(x => x.group === ward)
+                    statEntry.total_projects++
+                    statEntry.total_proj_units_assist_max = !isNaN(+proj_units_assist_max) ? statEntry.total_proj_units_assist_max + proj_units_assist_max : statEntry.total_proj_units_assist_max;
+                
+            } // total of total.projects = 931 i.e.  103 projects have null ward
         }
 
 
         //Update stats for each filtered project
         for (var i = 0; i < resultsView.filteredProjects.length; i++) {
-            var ward = resultsView.filteredProjects[i]['ward']
-            var proj_units_assist_max = resultsView.filteredProjects[i]['proj_units_assist_max']
+                var ward = resultsView.filteredProjects[i]['ward']
+                if ( ward !== null ){
+                    var proj_units_assist_max = resultsView.filteredProjects[i]['proj_units_assist_max']
 
-            var statEntry = resultsView.filteredStats['ward'].find(x => x.group === ward)
-                statEntry.projects++
-                statEntry.proj_units_assist_max = statEntry.proj_units_assist_max + proj_units_assist_max
+                    var statEntry = resultsView.filteredStats['ward'].find(x => x.group === ward)
+                        statEntry.projects++
+                        statEntry.proj_units_assist_max = statEntry.proj_units_assist_max + proj_units_assist_max
+                }
         }
 
         //Calculate percents
         for (var i = 0; i < resultsView.filteredStats['ward'].length; i++) {
                 var d = resultsView.filteredStats['ward'][i]
                 d.percent_projects = d['projects'] / d['total_projects']  //TODO protect against div0 error?
-                d.percent_proj_units_assist_max = d['proj_units_assist_max'] / d ['total_proj_units_assist_max']
+                d.percent_proj_units_assist_max = d['proj_units_assist_max'] / d['total_proj_units_assist_max']
             };  
 
         setState('filteredStatsAvailable',resultsView.filteredStats['ward']);
