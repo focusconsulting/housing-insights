@@ -208,7 +208,7 @@ button.nullValuesToggleSubmit::before {
     display: block;
     left: 100%;
     height: 40px;
-    width: 200px;
+    width: 250px;
 
 }
 
@@ -550,38 +550,16 @@ Others are working correctly.
 
 
 #layer-menu-buttons button {
-        border: 5px solid #fff;
+    border: 5px solid #fff;
     padding: 9px 3px;
+    font-size: 11px;
 }
 
-/*
-Switched to semantic-ui buttons instead
-#layer-menu, #overlay-menu, #temp-filter-menu {
-    background: inherit;
-}
-#layer-menu, #overlay-menu {
-    width: 100%;
-}
-#layer-menu a, #overlay-menu a {
-    font-size: 13px;
-    color: #404040;
-    display: block;
-    margin: 0;
-    padding: 0;
-    padding: 10px;
-    text-decoration: none;
-    text-align: center;
-}
-a.unavailable {
-    background-color: rgb(220, 220, 220);
-    color: rgb(200, 200, 200);
-    pointer-events: none;
-}
-a.active {
-    background-color: #b3cde3;
-}
+#projects-list p,
+#filter-components p {
+    font-size:14px;
 
-*/
+}
 
 .no-location-alert {
     position: absolute;
