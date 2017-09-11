@@ -984,11 +984,12 @@ var filterView = {
         $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
             var difference = $( this ).offset().top - $('#filter-components').offset().top; 
             
+            /*for debug
             console.log($( this ).offset().top);
             console.log('vs');
             console.log($('#filter-components').offset().top);
             console.log(difference);
-            
+            */
               // if the accordion content extend below the bounds of the #filters container
             $('#filter-components').animate({
                 scrollTop: $( '#filter-components' ).scrollTop() + difference - 29
@@ -1136,7 +1137,7 @@ var filterView = {
             this.site = document.getElementById('clear-pillbox-holder');
 
             this.site.insertBefore(this.labelPill, this.site.firstChild);
-            this.labelPill.textContent = 'Filtered';
+            this.labelPill.textContent = 'Active Filters';
         },
         site: undefined,
         tearDown: function(){
