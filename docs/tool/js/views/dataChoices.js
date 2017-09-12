@@ -4,7 +4,11 @@
 
 // "short_names" below are the abbreviations for use in the URL encoding of the state of filters. should add unit test to
 // ensure no duplicates. -JO
+/*
 
+
+
+*/
  "use strict";
  var dataChoices = [
         //TODO this hard coded array of objects is just a temporary method.
@@ -65,9 +69,9 @@
             "data_level": "project",
             "short_name": "pa"
         },
-        {   "source": "hud_own_type",
-            "display_name":"Ownership Type (per HUD)",
-            "display_text":"This field is only available for buildings participating in HUD programs; others are listed as 'Unknown'",
+        {   "source": "proj_own_type",
+            "display_name":"Ownership Type",
+            "display_text":"This field is currenly only available for projects that come from the Preservation Catalog",
             "component_type": "categorical",
             "data_type":"text",
             "data_level": "project",
@@ -75,6 +79,15 @@
         },
 
         {   "source": "portfolio",
+            "display_name": "Subsidy Program",
+            "display_text": "Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list",
+            "component_type":"categorical",
+            "data_type": "text",
+            "data_level": "project",
+            "short_name": "sp"
+        },
+        {
+            "source": "portfolio",
             "display_name": "Subsidy Program",
             "display_text": "Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list",
             "component_type":"categorical",
@@ -98,6 +111,48 @@
             "data_level": "project",
             "short_name": "pe"
         },
+        {   "source":"topa_count",
+            "display_name":"Number of TOPA notices",
+            "display_text": "Quanitity of TOPA records identified as associated with the property. Most useful to distinguish properties that do or do not have relevant TOPA notices.",
+            "component_type": "continuous",
+            "data_type": "integer",
+            "data_level": "project",
+            "short_name": "topac"
+        },
+        
+        {   "source":"most_recent_topa_date",
+            "display_name":"Most Recent TOPA Date",
+            "display_text": "Date of the most recent TOPA notice associated with the property, if there is one.",
+            "component_type": "date",
+            "data_type": "timestamp",
+            "data_level": "project",
+            "short_name": "topad"
+        },
+        {   "source":"most_recent_reac_score_num",
+            "display_name":"Most Recent REAC Score",
+            "display_text": "The numeric value of the most recent REAC inspection to occur at the property, if a REAC inspection exists. See the specific property page for full inspection history. ",
+            "component_type": "continuous",
+            "data_type": "integer",
+            "data_level": "project",
+            "short_name": "reacn"
+        },
+        {   "source":"most_recent_reac_score_date",
+            "display_name":"Most Recent REAC Date",
+            "display_text": "Date of the most recent REAC inspection to occur at the property, if a REAC inspection exists. See the specific property page for full inspection history.",
+            "component_type": "date",
+            "data_type": "timestamp",
+            "data_level": "project",
+            "short_name": "reacd"
+        },
+        {   "source":"sum_appraised_value_current_total",
+            "display_name":"Project Taxable Value",
+            "display_text": "This field is the sum of the current appraised value in the DC property tax database. When we are not able to accurately capture all the individual street addresses associated with a project, this field can sometimes undercount the full value.",
+            "component_type": "continuous",
+            "data_type": "integer",
+            "data_level": "project",
+            "short_name": "txtot"
+        },
+        
 
 
 //////////////////////////////////////////////////
@@ -253,5 +308,5 @@
             "style": "number",
             "short_name": "rnt"
         }
-       
     ];
+
