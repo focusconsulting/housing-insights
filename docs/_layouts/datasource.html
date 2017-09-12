@@ -36,11 +36,9 @@
 
 	  			<h2>Data Fields</h2>
 	  			<p><i>This section will be pulled in automatically from meta.json. Make any appropriate edits that are specific to individual fields of the table there.</i></p>
-
-	  			<p>This feature has not been implemented yet</p>
-	  			<!--TODO this is where we should pull in the appropriate meta.json data for each of the fields. 
-	  			Methodology here: https://jekyllrb.com/docs/datafiles/ -->
-
+					<!-- The inner div should not display. It's used to grab the table name from Jekyll. -->
+				<div id="datasource-table"><div style="display:none" id="{{page.tablename}}"></div></div>
+	  			<!-- Methodology here: https://jekyllrb.com/docs/datafiles/ -->
 			</div>
 			</div>
 		</div>
@@ -49,9 +47,11 @@
 <!--.sitewide includes-->
 {% include footer-includes.html %}
 {{page.javascript}}
+<!-- KM question: what does {{page.javascript}} do? -->
 <!--page specific includes-->
 	<!--none-->
 <!--.page specific includes-->
+<script src="/js/datasource.js"></script>
 
 </body>
 
