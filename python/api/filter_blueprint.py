@@ -33,7 +33,18 @@ def construct_filter_blueprint(name, engine):
                 , p.neighborhood_cluster
                 , p.neighborhood_cluster_desc
                 , p.zip
-
+                , p.most_recent_reac_score_num
+                , p.most_recent_reac_score_date
+                , p.sum_appraised_value_current_total
+                , p.topa_count
+                , p.most_recent_topa_date
+                , p.proj_units_tot_mar
+                , p.in_prescat
+                , p.in_dchousing
+                , p.in_dhcd
+                , p.proj_owner_type
+                , p.proj_ayb
+                
                 , s.portfolio
                 , s.agency
                 , to_char(s.poa_start, 'YYYY-MM-DD') as poa_start
