@@ -845,6 +845,8 @@ var filterView = {
             .attr("multiple", " ")
             .attr("id", c.source);
     
+
+
         //Add the dropdown menu choices
         for(var j = 0; j < c.options.length; j++){
             uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
@@ -1023,6 +1025,7 @@ var filterView = {
                         result.push(workingData[dataRow][filterView.components[i].source]);
                     }
                 };
+                result.sort();
                 filterView.components[i]['options'] = result;
 
                 new filterView.categoricalFilterControl(filterView.components[i]);
@@ -1039,6 +1042,7 @@ var filterView = {
                         result.push(workingData[dataRow][filterView.components[i].source]);
                     }
                 };
+                result.sort();
                 filterView.components[i]['options'] = result;
                 
                 new filterView.searchFilterControl(filterView.components[i]);
@@ -1072,9 +1076,15 @@ var filterView = {
                                     workingData[dataRow][layerDefinition.source]
                                 );
                             }
-                    }); 
+                    });
+
                 };
                 
+                //Sort them alphabetically
+                //TODO if we keep 'cluster 10' format, need to sort by number instead of purely alphabetically. 
+                Object.keys(filterView.locationFilterChoices).forEach(function (key) {
+                   filterView.locationFilterChoices[key].sort()
+                });
             };
 
 
