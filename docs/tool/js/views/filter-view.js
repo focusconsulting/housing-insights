@@ -223,7 +223,7 @@ var filterView = {
         }
 
         this.setInputCallback = function(callback){
-            
+            console.log('in setInputCallback'); 
             this.callback = callback; // making callback function a property of the filterTextInput so we can access it later -JO
             var checkKeyPress = function(e){
                 if(e.charCode === 9 || e.charCode === 13){
@@ -653,28 +653,88 @@ var filterView = {
 
         function getValuesAsDates(){
 
-            var minVals = dateInputs.returnValues()['min'];
-            var maxVals = dateInputs.returnValues()['max'];
+            var isNaNCount = 0;
+            var outOfRangeCount = 0;
+            var invalidEntries = [];
 
-            return {
-                min: new Date(minVals.year, minVals.month - 1, minVals.day),
-                max: new Date(maxVals.year, maxVals.month - 1, maxVals.day)
+            var minVals = dateInputs.returnValues()['min'];
+            console.log(minVals);
+            var maxVals = dateInputs.returnValues()['max'];
+            console.log(maxVals);
+            if ( confirmIsANumber([minVals,maxVals]) && confirmInRange([minVals,maxVals]) ){
+                filterView.removeErrors(component.source);
+                return {
+                    min: new Date(minVals.year, minVals.month - 1, minVals.day),
+                    max: new Date(maxVals.year, maxVals.month - 1, maxVals.day)
+                }
+            } else {
+                console.log(component.source, invalidEntries);
+                filterView.showErrors(component.source, invalidEntries);
+
+                return false;
+            }
+
+            function confirmIsANumber(minAndMax){
+                minAndMax.forEach(function(each, i){
+                    for (var key in each) {
+                      if (each.hasOwnProperty(key)) {
+                        if ( isNaN(+each[key]) ) {
+                          isNaNCount++;
+                          invalidEntries.push([i,key]);  
+                        } 
+                      }
+                    }
+                });
+                
+                return isNaNCount === 0 ? true : false;
+            }
+
+            function confirmInRange(minAndMax){
+                minAndMax.forEach(function(each, i){
+                    if ( +each.month < 1 || +each.month > 12 ) {
+                        invalidEntries.push([i,'month']);  
+                        outOfRangeCount++;
+                    }
+                    if ( +each.year < minDatum.getFullYear() || +each.year > maxDatum.getFullYear() ) {
+                        invalidEntries.push([i,'year']);  
+                        outOfRangeCount++;
+                    }
+                    var leapYear = +each.year % 4 === 0 ? true : false;
+                    var maxDay;
+                    if ( +each.month === 2 ) {
+                        maxDay = leapYear ? 29 : 28;
+                    } else if ( +each.month === 4 || +each.month === 6 || +each.month === 9 || +each.month === 11 ) {
+                        maxDay = 30;
+                    } else {
+                        maxDay = 31;
+                    }
+                    if ( +each.day < 0 || +each.day > maxDay ) {
+                        invalidEntries.push([i,'day']);  
+                        outOfRangeCount++;
+                    }
+                    
+                });
+                return outOfRangeCount === 0 ? true : false;
             }
 
         }
 
+
         var inputCallback = function(){
+            console.log('in dateFilterControl inputCallback');
             var specific_state_code = 'filterValues.' + component.source
 
             var dateValues = getValuesAsDates();
-            
-            slider.noUiSlider.set(
-                [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
-            );
+            console.log(dateValues);
+            if ( dateValues !== false ) {
+                slider.noUiSlider.set(
+                    [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
+                );
 
-            ths.uncheckNullToggleOnInitialFilterSet();
-            setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
-            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
+                ths.uncheckNullToggleOnInitialFilterSet();
+                setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
+                ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
+            } 
         }
 
         // For separating date inputs with a '/'
@@ -735,6 +795,30 @@ var filterView = {
                 ths.toggle.element.checked = false;
             }
         };
+    },
+    showErrors: function(source, invalidEntries) {
+        invalidEntries.forEach(function(each){
+            var invalidInput = d3.selectAll('#' + source + '-input input.' + each[1] + '-text').nodes()[each[0]];
+            invalidInput.classList.add('invalid');
+        });
+        if (d3.select('#invalid-filter-alert').node() === null) { // ie the alert is not already present
+            d3.select('#map-wrapper')
+              .append('div')
+              .attr('id','invalid-filter-alert')
+              .classed('no-location-alert', true)
+              .style('opacity',0)
+              .text('Invalid or out of range')
+              .transition().duration(1000)
+              .style('opacity',1);
+        }
+          
+    },
+    removeErrors: function(source){
+        d3.selectAll('#' + source + '-input input').classed('invalid', false);
+        d3.select('#invalid-filter-alert')
+          .transition().duration(1000)
+          .style('opacity',0)
+          .remove();
     },
     setupFilter: function(c){
     //This function does all the stuff needed for each filter regardless of type. 

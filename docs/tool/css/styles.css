@@ -84,6 +84,11 @@ div.filter.content input.filter-text{
     box-sizing: border-box;
 }
 
+input.filter-text.invalid {
+    background-color: #D69C93;
+    border: 2px solid #BD3621 !important;
+}
+
 div.filter.content input.year-text {
     width: 40px;
 }
@@ -580,6 +585,7 @@ Others are working correctly.
     border-radius: 35px;
     padding: 10px;
     color: rgb(189, 54, 33);
+    background-color: rgba(255,255,255,0.5);
 }
 
 #reset-zoom {
