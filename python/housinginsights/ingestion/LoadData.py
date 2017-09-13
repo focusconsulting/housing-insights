@@ -456,42 +456,54 @@ class LoadData(object):
         ########################
         # Sum of tax assessment
         ########################
-        
+
         logging.info("  Calculating tax assessment statistics")
 
-        stmt= '''
-             update project
-             set (sum_appraised_value_current_total
-                , sum_appraised_value_current_land
-                , sum_appraised_value_current_impr) 
-                = 
-             (select sum_appraised_value_current_total
-                , sum_appraised_value_current_land
-                , sum_appraised_value_current_impr
-             from(
-                select nlihc_id
-                       ,sum(appraised_value_current_total) as sum_appraised_value_current_total
-                       ,sum(appraised_value_current_land) as sum_appraised_value_current_land
-                       ,sum(appraised_value_current_impr) as sum_appraised_value_current_impr
-                from(
-                    select ssl
-                           ,project.nlihc_id as nlihc_id
-                           ,appraised_value_current_total
-                           , appraised_value_current_land
-                           , appraised_value_current_impr
-                    from project
-                    left join dc_tax
-                    on project.nlihc_id = dc_tax.nlihc_id
-                    --for debugging:
-                    --where project.nlihc_id in ('NL000001','NL000004','NL000006','NL000008','NL000010')
-                )
-                AS joined_appraisals
-                group by nlihc_id
-            ) as summed_appraisals
-            where summed_appraisals.nlihc_id = project.nlihc_id)
-            '''
-        conn.execute(stmt)
+        from sqlalchemy import select, update, and_, bindparam
 
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        p,t = meta.tables['project'],meta.tables['dc_tax']
+
+        q = select([p.c.nlihc_id
+                , t.c.appraised_value_current_total
+                , t.c.appraised_value_current_land
+                , t.c.appraised_value_current_impr]
+            )\
+            .where(
+                and_(p.c.nlihc_id == t.c.nlihc_id
+                , t.c.nlihc_id != None
+                )
+            )
+        rproxy = conn.execute(q)
+        rrows = rproxy.fetchall()
+        rproxy.close()
+
+        summed_appraisals = []
+        proj_ids = set([row.nlihc_id for row in rrows])
+        for proj in proj_ids:
+            summed_total, summed_land, summed_impr = \
+                sum([row.appraised_value_current_total
+                    for row in rrows if row.nlihc_id == proj])\
+                ,sum([row.appraised_value_current_land
+                    for row in rrows if row.nlihc_id == proj])\
+                ,sum([row.appraised_value_current_impr
+                    for row in rrows if row.nlihc_id == proj])
+            summed_appraisals.append({
+                'proj':proj,
+                'summed_total':summed_total
+                , 'summed_land':summed_land
+                , 'summed_impr':summed_impr
+            })
+
+        upd = p.update()\
+            .where(p.c.nlihc_id == bindparam('proj'))\
+            .values(sum_appraised_value_current_total = bindparam('summed_total')
+                   , sum_appraised_value_current_land = bindparam('summed_land')
+                   , sum_appraised_value_current_impr = bindparam('summed_impr')
+                   )
+
+        conn.execute(upd,summed_appraisals)
 
         # here should calculate the tax assessment per unit in the project; but, be sure to use the 
         # proj_unit_tot_mar instead of normal _tot so that if we don't have all the records from the mar
