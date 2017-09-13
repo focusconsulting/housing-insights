@@ -107,6 +107,15 @@ div.filter.content .continuous-input-text{
 
 .text-input{
     margin-left: 20px;
+    position: relative;
+}
+
+.text-input.date:before {
+    content: 'mm/dd/yyy';
+    position: absolute;
+    color: #767676;
+    font-size: 11px;
+    top: -23px;
 }
 
 button.nullValuesToggleSubmit{

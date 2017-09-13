@@ -270,6 +270,7 @@ var filterView = {
 
 
         //Create the element and put it 
+        console.log(keyValuePairsArrayMin);
         for (var i = 0; i < keyValuePairsArrayMin.length; i++){
             output['min'][keyValuePairsArrayMin[i][0]] = document.createElement('input');
             output['min'][keyValuePairsArrayMin[i][0]].setAttribute(
@@ -575,13 +576,13 @@ var filterView = {
         filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput(
             component,        
             [
-                ['day', minDatum.getDate()],
                 ['month', minDatum.getMonth() + 1],
+                ['day', minDatum.getDate()],
                 ['year', minDatum.getFullYear()]
             ],
             [
-                ['day', maxDatum.getDate()],
                 ['month', maxDatum.getMonth() + 1],
+                ['day', maxDatum.getDate()],
                 ['year', maxDatum.getFullYear()]
             ]
         );
