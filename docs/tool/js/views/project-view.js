@@ -186,7 +186,7 @@ var projectView = {
         var d = full_project_data;
         d3.select('#project-name').text(d.proj_name)
         d3.select('#project-address').text(d.proj_addre)
-        d3.select('#street-view').attr('src','https://maps.googleapis.com/maps/api/streetview?size=200x150&location=' + encodeURIComponent(d.proj_addre) + '%20Washington%20DC');
+        d3.select('#street-view').attr('src','https://maps.googleapis.com/maps/api/streetview?size=200x150&location=' + encodeURIComponent(d.proj_addre) + '%20Washington%20DC&key=AIzaSyC6TjZXrowAWxfCYETdDBE3XQVCbtD-RWc');
 
         //TODO add all matching addresses once proj_addre table is ready    
       },
