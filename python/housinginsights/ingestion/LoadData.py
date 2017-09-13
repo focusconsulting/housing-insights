@@ -561,49 +561,48 @@ class LoadData(object):
 
         # Bus Routes within Half a Mile of Each Project #
         # 
-        # Presently an inelegant method for calculating the number of nearby 
-        # bus routes and updating the project table with those results.
-        # The number of routes is calculated individually, and then
-        # that number is added with a single-row update query. With some
-        # tinkering the results surely could be collected in a table or
-        # object which then could allow for a single update of the whole set. 
+        """
+        The code below tries to reduce the time individual database queries
+        otherwise would take for record-by-record updates. It gathers 
+        the data needed in one initial composite query, uses list comprehension
+        to shorten processing, and executes the final update within SQLAlchemy's 
+        "executemany" context.   
+        """
 
-        proj_ids = [] 
-        rproxy = conn.execute('SELECT DISTINCT nlihc_id AS id FROM wmata_dist')
-        for row in rproxy: proj_ids.append(row.id)
+        from sqlalchemy import select, update, and_, bindparam
 
-        for proj in proj_ids:
-            stop_ids = []
-            stmt =  """
-                    SELECT DISTINCT stop_id_or_station_code AS stop
-                    FROM  wmata_dist
-                    WHERE nlihc_id = '{project}' 
-                    AND type = 'bus'
-                    """.format(project=proj)
-            rproxy = conn.execute(stmt)
-            for row in rproxy: stop_ids.append(row.stop)
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        p = meta.tables['project']
+        d = meta.tables['wmata_dist']
+        i = meta.tables['wmata_info']
 
-            q_list = str(stop_ids).replace('[','(').replace(']',')')
-            q = """
-                SELECT lines FROM wmata_info
-                WHERE stop_id_or_station_code in {}
-                """.format(q_list)
-            proxy = conn.execute(q)
-            routes = [x[0] for x in proxy.fetchall()]
+        q =  select([d.c.nlihc_id
+                , d.c.stop_id_or_station_code
+                , i.c.lines])\
+            .where(
+                and_(d.c.type == 'bus'
+                   , d.c.stop_id_or_station_code 
+                   == i.c.stop_id_or_station_code
+                )
+            )
+        rproxy = conn.execute(q)
+        rrows = rproxy.fetchall()
+        rproxy.close()
 
-            #Parse the : separated objects
-            routes = ':'.join(routes)
-            routes = routes.split(':')
-            unique = list(set(routes))
-            num_routes = len(unique)
+        bus_routes_nearby = []
+        proj_ids = set([row.nlihc_id for row in rrows])
+        for proj in proj_ids: 
+            clusters = [row.lines for row in rrows if row.nlihc_id == proj]
+            count_unique = len(set(":".join(clusters).split(":")))
+            bus_routes_nearby.append({'proj':proj,'routes':count_unique})
 
-            q = """
-                UPDATE project
-                SET bus_routes_nearby = {num_routes} 
-                WHERE project.nlihc_id = '{project}'
-                """.format(num_routes=num_routes,project=proj)
-            conn.execute(q)
+        upd = p.update()\
+            .where(p.c.nlihc_id == bindparam('proj'))\
+            .values(bus_routes_nearby = bindparam('routes'))
 
+        conn.execute(upd,bus_routes_nearby)
+        
         #########################
         # Teardown
         #########################
@@ -657,6 +656,8 @@ class LoadData(object):
             'building_permits': ['count', 'building_permits', 'all'],
             'building_permits_rate': ['rate', 'building_permits', 'all'],
             'construction_permits': ['count', 'building_permits',
+                                     'construction'],
+            'construction_permits_rate': ['rate', 'building_permits',
                                      'construction']
         }
 
