@@ -1,3 +1,6 @@
+    //A comment here helps Jekyll not get confused
+
+
     "use strict";
 
     var mapView = {
@@ -16,6 +19,9 @@
             controller.appendPartial(partialRequest, this);
 
             function appendCallback() {
+                //this is used to indicate the completion of loading
+                setState('filterViewLoaded',false);
+
                 setSubs([
                     ['mapLayer', mapView.showLayer],
                     ['mapLayer', mapView.layerOverlayToggle],
@@ -40,7 +46,6 @@
                     ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
-                    ['initialProjectsRendered',mapView.clearLoadingDimmer],
                     ['initialProjectsRendered',router.initFilters] // not 100% sure this trigger isn't later than we'd want
                                                               // but it shouln't be too early
                 ]);
@@ -62,9 +67,29 @@
                         };
                     },
                     onHide: function(){
-                        //do nothing extra
+                        
+                        //If filterView hasn't loaded yet, show the page loading dimmer
+                        if (!getState().filterViewLoaded[0]) {
+
+                            //Set dimmer to clear next time the filterViewLoaded event occurs
+                            setSubs([
+                                ['filterViewLoaded',mapView.clearLoadingDimmer]
+                            ]);
+
+                            //Add the loading dimmer underneath. Timeout needed so that it occurs after the current modal hide finishes
+                            setTimeout(function(){
+                                $('#loading-tool-dimmer').dimmer('show'); //.page.dimmer:first
+                            },0);
+
+                        } else {
+                            console.log("don't need to show loader")
+                        }
+                        
+
                     }
                   }).modal('show');
+
+                
 
                 this.originalZoom = 11;
                 this.originalCenter = [-77, 38.9072];
@@ -126,7 +151,6 @@
 
         },
         clearLoadingDimmer: function(msg, data){
-            console.log("Clearing dimmer");
             $('#loading-tool-dimmer').dimmer('hide');
         },
         navControl: {
