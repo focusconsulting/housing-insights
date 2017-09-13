@@ -1081,12 +1081,83 @@
         addExportButton: function() {
           // Get the modal
           var modal = d3.select('#exportDataModal');
+          var continuousFiltersTable = d3.select('#exportContinuousFilters');
+          var categoricalFiltersTable = d3.select('#exportCategoricalFilters');
+
           // Get the <span> element that closes the modal
           var span = d3.select(".close")[0];
           d3.select('#csvExportButton')
             .on('click', function(d) {
+              continuousFiltersTable._groups[0][0].innerHTML = "";
+              categoricalFiltersTable._groups[0][0].innerHTML = "";
               modal.style.display = "block";
               modal.class = "modal-open";
+              var activeFilters = filterUtil.getActiveFilterValues();
+              var continuousFilters = activeFilters[0];
+              var categoricalFilters = activeFilters[1];
+              var continuousColumns = ['Filter', 'Min', 'Max', 'Include Nulls'];
+              var categoricalColumns = ['Filter', 'Included Categories'];
+
+              if ( continuousFilters.length > 0 ){
+
+                var continuousThead = continuousFiltersTable.append('thead')
+                var	continuousTbody = continuousFiltersTable.append('tbody');
+
+                // append the header row
+                continuousThead.append('tr')
+                  .selectAll('th')
+                  .data(continuousColumns).enter()
+                  .append('th')
+                    .text(function (column) { return column; });
+
+                // create a row for each object in the data
+                var continuousRows = continuousTbody.selectAll('tr')
+                  .data(continuousFilters)
+                  .enter()
+                  .append('tr');
+
+                // create a cell in each row for each column
+                var continuousCells = continuousRows.selectAll('td')
+                  .data(function (row) {
+                    return continuousColumns.map(function (column) {
+                      return {column: column, value: row[column]};
+                    });
+                  })
+                  .enter()
+                  .append('td')
+                    .text(function (d) { return d.value; });
+              }
+
+              if ( categoricalFilters.length > 0 ){
+
+                var continuousThead = categoricalFiltersTable.append('thead')
+                var	continuousTbody = categoricalFiltersTable.append('tbody');
+
+                // append the header row
+                continuousThead.append('tr')
+                  .selectAll('th')
+                  .data(categoricalColumns).enter()
+                  .append('th')
+                    .text(function (column) { return column; });
+
+                // create a row for each object in the data
+                var continuousRows = continuousTbody.selectAll('tr')
+                  .data(categoricalFilters)
+                  .enter()
+                  .append('tr');
+
+                // create a cell in each row for each column
+                var continuousCells = continuousRows.selectAll('td')
+                  .data(function (row) {
+                    return categoricalColumns.map(function (column) {
+                      return {column: column, value: row[column]};
+                    });
+                  })
+                  .enter()
+                  .append('td')
+                    .text(function (d) { return d.value; });
+              }
+
           });
         },
         exportButton: function() {
