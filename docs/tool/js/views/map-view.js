@@ -40,10 +40,31 @@
                     ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
+                    ['initialProjectsRendered',mapView.clearLoadingDimmer],
                     ['initialProjectsRendered',router.initFilters] // not 100% sure this trigger isn't later than we'd want
                                                               // but it shouln't be too early
                 ]);
 
+
+                //Add the welcome screen
+                $('#welcomeModal').modal({
+                    approve: '.positive, .approve, .ok',
+                    deny     : '.negative, .deny, .cancel',
+                    onApprove: function(d) {
+
+                        //Figure out which button was pressed                      
+                        if (d.attr('id') == 'startTour') {
+                            console.log("start the tour");
+                        } else if (d.attr('id') == 'openExample1') {
+                            console.log("open example analysis");
+                        } else if (d.attr('id') == 'useTool') {
+                            //do nothing - all that's needed is to close the screen
+                        };
+                    },
+                    onHide: function(){
+                        //do nothing extra
+                    }
+                  }).modal('show');
 
                 this.originalZoom = 11;
                 this.originalCenter = [-77, 38.9072];
@@ -103,6 +124,10 @@
 
             }
 
+        },
+        clearLoadingDimmer: function(msg, data){
+            console.log("Clearing dimmer");
+            $('#loading-tool-dimmer').dimmer('hide');
         },
         navControl: {
             el: null,
