@@ -169,16 +169,30 @@ var filterUtil = {
   },
 	getActiveFilterValues: function() {
 	    var allFilterValues = filterUtil.getFilterValues();
-			var currentFilters = [];
+			var continuousFilters = [];
+			var categoricalFilters = [];
 			Object.keys(allFilterValues).forEach(function(key){
 				if ( allFilterValues[key][0] && allFilterValues[key][0].length > 0 ){
-					currentFilters.push({
-						Title: key,
-						Data: allFilterValues[key][0]
-					});
+					if ( allFilterValues[key][0].length === 3
+						&& Number.isInteger(allFilterValues[key][0][0])
+						&& Number.isInteger(allFilterValues[key][0][1]) ){
+							continuousFilters.push({
+								Filter: key,
+								Min: allFilterValues[key][0][0],
+								Max: allFilterValues[key][0][1],
+								'Include Nulls': allFilterValues[key][0][2]
+							});
+						}
+						else {
+							categoricalFilters.push({
+								Filter: key,
+								'Included Categories': allFilterValues[key][0]
+							})
+						}
+
 				}
 			});
-			return currentFilters;
+			return [continuousFilters,categoricalFilters];
 	    //then turn it into this format for any that are actually used (discarding any that have empty arrays in position 0)
 	    //{filter_name: ["list","if","categorical"],filter_name_2: [0,100,true] }//format: min,max,include nulls
 	 }

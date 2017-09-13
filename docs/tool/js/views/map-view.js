@@ -1034,48 +1034,82 @@
         addExportButton: function() {
           // Get the modal
           var modal = d3.select('#exportDataModal');
-          var filtersTable = d3.select('#exportFilters');
+          var continuousFiltersTable = d3.select('#exportContinuousFilters');
+          var categoricalFiltersTable = d3.select('#exportCategoricalFilters');
 
-          // while(filtersTable.rows.length > 0) {
-          //   filtersTable.deleteRow(0);
-          // }
           // Get the <span> element that closes the modal
           var span = d3.select(".close")[0];
           d3.select('#csvExportButton')
             .on('click', function(d) {
-              console.log(filtersTable)
-              filtersTable._groups[0][0].innerHTML = ""
+              continuousFiltersTable._groups[0][0].innerHTML = "";
+              categoricalFiltersTable._groups[0][0].innerHTML = "";
               modal.style.display = "block";
               modal.class = "modal-open";
               var activeFilters = filterUtil.getActiveFilterValues();
-              var columns = ['Title', 'Data'];
+              var continuousFilters = activeFilters[0];
+              var categoricalFilters = activeFilters[1];
+              var continuousColumns = ['Filter', 'Min', 'Max', 'Include Nulls'];
+              var categoricalColumns = ['Filter', 'Included Categories'];
 
-              var thead = filtersTable.append('thead')
-              var	tbody = filtersTable.append('tbody');
+              if ( continuousFilters.length > 0 ){
 
-              // append the header row
-              thead.append('tr')
-                .selectAll('th')
-                .data(columns).enter()
-                .append('th')
-                  .text(function (column) { return column; });
+                var continuousThead = continuousFiltersTable.append('thead')
+                var	continuousTbody = continuousFiltersTable.append('tbody');
 
-              // create a row for each object in the data
-            	var rows = tbody.selectAll('tr')
-            	  .data(activeFilters)
-            	  .enter()
-            	  .append('tr');
+                // append the header row
+                continuousThead.append('tr')
+                  .selectAll('th')
+                  .data(continuousColumns).enter()
+                  .append('th')
+                    .text(function (column) { return column; });
 
-            	// create a cell in each row for each column
-            	var cells = rows.selectAll('td')
-            	  .data(function (row) {
-            	    return columns.map(function (column) {
-            	      return {column: column, value: row[column]};
-            	    });
-            	  })
-            	  .enter()
-            	  .append('td')
-            	    .text(function (d) { return d.value; });
+                // create a row for each object in the data
+                var continuousRows = continuousTbody.selectAll('tr')
+                  .data(continuousFilters)
+                  .enter()
+                  .append('tr');
+
+                // create a cell in each row for each column
+                var continuousCells = continuousRows.selectAll('td')
+                  .data(function (row) {
+                    return continuousColumns.map(function (column) {
+                      return {column: column, value: row[column]};
+                    });
+                  })
+                  .enter()
+                  .append('td')
+                    .text(function (d) { return d.value; });
+              }
+
+              if ( categoricalFilters.length > 0 ){
+
+                var continuousThead = categoricalFiltersTable.append('thead')
+                var	continuousTbody = categoricalFiltersTable.append('tbody');
+
+                // append the header row
+                continuousThead.append('tr')
+                  .selectAll('th')
+                  .data(categoricalColumns).enter()
+                  .append('th')
+                    .text(function (column) { return column; });
+
+                // create a row for each object in the data
+                var continuousRows = continuousTbody.selectAll('tr')
+                  .data(categoricalFilters)
+                  .enter()
+                  .append('tr');
+
+                // create a cell in each row for each column
+                var continuousCells = continuousRows.selectAll('td')
+                  .data(function (row) {
+                    return categoricalColumns.map(function (column) {
+                      return {column: column, value: row[column]};
+                    });
+                  })
+                  .enter()
+                  .append('td')
+                    .text(function (d) { return d.value; });
+              }
 
           });
         },
