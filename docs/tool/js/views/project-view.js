@@ -135,6 +135,7 @@ var projectView = {
       htmlSection.appendChild(html);
       layoutSegment.render(full_project_data);
     });
+
   },
   
   navSidebar: {
@@ -185,6 +186,7 @@ var projectView = {
         var d = full_project_data;
         d3.select('#project-name').text(d.proj_name)
         d3.select('#project-address').text(d.proj_addre)
+        d3.select('#street-view').attr('src','https://maps.googleapis.com/maps/api/streetview?size=200x150&location=' + encodeURIComponent(d.proj_addre) + '%20Washington%20DC');
 
         //TODO add all matching addresses once proj_addre table is ready    
       },
