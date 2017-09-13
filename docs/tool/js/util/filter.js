@@ -169,10 +169,13 @@ var filterUtil = {
   },
 	getActiveFilterValues: function() {
 	    var allFilterValues = filterUtil.getFilterValues();
-			var currentFilters = {};
+			var currentFilters = [];
 			Object.keys(allFilterValues).forEach(function(key){
-				if ( allFilterValues[key][0] ){
-					currentFilters[key] = allFilterValues[key][0];
+				if ( allFilterValues[key][0] && allFilterValues[key][0].length > 0 ){
+					currentFilters.push({
+						Title: key,
+						Data: allFilterValues[key][0]
+					});
 				}
 			});
 			return currentFilters;

@@ -1034,26 +1034,49 @@
         addExportButton: function() {
           // Get the modal
           var modal = d3.select('#exportDataModal');
-          var filtersText = d3.select('#exportFilters');
+          var filtersTable = d3.select('#exportFilters');
+
+          // while(filtersTable.rows.length > 0) {
+          //   filtersTable.deleteRow(0);
+          // }
           // Get the <span> element that closes the modal
           var span = d3.select(".close")[0];
           d3.select('#csvExportButton')
             .on('click', function(d) {
+              console.log(filtersTable)
+              filtersTable._groups[0][0].innerHTML = ""
               modal.style.display = "block";
               modal.class = "modal-open";
               var activeFilters = filterUtil.getActiveFilterValues();
-              var activeFiltersString = "";
-              Object.keys(activeFilters).forEach(function(key){
-                activeFiltersString += key + ": ";
-                for (var i = 0; i < activeFilters[key].length; i++ ){
-                  activeFiltersString += activeFilters[key][i];
-                  if ( i < activeFilters[key].length - 1 ){
-                    activeFiltersString += ",";
-                  }
-                }
-                activeFiltersString += "\n";
-              });
-              filtersText._groups[0][0].innerText = activeFiltersString;
+              var columns = ['Title', 'Data'];
+
+              var thead = filtersTable.append('thead')
+              var	tbody = filtersTable.append('tbody');
+
+              // append the header row
+              thead.append('tr')
+                .selectAll('th')
+                .data(columns).enter()
+                .append('th')
+                  .text(function (column) { return column; });
+
+              // create a row for each object in the data
+            	var rows = tbody.selectAll('tr')
+            	  .data(activeFilters)
+            	  .enter()
+            	  .append('tr');
+
+            	// create a cell in each row for each column
+            	var cells = rows.selectAll('td')
+            	  .data(function (row) {
+            	    return columns.map(function (column) {
+            	      return {column: column, value: row[column]};
+            	    });
+            	  })
+            	  .enter()
+            	  .append('td')
+            	    .text(function (d) { return d.value; });
+
           });
         },
         exportButton: function() {
