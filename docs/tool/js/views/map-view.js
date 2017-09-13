@@ -1,5 +1,7 @@
+---
+frontmatter: isneeded
+---
     //A comment here helps Jekyll not get confused
-
 
     "use strict";
 
@@ -52,6 +54,18 @@
 
 
                 //Add the welcome screen
+                //Display the proper buttons based on whether we are loading a state or not
+                if (router.hasInitialFilterState){
+                    //loading saved analysis
+                    $('#viewSavedAnalysis').removeClass('hidden');
+                } else {
+                    //when loading fresh
+                    $('#openExample1').removeClass('hidden');
+                    $('#useTool').removeClass('hidden');
+                };
+
+                console.log("showing modal")
+                //Show modal
                 $('#welcomeModal').modal({
                     approve: '.positive, .approve, .ok',
                     deny     : '.negative, .deny, .cancel',
@@ -62,6 +76,7 @@
                             console.log("start the tour");
                         } else if (d.attr('id') == 'openExample1') {
                             console.log("open example analysis");
+                            mapView.showExample1();
                         } else if (d.attr('id') == 'useTool') {
                             //do nothing - all that's needed is to close the screen
                         };
@@ -84,8 +99,6 @@
                         } else {
                             console.log("don't need to show loader")
                         }
-                        
-
                     }
                   }).modal('show');
 
@@ -163,6 +176,11 @@
             move: function(){
                 mapView.navControl.el.classList.toggle('movedIn');
             }
+        },
+        showExample1: function(){
+            //Quick example to demonstrate functionality
+            //TODO this does not properly set the ui components - probably need to go through the router.js instead
+            setState('filterValues.most_recent_reac_score_num',[90, 100, false]);
         },
         initialSidebarState: function(){
             setState('sidebar.left',true);

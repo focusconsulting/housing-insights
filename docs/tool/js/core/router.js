@@ -1,3 +1,7 @@
+---
+frontmatter: isneeded
+---
+
 "use strict";
 
 var router = {
@@ -226,8 +230,9 @@ if ( window.location.hash.indexOf('#/HI/') !== -1 ) {
         router.initBuilding();
     } else {
         router.hasInitialFilterState = true;
+        //router.screenLoad(); //Replaced by semantic ui loading screen and welcome modal
     }
-    router.screenLoad();
+    
 } else {
     router.hasInitialFilterState = false;
 }
