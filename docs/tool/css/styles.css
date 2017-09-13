@@ -93,7 +93,7 @@ div.filter.content input.day-text {
 }
 
 div.filter.content .continuous-input-text{
-    width: 40px;
+    width: 85px;
 }
 
 .text-input.date span{
@@ -101,8 +101,8 @@ div.filter.content .continuous-input-text{
     margin-right: .3em;
 }
 .text-input.continuous span{
-    margin-left: 3em;
-    margin-right: 3em;
+    margin-left: 1em;
+    margin-right: 1em;
 }
 
 .text-input{

@@ -30,7 +30,7 @@ var router = {
     },
     pushFilter: function(msg, data){
         /*console.log(msg,data);*/
-        if (data.length === 0 || !data || ( msg === 'subNav.right' && msg === 'charts') ) {
+        if (data.length === 0 || !data || ( msg === 'subNav.right' && data === 'charts') ) {
             delete router.stateObj[msg];
         } else if ( msg.split('.')[0] === 'previewBuilding' ) {
             router.stateObj['previewBuilding'] = data[0];
@@ -109,7 +109,13 @@ var router = {
     decodeState: function(){
         console.log("decoding state from URL");
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
-
+        if ( stateArray.length === 1 && stateArray[0] === '' ) { // backstop in case a path ends in #/HI/. Nothing should
+                                                                 // leave us with that path, but just in case this check
+                                                                 // will keep it from wreaking havoc
+            window.history.replaceState(router.stateObj, 'newState', '#');
+            this.clearScreen();
+            return;
+        }
         stateArray.forEach(function(each){
             var dataChoice;
             var eachArray = each.split('=');
