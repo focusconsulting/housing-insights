@@ -806,3 +806,7 @@ input.search {
 .ui.labeled.icon.button> .icon{
     background-color: rgba(0,0,0,0);
 }
+
+#welcomeModal .actions {
+    margin-top:30px;
+}

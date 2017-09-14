@@ -58,6 +58,7 @@ frontmatter: isneeded
                 if (router.hasInitialFilterState){
                     //loading saved analysis
                     $('#viewSavedAnalysis').removeClass('hidden');
+                    $('#savedStateAlert').removeClass('hidden');
                 } else {
                     //when loading fresh
                     $('#openExample1').removeClass('hidden');
