@@ -63,15 +63,24 @@ frontmatter: isneeded
                     //when loading fresh
                     $('#openExample1').removeClass('hidden');
                     $('#useTool').removeClass('hidden');
-
-                    var removeSpinner = function() {
-                        $('#openExample1').removeClass('disabled');
-                        $('#openExample1 i').removeClass('spinner loading').addClass('check');
-                    }
-                    setSubs([['filterViewLoaded',removeSpinner]])
                 };
 
-                console.log("showing modal")
+                //Set up buttons to be enabled when page is done loading
+                var removeSpinners = function() {
+                        $('#openExample1').removeClass('disabled');
+                        $('#openExample1 i').removeClass('spinner loading').addClass('check');
+
+                        $('#startTour').removeClass('disabled');
+                        $('#startTour i').removeClass('spinner loading').addClass('check');
+
+                        $('#useTool').removeClass('disabled');
+                        $('#useTool i').removeClass('spinner loading').addClass('check');
+
+                        $('#viewSavedAnalysis').removeClass('disabled');
+                        $('#viewSavedAnalysis i').removeClass('spinner loading').addClass('check');
+                    }
+                setSubs([['filterViewLoaded',removeSpinners]])
+
                 //Show modal
                 $('#welcomeModal').modal({
                     approve: '.positive, .approve, .ok',
@@ -81,6 +90,124 @@ frontmatter: isneeded
                         //Figure out which button was pressed                      
                         if (d.attr('id') == 'startTour') {
                             console.log("start the tour");
+
+                            mapView.tour = new Shepherd.Tour({
+                              defaults: {
+                                classes: 'shepherd-theme-arrows',
+                                scrollTo: true
+                              }
+                            });
+
+                          
+                            mapView.tour.addStep('layer-choice', {
+                                text: "The zone type selected affects the 'Specific Zone' filter as well as all the zone-level datasets shown in blue",
+                                attachTo: '#layer-menu right',
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    show: function() {
+                                        console.log('we can trigger events here if needed');
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+                            mapView.tour.addStep('project-data', {
+                                text: "Change the inputs here to filter projects that meet certain criteria.",
+                                attachTo: '#filter-content-proj_units_tot right',
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    'before-show': function() {
+                                        $('#filter-proj_units_tot').click();
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+
+                            mapView.tour.addStep('zone-data', {
+                                text: "Data choices marked with a blue icon are zone-level data sets. \
+                                       They refer to data about the area the project is in, not the project itself.<br><br>\
+                                       Adjusting this filter would show projects in a Ward with a poverty rate between the selected values.<br><br>\
+                                       Remember you can change the zone type, but this will remove any existing selections you've made.",
+                                attachTo: '#filter-content-poverty_rate right',
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    'before-show': function() {
+                                        $('#filter-poverty_rate').click();
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+
+                              mapView.tour.addStep('search', {
+                                title: 'Search for a project',
+                                text: 'You can search by project name or address',
+                                attachTo: '.dropdown-proj_name_addre bottom',
+                                classes: 'shepherd-skinny shepherd-theme-arrows', //needed to use the right style sheet
+                                showCancelLink: true,
+                                buttons: [
+                                   {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+
+                            mapView.tour.addStep('export-data', {
+                                title: 'Export data',
+                                text: 'You can export a CSV file of all the project data here.',
+                                attachTo: '#sidebar-right left',
+                                classes: 'shepherd-skinny shepherd-theme-arrows', //needed to use the right style sheet
+                                showCancelLink: true,
+                                 when: {
+                                    'before-show': function() {
+                                        setState('subNav.right','buildings')
+                                    }
+                                },
+                                buttons: [
+                                   {
+                                      text: 'Done',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }
+                                ]
+                            });
+
+                            mapView.tour.start();
+
                         } else if (d.attr('id') == 'openExample1') {
                             console.log("open example analysis");
                             mapView.showExample1();

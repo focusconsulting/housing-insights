@@ -810,3 +810,9 @@ input.search {
 #welcomeModal .actions {
     margin-top:30px;
 }
+
+
+.shepherd-skinny {
+    max-width:300px !important;
+    z-index:1000 !important;
+}

@@ -101,7 +101,7 @@
                             <div class="preview-contents">There is no project selected</div>
                         </div>
                     </div>
-                    <div id="" class="header">
+                    <div id="matching-list-header" class="header">
                       Matching Projects
                       <button id="csvExportButton" type="button" name="csv-export" data-toggle="modal" data-target="#exportDataModal">Export CSV</button> 
                     </div>
@@ -148,23 +148,31 @@
             <p>Data has been gathered from multiple sources including the DC Governement, Urban Institue, HUD, and the US Census Bureau. A full listing of data sources is located <a href="/data">on our data documentation page</a></p>
             
             <div id="savedStateAlert" class="ui hidden">
-                <h4>Loading saved analysis</h4>
-                <p>You are visiting the tool from a URL for a saved analysis.</p>
+                <p><i>You are visiting the tool from a URL for a saved analysis.</i></p>
             </div>
         </div>
 
         <div class="actions">
-            <div id="startTour" class="ui button ok">Take a tour</div>
+            
+            <div id="startTour" class="ui button ok labeled icon disabled">
+                <i class="ui spinner loading icon"></i>
+                Take a tour
+            </div>
             <div id="openExample1" class="ui button ok labeled icon hidden disabled">
               <i class="ui spinner loading icon"></i>
               View example analysis
             </div>
-            <div id="useTool" class="ui button ok hidden">Use the tool</div>
-            <div id="viewSavedAnalysis" class="ui button ok hidden">View saved analysis</div>
+            <div id="useTool" class="ui button ok labeled icon hidden disabled">
+                <i class="ui spinner loading icon"></i>
+                Use the tool</div>
+            <div id="viewSavedAnalysis" class="ui button ok labeled icon hidden disabled">
+                <i class="ui spinner loading icon"></i>
+                View saved analysis
+            </div>
+
         </div>
       </div>
     </div>
-
 </div>
 
 
