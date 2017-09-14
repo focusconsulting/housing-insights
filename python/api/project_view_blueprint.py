@@ -28,10 +28,9 @@ def construct_project_view_blueprint(name, engine):
             q = """
                 SELECT dist_in_miles, type, stop_id_or_station_code
                 FROM wmata_dist
-                WHERE nlihc_id = '{}'
-                """.format(nlihc_id)
+                WHERE nlihc_id =:nlihc_id"""#.format(nlihc_id)
 
-            proxy = conn.execute(q)
+            proxy = conn.execute(text(q), nlihc_id=nlihc_id)
             results = proxy.fetchall()
 
             #transform the results.
@@ -315,11 +314,10 @@ def construct_project_view_blueprint(name, engine):
     def project_subsidies(nlihc_id):
         q = """
             SELECT * FROM subsidy
-            WHERE nlihc_id = '{}'
-            """.format(nlihc_id)
+            WHERE nlihc_id =:nlihc_id"""#.format(nlihc_id)
 
         conn = engine.connect()
-        proxy = conn.execute(q)
+        proxy = conn.execute(text(q), nlihc_id=nlihc_id)
         results = [dict(x) for x in proxy.fetchall()]
         conn.close()
         output = {'objects': results}
