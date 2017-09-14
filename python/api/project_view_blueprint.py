@@ -6,6 +6,7 @@ import math
 import logging
 from flask_cors import cross_origin
 
+from sqlalchemy.sql import text
 
 def construct_project_view_blueprint(name, engine):
 
