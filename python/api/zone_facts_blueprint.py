@@ -8,6 +8,7 @@ import logging
 
 from api.utils import objects_divide
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.sql import text
 
 def construct_zone_facts_blueprint(name, engine):
 
@@ -22,12 +23,14 @@ def construct_zone_facts_blueprint(name, engine):
         values, in the format needed by the chloropleth map
         '''
         try:
-            q = 'SELECT zone, {} FROM zone_facts \n'.format(column_name)
-            q += "WHERE zone_type = '{}' \n".format(grouping)
+            q = 'SELECT zone, :column_name FROM zone_facts \n'#.format(column_name)
+            q += "WHERE zone_type =:grouping  \n"#.format(grouping)
             q += "ORDER BY zone \n"
 
             conn = engine.connect()
-            proxy = conn.execute(q)
+            proxy = conn.execute(text(q), 
+                                column_name=column_name,
+                                grouping=grouping)
             results = [dict(x) for x in proxy.fetchall()]
             status = 'success'
             conn.close()
