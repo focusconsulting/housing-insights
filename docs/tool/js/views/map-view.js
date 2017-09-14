@@ -62,6 +62,12 @@ frontmatter: isneeded
                     //when loading fresh
                     $('#openExample1').removeClass('hidden');
                     $('#useTool').removeClass('hidden');
+
+                    var removeSpinner = function() {
+                        $('#openExample1').removeClass('disabled');
+                        $('#openExample1 i').removeClass('spinner loading').addClass('check');
+                    }
+                    setSubs([['filterViewLoaded',removeSpinner]])
                 };
 
                 console.log("showing modal")
@@ -180,7 +186,9 @@ frontmatter: isneeded
         showExample1: function(){
             //Quick example to demonstrate functionality
             //TODO this does not properly set the ui components - probably need to go through the router.js instead
-            setState('filterValues.most_recent_reac_score_num',[90, 100, false]);
+            var urlParams = 'reacn=20_73'
+            window.history.replaceState({stateinfo:"elsewhere this is the state object, but we don't have a way to access the correct state object"}, 'newState', '#/HI/' + urlParams);
+            router.decodeState()
         },
         initialSidebarState: function(){
             setState('sidebar.left',true);

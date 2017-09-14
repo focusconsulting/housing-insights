@@ -800,3 +800,9 @@ dl.inline dt{
 input.search {
     width:200px !important;
 }
+
+
+/*fixes spinning box background when a icon-button has a loading icon*/
+.ui.labeled.icon.button> .icon{
+    background-color: rgba(0,0,0,0);
+}
