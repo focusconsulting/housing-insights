@@ -7,7 +7,6 @@ values.
 from abc import ABCMeta, abstractclassmethod, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
-import logging
 import os
 from uuid import uuid4
 
@@ -20,6 +19,9 @@ from housinginsights.sources.models.mar import MAR_TO_TABLE_FIELDS
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
                                            os.pardir))
+
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 """
 Usage:
@@ -152,7 +154,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             if value is None or value == self.null_value:
                 date = self.null_value
             else:
-                logging.warning("    Unable to format date properly: {}".format(value))
+                logger.warning("    Unable to format date properly: {}".format(value))
                 date = self.null_value
 
         return date
@@ -232,7 +234,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         except KeyError:
             pass
             #this prints error for many rows with nulls.
-            logging.warning('  no matching Tract found for row {}'.format(
+            logger.warning('  no matching Tract found for row {}'.format(
                 row_num, row))
         return row
 
@@ -248,7 +250,7 @@ class CleanerBase(object, metaclass=ABCMeta):
         except KeyError:
             pass
             #this prints error for many rows with nulls.
-            logging.warning('  no matching Tract found for row {}'.format(row_num,row))
+            logger.warning('  no matching Tract found for row {}'.format(row_num,row))
         return row
 
     def rename_ward(self, row, ward_key='WARD'):
@@ -329,7 +331,7 @@ class CleanerBase(object, metaclass=ABCMeta):
                 first_address = address.split(';')[0]
                 result = mar_api.find_addr_string(first_address)
             except ValueError:
-                logging.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
+                logger.info("ValueError in Mar for {} - returning none".format(row['Proj_addre']))
                 result = None
             
             if result:
@@ -665,7 +667,7 @@ class ProjectCleaner(CleanerBase):
             row = self.add_mar_id(row, 'Proj_address_id')
             row = self.add_geocode_from_mar(row=row)
         except Exception as e:
-            logging.error("Error geocoding {}, error was {}".format(row,e))
+            logger.error("Error geocoding {}, error was {}".format(row,e))
 
         row = self.rename_ward(row, ward_key='Ward2012')
         row = self.rename_status(row)

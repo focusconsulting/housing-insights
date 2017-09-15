@@ -19,7 +19,6 @@ Notes:
 
 import sys
 import os
-import logging
 import argparse
 import json
 import concurrent.futures
@@ -49,14 +48,15 @@ if __name__ == "__main__":
     sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
-from housinginsights.tools.logger import HILogger
+
 
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 from housinginsights.ingestion.Manifest import Manifest
 
-logger = HILogger(name=__file__, logfile="ingestion.log", level=10)
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 class LoadData(object):
 
@@ -89,10 +89,13 @@ class LoadData(object):
                                                          'manifest.csv'))
         self._keep_temp_files = keep_temp_files
 
+        
+
         # load given meta.json and manifest.csv files into memory
         self.meta = ingestionfunctions.load_meta_data(meta_path)
         self.manifest = Manifest(manifest_path)
 
+        
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
 
@@ -102,6 +105,7 @@ class LoadData(object):
         self._failed_table_count = 0
 
         self.drop_tables = drop_tables
+
 
     def _drop_tables(self):
         """
@@ -194,7 +198,7 @@ class LoadData(object):
             # delete only rows with data_id in respective table
             table_name = sql_manifest_row['destination_table']
         except TypeError: #will occur if sql_manifest_row == None
-            logging.info("    No sql_manifest exists! Proceed with adding"
+            logger.info("    No sql_manifest exists! Proceed with adding"
                          " new data to the database!")
             return None
 
@@ -423,7 +427,7 @@ class LoadData(object):
         #########################
         # Most recent REAC score
         #########################
-        logging.info("  Calculating REAC statistics")
+        logger.info("  Calculating REAC statistics")
         #HT on sql syntax for a bulk insert, for future reference. Also notes how to only replace if exists: https://stackoverflow.com/a/7918818
         #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
         stmt = '''
@@ -457,7 +461,7 @@ class LoadData(object):
         # Sum of tax assessment
         ########################
 
-        logging.info("  Calculating tax assessment statistics")
+        logger.info("  Calculating tax assessment statistics")
 
         from sqlalchemy import select, update, and_, bindparam
 
@@ -509,7 +513,7 @@ class LoadData(object):
         # proj_unit_tot_mar instead of normal _tot so that if we don't have all the records from the mar
         # (due to missing addresses in the proj_addre table) we'll be missing the same ones from numerator
         # and denominator so will get realistic average. 
-        logging.info("  Calculating TOPA statistics")
+        logger.info("  Calculating TOPA statistics")
         
         stmt =  """
                 update project
@@ -1216,7 +1220,10 @@ class LoadData(object):
             # TODO - while cleaning one row, start cleaning the next
             # TODO - once cleaning is done, write row to psv file
             # TODO - consider using queue: once empty update db with psv data
+            total_rows = len(csv_reader)
             for idx, data_row in enumerate(csv_reader):
+                print("  on row {} of {}".format(idx,total_rows), end='\r', flush=True)
+
                 data_row.update(meta_only_fields)  # insert other field dict
                 clean_data_row = cleaner.clean(data_row, idx)
                 if clean_data_row is not None:
@@ -1255,6 +1262,9 @@ class LoadData(object):
 
     def _clean_data(self, idx, data_row, cleaner, table_name, data_fields):
         """
+        Only used by threading - currently not used
+
+
         Helper function that actually does the cleaning processing of each
         row in the raw data file. To improve performance, each row is
         processess currently by n number of threads determined in
@@ -1307,6 +1317,8 @@ def main(passed_arguments):
     options.
     """
 
+    
+
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
@@ -1340,6 +1352,8 @@ def main(passed_arguments):
 
     # universal defaults
     keep_temp_files = True
+
+    
 
     # Instantiate and run the loader
     loader = LoadData(database_choice=database_choice, meta_path=meta_path,
