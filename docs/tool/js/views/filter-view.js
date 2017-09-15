@@ -419,14 +419,16 @@ var filterView = {
             var minVals = returnVals.min;
             var maxVals = returnVals.max;
             var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, ths.minDatum, ths.maxDatum);
-            if ( validateResults ){
+            if ( validateResults[0] ){
+                var setMin = validateResults[1] ? ths.minDatum : minVals.min;
+                var setMax = validateResults[2] ? ths.maxDatum : maxVals.max;
                 ths.slider.noUiSlider.set(
-                    [returnVals['min']['min'], returnVals['max']['max']]
+                    [setMin, setMax]
                 );
 
                 ths.uncheckNullToggleOnInitialFilterSet();
-                setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
-                ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
+                setState(specific_state_code, [setMin, setMax, ths.toggle.element.checked]);
+                ths.checkAgainstOriginalValues(+setMin, +setMax, ths.toggle.element.checked)
             }
         }
         this.textBoxes.setInputCallback(inputCallback);
@@ -531,16 +533,19 @@ var filterView = {
     validateTextInput: function(minVals, maxVals, componentSource, filterType, minDatum, maxDatum){
         var isNaNCount = 0;
         var outOfRangeCount = 0;
+        var forceMin = false;
+        var forceMax = false; // these will return true if the textInput attempts to set a value beyond the bounds
+                              // of the actual data  
         var invalidEntries = [];
 
-        var doesValidate = filterType === 'date' ? ( confirmIsANumber([minVals,maxVals]) && confirmInRange([minVals,maxVals]) ) :  confirmIsANumber([minVals,maxVals]) ;
+        var doesValidate =  ( confirmIsANumber([minVals,maxVals]) && confirmInRange([minVals,maxVals]) );
         
         if ( doesValidate ) {
             filterView.removeErrors(componentSource);
         } else {
             filterView.showErrors(componentSource, invalidEntries);
         }
-        return doesValidate;
+        return [doesValidate, forceMin, forceMax];
         
         function confirmIsANumber(minAndMax){
             minAndMax.forEach(function(each, i){
@@ -558,14 +563,16 @@ var filterView = {
         }
 
         function confirmInRange(minAndMax){
+            if ( filterType === 'date' ){
+                console.log('DEBUGGING', minDatum);
                 minAndMax.forEach(function(each, i){
                     if ( +each.month < 1 || +each.month > 12 ) {
                         invalidEntries.push([i,'month']);  
                         outOfRangeCount++;
                     }
-                    if ( +each.year < minDatum.getFullYear() || +each.year > maxDatum.getFullYear() ) {
-                        invalidEntries.push([i,'year']);  
-                        outOfRangeCount++;
+                    if ( +each.year < 1000 ||  +each.year > 9999 ) { // just ensuring it's a four-digit number
+                        invalidEntries.push([i,'year']);               // input that is beyond the range of the actual data
+                        outOfRangeCount++;                             // will be coerced to the actual min or actual max below
                     }
                     var leapYear = +each.year % 4 === 0 ? true : false;
                     var maxDay;
@@ -580,10 +587,29 @@ var filterView = {
                         invalidEntries.push([i,'day']);  
                         outOfRangeCount++;
                     }
-                    
                 });
-                return outOfRangeCount === 0 ? true : false;
+                if ( new Date(minAndMax[0].year, minAndMax[0].month - 1, minAndMax[0].day) < minDatum ) { // coercing here
+                    forceMin = true;
+                }
+                if ( new Date(minAndMax[1].year, minAndMax[1].month - 1, minAndMax[1].day) > maxDatum ) {
+                    forceMax = true;
+                }
+            } else {
+                minAndMax.forEach(function(each, i){
+                    if ( each.min > each.max ) {
+                        invalidEntries.push([i,'min']);
+                        outOfRangeCount++;
+                    }
+                    if ( each.min < minDatum ) {
+                        forceMin = true;
+                    }
+                     if ( each.max > maxDatum ) {
+                        forceMax = true;
+                    }
+                });   
             }
+            return outOfRangeCount === 0 ? true : false;
+        }
     },
     dateFilterControl: function(component){
         //Creates a new filterControl on the sidebar. 
@@ -720,11 +746,12 @@ var filterView = {
             var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, minDatum, maxDatum);
             // returns true/false
             
-            if ( validateResults ){
-                
+            if ( validateResults[0] ){
+                var setMin = validateResults[1] ? minDatum : new Date(minVals.year, minVals.month - 1, minVals.day);
+                var setMax = validateResults[2] ? maxDatum : new Date(maxVals.year, maxVals.month - 1, maxVals.day);
                 return {
-                    min: new Date(minVals.year, minVals.month - 1, minVals.day),
-                    max: new Date(maxVals.year, maxVals.month - 1, maxVals.day)
+                    min: setMin,
+                    max: setMax
                 }
             } else {
                
