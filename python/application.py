@@ -221,6 +221,36 @@ def get_meta():
     return row[0]
 
 
+
+
+##########################
+# Endpoints for triggering data updates manually
+##########################
+from scripts import services
+
+@application.route('/admin/get_module/<module>', methods=['GET'])
+def get_module(module):
+
+    db_choice = 'docker'
+
+    if module in ['opendata','DCHousing','dhcd',
+            'census','wmata_distcalc','prescat']:
+        services.get_single_module(module, db_choice)
+
+    return 'Finished fetching, check logs for success or failure'
+
+
+
+@application.route('/admin/update_source/<udid>', methods=['GET'])
+def update_source(udid):
+    '''
+    udid=unique data id of the source to be upgraded
+    '''
+    db_choice = 'docker'
+    success = services.run_load_data_update(udid,db_choice)
+
+    return ("Operation successful? {}".format(str(success)))
+    
 ##########################################
 # Start the app
 ##########################################

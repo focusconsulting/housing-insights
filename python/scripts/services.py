@@ -2,9 +2,12 @@ import os, sys
 python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir))
 sys.path.append(python_filepath)
+
+print("path:")
+print(sys.path)
 from housinginsights.tools.logger import HILogger
-import get_api_data
-import load_data
+from scripts import get_api_data
+from scripts import load_data
 from housinginsights.tools.mailer import HIMailer
 
 loggers = [ HILogger(name=__file__, logfile="services.log", level=10),
@@ -12,17 +15,6 @@ loggers = [ HILogger(name=__file__, logfile="services.log", level=10),
             HILogger(name=__file__, logfile="ingestion.log", level=10)
             ]
 logger = loggers[0]
-
-def run_get_api_data(debug=False):
-    # TODO Figure out which parameters should be passed for this to run as a service.
-    try:
-        get_api_data.get_multiple_api_sources(db='docker_database')
-    except Exception as e:
-        logger.error("get_api_data failed with error: %s", e)
-        if debug:
-            raise e
-    finally:
-        get_api_data.send_log_file_to_admin(debug=debug)
 
 def send_log_file_to_admin(debug=True):
     """
@@ -69,6 +61,46 @@ def get_log_level_counts(logfile):
                 level_counts[level] = 1
     return level_counts
 
+
+def get_single_module(module, db_choice):
+    arguments = get_api_data.parser.parse_args([db_choice,'--modules',module])
+    get_api_data.get_multiple_api_sources(arguments)
+
+
+
+def run_get_api_data(debug=False):
+    # TODO Figure out which parameters should be passed for this to run as a service.
+    try:
+        get_api_data.get_multiple_api_sources(db='docker_database')
+    except Exception as e:
+        logger.error("get_api_data failed with error: %s", e)
+        if debug:
+            raise e
+    finally:
+        get_api_data.send_log_file_to_admin(debug=debug)
+
+def run_load_data_update(udid,db_choice):
+    '''
+    This is a quick and dirty method for running only the load data script with a single data id to be updated
+    For use when running a single update from the server (better off using load_data directly for more complex needs)
+
+    udid = unique data id
+    db_choice = database choice name in the format expected by the command line arguments
+    '''
+
+    if udid in ['tax, building_permits_2016','crime_2016','crime_2017',
+        'acs5_2015','wmata_stops','wmata_dist','mar','prescat_project',
+        'prescat_subsidy','prescat_reac','prescat_real_property',
+        'prescat_parcel','dhcd_dfd_properties_project',
+        'dhcd_dfd_properties_subsidy']:
+
+
+        arguments = load_data.parser.parse_args([db_choice,'--update-only',udid])
+        load_data.main(arguments)
+        return True
+    
+    else:
+        return False
 
 def weekly_update():
     db_choice = 'docker'
