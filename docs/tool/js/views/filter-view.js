@@ -415,14 +415,19 @@ var filterView = {
         //When textbox inputs change - need to adjust the slider and setState. 
             var specific_state_code = 'filterValues.' + component.source
             var returnVals = ths.textBoxes.returnValues();
+            console.log('DEBUGGING', returnVals);
+            var minVals = returnVals.min;
+            var maxVals = returnVals.max;
+            var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, ths.minDatum, ths.maxDatum);
+            if ( validateResults ){
+                ths.slider.noUiSlider.set(
+                    [returnVals['min']['min'], returnVals['max']['max']]
+                );
 
-            ths.slider.noUiSlider.set(
-                [returnVals['min']['min'], returnVals['max']['max']]
-            );
-
-            ths.uncheckNullToggleOnInitialFilterSet();
-            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
-            ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
+                ths.uncheckNullToggleOnInitialFilterSet();
+                setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
+                ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
+            }
         }
         this.textBoxes.setInputCallback(inputCallback);
 
@@ -711,8 +716,8 @@ var filterView = {
         function getValuesAsDates(){
             var minVals = dateInputs.returnValues()['min'];
             var maxVals = dateInputs.returnValues()['max'];
-            
-            var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, 'date', minDatum, maxDatum);
+            console.log('DEBUGGING', component);
+            var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, minDatum, maxDatum);
             // returns true/false
             
             if ( validateResults ){
