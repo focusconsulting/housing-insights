@@ -151,15 +151,10 @@ var router = {
                 setState('previewBuilding', [matchingRenderedProject,true]); // true = flag to scroll matching projects list
             
             } else {
-                console.log('DEBUGGING', eachArray);
                 dataChoice = dataChoices.find(function(obj){
                     return obj.short_name === eachArray[0];
                 });
-                console.log('datachoice', dataChoice);
-                console.log('filterControlsDict',filterView.filterControlsDict);
-                console.log('filterViewLoaded',getState().filterViewLoaded);
                 var filterControlObj = filterView.filterControlsDict[dataChoice.short_name]
-                console.log('filterControlObj', filterControlObj);
                 if ( dataChoice.component_type === 'continuous' ) {
                     var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
                     var values = eachArray[1].split(separator);
