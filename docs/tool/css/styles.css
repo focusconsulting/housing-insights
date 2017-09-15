@@ -89,6 +89,25 @@ input.filter-text.invalid {
     border: 2px solid #BD3621 !important;
 }
 
+.filter-title.invalid:before {
+    content: '!';
+    position: absolute;
+    right: 11px;
+    color: #fff;
+    z-index: 1;
+    top: 5px;
+}
+
+.filter-title.invalid:after {
+    content: '\025B2';
+    position: absolute;
+    right: 0;
+    font-size: 187%;
+    top: 3px;
+    color: #BD3621;
+    
+}
+
 div.filter.content input.year-text {
     width: 40px;
 }
@@ -679,6 +698,7 @@ Others are working correctly.
     color: rgba(0, 0, 30, 0.95);
     font-weight: bold;
     border-top: 1px solid rgba(34, 36, 38, 0.15);
+    position: relative;
 }
 
 /* Hover */

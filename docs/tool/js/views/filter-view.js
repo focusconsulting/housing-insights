@@ -798,6 +798,7 @@ var filterView = {
     },
     showErrors: function(source, invalidEntries) {
         invalidEntries.forEach(function(each){
+            d3.select('#filter-' + source).classed('invalid', true);
             var invalidInput = d3.selectAll('#' + source + '-input input.' + each[1] + '-text').nodes()[each[0]];
             invalidInput.classList.add('invalid');
         });
@@ -807,13 +808,14 @@ var filterView = {
               .attr('id','invalid-filter-alert')
               .classed('no-location-alert', true)
               .style('opacity',0)
-              .text('Invalid or out of range')
+              .text('Filter invalid or out of range')
               .transition().duration(1000)
               .style('opacity',1);
         }
           
     },
     removeErrors: function(source){
+        d3.select('#filter-' + source).classed('invalid', false);
         d3.selectAll('#' + source + '-input input').classed('invalid', false);
         d3.select('#invalid-filter-alert')
           .transition().duration(1000)
