@@ -10,7 +10,7 @@ if __name__ == '__main__':
 from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 
 

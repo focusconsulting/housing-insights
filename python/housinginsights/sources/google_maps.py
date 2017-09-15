@@ -1,7 +1,7 @@
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class GoogleMapsApiConn(BaseApiConn):
     """
