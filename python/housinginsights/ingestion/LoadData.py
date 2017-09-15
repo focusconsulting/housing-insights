@@ -61,7 +61,8 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 class LoadData(object):
 
     def __init__(self, database_choice=None, meta_path=None,
-                 manifest_path=None, keep_temp_files=True, drop_tables=False):
+                 manifest_path=None, keep_temp_files=True, 
+                 drop_tables=False,debug=False):
         """
         Initializes the class with optional arguments. The default behaviour
         is to load the local database with data tracked from meta.json
@@ -105,6 +106,7 @@ class LoadData(object):
         self._failed_table_count = 0
 
         self.drop_tables = drop_tables
+        self.debug=debug
 
 
     def _drop_tables(self):
@@ -152,8 +154,10 @@ class LoadData(object):
                 #And drop the table itself
                 q = "DROP TABLE {}".format(table)
                 conn.execute(q)
-            except ProgrammingError:
+            except ProgrammingError as e:
                 logger.error("Couldn't remove table {}".format(table))
+                if self.debug == True:
+                    raise e
 
 
     def _meta_json_to_database(self):
@@ -173,7 +177,7 @@ class LoadData(object):
             conn.execute("DELETE FROM meta;")
             conn.execute(ins)
 
-    def _remove_existing_data(self, uid, manifest_row):
+    def _remove_existing_data(self, manifest_row):
         """
         Removes all rows in the respective table for the given unique_data_id
         then sets status = deleted for the unique_data_id in the
@@ -185,6 +189,8 @@ class LoadData(object):
         sqlalchemy result object if row exists in sql manifest - else
         returns None
         """
+        uid = manifest_row['unique_data_id']
+
         temp_filepath = self._get_temp_filepath(
             manifest_row=manifest_row)
 
@@ -251,7 +257,9 @@ class LoadData(object):
                 conn.close()
                 return proxy
             except ProgrammingError:
-                logger.warning("Problem dropping table")
+                logger.error("Could not drop table {} from the database".format(table_name))
+                if self.debug == True:
+                    raise e
 
     def _get_most_recent_timestamp_subfolder(self, root_folder_path):
         """
@@ -315,10 +323,6 @@ class LoadData(object):
                 logger.info("  Skipping: {} not found in manifest!".format(
                     uid))
             else:
-                logger.info("  Manifest row found for {} - preparing to "
-                             "remove data.".format(uid))
-                self._remove_existing_data(uid=uid, manifest_row=manifest_row)
-                self._remove_table_if_empty(manifest_row = manifest_row)
 
                 # follow normal workflow and load data_id
                 logger.info(
@@ -1210,7 +1214,6 @@ class LoadData(object):
                                filename=temp_filepath)
 
         # clean the file and save the output to a local pipe-delimited file
-        # if it doesn't have a 'loaded' status in the database manifest
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
             start_time = time()
@@ -1224,10 +1227,16 @@ class LoadData(object):
             for idx, data_row in enumerate(csv_reader):
                 print("  on row {} of {}".format(idx,total_rows), end='\r', flush=True)
 
-                data_row.update(meta_only_fields)  # insert other field dict
-                clean_data_row = cleaner.clean(data_row, idx)
-                if clean_data_row is not None:
-                    csv_writer.write(clean_data_row)
+                try:
+                    data_row.update(meta_only_fields)  # insert other field dict
+                    clean_data_row = cleaner.clean(data_row, idx)
+                    if clean_data_row is not None:
+                        csv_writer.write(clean_data_row)
+                except Exception as e:
+                    logger.error("Error when trying to clean row index {} from the manifest_row {}".format(idx,manifest_row))
+                    if self.debug == True:
+                        raise e
+
 
             # with concurrent.futures.ThreadPoolExecutor(
             #         max_workers=100) as executor:
@@ -1253,7 +1262,7 @@ class LoadData(object):
             csv_writer.close()
 
             # write the data to the database
-            self._update_database(sql_interface=sql_interface)
+            self._update_database(sql_interface=sql_interface, manifest_row = manifest_row)
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
@@ -1295,12 +1304,16 @@ class LoadData(object):
 
         return clean_data_row
 
-    def _update_database(self, sql_interface):
+    def _update_database(self, sql_interface, manifest_row):
         """
         Load the clean PSV file into the database
         """
         print("  Loading...")
 
+        # TODO Need to figure out how to revert the removal if loading doesn't work??
+        self._remove_existing_data(manifest_row=manifest_row)
+        self._remove_table_if_empty(manifest_row = manifest_row)
+            
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()
         try:
@@ -1359,7 +1372,8 @@ def main(passed_arguments):
     loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                       manifest_path=manifest_path,
                       keep_temp_files=keep_temp_files,
-                      drop_tables=drop_tables)
+                      drop_tables=drop_tables,
+                      debug = False)
 
     #Remove tables before starting ingestion process
     if passed_arguments.remove_tables:

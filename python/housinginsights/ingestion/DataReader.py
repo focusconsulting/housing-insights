@@ -369,29 +369,18 @@ class DataReader(HIReader):
 
     def _check_include_flag(self, sql_manifest_row):
         """
-        Internal function compares manifest from the csv to manifest in the
-        database. If the manifest says the file should be used ("use") AND the
-        file is not already loaded into the database (as indicated by the
-        matching sql_manifest_row), the file will be added.
+        Checks to make sure the include_flag matches requirements for loading the data
 
-        The sql object in charge of getting the sql_manifest_row and writing
-        new sql_manifest_row elements to the database is in charge of making
-        sure that the sql_manifest_row['status'] field can be trusted as a true
-        representation of what is in the database currently.
+        Previously this compared the manifest_row to the sql_manifest_row; however,
+        since the unique_data_id now stays constant across time this check is 
+        not needed. 
         """
 
         if self.manifest_row['include_flag'] == 'use':
-            if sql_manifest_row is None:  # okay if data isn't already in db
-                return True
-            # TODO: make this into if/else statement?
-            if sql_manifest_row['status'] != 'loaded':
-                return True
-            if sql_manifest_row['status'] == 'loaded':
-                logger.info("  {} is already in the database, skipping".format(
-                                self.manifest_row['unique_data_id']))
-                return False
+           return True
+
         else:
-            logger.info("  {} include_flag is {}, skipping".format(
+            logger.warning("Skipping data source. {} include_flag is {}".format(
                 self.manifest_row['unique_data_id'],
                 self.manifest_row['include_flag']))
             return False
