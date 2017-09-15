@@ -23,7 +23,8 @@
             "component_type": "searchbar",
             "data_type": "text",
             "data_level": "project",
-            "short_name": "na"
+            "short_name": "na",
+            "sourcetable": ""
         },
         
         {   "source":"location",
@@ -32,7 +33,8 @@
             "component_type": "location",
             "data_type": "text",
             "data_level": "project",
-            "short_name": "l"
+            "short_name": "l",
+            "sourcetable": ""
         },
         {   "source":"proj_name",
             "display_name": "Project name",
@@ -40,7 +42,8 @@
             "component_type": "categorical",
             "data_type": "text",
             "data_level": "project",
-            "short_name": "n"
+            "short_name": "n",
+            "sourcetable":"project"
         },
         {   "source":"proj_addre",
             "display_name": "Project address",
@@ -48,7 +51,8 @@
             "component_type": "categorical",
             "data_type": "text",
             "data_level": "project",
-            "short_name": "a"
+            "short_name": "a",
+            "sourcetable": "project"
         },
         {   "source": "proj_units_tot",
             "display_name": "Total units in project",
@@ -57,7 +61,8 @@
             "data_type":"integer",
             "num_decimals_displayed": 0, //0 if integer, 1 otherwise. Could also store data type instead. 
             "data_level": "project",
-            "short_name": "pu"
+            "short_name": "pu",
+            "sourcetable": "project"
         },
         
         {   "source": "proj_units_assist_max",
@@ -67,15 +72,17 @@
             "data_type":"integer",
             "num_decimals_displayed":0,
             "data_level": "project",
-            "short_name": "pa"
+            "short_name": "pa",
+            "sourcetable": "project"
         },
-        {   "source": "proj_own_type",
+        {   "source": "proj_owner_type",
             "display_name":"Ownership Type",
             "display_text":"This field is currenly only available for projects that come from the Preservation Catalog",
             "component_type": "categorical",
             "data_type":"text",
             "data_level": "project",
-            "short_name": "hud"
+            "short_name": "hud",
+            "sourcetable": "project"
         },
 
         {   "source": "portfolio",
@@ -84,16 +91,8 @@
             "component_type":"categorical",
             "data_type": "text",
             "data_level": "project",
-            "short_name": "sp"
-        },
-        {
-            "source": "portfolio",
-            "display_name": "Subsidy Program",
-            "display_text": "Filters to buildings that participate in at least one of the selected programs. Note some larger programs are divided into multiple parts in this list",
-            "component_type":"categorical",
-            "data_type": "text",
-            "data_level": "project",
-            "short_name": "sp"
+            "short_name": "sp",
+            "sourcetable": "subsidy"
         },
         {   "source":"poa_start",
             "display_name":"Subsidy Start Date",
@@ -101,7 +100,8 @@
             "component_type": "date",
             "data_type": "timestamp",
             "data_level": "project",
-            "short_name": "ps"
+            "short_name": "ps",
+            "sourcetable": "subsidy"
         },
         {   "source":"poa_end",
             "display_name":"Subsidy End Date",
@@ -109,7 +109,8 @@
             "component_type": "date",
             "data_type": "timestamp",
             "data_level": "project",
-            "short_name": "pe"
+            "short_name": "pe",
+            "sourcetable": "subsidy"
         },
         {   "source":"topa_count",
             "display_name":"Number of TOPA notices",
@@ -117,7 +118,8 @@
             "component_type": "continuous",
             "data_type": "integer",
             "data_level": "project",
-            "short_name": "topac"
+            "short_name": "topac",
+            "sourcetable": "project"
         },
         
         {   "source":"most_recent_topa_date",
@@ -126,7 +128,8 @@
             "component_type": "date",
             "data_type": "timestamp",
             "data_level": "project",
-            "short_name": "topad"
+            "short_name": "topad",
+            "sourcetable": "project"
         },
         {   "source":"most_recent_reac_score_num",
             "display_name":"Most Recent REAC Score",
@@ -134,7 +137,8 @@
             "component_type": "continuous",
             "data_type": "integer",
             "data_level": "project",
-            "short_name": "reacn"
+            "short_name": "reacn",
+            "sourcetable": "project"
         },
         {   "source":"most_recent_reac_score_date",
             "display_name":"Most Recent REAC Date",
@@ -142,7 +146,8 @@
             "component_type": "date",
             "data_type": "timestamp",
             "data_level": "project",
-            "short_name": "reacd"
+            "short_name": "reacd",
+            "sourcetable": "project"
         },
         {   "source":"sum_appraised_value_current_total",
             "display_name":"Project Taxable Value",
@@ -150,7 +155,8 @@
             "component_type": "continuous",
             "data_type": "integer",
             "data_level": "project",
-            "short_name": "txtot"
+            "short_name": "txtot",
+            "sourcetable": "project"
         },
         
 
@@ -171,7 +177,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
             "style": "number",
-            "short_name": "cv"
+            "short_name": "cv",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "non_violent_crime_rate",
@@ -183,7 +190,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
             "style": "number",
-            "short_name": "cn"
+            "short_name": "cn",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "crime_rate",
@@ -195,7 +203,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "ward",
             "style": "number",
-            "short_name": "ca"
+            "short_name": "ca",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "construction_permits",
@@ -207,7 +216,8 @@
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
             "style": "number",
-            "short_name": "bpc"
+            "short_name": "bpc",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "building_permits",
@@ -219,20 +229,21 @@
             "zones": ["ward", "neighborhood_cluster", "zip"],
             "default_layer": "ward",
             "style": "number",
-            "short_name": "bpa"
+            "short_name": "bpa",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "poverty_rate",
             "display_name": "ACS: Poverty Rate",
-            "display_text": "Fraction of residents below the poverty rate.",
-            
+            "display_text": "Fraction of residents below the poverty rate.",           
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent",
-            "short_name": "pov"
+            "short_name": "pov",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "income_per_capita",
@@ -244,7 +255,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "money",
-            "short_name": "inc"
+            "short_name": "inc",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "labor_participation",
@@ -256,7 +268,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent",
-            "short_name": "lp"
+            "short_name": "lp",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "fraction_single_mothers",
@@ -268,7 +281,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent",
-            "short_name": "sm"
+            "short_name": "sm",
+            "sourcetable": "zone_facts"
         },
         /*
         {
@@ -294,7 +308,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "percent",
-            "short_name": "ff"
+            "short_name": "ff",
+            "sourcetable": "zone_facts"
         },
         {
             "source": "acs_median_rent",
@@ -306,7 +321,8 @@
             "zones": ["ward", "neighborhood_cluster", "census_tract"],
             "default_layer": "census_tract",
             "style": "number",
-            "short_name": "rnt"
+            "short_name": "rnt",
+            "sourcetable": "zone_facts"
         }
     ];
 

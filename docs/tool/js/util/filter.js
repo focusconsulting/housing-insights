@@ -1,19 +1,21 @@
 var filterUtil = {
-	
+
 	init: function(){
 		setSubs([
             ['filterValues', filterUtil.publishFilteredData],
-            ['nullsShown', filterUtil.nullsToggleHandler] // rather than subscribe publishFilteredData  to 
+            ['nullsShown', filterUtil.nullsToggleHandler], // rather than subscribe publishFilteredData  to
                                                           // both filter change and null toggle events, I'm
                                                           // making a null toggle event trigger a filter change -JO
+						['getFilterValues',filterUtil.getFilterValues],
+						['getActiveFilterValues',filterUtil.getActiveFilterValues]
 		]);
 
         // dataRequest is an object {name:<String>, url: <String>[,callback:<Function>]]}
         controller.getData({
                     name: 'filterData',
-                    url: model.URLS.filterData, 
+                    url: model.URLS.filterData,
                     callback: filterUtil.publishFilteredData
-                }) 
+                })
 
 	},
 
@@ -21,7 +23,7 @@ var filterUtil = {
     getNullsShown: function(){
         var state = getState();
         //Extract just the nullsShown stuff from our state
-        //state is stored as nullsShown.data_id with period as part of the object's key. 
+        //state is stored as nullsShown.data_id with period as part of the object's key.
 
         var nullsShown = {};
 
@@ -38,7 +40,7 @@ var filterUtil = {
         var state = getState();
 
         //Extract just the filterValues stuff from our state
-        //state is stored as filterValues.data_id with period as part of the object's key. 
+        //state is stored as filterValues.data_id with period as part of the object's key.
         //TODO this only works w/ one level of dot notation nesting (probably all we need).
         var filterValues = {};
         for (key in state) {
@@ -52,21 +54,21 @@ var filterUtil = {
     },
 
 	filterData: function(){
-        
-    	var workingData = model.dataCollection['filterData'].objects; 
+
+    	var workingData = model.dataCollection['filterData'].objects;
         var filterValues = filterUtil.getFilterValues();
 
 		for (key in filterValues) { // iterate through registered filters
-			
+
             //need to get the matching component out of a list of objects
             var component = dataChoices.filter(function(obj) {
               return obj.source == key;
             });
             component = component[0]
 
-                        
+
 			if (component['component_type'] == 'continuous') {
-                
+
                 if (filterValues[key][0].length == 0){
                     // don't filter because the filter has been removed.
                     // The length would be '1' because nullsShown is always included.
@@ -77,8 +79,8 @@ var filterUtil = {
                     var max = Number(Math.round(filterValues[key][0][1]+'e'+decimalPlaces)+'e-'+decimalPlaces);
 
                     //If it's a zone-level data set, need to choose the right column
-                    var modifier = component.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : '' 
-                    
+                    var modifier = component.data_level == 'zone' ? ("_" + getState()['mapLayer'][0]) : ''
+
                     //filter it
                     workingData = workingData.filter(function(d){
                         if(d[(key + modifier)] === null){
@@ -107,8 +109,8 @@ var filterUtil = {
                         if(filterValues[key][0].length === 0){
                             return true;
                         }
-                        
-                        return d[key].valueOf() >= filterValues[key][0][0].valueOf() 
+
+                        return d[key].valueOf() >= filterValues[key][0][0].valueOf()
                             && d[key].valueOf() <= filterValues[key][0][1].valueOf();
                     });
                 }
@@ -124,7 +126,7 @@ var filterUtil = {
 					return filterValues[key][0].includes(d[key]);
 				})
             }
-            
+
             if (component['component_type'] == 'location') {
                 workingData = workingData.filter(function(d){
                     if(filterValues.location[0].length === 0){
@@ -142,7 +144,7 @@ var filterUtil = {
         };
         filterUtil.filteredData = ids;
 	},
-	
+
 	deduplicate: function(){
 		var result = [];
 		for (var i = 0; i < this.filteredData.length; i++) {
@@ -152,18 +154,47 @@ var filterUtil = {
 		}
 		filterUtil.filteredData = result;
 	},
-	
-	publishFilteredData: function(){ 
-                                        
+
+	publishFilteredData: function(){
+
         filterUtil.filterData();
 		filterUtil.deduplicate();
 		setState('filteredData', filterUtil.filteredData);
 	},
-    nullsToggleHandler: function(msg){
+  nullsToggleHandler: function(msg){
         var dataChoice = dataChoices.find(function(each){
             return each.source === msg.split('.')[1];
         });
         filterView.filterInputs[dataChoice.short_name].callback(); // fire callback as if the associated filter has been changed
-    }
+  },
+	getActiveFilterValues: function() {
+	    var allFilterValues = filterUtil.getFilterValues();
+			var continuousFilters = [];
+			var categoricalFilters = [];
+			Object.keys(allFilterValues).forEach(function(key){
+				if ( allFilterValues[key][0] && allFilterValues[key][0].length > 0 ){
+					if ( allFilterValues[key][0].length === 3
+						&& Number.isInteger(allFilterValues[key][0][0])
+						&& Number.isInteger(allFilterValues[key][0][1]) ){
+							continuousFilters.push({
+								Filter: key,
+								Min: allFilterValues[key][0][0],
+								Max: allFilterValues[key][0][1],
+								'Include Nulls': allFilterValues[key][0][2]
+							});
+						}
+						else {
+							categoricalFilters.push({
+								Filter: key,
+								'Included Categories': allFilterValues[key][0]
+							})
+						}
+
+				}
+			});
+			return [continuousFilters,categoricalFilters];
+	    //then turn it into this format for any that are actually used (discarding any that have empty arrays in position 0)
+	    //{filter_name: ["list","if","categorical"],filter_name_2: [0,100,true] }//format: min,max,include nulls
+	 }
 
 };
