@@ -846,7 +846,7 @@
                     }, 500)
                 }
         },  
-
+        
         showProjectPreview: function(msg, data) {
             var projectData = data[0];
             if ( projectData ) {
@@ -917,8 +917,7 @@
                     current.append('br')
 
                     //Add a definition list of property: value
-                    var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
-                                            'subsidy_end_last']
+                    var previewFields =     ['proj_units_assist_max', 'proj_units_tot']
 
                     var dl = current.append('dl')
                             .classed("properties-list",true)
@@ -932,6 +931,32 @@
                         value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
                         dl.append('dd').text(value)
                     }
+
+                    var currentNlihc = projectData.properties.nlihc_id;
+                    var subsidyContainerId = 'subsFor' + currentNlihc;
+                    var subsidyTableId = 'subsTableFor' + currentNlihc;
+                    controller.getData({
+                        name: currentNlihc + '_subsidy',
+                        url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies",
+                        callback: function(data){
+                            current.append('div')
+                                .attr('id', subsidyContainerId)
+                                .append('p')
+                                .text('Subsidies for this project');
+                            d3.select('#' + subsidyContainerId)
+                                .append('div').attr('id', subsidyTableId);
+                                                
+                            new D3Table('#' + subsidyTableId)
+                                .data(data.items)
+                                .columns([
+                                    {field:'poa_end', label:'Scheduled End Date', class:'value', html: function(d){return d}},
+                                    {field:'poa_start', label:'Start Date', class:'value', html: function(d){return d}},
+                                    {field:'program', label:'Program', class:'value', html: function(d){return d}}
+                                ])
+                                .create();
+                        }
+                    });
+                    
                 };
 
                 controller.getData({
@@ -947,7 +972,6 @@
                         .style('opacity',1)
                 },fadeDuration)
             }
-
         },
 
         filterMap: function(msg, data) {

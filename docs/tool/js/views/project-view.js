@@ -360,7 +360,6 @@ var projectView = {
 
         var data = full_project_data['subsidy']
         console.log("subsidy data",data);
-        
         new D3Table('#subsidy-table')
             .data(data)
             .columns([
