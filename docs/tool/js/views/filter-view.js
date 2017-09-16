@@ -22,6 +22,7 @@ var filterView = {
                 ['mapLayer', filterView.updateLocationFilterControl],
                 ['mapLayer', filterView.resetZoneFilters],
                 ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
+                //['anyFilterActive', filterView.clearAllInvalid]
             ]);
 
             setState('subNav.left','layers');
@@ -564,7 +565,6 @@ var filterView = {
 
         function confirmInRange(minAndMax){
             if ( filterType === 'date' ){
-                console.log('DEBUGGING', minDatum);
                 minAndMax.forEach(function(each, i){
                     if ( +each.month < 1 || +each.month > 12 ) {
                         invalidEntries.push([i,'month']);  
@@ -588,25 +588,31 @@ var filterView = {
                         outOfRangeCount++;
                     }
                 });
-                if ( new Date(minAndMax[0].year, minAndMax[0].month - 1, minAndMax[0].day) < minDatum ) { // coercing here
+                if ( new Date(minAndMax[0].year, minAndMax[0].month - 1, minAndMax[0].day) > new Date(minAndMax[1].year, minAndMax[1].month - 1, minAndMax[1].day) ) { 
+                    // ie if input start date is later than the input end date
+                    invalidEntries.push([0,'year']); 
+                    invalidEntries.push([1,'year']);  
+                    outOfRangeCount++;
+                }
+                if ( new Date(minAndMax[0].year, minAndMax[0].month - 1, minAndMax[0].day) < minDatum ) { // coercing here if input min < actual min
                     forceMin = true;
                 }
-                if ( new Date(minAndMax[1].year, minAndMax[1].month - 1, minAndMax[1].day) > maxDatum ) {
+                if ( new Date(minAndMax[1].year, minAndMax[1].month - 1, minAndMax[1].day) > maxDatum ) { 
                     forceMax = true;
                 }
             } else {
-                minAndMax.forEach(function(each, i){
-                    if ( each.min > each.max ) {
-                        invalidEntries.push([i,'min']);
-                        outOfRangeCount++;
-                    }
-                    if ( each.min < minDatum ) {
-                        forceMin = true;
-                    }
-                     if ( each.max > maxDatum ) {
-                        forceMax = true;
-                    }
-                });   
+                console.log('BHDJAK', minAndMax);
+                if ( minAndMax[0].min > minAndMax[1].max ){
+                    invalidEntries.push([0,'min']);
+                    invalidEntries.push([1,'max']);
+                    outOfRangeCount++;
+                }
+                if ( minAndMax[0].min < minDatum ){
+                    forceMin = true;
+                }
+                if ( minAndMax[1].max > maxDatum ){
+                    forceMax = true;
+                }
             }
             return outOfRangeCount === 0 ? true : false;
         }
@@ -742,7 +748,7 @@ var filterView = {
         function getValuesAsDates(){
             var minVals = dateInputs.returnValues()['min'];
             var maxVals = dateInputs.returnValues()['max'];
-            console.log('DEBUGGING', component);
+
             var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, minDatum, maxDatum);
             // returns true/false
             
@@ -836,7 +842,11 @@ var filterView = {
         }
 
         this.isTouched = function(){
+            console.log(this);
             var dateValues = getValuesAsDates();
+            if ( document.getElementById('filter-' + this.component.source).className.indexOf('invalid') !== -1 ) {
+                return true;
+            }
             return dateValues.min.valueOf() !== minDatum.valueOf() || dateValues.max.valueOf() !== maxDatum.valueOf() || this.nullsShown === false;
         }
 
@@ -859,7 +869,6 @@ var filterView = {
     },
     showErrors: function(source, invalidEntries, filterType) { // eg from dateFilter invalidEntries is array. 1: 0 or 1 (min or max); 2: e.g. 'day'
                                                    // from continuous e.g. [[1,"max"]]
-        console.log('DEBUGGING', JSON.stringify(invalidEntries) );
         invalidEntries.forEach(function(each){
             d3.select('#filter-' + source).classed('invalid', true);
             var invalidInput = filterType === 'date' ? d3.selectAll('#' + source + '-input input.' + each[1] + '-text').nodes()[each[0]] : d3.select('#' + source + '-input input.' + each[1] + '-text').node();
@@ -1250,6 +1259,7 @@ var filterView = {
         for(var i = 0; i < filterView.filterControls.length; i++){
             if(filterView.filterControls[i].isTouched()){
                 filterView.filterControls[i].clear();
+                filterView.removeErrors(filterView.filterControls[i].component.source);
             }
         }
         filterView.indicateActivatedFilters();
@@ -1416,6 +1426,7 @@ var filterView = {
             .append('i')
             .classed("delete icon",true)
             .on("click", function(d) {
+                filterView.removeErrors(d.component.source);
                 d.clear();
             })
                  
