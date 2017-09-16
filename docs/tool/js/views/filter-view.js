@@ -415,7 +415,6 @@ var filterView = {
         //When textbox inputs change - need to adjust the slider and setState. 
             var specific_state_code = 'filterValues.' + component.source
             var returnVals = ths.textBoxes.returnValues();
-            console.log('DEBUGGING', returnVals);
             var minVals = returnVals.min;
             var maxVals = returnVals.max;
             var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, ths.minDatum, ths.maxDatum);
@@ -425,7 +424,8 @@ var filterView = {
                 ths.slider.noUiSlider.set(
                     [setMin, setMax]
                 );
-
+                ths.textBoxes.setValues([['min', setMin]],[['max', setMax]]); // bind the values in the text boxes to the values
+                                                                              // potentially just coerced to actual min and actual max
                 ths.uncheckNullToggleOnInitialFilterSet();
                 setState(specific_state_code, [setMin, setMax, ths.toggle.element.checked]);
                 ths.checkAgainstOriginalValues(+setMin, +setMax, ths.toggle.element.checked)
@@ -543,7 +543,7 @@ var filterView = {
         if ( doesValidate ) {
             filterView.removeErrors(componentSource);
         } else {
-            filterView.showErrors(componentSource, invalidEntries);
+            filterView.showErrors(componentSource, invalidEntries, filterType);
         }
         return [doesValidate, forceMin, forceMax];
         
@@ -746,13 +746,28 @@ var filterView = {
             var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, minDatum, maxDatum);
             // returns true/false
             
+            var setMin = validateResults[1] ? minDatum : new Date(minVals.year, minVals.month - 1, minVals.day);
+            var setMax = validateResults[2] ? maxDatum : new Date(maxVals.year, maxVals.month - 1, maxVals.day);
+
             if ( validateResults[0] ){
-                var setMin = validateResults[1] ? minDatum : new Date(minVals.year, minVals.month - 1, minVals.day);
-                var setMax = validateResults[2] ? maxDatum : new Date(maxVals.year, maxVals.month - 1, maxVals.day);
+                 dateInputs.setValues( // bind the text box values to values potentially coerced to the actual min
+                                       // or max
+                    [
+                        ['year', setMin.getFullYear()],
+                        ['month', setMin.getMonth() + 1],
+                        ['day', setMin.getDate()]
+                    ],
+                    [
+                        ['year', setMax.getFullYear()],
+                        ['month', setMax.getMonth() + 1],
+                        ['day', setMax.getDate()]
+                    ]
+                );
                 return {
                     min: setMin,
                     max: setMax
                 }
+
             } else {
                
 
@@ -842,10 +857,13 @@ var filterView = {
             }
         };
     },
-    showErrors: function(source, invalidEntries) {
+    showErrors: function(source, invalidEntries, filterType) { // eg from dateFilter invalidEntries is array. 1: 0 or 1 (min or max); 2: e.g. 'day'
+                                                   // from continuous e.g. [[1,"max"]]
+        console.log('DEBUGGING', JSON.stringify(invalidEntries) );
         invalidEntries.forEach(function(each){
             d3.select('#filter-' + source).classed('invalid', true);
-            var invalidInput = d3.selectAll('#' + source + '-input input.' + each[1] + '-text').nodes()[each[0]];
+            var invalidInput = filterType === 'date' ? d3.selectAll('#' + source + '-input input.' + each[1] + '-text').nodes()[each[0]] : d3.select('#' + source + '-input input.' + each[1] + '-text').node();
+            console.log(invalidInput);
             invalidInput.classList.add('invalid');
         });
         if (d3.select('#invalid-filter-alert').node() === null) { // ie the alert is not already present
