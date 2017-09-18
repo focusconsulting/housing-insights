@@ -1,3 +1,7 @@
+# Script is deprecated, as of September 18, 2017.
+# zoneUnitCount now calculated with LoadData's _get_residential_units()
+#
+
 from pprint import pprint
 import os
 import sys
