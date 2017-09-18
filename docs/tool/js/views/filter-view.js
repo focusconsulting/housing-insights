@@ -10,6 +10,7 @@ var filterView = {
             //Make sure other functionality is hooked up
             setSubs([
                 ['filterViewLoaded', filterUtil.init],
+                
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],

@@ -377,7 +377,7 @@ button.nullValuesToggleSubmit::before {
     max-width: 300px;
     top: 80px;
     bottom: 0;
-    z-index: 9999;
+    z-index: 1000;
     background-color: rgba(255, 255, 255, 0.95);
     transform: translate(-100%, 0);
     transition: transform 0.2s linear;
@@ -799,4 +799,20 @@ dl.inline dt{
 /*patches semantic ui bug that search helper text is cut off after clearing a pillbox*/
 input.search {
     width:200px !important;
+}
+
+
+/*fixes spinning box background when a icon-button has a loading icon*/
+.ui.labeled.icon.button> .icon{
+    background-color: rgba(0,0,0,0);
+}
+
+#welcomeModal .actions {
+    margin-top:30px;
+}
+
+
+.shepherd-skinny {
+    max-width:300px !important;
+    z-index:1000 !important;
 }
