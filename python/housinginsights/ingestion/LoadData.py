@@ -19,7 +19,6 @@ Notes:
 
 import sys
 import os
-import logging
 import argparse
 import json
 import concurrent.futures
@@ -49,14 +48,15 @@ if __name__ == "__main__":
     sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
-from housinginsights.tools.logger import HILogger
+
 
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 from housinginsights.ingestion.Manifest import Manifest
 
-logger = HILogger(name=__file__, logfile="ingestion.log", level=10)
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 class LoadData(object):
 
@@ -89,10 +89,13 @@ class LoadData(object):
                                                          'manifest.csv'))
         self._keep_temp_files = keep_temp_files
 
+        
+
         # load given meta.json and manifest.csv files into memory
         self.meta = ingestionfunctions.load_meta_data(meta_path)
         self.manifest = Manifest(manifest_path)
 
+        
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
 
@@ -102,6 +105,7 @@ class LoadData(object):
         self._failed_table_count = 0
 
         self.drop_tables = drop_tables
+
 
     def _drop_tables(self):
         """
@@ -194,7 +198,7 @@ class LoadData(object):
             # delete only rows with data_id in respective table
             table_name = sql_manifest_row['destination_table']
         except TypeError: #will occur if sql_manifest_row == None
-            logging.info("    No sql_manifest exists! Proceed with adding"
+            logger.info("    No sql_manifest exists! Proceed with adding"
                          " new data to the database!")
             return None
 
@@ -423,7 +427,7 @@ class LoadData(object):
         #########################
         # Most recent REAC score
         #########################
-        logging.info("  Calculating REAC statistics")
+        logger.info("  Calculating REAC statistics")
         #HT on sql syntax for a bulk insert, for future reference. Also notes how to only replace if exists: https://stackoverflow.com/a/7918818
         #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
         stmt = '''
@@ -453,50 +457,64 @@ class LoadData(object):
         conn.execute(stmt)
 
 
-        #########################
+        ########################
         # Sum of tax assessment
-        #########################
-        logging.info("  Calculating tax assessment statistics")
+        ########################
 
-        stmt= '''
-             update project
-             set (sum_appraised_value_current_total
-                , sum_appraised_value_current_land
-                , sum_appraised_value_current_impr) 
-                = 
-             (select sum_appraised_value_current_total
-                , sum_appraised_value_current_land
-                , sum_appraised_value_current_impr
-             from(
-                select nlihc_id
-                       ,sum(appraised_value_current_total) as sum_appraised_value_current_total
-                       ,sum(appraised_value_current_land) as sum_appraised_value_current_land
-                       ,sum(appraised_value_current_impr) as sum_appraised_value_current_impr
-                from(
-                    select ssl
-                           ,project.nlihc_id as nlihc_id
-                           ,appraised_value_current_total
-                           , appraised_value_current_land
-                           , appraised_value_current_impr
-                    from project
-                    left join dc_tax
-                    on project.nlihc_id = dc_tax.nlihc_id
-                    --for debugging:
-                    --where project.nlihc_id in ('NL000001','NL000004','NL000006','NL000008','NL000010')
+        logger.info("  Calculating tax assessment statistics")
+
+        from sqlalchemy import select, update, and_, bindparam
+
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        p,t = meta.tables['project'],meta.tables['dc_tax']
+
+        q = select([p.c.nlihc_id
+                , t.c.appraised_value_current_total
+                , t.c.appraised_value_current_land
+                , t.c.appraised_value_current_impr]
+            )\
+            .where(
+                and_(p.c.nlihc_id == t.c.nlihc_id
+                , t.c.nlihc_id != None
                 )
-                AS joined_appraisals
-                group by nlihc_id
-            ) as summed_appraisals
-            where summed_appraisals.nlihc_id = project.nlihc_id)
-            '''
-        conn.execute(stmt)
+            )
+        rproxy = conn.execute(q)
+        rrows = rproxy.fetchall()
+        rproxy.close()
 
+        summed_appraisals = []
+        proj_ids = set([row.nlihc_id for row in rrows])
+        for proj in proj_ids:
+            summed_total, summed_land, summed_impr = \
+                sum([row.appraised_value_current_total
+                    for row in rrows if row.nlihc_id == proj])\
+                ,sum([row.appraised_value_current_land
+                    for row in rrows if row.nlihc_id == proj])\
+                ,sum([row.appraised_value_current_impr
+                    for row in rrows if row.nlihc_id == proj])
+            summed_appraisals.append({
+                'proj':proj,
+                'summed_total':summed_total
+                , 'summed_land':summed_land
+                , 'summed_impr':summed_impr
+            })
+
+        upd = p.update()\
+            .where(p.c.nlihc_id == bindparam('proj'))\
+            .values(sum_appraised_value_current_total = bindparam('summed_total')
+                   , sum_appraised_value_current_land = bindparam('summed_land')
+                   , sum_appraised_value_current_impr = bindparam('summed_impr')
+                   )
+
+        conn.execute(upd,summed_appraisals)
 
         # here should calculate the tax assessment per unit in the project; but, be sure to use the 
         # proj_unit_tot_mar instead of normal _tot so that if we don't have all the records from the mar
         # (due to missing addresses in the proj_addre table) we'll be missing the same ones from numerator
         # and denominator so will get realistic average. 
-        logging.info("  Calculating TOPA statistics")
+        logger.info("  Calculating TOPA statistics")
+        
         stmt =  """
                 update project
                 set (topa_count
@@ -537,6 +555,70 @@ class LoadData(object):
         # Other calculated fields
         #########################
 
+        # Miles (or Portion of) to Nearest Metro Station
+        
+        stmt =  """
+                UPDATE project
+                SET nearest_metro_station =
+                (
+                SELECT nearest_metro 
+                FROM 
+                    (
+                    SELECT wmata_dist.nlihc_id AS nlihc_id
+                        , MIN(dist_in_miles) AS nearest_metro
+                    FROM wmata_dist
+                    WHERE type = 'rail'
+                    GROUP BY nlihc_id
+                    ) AS nstation
+                WHERE nstation.nlihc_id = project.nlihc_id 
+                )
+                """
+        conn.execute(stmt)
+
+        # Bus Routes within Half a Mile of Each Project #
+        # 
+        """
+        The code below tries to reduce the time individual database queries
+        otherwise would take for record-by-record updates. It gathers 
+        the data needed in one initial composite query, uses list comprehension
+        to shorten processing, and executes the final update within SQLAlchemy's 
+        "executemany" context.   
+        """
+
+        from sqlalchemy import select, update, and_, bindparam
+
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        p = meta.tables['project']
+        d = meta.tables['wmata_dist']
+        i = meta.tables['wmata_info']
+
+        q =  select([d.c.nlihc_id
+                , d.c.stop_id_or_station_code
+                , i.c.lines])\
+            .where(
+                and_(d.c.type == 'bus'
+                   , d.c.stop_id_or_station_code 
+                   == i.c.stop_id_or_station_code
+                )
+            )
+        rproxy = conn.execute(q)
+        rrows = rproxy.fetchall()
+        rproxy.close()
+
+        bus_routes_nearby = []
+        proj_ids = set([row.nlihc_id for row in rrows])
+        for proj in proj_ids: 
+            clusters = [row.lines for row in rrows if row.nlihc_id == proj]
+            count_unique = len(set(":".join(clusters).split(":")))
+            bus_routes_nearby.append({'proj':proj,'routes':count_unique})
+
+        upd = p.update()\
+            .where(p.c.nlihc_id == bindparam('proj'))\
+            .values(bus_routes_nearby = bindparam('routes'))
+
+        conn.execute(upd,bus_routes_nearby)
+        
         #########################
         # Teardown
         #########################
@@ -590,6 +672,8 @@ class LoadData(object):
             'building_permits': ['count', 'building_permits', 'all'],
             'building_permits_rate': ['rate', 'building_permits', 'all'],
             'construction_permits': ['count', 'building_permits',
+                                     'construction'],
+            'construction_permits_rate': ['rate', 'building_permits',
                                      'construction']
         }
 
@@ -1136,7 +1220,10 @@ class LoadData(object):
             # TODO - while cleaning one row, start cleaning the next
             # TODO - once cleaning is done, write row to psv file
             # TODO - consider using queue: once empty update db with psv data
+            total_rows = len(csv_reader)
             for idx, data_row in enumerate(csv_reader):
+                print("  on row {} of {}".format(idx,total_rows), end='\r', flush=True)
+
                 data_row.update(meta_only_fields)  # insert other field dict
                 clean_data_row = cleaner.clean(data_row, idx)
                 if clean_data_row is not None:
@@ -1175,6 +1262,9 @@ class LoadData(object):
 
     def _clean_data(self, idx, data_row, cleaner, table_name, data_fields):
         """
+        Only used by threading - currently not used
+
+
         Helper function that actually does the cleaning processing of each
         row in the raw data file. To improve performance, each row is
         processess currently by n number of threads determined in
@@ -1227,6 +1317,8 @@ def main(passed_arguments):
     options.
     """
 
+    
+
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
     meta_path = os.path.abspath(os.path.join(scripts_path, 'meta.json'))
@@ -1260,6 +1352,8 @@ def main(passed_arguments):
 
     # universal defaults
     keep_temp_files = True
+
+    
 
     # Instantiate and run the loader
     loader = LoadData(database_choice=database_choice, meta_path=meta_path,

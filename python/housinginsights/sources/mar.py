@@ -5,7 +5,7 @@ from housinginsights.sources.base import BaseApiConn
 from housinginsights.sources.models.mar import MarResult, FIELDS
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 
 class MarApiConn(BaseApiConn):
@@ -16,7 +16,7 @@ class MarApiConn(BaseApiConn):
 
     BASEURL = 'http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx'
 
-    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+    def __init__(self,baseurl=None,proxies=None,database_choice=None, debug=False):
         super().__init__(baseurl=MarApiConn.BASEURL)
 
     

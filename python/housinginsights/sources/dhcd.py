@@ -24,10 +24,6 @@ from xmljson import parker as xml_to_json
 
 import json
 
-from housinginsights.tools.logger import HILogger
-
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
-
 from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         APP_METADATA_FIELDS, \
@@ -39,7 +35,7 @@ from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
 INCLUDE_ALL_FIELDS = True
 
 from housinginsights.tools.logger import HILogger
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class DhcdApiConn(ProjectBaseApiConn):
     """
@@ -58,9 +54,9 @@ class DhcdApiConn(ProjectBaseApiConn):
     PARAMS_DATA_DEFAULT_FIELDS = {'a': 'API_DoQuery', 'query': '{\'1\'.XEX.\'0\'}'}
 
 
-    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+    def __init__(self,baseurl=None,proxies=None,database_choice=None, debug=False):
 
-        super().__init__(baseurl=DhcdApiConn.BASEURL, proxies=proxies,database_choice=database_choice)
+        super().__init__(baseurl=DhcdApiConn.BASEURL, proxies=proxies,database_choice=database_choice, debug=debug)
 
         # unique_data_id format: 'dhcd_dfd_' + <lowercase_table_name>
         self._available_unique_data_ids = [ 'dhcd_dfd_projects', 

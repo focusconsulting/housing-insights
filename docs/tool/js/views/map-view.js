@@ -33,13 +33,14 @@
                     ['overlaySet', chloroplethLegend.init],
                     ['hoverBuilding', mapView.showPopup],
                     ['previewBuilding', mapView.showProjectPreview],
+                    ['previewBuilding', mapView.highlightPreviewBuilding],
                     ['filteredData', mapView.filterMap],
                     ['filteredViewLoaded',mapView.addExportButton],
                     ['filteredViewLoaded',mapView.exportButton],
-                    ['hoverBuildingList', mapView.highlightBuilding],
+                    ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
-                    ['filterViewLoaded',router.initFilters] // not 100% sure this trigger isn't later than we'd want
+                    ['initialProjectsRendered',router.initFilters] // not 100% sure this trigger isn't later than we'd want
                                                               // but it shouln't be too early
                 ]);
 
@@ -56,11 +57,25 @@
                     minZoom: 3,
                     preserveDrawingBuffer: true
                 });
-
                 this.map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
+                });
+                
+                // filter decoding was happening too quickly after initialLayers were added (ln 463),
+                // before they were fully rendered. even mapBox's 'render' was sometime too early. ussing instead
+                // getLayer('projects') to make sure the layers are indeed present. 'render' is fired often; function below
+                // checks it against state of the project layer and 
+                // !isFilterInitialized to setState initialProjectsRendered. router.initFilters
+                // subscribes to that stateChange and turns isFilterInitialized to true so that this stateChange
+                // fires only once. 
+
+                var theMap = this.map;
+                this.map.on('render', function() {
+                  if ( theMap.loaded() && theMap.getLayer('project-enter') !== undefined && !router.isFilterInitialized ) {
+                      setState('initialProjectsRendered', true);
+                  }
                 });
 
                 this.map.on('zoomend', function() {
@@ -639,7 +654,7 @@
 
                             'circle-stroke-opacity': 0.5,
                             'circle-opacity': 0.5,
-                            'circle-stroke-width': 2,
+                            'circle-stroke-width': 0,
                             'circle-color': '#aaaaaa',
                             'circle-stroke-color': '#aaaaaa'
 
@@ -654,16 +669,16 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
                                 ]
                             },
                             'circle-opacity': 0.5,
                             'circle-color': '#aaaaaa',
 
-                            'circle-stroke-opacity': 0.7,
-                            'circle-stroke-width': 2,
+                            'circle-stroke-opacity': 0.5,
+                            'circle-stroke-width': 0,
                             'circle-stroke-color': '#626262'
                         }
                     });
@@ -676,15 +691,15 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
                                 ]
                             },
                             'circle-opacity': 0.5,
                             'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2,
+                            'circle-stroke-width': 0,
                             'circle-stroke-opacity': 0.5,
                             'circle-stroke-color': '#fd8d3c'    //same as circle for existing
                         }
@@ -698,20 +713,22 @@
                             'circle-radius': {
                                 'base': 1.75,
                                 'stops': [
-                                    [11, 3],
-                                    [12, 4],
-                                    [15, 15]
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
                                 ]
                             },
 
                             'circle-opacity': 0.5,
                             'circle-color': '#fd8d3c',
 
-                            'circle-stroke-width': 2, //Warning, this is not actually set here - the animateEnterExit overrides it
-                            'circle-stroke-opacity': 0.7,
+                            'circle-stroke-width': 0, //Warning, this is not actually set here - the animateEnterExit overrides it
+                            'circle-stroke-opacity': 0.5,
                             'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
                         }
                     });
+
+                    setState('initialLayersAdded', true);
 
                    //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
                     mapView.map.on('mousemove', function(e) {
@@ -744,8 +761,8 @@
                             mapView.removeAllPopups();
                         } else {
                         //If you click on a building, show that building in the side panel
-                            setState('previewBuilding', building);
                             setState('subNav.right', 'buildings');
+                            setState('previewBuilding', [building, true]); // true ie flag to scroll matchign list
                         }
                     });
 
@@ -800,8 +817,9 @@
                 .addTo(mapView.map);
 
             popup._container.onclick = function(e) {
-                setState('previewBuilding', data);
+
                 setState('subNav.right', 'buildings');
+                setState('previewBuilding', [data, true]); // tru ie flag to scroll matching list
             };
 
             mapView.popups.push(popup);
@@ -814,97 +832,121 @@
             },3000);
 
         },
+        scrollMatchingList: function(data){
+                var projectData = data[0];
+                $('#projects-list .projects-list-selected').removeClass('projects-list-selected'); 
+                var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
+                $listItem.addClass('projects-list-selected');
+                
+                if ( $listItem.length > 0 && data[1]) { // if the map has been filtered the listitem may no longer be in the DOM
+                                                        // data[1] == false is the flag to not scroll
+                    var difference = $listItem.offset().top - $('#projects-list-group').offset().top; 
+                    $('#projects-list-group').animate({
+                        scrollTop: $( '#projects-list-group' ).scrollTop() + difference - 7
+                    }, 500)
+                }
+        },  
 
         showProjectPreview: function(msg, data) {
-            var project = [data.properties];    //defining as one-element array for d3 data binding
+            var projectData = data[0];
+            if ( projectData ) {
 
-            //Bind the selected project to a div that will hold the preview graphics
-            var selection = d3.select('#project-preview')
-                            .selectAll("div.preview-contents")
-                                .data(project, function(d){
-                                    return typeof(d) !== "undefined" ? d.nlihc_id : null; //deals w/ initial div which has no bound data yet
-                                })
-            var fadeDuration = 500
+                mapView.scrollMatchingList(data);
+                  
+                if ( projectData.properties.longitude != null && projectData.properties.latitude ){
+                    mapView.flyToProject([projectData.properties.longitude, projectData.properties.latitude]);
+                }
+                //setState('hoverBuildingList', projectData.properties.nlihc_id);
+                var project = [projectData.properties];    //defining as one-element array for d3 data binding
 
-            //Transition the whole container of the previously previewed building
-            var leaving = selection.exit()
-                    .transition()
-                    .duration(fadeDuration)
-                    .style('opacity',0)
-                    .remove()
+                //Bind the selected project to a div that will hold the preview graphics
+                var selection = d3.select('#project-preview')
+                                .selectAll("div.preview-contents")
+                                    .data(project, function(d){
+                                        return typeof(d) !== "undefined" ? d.nlihc_id : null; //deals w/ initial div which has no bound data yet
+                                    })
+                var fadeDuration = 500
 
-            //Create the new container
-            mapView.showProjectPreview.current = selection.enter()
-                        .append('div')
-                        .classed("preview-contents",true)
+                //Transition the whole container of the previously previewed building
+                var leaving = selection.exit()
+                        .transition()
+                        .duration(fadeDuration)
                         .style('opacity',0)
-                        //.text(function(d){return d.nlihc_id})
+                        .remove()
 
-            //callback used to populate container since we need data loaded before it can run
-            //callback called after function definition
-            mapView.fillContainer = function(meta){
-                var current = mapView.showProjectPreview.current //alias for convenience
+                //Create the new container
+                mapView.showProjectPreview.current = selection.enter()
+                            .append('div')
+                            .classed("preview-contents",true)
+                            .style('opacity',0)
+                            //.text(function(d){return d.nlihc_id})
 
-                //Add the building name with a link to the project page
-                var field = getFieldFromMeta('project', 'proj_name') //field is the meta.json that has stuff like display_text
-                var value = project[0]['proj_name'] + ' >>' // adding chevrons to indicate clicking for more, might not
-                                                            // even be necessary with underlining
+                //callback used to populate container since we need data loaded before it can run
+                //callback called after function definition
+                mapView.fillContainer = function(meta){
+                    var current = mapView.showProjectPreview.current //alias for convenience
 
-                current.append('a')
-                    .classed('proj_name',true)
-                    .text(value)
-                    .style("text-decoration", "underline") // to indicate it is a link
-                    .on("click", function(e) {
-                        setState('selectedBuilding', data); //data comes from state - it is the building that was clicked
-                        setState('switchView', projectView);
-                    });
+                    //Add the building name with a link to the project page
+                    var field = getFieldFromMeta('project', 'proj_name') //field is the meta.json that has stuff like display_text
+                    var value = project[0]['proj_name'] + ' >>' // adding chevrons to indicate clicking for more, might not
+                                                                // even be necessary with underlining
 
-                //Add fields that don't have the field name displayed
-                var headerFields =  ['proj_addre','ward','neighborhood_cluster_desc']
-                for (var i = 0; i < headerFields.length; i++) {
-                    var field = getFieldFromMeta('project',headerFields[i])
-                    var value = project[0][headerFields[i]];
-                    value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
-
-                    current.append('div')
-                        .classed('preview-field',true)
-                        .classed(headerFields[i],true)
+                    current.append('a')
+                        .classed('proj_name',true)
                         .text(value)
+                        .style("text-decoration", "underline") // to indicate it is a link
+                        .on("click", function(e) {
+                            setState('selectedBuilding', projectData); //data comes from state - it is the building that was clicked
+                            setState('switchView', projectView);
+                        });
+
+                    //Add fields that don't have the field name displayed
+                    var headerFields =  ['proj_addre','ward','neighborhood_cluster_desc']
+                    for (var i = 0; i < headerFields.length; i++) {
+                        var field = getFieldFromMeta('project',headerFields[i])
+                        var value = project[0][headerFields[i]];
+                        value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
+
+                        current.append('div')
+                            .classed('preview-field',true)
+                            .classed(headerFields[i],true)
+                            .text(value)
+                    };
+
+                    //Add line break
+                    current.append('br')
+
+                    //Add a definition list of property: value
+                    var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
+                                            'subsidy_end_last']
+
+                    var dl = current.append('dl')
+                            .classed("properties-list",true)
+                            .classed("inline",true);
+
+                    for (var i = 0; i < previewFields.length; i++) {
+                        var field = getFieldFromMeta('project',previewFields[i])
+                        dl.append('dt').text(field['display_name'] + ': '); //todo use meta.json instead
+
+                        var value = project[0][previewFields[i]];
+                        value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
+                        dl.append('dd').text(value)
+                    }
                 };
 
-                //Add line break
-                current.append('br')
+                controller.getData({
+                                name:'metaData',
+                                url: model.URLS.metaData,
+                                callback: mapView.fillContainer
+                                });
 
-                //Add a definition list of property: value
-                var previewFields =     ['proj_units_assist_max', 'proj_units_tot','subsidy_end_first',
-                                        'subsidy_end_last']
-
-                var dl = current.append('dl')
-                        .classed("properties-list",true)
-                        .classed("inline",true);
-
-                for (var i = 0; i < previewFields.length; i++) {
-                    var field = getFieldFromMeta('project',previewFields[i])
-                    dl.append('dt').text(field['display_name'] + ': '); //todo use meta.json instead
-
-                    var value = project[0][previewFields[i]];
-                    value = (value === null | value == "null") ? ' Unknown' : value; // handles when data has "null" as a value
-                    dl.append('dd').text(value)
-                }
-            };
-
-            controller.getData({
-                            name:'metaData',
-                            url: model.URLS.metaData,
-                            callback: mapView.fillContainer
-                            });
-
-            //Make the new container appear after the old one is gone
-            setTimeout(function(){
-                mapView.showProjectPreview.current.transition()
-                    .duration(fadeDuration)
-                    .style('opacity',1)
-            },fadeDuration)
+                //Make the new container appear after the old one is gone
+                setTimeout(function(){
+                    mapView.showProjectPreview.current.transition()
+                        .duration(fadeDuration)
+                        .style('opacity',1)
+                },fadeDuration)
+            }
 
         },
 
@@ -933,18 +975,21 @@
             var delayAnimation = setTimeout(function(){
                 mapView.map.setPaintProperty('project-enter','circle-stroke-width', 6);
                 var shrinkCircles = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 2);
+                    mapView.map.setPaintProperty('project-enter','circle-stroke-width', 0);
                 },300);
 
-                mapView.map.setPaintProperty('project-exit','circle-stroke-width', 6);
-                var expandCircles = setTimeout(function(){
-                    mapView.map.setPaintProperty('project-exit','circle-stroke-width', 2);
-                },300);
             },250); // a delay is necessary to avoid animating the layer before mapBox finishes applying the filters.
                     // with too little time, you'll see projects that have klass 'stay' animate as if they were 'enter'.
                     // would be nicer with a callback, but I don't htink that's available -JO
 
 
+
+        },
+        flyToProject: function(lngLatArray) {
+            mapView.map.flyTo({
+                center: lngLatArray,
+                zoom: 15
+            });
         },
         /*
         The listBuildings function controls the right sidebar in the main map view.
@@ -971,10 +1016,12 @@
 
             var listItems = preview.selectAll('div')
                 .data(data, function(d) {
-                    return d.properties.nlihc_id;
+                    return d.properties.nlihc_id; // needs key to do update
                 });
+                
 
             listItems.attr('class', 'update');
+
 
             listItems.enter().append('div')
                 //.attr('class','enter')
@@ -992,32 +1039,32 @@
                 .on('mouseleave', function(d) {
                     clearTimeout(mapView['highlight-timer-' + d.properties.nlihc_id]);
                     setState('hoverBuildingList', false);
-                    if (mapView.map.getLayer('project-highlight-' + d.properties.nlihc_id)) {
-                        mapView.map.setFilter('project-highlight-' + d.properties.nlihc_id, ['==', 'nlihc_id', '']);
-                        mapView.map.removeLayer('project-highlight-' + d.properties.nlihc_id);
-                    }
                 })
                 .on('click', function(d) {
-                    if ( d.properties.longitude !== null && d.properties.latitude !== null ) {
-                        mapView.map.flyTo({
-                            center: [d.properties.longitude, d.properties.latitude],
-                            zoom: 15
-                        });
-                    } else {
+                    if ( d.properties.longitude == null || d.properties.latitude == null ) {
                         mapView.alertNoLocationInfo()
                     }
-                    setState('previewBuilding', d);
+                    setState('previewBuilding', [d, false]); // false is flag to not scroll the list
                 })
 
                 .attr('tabIndex', 0)
                 .transition().duration(100)
-                .attr('class', 'enter');
+                .attr('class', 'enter')
+                .attr('id', function(d){
+                    return d.properties.nlihc_id;
+                });
 
             listItems.exit()
                 .attr('class', 'exit')
                 .transition(t)
                 .remove();
 
+            if ( getState().previewBuilding && getState().previewBuilding[0] ){
+                setTimeout(function(){
+                    mapView.scrollMatchingList(getState().previewBuilding[0]);
+                },1000);
+            }
+         
         },
         alertNoLocationInfo: function(){
             d3.select('#map-wrapper')
@@ -1034,12 +1081,83 @@
         addExportButton: function() {
           // Get the modal
           var modal = d3.select('#exportDataModal');
+          var continuousFiltersTable = d3.select('#exportContinuousFilters');
+          var categoricalFiltersTable = d3.select('#exportCategoricalFilters');
+
           // Get the <span> element that closes the modal
           var span = d3.select(".close")[0];
           d3.select('#csvExportButton')
             .on('click', function(d) {
+              continuousFiltersTable._groups[0][0].innerHTML = "";
+              categoricalFiltersTable._groups[0][0].innerHTML = "";
               modal.style.display = "block";
               modal.class = "modal-open";
+              var activeFilters = filterUtil.getActiveFilterValues();
+              var continuousFilters = activeFilters[0];
+              var categoricalFilters = activeFilters[1];
+              var continuousColumns = ['Filter', 'Min', 'Max', 'Include Nulls'];
+              var categoricalColumns = ['Filter', 'Included Categories'];
+
+              if ( continuousFilters.length > 0 ){
+
+                var continuousThead = continuousFiltersTable.append('thead')
+                var	continuousTbody = continuousFiltersTable.append('tbody');
+
+                // append the header row
+                continuousThead.append('tr')
+                  .selectAll('th')
+                  .data(continuousColumns).enter()
+                  .append('th')
+                    .text(function (column) { return column; });
+
+                // create a row for each object in the data
+                var continuousRows = continuousTbody.selectAll('tr')
+                  .data(continuousFilters)
+                  .enter()
+                  .append('tr');
+
+                // create a cell in each row for each column
+                var continuousCells = continuousRows.selectAll('td')
+                  .data(function (row) {
+                    return continuousColumns.map(function (column) {
+                      return {column: column, value: row[column]};
+                    });
+                  })
+                  .enter()
+                  .append('td')
+                    .text(function (d) { return d.value; });
+              }
+
+              if ( categoricalFilters.length > 0 ){
+
+                var continuousThead = categoricalFiltersTable.append('thead')
+                var	continuousTbody = categoricalFiltersTable.append('tbody');
+
+                // append the header row
+                continuousThead.append('tr')
+                  .selectAll('th')
+                  .data(categoricalColumns).enter()
+                  .append('th')
+                    .text(function (column) { return column; });
+
+                // create a row for each object in the data
+                var continuousRows = continuousTbody.selectAll('tr')
+                  .data(categoricalFilters)
+                  .enter()
+                  .append('tr');
+
+                // create a cell in each row for each column
+                var continuousCells = continuousRows.selectAll('td')
+                  .data(function (row) {
+                    return categoricalColumns.map(function (column) {
+                      return {column: column, value: row[column]};
+                    });
+                  })
+                  .enter()
+                  .append('td')
+                    .text(function (d) { return d.value; });
+              }
+
           });
         },
         exportButton: function() {
@@ -1049,10 +1167,14 @@
           });
         },
 
-        highlightBuilding(msg, data) {
+        highlightHoveredBuilding(msg, data) {
+            if ( getState().hoverBuildingList[1] ){ // if there's a previous hoverBuildingList state, clear the highlight
+                mapView.map.setFilter('project-highlight-hovered-' + getState().hoverBuildingList[1], ['==', 'nlihc_id', '']);
+                mapView.map.removeLayer('project-highlight-hovered-' + getState().hoverBuildingList[1]);
+            }
             if (data) {
                 mapView.map.addLayer({
-                    'id': 'project-highlight-' + data,
+                    'id': 'project-highlight-hovered-' + data,
                     'type': 'circle',
                     'source': 'project',
                     'paint': {
@@ -1072,31 +1194,65 @@
                     'filter': ['==', 'nlihc_id', data]
                 });
             }
+            
+        },
+        highlightPreviewBuilding(msg, data) {
+            var projectData = data[0];
+            if ( getState().previewBuilding[1] ){ // if there's a previous previewBuilding state, clear the highlight
+                mapView.map.setFilter('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id, ['==', 'nlihc_id', '']);
+                mapView.map.removeLayer('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id);
+            }
+            if (projectData) {
+                mapView.map.addLayer({
+                    'id': 'project-highlight-preview-' + projectData.properties.nlihc_id,
+                    'type': 'circle',
+                    'source': 'project',
+                    'paint': {
+                        'circle-blur': 0.2,
+                        'circle-color': 'transparent',
+                        'circle-radius': {
+                                'base': 1.75,
+                                'stops': [
+                                    [11, 4],
+                                    [12, 5],
+                                    [15, 16]
+                                ]
+                            },
+                        'circle-stroke-width': 2,
+                        'circle-stroke-opacity': 1,
+                        'circle-stroke-color': '#bd3621'
+                    },
+                    'filter': ['==', 'nlihc_id', projectData.properties.nlihc_id]
+                });
+            }
+            
         },
         zoomToFilteredProjects: function(msg, data){
-            var maxLat = d3.max(data, function(d){
-                return d.latitude;
-            });
-            var minLat = d3.min(data, function(d){
-                return d.latitude;
-            });
-            var maxLon = d3.max(data, function(d){
-                if (d.longitude < 0 ) {
-                    return d.longitude; // workaround of data error where one project has positive longitude instead of positive
-                                        // can remove `if` statement when resolved (issue 405)
+            if ( getState().previewBuilding === undefined || !getState().previewBuilding[0] ) {
+                var maxLat = d3.max(data, function(d){
+                    return d.latitude;
+                });
+                var minLat = d3.min(data, function(d){
+                    return d.latitude;
+                });
+                var maxLon = d3.max(data, function(d){
+                    if (d.longitude < 0 ) {
+                        return d.longitude; // workaround of data error where one project has positive longitude instead of positive
+                                            // can remove `if` statement when resolved (issue 405)
+                    }
+                });
+                var minLon = d3.min(data, function(d){
+                    return d.longitude;
+                });
+                mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]],
+                                {linear: true,
+                                padding: {top: 20, bottom: 20, left: 320, right: 370}, //to accomodate sidebars + 20 px
+                                maxZoom: 14  //far enough to see whole neighborhood cluster
+                                });
+                if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
+                    mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
+                    mapView.map.originalZoom = mapView.map.getZoom();
                 }
-            });
-            var minLon = d3.min(data, function(d){
-                return d.longitude;
-            });
-            mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]],
-                            {linear: true,
-                            padding: {top: 20, bottom: 20, left: 320, right: 370}, //to accomodate sidebars + 20 px
-                            maxZoom: 14  //far enough to see whole neighborhood cluster
-                            });
-            if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
-                mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];
-                mapView.map.originalZoom = mapView.map.getZoom();
             }
         }
     };

@@ -129,6 +129,14 @@ var filterView = {
         //Add the element and set to default value
         this.container = document.createElement('div');
         this.container.classList.add('nullsToggleContainer');
+
+        //Add the tooltip on hover
+        var tooltipText = 'Some projects might be missing data for this field. Check this box to include projects with missing data in the map view.';
+        this.container.setAttribute('data-toggle', 'tooltip');
+        this.container.setAttribute('data-placement', 'top');
+        this.container.setAttribute('title', tooltipText);
+        $(this.container).tooltip();
+
         this.element = document.createElement('input');
         this.element.setAttribute('type', 'checkbox');
         this.element.setAttribute('value', 'showNulls-' + component.source);
@@ -142,7 +150,6 @@ var filterView = {
             this.container.appendChild(this.element);
             this.container.appendChild(txt);
         }
-
     },
     filterInputs: {}, // adding filterInputs object so we can access them later -JO //TODO should switch to filterControls instead -NH
     dateInputs: {}, // same for date inputs - JO //TODO same -NH
@@ -412,6 +419,7 @@ var filterView = {
                 [returnVals['min']['min'], returnVals['max']['max']]
             );
 
+            ths.uncheckNullToggleOnInitialFilterSet();
             setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
             ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
         }
@@ -439,6 +447,7 @@ var filterView = {
                 var min = unencoded[0]
                 var max = unencoded[1]
                 ths.textBoxes.setValues([['min', min]],[['max', max]]);
+                ths.uncheckNullToggleOnInitialFilterSet();
 
                 //Set the filterValues state
                 if(doesItSetState){
@@ -455,6 +464,16 @@ var filterView = {
                 ths.clear();
             } 
         }
+
+        this.uncheckNullToggleOnInitialFilterSet = function(){
+            var filterValues = filterUtil.getFilterValues();
+
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1 || filterValues[component.source][0].length == 0) {
+                console.log('Unchecking the null toggle for ', component.source);
+                ths.toggle.element.checked = false;
+            }
+        };
+
         // Changing value should trigger map update
         var currentSliderCallback = makeSliderCallback(c, true)
         this.slider.noUiSlider.on('change', currentSliderCallback);
@@ -607,7 +626,9 @@ var filterView = {
                         ['day', newMaxDate.getDate()]
                     ]
                 );
-                
+
+                ths.uncheckNullToggleOnInitialFilterSet();
+
                 if(doesItSetState){
                     ths.toggle.element.checked
                     setState(specific_state_code,[newMinDate, newMaxDate, ths.toggle.element.checked]);
@@ -650,6 +671,7 @@ var filterView = {
                 [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
             );
 
+            ths.uncheckNullToggleOnInitialFilterSet();
             setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
             ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
         }
@@ -704,6 +726,14 @@ var filterView = {
             } 
         }
 
+        this.uncheckNullToggleOnInitialFilterSet = function(){
+            var filterValues = filterUtil.getFilterValues();
+
+            if (!filterValues[component.source] || filterValues[component.source].length <= 1 || filterValues[component.source][0].length == 0) {
+                console.log('Unchecking the null toggle for ', component.source);
+                ths.toggle.element.checked = false;
+            }
+        };
     },
     setupFilter: function(c){
     //This function does all the stuff needed for each filter regardless of type. 
@@ -815,6 +845,8 @@ var filterView = {
             .attr("multiple", " ")
             .attr("id", c.source);
     
+
+
         //Add the dropdown menu choices
         for(var j = 0; j < c.options.length; j++){
             uiSelector.append("option").attr("value", c.options[j]).text(c.options[j])
@@ -954,11 +986,12 @@ var filterView = {
         $('#filter-components').accordion({'exclusive':true, 'onOpen':function(){
             var difference = $( this ).offset().top - $('#filter-components').offset().top; 
             
+            /*for debug
             console.log($( this ).offset().top);
             console.log('vs');
             console.log($('#filter-components').offset().top);
             console.log(difference);
-            
+            */
               // if the accordion content extend below the bounds of the #filters container
             $('#filter-components').animate({
                 scrollTop: $( '#filter-components' ).scrollTop() + difference - 29
@@ -992,6 +1025,7 @@ var filterView = {
                         result.push(workingData[dataRow][filterView.components[i].source]);
                     }
                 };
+                result.sort();
                 filterView.components[i]['options'] = result;
 
                 new filterView.categoricalFilterControl(filterView.components[i]);
@@ -1008,6 +1042,7 @@ var filterView = {
                         result.push(workingData[dataRow][filterView.components[i].source]);
                     }
                 };
+                result.sort();
                 filterView.components[i]['options'] = result;
                 
                 new filterView.searchFilterControl(filterView.components[i]);
@@ -1041,9 +1076,15 @@ var filterView = {
                                     workingData[dataRow][layerDefinition.source]
                                 );
                             }
-                    }); 
+                    });
+
                 };
                 
+                //Sort them alphabetically
+                //TODO if we keep 'cluster 10' format, need to sort by number instead of purely alphabetically. 
+                Object.keys(filterView.locationFilterChoices).forEach(function (key) {
+                   filterView.locationFilterChoices[key].sort()
+                });
             };
 
 
@@ -1106,7 +1147,7 @@ var filterView = {
             this.site = document.getElementById('clear-pillbox-holder');
 
             this.site.insertBefore(this.labelPill, this.site.firstChild);
-            this.labelPill.textContent = 'Filtered';
+            this.labelPill.textContent = 'Active Filters';
         },
         site: undefined,
         tearDown: function(){

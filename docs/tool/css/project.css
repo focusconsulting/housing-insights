@@ -7,6 +7,7 @@
 	font-size: 15px;
     font-weight: bold;
     margin-bottom: 0px;
+    color: rgb(54,82,124);
 }
 
 .centered {
@@ -138,15 +139,15 @@
 	padding-right:10px;
 }
 
-.project-data-table td.title {
+.project-data-table td.title,
+.project-data-table thead td {
 	font-weight:bold;
 }
 
-.project-dat-atable td.value {
+.project-data-table td.value {
 	font-weight:normal;
 }
 
 .ui.attached.header {
 	background-color: rgb(237, 241, 247);
 }
-

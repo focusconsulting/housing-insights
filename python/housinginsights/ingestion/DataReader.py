@@ -8,7 +8,7 @@ import csv
 from os import path
 import os
 
-import sys, logging, traceback
+import sys, traceback
 
 from http.client import HTTPConnection, HTTPSConnection, HTTPResponse, HTTPException, OK
 from urllib.parse import urlparse
@@ -19,6 +19,11 @@ import codecs
 
 from datetime import datetime
 import dateutil.parser as dateparser
+
+
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
+
 
 #DataReader edits (FYI for Walt):
 # -Renamed DataReader to HIReader (housing insights reader); extended 2 versions of it (ManifestReader and DataReader)
@@ -164,7 +169,7 @@ class DataReader(HIReader):
 
         # Use default encoding if none found
         if 'encoding' not in manifest_row:
-            logging.warning("  Warning: encoding not found in manifest. " \
+            logger.warning("  Warning: encoding not found in manifest. " \
                             "Falling back to latin-1.")
         self.encoding = manifest_row.get('encoding', 'latin-1')
 
@@ -179,18 +184,18 @@ class DataReader(HIReader):
         #     content_type_header = self._test_connection_to_URL(self.s3_path)
         #     self._restore_verbose_error_reporting()
         #     if content_type_header is not None:
-        #         logging.info("  Content (MIME) type: {}".format(content_type_header))
+        #         logger.info("  Content (MIME) type: {}".format(content_type_header))
 
         self._keys = None
         # Load data file from given file system - S3 or local
         if load_from == "s3":
             # Test connection to s3 URL
             if self.manifest_row['include_flag'] == 'use':
-                self._suppress_verbose_error_reporting()
+                #self._suppress_verbose_error_reporting()
                 content_type_header = self._test_connection_to_URL(self.s3_path)
-                self._restore_verbose_error_reporting()
+                #self._restore_verbose_error_reporting()
                 if content_type_header is not None:
-                    logging.info(
+                    logger.info(
                         "  Content (MIME) type: {}".format(content_type_header))
 
             self.path = self.s3_path
@@ -259,12 +264,12 @@ class DataReader(HIReader):
         headers = None
         try:
             with open(self.path, 'r', newline='', encoding=self.encoding) as f:
-                logging.info("  Defaulting to local data file: '{}'".format(self.path))
+                logger.info("  Defaulting to local data file: '{}'".format(self.path))
                 myreader = csv.reader(f, delimiter=',')
                 headers = next(myreader)
         except FileNotFoundError as e:
             self._validate_or_create_path()
-            logging.info("  File not found. Attempting to download file to disk: " +
+            logger.info("  File not found. Attempting to download file to disk: " +
                          self.s3_path)
             try:
                 urlretrieve(self.s3_path, self.path)
@@ -272,21 +277,21 @@ class DataReader(HIReader):
                 if os.path.isfile(self.path):
                     file_size = int(os.stat(self.path).st_size)
                 if file_size > 0:
-                    logging.info("  Download complete.  " \
+                    logger.info("  Download complete.  " \
                                  "{} bytes downloaded.".format(file_size))
                 else:
-                    logging.warning("  Warning: Download cannot be verified; " \
+                    logger.warning("  Warning: Download cannot be verified; " \
                                     "check location: '{}'".format(self.path))
                     return
                 with open(self.path, 'r', newline='', encoding=self.encoding) as f:
                     myreader = csv.reader(f,delimiter=',')
                     headers = next(myreader)
             except URLError as ue:
-                logging.error("  Error: _download_data_file(): " \
+                logger.error("  Error: _download_data_file(): " \
                               "Error opening URL '{}' for download.".format(self.path))
                 raise
             except OSError as oe:
-                logging.error("  Error: _download_data_file(): " \
+                logger.error("  Error: _download_data_file(): " \
                               "Downloaded file '{}' cannot be opened " \
                               "for reading.".format(oe.filename))
                 raise
@@ -317,18 +322,18 @@ class DataReader(HIReader):
         """
         _keys = None
         if self.path_type == 'url':
-            logging.info("  File will be read from remote location: '{}'".format(self.path))
+            logger.info("  File will be read from remote location: '{}'".format(self.path))
             try:
                 with urlopen(self.path) as ftpstream:
                     reader = DictReader(codecs.iterdecode(ftpstream, self.encoding))
                     _keys = reader.fieldnames
                     if self._contains_leading_bom(_keys[0], encoding=self.encoding):
-                        logging.info("  Leading BOM (byte order mark) found in file '{}'; " \
+                        logger.info("  Leading BOM (byte order mark) found in file '{}'; " \
                                      "updating header keys to omit BOM...".format(
                                         os.path.basename(self.path)))
                         _keys[0] = self._remove_leading_bom(_keys[0], self.encoding)
             except URLError as ue:
-                logging.error("  Error: _set_keys(): Header fieldname keys cannot be set; " \
+                logger.error("  Error: _set_keys(): Header fieldname keys cannot be set; " \
                               "error opening URL '{}' for reading.".format(self.path))
         else:
             try:
@@ -336,16 +341,16 @@ class DataReader(HIReader):
                     reader = DictReader(data)
                     _keys = reader.fieldnames
                     if self._contains_leading_bom(_keys[0], encoding=self.encoding):
-                        logging.info("  Leading BOM (byte order mark) found in file '{}'; " \
+                        logger.info("  Leading BOM (byte order mark) found in file '{}'; " \
                                      "updating header keys to omit BOM...".format(
                                         os.path.basename(self.path)))
                         _keys[0] = self._remove_leading_bom(_keys[0], encoding=self.encoding)
             except OSError as oe:
-                logging.error("  Error: _set_keys(): Header fieldname keys cannot be set; " \
+                logger.error("  Error: _set_keys(): Header fieldname keys cannot be set; " \
                               "file '{}' cannot be opened for reading.".format(oe.filename))
-                logging.error("  Full system error message:\n\n  '{}'".format(oe.strerror))
+                logger.error("  Full system error message:\n\n  '{}'".format(oe.strerror))
             except ValueError as ve:
-                logging.error("  Error: _set_keys(): Header fieldname keys cannot be set; " \
+                logger.error("  Error: _set_keys(): Header fieldname keys cannot be set; " \
                               "encoding error encountered.")
         return _keys
 
@@ -382,11 +387,11 @@ class DataReader(HIReader):
             if sql_manifest_row['status'] != 'loaded':
                 return True
             if sql_manifest_row['status'] == 'loaded':
-                logging.info("  {} is already in the database, skipping".format(
+                logger.info("  {} is already in the database, skipping".format(
                                 self.manifest_row['unique_data_id']))
                 return False
         else:
-            logging.info("  {} include_flag is {}, skipping".format(
+            logger.info("  {} include_flag is {}, skipping".format(
                 self.manifest_row['unique_data_id'],
                 self.manifest_row['include_flag']))
             return False
@@ -400,7 +405,7 @@ class DataReader(HIReader):
         try:
             field_list = self.meta[self.destination_table]['fields']
         except KeyError:
-            logging.info('  table "{}" not found in meta data'.format(
+            logger.info('  table "{}" not found in meta data'.format(
                 self.destination_table))
             return False
 
@@ -414,11 +419,11 @@ class DataReader(HIReader):
 
         #Log our errors if any
         if not success:
-            logging.warning("  do_fields_match: {}. '{}' had missing " \
+            logger.warning("  do_fields_match: {}. '{}' had missing " \
                             "items:\n{}".format(success, self.destination_table,
                                                 self.not_found))
         else:
-            logging.info("  do_fields_match: {}. meta.json and csv field lists " \
+            logger.info("  do_fields_match: {}. meta.json and csv field lists " \
                          "match completely for '{}'".format(
                             success, self.destination_table))
 
@@ -539,11 +544,11 @@ class DataReader(HIReader):
         sys.excepthook = self._discreet_exception_handler
         # Temporarily remove any StreamHandler instances for the default logger:
         self._error_reporting_overhead['stream_handlers'] = []
-        stream_handlers = (h for h in logging.getLogger().handlers \
-                             if isinstance(h, logging.StreamHandler))
+        stream_handlers = (h for h in logger.getLogger().handlers \
+                             if isinstance(h, logger.StreamHandler))
         for h in stream_handlers:
             self._error_reporting_overhead['stream_handlers'].append(h)
-            logging.getLogger().removeHandler(h)
+            logger.getLogger().removeHandler(h)
 
     def _restore_verbose_error_reporting(self):
         """
@@ -559,7 +564,7 @@ class DataReader(HIReader):
         if len(self._error_reporting_overhead['stream_handlers']) > 0:
             stream_handlers_indices = []
             for i, h in enumerate(self._error_reporting_overhead['stream_handlers']):
-                logging.getLogger().addHandler(h)
+                logger.getLogger().addHandler(h)
                 stream_handlers_indices.append(i)
             for j in stream_handlers_indices:
                 self._error_reporting_overhead['stream_handlers'].pop(j)
@@ -573,11 +578,11 @@ class DataReader(HIReader):
         Prints only the handled exception to stderr while logging any
         accompanying stack traces to the default log.
         """
-        logging.error("{}: {}".format(exception_class.__name__, exception))
-        logging.error("Traceback (most recent call last):")
+        logger.error("{}: {}".format(exception_class.__name__, exception))
+        logger.error("Traceback (most recent call last):")
         tb_entries = traceback.extract_tb(tb)
         for tb_entry in tb_entries:
-            logging.error("  File \"{}\", line {}, in {}\n" \
+            logger.error("  File \"{}\", line {}, in {}\n" \
                           "    {}".format(tb_entry[0], tb_entry[1], tb_entry[2],
                                           tb_entry[3]))
         print("{}: {}".format(exception_class.__name__, exception),
@@ -607,7 +612,7 @@ class DataReader(HIReader):
             if (str.startswith(bom_in_latin_1)):
                 return True
         else:
-            logging.error("Unrecognized encoding: '{}'".format(encoding))
+            logger.error("Unrecognized encoding: '{}'".format(encoding))
         return False
 
     def _remove_leading_bom(self, str, encoding='utf-8'):
@@ -636,6 +641,6 @@ class DataReader(HIReader):
             if (str.startswith(bom_in_latin_1)):
                 str_new = "".join(str.split(bom_in_latin_1,1)[1])
         else:
-            logging.error("Unrecognized encoding: '{}'".format(encoding))
+            logger.error("Unrecognized encoding: '{}'".format(encoding))
         return str_new
 

@@ -5,7 +5,7 @@
     "fields": [
       {
         "display_name": "NLIHC ID",
-        "display_text": "Unique identifier of the project as found in the project table.",
+        "display_text": "Preservation Catalog ID",
         "required_in_source": true,
         "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
@@ -13,7 +13,7 @@
       },
       {
         "display_name": "proj_name",
-        "display_text": "",
+        "display_text": "Property name",
         "required_in_source": false,
         "source_name": "Proj_name",
         "sql_name": "proj_name",
@@ -29,7 +29,7 @@
       },
       {
         "display_name": "bldg_image_url",
-        "display_text": "",
+        "display_text": "OCTO property URL",
         "required_in_source": false,
         "source_name": "Bldg_image_url",
         "sql_name": "bldg_image_url",
@@ -37,7 +37,7 @@
       },
       {
         "display_name": "bldg_streetview_url",
-        "display_text": "",
+        "display_text": "Google Street View URL",
         "required_in_source": false,
         "source_name": "Bldg_streetview_url",
         "sql_name": "bldg_streetview_url",
@@ -45,7 +45,7 @@
       },
       {
         "display_name": "MAR ID",
-        "display_text": "Unique id in DC's Master Address Repository",
+        "display_text": "Unique ID in DC's Master Address Repository",
         "required_in_source": true,
         "source_name": "Bldg_address_id",
         "sql_name": "mar_id",
@@ -53,7 +53,7 @@
       },
       {
         "display_name": "anc2012",
-        "display_text": "",
+        "display_text": "Advisory Neighborhood Commission as of 2012",
         "required_in_source": false,
         "source_name": "Anc2012",
         "sql_name": "anc2012",
@@ -61,7 +61,7 @@
       },
       {
         "display_name": "psa2012",
-        "display_text": "",
+        "display_text": "Police Service Area as of 2012",
         "required_in_source": false,
         "source_name": "Psa2012",
         "sql_name": "psa2012",
@@ -69,7 +69,7 @@
       },
       {
         "display_name": "geo2010",
-        "display_text": "",
+        "display_text": "Full census tract ID as of 2010",
         "required_in_source": false,
         "source_name": "Geo2010",
         "sql_name": "geo2010",
@@ -77,7 +77,7 @@
       },
       {
         "display_name": "cluster_tr2000",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster as of 2000",
         "required_in_source": false,
         "source_name": "Cluster_tr2000",
         "sql_name": "cluster_tr2000",
@@ -85,7 +85,7 @@
       },
       {
         "display_name": "cluster_tr2000_name",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster name as of 2000",
         "required_in_source": false,
         "source_name": "Cluster_tr2000_name",
         "sql_name": "cluster_tr2000_name",
@@ -93,7 +93,7 @@
       },
       {
         "display_name": "bldg_zip",
-        "display_text": "",
+        "display_text": "Property zip code",
         "required_in_source": false,
         "source_name": "Bldg_zip",
         "sql_name": "bldg_zip",
@@ -101,7 +101,7 @@
       },
       {
         "display_name": "ward2012",
-        "display_text": "",
+        "display_text": "Ward as of 2012",
         "required_in_source": false,
         "source_name": "Ward2012",
         "sql_name": "ward2012",
@@ -109,7 +109,7 @@
       },
       {
         "display_name": "ssl",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID",
         "required_in_source": false,
         "source_name": "Ssl",
         "sql_name": "ssl",
@@ -117,7 +117,7 @@
       },
       {
         "display_name": "bldg_x",
-        "display_text": "",
+        "display_text": "Longitude (MD State Plane Coordinate, NAD 1983 meters)",
         "required_in_source": false,
         "source_name": "Bldg_x",
         "sql_name": "bldg_x",
@@ -125,7 +125,7 @@
       },
       {
         "display_name": "bldg_y",
-        "display_text": "",
+        "display_text": "Latitude (MD State Plane Coordinate, NAD 1983 meters)",
         "required_in_source": false,
         "source_name": "Bldg_y",
         "sql_name": "bldg_y",
@@ -133,7 +133,7 @@
       },
       {
         "display_name": "bldg_lon",
-        "display_text": "",
+        "display_text": "Longitude",
         "required_in_source": false,
         "source_name": "Bldg_lon",
         "sql_name": "bldg_lon",
@@ -141,7 +141,7 @@
       },
       {
         "display_name": "bldg_lat",
-        "display_text": "",
+        "display_text": "Latitude",
         "required_in_source": false,
         "source_name": "Bldg_lat",
         "sql_name": "bldg_lat",
@@ -575,7 +575,7 @@
       },
       {
         "display_name": "Object ID",
-        "display_text": "",
+        "display_text": "Database ID from Open Data DC",
         "required_in_source": true,
         "source_name": "OBJECTID",
         "sql_name": "objectid",
@@ -583,7 +583,7 @@
       },
       {
         "display_name": "DCRA Internal Number",
-        "display_text": "",
+        "display_text": "Tracking ID from DC Departent of Consumer and Regulatory Affairs",
         "required_in_source": true,
         "source_name": "DCRAINTERNALNUMBER",
         "sql_name": "dcrainternalnumber",
@@ -591,7 +591,7 @@
       },
       {
         "display_name": "Issue Date",
-        "display_text": "",
+        "display_text": "Date the permit was issued",
         "required_in_source": true,
         "source_name": "ISSUE_DATE",
         "sql_name": "issue_date",
@@ -599,7 +599,7 @@
       },
       {
         "display_name": "Permit ID",
-        "display_text": "",
+        "display_text": "Permit ID",
         "required_in_source": true,
         "source_name": "PERMIT_ID",
         "sql_name": "permit_id",
@@ -607,7 +607,7 @@
       },
       {
         "display_name": "Permit Type Name",
-        "display_text": "",
+        "display_text": "Indicates the permit's primary type",
         "required_in_source": true,
         "source_name": "PERMIT_TYPE_NAME",
         "sql_name": "permit_type_name",
@@ -615,7 +615,7 @@
       },
       {
         "display_name": "Permit Subtype Name",
-        "display_text": "",
+        "display_text": "Indicates the permit's secondary type",
         "required_in_source": true,
         "source_name": "PERMIT_SUBTYPE_NAME",
         "sql_name": "permit_subtype_name",
@@ -623,7 +623,7 @@
       },
       {
         "display_name": "Permit Category Name",
-        "display_text": "",
+        "display_text": "Indicates specific category detail when available",
         "required_in_source": true,
         "source_name": "PERMIT_CATEGORY_NAME",
         "sql_name": "permit_category_name",
@@ -631,7 +631,7 @@
       },
       {
         "display_name": "Application Status Name",
-        "display_text": "",
+        "display_text": "Permit application status",
         "required_in_source": true,
         "source_name": "APPLICATION_STATUS_NAME",
         "sql_name": "application_status_name",
@@ -639,7 +639,7 @@
       },
       {
         "display_name": "Full Address",
-        "display_text": "",
+        "display_text": "Full street address associated with the permit",
         "required_in_source": true,
         "source_name": "FULL_ADDRESS",
         "sql_name": "full_address",
@@ -647,7 +647,7 @@
       },
       {
         "display_name": "Description of Work",
-        "display_text": "",
+        "display_text": "Description of work to be completed under the permit",
         "required_in_source": true,
         "source_name": "DESC_OF_WORK",
         "sql_name": "desc_of_work",
@@ -655,7 +655,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID associated with the permit address",
         "required_in_source": true,
         "source_name": "SSL",
         "sql_name": "ssl",
@@ -663,7 +663,7 @@
       },
       {
         "display_name": "Zoning",
-        "display_text": "",
+        "display_text": "The DC zone district associated with the permit address",
         "required_in_source": true,
         "source_name": "ZONING",
         "sql_name": "zoning",
@@ -671,7 +671,7 @@
       },
       {
         "display_name": "Permit Applicant",
-        "display_text": "",
+        "display_text": "Permit applicant name(s)",
         "required_in_source": true,
         "source_name": "PERMIT_APPLICANT",
         "sql_name": "permit_applicant",
@@ -679,7 +679,7 @@
       },
       {
         "display_name": "Fee Type",
-        "display_text": "",
+        "display_text": "The fee type(s) and cost(s) for the permit",
         "required_in_source": true,
         "source_name": "FEE_TYPE",
         "sql_name": "fee_type",
@@ -687,7 +687,7 @@
       },
       {
         "display_name": "Fees Paid",
-        "display_text": "",
+        "display_text": "Total amount of fees paid for the permit",
         "required_in_source": true,
         "source_name": "FEES_PAID",
         "sql_name": "fees_paid",
@@ -695,7 +695,7 @@
       },
       {
         "display_name": "Owner Name",
-        "display_text": "",
+        "display_text": "Property owner name",
         "required_in_source": true,
         "source_name": "OWNER_NAME",
         "sql_name": "owner_name",
@@ -703,7 +703,7 @@
       },
       {
         "display_name": "Last Modified Date",
-        "display_text": "",
+        "display_text": "Indicates the last time the permit application was modified",
         "required_in_source": true,
         "source_name": "LASTMODIFIEDDATE",
         "sql_name": "lastmodifieddate",
@@ -711,7 +711,7 @@
       },
       {
         "display_name": "City",
-        "display_text": "",
+        "display_text": "City",
         "required_in_source": true,
         "source_name": "CITY",
         "sql_name": "city",
@@ -719,7 +719,7 @@
       },
       {
         "display_name": "State",
-        "display_text": "",
+        "display_text": "State",
         "required_in_source": true,
         "source_name": "STATE",
         "sql_name": "state",
@@ -727,7 +727,7 @@
       },
       {
         "display_name": "Latitude",
-        "display_text": "",
+        "display_text": "Latitude",
         "required_in_source": true,
         "source_name": "LATITUDE",
         "sql_name": "latitude",
@@ -735,7 +735,7 @@
       },
       {
         "display_name": "Longitude",
-        "display_text": "",
+        "display_text": "Longitude",
         "required_in_source": true,
         "source_name": "LONGITUDE",
         "sql_name": "longitude",
@@ -743,7 +743,7 @@
       },
       {
         "display_name": "Xcoord",
-        "display_text": "",
+        "display_text": "X coordinate",
         "required_in_source": true,
         "source_name": "XCOORD",
         "sql_name": "xcoord",
@@ -751,7 +751,7 @@
       },
       {
         "display_name": "Ycoord",
-        "display_text": "",
+        "display_text": "Y coordinate",
         "required_in_source": true,
         "source_name": "YCOORD",
         "sql_name": "ycoord",
@@ -759,7 +759,7 @@
       },
       {
         "display_name": "Zip code",
-        "display_text": "",
+        "display_text": "Zip code",
         "required_in_source": true,
         "source_name": "ZIPCODE",
         "sql_name": "zip",
@@ -767,7 +767,7 @@
       },
       {
         "display_name": "Mar Address Repository ID",
-        "display_text": "",
+        "display_text": "Mar Address Repository ID",
         "required_in_source": true,
         "source_name": "MARADDRESSREPOSITORYID",
         "sql_name": "mar_id",
@@ -775,7 +775,7 @@
       },
       {
         "display_name": "DC Stat Address Key",
-        "display_text": "",
+        "display_text": "DC Stat Address Key",
         "required_in_source": true,
         "source_name": "DCSTATADDRESSKEY",
         "sql_name": "dcstataddresskey",
@@ -783,7 +783,7 @@
       },
       {
         "display_name": "DC Stat Location Key",
-        "display_text": "",
+        "display_text": "DC Stat Location Key",
         "required_in_source": true,
         "source_name": "DCSTATLOCATIONKEY",
         "sql_name": "dcstatlocationkey",
@@ -791,7 +791,7 @@
       },
       {
         "display_name": "Census Tract",
-        "display_text": "",
+        "display_text": "Census Tract",
         "required_in_source": false,
         "source_name": "census_tract",
         "sql_name": "census_tract",
@@ -799,7 +799,7 @@
       },
       {
         "display_name": "Ward",
-        "display_text": "",
+        "display_text": "Ward",
         "required_in_source": true,
         "source_name": "WARD",
         "sql_name": "ward",
@@ -807,7 +807,7 @@
       },
       {
         "display_name": "ANC",
-        "display_text": "",
+        "display_text": "Advisory Neighborhood Commission",
         "required_in_source": true,
         "source_name": "ANC",
         "sql_name": "anc",
@@ -815,7 +815,7 @@
       },
       {
         "display_name": "SMD",
-        "display_text": "",
+        "display_text": "SMD",
         "required_in_source": true,
         "source_name": "SMD",
         "sql_name": "smd",
@@ -823,7 +823,7 @@
       },
       {
         "display_name": "District",
-        "display_text": "",
+        "display_text": "District",
         "required_in_source": true,
         "source_name": "DISTRICT",
         "sql_name": "district",
@@ -831,7 +831,7 @@
       },
       {
         "display_name": "PSA",
-        "display_text": "",
+        "display_text": "Police Service Area",
         "required_in_source": true,
         "source_name": "PSA",
         "sql_name": "psa",
@@ -839,7 +839,7 @@
       },
       {
         "display_name": "Neighborhood Cluster",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster",
         "required_in_source": true,
         "source_name": "NEIGHBORHOODCLUSTER",
         "sql_name": "neighborhood_cluster",
@@ -847,7 +847,7 @@
       },
       {
         "display_name": "Hot Spot 2006 Name",
-        "display_text": "",
+        "display_text": "Hot Spot 2006 Name",
         "required_in_source": true,
         "source_name": "HOTSPOT2006NAME",
         "sql_name": "hotspot2006name",
@@ -855,7 +855,7 @@
       },
       {
         "display_name": "Hot Spot 2005 Name",
-        "display_text": "",
+        "display_text": "Hot Spot 2005 Name",
         "required_in_source": true,
         "source_name": "HOTSPOT2005NAME",
         "sql_name": "hotspot2005name",
@@ -863,7 +863,7 @@
       },
       {
         "display_name": "Hot Spot 2004 Name",
-        "display_text": "",
+        "display_text": "Hot Spot 2004 Name",
         "required_in_source": true,
         "source_name": "HOTSPOT2004NAME",
         "sql_name": "hotspot2004name",
@@ -871,7 +871,7 @@
       },
       {
         "display_name": "Business Improvement District",
-        "display_text": "",
+        "display_text": "Business Improvement District",
         "required_in_source": true,
         "source_name": "BUSINESSIMPROVEMENTDISTRICT",
         "sql_name": "businessimprovementdistrict",
@@ -941,7 +941,7 @@
       },
       {
         "display_name": "Offense Category",
-        "display_text": "",
+        "display_text": "Indicates what type of offense occurred ",
         "required_in_source": true,
         "source_name": "OFFENSE",
         "sql_name": "offense",
@@ -957,7 +957,7 @@
       },
       {
         "display_name": "Xblock",
-        "display_text": "",
+        "display_text": "City block X coordinate",
         "required_in_source": true,
         "source_name": "XBLOCK",
         "sql_name": "xblock",
@@ -965,7 +965,7 @@
       },
       {
         "display_name": "Yblock",
-        "display_text": "",
+        "display_text": "City block Y coordinate",
         "required_in_source": true,
         "source_name": "YBLOCK",
         "sql_name": "yblock",
@@ -973,7 +973,7 @@
       },
       {
         "display_name": "Ward",
-        "display_text": "",
+        "display_text": "Ward",
         "required_in_source": true,
         "source_name": "WARD",
         "sql_name": "ward",
@@ -981,7 +981,7 @@
       },
       {
         "display_name": "ANC",
-        "display_text": "",
+        "display_text": "Advisory Neighborhood Commission",
         "required_in_source": true,
         "source_name": "ANC",
         "sql_name": "anc",
@@ -989,7 +989,7 @@
       },
       {
         "display_name": "Police District",
-        "display_text": "",
+        "display_text": "Police District",
         "required_in_source": true,
         "source_name": "DISTRICT",
         "sql_name": "district",
@@ -997,7 +997,7 @@
       },
       {
         "display_name": "PSA",
-        "display_text": "",
+        "display_text": "Police Service Area",
         "required_in_source": true,
         "source_name": "PSA",
         "sql_name": "psa",
@@ -1005,7 +1005,7 @@
       },
       {
         "display_name": "Neighborhood Cluster",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster",
         "required_in_source": true,
         "source_name": "NEIGHBORHOOD_CLUSTER",
         "sql_name": "neighborhood_cluster",
@@ -1013,7 +1013,7 @@
       },
       {
         "display_name": "Census Block Group",
-        "display_text": "",
+        "display_text": "Census Block Group",
         "required_in_source": true,
         "source_name": "BLOCK_GROUP",
         "sql_name": "block_group",
@@ -1021,7 +1021,7 @@
       },
       {
         "display_name": "Census Tract",
-        "display_text": "",
+        "display_text": "Full census tract ID associated with the crime address",
         "required_in_source": true,
         "source_name": "CENSUS_TRACT",
         "sql_name": "census_tract",
@@ -1029,7 +1029,7 @@
       },
       {
         "display_name": "Voting Precint",
-        "display_text": "",
+        "display_text": "Voting Precint",
         "required_in_source": true,
         "source_name": "VOTING_PRECINCT",
         "sql_name": "voting_precinct",
@@ -1037,7 +1037,7 @@
       },
       {
         "display_name": "Xcoord",
-        "display_text": "",
+        "display_text": "X coordinate",
         "required_in_source": true,
         "source_name": "XCOORD",
         "sql_name": "xcoord",
@@ -1045,7 +1045,7 @@
       },
       {
         "display_name": "Ycoord",
-        "display_text": "",
+        "display_text": "Y coordinate",
         "required_in_source": true,
         "source_name": "YCOORD",
         "sql_name": "ycoord",
@@ -1053,7 +1053,7 @@
       },
       {
         "display_name": "Latitude",
-        "display_text": "",
+        "display_text": "Latitude",
         "required_in_source": true,
         "source_name": "LATITUDE",
         "sql_name": "latitude",
@@ -1061,7 +1061,7 @@
       },
       {
         "display_name": "Longitude",
-        "display_text": "",
+        "display_text": "Longitude",
         "required_in_source": true,
         "source_name": "LONGITUDE",
         "sql_name": "longitude",
@@ -1069,7 +1069,7 @@
       },
       {
         "display_name": "BID",
-        "display_text": "",
+        "display_text": "Business Improvement District",
         "required_in_source": true,
         "source_name": "BID",
         "sql_name": "bid",
@@ -1077,7 +1077,7 @@
       },
       {
         "display_name": "Start Date",
-        "display_text": "",
+        "display_text": "System start date from Open Data DC",
         "required_in_source": true,
         "source_name": "START_DATE",
         "sql_name": "start_date",
@@ -1085,7 +1085,7 @@
       },
       {
         "display_name": "End Date",
-        "display_text": "",
+        "display_text": "System end date from Open Data DC",
         "required_in_source": true,
         "source_name": "END_DATE",
         "sql_name": "end_date",
@@ -1093,7 +1093,7 @@
       },
       {
         "display_name": "Object ID",
-        "display_text": "",
+        "display_text": "Database ID from Open Data DC",
         "required_in_source": true,
         "source_name": "OBJECTID",
         "sql_name": "objectid",
@@ -1115,7 +1115,7 @@
     "fields": [
       {
         "display_name": "Object ID",
-        "display_text": "",
+        "display_text": "Database ID from Open Data DC",
         "required_in_source": true,
         "source_name": "OBJECTID",
         "sql_name": "objectid",
@@ -1123,7 +1123,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID associated with the property address",
         "required_in_source": true,
         "source_name": "SSL",
         "sql_name": "ssl",
@@ -1131,7 +1131,7 @@
       },
       {
         "display_name": "Assessor Name",
-        "display_text": "",
+        "display_text": "Assessor Name",
         "required_in_source": true,
         "source_name": "ASSESSOR_NAME",
         "sql_name": "assessor_name",
@@ -1139,7 +1139,7 @@
       },
       {
         "display_name": "Land Use Code",
-        "display_text": "",
+        "display_text": "Three digit code that identifies the property type",
         "required_in_source": true,
         "source_name": "LAND_USE_CODE",
         "sql_name": "land_use_code",
@@ -1147,7 +1147,7 @@
       },
       {
         "display_name": "Land Use Description",
-        "display_text": "",
+        "display_text": "Describes the property type associated with the Land Use Code",
         "required_in_source": true,
         "source_name": "LAND_USE_DESCRIPTION",
         "sql_name": "land_use_description",
@@ -1155,7 +1155,7 @@
       },
       {
         "display_name": "Land Area",
-        "display_text": "",
+        "display_text": "Numeric measurement of land area associated with the property address",
         "required_in_source": true,
         "source_name": "LANDAREA",
         "sql_name": "landarea",
@@ -1163,7 +1163,7 @@
       },
       {
         "display_name": "Property Address",
-        "display_text": "",
+        "display_text": "Property Address",
         "required_in_source": true,
         "source_name": "PROPERTY_ADDRESS",
         "sql_name": "property_address",
@@ -1171,7 +1171,7 @@
       },
       {
         "display_name": "OTR Neighborhood Code",
-        "display_text": "",
+        "display_text": "OTR Neighborhood Code",
         "required_in_source": true,
         "source_name": "OTR_NEIGHBORHOOD_CODE",
         "sql_name": "otr_neighborhood_code",
@@ -1179,7 +1179,7 @@
       },
       {
         "display_name": "OTR Neighborhood Name",
-        "display_text": "",
+        "display_text": "OTR Neighborhood Name",
         "required_in_source": true,
         "source_name": "OTR_NEIGHBORHOOD_NAME",
         "sql_name": "otr_neighborhood_name",
@@ -1187,7 +1187,7 @@
       },
       {
         "display_name": "Owner Name Primary",
-        "display_text": "",
+        "display_text": "Name of the legal property owner",
         "required_in_source": true,
         "source_name": "OWNER_NAME_PRIMARY",
         "sql_name": "owner_name_primary",
@@ -1195,7 +1195,7 @@
       },
       {
         "display_name": "Careof Name",
-        "display_text": "",
+        "display_text": "Name of property caretaker if provided",
         "required_in_source": true,
         "source_name": "CAREOF_NAME",
         "sql_name": "careof_name",
@@ -1203,7 +1203,7 @@
       },
       {
         "display_name": "Owner Address Line 1",
-        "display_text": "",
+        "display_text": "Owner Address Line 1",
         "required_in_source": true,
         "source_name": "OWNER_ADDRESS_LINE1",
         "sql_name": "owner_address_line1",
@@ -1211,7 +1211,7 @@
       },
       {
         "display_name": "Owner Address Line 2",
-        "display_text": "",
+        "display_text": "Owner Address Line 2",
         "required_in_source": true,
         "source_name": "OWNER_ADDRESS_LINE2",
         "sql_name": "owner_address_line2",
@@ -1219,7 +1219,7 @@
       },
       {
         "display_name": "Owner Address City State Zip",
-        "display_text": "",
+        "display_text": "Owner Address City State Zip",
         "required_in_source": true,
         "source_name": "OWNER_ADDRESS_CITYSTZIP",
         "sql_name": "owner_address_citystzip",
@@ -1331,7 +1331,7 @@
       },
       {
         "display_name": "Tax Rate",
-        "display_text": "",
+        "display_text": "Tax Rate",
         "required_in_source": true,
         "source_name": "TAXRATE",
         "sql_name": "taxrate",
@@ -1339,7 +1339,7 @@
       },
       {
         "display_name": "Mixed Use",
-        "display_text": "",
+        "display_text": "Mixed Use",
         "required_in_source": true,
         "source_name": "MIXED_USE",
         "sql_name": "mixed_use",
@@ -1347,7 +1347,7 @@
       },
       {
         "display_name": "Owner Occupied Coop Units",
-        "display_text": "",
+        "display_text": "Number of owner occupied coop units",
         "required_in_source": true,
         "source_name": "OWNER_OCCUPIED_COOP_UNITS",
         "sql_name": "owner_occupied_coop_units",
@@ -1355,7 +1355,7 @@
       },
       {
         "display_name": "Last Sale Price",
-        "display_text": "",
+        "display_text": "Last Sale Price",
         "required_in_source": true,
         "source_name": "LAST_SALE_PRICE",
         "sql_name": "last_sale_price",
@@ -1363,7 +1363,7 @@
       },
       {
         "display_name": "Last Sale Date",
-        "display_text": "",
+        "display_text": "Last Sale Date",
         "required_in_source": true,
         "source_name": "LAST_SALE_DATE",
         "sql_name": "last_sale_date",
@@ -1371,7 +1371,7 @@
       },
       {
         "display_name": "Deed Date",
-        "display_text": "",
+        "display_text": "Deed Date",
         "required_in_source": true,
         "source_name": "DEED_DATE",
         "sql_name": "deed_date",
@@ -1395,7 +1395,7 @@
       },
       {
         "display_name": "Owner Name Secondary",
-        "display_text": "",
+        "display_text": "Owner Name Secondary",
         "required_in_source": true,
         "source_name": "OWNER_NAME_SECONDARY",
         "sql_name": "owner_name_secondary",
@@ -1403,7 +1403,7 @@
       },
       {
         "display_name": "Address ID",
-        "display_text": "",
+        "display_text": "Address ID",
         "required_in_source": true,
         "source_name": "ADDRESS_ID",
         "sql_name": "address_id",
@@ -1411,7 +1411,7 @@
       },
       {
         "display_name": "Last Modified Date",
-        "display_text": "",
+        "display_text": "Date the record was last modified according to Open Data DC",
         "required_in_source": true,
         "source_name": "LASTMODIFIEDDATE",
         "sql_name": "lastmodifieddate",
@@ -1419,7 +1419,7 @@
       },
       {
         "display_name": "NLIHC ID",
-        "display_text": "Used to uniquely identify a record in the Project table",
+        "display_text": "Preservation Catalog ID",
         "required_in_source": false,
         "source_name": "nlihc_id",
         "sql_name": "nlihc_id",
@@ -2079,7 +2079,7 @@
     "fields": [
       {
         "display_name": "Nlihc ID",
-        "display_text": "",
+        "display_text": "Preservation Catalog ID",
         "required_in_source": true,
         "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
@@ -2087,7 +2087,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID associated with the property address",
         "required_in_source": true,
         "source_name": "Ssl",
         "sql_name": "ssl",
@@ -2189,15 +2189,15 @@
     "fields": [
       {
         "display_name": "Nlihc_id",
-        "display_text": "",
+        "display_text": "National Low Income Housing Coalition ID",
         "required_in_source": true,
         "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
         "type": "text"
       },
       {
-        "display_name": "Mar ID",
-        "display_text": "The mar id for the building location",
+        "display_name": "MAR ID",
+        "display_text": "The MAR id for the property location",
         "required_in_source": false,
         "source_name": "mar_id",
         "sql_name": "mar_id",
@@ -2205,7 +2205,7 @@
       },
       {
         "display_name": "Status",
-        "display_text": "",
+        "display_text": "Indicates if the property is active",
         "required_in_source": true,
         "source_name": "Status",
         "sql_name": "status",
@@ -2213,7 +2213,7 @@
       },
       {
         "display_name": "Subsidized",
-        "display_text": "",
+        "display_text": "Indicates if the property is subsidized",
         "required_in_source": true,
         "source_name": "Subsidized",
         "sql_name": "subsidized",
@@ -2221,7 +2221,7 @@
       },
       {
         "display_name": "Cat Expiring",
-        "display_text": "",
+        "display_text": "Indicates if the property has an upcoming expiring subsidy",
         "required_in_source": true,
         "source_name": "Cat_Expiring",
         "sql_name": "cat_expiring",
@@ -2229,7 +2229,7 @@
       },
       {
         "display_name": "Cat Failing Inspection",
-        "display_text": "",
+        "display_text": "Indicates if the property has a recent failing REAC score",
         "required_in_source": true,
         "source_name": "Cat_Failing_Insp",
         "sql_name": "cat_failing_insp",
@@ -2237,7 +2237,7 @@
       },
       {
         "display_name": "Project Name",
-        "display_text": "",
+        "display_text": "Property name",
         "required_in_source": true,
         "source_name": "Proj_Name",
         "sql_name": "proj_name",
@@ -2245,7 +2245,7 @@
       },
       {
         "display_name": "Project Address",
-        "display_text": "",
+        "display_text": "Property address",
         "required_in_source": true,
         "source_name": "Proj_addre",
         "sql_name": "proj_addre",
@@ -2253,7 +2253,7 @@
       },
       {
         "display_name": "Project City",
-        "display_text": "",
+        "display_text": "Property city",
         "required_in_source": true,
         "source_name": "Proj_City",
         "sql_name": "proj_city",
@@ -2261,7 +2261,7 @@
       },
       {
         "display_name": "Project State",
-        "display_text": "",
+        "display_text": "Property state",
         "required_in_source": true,
         "source_name": "Proj_ST",
         "sql_name": "proj_st",
@@ -2269,7 +2269,7 @@
       },
       {
         "display_name": "Zip Code",
-        "display_text": "",
+        "display_text": "Property zip code",
         "required_in_source": true,
         "source_name": "Proj_zip",
         "sql_name": "zip",
@@ -2277,7 +2277,7 @@
       },
       {
         "display_name": "Project Units Total",
-        "display_text": "",
+        "display_text": "Total housing units in the property",
         "required_in_source": true,
         "source_name": "Proj_Units_Tot",
         "sql_name": "proj_units_tot",
@@ -2285,15 +2285,15 @@
       },
       {
         "display_name": "Project Units Assist Min",
-        "display_text": "",
+        "display_text": "Minimum total assisted housing units in the property",
         "required_in_source": true,
         "source_name": "Proj_Units_Assist_Min",
         "sql_name": "proj_units_assist_min",
         "type": "integer"
       },
       {
-        "display_name": "project Units Assist Max",
-        "display_text": "",
+        "display_name": "Project Units Assist Max",
+        "display_text": "Maximum total assisted housing units in the property",
         "required_in_source": true,
         "source_name": "Proj_Units_Assist_Max",
         "sql_name": "proj_units_assist_max",
@@ -2301,7 +2301,7 @@
       },
       {
         "display_name": "Hud Owner Effect Dt",
-        "display_text": "",
+        "display_text": "Date current owner acquired property according to HUD",
         "required_in_source": true,
         "source_name": "Hud_Own_Effect_dt",
         "sql_name": "hud_own_effect_dt",
@@ -2309,7 +2309,7 @@
       },
       {
         "display_name": "Hud Owner Name",
-        "display_text": "",
+        "display_text": "Current property owner name according to HUD",
         "required_in_source": true,
         "source_name": "Hud_Own_Name",
         "sql_name": "hud_own_name",
@@ -2317,7 +2317,7 @@
       },
       {
         "display_name": "Hud Owner Type",
-        "display_text": "",
+        "display_text": "Current property owner type according to HUD",
         "required_in_source": true,
         "source_name": "Hud_Own_Type",
         "sql_name": "hud_own_type",
@@ -2325,7 +2325,7 @@
       },
       {
         "display_name": "Hud Mgr Name",
-        "display_text": "",
+        "display_text": "Current property manager name according to HUD",
         "required_in_source": true,
         "source_name": "Hud_Mgr_Name",
         "sql_name": "hud_mgr_name",
@@ -2333,7 +2333,7 @@
       },
       {
         "display_name": "Hud Mgr Type",
-        "display_text": "",
+        "display_text": "Current property manager type according to HUD",
         "required_in_source": true,
         "source_name": "Hud_Mgr_Type",
         "sql_name": "hud_mgr_type",
@@ -2341,7 +2341,7 @@
       },
       {
         "display_name": "Subsidy Start First",
-        "display_text": "",
+        "display_text": "First subsidy start date",
         "required_in_source": true,
         "source_name": "Subsidy_Start_First",
         "sql_name": "subsidy_start_first",
@@ -2349,7 +2349,7 @@
       },
       {
         "display_name": "Subsidy Start Last",
-        "display_text": "",
+        "display_text": "Last subsidy start date",
         "required_in_source": true,
         "source_name": "Subsidy_Start_Last",
         "sql_name": "subsidy_start_last",
@@ -2357,7 +2357,7 @@
       },
       {
         "display_name": "Subsidy End First",
-        "display_text": "",
+        "display_text": "First subsidy end date",
         "required_in_source": true,
         "source_name": "Subsidy_End_First",
         "sql_name": "subsidy_end_first",
@@ -2365,7 +2365,7 @@
       },
       {
         "display_name": "Subsidy End Last",
-        "display_text": "",
+        "display_text": "Last subsidy end date",
         "required_in_source": true,
         "source_name": "Subsidy_End_Last",
         "sql_name": "subsidy_end_last",
@@ -2373,7 +2373,7 @@
       },
       {
         "display_name": "Ward",
-        "display_text": "",
+        "display_text": "Ward",
         "required_in_source": true,
         "source_name": "Ward2012",
         "sql_name": "ward",
@@ -2381,7 +2381,7 @@
       },
       {
         "display_name": "PBCA",
-        "display_text": "",
+        "display_text": "Performanced-Based Contract Administrator program property",
         "required_in_source": true,
         "source_name": "PBCA",
         "sql_name": "pbca",
@@ -2389,7 +2389,7 @@
       },
       {
         "display_name": "ANC",
-        "display_text": "",
+        "display_text": "Advisory Neighborhood Commission",
         "required_in_source": true,
         "source_name": "Anc2012",
         "sql_name": "anc",
@@ -2397,7 +2397,7 @@
       },
       {
         "display_name": "Psa 2012",
-        "display_text": "",
+        "display_text": "Police Service Area",
         "required_in_source": true,
         "source_name": "Psa2012",
         "sql_name": "psa2012",
@@ -2405,7 +2405,7 @@
       },
       {
         "display_name": "Census Tract",
-        "display_text": "",
+        "display_text": "Censur Tract",
         "required_in_source": true,
         "source_name": "Geo2010",
         "sql_name": "census_tract",
@@ -2413,7 +2413,7 @@
       },
       {
         "display_name": "Neighborhood Cluster",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster",
         "required_in_source": true,
         "source_name": "Cluster_tr2000",
         "sql_name": "neighborhood_cluster",
@@ -2421,7 +2421,7 @@
       },
       {
         "display_name": "Neighborhood Cluster Description",
-        "display_text": "",
+        "display_text": "Tract-based neighborhood cluster description",
         "required_in_source": true,
         "source_name": "Cluster_tr2000_name",
         "sql_name": "neighborhood_cluster_desc",
@@ -2436,16 +2436,16 @@
         "type": "text"
       },
       {
-        "display_name": "Project Image url",
-        "display_text": "",
+        "display_name": "Project Image URL",
+        "display_text": "OCTO property image URL",
         "required_in_source": true,
         "source_name": "Proj_image_url",
         "sql_name": "proj_image_url",
         "type": "text"
       },
       {
-        "display_name": "Project Street View url",
-        "display_text": "",
+        "display_name": "Project Street View URL",
+        "display_text": "Google Street View URL",
         "required_in_source": true,
         "source_name": "Proj_streetview_url",
         "sql_name": "proj_streetview_url",
@@ -2453,7 +2453,7 @@
       },
       {
         "display_name": "Project Address ID",
-        "display_text": "",
+        "display_text": "MAR Address ID",
         "required_in_source": true,
         "source_name": "Proj_address_id",
         "sql_name": "proj_address_id",
@@ -2461,7 +2461,7 @@
       },
       {
         "display_name": "Xcoord",
-        "display_text": "",
+        "display_text": "Longitude (MD State Plane Coordinate, NAD 1983 meters)",
         "required_in_source": true,
         "source_name": "Proj_x",
         "sql_name": "xcoord",
@@ -2469,7 +2469,7 @@
       },
       {
         "display_name": "Ycoord",
-        "display_text": "",
+        "display_text": "Latitude (MD State Plane Coordinate, NAD 1983 meters)",
         "required_in_source": true,
         "source_name": "Proj_y",
         "sql_name": "ycoord",
@@ -2477,7 +2477,7 @@
       },
       {
         "display_name": "Latitude",
-        "display_text": "",
+        "display_text": "Latitude",
         "required_in_source": true,
         "source_name": "Proj_lat",
         "sql_name": "latitude",
@@ -2485,7 +2485,7 @@
       },
       {
         "display_name": "Longitude",
-        "display_text": "",
+        "display_text": "Longitude",
         "required_in_source": true,
         "source_name": "Proj_lon",
         "sql_name": "longitude",
@@ -2493,7 +2493,7 @@
       },
       {
         "display_name": "Building Count",
-        "display_text": "",
+        "display_text": "Building Count",
         "required_in_source": true,
         "source_name": "Bldg_count",
         "sql_name": "bldg_count",
@@ -2542,7 +2542,7 @@
       },
       {
         "display_name": "Contract number",
-        "display_text": "",
+        "display_text": "TRACS-assigned contract number",
         "required_in_source": true,
         "source_name": "contract_number",
         "sql_name": "contract_number",
@@ -2550,7 +2550,7 @@
       },
       {
         "display_name": "Category Code",
-        "display_text": "",
+        "display_text": "Preservation Catalog property category",
         "required_in_source": true,
         "source_name": "Category_Code",
         "sql_name": "category_code",
@@ -2558,7 +2558,7 @@
       },
       {
         "display_name": "Cat at Risk",
-        "display_text": "",
+        "display_text": "Property at risk according to Preservation Catalog",
         "required_in_source": true,
         "source_name": "Cat_At_Risk",
         "sql_name": "cat_at_risk",
@@ -2566,7 +2566,7 @@
       },
       {
         "display_name": "Cat More Info",
-        "display_text": "",
+        "display_text": "Property flagged for gathering more information in Preservation Catalog",
         "required_in_source": true,
         "source_name": "Cat_More_Info",
         "sql_name": "cat_more_info",
@@ -2574,7 +2574,7 @@
       },
       {
         "display_name": "Cat Lost",
-        "display_text": "",
+        "display_text": "Lost affordable housing according to Preservation Catalog",
         "required_in_source": true,
         "source_name": "Cat_Lost",
         "sql_name": "cat_lost",
@@ -2582,7 +2582,7 @@
       },
       {
         "display_name": "Cat Replaced",
-        "display_text": "",
+        "display_text": "Replaced affordable housing according to Preservation Catalog",
         "required_in_source": true,
         "source_name": "Cat_Replaced",
         "sql_name": "cat_replaced",
@@ -2653,7 +2653,22 @@
         "sql_name": "most_recent_topa_date",
         "type": "timestamp"
       },
-
+      {
+        "display_name": "Nearest Metro Station",
+        "display_text": "Distance to Nearest Metro Station within Half a Mile",
+        "required_in_source": false,
+        "source_name": "nearest_metro_station",
+        "sql_name": "nearest_metro_station",
+        "type": "decimal"
+      },
+      {
+        "display_name": "Bus Routes Nearby",
+        "display_text": "Number of Bus Routes within Half a Mile",
+        "required_in_source": false,
+        "source_name": "bus_routes_nearby",
+        "sql_name": "bus_routes_nearby",
+        "type": "integer"
+      },
       {
         "display_name": "Total Units (MAR)",
         "display_text": "Total number of units (including market rate) as determined by the Master Address Repository",
@@ -2696,8 +2711,6 @@
         "sql_name": "in_dhcd",
         "type": "text"
       }, 
-
-
       {
         "display_name": "Unique Data ID",
         "display_text": "Identifies which source file this record came from",
@@ -2776,7 +2789,7 @@
     "fields": [
       {
         "display_name": "Nlihc ID",
-        "display_text": "",
+        "display_text": "Preservation Catalog ID",
         "required_in_source": true,
         "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
@@ -2784,7 +2797,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID",
         "required_in_source": true,
         "source_name": "Ssl",
         "sql_name": "ssl",
@@ -2830,7 +2843,7 @@
     "fields": [
       {
         "display_name": "Nlihc ID",
-        "display_text": "",
+        "display_text": "Preservation Catalog ID",
         "required_in_source": true,
         "source_name": "Nlihc_id",
         "sql_name": "nlihc_id",
@@ -3004,7 +3017,7 @@
     "fields": [
       {
         "display_name": "Nlihc ID",
-        "display_text": "",
+        "display_text": "Preservation Catalog ID",
         "required_in_source": true,
         "source_name": "nlihc_id",
         "sql_name": "nlihc_id",
@@ -3920,7 +3933,7 @@
       },
       {
         "display_name": "Latitude",
-        "display_text": "Latitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
+        "display_text": "Latitude of address associated with TOPA notice confirmed by reverse geocoding.",
         "required_in_source": true,
         "source_name": "Y",
         "sql_name": "latitude",
@@ -3928,7 +3941,7 @@
       },
       {
         "display_name": "Longitude",
-        "display_text": "Longitude confirmed of address associated with TOPA notice confirme by reverse geocoding.",
+        "display_text": "Longitude of address associated with TOPA notice confirmed by reverse geocoding.",
         "required_in_source": true,
         "source_name": "X",
         "sql_name": "longitude",
@@ -3944,7 +3957,7 @@
       },
       {
         "display_name": "NLIHC_id",
-        "display_text": "The NLIHC ID as matched from project table.",
+        "display_text": "National Low Income Housing Coalition ID",
         "required_in_source": false,
         "source_name": "nlihc_id",
         "sql_name": "nlihc_id",
@@ -4016,7 +4029,7 @@
       },
       {
         "display_name": "PSA 2012",
-        "display_text": "Police service area assoicated with the address of the TOPA notice as of 2004",
+        "display_text": "Police Service Area assoicated with the address of the TOPA notice as of 2012",
         "required_in_source": true,
         "source_name": "Psa2012",
         "sql_name": "psa2012",
@@ -4024,7 +4037,7 @@
       },
       {
         "display_name": "SSL",
-        "display_text": "Square Suffix Lot ID for the address associated with the address of the TOPA notice.",
+        "display_text": "Square Suffix Lot ID for the address associated with the TOPA notice.",
         "required_in_source": true,
         "source_name": "SSL",
         "sql_name": "ssl",
@@ -4316,6 +4329,13 @@
         "source_name": "construction_permits",
         "sql_name": "construction_permits",
         "type": "decimal"
+      },
+      {
+        "display_name": "Construction Building Permits Rate",
+        "display_text": "Construction permits in zone per 1,000 housing units",
+        "source_name": "construction_permits_rate",
+        "sql_name": "construction_permits_rate",
+        "type": "decimal"
       }
     ]
   },
@@ -4380,7 +4400,7 @@
       },
       {
         "display_name": "ssl",
-        "display_text": "",
+        "display_text": "Square Suffix Lot ID",
         "required_in_source": true,
         "source_name": "SSL",
         "sql_name": "ssl",
