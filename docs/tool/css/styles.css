@@ -291,7 +291,11 @@ button.nullValuesToggleSubmit::before {
 
 .main-view:not(#map-view) {
     position: relative;
-    top: 40px;
+    top: 0px;
+}
+
+.navbar.navbar-default {
+    margin-bottom:0px !important;
 }
 
 .main-view.fade {
@@ -430,6 +434,7 @@ button.nullValuesToggleSubmit::before {
     transform: translate(100%, 0);
     border-right-width: 0;
     border-left: 1px solid rgb(189, 54, 33);
+    border-top: 1px solid rgb(189, 54, 33);
 }
 
 /*
@@ -794,7 +799,6 @@ Others are working correctly.
     height: 40px;
     display: flex;
     justify-content: space-between;
-    position: fixed;
     z-index: 10000;
 }
 
