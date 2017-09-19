@@ -24,10 +24,6 @@ from xmljson import parker as xml_to_json
 
 import json
 
-from housinginsights.tools.logger import HILogger
-
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
-
 from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         APP_METADATA_FIELDS, \
@@ -39,7 +35,7 @@ from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
 INCLUDE_ALL_FIELDS = True
 
 from housinginsights.tools.logger import HILogger
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class DhcdApiConn(ProjectBaseApiConn):
     """

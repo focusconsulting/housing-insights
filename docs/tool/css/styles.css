@@ -84,6 +84,30 @@ div.filter.content input.filter-text{
     box-sizing: border-box;
 }
 
+input.filter-text.invalid {
+    background-color: #D69C93;
+    border: 2px solid #BD3621 !important;
+}
+
+.filter-title.invalid:before {
+    content: '!';
+    position: absolute;
+    right: 11px;
+    color: #fff;
+    z-index: 1;
+    top: 5px;
+}
+
+.filter-title.invalid:after {
+    content: '\025B2';
+    position: absolute;
+    right: 0;
+    font-size: 187%;
+    top: 3px;
+    color: #BD3621;
+    
+}
+
 div.filter.content input.year-text {
     width: 40px;
 }
@@ -107,6 +131,15 @@ div.filter.content .continuous-input-text{
 
 .text-input{
     margin-left: 20px;
+    position: relative;
+}
+
+.text-input.date:before {
+    content: 'mm/dd/yyy';
+    position: absolute;
+    color: #767676;
+    font-size: 11px;
+    top: -23px;
 }
 
 button.nullValuesToggleSubmit{
@@ -377,7 +410,7 @@ button.nullValuesToggleSubmit::before {
     max-width: 300px;
     top: 80px;
     bottom: 0;
-    z-index: 9999;
+    z-index: 1000;
     background-color: rgba(255, 255, 255, 0.95);
     transform: translate(-100%, 0);
     transition: transform 0.2s linear;
@@ -571,6 +604,7 @@ Others are working correctly.
     border-radius: 35px;
     padding: 10px;
     color: rgb(189, 54, 33);
+    background-color: rgba(255,255,255,0.5);
 }
 
 #reset-zoom {
@@ -664,6 +698,7 @@ Others are working correctly.
     color: rgba(0, 0, 30, 0.95);
     font-weight: bold;
     border-top: 1px solid rgba(34, 36, 38, 0.15);
+    position: relative;
 }
 
 /* Hover */
@@ -799,4 +834,20 @@ dl.inline dt{
 /*patches semantic ui bug that search helper text is cut off after clearing a pillbox*/
 input.search {
     width:200px !important;
+}
+
+
+/*fixes spinning box background when a icon-button has a loading icon*/
+.ui.labeled.icon.button> .icon{
+    background-color: rgba(0,0,0,0);
+}
+
+#welcomeModal .actions {
+    margin-top:30px;
+}
+
+
+.shepherd-skinny {
+    max-width:300px !important;
+    z-index:1000 !important;
 }

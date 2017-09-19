@@ -11,8 +11,15 @@ title: Housing Insights - Tool
 Housing Insights (banner content / menu to come)
 </div>
 -->
-    <div id="body-wrapper"></div>
+<div id="body-wrapper"></div>
 <div id="loading-state-screen">Loading saved state . . .</div>
+
+<div id="loading-tool-dimmer" class="ui page dimmer">
+  <div class="content">
+    <div class="ui indeterminate massive text loader">Loading</div>
+  </div>
+</div>
+
 <!-- Modal -->
   <div class="modal fade" id="exportDataModal" role="dialog">
     <div class="modal-dialog">
@@ -32,6 +39,7 @@ Housing Insights (banner content / menu to come)
           </table>
         </div>
         <div class="modal-footer">
+          <button type="button" id="copyFilterNames" class="btn btn-default">Copy Filter Names</button>
           <button type="button" id="exportCsv" class="btn btn-default">Export to CSV</button>
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>

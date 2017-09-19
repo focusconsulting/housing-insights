@@ -13,7 +13,7 @@ import housinginsights.tools.dbtools as dbtools
 from housinginsights.tools.logger import HILogger
 import sqlalchemy
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class WmataApiConn(BaseApiConn):
 

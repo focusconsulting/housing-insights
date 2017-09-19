@@ -10,6 +10,7 @@ var filterView = {
             //Make sure other functionality is hooked up
             setSubs([
                 ['filterViewLoaded', filterUtil.init],
+                
                 ['sidebar', filterView.toggleSidebar],
                 ['subNav', filterView.toggleSubNavButtons],
                 ['filterValues', filterView.indicateActivatedFilters],
@@ -22,6 +23,7 @@ var filterView = {
                 ['mapLayer', filterView.updateLocationFilterControl],
                 ['mapLayer', filterView.resetZoneFilters],
                 ['filterViewLoaded', filterView.updateLocationFilterControl] //handles situation where initial mapLayer state is triggered before the dropdown is available to be selected
+                //['anyFilterActive', filterView.clearAllInvalid]
             ]);
 
             setState('subNav.left','layers');
@@ -223,7 +225,7 @@ var filterView = {
         }
 
         this.setInputCallback = function(callback){
-            
+            console.log('in setInputCallback'); 
             this.callback = callback; // making callback function a property of the filterTextInput so we can access it later -JO
             var checkKeyPress = function(e){
                 if(e.charCode === 9 || e.charCode === 13){
@@ -270,6 +272,7 @@ var filterView = {
 
 
         //Create the element and put it 
+        console.log(keyValuePairsArrayMin);
         for (var i = 0; i < keyValuePairsArrayMin.length; i++){
             output['min'][keyValuePairsArrayMin[i][0]] = document.createElement('input');
             output['min'][keyValuePairsArrayMin[i][0]].setAttribute(
@@ -414,14 +417,21 @@ var filterView = {
         //When textbox inputs change - need to adjust the slider and setState. 
             var specific_state_code = 'filterValues.' + component.source
             var returnVals = ths.textBoxes.returnValues();
-
-            ths.slider.noUiSlider.set(
-                [returnVals['min']['min'], returnVals['max']['max']]
-            );
-
-            ths.uncheckNullToggleOnInitialFilterSet();
-            setState(specific_state_code, [returnVals['min']['min'], returnVals['max']['max'], ths.toggle.element.checked]);
-            ths.checkAgainstOriginalValues(+returnVals['min']['min'], +returnVals['max']['max'], ths.toggle.element.checked)
+            var minVals = returnVals.min;
+            var maxVals = returnVals.max;
+            var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, ths.minDatum, ths.maxDatum);
+            if ( validateResults[0] ){
+                var setMin = validateResults[1] ? ths.minDatum : minVals.min;
+                var setMax = validateResults[2] ? ths.maxDatum : maxVals.max;
+                ths.slider.noUiSlider.set(
+                    [setMin, setMax]
+                );
+                ths.textBoxes.setValues([['min', setMin]],[['max', setMax]]); // bind the values in the text boxes to the values
+                                                                              // potentially just coerced to actual min and actual max
+                ths.uncheckNullToggleOnInitialFilterSet();
+                setState(specific_state_code, [setMin, setMax, ths.toggle.element.checked]);
+                ths.checkAgainstOriginalValues(+setMin, +setMax, ths.toggle.element.checked)
+            }
         }
         this.textBoxes.setInputCallback(inputCallback);
 
@@ -522,6 +532,92 @@ var filterView = {
             ths.clear() //also refills textboxes
         }
     },
+    validateTextInput: function(minVals, maxVals, componentSource, filterType, minDatum, maxDatum){
+        var isNaNCount = 0;
+        var outOfRangeCount = 0;
+        var forceMin = false;
+        var forceMax = false; // these will return true if the textInput attempts to set a value beyond the bounds
+                              // of the actual data  
+        var invalidEntries = [];
+
+        var doesValidate =  ( confirmIsANumber([minVals,maxVals]) && confirmInRange([minVals,maxVals]) );
+        
+        if ( doesValidate ) {
+            filterView.removeErrors(componentSource);
+        } else {
+            filterView.showErrors(componentSource, invalidEntries, filterType);
+        }
+        return [doesValidate, forceMin, forceMax];
+        
+        function confirmIsANumber(minAndMax){
+            minAndMax.forEach(function(each, i){
+                for (var key in each) {
+                  if (each.hasOwnProperty(key)) {
+                    if ( isNaN(+each[key]) ) {
+                      isNaNCount++;
+                      invalidEntries.push([i,key]);  
+                    } 
+                  }
+                }
+            });
+            
+            return isNaNCount === 0 ? true : false;
+        }
+
+        function confirmInRange(minAndMax){
+            if ( filterType === 'date' ){
+                minAndMax.forEach(function(each, i){
+                    if ( +each.month < 1 || +each.month > 12 ) {
+                        invalidEntries.push([i,'month']);  
+                        outOfRangeCount++;
+                    }
+                    if ( +each.year < 1000 ||  +each.year > 9999 ) { // just ensuring it's a four-digit number
+                        invalidEntries.push([i,'year']);               // input that is beyond the range of the actual data
+                        outOfRangeCount++;                             // will be coerced to the actual min or actual max below
+                    }
+                    var leapYear = +each.year % 4 === 0 ? true : false;
+                    var maxDay;
+                    if ( +each.month === 2 ) {
+                        maxDay = leapYear ? 29 : 28;
+                    } else if ( +each.month === 4 || +each.month === 6 || +each.month === 9 || +each.month === 11 ) {
+                        maxDay = 30;
+                    } else {
+                        maxDay = 31;
+                    }
+                    if ( +each.day < 0 || +each.day > maxDay ) {
+                        invalidEntries.push([i,'day']);  
+                        outOfRangeCount++;
+                    }
+                });
+                if ( new Date(minAndMax[0].year, minAndMax[0].month - 1, minAndMax[0].day) > new Date(minAndMax[1].year, minAndMax[1].month - 1, minAndMax[1].day) ) { 
+                    // ie if input start date is later than the input end date
+                    invalidEntries.push([0,'year']); 
+                    invalidEntries.push([1,'year']);  
+                    outOfRangeCount++;
+                }
+                if ( new Date(minAndMax[0].year, minAndMax[0].month - 1, minAndMax[0].day) < minDatum ) { // coercing here if input min < actual min
+                    forceMin = true;
+                }
+                if ( new Date(minAndMax[1].year, minAndMax[1].month - 1, minAndMax[1].day) > maxDatum ) { 
+                    forceMax = true;
+                }
+            } else {
+                console.log('BHDJAK', minAndMax);
+                if ( minAndMax[0].min > minAndMax[1].max ){
+                    invalidEntries.push([0,'min']);
+                    invalidEntries.push([1,'max']);
+                    outOfRangeCount++;
+                }
+                if ( minAndMax[0].min < minDatum ){
+                    forceMin = true;
+                }
+                if ( minAndMax[1].max > maxDatum ){
+                    forceMax = true;
+                }
+            }
+            return outOfRangeCount === 0 ? true : false;
+        }
+    },
     dateFilterControl: function(component){
         //Creates a new filterControl on the sidebar. 
         //component is the variable of configuration settings pulled from dataChoices.js
@@ -575,13 +671,13 @@ var filterView = {
         filterView.filterInputs[this.component.short_name] = new filterView.filterTextInput(
             component,        
             [
-                ['day', minDatum.getDate()],
                 ['month', minDatum.getMonth() + 1],
+                ['day', minDatum.getDate()],
                 ['year', minDatum.getFullYear()]
             ],
             [
-                ['day', maxDatum.getDate()],
                 ['month', maxDatum.getMonth() + 1],
+                ['day', maxDatum.getDate()],
                 ['year', maxDatum.getFullYear()]
             ]
         );
@@ -651,29 +747,62 @@ var filterView = {
         slider.noUiSlider.on('slide', slideSliderCallback);
 
         function getValuesAsDates(){
-
             var minVals = dateInputs.returnValues()['min'];
             var maxVals = dateInputs.returnValues()['max'];
 
-            return {
-                min: new Date(minVals.year, minVals.month - 1, minVals.day),
-                max: new Date(maxVals.year, maxVals.month - 1, maxVals.day)
+            var validateResults = filterView.validateTextInput(minVals, maxVals, component.source, component.component_type, minDatum, maxDatum);
+            // returns true/false
+            
+            var setMin = validateResults[1] ? minDatum : new Date(minVals.year, minVals.month - 1, minVals.day);
+            var setMax = validateResults[2] ? maxDatum : new Date(maxVals.year, maxVals.month - 1, maxVals.day);
+
+            if ( validateResults[0] ){
+                 dateInputs.setValues( // bind the text box values to values potentially coerced to the actual min
+                                       // or max
+                    [
+                        ['year', setMin.getFullYear()],
+                        ['month', setMin.getMonth() + 1],
+                        ['day', setMin.getDate()]
+                    ],
+                    [
+                        ['year', setMax.getFullYear()],
+                        ['month', setMax.getMonth() + 1],
+                        ['day', setMax.getDate()]
+                    ]
+                );
+                return {
+                    min: setMin,
+                    max: setMax
+                }
+
+            } else {
+               
+
+                return false;
             }
+
+           
+
+            
 
         }
 
+
         var inputCallback = function(){
+            console.log('in dateFilterControl inputCallback');
             var specific_state_code = 'filterValues.' + component.source
 
             var dateValues = getValuesAsDates();
-            
-            slider.noUiSlider.set(
-                [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
-            );
+            console.log(dateValues);
+            if ( dateValues !== false ) {
+                slider.noUiSlider.set(
+                    [dateValues.min.getFullYear(), dateValues.max.getFullYear()]
+                );
 
-            ths.uncheckNullToggleOnInitialFilterSet();
-            setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
-            ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
+                ths.uncheckNullToggleOnInitialFilterSet();
+                setState(specific_state_code, [dateValues.min, dateValues.max, ths.toggle.element.checked]);
+                ths.checkAgainstOriginalValues(dateValues.min, dateValues.max, ths.toggle.element.checked);
+            } 
         }
 
         // For separating date inputs with a '/'
@@ -714,7 +843,11 @@ var filterView = {
         }
 
         this.isTouched = function(){
+            console.log(this);
             var dateValues = getValuesAsDates();
+            if ( document.getElementById('filter-' + this.component.source).className.indexOf('invalid') !== -1 ) {
+                return true;
+            }
             return dateValues.min.valueOf() !== minDatum.valueOf() || dateValues.max.valueOf() !== maxDatum.valueOf() || this.nullsShown === false;
         }
 
@@ -734,6 +867,34 @@ var filterView = {
                 ths.toggle.element.checked = false;
             }
         };
+    },
+    showErrors: function(source, invalidEntries, filterType) { // eg from dateFilter invalidEntries is array. 1: 0 or 1 (min or max); 2: e.g. 'day'
+                                                   // from continuous e.g. [[1,"max"]]
+        invalidEntries.forEach(function(each){
+            d3.select('#filter-' + source).classed('invalid', true);
+            var invalidInput = filterType === 'date' ? d3.selectAll('#' + source + '-input input.' + each[1] + '-text').nodes()[each[0]] : d3.select('#' + source + '-input input.' + each[1] + '-text').node();
+            console.log(invalidInput);
+            invalidInput.classList.add('invalid');
+        });
+        if (d3.select('#invalid-filter-alert').node() === null) { // ie the alert is not already present
+            d3.select('#map-wrapper')
+              .append('div')
+              .attr('id','invalid-filter-alert')
+              .classed('no-location-alert', true)
+              .style('opacity',0)
+              .text('Filter invalid or out of range')
+              .transition().duration(1000)
+              .style('opacity',1);
+        }
+          
+    },
+    removeErrors: function(source){
+        d3.select('#filter-' + source).classed('invalid', false);
+        d3.selectAll('#' + source + '-input input').classed('invalid', false);
+        d3.select('#invalid-filter-alert')
+          .transition().duration(1000)
+          .style('opacity',0)
+          .remove();
     },
     setupFilter: function(c){
     //This function does all the stuff needed for each filter regardless of type. 
@@ -1099,6 +1260,7 @@ var filterView = {
         for(var i = 0; i < filterView.filterControls.length; i++){
             if(filterView.filterControls[i].isTouched()){
                 filterView.filterControls[i].clear();
+                filterView.removeErrors(filterView.filterControls[i].component.source);
             }
         }
         filterView.indicateActivatedFilters();
@@ -1265,6 +1427,7 @@ var filterView = {
             .append('i')
             .classed("delete icon",true)
             .on("click", function(d) {
+                filterView.removeErrors(d.component.source);
                 d.clear();
             })
                  
