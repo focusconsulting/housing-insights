@@ -278,12 +278,14 @@ var projectView = {
           d3.xml("/assets/icons/real-property.svg", function(xml) {
               document.getElementById('real-property-icon').appendChild(xml.documentElement);
 
+              d3.select('#real-property-svg')
+                  .style('margin-left', '26.5px');
+
               d3.select('#real-property-svg circle')
                   .style('stroke', '#cccccc')
                   .style('stroke-width', '8px')
                   .style('fill', 'white');
 
-              data = {};
               if (data.length > 0) {
                   d3.select('#real-property-svg path')
                       .style('fill', 'green');
