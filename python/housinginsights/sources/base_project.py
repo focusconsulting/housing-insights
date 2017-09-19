@@ -14,7 +14,6 @@ from housinginsights.tools import dbtools
 import requests
 import csv
 import os
-import logging
 
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.tools import misc as misctools
@@ -93,6 +92,8 @@ class ProjectBaseApiConn(BaseApiConn):
         
         #Look for a project in the current data
         match_found=False
+        found_via=None
+        mar_ids=[]
         for address in addresses:
             #Look for any matching address. If we find a match, assume the whole project is match
 
@@ -105,6 +106,7 @@ class ProjectBaseApiConn(BaseApiConn):
             try:
                 nlihc_match = self.proj_addre_lookup[address]
                 match_found = True
+                found_via='address'
                 break
             except KeyError:
                 #address not already in data
@@ -113,59 +115,19 @@ class ProjectBaseApiConn(BaseApiConn):
             #Try the mar id
             try:
                 mar_id = self._get_mar_id(address)
+                mar_ids.append(mar_id)
                 nlihc_match = self.proj_addre_lookup_from_mar[mar_id]
                 match_found = True
+                found_via = 'mar_id'
                 break
             except KeyError:
                 #mar id not in proj_addre table
                 pass
 
         if match_found == True:
-            return nlihc_match, True
+            return nlihc_match, True, found_via, mar_ids
         else:
-            return str(uuid4()), False
-
-        #TODO this can be deleted:
-        #Old method - only one mar_id in project table. 
-        #result = None
-        #if mar_id != None:
-        #    query = "select nlihc_id from project where mar_id = " \
-        #            "'{}';".format(mar_id)
-        #    query_result = db_conn.execute(query)
-        #    result = [dict(x) for x in query_result.fetchall()]
-
-        #if result:
-        #    return result[0]['nlihc_id'], True
-        #else:
-        #    return str(uuid4()), False
-
-    def create_address_csv_prescat(self,uid,proj_path=None, addre_path=None):
-        '''
-        Used for the project table only?
-
-        Can't think of a way to make the same function for both prescat (which 
-        already has proj/subsidy split) and the other data sets that don't and
-        therefore need the address splitting to happen during entity resolution. 
-
-        TODO this is incomplete.
-        '''
-
-
-
-        with open(proj_path, encoding='utf-8') as proj, \
-                open(addre_path, mode='w', encoding='utf-8') as addre:
-            proj_reader = csv.DictReader(proj)
-            addre_writer = csv.DictWriter(addre, fieldnames=['nlihc_id','address', 'mar_id']) #TODO make this an imported model
-            addre_writer.writeheader()
-
-            for proj_row in proj_reader:
-                address_data = proj_row['Proj_addre']
-                nlihc_id = proj_row['Nlihc_id']
-
-                addresses = misctools.get_unique_addresses_from_str(address_data)
-                addresses = [misctools.quick_address_cleanup(a) for a in addresses]
-
-                self._append_addresses(addresses=addresses, nlihc_id = nlihc_id, addre_writer = addre_writer)
+            return str(uuid4()), False, found_via, mar_ids
 
     def _append_addresses(self, addresses, nlihc_id, addre_writer):
         
@@ -291,15 +253,21 @@ class ProjectBaseApiConn(BaseApiConn):
                     addresses = misctools.get_unique_addresses_from_str(address_data)
                     addresses = [misctools.quick_address_cleanup(a) for a in addresses]
 
-                    nlihc_id, in_proj_table = self._get_nlihc_id_from_db(addresses=addresses)
+                    # found_via is which method was first successful, mar_id_found is the mar_id used if it got to the mar_id phase.
+                    nlihc_id, in_proj_table, found_via, mar_ids_found = self._get_nlihc_id_from_db(addresses=addresses)
                     
-                    print(in_proj_table,nlihc_id, addresses)
+                    print(in_proj_table,nlihc_id, addresses, found_via, mar_ids_found)
                     #Add values to the project table output file if necessary
                     if not in_proj_table:
+
                         data = self._map_data_for_row(nlihc_id=nlihc_id,
                                                       fields=PROJ_FIELDS,
                                                       fields_map=project_fields_map,
                                                       line=source_row)
+
+                        #TODO need to finish this method
+                        data = self._geocode_if_needed(data,mar_ids_found)
+
                         proj_writer.writerow(data)       
 
                         # add all to the proj_addre table
@@ -323,6 +291,25 @@ class ProjectBaseApiConn(BaseApiConn):
                     if self.debug == True:
                         raise e
                 
+    def _geocode_if_needed(self, data,mar_ids_found):
+        '''
+        TODO this is incomplete!!!!
+
+
+        '''
+        geocode_fields = [data['Proj_lat'],data['Proj_lon'],data['Zip'],data['Cluster_tr2000'],data['Ward2012']]
+        if None in geocode_fields:
+            for mar_id in mar_ids_found:
+                try:
+                    mar_record = 'get_mar_record' #need to lookup from the database mar table
+                    #data['Proj_lat'] = mar_record['latitude']
+                    break
+                except Exception as e:
+                    continue
+
+        return data
+
+
 
     def _add_calculated_subsidy_data(self, uid,data):
         '''

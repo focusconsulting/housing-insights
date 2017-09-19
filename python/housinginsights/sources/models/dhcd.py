@@ -6,30 +6,33 @@ Model for DHCD DFD api
 APP_ID = 'bit4kvfmq'
 
 
+# TODO commented out mappings are b/c we are currently not using the 
+# data from these other tables. When we want to add additional 
+# data from these fields, we should uncomment them. 
 TABLE_ID_MAPPING = {
         'Projects'               : 'bit4krbdh',
         'Properties'             : 'bi4xqgzv4',
-        'Units'                  : 'bi5rjybzu',
-        'Loans'                  : 'bje8tw7zv',
-        'Modifications'          : 'bmdugdvkj',
-        'LIHTC Allocations'      : 'bje6i5q6n',
-        'Construction Activity'  : 'bje32df5p',
-        'Funding Sources'        : 'biwe8ny4f',
-        '8609s'                  : 'bmbugpa4q',
-        '8610s'                  : 'bk8mpqqqx',
-        'Source/Use'             : 'bk5cnab59',
-        'AMI Levels'             : 'bi5rib47y',
-        'Fiscal Years'           : 'bk8mkqy47',
-        'Organizations'          : 'bmhgudsjn',
-        'Teams'                  : 'bks6xc8h7',
-        'Project Managers'       : 'bknhzjtqb',
-        'Funding Increases'      : 'bmmnf2mzm',
-        'LIHTC Fees'             : 'bmsjssxp6',
-        'LIHTC - BINs'           : 'bms24sdeg',
-        'Council Packages'       : 'bmr6b6ipk',
-        'Policies and Procedures': 'bma2g4g7a',
-        'DHCD Documents'         : 'bknktet3x',
-        'Images/Icons'           : 'biw84iuzj'
+        #'Units'                  : 'bi5rjybzu',
+        #'Loans'                  : 'bje8tw7zv',
+        #'Modifications'          : 'bmdugdvkj',
+        #'LIHTC Allocations'      : 'bje6i5q6n',
+        #'Construction Activity'  : 'bje32df5p',
+        #'Funding Sources'        : 'biwe8ny4f',
+        #'8609s'                  : 'bmbugpa4q',
+        #'8610s'                  : 'bk8mpqqqx',
+        #'Source/Use'             : 'bk5cnab59',
+        #'AMI Levels'             : 'bi5rib47y',
+        #'Fiscal Years'           : 'bk8mkqy47',
+        #'Organizations'          : 'bmhgudsjn',
+        #'Teams'                  : 'bks6xc8h7',
+        #'Project Managers'       : 'bknhzjtqb',
+        #'Funding Increases'      : 'bmmnf2mzm',
+        #'LIHTC Fees'             : 'bmsjssxp6',
+        #'LIHTC - BINs'           : 'bms24sdeg',
+        #'Council Packages'       : 'bmr6b6ipk',
+        #'Policies and Procedures': 'bma2g4g7a',
+        #'DHCD Documents'         : 'bknktet3x',
+        #'Images/Icons'           : 'biw84iuzj'
 }
 
 
