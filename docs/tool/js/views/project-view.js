@@ -276,7 +276,7 @@ var projectView = {
         var data = full_project_data.real_property
 
           d3.xml("/assets/icons/real-property.svg", function(xml) {
-              document.getElementById('realPropertyIcon').appendChild(xml.documentElement);
+              document.getElementById('real-property-icon').appendChild(xml.documentElement);
 
               d3.select('#real-property-svg circle')
                   .style('stroke', '#cccccc')
@@ -315,7 +315,7 @@ var projectView = {
       hideTitle:false,
       render: function(full_project_data){
         var topaTable =  d3.select('#topa-notice-table')
-        if (full_project_data.topa.length == 0 ) {
+        if (full_project_data.topa.length === 0 ) {
           topaTable.append('p')
             .text('No known TOPA notices!')
         } else {
