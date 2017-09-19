@@ -208,8 +208,40 @@ var projectView = {
       hideTitle: false,
       render: function(full_project_data){
           var data = [];
-          data.push({title:'Subsidized Units',value: full_project_data['proj_units_assist_max']})
-          data.push({title:'Total Units',value: (full_project_data['proj_units_tot'])})
+          data.push({title:'Subsidized Units',value: full_project_data['proj_units_assist_max']});
+          data.push({title:'Total Units',value: full_project_data['proj_units_tot']});
+
+          // Do both the total unit and subsidized unit count exist for this project?
+          if (data[0].value && data[1].value) {
+              data[0]['percent-subsidized'] = data[0].value / data[1].value;
+
+              var subsidizedProjectChart = new DonutChart('#subsidized-unit-chart')
+                  .width(124)
+                  .height(124)
+                  .margin({bottom: 18})
+                  .data(data)
+                  .field('percent-subsidized')
+                  .label('title')
+                  .create()
+          } else if (data[0].value) { //Does the Subsidized Unit count exist for this project?
+              d3.select('#subsidized-unit-chart')
+                  .append('h2')
+                  .text(data[0].value);
+
+              d3.select('#subsidized-unit-chart')
+                  .append('p')
+                  .text('Subsidized Units');
+          } else if (data[1].value) { //Does the Total Unit count exist for this project?
+              d3.select('#subsidized-unit-chart')
+                  .append('h2')
+                  .text(data[1].value);
+
+              d3.select('#subsidized-unit-chart')
+                  .append('p')
+                  .text('Total Units');
+          }
+
+          //TODO: Add an indicator/icon for when neither Subsidized nor Total unit count exist. The space is currently blank when this happens.
 
           var table = new D3Table('#units-table')
             .data(data)
