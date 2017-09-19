@@ -222,25 +222,29 @@ var projectView = {
       }
     },
     location: {
-      title:'Location Information',
-      wrapperPartial: 'partials/project-view/location.html',
-      hideTitle: true,
-      render: function(full_project_data){
-          var data = [];
-          data.push({title:'Ward',value: full_project_data['ward']})
-          data.push({title:'Neighborhood Cluster',value: (full_project_data['neighborhood_cluster'] + ": " + full_project_data['neighborhood_cluster_desc'])})
-          data.push({title:'ANC',value: full_project_data['anc']})
-          data.push({title: 'Census Tract',value: full_project_data['census_tract']})
+        title: 'Location Information',
+        wrapperPartial: 'partials/project-view/location.html',
+        hideTitle: true,
+        render: function(full_project_data){
+            var data = [];
+            data.push({title:'Ward',value: full_project_data['ward']})
+            data.push({title: 'Neighborhood Cluster',value: (full_project_data['neighborhood_cluster'] + ": " + full_project_data['neighborhood_cluster_desc'])})
+            data.push({title: 'ANC', value: full_project_data['anc']})
+            data.push({title: 'Census Tract', value: full_project_data['census_tract']})
 
+            var table = new D3Table('#location-table')
+                .data(data)
+                .columns([
+                    {field:'title', label:'Title', class:'title', html: function(d){return d}},
+                    'value'])
+                .hideTitle(true)
+                .create();
 
-          var table = new D3Table('#location-table')
-            .data(data)
-            .columns([
-                {field:'title', label:'Title', class:'title', html: function(d){return d}},
-                'value'])
-            .hideTitle(true)
-            .create()
-      }
+            var projLongitude = full_project_data['longitude'];
+            var projLatitude = full_project_data['latitude'];
+
+            d3.select('#project-location-map').attr('src', 'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+bd3633(' + projLongitude + ',' + projLatitude + ')/-77.0369,38.9072,8.3/124x124?access_token=' + mapboxgl.accessToken + '&attribution=false&logo=false');
+        }
     },
     ownership: {
       title: 'Ownership',
@@ -271,19 +275,39 @@ var projectView = {
       render: function(full_project_data){
         var data = full_project_data.real_property
 
-        if (data.length == 0 ) {
+          d3.xml("/assets/icons/real-property.svg", function(xml) {
+              document.getElementById('real-property-icon').appendChild(xml.documentElement);
+
+              d3.select('#real-property-svg')
+                  .style('margin-left', '26.5px');
+
+              d3.select('#real-property-svg circle')
+                  .style('stroke', '#cccccc')
+                  .style('stroke-width', '8px')
+                  .style('fill', 'white');
+
+              if (data.length > 0) {
+                  d3.select('#real-property-svg path')
+                      .style('fill', 'green');
+              } else {
+                  d3.select('#real-property-svg path')
+                      .style('fill', '#cccccc');
+              }
+          });
+
+        if (data.length === 0 ) {
           d3.select('#realPropertyTable')
             .append('p')
             .html('No sale activity available')
-        } else{
-        var table = new D3Table('#realPropertyTable')
-                            .data(data)
-                            .columns([
-                                {field:'rp_date', label:'Date', class:'value', html: function(d){return d}},
-                                {field:'rp_type', label:'Activity Type', class:'value', html: function(d){return d}},
-                                {field:'rp_desc', label:'Description',class:'value',html:function(d){return d;}},
-                                ])
-                            .create()
+        } else {
+            var table = new D3Table('#realPropertyTable')
+                                .data(data)
+                                .columns([
+                                    {field:'rp_date', label:'Date', class:'value', html: function(d){return d}},
+                                    {field:'rp_type', label:'Activity Type', class:'value', html: function(d){return d}},
+                                    {field:'rp_desc', label:'Description',class:'value',html:function(d){return d;}},
+                                    ])
+                                .create()
         }
       }
     },
@@ -293,9 +317,16 @@ var projectView = {
       hideTitle:false,
       render: function(full_project_data){
         var topaTable =  d3.select('#topa-notice-table')
-        if (full_project_data.topa.length == 0 ) {
+        if (full_project_data.topa.length === 0 ) {
           topaTable.append('p')
             .text('No known TOPA notices!')
+
+            // Add TOPA icon with notice count
+            d3.select("#topa-icon")
+                .append("img")
+                .style('padding-left', '26.5px')
+                .attr("src", "/assets/icons/topa-no-warnings.svg");
+
         } else {
           //TODO! Refactor this into a 'buildTable' function that is callable from wherever. 
           //helpful examples:
@@ -338,8 +369,34 @@ var projectView = {
                       return d3.format('$,.0r')(d.sale_price)
                     }
                   })
-          }
 
+          // Add TOPA icon with notice count
+          var svg = d3.select("#topa-icon")
+              .append("img")
+              .style('padding-left', '26.5px')
+              .attr("src", "/assets/icons/topa-warning.svg");
+
+          var topaCount = d3.select("#topa-icon")
+              .append("h2")
+              .style('margin-top', '-35px')
+              .style('text-align', 'center')
+              .style('color', '#000000')
+              .text(full_project_data.topa.length);
+
+          var topaCountLabel = d3.select("#topa-icon")
+              .append("p")
+              .style('text-align', 'center')
+              .style('font-size', '12px')
+              .style('margin-top', '-5px')
+
+              if(full_project_data.topa.length === 1) {
+                topaCountLabel.text('TOPA Notice');
+              } else {
+                topaCountLabel.text('TOPA Notices');
+              }
+
+
+          }
       }
     },
     subsidyTimelineChart: {
