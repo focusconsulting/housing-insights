@@ -34,12 +34,11 @@ from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         TABLE_METADATA_FIELDS, \
                                                         DhcdResult, \
                                                         PROJECT_FIELDS_MAP,\
-                                                        SUBSIDY_FIELDS_MAP
+                                                        SUBSIDY_FIELDS_MAP, \
+                                                        PROJECT_ADDRE_FIELDS_MAP
 
 INCLUDE_ALL_FIELDS = True
 
-from housinginsights.tools.logger import HILogger
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
 
 class DhcdApiConn(ProjectBaseApiConn):
     """
@@ -333,7 +332,7 @@ class DhcdApiConn(ProjectBaseApiConn):
                     
                     #Convert to format expected by database
                     if u == 'dhcd_dfd_properties':
-                        self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, db)
+                        self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, PROJECT_ADDRE_FIELDS_MAP, db)
 
 
 
