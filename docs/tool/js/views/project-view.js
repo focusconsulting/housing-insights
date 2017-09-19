@@ -257,7 +257,6 @@ var projectView = {
           data.push({title:'Manager Type',value: full_project_data['hud_mgr_type']})
           data.push({title: 'Manager',value: full_project_data['hud_mg_name']})
 
-
           var table = new D3Table('#ownership-table')
             .data(data)
             .columns([
@@ -266,6 +265,12 @@ var projectView = {
                 ])
             .hideTitle(true)
             .create()
+
+          var ownershipIcon = d3.select("#ownership-icon")
+              .append("img")
+              .style('padding-left', '26.5px')
+              .style('margin-top', '10px')
+              .attr("src", "/assets/icons/ownership.svg");
       }
     },
     saleActivity: {
