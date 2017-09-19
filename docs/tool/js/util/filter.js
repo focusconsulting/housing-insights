@@ -173,23 +173,39 @@ var filterUtil = {
 			var categoricalFilters = [];
 			Object.keys(allFilterValues).forEach(function(key){
 				if ( allFilterValues[key][0] && allFilterValues[key][0].length > 0 ){
-					if ( allFilterValues[key][0].length === 3
-						&& Number.isInteger(allFilterValues[key][0][0])
-						&& Number.isInteger(allFilterValues[key][0][1]) ){
-							continuousFilters.push({
-								Filter: key,
-								Min: allFilterValues[key][0][0],
-								Max: allFilterValues[key][0][1],
-								'Include Nulls': allFilterValues[key][0][2]
-							});
+					console.log(filterView.components);
+					filterView.components.forEach(function(element){
+						if ( element.source === key ){
+							if ( element.component_type === 'continuous' ){
+								continuousFilters.push({
+									Filter: element.display_name,
+									Min: allFilterValues[key][0][0],
+									Max: allFilterValues[key][0][1],
+									'Include Nulls': allFilterValues[key][0][2]
+								});
+							}
+							else if ( element.component_type === 'categorical' ) {
+								categoricalFilters.push({
+									Filter: element.display_name,
+									'Included Categories': allFilterValues[key][0]
+								})
+							}
+							else if ( element.component_type === 'date' ) {
+								var minMonth = allFilterValues[key][0][0].getMonth() + 1
+								var minDate = minMonth + "/" + allFilterValues[key][0][0].getDate()
+										+ "/" + allFilterValues[key][0][0].getFullYear();
+								var maxMonth = allFilterValues[key][0][1].getMonth() + 1
+								var maxDate = maxMonth + "/" + allFilterValues[key][0][1].getDate()
+										+ "/" + allFilterValues[key][0][1].getFullYear();
+								continuousFilters.push({
+									Filter: element.display_name,
+									Min: minDate,
+									Max: maxDate,
+									'Include Nulls': allFilterValues[key][0][2]
+								});
+							}
 						}
-						else {
-							categoricalFilters.push({
-								Filter: key,
-								'Included Categories': allFilterValues[key][0]
-							})
-						}
-
+					})
 				}
 			});
 			return [continuousFilters,categoricalFilters];
