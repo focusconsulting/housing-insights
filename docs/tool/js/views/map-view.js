@@ -48,8 +48,9 @@ frontmatter: isneeded
                     ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
-                    ['initialProjectsRendered',router.initFilters] // not 100% sure this trigger isn't later than we'd want
-                                                              // but it shouln't be too early
+                    ['initialProjectsRendered',router.initGate],
+                    ['filterViewLoaded', router.initGate]
+                                                              
                 ]);
 
 
