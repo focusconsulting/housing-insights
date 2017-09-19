@@ -647,9 +647,10 @@ class LoadData(object):
             sql_interface.create_table(db_conn=conn, table='zone_facts')
 
         # populate table with calculated fields values
-        self._populate_zone_facts_table()
+        res_units_by_zone_type = self._get_residential_units()
+        self._populate_zone_facts_table(res_units_by_zone_type)
 
-    def _populate_zone_facts_table(self):
+    def _populate_zone_facts_table(self,res_units_by_zone_type):
         """
         Populates the zone_facts table with the calculated fields data and
         acs rent data fields from census.
@@ -673,6 +674,7 @@ class LoadData(object):
             'crime_rate': ['rate', 'crime', 'all'],
             'violent_crime_rate': ['rate', 'crime', 'violent'],
             'non_violent_crime_rate': ['rate', 'crime', 'nonviolent'],
+            'residential_units': ['sum', 'mar', 'active_res_occupancy_count'],
             'building_permits': ['count', 'building_permits', 'all'],
             'building_permits_rate': ['rate', 'building_permits', 'all'],
             'construction_permits': ['count', 'building_permits',
@@ -700,14 +702,22 @@ class LoadData(object):
                     logger.error(e)
 
             # get field value from building permits and crime table
-            for field in summarize_obs_field_args:
+            for field in sorted(summarize_obs_field_args,reverse=True): 
+                # Sorted to calculate res_units_by_zone_type before permit rates.
                 try:
                     method, table_name, filter_name = summarize_obs_field_args[
                         field]
-                    result = self._summarize_observations(method, table_name,
-                                                          filter_name,
-                                                          months=12,
-                                                          grouping=zone_type)
+                    if field == 'residential_units': 
+                        field_values[field] = res_units_by_zone_type[zone_type]['items']
+                        continue
+                    result = self._summarize_observations(
+                        method, 
+                        table_name,
+                        filter_name,
+                        months=12,
+                        grouping=zone_type,
+                        res_units_by_zone_type=res_units_by_zone_type
+                        )
                     field_values[field] = result['items']
                 except Exception as e:
                     logger.error("Couldn't summarize data for {}".format(field))
@@ -799,7 +809,8 @@ class LoadData(object):
 
                 if n not in denominator_data['items'] or \
                                 numerator_data['items'][n] is None \
-                        or denominator_data['items'][n] is None:
+                        or denominator_data['items'][n] is None \
+                        or denominator_data['items'][n] == 0:
                     divided = None
                 else:
                     divided = numerator_data['items'][n] / denominator_data[
@@ -933,7 +944,7 @@ class LoadData(object):
         return {'items': items, 'grouping': grouping, 'data_id': field}
 
     def _summarize_observations(self, method, table_name, filter_name, months,
-                                grouping):
+                                grouping,res_units_by_zone_type):
         """
         This endpoint takes a table that has each record as list of observations
         (like our crime and building_permits tables) and returns summary
@@ -1040,7 +1051,7 @@ class LoadData(object):
         # Apply the normalization if needed
         if method == 'rate':
             if table_name in ['building_permits']:
-                denominator = self._get_residential_units(grouping)
+                denominator = res_units_by_zone_type[grouping]
                 api_results = self._items_divide(api_results, denominator)
                 api_results = self._scale(api_results, 1000)  # per 1000
                 # residential units
@@ -1103,28 +1114,34 @@ class LoadData(object):
 
         return data
 
-    def _get_residential_units(self, grouping):
+    def _get_residential_units(self):
         """
         Returns the number of residential units in the standard 'items' format
         """
-        
+
         try:
             with self.engine.connect() as conn:
 
-                q = """
-                    SELECT zone_specific AS zone, housing_unit_count AS total 
-                    FROM zone_housingunit_bedrm_count 
-                    WHERE zone_type = '{grouping}';
-                    """.format(grouping=grouping)
-
-                proxy = conn.execute(q)
-                zone_units = {row.zone: row.total for row in proxy}
-
-            return {'items':zone_units}
+                res_units_by_zone_type = {}
+                zone_types = ['ward','neighborhood_cluster','census_tract']
+                for zone_type in zone_types:
+                    q = """
+                        SELECT {zone_type}
+                            , sum(active_res_occupancy_count)
+                        FROM mar
+                        GROUP BY {zone_type}
+                        """.format(zone_type=zone_type)
+                    rproxy = conn.execute(q)
+                    rrows = rproxy.fetchall()
+                    res_units_by_zone_type[zone_type] = {'items' : 
+                        {row[0]:row[1] for row in rrows 
+                        if row[0] != None and row[0] != ''}
+                    }
+                return res_units_by_zone_type
 
         #TODO do better error handling - for interim development purposes only
         except Exception as e:
-            return {'items': None, 'notes': "Query failed: {}".format(e),
+            return {'items': None, 'notes': "_get_residential_units failed: {}".format(e),
                     'grouping': grouping, 'data_id': "res_units_by_zone"}
 
     def _process_data_file(self, manifest_row):

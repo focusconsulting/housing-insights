@@ -1,3 +1,8 @@
+---
+frontmatter: isneeded
+---
+    //A comment here helps Jekyll not get confused
+
     "use strict";
 
     var mapView = {
@@ -16,6 +21,9 @@
             controller.appendPartial(partialRequest, this);
 
             function appendCallback() {
+                //this is used to indicate the completion of loading
+                setState('filterViewLoaded',false);
+
                 setSubs([
                     ['mapLayer', mapView.showLayer],
                     ['mapLayer', mapView.layerOverlayToggle],
@@ -40,10 +48,196 @@
                     ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
-                    ['initialProjectsRendered',router.initFilters] // not 100% sure this trigger isn't later than we'd want
-                                                              // but it shouln't be too early
+                    ['initialProjectsRendered',router.initGate],
+                    ['filterViewLoaded', router.initGate]
+                                                              
                 ]);
 
+
+                //Add the welcome screen
+                //Display the proper buttons based on whether we are loading a state or not
+                if (router.hasInitialFilterState){
+                    //loading saved analysis
+                    $('#viewSavedAnalysis').removeClass('hidden');
+                    $('#savedStateAlert').removeClass('hidden');
+                } else {
+                    //when loading fresh
+                    $('#openExample1').removeClass('hidden');
+                    $('#useTool').removeClass('hidden');
+                };
+
+                //Set up buttons to be enabled when page is done loading
+                var removeSpinners = function() {
+                        $('#openExample1').removeClass('disabled');
+                        $('#openExample1 i').removeClass('spinner loading').addClass('check');
+
+                        $('#startTour').removeClass('disabled');
+                        $('#startTour i').removeClass('spinner loading').addClass('check');
+
+                        $('#useTool').removeClass('disabled');
+                        $('#useTool i').removeClass('spinner loading').addClass('check');
+
+                        $('#viewSavedAnalysis').removeClass('disabled');
+                        $('#viewSavedAnalysis i').removeClass('spinner loading').addClass('check');
+                    }
+                setSubs([['filterViewLoaded',removeSpinners]])
+
+                //Show modal
+                $('#welcomeModal').modal({
+                    approve: '.positive, .approve, .ok',
+                    deny     : '.negative, .deny, .cancel',
+                    onApprove: function(d) {
+
+                        //Figure out which button was pressed                      
+                        if (d.attr('id') == 'startTour') {
+                            console.log("start the tour");
+
+                            mapView.tour = new Shepherd.Tour({
+                              defaults: {
+                                classes: 'shepherd-theme-arrows',
+                                scrollTo: true
+                              }
+                            });
+
+                          
+                            mapView.tour.addStep('layer-choice', {
+                                text: "The zone type selected affects the 'Specific Zone' filter as well as all the zone-level datasets shown in blue",
+                                attachTo: '#layer-menu right',
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    show: function() {
+                                        console.log('we can trigger events here if needed');
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+                            mapView.tour.addStep('project-data', {
+                                text: "Change the inputs here to filter projects that meet certain criteria.",
+                                attachTo: '#filter-content-proj_units_tot right',
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    'before-show': function() {
+                                        $('#filter-proj_units_tot').click();
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+
+                            mapView.tour.addStep('zone-data', {
+                                text: "Data choices marked with a blue icon are zone-level data sets. \
+                                       They refer to data about the area the project is in, not the project itself.<br><br>\
+                                       Adjusting this filter would show projects in a Ward with a poverty rate between the selected values.<br><br>\
+                                       Remember you can change the zone type, but this will remove any existing selections you've made.",
+                                attachTo: '#filter-content-poverty_rate right',
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    'before-show': function() {
+                                        $('#filter-poverty_rate').click();
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+
+                              mapView.tour.addStep('search', {
+                                title: 'Search for a project',
+                                text: 'You can search by project name or address',
+                                attachTo: '.dropdown-proj_name_addre bottom',
+                                classes: 'shepherd-skinny shepherd-theme-arrows', //needed to use the right style sheet
+                                showCancelLink: true,
+                                buttons: [
+                                   {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
+
+                            mapView.tour.addStep('export-data', {
+                                title: 'Export data',
+                                text: 'You can export a CSV file of all the project data here.',
+                                attachTo: '#sidebar-right left',
+                                classes: 'shepherd-skinny shepherd-theme-arrows', //needed to use the right style sheet
+                                showCancelLink: true,
+                                 when: {
+                                    'before-show': function() {
+                                        setState('subNav.right','buildings')
+                                    }
+                                },
+                                buttons: [
+                                   {
+                                      text: 'Done',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }
+                                ]
+                            });
+
+                            mapView.tour.start();
+
+                        } else if (d.attr('id') == 'openExample1') {
+                            console.log("open example analysis");
+                            mapView.showExample1();
+                        } else if (d.attr('id') == 'useTool') {
+                            //do nothing - all that's needed is to close the screen
+                        };
+                    },
+                    onHide: function(){
+                        
+                        //If filterView hasn't loaded yet, show the page loading dimmer
+                        if (!getState().filterViewLoaded[0]) {
+
+                            //Set dimmer to clear next time the filterViewLoaded event occurs
+                            setSubs([
+                                ['filterViewLoaded',mapView.clearLoadingDimmer]
+                            ]);
+
+                            //Add the loading dimmer underneath. Timeout needed so that it occurs after the current modal hide finishes
+                            setTimeout(function(){
+                                $('#loading-tool-dimmer').dimmer('show'); //.page.dimmer:first
+                            },0);
+
+                        } else {
+                            console.log("don't need to show loader")
+                        }
+                    }
+                  }).modal('show');
+
+                
 
                 this.originalZoom = 11;
                 this.originalCenter = [-77, 38.9072];
@@ -104,6 +298,9 @@
             }
 
         },
+        clearLoadingDimmer: function(msg, data){
+            $('#loading-tool-dimmer').dimmer('hide');
+        },
         navControl: {
             el: null,
             init: function(){
@@ -114,6 +311,13 @@
             move: function(){
                 mapView.navControl.el.classList.toggle('movedIn');
             }
+        },
+        showExample1: function(){
+            //Quick example to demonstrate functionality
+            //TODO this does not properly set the ui components - probably need to go through the router.js instead
+            var urlParams = 'reacn=20_73'
+            window.history.replaceState({stateinfo:"elsewhere this is the state object, but we don't have a way to access the correct state object"}, 'newState', '#/HI/' + urlParams);
+            router.decodeState()
         },
         initialSidebarState: function(){
             setState('sidebar.left',true);
@@ -1098,6 +1302,8 @@
               var continuousColumns = ['Filter', 'Min', 'Max', 'Include Nulls'];
               var categoricalColumns = ['Filter', 'Included Categories'];
 
+              console.log("&&& activeFilters", activeFilters);
+
               if ( continuousFilters.length > 0 ){
 
                 var continuousThead = continuousFiltersTable.append('thead')
@@ -1158,7 +1364,21 @@
                     .text(function (d) { return d.value; });
               }
 
-          });
+            });
+          d3.select('#copyFilterNames')
+            .on('click', function(d){
+                var activeFilters = filterUtil.getActiveFilterValues();
+                var filterTitlesOnly = [].concat.apply([], activeFilters.map(function(objArray){
+                    return objArray.map(function(obj){ return obj.Filter; });
+                }));
+                function setClipBoardToFilterTitleList(event){
+                    event.clipboardData.setData('text/plain', filterTitlesOnly.join("\n "));
+                    event.preventDefault();
+                }
+                document.body.addEventListener('copy', setClipBoardToFilterTitleList);
+                document.execCommand('copy');
+                document.body.removeEventListener('copy', setClipBoardToFilterTitleList);
+            });
         },
         exportButton: function() {
           d3.select('#exportCsv')

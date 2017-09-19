@@ -4310,6 +4310,13 @@
         "type": "decimal"
       },
       {
+        "display_name": "Residential Units",
+        "display_text": "Total active residential units in zone",
+        "source_name": "residential_units",
+        "sql_name": "residential_units",
+        "type": "decimal"
+      },
+      {
         "display_name": "Building Permits",
         "display_text": "Count of building permits in zone",
         "source_name": "building_permits",

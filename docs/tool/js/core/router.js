@@ -1,9 +1,22 @@
+---
+frontmatter: isneeded
+---
+
 "use strict";
 
 var router = {
     isFilterInitialized: false,
     stateObj: {},
-    initFilters: function(msg,data){
+    initGate: function(){
+        if ( getState().initialProjectsRendered && getState().filterViewLoaded ) { // each stateChange triggers the gate function
+                                                                                   // but both need to be true before calling
+                                                                                   // initFilters. fixes bug whereby url decode
+                                                                                   // was running before the filterControlsDict
+                                                                                   // was defined
+            router.initFilters();
+        }
+    },
+    initFilters: function(){
         if ( router.isFilterInitialized ) return;
         setSubs([
             ['filterValues', router.pushFilter],
@@ -145,9 +158,7 @@ var router = {
                 dataChoice = dataChoices.find(function(obj){
                     return obj.short_name === eachArray[0];
                 });
-                console.log('datachoice', dataChoice);
                 var filterControlObj = filterView.filterControlsDict[dataChoice.short_name]
-                console.log('filterControlObj', filterControlObj);
                 if ( dataChoice.component_type === 'continuous' ) {
                     var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
                     var values = eachArray[1].split(separator);
@@ -226,8 +237,9 @@ if ( window.location.hash.indexOf('#/HI/') !== -1 ) {
         router.initBuilding();
     } else {
         router.hasInitialFilterState = true;
+        //router.screenLoad(); //Replaced by semantic ui loading screen and welcome modal
     }
-    router.screenLoad();
+    
 } else {
     router.hasInitialFilterState = false;
 }
