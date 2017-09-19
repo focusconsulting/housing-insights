@@ -222,25 +222,26 @@ var projectView = {
       }
     },
     location: {
-      title:'Location Information',
-      wrapperPartial: 'partials/project-view/location.html',
-      hideTitle: true,
-      render: function(full_project_data){
-          var data = [];
-          data.push({title:'Ward',value: full_project_data['ward']})
-          data.push({title:'Neighborhood Cluster',value: (full_project_data['neighborhood_cluster'] + ": " + full_project_data['neighborhood_cluster_desc'])})
-          data.push({title:'ANC',value: full_project_data['anc']})
-          data.push({title: 'Census Tract',value: full_project_data['census_tract']})
+        title: 'Location Information',
+        wrapperPartial: 'partials/project-view/location.html',
+        hideTitle: true,
+        render: function(full_project_data){
+            var data = [];
+            data.push({title:'Ward',value: full_project_data['ward']})
+            data.push({title: 'Neighborhood Cluster',value: (full_project_data['neighborhood_cluster'] + ": " + full_project_data['neighborhood_cluster_desc'])})
+            data.push({title: 'ANC', value: full_project_data['anc']})
+            data.push({title: 'Census Tract', value: full_project_data['census_tract']})
 
+            var table = new D3Table('#location-table')
+                .data(data)
+                .columns([
+                    {field:'title', label:'Title', class:'title', html: function(d){return d}},
+                    'value'])
+                .hideTitle(true)
+                .create();
 
-          var table = new D3Table('#location-table')
-            .data(data)
-            .columns([
-                {field:'title', label:'Title', class:'title', html: function(d){return d}},
-                'value'])
-            .hideTitle(true)
-            .create()
-      }
+            d3.select('#project-location-map').attr('src', 'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+bd3633(' + full_project_data['longitude'] + ',' + full_project_data['latitude'] + ')/' + full_project_data['longitude'] + ',' + full_project_data['latitude'] + ',8.5/100x100?access_token=' + mapboxgl.accessToken + '&attribution=false&logo=false');
+        }
     },
     ownership: {
       title: 'Ownership',
