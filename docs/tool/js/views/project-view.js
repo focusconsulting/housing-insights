@@ -388,7 +388,13 @@ var projectView = {
               .style('text-align', 'center')
               .style('font-size', '12px')
               .style('margin-top', '-5px')
-              .text('TOPA Notices')
+
+              if(full_project_data.topa.length === 1) {
+                topaCountLabel.text('TOPA Notice');
+              } else {
+                topaCountLabel.text('TOPA Notices');
+              }
+
 
           }
       }
