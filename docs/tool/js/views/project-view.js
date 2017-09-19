@@ -275,7 +275,7 @@ var projectView = {
             var projLongitude = full_project_data['longitude'];
             var projLatitude = full_project_data['latitude'];
 
-            d3.select('#project-location-map').attr('src', 'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+bd3633(' + projLongitude + ',' + projLatitude + ')/-77.0369,38.9072,8.3/124x124?access_token=' + mapboxgl.accessToken + '&attribution=false&logo=false');
+            d3.select('#project-location-map').attr('src', 'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+325d88(' + projLongitude + ',' + projLatitude + ')/-77.0369,38.9072,8.3/124x124?access_token=' + mapboxgl.accessToken + '&attribution=false&logo=false');
         }
     },
     ownership: {
@@ -325,7 +325,7 @@ var projectView = {
 
               if (data.length > 0) {
                   d3.select('#real-property-svg path')
-                      .style('fill', 'green');
+                      .style('fill', '#325d88');
               } else {
                   d3.select('#real-property-svg path')
                       .style('fill', '#cccccc');
