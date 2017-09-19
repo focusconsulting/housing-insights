@@ -275,19 +275,37 @@ var projectView = {
       render: function(full_project_data){
         var data = full_project_data.real_property
 
-        if (data.length == 0 ) {
+          d3.xml("/assets/icons/real-property.svg", function(xml) {
+              document.getElementById('realPropertyIcon').appendChild(xml.documentElement);
+
+              d3.select('#real-property-svg circle')
+                  .style('stroke', '#cccccc')
+                  .style('stroke-width', '8px')
+                  .style('fill', 'white');
+
+              data = {};
+              if (data.length > 0) {
+                  d3.select('#real-property-svg path')
+                      .style('fill', 'green');
+              } else {
+                  d3.select('#real-property-svg path')
+                      .style('fill', '#cccccc');
+              }
+          });
+
+        if (data.length === 0 ) {
           d3.select('#realPropertyTable')
             .append('p')
             .html('No sale activity available')
-        } else{
-        var table = new D3Table('#realPropertyTable')
-                            .data(data)
-                            .columns([
-                                {field:'rp_date', label:'Date', class:'value', html: function(d){return d}},
-                                {field:'rp_type', label:'Activity Type', class:'value', html: function(d){return d}},
-                                {field:'rp_desc', label:'Description',class:'value',html:function(d){return d;}},
-                                ])
-                            .create()
+        } else {
+            var table = new D3Table('#realPropertyTable')
+                                .data(data)
+                                .columns([
+                                    {field:'rp_date', label:'Date', class:'value', html: function(d){return d}},
+                                    {field:'rp_type', label:'Activity Type', class:'value', html: function(d){return d}},
+                                    {field:'rp_desc', label:'Description',class:'value',html:function(d){return d;}},
+                                    ])
+                                .create()
         }
       }
     },
