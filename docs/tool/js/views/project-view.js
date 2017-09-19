@@ -318,6 +318,13 @@ var projectView = {
         if (full_project_data.topa.length === 0 ) {
           topaTable.append('p')
             .text('No known TOPA notices!')
+
+            // Add TOPA icon with notice count
+            d3.select("#topa-icon")
+                .append("img")
+                .style('padding-left', '26.5px')
+                .attr("src", "/assets/icons/topa-no-warnings.svg");
+
         } else {
           //TODO! Refactor this into a 'buildTable' function that is callable from wherever. 
           //helpful examples:
@@ -360,8 +367,28 @@ var projectView = {
                       return d3.format('$,.0r')(d.sale_price)
                     }
                   })
-          }
 
+          // Add TOPA icon with notice count
+          var svg = d3.select("#topa-icon")
+              .append("img")
+              .style('padding-left', '26.5px')
+              .attr("src", "/assets/icons/topa-warning.svg");
+
+          var topaCount = d3.select("#topa-icon")
+              .append("h2")
+              .style('margin-top', '-35px')
+              .style('text-align', 'center')
+              .style('color', '#000000')
+              .text(full_project_data.topa.length);
+
+          var topaCountLabel = d3.select("#topa-icon")
+              .append("p")
+              .style('text-align', 'center')
+              .style('font-size', '12px')
+              .style('margin-top', '-5px')
+              .text('TOPA Notices')
+
+          }
       }
     },
     subsidyTimelineChart: {
