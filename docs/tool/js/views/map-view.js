@@ -1302,6 +1302,8 @@ frontmatter: isneeded
               var continuousColumns = ['Filter', 'Min', 'Max', 'Include Nulls'];
               var categoricalColumns = ['Filter', 'Included Categories'];
 
+              console.log("&&& activeFilters", activeFilters);
+
               if ( continuousFilters.length > 0 ){
 
                 var continuousThead = continuousFiltersTable.append('thead')
@@ -1362,7 +1364,21 @@ frontmatter: isneeded
                     .text(function (d) { return d.value; });
               }
 
-          });
+            });
+          d3.select('#copyFilterNames')
+            .on('click', function(d){
+                var activeFilters = filterUtil.getActiveFilterValues();
+                var filterTitlesOnly = [].concat.apply([], activeFilters.map(function(objArray){
+                    return objArray.map(function(obj){ return obj.Filter; });
+                }));
+                function setClipBoardToFilterTitleList(event){
+                    event.clipboardData.setData('text/plain', filterTitlesOnly.join("\n "));
+                    event.preventDefault();
+                }
+                document.body.addEventListener('copy', setClipBoardToFilterTitleList);
+                document.execCommand('copy');
+                document.body.removeEventListener('copy', setClipBoardToFilterTitleList);
+            });
         },
         exportButton: function() {
           d3.select('#exportCsv')
