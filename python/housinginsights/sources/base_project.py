@@ -6,7 +6,6 @@ import csv
 import os
 from uuid import uuid4
 
-# app modules
 from housinginsights.config.base import HousingInsightsConfig
 from housinginsights.sources.models.pres_cat import PROJ_FIELDS, \
     SUBSIDY_FIELDS, PROJ_ADDRE_FIELDS
@@ -81,16 +80,18 @@ class ProjectBaseApiConn(BaseApiConn):
 
     def _get_nlihc_id_from_db(self, addresses, uid):
         """
-        Returns a tuple nlihc_id, in_proj_table_flag pair for a given address
+        Returns a tuple (nlihc_id, unique_data_id, in_proj_table_flag,
+        found_via, list of mar_ids) for a given address
         id by looking for any matching address or mar_id for the list of
         addresses passed.
 
-        If there doesn't map to an existing building in the table,
+        If there isn't a map to an existing building in the table,
         a randomly generated uuid is returned as nlihc_id.
         """
         
         # look for any matching address. If we find a match, assume the
         # whole project is match
+        mar_ids = list()
         for address in addresses:
 
             # first handle non-matching "matches"
@@ -98,54 +99,42 @@ class ProjectBaseApiConn(BaseApiConn):
                 # not a real match, go to next address
                 continue
 
-            # next try lookup by mar id
+            # next try lookup by mar id first
             try:
                 mar_id = self._get_mar_id(address)
+                mar_ids.append(mar_id)
                 nlihc_id, unique_data_id = self.proj_addre_lookup_from_mar[
                     mar_id]
-                return nlihc_id, unique_data_id, True
+                return nlihc_id, unique_data_id, True, 'mar_id', mar_ids
             except KeyError:
-                # mar id not in proj_addre table; try the address directly
-                try:
-                    nlihc_id, unique_data_id = self.proj_addre_lookup[
-                        address]
-                    return nlihc_id, unique_data_id, True
-                except KeyError:
-                    # address not already in data
-                    continue
+                # mar id not in proj_addre table
+                pass
 
-        return str(uuid4()), uid, False
+            # try the address directly
+            try:
+                nlihc_id, unique_data_id = self.proj_addre_lookup[
+                    address]
+                return nlihc_id, unique_data_id, True, 'address', mar_ids
+            except KeyError:
+                # address not already in data
+                continue
 
-    def create_address_csv_prescat(self,uid,proj_path=None, addre_path=None):
-        '''
-        Used for the project table only?
-
-        Can't think of a way to make the same function for both prescat (which 
-        already has proj/subsidy split) and the other data sets that don't and
-        therefore need the address splitting to happen during entity resolution. 
-
-        TODO this is incomplete.
-        '''
-
-
-
-        with open(proj_path, encoding='utf-8') as proj, \
-                open(addre_path, mode='w', encoding='utf-8') as addre:
-            proj_reader = csv.DictReader(proj)
-            addre_writer = csv.DictWriter(addre, fieldnames=['nlihc_id','address', 'mar_id']) #TODO make this an imported model
-            addre_writer.writeheader()
-
-            for proj_row in proj_reader:
-                address_data = proj_row['Proj_addre']
-                nlihc_id = proj_row['Nlihc_id']
-
-                addresses = misctools.get_unique_addresses_from_str(address_data)
-                addresses = [misctools.quick_address_cleanup(a) for a in addresses]
-
-                self._append_addresses(addresses=addresses, nlihc_id = nlihc_id, addre_writer = addre_writer)
+        return str(uuid4()), uid, False, None, mar_ids
 
     def _append_addresses(self, addresses, nlihc_id, addre_writer, line,
                           fields_map):
+        """
+        Writes the _addre.csv with the same metadata columns as the
+        prescat_addre.csv.
+
+        :param addresses: the list of addresses mapping to the given nlihc_id
+        :param nlihc_id: the prescat key for the addresses
+        :param addre_writer: the file object to be written to
+        :param line: the current source row being processed
+        :param fields_map: the mapping between source metadata columns and
+        prescat_addre metadata columns
+        :return: None
+        """
 
         for address in addresses:
             data = dict()
@@ -277,14 +266,15 @@ class ProjectBaseApiConn(BaseApiConn):
                     # then do a quick standardization clean up
                     addr_field_name = project_fields_map['Proj_addre']
                     address_data = source_row[addr_field_name]
-
-                    # TODO: geocode clean up here for those missing address_data
-
                     addresses = misctools.get_unique_addresses_from_str(address_data)
                     addresses = [misctools.quick_address_cleanup(a) for a in
                                  addresses]
 
-                    nlihc_id, data_id, in_proj_table = self._get_nlihc_id_from_db(
+                    # found_via is which method was first successful,
+                    # mar_id_found is the mar_id used if it got to the
+                    # mar_id phase.
+                    nlihc_id, data_id, in_proj_table, found_via, mar_ids_found \
+                        = self._get_nlihc_id_from_db(
                         addresses=addresses, uid=uid)
 
                     uid_addre = uid + '_addre'  # correct uid for *_addre
@@ -303,6 +293,10 @@ class ProjectBaseApiConn(BaseApiConn):
                                                       fields=PROJ_FIELDS,
                                                       fields_map=project_fields_map,
                                                       line=source_row)
+
+                        # TODO need to finish this method
+                        data = self._geocode_if_needed(data, mar_ids_found)
+
                         proj_writer.writerow(data)
 
                         # add all to the proj_addre table
@@ -336,6 +330,25 @@ class ProjectBaseApiConn(BaseApiConn):
                     logger.error("Failed to process {}".format(source_row))
                     if self.debug:
                         raise e
+
+    def _geocode_if_needed(self, data, mar_ids_found):
+        '''
+        TODO this is incomplete!!!!
+
+
+        '''
+        geocode_fields = [data['Proj_lat'], data['Proj_lon'], data['Zip'],
+                          data['Cluster_tr2000'], data['Ward2012']]
+        if None in geocode_fields:
+            for mar_id in mar_ids_found:
+                try:
+                    mar_record = 'get_mar_record' #need to lookup from the database mar table
+                    #data['Proj_lat'] = mar_record['latitude']
+                    break
+                except Exception as e:
+                    continue
+
+        return data
 
     def _add_calculated_subsidy_data(self, uid, data):
         """

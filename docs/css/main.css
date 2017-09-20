@@ -37,10 +37,11 @@ Much of this should be replaced with a bootstrap-theme.css file instead*/
   margin-top: -20px;
 }
 
+/* This caused super weird behavior in the semantic ui accordions
 .title-text{
   padding:10% 0
 }
-
+*/
 
 .hero-image h1,
 .hero-image h2 {
@@ -48,19 +49,6 @@ Much of this should be replaced with a bootstrap-theme.css file instead*/
   /*text-align: center;*/
 }
 
-.navbar{
-    background-color: var(--main-color);
-}
-
-.navbar-default .navbar-nav > li > a,
-.navbar-default .navbar-brand {
-	color: #ffffff;
-}
-
-.navbar-default .navbar-toggle .icon-bar {
-	background-color: #ffffff;
-  background-image: none;
-}
 
 
 a.disabled {
@@ -134,4 +122,31 @@ p {
 
 .calendar-link a {
   color: #198CFF
+}
+
+
+
+.navbar-nav > li > a, .navbar-brand {
+    padding: 4px 20px !important; 
+    height: 40px !important;
+    line-height: 26px !important;
+    font-size: 14px !important;
+    text-transform: capitalize !important;
+
+}
+
+.navbar {min-height:40px !important;}
+
+.navbar{
+    background-color: var(--main-color);
+}
+
+.navbar-default .navbar-nav > li > a,
+.navbar-default .navbar-brand {
+  color: #ffffff;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+  background-color: #ffffff;
+  background-image: none;
 }

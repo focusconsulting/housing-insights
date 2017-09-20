@@ -1,18 +1,35 @@
+---
+frontmatter: isneeded
+---
+
 "use strict";
 
 var router = {
     isFilterInitialized: false,
     stateObj: {},
-    initFilters: function(msg,data){
+    initGate: function(){
+        if ( getState().initialProjectsRendered && getState().filterViewLoaded ) { // each stateChange triggers the gate function
+                                                                                   // but both need to be true before calling
+                                                                                   // initFilters. fixes bug whereby url decode
+                                                                                   // was running before the filterControlsDict
+                                                                                   // was defined
+            router.initFilters();
+        }
+    },
+    initFilters: function(){
         if ( router.isFilterInitialized ) return;
         setSubs([
             ['filterValues', router.pushFilter],
             ['mapLayer', router.pushFilter],
             ['overlaySet', router.pushFilter],
+            ['subNav.right', router.pushFilter],
+            ['previewBuilding', router.pushFilter],
             ['clearState', router.clearOverlayURL]
         ]);        
         router.isFilterInitialized = true;
-        if ( router.hasInitialFilterState ) router.decodeState();
+        if ( router.hasInitialFilterState ) {
+            router.decodeState();
+        }
     },
     initBuilding: function() {
         router.initialView = 'building';
@@ -25,13 +42,13 @@ var router = {
         }
     },
     pushFilter: function(msg, data){
-        console.log(msg,data);
-        // TO DO: add handling for sidebar and preview pusher
-        if (data.length === 0) {
+        /*console.log(msg,data);*/
+        if (data.length === 0 || !data || ( msg === 'subNav.right' && data === 'charts') ) {
             delete router.stateObj[msg];
+        } else if ( msg.split('.')[0] === 'previewBuilding' ) {
+            router.stateObj['previewBuilding'] = data[0];
         } else {
             router.stateObj[msg] = data;
-            console.log(router.stateObj);
         }
         router.setHash()
     },
@@ -90,9 +107,13 @@ var router = {
                     return router.stateObj.overlaySet.overlay === obj.source;
                 });
                 paramsArray.push( 'ol=' + dataChoice.short_name);
+            } else if ( key === 'subNav.right' && router.stateObj['subNav.right'] === 'buildings' ) {
+                paramsArray.push('sb=bdng');
+            } else if ( key.split('.')[0] === 'previewBuilding' ){
+                paramsArray.push('pb=' + router.stateObj['previewBuilding'].properties.nlihc_id);
             }
         }
-     //   console.log(paramsArray.join('&'));
+     
         return paramsArray.join('&').replace(/ /g,'_');
     },
     screenLoad: function(){
@@ -101,6 +122,13 @@ var router = {
     decodeState: function(){
         console.log("decoding state from URL");
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
+        if ( stateArray.length === 1 && stateArray[0] === '' ) { // backstop in case a path ends in #/HI/. Nothing should
+                                                                 // leave us with that path, but just in case this check
+                                                                 // will keep it from wreaking havoc
+            window.history.replaceState(router.stateObj, 'newState', '#');
+            this.clearScreen();
+            return;
+        }
         stateArray.forEach(function(each){
             var dataChoice;
             var eachArray = each.split('=');
@@ -113,13 +141,24 @@ var router = {
                 router.openFilterControl(dataChoice.source); // can be replicated for non-overLay filters if
                                                              // we decide to url encode them and want them (or the
                                                              // last) opened on load
+            } else if ( eachArray[0] === 'sb' ){
+                setState('subNav.right', 'buildings');
+            
+            } else if ( eachArray[0] === 'pb' ) {
+                setState('subNav.right', 'buildings');
+                var renderedProjects = mapView.map.queryRenderedFeatures({
+                    layers: ['project','project-enter','project-exit', 'project-unmatched']
+                });
+                var matchingRenderedProject = renderedProjects.find(function(each){
+                    return each.properties.nlihc_id === eachArray[1];
+                });
+                setState('previewBuilding', [matchingRenderedProject,true]); // true = flag to scroll matching projects list
+            
             } else {
                 dataChoice = dataChoices.find(function(obj){
                     return obj.short_name === eachArray[0];
                 });
-                console.log('datachoice', dataChoice);
                 var filterControlObj = filterView.filterControlsDict[dataChoice.short_name]
-                console.log('filterControlObj', filterControlObj);
                 if ( dataChoice.component_type === 'continuous' ) {
                     var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
                     var values = eachArray[1].split(separator);
@@ -198,8 +237,9 @@ if ( window.location.hash.indexOf('#/HI/') !== -1 ) {
         router.initBuilding();
     } else {
         router.hasInitialFilterState = true;
+        //router.screenLoad(); //Replaced by semantic ui loading screen and welcome modal
     }
-    router.screenLoad();
+    
 } else {
     router.hasInitialFilterState = false;
 }

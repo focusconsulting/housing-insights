@@ -1,3 +1,7 @@
+# Script is deprecated, as of September 18, 2017.
+# zoneUnitCount now calculated with LoadData's _get_residential_units()
+#
+
 from pprint import pprint
 import os
 import sys
@@ -12,7 +16,7 @@ sys.path.append(PYTHON_PATH)
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class MarApiConn_2(BaseApiConn):
     """

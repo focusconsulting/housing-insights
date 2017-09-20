@@ -12,7 +12,7 @@ from housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
     SUBSIDY_FIELDS_MAP, PROJECT_ADDRE_FIELDS_MAP
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 
 class DCHousingApiConn(ProjectBaseApiConn):
