@@ -689,8 +689,7 @@ class LoadData(object):
         }
 
         zone_types = ['census_tract', 'ward', 'neighborhood_cluster']
-        residential_units_by_zone_type = res_units_by_zone_type
-        print("res_units_imported" + str(res_units_by_zone_type['census_tract'])[0:50])
+
         query_results = list()
 
         # populate columns accordingly for each zone_specific type
