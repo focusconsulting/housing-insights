@@ -848,6 +848,7 @@ input.search {
 
 #welcomeModal .actions {
     margin-top:30px;
+    text-align: inherit;
 }
 
 
