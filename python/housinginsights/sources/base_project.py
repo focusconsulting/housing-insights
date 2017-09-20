@@ -271,8 +271,8 @@ class ProjectBaseApiConn(BaseApiConn):
                                  addresses]
 
                     # found_via is which method was first successful,
-                    # mar_id_found is the mar_id used if it got to the
-                    # mar_id phase.
+                    # mar_ids_found is all the mar_ids it found; if successful
+                    # the last element of the list will be the matching mar_id
                     nlihc_id, data_id, in_proj_table, found_via, mar_ids_found \
                         = self._get_nlihc_id_from_db(addresses=addresses,
                                                      uid=uid)

@@ -2,6 +2,9 @@ import os, sys
 python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir))
 sys.path.append(python_filepath)
+
+import argparse 
+
 from housinginsights.tools.logger import HILogger
 import get_api_data
 import load_data
@@ -70,19 +73,28 @@ def get_log_level_counts(logfile):
     return level_counts
 
 
-def weekly_update():
+
+def weekly_update(drop_tables_first = False):
     db_choice = 'docker'
     send_log = True
     debug = True
 
+
     #Run the jobs
     try:
+        if drop_tables_first:
+            remove_table_flag = '--remove-tables'
+            tables_to_remove = 'all'
+        else:
+            remove_table_flag = ''
+            tables_to_remove = ''
+
         #Get and load data in order so that we appropriately deal with duplicate records
 
         #Start with MAR so that we can geocode things
         arguments = get_api_data.parser.parse_args([db_choice,'--modules','opendata','--ids','mar'])
         get_api_data.get_multiple_api_sources(arguments)
-        arguments = load_data.parser.parse_args([db_choice,'--update-only','mar'])
+        arguments = load_data.parser.parse_args([db_choice,'--update-only','mar', '--skip-calculations' , remove_table_flag, tables_to_remove])
         load_data.main(arguments)
 
 
@@ -94,21 +106,27 @@ def weekly_update():
                                                                             'prescat_addre',
                                                                             'prescat_reac',
                                                                             'prescat_real_property',
-                                                                            'prescat_parcel'])
+                                                                            'prescat_parcel',
+
+                                                                            '--skip-calculations' ])
         load_data.main(arguments)
 
 
         #then DHCD since it has better data when duplicate entries appear in DCHousing
         arguments = get_api_data.parser.parse_args([db_choice,'--modules','dhcd'])
         get_api_data.get_multiple_api_sources(arguments)
-        arguments = load_data.parser.parse_args([db_choice,'--update-only','dhcd_dfd_properties_project','dhcd_dfd_properties_subsidy'])
+        arguments = load_data.parser.parse_args([db_choice,'--update-only','dhcd_dfd_properties_project',
+                                                                        'dhcd_dfd_properties_subsidy',
+                                                                        '--skip-calculations' ])
         load_data.main(arguments)
 
 
         #Then DCHousing
         arguments = get_api_data.parser.parse_args([db_choice,'--modules','DCHousing'])
         get_api_data.get_multiple_api_sources(arguments)
-        arguments = load_data.parser.parse_args([db_choice,'--update-only','dchousing_project','dchousing_subsidy'])
+        arguments = load_data.parser.parse_args([db_choice,'--update-only','dchousing_project',
+                                                                        'dchousing_subsidy',
+                                                                        '--skip-calculations'])
         load_data.main(arguments)
 
 
@@ -143,6 +161,12 @@ def weekly_update():
             send_log_file_to_admin(debug=debug)
     
 
+
 if __name__ == '__main__':
-    
-    weekly_update()
+    services_parser = argparse.ArgumentParser("Services.py for running the weekly update job")  
+    services_parser.add_argument('--drop-all', help="drop all tables before starting the update", 
+            action='store_true')
+
+    services_arguments = services_parser.parse_args()
+
+    weekly_update(services_arguments.drop_all)
