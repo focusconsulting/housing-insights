@@ -1,6 +1,6 @@
 ---
 layout: datasource
-tablename: reac_scores
+tablename: reac_score
 title: REAC Scores
 ---
 
