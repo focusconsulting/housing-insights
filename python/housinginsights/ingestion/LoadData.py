@@ -138,26 +138,34 @@ class LoadData(object):
 
         tables: a list of table names to be deleted
         '''
-        for table in tables:
-            try:
-                logger.info("Dropping the {} table and all associated manifest rows".format(table))
-                #Delete all the relevant rows of the sql manifest table
-                q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
-                conn = self.engine.connect()
-                proxy = conn.execute(q)
-                results = proxy.fetchall()
-                for row in results:
-                    q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
-                        row[0])
+        if 'all' in tables:
+            self._drop_tables()
+            logger.info('Dropped all tables from database')
+
+        else:
+            for table in tables:
+                try:
+                    logger.info("Dropping the {} table and all associated manifest rows".format(table))
+                    #Delete all the relevant rows of the sql manifest table
+                    q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
+                    conn = self.engine.connect()
+                    proxy = conn.execute(q)
+                    results = proxy.fetchall()
+                    for row in results:
+                        q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                            row[0])
+                        conn.execute(q)
+
+                    #And drop the table itself
+                    q = "DROP TABLE {}".format(table)
                     conn.execute(q)
 
-                #And drop the table itself
-                q = "DROP TABLE {}".format(table)
-                conn.execute(q)
-            except ProgrammingError as e:
-                logger.error("Couldn't remove table {}".format(table))
-                if self.debug == True:
-                    raise e
+                    logger.info("Dropping table {} was successful".format(table))
+                    
+                except ProgrammingError as e:
+                    logger.error("Couldn't remove table {}".format(table))
+                    if self.debug == True:
+                        raise e
 
 
     def _meta_json_to_database(self):
@@ -1341,13 +1349,12 @@ class LoadData(object):
             self._failed_table_count += 1
             pass
 
+
 def main(passed_arguments):
     """
     Initializes load procedure based on passed command line arguments and
     options.
-    """
-
-    
+    """    
 
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
@@ -1423,7 +1430,8 @@ parser.add_argument('--update-only', nargs='+',
                          'values')
 parser.add_argument('--remove-tables', nargs='+',
                     help='Drops tables before running the load data code. '
-                    ' Add the name of each table to drop in format "table1 table2"')
+                    ' Add the name of each table to drop in format "table1 table2"'
+                    ' If you want to drop all tables, use the keyword "all"')
 
 parser.add_argument ('--recalculate-only',action='store_true',
                     help="Don't update any data, just redo calculated fields")
