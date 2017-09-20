@@ -274,17 +274,17 @@ class ProjectBaseApiConn(BaseApiConn):
                     # mar_id_found is the mar_id used if it got to the
                     # mar_id phase.
                     nlihc_id, data_id, in_proj_table, found_via, mar_ids_found \
-                        = self._get_nlihc_id_from_db(
-                        addresses=addresses, uid=uid)
+                        = self._get_nlihc_id_from_db(addresses=addresses,
+                                                     uid=uid)
 
                     uid_addre = uid + '_addre'  # correct uid for *_addre
 
                     logger.info('proj_address lookup result: found= {}, '
-                                'nlihc_id= {}, unique_data_id origin= {}, '
-                                'current uid= {}, '
-                                'addresses= {}'.format(in_proj_table, nlihc_id,
-                                                       data_id, uid_addre,
-                                                       addresses))
+                                'via= {}, nlihc_id= {}, '
+                                'unique_data_id origin= {}, current uid= {}, '
+                                'addresses= {}, mar_ids= {}'.format(
+                        in_proj_table, found_via, nlihc_id, data_id, uid_addre,
+                        addresses, mar_ids_found))
 
                     # add values to the project table output file if no match
                     # found or match is found and same uid

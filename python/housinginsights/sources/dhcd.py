@@ -296,8 +296,8 @@ class DhcdApiConn(ProjectBaseApiConn):
         self.result_to_csv(TABLE_METADATA_FIELDS, all_tables_field_metadata, output_path_table_metadata)
         self.result_to_csv(APP_METADATA_FIELDS, list(list(d.values()) for d in app_metadata.values()), output_path_app_metadata)
 
-
-    def get_data(self, unique_data_ids=None, sample=False, output_type='csv', **kwargs):
+    def get_data(self, unique_data_ids=None, sample=False, output_type='csv',
+                 **kwargs):
         """
         Returns a JSON object of the entire data set.
 
@@ -324,13 +324,15 @@ class DhcdApiConn(ProjectBaseApiConn):
                 data_xml_records = data_xml_root.findall('record')
                 data_json = xml_to_json.data(data_xml_root)
 
-                results = [ DhcdResult({e.tag: e.text for e in list(r)}, self._fields[u]).data for r in data_xml_records ]
+                results = [DhcdResult(
+                    {e.tag: e.text for e in list(r)},
+                    self._fields[u]).data for r in data_xml_records]
 
-                    self.result_to_csv(self._fields[u], results, self.output_paths[u])
+                self.result_to_csv(self._fields[u], results, self.output_paths[u])
 
-                    #Convert to format expected by database
-                    if u == 'dhcd_dfd_properties':
-                        self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, PROJECT_ADDRE_FIELDS_MAP, db)
+                #Convert to format expected by database
+                if u == 'dhcd_dfd_properties':
+                    self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, PROJECT_ADDRE_FIELDS_MAP, db)
 
 
 
