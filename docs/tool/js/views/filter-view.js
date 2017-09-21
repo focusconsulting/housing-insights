@@ -504,7 +504,7 @@ var filterView = {
 
         this.isTouched = function(){
             var returnVals = ths.textBoxes.returnValues();
-            return returnVals.min.min != this.minDatum || returnVals.max.max != this.maxDatum || this.nullsShown === false;
+            return returnVals.min.min != this.minDatum || returnVals.max.max != this.maxDatum || ths.toggle.element.checked === false;
         };
 
         this.set = function(min,max,nullValue){
@@ -655,7 +655,7 @@ var filterView = {
 
         slider = document.getElementById(c.source);
         noUiSlider.create(slider, {
-            start: [minDatum, maxDatum],
+            start: [minDatum.getFullYear(), maxDatum.getFullYear()],
             connect: true,
             tooltips: [ false, false ],
             range: {
@@ -841,12 +841,11 @@ var filterView = {
         }
 
         this.isTouched = function(){
-            console.log(this);
             var dateValues = getValuesAsDates();
             if ( document.getElementById('filter-' + this.component.source).className.indexOf('invalid') !== -1 ) {
                 return true;
             }
-            return dateValues.min.valueOf() !== minDatum.valueOf() || dateValues.max.valueOf() !== maxDatum.valueOf() || this.nullsShown === false;
+            return dateValues.min.valueOf() !== minDatum.valueOf() || dateValues.max.valueOf() !== maxDatum.valueOf() || ths.toggle.element.checked === false;
         }
 
         this.checkAgainstOriginalValues = function(min,max,showNulls){
