@@ -24,22 +24,27 @@ from xmljson import parker as xml_to_json
 
 import json
 
-from housinginsights.tools.logger import HILogger
-
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
-
 from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.dhcd import APP_ID, TABLE_ID_MAPPING, \
                                                         APP_METADATA_FIELDS, \
                                                         TABLE_METADATA_FIELDS, \
                                                         DhcdResult, \
                                                         PROJECT_FIELDS_MAP,\
-                                                        SUBSIDY_FIELDS_MAP
+                                                        SUBSIDY_FIELDS_MAP, \
+                                                        PROJECT_ADDRE_FIELDS_MAP
 
-INCLUDE_ALL_FIELDS = True
+
+
+# TODO include_all_fields properly switches which fields are requested to be a more extensive list
+# However, for the DHCD "project" table (equivalent to Housing Insights 'subsidy' table), the
+# query then results in a 'Report too large' error (errcode 75). IF we want to enable this field,
+# we will need to enable chunking the request using the record ids.
+# info: https://community.quickbase.com/quickbase/topics/suggestion-to-work-around-when-report-too-large-maximum-number-of-bytes-in-report-exceeded-error
+
+INCLUDE_ALL_FIELDS = {'dhcd_dfd_projects': False, 'dhcd_dfd_properties':True}
 
 from housinginsights.tools.logger import HILogger
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class DhcdApiConn(ProjectBaseApiConn):
     """
@@ -58,9 +63,9 @@ class DhcdApiConn(ProjectBaseApiConn):
     PARAMS_DATA_DEFAULT_FIELDS = {'a': 'API_DoQuery', 'query': '{\'1\'.XEX.\'0\'}'}
 
 
-    def __init__(self,baseurl=None,proxies=None,database_choice=None):
+    def __init__(self,baseurl=None,proxies=None,database_choice=None, debug=False):
 
-        super().__init__(baseurl=DhcdApiConn.BASEURL, proxies=proxies,database_choice=database_choice)
+        super().__init__(baseurl=DhcdApiConn.BASEURL, proxies=proxies,database_choice=database_choice, debug=debug)
 
         # unique_data_id format: 'dhcd_dfd_' + <lowercase_table_name>
         self._available_unique_data_ids = [ 'dhcd_dfd_projects', 
@@ -116,10 +121,10 @@ class DhcdApiConn(ProjectBaseApiConn):
         if INCLUDE_ALL_FIELDS:
             self._get_metadata()
         else:
-            self._get_metadata(default_display_only=True)
+            self._get_metadata()
 
 
-    def _get_metadata(self, default_display_only=False):
+    def _get_metadata(self):
         """
         Retrieves metadata about the DHCD DFD Quick Base app and its member tables
         (including field metadata and relationships) and saves this in two CSV files.
@@ -127,11 +132,6 @@ class DhcdApiConn(ProjectBaseApiConn):
         Also, for each unique data id corresponding to a table, (1) builds a field
         reference list of all relevant fields, and (2) sets the query parameter string
         (including the sort field parameter) used when saving table data in get_data(...).
-
-        :param default_display_only: Indicates whether or not to only include default
-                                     display fields in the field reference list;
-                                     default is False (gets all available table fields).
-        :type  default_display_only: Boolean.
         """
         output_path_dir = os.path.dirname(self.output_paths[self._available_unique_data_ids[0]])
         output_path_app_metadata = os.path.join(output_path_dir, '_dhcd_dfd_app_metadata.csv')
@@ -143,6 +143,7 @@ class DhcdApiConn(ProjectBaseApiConn):
         app_metadata = OrderedDict()
         table_metadata = OrderedDict()
         field_count = 0
+
         for app_table_metadata in app_tables_metadata_xml:
 
             table_dbid = app_table_metadata.text
@@ -162,131 +163,132 @@ class DhcdApiConn(ProjectBaseApiConn):
                     unique_data_id = 'dhcd_dfd_' + table_name_snake_case
                     self._fields[unique_data_id] = []
 
-                table_metadata_xml_fields = table_metadata_xml_root.findall('./table/fields/field')
-                table_metadata[table_dbid] = OrderedDict()
-                field_line_start = field_count + 2
+                    table_metadata_xml_fields = table_metadata_xml_root.findall('./table/fields/field')
+                    table_metadata[table_dbid] = OrderedDict()
+                    field_line_start = field_count + 2
 
-                for field_xml in table_metadata_xml_fields:
+                    for field_xml in table_metadata_xml_fields:
 
-                    fid = int(field_xml.get('id'))
-                    table_metadata[table_dbid][fid] = OrderedDict()
+                        fid = int(field_xml.get('id'))
+                        table_metadata[table_dbid][fid] = OrderedDict()
 
-                    field_label = field_xml.find('label').text
-                    field_name = field_label.lower().translate(self._identifier_translation_map)
+                        field_label = field_xml.find('label').text
+                        field_name = field_label.lower().translate(self._identifier_translation_map)
 
-                    # For any fields that belong to composite fields (e.g. address component fields),
-                    # resolve the full field name by prepending the parent field name
-                    parent_fid = None
-                    if field_xml.find('parentFieldID') is not None:
-                        parent_fid = int(field_xml.find('parentFieldID').text)
-                        if parent_fid in table_metadata[table_dbid]:
-                            parent_field_name = table_metadata[table_dbid][parent_fid]['field_name']
+                        # For any fields that belong to composite fields (e.g. address component fields),
+                        # resolve the full field name by prepending the parent field name
+                        parent_fid = None
+                        if field_xml.find('parentFieldID') is not None:
+                            parent_fid = int(field_xml.find('parentFieldID').text)
+                            if parent_fid in table_metadata[table_dbid]:
+                                parent_field_name = table_metadata[table_dbid][parent_fid]['field_name']
+                            else:
+                                parent_field_label = table_metadata_xml_root.find("./table/fields/field[@id='{}']/label".format(str(parent_fid))).text
+                                parent_field_name = parent_field_label.lower().translate(self._identifier_translation_map)
+                            if parent_field_name[0].isdigit():
+                                parent_field_name = '_' + parent_field_name
+                            field_name = '__'.join([parent_field_name, field_name])
+
+                        if field_name[0].isdigit():
+                            field_name = '_' + field_name
+
+                        # For any composite fields (e.g. address fields), get child/component fields
+                        child_fids = []
+                        for child_field in field_xml.findall('./compositeFields/compositeField'):
+                            child_fids.append(child_field.get('id'))
+                        child_fids = '|'.join(child_fids) if len(child_fids) > 0 else None
+
+                        table_metadata[table_dbid][fid]['table_name'] = table_name
+                        table_metadata[table_dbid][fid]['field_name'] = field_name
+                        table_metadata[table_dbid][fid]['field_label'] = field_label
+                        table_metadata[table_dbid][fid]['field_id'] = str(fid)
+                        table_metadata[table_dbid][fid]['field_type'] = field_xml.get('field_type')
+                        table_metadata[table_dbid][fid]['base_type'] = field_xml.get('base_type')
+                        table_metadata[table_dbid][fid]['appears_by_default'] = field_xml.find('appears_by_default').text
+
+                        table_metadata[table_dbid][fid]['composite_field_parent_fid'] = parent_fid
+                        table_metadata[table_dbid][fid]['composite_field_child_fids'] = child_fids
+
+                        table_metadata[table_dbid][fid]['mode'] = field_xml.get('mode')
+
+                        table_metadata[table_dbid][fid]['formula'] = None
+                        if field_xml.find('formula') is not None:
+                            table_metadata[table_dbid][fid]['formula'] = field_xml.find('formula').text
+
+                        table_metadata[table_dbid][fid]['choices'] = None
+                        if field_xml.find('choices') is not None:
+                            table_metadata[table_dbid][fid]['choices'] = ""
+                            for choice in field_xml.findall('./choices/choice'):
+                                table_metadata[table_dbid][fid]['choices'] += "\n" + choice.text \
+                                                        if len(table_metadata[table_dbid][fid]['choices']) > 0 \
+                                                        else choice.text
+
+                        table_metadata[table_dbid][fid]['lookup_target_fid'] = None
+                        table_metadata[table_dbid][fid]['lookup_source_fid'] = None
+                        if table_metadata[table_dbid][fid]['mode'] == 'lookup':
+                            if field_xml.find('lutfid') is not None:
+                                table_metadata[table_dbid][fid]['lookup_target_fid'] = field_xml.find('lutfid').text
+                            if field_xml.find('lusfid') is not None:
+                                table_metadata[table_dbid][fid]['lookup_source_fid'] = field_xml.find('lusfid').text
+
+                        table_metadata[table_dbid][fid]['dblink_target_dbid'] = None
+                        table_metadata[table_dbid][fid]['dblink_target_fid'] = None
+                        table_metadata[table_dbid][fid]['dblink_source_fid'] = None
+                        if table_metadata[table_dbid][fid]['mode'] == 'virtual' and \
+                            table_metadata[table_dbid][fid]['field_type'] == 'dblink':
+                            if field_xml.find('target_dbid') is not None:
+                                table_metadata[table_dbid][fid]['dblink_target_dbid'] = field_xml.find('target_dbid').text
+                            if field_xml.find('target_fid') is not None:
+                                table_metadata[table_dbid][fid]['dblink_target_fid'] = field_xml.find('target_fid').text
+                            if field_xml.find('source_fid') is not None:
+                                table_metadata[table_dbid][fid]['dblink_source_fid'] = field_xml.find('source_fid').text
+                        table_metadata[table_dbid][fid]['fkey_table_app_dbid'] = None
+                        table_metadata[table_dbid][fid]['fkey_table_alias'] = None
+                        if field_xml.find('mastag') is not None:
+                            fkey_ref = field_xml.find('mastag').text.split('.')
+                            if len(fkey_ref) == 2:
+                                table_metadata[table_dbid][fid]['fkey_table_app_dbid'] = fkey_ref[0]
+                                table_metadata[table_dbid][fid]['fkey_table_alias'] = fkey_ref[1].lower()
+                            else:
+                                table_metadata[table_dbid][fid]['fkey_table_app_dbid'] = None
+                                table_metadata[table_dbid][fid]['fkey_table_alias'] = fkey_ref[0].lower()
+
+                        table_metadata[table_dbid][fid]['field_help'] = field_xml.find('fieldhelp').text
+
+                        # For each unique data id corresponding to a table,
+                        # build a list of all relevant fields
+                        if unique_data_id is not None and \
+                            (INCLUDE_ALL_FIELDS[unique_data_id] or \
+                             table_metadata[table_dbid][fid]['appears_by_default'] == '1'):
+                            self._fields[unique_data_id].append(field_name)
+
+                        field_count += 1
+
+                    field_line_end = field_count + 1
+
+                    app_metadata[table_dbid] = OrderedDict([
+    					  ('table_name',                table_name),
+                          ('table_dbid',                table_dbid),
+                          ('table_alias',               app_table_metadata.get('name')),
+                          ('key_fid',                   table_metadata_xml_orig.find('key_fid').text),
+                          ('default_sort_fid',          table_metadata_xml_orig.find('def_sort_fid').text),
+                          ('default_sort_order',        table_metadata_xml_orig.find('def_sort_order').text),
+                          ('single_record_name',        table_metadata_xml_orig.find('single_record_name').text),
+                          ('plural_record_name',        table_metadata_xml_orig.find('plural_record_name').text),
+                          ('field_metadata_line_start', field_line_start),
+                          ('field_metadata_line_end',   field_line_end)
+                        ])
+
+                    if unique_data_id is not None and unique_data_id in self._fields:
+                        # While not strictly a field, Quick Base always includes final 'update_id':
+                        self._fields[unique_data_id].append('update_id')
+                        # Set the query parameter string (including the sort field parameter):
+                        if INCLUDE_ALL_FIELDS[unique_data_id]:
+                            self._params[unique_data_id] = DhcdApiConn.PARAMS_DATA_ALL_FIELDS
                         else:
-                            parent_field_label = table_metadata_xml_root.find("./table/fields/field[@id='{}']/label".format(str(parent_fid))).text
-                            parent_field_name = parent_field_label.lower().translate(self._identifier_translation_map)
-                        if parent_field_name[0].isdigit():
-                            parent_field_name = '_' + parent_field_name
-                        field_name = '__'.join([parent_field_name, field_name])
+                            self._params[unique_data_id] = DhcdApiConn.PARAMS_DATA_DEFAULT_FIELDS
 
-                    if field_name[0].isdigit():
-                        field_name = '_' + field_name
-
-                    # For any composite fields (e.g. address fields), get child/component fields
-                    child_fids = []
-                    for child_field in field_xml.findall('./compositeFields/compositeField'):
-                        child_fids.append(child_field.get('id'))
-                    child_fids = '|'.join(child_fids) if len(child_fids) > 0 else None
-
-                    table_metadata[table_dbid][fid]['table_name'] = table_name
-                    table_metadata[table_dbid][fid]['field_name'] = field_name
-                    table_metadata[table_dbid][fid]['field_label'] = field_label
-                    table_metadata[table_dbid][fid]['field_id'] = str(fid)
-                    table_metadata[table_dbid][fid]['field_type'] = field_xml.get('field_type')
-                    table_metadata[table_dbid][fid]['base_type'] = field_xml.get('base_type')
-                    table_metadata[table_dbid][fid]['appears_by_default'] = field_xml.find('appears_by_default').text
-
-                    table_metadata[table_dbid][fid]['composite_field_parent_fid'] = parent_fid
-                    table_metadata[table_dbid][fid]['composite_field_child_fids'] = child_fids
-
-                    table_metadata[table_dbid][fid]['mode'] = field_xml.get('mode')
-
-                    table_metadata[table_dbid][fid]['formula'] = None
-                    if field_xml.find('formula') is not None:
-                        table_metadata[table_dbid][fid]['formula'] = field_xml.find('formula').text
-
-                    table_metadata[table_dbid][fid]['choices'] = None
-                    if field_xml.find('choices') is not None:
-                        table_metadata[table_dbid][fid]['choices'] = ""
-                        for choice in field_xml.findall('./choices/choice'):
-                            table_metadata[table_dbid][fid]['choices'] += "\n" + choice.text \
-                                                    if len(table_metadata[table_dbid][fid]['choices']) > 0 \
-                                                    else choice.text
-
-                    table_metadata[table_dbid][fid]['lookup_target_fid'] = None
-                    table_metadata[table_dbid][fid]['lookup_source_fid'] = None
-                    if table_metadata[table_dbid][fid]['mode'] == 'lookup':
-                        if field_xml.find('lutfid') is not None:
-                            table_metadata[table_dbid][fid]['lookup_target_fid'] = field_xml.find('lutfid').text
-                        if field_xml.find('lusfid') is not None:
-                            table_metadata[table_dbid][fid]['lookup_source_fid'] = field_xml.find('lusfid').text
-
-                    table_metadata[table_dbid][fid]['dblink_target_dbid'] = None
-                    table_metadata[table_dbid][fid]['dblink_target_fid'] = None
-                    table_metadata[table_dbid][fid]['dblink_source_fid'] = None
-                    if table_metadata[table_dbid][fid]['mode'] == 'virtual' and \
-                        table_metadata[table_dbid][fid]['field_type'] == 'dblink':
-                        if field_xml.find('target_dbid') is not None:
-                            table_metadata[table_dbid][fid]['dblink_target_dbid'] = field_xml.find('target_dbid').text
-                        if field_xml.find('target_fid') is not None:
-                            table_metadata[table_dbid][fid]['dblink_target_fid'] = field_xml.find('target_fid').text
-                        if field_xml.find('source_fid') is not None:
-                            table_metadata[table_dbid][fid]['dblink_source_fid'] = field_xml.find('source_fid').text
-                    table_metadata[table_dbid][fid]['fkey_table_app_dbid'] = None
-                    table_metadata[table_dbid][fid]['fkey_table_alias'] = None
-                    if field_xml.find('mastag') is not None:
-                        fkey_ref = field_xml.find('mastag').text.split('.')
-                        if len(fkey_ref) == 2:
-                            table_metadata[table_dbid][fid]['fkey_table_app_dbid'] = fkey_ref[0]
-                            table_metadata[table_dbid][fid]['fkey_table_alias'] = fkey_ref[1].lower()
-                        else:
-                            table_metadata[table_dbid][fid]['fkey_table_app_dbid'] = None
-                            table_metadata[table_dbid][fid]['fkey_table_alias'] = fkey_ref[0].lower()
-
-                    table_metadata[table_dbid][fid]['field_help'] = field_xml.find('fieldhelp').text
-
-                    # For each unique data id corresponding to a table,
-                    # build a list of all relevant fields
-                    if unique_data_id is not None and \
-                        (not default_display_only or \
-                         table_metadata[table_dbid][fid]['appears_by_default'] == '1'):
-                        self._fields[unique_data_id].append(field_name)
-
-                    field_count += 1
-
-                field_line_end = field_count + 1
-
-                app_metadata[table_dbid] = OrderedDict([
-					  ('table_name',                table_name),
-                      ('table_dbid',                table_dbid),
-                      ('table_alias',               app_table_metadata.get('name')),
-                      ('key_fid',                   table_metadata_xml_orig.find('key_fid').text),
-                      ('default_sort_fid',          table_metadata_xml_orig.find('def_sort_fid').text),
-                      ('default_sort_order',        table_metadata_xml_orig.find('def_sort_order').text),
-                      ('single_record_name',        table_metadata_xml_orig.find('single_record_name').text),
-                      ('plural_record_name',        table_metadata_xml_orig.find('plural_record_name').text),
-                      ('field_metadata_line_start', field_line_start),
-                      ('field_metadata_line_end',   field_line_end)
-                    ])
-
-                if unique_data_id is not None and unique_data_id in self._fields:
-                    # While not strictly a field, Quick Base always includes final 'update_id':
-                    self._fields[unique_data_id].append('update_id')
-                    # Set the query parameter string (including the sort field parameter):
-                    if not default_display_only:
-                        self._params[unique_data_id] = DhcdApiConn.PARAMS_DATA_ALL_FIELDS
-                    else:
-                        self._params[unique_data_id] = DhcdApiConn.PARAMS_DATA_DEFAULT_FIELDS
-                    self._params[unique_data_id]['slist'] = app_metadata[table_dbid]['default_sort_fid']
+                        self._params[unique_data_id]['slist'] = app_metadata[table_dbid]['default_sort_fid']
 
         all_tables_field_metadata = [ list(field_metadata_row.values()) \
                                         for all_field_metadata in table_metadata.values() \
@@ -294,8 +296,8 @@ class DhcdApiConn(ProjectBaseApiConn):
         self.result_to_csv(TABLE_METADATA_FIELDS, all_tables_field_metadata, output_path_table_metadata)
         self.result_to_csv(APP_METADATA_FIELDS, list(list(d.values()) for d in app_metadata.values()), output_path_app_metadata)
 
-
-    def get_data(self, unique_data_ids=None, sample=False, output_type='csv', **kwargs):
+    def get_data(self, unique_data_ids=None, sample=False, output_type='csv',
+                 **kwargs):
         """
         Returns a JSON object of the entire data set.
 
@@ -322,18 +324,15 @@ class DhcdApiConn(ProjectBaseApiConn):
                 data_xml_records = data_xml_root.findall('record')
                 data_json = xml_to_json.data(data_xml_root)
 
-                if output_type == 'stdout':
-                    print(json.dumps(data_json, indent=4))
+                results = [DhcdResult(
+                    {e.tag: e.text for e in list(r)},
+                    self._fields[u]).data for r in data_xml_records]
 
-                elif output_type == 'csv':
+                self.result_to_csv(self._fields[u], results, self.output_paths[u])
 
-                    results = [ DhcdResult({e.tag: e.text for e in list(r)}, self._fields[u]).data for r in data_xml_records ]
-
-                    self.result_to_csv(self._fields[u], results, self.output_paths[u])
-                    
-                    #Convert to format expected by database
-                    if u == 'dhcd_dfd_properties':
-                        self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, db)
+                #Convert to format expected by database
+                if u == 'dhcd_dfd_properties':
+                    self.create_project_subsidy_csv('dhcd_dfd_properties', PROJECT_FIELDS_MAP, SUBSIDY_FIELDS_MAP, PROJECT_ADDRE_FIELDS_MAP, db)
 
 
 

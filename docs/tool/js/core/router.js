@@ -1,18 +1,35 @@
+---
+frontmatter: isneeded
+---
+
 "use strict";
 
 var router = {
     isFilterInitialized: false,
     stateObj: {},
-    initFilters: function(msg,data){
+    initGate: function(){
+        if ( getState().initialProjectsRendered && getState().filterViewLoaded ) { // each stateChange triggers the gate function
+                                                                                   // but both need to be true before calling
+                                                                                   // initFilters. fixes bug whereby url decode
+                                                                                   // was running before the filterControlsDict
+                                                                                   // was defined
+            router.initFilters();
+        }
+    },
+    initFilters: function(){
         if ( router.isFilterInitialized ) return;
         setSubs([
             ['filterValues', router.pushFilter],
             ['mapLayer', router.pushFilter],
             ['overlaySet', router.pushFilter],
+            ['subNav.right', router.pushFilter],
+            ['previewBuilding', router.pushFilter],
             ['clearState', router.clearOverlayURL]
-        ]);        
+        ]);
         router.isFilterInitialized = true;
-        if ( router.hasInitialFilterState ) router.decodeState();
+        if ( router.hasInitialFilterState ) {
+            router.decodeState();
+        }
     },
     initBuilding: function() {
         router.initialView = 'building';
@@ -25,13 +42,13 @@ var router = {
         }
     },
     pushFilter: function(msg, data){
-        console.log(msg,data);
-        // TO DO: add handling for sidebar and preview pusher
-        if (data.length === 0) {
+        /*console.log(msg,data);*/
+        if (data.length === 0 || !data || ( msg === 'subNav.right' && data === 'charts') ) {
             delete router.stateObj[msg];
+        } else if ( msg.split('.')[0] === 'previewBuilding' ) {
+            router.stateObj['previewBuilding'] = data[0];
         } else {
             router.stateObj[msg] = data;
-            console.log(router.stateObj);
         }
         router.setHash()
     },
@@ -40,7 +57,7 @@ var router = {
             // clear location has if state obj is empty  OR if it's only property is mapLayer equal to initial mapLayer (ward for now)
             window.history.replaceState(router.stateObj, 'newState', '#');
         } else {
-            window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramifyFilter());        
+            window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramifyFilter());
         }
     },
     pushViewChange: function(msg, data){
@@ -57,7 +74,7 @@ var router = {
                 var dataChoice = dataChoices.find(function(obj){
                     return key.split('.')[1] === obj.source;
                 });
-                
+
                 if ( dataChoice.component_type === 'continuous' ) {
                     var separator = router.stateObj[key] && router.stateObj[key][2] ? '-' : '_';
                     paramsArray.push(dataChoice.short_name + '=' + router.stateObj[key][0] + separator + router.stateObj[key][1]);
@@ -72,27 +89,31 @@ var router = {
                         var date = router.stateObj[key][i].getDate();
                         var month = router.stateObj[key][i].getMonth() + 1;
                         var year = router.stateObj[key][i].getFullYear();
-                        dateStrings[i] = 'd' + date.toString() + 'm' + month.toString() + 'y' + year.toString(); 
+                        dateStrings[i] = 'd' + date.toString() + 'm' + month.toString() + 'y' + year.toString();
                     }
                     paramsArray.push(dataChoice.short_name + '=' + dateStrings[0] + separator + dateStrings[1]);
                 }
             } else if ( key.split('.')[0] === 'mapLayer') {
                 if ( router.stateObj[key] !== mapView.initialLayers[0].source ) { // paramify only if mapLayer does not equal
-                                                                                  // initial layer. now `ward` but could be 
+                                                                                  // initial layer. now `ward` but could be
                                                                                   // something else
                     paramsArray.unshift('ml=' + router.stateObj[key]); // ensure mapLayer is always first
                                                                        // some other component seems to already ensure
                                                                        // this, but no harm done to do again.
                 }
             } else if ( key === 'overlaySet') {
-                
+
                 var dataChoice = dataChoices.find(function(obj){
                     return router.stateObj.overlaySet.overlay === obj.source;
                 });
                 paramsArray.push( 'ol=' + dataChoice.short_name);
+            } else if ( key === 'subNav.right' && router.stateObj['subNav.right'] === 'buildings' ) {
+                paramsArray.push('sb=bdng');
+            } else if ( key.split('.')[0] === 'previewBuilding' ){
+                paramsArray.push('pb=' + router.stateObj['previewBuilding'].properties.nlihc_id);
             }
         }
-     //   console.log(paramsArray.join('&'));
+     
         return paramsArray.join('&').replace(/ /g,'_');
     },
     screenLoad: function(){
@@ -101,6 +122,13 @@ var router = {
     decodeState: function(){
         console.log("decoding state from URL");
         var stateArray = window.location.hash.replace('#/HI/','').split('&');
+        if ( stateArray.length === 1 && stateArray[0] === '' ) { // backstop in case a path ends in #/HI/. Nothing should
+                                                                 // leave us with that path, but just in case this check
+                                                                 // will keep it from wreaking havoc
+            window.history.replaceState(router.stateObj, 'newState', '#');
+            this.clearScreen();
+            return;
+        }
         stateArray.forEach(function(each){
             var dataChoice;
             var eachArray = each.split('=');
@@ -113,22 +141,33 @@ var router = {
                 router.openFilterControl(dataChoice.source); // can be replicated for non-overLay filters if
                                                              // we decide to url encode them and want them (or the
                                                              // last) opened on load
+            } else if ( eachArray[0] === 'sb' ){
+                setState('subNav.right', 'buildings');
+            
+            } else if ( eachArray[0] === 'pb' ) {
+                setState('subNav.right', 'buildings');
+                var renderedProjects = mapView.map.queryRenderedFeatures({
+                    layers: ['project','project-enter','project-exit', 'project-unmatched']
+                });
+                var matchingRenderedProject = renderedProjects.find(function(each){
+                    return each.properties.nlihc_id === eachArray[1];
+                });
+                setState('previewBuilding', [matchingRenderedProject,true]); // true = flag to scroll matching projects list
+            
             } else {
                 dataChoice = dataChoices.find(function(obj){
                     return obj.short_name === eachArray[0];
                 });
-                console.log('datachoice', dataChoice);
                 var filterControlObj = filterView.filterControlsDict[dataChoice.short_name]
-                console.log('filterControlObj', filterControlObj);
                 if ( dataChoice.component_type === 'continuous' ) {
                     var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
                     var values = eachArray[1].split(separator);
                     var min = +values[0]
                     var max = +values[1]
                     var nullsShown = separator === '_' ? false : true;
-                    
+
                     filterControlObj.set(min,max,nullsShown);
-                    
+
                 }
             if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'location' || dataChoice.component_type === 'searchbar' ){
                     var values = eachArray[1].replace(/_/g,' ').split('+');
@@ -137,8 +176,8 @@ var router = {
                             dropdown_element.dropdown('set selected', values);
                     }); // decoding location won't without the setTimeout trick, which asyncs the function, to be fired
                         // in the next open slot in the queue. especially true if the mapLaye needs to be changed first, because then
-                        // probably a lot of async stuff is triggered but the setState call above. 
-                }   
+                        // probably a lot of async stuff is triggered but the setState call above.
+                }
                 if ( dataChoice.component_type === 'date' ){
                     // handle decoding for date type filter here
                     var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
@@ -159,8 +198,8 @@ var router = {
                         ]
                     );
                     document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = nullsShown;
-                    
-                    //Commit the values using callback(), which will update slider to match. 
+
+                    //Commit the values using callback(), which will update slider to match.
                     filterView.filterInputs[dataChoice.short_name].callback();
                 }
             }
@@ -198,8 +237,9 @@ if ( window.location.hash.indexOf('#/HI/') !== -1 ) {
         router.initBuilding();
     } else {
         router.hasInitialFilterState = true;
+        //router.screenLoad(); //Replaced by semantic ui loading screen and welcome modal
     }
-    router.screenLoad();
+    
 } else {
     router.hasInitialFilterState = false;
 }

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+	{% include header-includes.html %}
+	{% include tool-header.html %}
+	{{page.css}}
+
+	<title>{{ page.title }}</title>
+
+</head>
+
+
+<!--Optional on-page styles-->
+<style>
+
+</style>
+
+
+
+<!--Main body of the content here-->
+<body>
+	{% include navbar.html %}
+	{{content}}
+
+	{{page.javascript}}
+
+	{% include tool-footer.html %}
+</body>
+
+</html>

@@ -39,8 +39,7 @@ class Manifest(HIReader):
 
                 #parse the date into proper format for sql
                 try:
-                    _date = dateparser.parse(row['data_date'],dayfirst=False,
-                                             yearfirst=False)
+                    _date = dateparser.parse(row['data_date'],dayfirst=False,yearfirst=False)
                     row['data_date'] = datetime.strftime(_date, '%Y-%m-%d')
                 except ValueError:
                     row['data_date'] = 'Null'

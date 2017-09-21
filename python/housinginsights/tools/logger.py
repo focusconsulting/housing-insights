@@ -22,6 +22,8 @@ class HILogger():
 
         # Create Logger, Formatter, and StreamHandler
         logger = logging.getLogger(os.path.basename(name))
+        logger.handlers = []
+
         logger.setLevel(level)
         formatter = logging.Formatter(  fmt=fmt,
                                         datefmt=datefmt)
@@ -34,6 +36,7 @@ class HILogger():
             logger.addHandler(file_handler)
 
         self.logger = logger
+
 
     def debug(self, msg, *args, **kwargs):
         self.logger.debug(msg, *args, **kwargs)

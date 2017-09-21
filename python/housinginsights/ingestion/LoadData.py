@@ -19,7 +19,6 @@ Notes:
 
 import sys
 import os
-import logging
 import argparse
 import json
 import concurrent.futures
@@ -49,19 +48,21 @@ if __name__ == "__main__":
     sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
-from housinginsights.tools.logger import HILogger
+
 
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 from housinginsights.ingestion.Manifest import Manifest
 
-logger = HILogger(name=__file__, logfile="ingestion.log", level=10)
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 class LoadData(object):
 
     def __init__(self, database_choice=None, meta_path=None,
-                 manifest_path=None, keep_temp_files=True, drop_tables=False):
+                 manifest_path=None, keep_temp_files=True, 
+                 drop_tables=False,debug=False):
         """
         Initializes the class with optional arguments. The default behaviour
         is to load the local database with data tracked from meta.json
@@ -89,10 +90,13 @@ class LoadData(object):
                                                          'manifest.csv'))
         self._keep_temp_files = keep_temp_files
 
+        
+
         # load given meta.json and manifest.csv files into memory
         self.meta = ingestionfunctions.load_meta_data(meta_path)
         self.manifest = Manifest(manifest_path)
 
+        
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
 
@@ -102,6 +106,8 @@ class LoadData(object):
         self._failed_table_count = 0
 
         self.drop_tables = drop_tables
+        self.debug=debug
+
 
     def _drop_tables(self):
         """
@@ -132,24 +138,34 @@ class LoadData(object):
 
         tables: a list of table names to be deleted
         '''
-        for table in tables:
-            try:
-                logger.info("Dropping the {} table and all associated manifest rows".format(table))
-                #Delete all the relevant rows of the sql manifest table
-                q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
-                conn = self.engine.connect()
-                proxy = conn.execute(q)
-                results = proxy.fetchall()
-                for row in results:
-                    q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
-                        row[0])
+        if 'all' in tables:
+            self._drop_tables()
+            logger.info('Dropped all tables from database')
+
+        else:
+            for table in tables:
+                try:
+                    logger.info("Dropping the {} table and all associated manifest rows".format(table))
+                    #Delete all the relevant rows of the sql manifest table
+                    q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
+                    conn = self.engine.connect()
+                    proxy = conn.execute(q)
+                    results = proxy.fetchall()
+                    for row in results:
+                        q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                            row[0])
+                        conn.execute(q)
+
+                    #And drop the table itself
+                    q = "DROP TABLE {}".format(table)
                     conn.execute(q)
 
-                #And drop the table itself
-                q = "DROP TABLE {}".format(table)
-                conn.execute(q)
-            except ProgrammingError:
-                logger.error("Couldn't remove table {}".format(table))
+                    logger.info("Dropping table {} was successful".format(table))
+
+                except ProgrammingError as e:
+                    logger.error("Couldn't remove table {}".format(table))
+                    if self.debug == True:
+                        raise e
 
 
     def _meta_json_to_database(self):
@@ -169,7 +185,7 @@ class LoadData(object):
             conn.execute("DELETE FROM meta;")
             conn.execute(ins)
 
-    def _remove_existing_data(self, uid, manifest_row):
+    def _remove_existing_data(self, manifest_row):
         """
         Removes all rows in the respective table for the given unique_data_id
         then sets status = deleted for the unique_data_id in the
@@ -181,6 +197,8 @@ class LoadData(object):
         sqlalchemy result object if row exists in sql manifest - else
         returns None
         """
+        uid = manifest_row['unique_data_id']
+
         temp_filepath = self._get_temp_filepath(
             manifest_row=manifest_row)
 
@@ -194,7 +212,7 @@ class LoadData(object):
             # delete only rows with data_id in respective table
             table_name = sql_manifest_row['destination_table']
         except TypeError: #will occur if sql_manifest_row == None
-            logging.info("    No sql_manifest exists! Proceed with adding"
+            logger.info("    No sql_manifest exists! Proceed with adding"
                          " new data to the database!")
             return None
 
@@ -247,7 +265,9 @@ class LoadData(object):
                 conn.close()
                 return proxy
             except ProgrammingError:
-                logger.warning("Problem dropping table")
+                logger.error("Could not drop table {} from the database".format(table_name))
+                if self.debug == True:
+                    raise e
 
     def _get_most_recent_timestamp_subfolder(self, root_folder_path):
         """
@@ -311,20 +331,12 @@ class LoadData(object):
                 logger.info("  Skipping: {} not found in manifest!".format(
                     uid))
             else:
-                logger.info("  Manifest row found for {} - preparing to "
-                             "remove data.".format(uid))
-                self._remove_existing_data(uid=uid, manifest_row=manifest_row)
-                self._remove_table_if_empty(manifest_row = manifest_row)
 
                 # follow normal workflow and load data_id
                 logger.info(
                     "  Loading {} data!".format(uid))
                 self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
-
-        # build Zone Facts table
-        self._create_zone_facts_table()
-        self._populate_calculated_project_fields()
 
         return processed_data_ids
 
@@ -366,12 +378,7 @@ class LoadData(object):
                     self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(manifest_row['unique_data_id'])
             except:
-                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))
-
-        # build Zone Facts table
-        #self._automap() #not yet used - created for potential use by calculated fields
-        self._create_zone_facts_table()
-        self._populate_calculated_project_fields()
+                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))        
 
         return processed_data_ids
 
@@ -380,10 +387,14 @@ class LoadData(object):
         An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but
         changes to the calculations are made, re-run the calculation routines.
         '''
-
-        self._automap()
-        self._create_zone_facts_table()
-        self._populate_calculated_project_fields()
+        try:
+            #self._automap() #not yet used - created for potential use by calculated fields
+            self._create_zone_facts_table()
+            self._populate_calculated_project_fields()
+        except Exception as e:
+            logger.error("Failed to recalculate database due to {}".format(e))
+            if self.debug:
+                raise e
 
         return None
 
@@ -416,14 +427,13 @@ class LoadData(object):
         Adds values for calculated fields to the project table
         Assumes the columns have already been created due to meta.json
         '''
-
         conn = self.engine.connect()
 
 
         #########################
         # Most recent REAC score
         #########################
-        logging.info("  Calculating REAC statistics")
+        logger.info("  Calculating REAC statistics")
         #HT on sql syntax for a bulk insert, for future reference. Also notes how to only replace if exists: https://stackoverflow.com/a/7918818
         #This statement finds the most recent reac score in the reac_score table for each nlihc_id, and writes that into the project table
         stmt = '''
@@ -453,50 +463,64 @@ class LoadData(object):
         conn.execute(stmt)
 
 
-        #########################
+        ########################
         # Sum of tax assessment
-        #########################
-        logging.info("  Calculating tax assessment statistics")
+        ########################
 
-        stmt= '''
-             update project
-             set (sum_appraised_value_current_total
-                , sum_appraised_value_current_land
-                , sum_appraised_value_current_impr) 
-                = 
-             (select sum_appraised_value_current_total
-                , sum_appraised_value_current_land
-                , sum_appraised_value_current_impr
-             from(
-                select nlihc_id
-                       ,sum(appraised_value_current_total) as sum_appraised_value_current_total
-                       ,sum(appraised_value_current_land) as sum_appraised_value_current_land
-                       ,sum(appraised_value_current_impr) as sum_appraised_value_current_impr
-                from(
-                    select ssl
-                           ,project.nlihc_id as nlihc_id
-                           ,appraised_value_current_total
-                           , appraised_value_current_land
-                           , appraised_value_current_impr
-                    from project
-                    left join dc_tax
-                    on project.nlihc_id = dc_tax.nlihc_id
-                    --for debugging:
-                    --where project.nlihc_id in ('NL000001','NL000004','NL000006','NL000008','NL000010')
+        logger.info("  Calculating tax assessment statistics")
+
+        from sqlalchemy import select, update, and_, bindparam
+
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        p,t = meta.tables['project'],meta.tables['dc_tax']
+
+        q = select([p.c.nlihc_id
+                , t.c.appraised_value_current_total
+                , t.c.appraised_value_current_land
+                , t.c.appraised_value_current_impr]
+            )\
+            .where(
+                and_(p.c.nlihc_id == t.c.nlihc_id
+                , t.c.nlihc_id != None
                 )
-                AS joined_appraisals
-                group by nlihc_id
-            ) as summed_appraisals
-            where summed_appraisals.nlihc_id = project.nlihc_id)
-            '''
-        conn.execute(stmt)
+            )
+        rproxy = conn.execute(q)
+        rrows = rproxy.fetchall()
+        rproxy.close()
 
+        summed_appraisals = []
+        proj_ids = set([row.nlihc_id for row in rrows])
+        for proj in proj_ids:
+            summed_total, summed_land, summed_impr = \
+                sum([row.appraised_value_current_total
+                    for row in rrows if row.nlihc_id == proj])\
+                ,sum([row.appraised_value_current_land
+                    for row in rrows if row.nlihc_id == proj])\
+                ,sum([row.appraised_value_current_impr
+                    for row in rrows if row.nlihc_id == proj])
+            summed_appraisals.append({
+                'proj':proj,
+                'summed_total':summed_total
+                , 'summed_land':summed_land
+                , 'summed_impr':summed_impr
+            })
+
+        upd = p.update()\
+            .where(p.c.nlihc_id == bindparam('proj'))\
+            .values(sum_appraised_value_current_total = bindparam('summed_total')
+                   , sum_appraised_value_current_land = bindparam('summed_land')
+                   , sum_appraised_value_current_impr = bindparam('summed_impr')
+                   )
+
+        conn.execute(upd,summed_appraisals)
 
         # here should calculate the tax assessment per unit in the project; but, be sure to use the 
         # proj_unit_tot_mar instead of normal _tot so that if we don't have all the records from the mar
         # (due to missing addresses in the proj_addre table) we'll be missing the same ones from numerator
         # and denominator so will get realistic average. 
-        logging.info("  Calculating TOPA statistics")
+        logger.info("  Calculating TOPA statistics")
+        
         stmt =  """
                 update project
                 set (topa_count
@@ -537,6 +561,70 @@ class LoadData(object):
         # Other calculated fields
         #########################
 
+        # Miles (or Portion of) to Nearest Metro Station
+        
+        stmt =  """
+                UPDATE project
+                SET nearest_metro_station =
+                (
+                SELECT nearest_metro 
+                FROM 
+                    (
+                    SELECT wmata_dist.nlihc_id AS nlihc_id
+                        , MIN(dist_in_miles) AS nearest_metro
+                    FROM wmata_dist
+                    WHERE type = 'rail'
+                    GROUP BY nlihc_id
+                    ) AS nstation
+                WHERE nstation.nlihc_id = project.nlihc_id 
+                )
+                """
+        conn.execute(stmt)
+
+        # Bus Routes within Half a Mile of Each Project #
+        # 
+        """
+        The code below tries to reduce the time individual database queries
+        otherwise would take for record-by-record updates. It gathers 
+        the data needed in one initial composite query, uses list comprehension
+        to shorten processing, and executes the final update within SQLAlchemy's 
+        "executemany" context.   
+        """
+
+        from sqlalchemy import select, update, and_, bindparam
+
+        meta = MetaData()
+        meta.reflect(bind=self.engine)
+        p = meta.tables['project']
+        d = meta.tables['wmata_dist']
+        i = meta.tables['wmata_info']
+
+        q =  select([d.c.nlihc_id
+                , d.c.stop_id_or_station_code
+                , i.c.lines])\
+            .where(
+                and_(d.c.type == 'bus'
+                   , d.c.stop_id_or_station_code 
+                   == i.c.stop_id_or_station_code
+                )
+            )
+        rproxy = conn.execute(q)
+        rrows = rproxy.fetchall()
+        rproxy.close()
+
+        bus_routes_nearby = []
+        proj_ids = set([row.nlihc_id for row in rrows])
+        for proj in proj_ids: 
+            clusters = [row.lines for row in rrows if row.nlihc_id == proj]
+            count_unique = len(set(":".join(clusters).split(":")))
+            bus_routes_nearby.append({'proj':proj,'routes':count_unique})
+
+        upd = p.update()\
+            .where(p.c.nlihc_id == bindparam('proj'))\
+            .values(bus_routes_nearby = bindparam('routes'))
+
+        conn.execute(upd,bus_routes_nearby)
+        
         #########################
         # Teardown
         #########################
@@ -549,21 +637,30 @@ class LoadData(object):
         performing client-side reconfiguration of data into display fields.
         This is all now done in the backend whenever new data is loaded.
         """
-        # drop zone_facts table if already in db
-        if 'zone_facts' in self.engine.table_names():
+        
+        try:
+            # drop zone_facts table if already in db
+            if 'zone_facts' in self.engine.table_names():
+                with self.engine.connect() as conn:
+                    conn.execute('DROP TABLE zone_facts;')
+
+            # create empty zone_facts table
+            sql_interface = HISql(meta=self.meta, manifest_row=None,
+                                  engine=self.engine)
             with self.engine.connect() as conn:
-                conn.execute('DROP TABLE zone_facts;')
+                sql_interface.create_table(db_conn=conn, table='zone_facts')
 
-        # create empty zone_facts table
-        sql_interface = HISql(meta=self.meta, manifest_row=None,
-                              engine=self.engine)
-        with self.engine.connect() as conn:
-            sql_interface.create_table(db_conn=conn, table='zone_facts')
+            # populate table with calculated fields values
+            res_units_by_zone_type = self._get_residential_units()
+            self._populate_zone_facts_table(res_units_by_zone_type)
+        
+        except Exception as e:
+            logger.error("Failed to create zone_facts table")
+            if self.debug:
+                raise e
 
-        # populate table with calculated fields values
-        self._populate_zone_facts_table()
 
-    def _populate_zone_facts_table(self):
+    def _populate_zone_facts_table(self,res_units_by_zone_type):
         """
         Populates the zone_facts table with the calculated fields data and
         acs rent data fields from census.
@@ -587,9 +684,12 @@ class LoadData(object):
             'crime_rate': ['rate', 'crime', 'all'],
             'violent_crime_rate': ['rate', 'crime', 'violent'],
             'non_violent_crime_rate': ['rate', 'crime', 'nonviolent'],
+            'residential_units': ['sum', 'mar', 'active_res_occupancy_count'],
             'building_permits': ['count', 'building_permits', 'all'],
             'building_permits_rate': ['rate', 'building_permits', 'all'],
             'construction_permits': ['count', 'building_permits',
+                                     'construction'],
+            'construction_permits_rate': ['rate', 'building_permits',
                                      'construction']
         }
 
@@ -612,14 +712,22 @@ class LoadData(object):
                     logger.error(e)
 
             # get field value from building permits and crime table
-            for field in summarize_obs_field_args:
+            for field in sorted(summarize_obs_field_args,reverse=True): 
+                # Sorted to calculate res_units_by_zone_type before permit rates.
                 try:
                     method, table_name, filter_name = summarize_obs_field_args[
                         field]
-                    result = self._summarize_observations(method, table_name,
-                                                          filter_name,
-                                                          months=12,
-                                                          grouping=zone_type)
+                    if field == 'residential_units': 
+                        field_values[field] = res_units_by_zone_type[zone_type]['items']
+                        continue
+                    result = self._summarize_observations(
+                        method, 
+                        table_name,
+                        filter_name,
+                        months=12,
+                        grouping=zone_type,
+                        res_units_by_zone_type=res_units_by_zone_type
+                        )
                     field_values[field] = result['items']
                 except Exception as e:
                     logger.error("Couldn't summarize data for {}".format(field))
@@ -711,7 +819,8 @@ class LoadData(object):
 
                 if n not in denominator_data['items'] or \
                                 numerator_data['items'][n] is None \
-                        or denominator_data['items'][n] is None:
+                        or denominator_data['items'][n] is None \
+                        or denominator_data['items'][n] == 0:
                     divided = None
                 else:
                     divided = numerator_data['items'][n] / denominator_data[
@@ -845,7 +954,7 @@ class LoadData(object):
         return {'items': items, 'grouping': grouping, 'data_id': field}
 
     def _summarize_observations(self, method, table_name, filter_name, months,
-                                grouping):
+                                grouping,res_units_by_zone_type):
         """
         This endpoint takes a table that has each record as list of observations
         (like our crime and building_permits tables) and returns summary
@@ -952,7 +1061,7 @@ class LoadData(object):
         # Apply the normalization if needed
         if method == 'rate':
             if table_name in ['building_permits']:
-                denominator = self._get_residential_units(grouping)
+                denominator = res_units_by_zone_type[grouping]
                 api_results = self._items_divide(api_results, denominator)
                 api_results = self._scale(api_results, 1000)  # per 1000
                 # residential units
@@ -1015,28 +1124,34 @@ class LoadData(object):
 
         return data
 
-    def _get_residential_units(self, grouping):
+    def _get_residential_units(self):
         """
         Returns the number of residential units in the standard 'items' format
         """
-        
+
         try:
             with self.engine.connect() as conn:
 
-                q = """
-                    SELECT zone_specific AS zone, housing_unit_count AS total 
-                    FROM zone_housingunit_bedrm_count 
-                    WHERE zone_type = '{grouping}';
-                    """.format(grouping=grouping)
-
-                proxy = conn.execute(q)
-                zone_units = {row.zone: row.total for row in proxy}
-
-            return {'items':zone_units}
+                res_units_by_zone_type = {}
+                zone_types = ['ward','neighborhood_cluster','census_tract']
+                for zone_type in zone_types:
+                    q = """
+                        SELECT {zone_type}
+                            , sum(active_res_occupancy_count)
+                        FROM mar
+                        GROUP BY {zone_type}
+                        """.format(zone_type=zone_type)
+                    rproxy = conn.execute(q)
+                    rrows = rproxy.fetchall()
+                    res_units_by_zone_type[zone_type] = {'items' : 
+                        {row[0]:row[1] for row in rrows 
+                        if row[0] != None and row[0] != ''}
+                    }
+                return res_units_by_zone_type
 
         #TODO do better error handling - for interim development purposes only
         except Exception as e:
-            return {'items': None, 'notes': "Query failed: {}".format(e),
+            return {'items': None, 'notes': "_get_residential_units failed: {}".format(e),
                     'grouping': grouping, 'data_id': "res_units_by_zone"}
 
     def _process_data_file(self, manifest_row):
@@ -1126,7 +1241,6 @@ class LoadData(object):
                                filename=temp_filepath)
 
         # clean the file and save the output to a local pipe-delimited file
-        # if it doesn't have a 'loaded' status in the database manifest
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
             start_time = time()
@@ -1136,11 +1250,21 @@ class LoadData(object):
             # TODO - while cleaning one row, start cleaning the next
             # TODO - once cleaning is done, write row to psv file
             # TODO - consider using queue: once empty update db with psv data
+            total_rows = len(csv_reader)
             for idx, data_row in enumerate(csv_reader):
-                data_row.update(meta_only_fields)  # insert other field dict
-                clean_data_row = cleaner.clean(data_row, idx)
-                if clean_data_row is not None:
-                    csv_writer.write(clean_data_row)
+                if idx % 100 == 0:
+                    print("  on row ~{} of {}".format(idx,total_rows), end='\r', flush=True)
+
+                try:
+                    data_row.update(meta_only_fields)  # insert other field dict
+                    clean_data_row = cleaner.clean(data_row, idx)
+                    if clean_data_row is not None:
+                        csv_writer.write(clean_data_row)
+                except Exception as e:
+                    logger.error("Error when trying to clean row index {} from the manifest_row {}".format(idx,manifest_row))
+                    if self.debug == True:
+                        raise e
+
 
             # with concurrent.futures.ThreadPoolExecutor(
             #         max_workers=100) as executor:
@@ -1166,7 +1290,7 @@ class LoadData(object):
             csv_writer.close()
 
             # write the data to the database
-            self._update_database(sql_interface=sql_interface)
+            self._update_database(sql_interface=sql_interface, manifest_row = manifest_row)
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
@@ -1175,6 +1299,9 @@ class LoadData(object):
 
     def _clean_data(self, idx, data_row, cleaner, table_name, data_fields):
         """
+        Only used by threading - currently not used
+
+
         Helper function that actually does the cleaning processing of each
         row in the raw data file. To improve performance, each row is
         processess currently by n number of threads determined in
@@ -1205,12 +1332,16 @@ class LoadData(object):
 
         return clean_data_row
 
-    def _update_database(self, sql_interface):
+    def _update_database(self, sql_interface, manifest_row):
         """
         Load the clean PSV file into the database
         """
         print("  Loading...")
 
+        # TODO Need to figure out how to revert the removal if loading doesn't work??
+        self._remove_existing_data(manifest_row=manifest_row)
+        self._remove_table_if_empty(manifest_row = manifest_row)
+            
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()
         try:
@@ -1221,11 +1352,12 @@ class LoadData(object):
             self._failed_table_count += 1
             pass
 
+
 def main(passed_arguments):
     """
     Initializes load procedure based on passed command line arguments and
     options.
-    """
+    """    
 
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
@@ -1261,11 +1393,14 @@ def main(passed_arguments):
     # universal defaults
     keep_temp_files = True
 
+    
+
     # Instantiate and run the loader
     loader = LoadData(database_choice=database_choice, meta_path=meta_path,
                       manifest_path=manifest_path,
                       keep_temp_files=keep_temp_files,
-                      drop_tables=drop_tables)
+                      drop_tables=drop_tables,
+                      debug = passed_arguments.debug)
 
     #Remove tables before starting ingestion process
     if passed_arguments.remove_tables:
@@ -1279,7 +1414,10 @@ def main(passed_arguments):
     else:
         loader.rebuild()
 
-
+    if passed_arguments.skip_calculations==False:
+        loader.recalculate_database()
+    else:
+        logger.info("Skipping recalculation of calculated database fields")
 
     #TODO add in failures report here e.g. _failed_table_count
 
@@ -1298,10 +1436,17 @@ parser.add_argument('--update-only', nargs='+',
                          'values')
 parser.add_argument('--remove-tables', nargs='+',
                     help='Drops tables before running the load data code. '
-                    ' Add the name of each table to drop in format "table1 table2"')
+                    ' Add the name of each table to drop in format "table1 table2"'
+                    ' If you want to drop all tables, use the keyword "all"')
 
 parser.add_argument ('--recalculate-only',action='store_true',
                     help="Don't update any data, just redo calculated fields")
+
+parser.add_argument ('--skip-calculations',action='store_true', default=False,
+                    help="Don't do any calculations")
+
+parser.add_argument ('--debug',action='store_true', default=False,
+                    help="Raise exceptions as they occur")
 
 
 if __name__ == '__main__':

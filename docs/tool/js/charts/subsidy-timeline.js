@@ -43,7 +43,7 @@ var subsidyTimelineExtension = { // Final step of inheriting from Chart, defines
         
         controller.getData(chartOptions.dataRequest);
         function doStuffWithData(returnData){
-            data = returnData.items;
+            data = returnData.objects;
 
             function nullJudgment(){
               this.status = false;

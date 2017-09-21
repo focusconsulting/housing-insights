@@ -18,8 +18,9 @@ python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
 sys.path.append(python_filepath)
 
 # Configure logging
+import logging
 from housinginsights.tools.logger import HILogger
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log", level=logging.INFO)
 
 #TODO is this import necessary?
 from housinginsights.config.base import HousingInsightsConfig
@@ -83,7 +84,7 @@ def get_multiple_api_sources(a):
             class_name = modules[m]
             api_class = getattr(module, class_name)
 
-            api_instance = api_class(database_choice=db)
+            api_instance = api_class(database_choice=db, debug=debug)
             api_method = getattr(api_instance, 'get_data') # Every class should have a get_data method!
 
             # Get the data

@@ -9,10 +9,11 @@ from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.sources.models.DCHousing import FIELDS,\
     DCHousingResult
 from housinginsights.sources.models.DCHousing import PROJECT_FIELDS_MAP,\
-    SUBSIDY_FIELDS_MAP
+    SUBSIDY_FIELDS_MAP, PROJECT_ADDRE_FIELDS_MAP
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
+
 
 class DCHousingApiConn(ProjectBaseApiConn):
     """
@@ -31,8 +32,8 @@ class DCHousingApiConn(ProjectBaseApiConn):
     BASEURL = 'https://opendata.arcgis.com/datasets/'
     DATA_URL = '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
 
-    def __init__(self, baseurl=None,proxies=None,database_choice=None):
-        super().__init__(baseurl=DCHousingApiConn.BASEURL, proxies=proxies,database_choice=database_choice)
+    def __init__(self, baseurl=None,proxies=None,database_choice=None, debug=False):
+        super().__init__(baseurl=DCHousingApiConn.BASEURL, proxies=proxies,database_choice=database_choice, debug=debug)
 
         self._available_unique_data_ids = ['dchousing']
 
@@ -66,7 +67,7 @@ class DCHousingApiConn(ProjectBaseApiConn):
                                           filepath=self.output_paths[u])
                     self.create_project_subsidy_csv(
                         self._available_unique_data_ids[0], PROJECT_FIELDS_MAP,
-                        SUBSIDY_FIELDS_MAP, db)
+                        SUBSIDY_FIELDS_MAP, PROJECT_ADDRE_FIELDS_MAP, db)
 
 if __name__ == '__main__':
     

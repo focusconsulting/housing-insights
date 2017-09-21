@@ -1,5 +1,6 @@
 //A comment here helps keep Jekyll from getting confused about rendering
 
+
 "use strict";
 
 var projectView = {
@@ -32,6 +33,10 @@ var projectView = {
   renderSegments: function(){
     var nlihc_id = getState()['selectedBuilding'][0]['properties']['nlihc_id']
     var full_project_data = model.dataCollection['full_project_data_' + nlihc_id]['objects'][0]
+    
+    //save for later use
+    projectView.full_project_data = full_project_data;
+
     for(var segmentName in this.layout){
       this.wrapAndAppendSegment(this.layout[segmentName], full_project_data);
     }
@@ -81,12 +86,12 @@ var projectView = {
           },
           {
               name: "transit_stats",
-              url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
+              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
               callback: dataBatchCallback
           },
           {
               name: "nearby_projects",
-              url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
+              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
               callback: dataBatchCallback
           },
           {
@@ -130,6 +135,7 @@ var projectView = {
       htmlSection.appendChild(html);
       layoutSegment.render(full_project_data);
     });
+
   },
   
   navSidebar: {
@@ -177,10 +183,10 @@ var projectView = {
       hideTitle: true,
       wrapperPartial: 'partials/project-view/header.html',
       render: function(full_project_data){
-        console.log("full project data", full_project_data)
         var d = full_project_data;
         d3.select('#project-name').text(d.proj_name)
         d3.select('#project-address').text(d.proj_addre)
+        d3.select('#street-view').attr('src','https://maps.googleapis.com/maps/api/streetview?size=200x150&location=' + encodeURIComponent(d.proj_addre) + '%20Washington%20DC&key=AIzaSyC6TjZXrowAWxfCYETdDBE3XQVCbtD-RWc');
 
         //TODO add all matching addresses once proj_addre table is ready    
       },
@@ -195,21 +201,151 @@ var projectView = {
       }
     },
     */
-    location: {
+    units: {
       //Several sections after this have title hidden, so this uses generic title above all of them
-      title:'Property Information',
-      wrapperPartial: 'partials/project-view/location.html',
+      title: 'Property Information',
+      wrapperPartial:'partials/project-view/units.html',
       hideTitle: false,
       render: function(full_project_data){
-        //
+          var data = [];
+          data.push({title:'Subsidized Units',value: full_project_data['proj_units_assist_max']});
+          data.push({title:'Total Units',value: full_project_data['proj_units_tot']});
+
+          // Do both the total unit and subsidized unit count exist for this project?
+          if (data[0].value && data[1].value) {
+              data[0]['percent-subsidized'] = data[0].value / data[1].value;
+
+              var subsidizedProjectChart = new DonutChart('#subsidized-unit-chart')
+                  .width(124)
+                  .height(124)
+                  .margin({bottom: 18})
+                  .data(data)
+                  .field('percent-subsidized')
+                  .label('title')
+                  .create()
+          } else if (data[0].value) { //Does the Subsidized Unit count exist for this project?
+              d3.select('#subsidized-unit-chart')
+                  .append('h2')
+                  .text(data[0].value);
+
+              d3.select('#subsidized-unit-chart')
+                  .append('p')
+                  .text('Subsidized Units');
+          } else if (data[1].value) { //Does the Total Unit count exist for this project?
+              d3.select('#subsidized-unit-chart')
+                  .append('h2')
+                  .text(data[1].value);
+
+              d3.select('#subsidized-unit-chart')
+                  .append('p')
+                  .text('Total Units');
+          }
+
+          //TODO: Add an indicator/icon for when neither Subsidized nor Total unit count exist. The space is currently blank when this happens.
+
+          var table = new D3Table('#units-table')
+            .data(data)
+            .columns([
+                {field:'title', label:'Title', class:'title', html: function(d){return d}},
+                {field:'value',label:'Value',class:'value',html:function(d){return d==null ? 'Unknown' : d}}
+                ])
+            .hideTitle(true)
+            .create()
       }
+    },
+    location: {
+        title: 'Location Information',
+        wrapperPartial: 'partials/project-view/location.html',
+        hideTitle: true,
+        render: function(full_project_data){
+            var data = [];
+            data.push({title:'Ward',value: full_project_data['ward']})
+            data.push({title: 'Neighborhood Cluster',value: (full_project_data['neighborhood_cluster'] + ": " + full_project_data['neighborhood_cluster_desc'])})
+            data.push({title: 'ANC', value: full_project_data['anc']})
+            data.push({title: 'Census Tract', value: full_project_data['census_tract']})
+
+            var table = new D3Table('#location-table')
+                .data(data)
+                .columns([
+                    {field:'title', label:'Title', class:'title', html: function(d){return d}},
+                    'value'])
+                .hideTitle(true)
+                .create();
+
+            var projLongitude = full_project_data['longitude'];
+            var projLatitude = full_project_data['latitude'];
+
+            d3.select('#project-location-map').attr('src', 'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+325d88(' + projLongitude + ',' + projLatitude + ')/-77.0369,38.9072,8.3/124x124?access_token=' + mapboxgl.accessToken + '&attribution=false&logo=false');
+        }
     },
     ownership: {
       title: 'Ownership',
       wrapperPartial: 'partials/project-view/ownership.html',
       hideTitle:true,
       render: function(full_project_data){
-        //
+          var data = [];
+          data.push({title:'Owner Type',value: full_project_data['proj_owner_type']})
+          data.push({title:'Owner',value: (full_project_data['hud_own_name'])})
+          data.push({title:'Manager Type',value: full_project_data['hud_mgr_type']})
+          data.push({title: 'Manager',value: full_project_data['hud_mg_name']})
+
+          var table = new D3Table('#ownership-table')
+            .data(data)
+            .columns([
+                {field:'title', label:'Title', class:'title', html: function(d){return d}},
+                {field:'value',label:'Value',class:'value',html:function(d){return d==null ? 'Unknown' : d}}
+                ])
+            .hideTitle(true)
+            .create()
+
+          var ownershipIcon = d3.select("#ownership-icon")
+              .append("img")
+              .style('padding-left', '26.5px')
+              .style('margin-top', '10px')
+              .attr("src", "/assets/icons/ownership.svg");
+      }
+    },
+    saleActivity: {
+      title: 'Sale Activity',
+      wrapperPartial:'partials/project-view/saleActivity.html',
+      hideTitle:true,
+      render: function(full_project_data){
+        var data = full_project_data.real_property
+
+          d3.xml("/assets/icons/real-property.svg", function(xml) {
+              document.getElementById('real-property-icon').appendChild(xml.documentElement);
+
+              d3.select('#real-property-svg')
+                  .style('margin-left', '26.5px');
+
+              d3.select('#real-property-svg circle')
+                  .style('stroke', '#cccccc')
+                  .style('stroke-width', '8px')
+                  .style('fill', 'white');
+
+              if (data.length > 0) {
+                  d3.select('#real-property-svg path')
+                      .style('fill', '#325d88');
+              } else {
+                  d3.select('#real-property-svg path')
+                      .style('fill', '#cccccc');
+              }
+          });
+
+        if (data.length === 0 ) {
+          d3.select('#realPropertyTable')
+            .append('p')
+            .html('No sale activity available')
+        } else {
+            var table = new D3Table('#realPropertyTable')
+                                .data(data)
+                                .columns([
+                                    {field:'rp_date', label:'Date', class:'value', html: function(d){return d}},
+                                    {field:'rp_type', label:'Activity Type', class:'value', html: function(d){return d}},
+                                    {field:'rp_desc', label:'Description',class:'value',html:function(d){return d;}},
+                                    ])
+                                .create()
+        }
       }
     },
     topaNotices: {
@@ -218,9 +354,16 @@ var projectView = {
       hideTitle:false,
       render: function(full_project_data){
         var topaTable =  d3.select('#topa-notice-table')
-        if (full_project_data.topa.length == 0 ) {
+        if (full_project_data.topa.length === 0 ) {
           topaTable.append('p')
             .text('No known TOPA notices!')
+
+            // Add TOPA icon with notice count
+            d3.select("#topa-icon")
+                .append("img")
+                .style('padding-left', '26.5px')
+                .attr("src", "/assets/icons/topa-no-warnings.svg");
+
         } else {
           //TODO! Refactor this into a 'buildTable' function that is callable from wherever. 
           //helpful examples:
@@ -263,8 +406,34 @@ var projectView = {
                       return d3.format('$,.0r')(d.sale_price)
                     }
                   })
-          }
 
+          // Add TOPA icon with notice count
+          var svg = d3.select("#topa-icon")
+              .append("img")
+              .style('padding-left', '26.5px')
+              .attr("src", "/assets/icons/topa-warning.svg");
+
+          var topaCount = d3.select("#topa-icon")
+              .append("h2")
+              .style('margin-top', '-35px')
+              .style('text-align', 'center')
+              .style('color', '#000000')
+              .text(full_project_data.topa.length);
+
+          var topaCountLabel = d3.select("#topa-icon")
+              .append("p")
+              .style('text-align', 'center')
+              .style('font-size', '12px')
+              .style('margin-top', '-5px')
+
+              if(full_project_data.topa.length === 1) {
+                topaCountLabel.text('TOPA Notice');
+              } else {
+                topaCountLabel.text('TOPA Notices');
+              }
+
+
+          }
       }
     },
     subsidyTimelineChart: {
@@ -276,12 +445,29 @@ var projectView = {
         new SubsidyTimelineChart({
             dataRequest: {
                 name: currentNlihc + '_subsidy',
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
+                url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
             },
             container: '#subsidy-timeline-chart',
             width: 700,
             height: 300
         }); 
+
+        var data = full_project_data['subsidy']
+        console.log("subsidy data",data);
+        
+        new D3Table('#subsidy-table')
+            .data(data)
+            .columns([
+                
+                {field:'poa_end', label:'Scheduled End Date', class:'value', html: function(d){return d}},
+                {field:'poa_end_actual', label:'Actual End Date', class:'value', html: function(d){return d==null ? '-' : d}},
+                {field:'poa_start', label:'Start Date', class:'value', html: function(d){return d}},
+                {field:'units_assist', label:'Assisted Units', class:'value', html: function(d){return d}},
+                {field:'program', label:'Program', class:'value', html: function(d){return d}},
+                {field:'agency', label:'Agency', class:'value', html: function(d){return d}}
+              ])
+            .create();
+
       }
     },
     affordableHousingMap:{

@@ -9,17 +9,17 @@ if __name__ == '__main__':
 from housinginsights.sources.base import BaseApiConn
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 class OpenDataApiConn(BaseApiConn):
     """
     
     """
-    def __init__(self, baseurl=None,proxies=None,database_choice=None):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None,debug=False):
         #baseurl not actually used since we need the _urls property to hold many urls. 
         #Needed to get call to super() to work correctly. TODO refactor so this is optional.
         baseurl = 'https://opendata.arcgis.com/datasets/'
-        super(OpenDataApiConn, self).__init__(baseurl=baseurl, proxies=None)
+        super(OpenDataApiConn, self).__init__(baseurl=baseurl, proxies=proxies, debug=debug)
 
         self._available_unique_data_ids = [
                         "tax",

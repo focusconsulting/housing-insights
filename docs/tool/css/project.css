@@ -7,6 +7,7 @@
 	font-size: 15px;
     font-weight: bold;
     margin-bottom: 0px;
+    color: rgb(54,82,124);
 }
 
 .centered {
@@ -138,11 +139,12 @@
 	padding-right:10px;
 }
 
-.project-data-table td.title {
+.project-data-table td.title,
+.project-data-table thead td {
 	font-weight:bold;
 }
 
-.project-dat-atable td.value {
+.project-data-table td.value {
 	font-weight:normal;
 }
 
@@ -150,3 +152,15 @@
 	background-color: rgb(237, 241, 247);
 }
 
+#subsidized-unit-chart h2 {
+	font-size: 27px;
+	text-align: center;
+	margin: 0;
+	color: rgb(169,169,169);
+}
+
+#subsidized-unit-chart p {
+	font-size: 16px;
+	text-align: center;
+	color: #cccccc;
+}
