@@ -846,11 +846,14 @@ input.search {
     background-color: rgba(0,0,0,0);
 }
 
+#welcomeModal {
+    overflow-y: auto;
+}
+
 #welcomeModal .actions {
     margin-top:30px;
     text-align: inherit;
 }
-
 
 .shepherd-skinny {
     max-width:300px !important;
