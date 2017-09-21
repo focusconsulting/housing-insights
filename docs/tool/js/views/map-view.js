@@ -49,7 +49,6 @@ frontmatter: isneeded
                     ['filteredViewLoaded',mapView.exportButton],
                     ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
-                    ['filterViewLoaded',mapView.refreshModal],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['initialProjectsRendered',router.initGate],
                     ['filterViewLoaded', router.initGate]
@@ -258,7 +257,6 @@ frontmatter: isneeded
 
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
-                    mapView.refreshModal();
                 });
                 
                 // filter decoding was happening too quickly after initialLayers were added (ln 463),
@@ -328,11 +326,6 @@ frontmatter: isneeded
             setState('sidebar.right',true);
             setState('subNav.left', 'filters');
             setState('subNav.right', 'charts');
-        },
-        refreshModal: function(){
-            console.log("refreshing modal")
-            $('#welcomeModal').modal('refresh');
-            $('#welcomeModal').modal('refresh');
         },
         ChloroplethColorRange: function(source_data_name, chloroData, style){
             // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd

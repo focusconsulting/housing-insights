@@ -846,10 +846,23 @@ input.search {
     background-color: rgba(0,0,0,0);
 }
 
-#welcomeModal .actions {
-    margin-top:30px;
+#welcomeModal {
+    overflow-y: auto;
 }
 
+#welcomeModal .actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#welcomeModal .btn {
+    margin: 5px;
+}
+
+body .modal-dialog.large {
+    width: 80%; /* respsonsive width */
+    text-align:left;
+}
 
 .shepherd-skinny {
     max-width:300px !important;

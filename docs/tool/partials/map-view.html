@@ -133,48 +133,70 @@
     </div>
 
     <!--Welcome Modal-->
-    <div id="welcomeModal" class="ui modal">
-      <i class="close icon"></i>
-      <div class="header">Welcome to Housing Insights!</div>
-      <div class="content">
-        <div class="scrolling content">
-            <p>The Housing Insights tool provides data about subsidized affordable housing projects and the neighborhoods that they're in.</p>
+    <div class="modal" id="welcomeModal">
+        <div class="modal-dialog large">
+            <div class="modal-content">
+                <div class="modal-body" >
+                    <h1>Welcome to Housing Insights!</h1>
+                     <p>The Housing Insights tool provides data about subsidized affordable housing projects and the
+                        neighborhoods that they're in.</p>
 
-            <h2>Who is this for?</h2>
-            <p>This data tool is designed for affordable housing advocates and government officials to better understand the state of affordable housing in Washington, DC.</p>
+                    <div class="ui info message">
+                      <div class="header">
+                        This tool is in alpha!
+                      </div>
+                      <strong>Help us improve:</strong> if you have feedback, positive or negative, or questions you can email the leadership team at <a href="mailto:housinginsights@googlegroups.com">housinginsights@googlegroups.com</a> or open an issue on our
+                        <a href="https://github.com/codefordc/housing-insights/">Github Repository</a>. 
+                    </p></div>
 
-            <h2>What can it do?</h2>
-            <p>The tool provides a dyamic view of all affordable housing in the city. You can filter the projects to view summary statistics of projects that meet certain criteria, and view neighborhood data overlayed on top of the map. You can also view details of specific projects.</p>
+                   
+                    <h3>Who is this for?</h3>
+                    <p>This data tool is designed for affordable housing advocates and government officials to better
+                        understand the state of affordable housing in Washington, DC.</p>
 
-            <h2>Where is the data from?</h2>
-            <p>Data has been gathered from multiple sources including the DC Governement, Urban Institue, HUD, and the US Census Bureau. A full listing of data sources is located <a href="/data">on our data documentation page</a></p>
-            
-            <div id="savedStateAlert" class="ui hidden">
-                <p><i>You are visiting the tool from a URL for a saved analysis.</i></p>
+                    <h3>What can it do?</h3>
+                    <p>The tool provides a dyamic view of all affordable housing in the city. You can filter the
+                        projects to view summary statistics of projects that meet certain criteria, and view
+                        neighborhood data overlayed on top of the map. You can also view details of specific
+                        projects.</p>
+
+                    <h3>Where is the data from?</h3>
+                    <p>Data has been gathered from multiple sources including the DC Governement, Urban Institue, HUD,
+                        and the US Census Bureau. A full listing of data sources is located <a href="/data">on our data
+                            documentation page</a></p>
+
+                    <div id="savedStateAlert" class="ui hidden">
+                        <p><i>You are visiting the tool from a URL for a saved analysis.</i></p>
+                    </div>
+                </div>
+                <div class="modal-footer actions">
+                    <div id="startTour" class="btn btn-primary ok labeled icon disabled">
+                        <i class="ui spinner loading icon"></i>
+                        Take a tour
+                    </div>
+                    <div id="openExample1" class="btn btn-primary ok labeled icon hidden disabled">
+                        <i class="ui spinner loading icon"></i>
+                        View example analysis
+                    </div>
+                    <div id="useTool" class="btn btn-primary ok labeled icon hidden disabled">
+                        <i class="ui spinner loading icon"></i>
+                        Use the tool
+                    </div>
+                    <div id="viewSavedAnalysis" class="btn btn-primary ok labeled icon hidden disabled">
+                        <i class="ui spinner loading icon"></i>
+                        View saved analysis
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <p><i>This tool was created by <a href="team">this group of volunteers</a> in collaboration with <a href="https://www.cnhed.org/">CNHED</a>, <a href="https://www.urban.org/">Urban Institute</a>, and <a href="https://dhcd.dc.gov/">DHCD</a>.</i></p>
+                </div>
             </div>
         </div>
-
-        <div class="actions">
-            
-            <div id="startTour" class="ui button ok labeled icon disabled">
-                <i class="ui spinner loading icon"></i>
-                Take a tour
-            </div>
-            <div id="openExample1" class="ui button ok labeled icon hidden disabled">
-              <i class="ui spinner loading icon"></i>
-              View example analysis
-            </div>
-            <div id="useTool" class="ui button ok labeled icon hidden disabled">
-                <i class="ui spinner loading icon"></i>
-                Use the tool</div>
-            <div id="viewSavedAnalysis" class="ui button ok labeled icon hidden disabled">
-                <i class="ui spinner loading icon"></i>
-                View saved analysis
-            </div>
-
-        </div>
-      </div>
     </div>
+
+
+</div>
 </div>
 
 
