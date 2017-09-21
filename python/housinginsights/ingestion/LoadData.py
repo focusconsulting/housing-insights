@@ -138,26 +138,34 @@ class LoadData(object):
 
         tables: a list of table names to be deleted
         '''
-        for table in tables:
-            try:
-                logger.info("Dropping the {} table and all associated manifest rows".format(table))
-                #Delete all the relevant rows of the sql manifest table
-                q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
-                conn = self.engine.connect()
-                proxy = conn.execute(q)
-                results = proxy.fetchall()
-                for row in results:
-                    q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
-                        row[0])
+        if 'all' in tables:
+            self._drop_tables()
+            logger.info('Dropped all tables from database')
+
+        else:
+            for table in tables:
+                try:
+                    logger.info("Dropping the {} table and all associated manifest rows".format(table))
+                    #Delete all the relevant rows of the sql manifest table
+                    q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
+                    conn = self.engine.connect()
+                    proxy = conn.execute(q)
+                    results = proxy.fetchall()
+                    for row in results:
+                        q = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                            row[0])
+                        conn.execute(q)
+
+                    #And drop the table itself
+                    q = "DROP TABLE {}".format(table)
                     conn.execute(q)
 
-                #And drop the table itself
-                q = "DROP TABLE {}".format(table)
-                conn.execute(q)
-            except ProgrammingError as e:
-                logger.error("Couldn't remove table {}".format(table))
-                if self.debug == True:
-                    raise e
+                    logger.info("Dropping table {} was successful".format(table))
+
+                except ProgrammingError as e:
+                    logger.error("Couldn't remove table {}".format(table))
+                    if self.debug == True:
+                        raise e
 
 
     def _meta_json_to_database(self):
@@ -330,10 +338,6 @@ class LoadData(object):
                 self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
 
-        # build Zone Facts table
-        self._create_zone_facts_table()
-        self._populate_calculated_project_fields()
-
         return processed_data_ids
 
     def _get_temp_filepath(self, manifest_row):
@@ -374,12 +378,7 @@ class LoadData(object):
                     self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(manifest_row['unique_data_id'])
             except:
-                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))
-
-        # build Zone Facts table
-        #self._automap() #not yet used - created for potential use by calculated fields
-        self._create_zone_facts_table()
-        self._populate_calculated_project_fields()
+                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))        
 
         return processed_data_ids
 
@@ -388,10 +387,14 @@ class LoadData(object):
         An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but
         changes to the calculations are made, re-run the calculation routines.
         '''
-
-        self._automap()
-        self._create_zone_facts_table()
-        self._populate_calculated_project_fields()
+        try:
+            #self._automap() #not yet used - created for potential use by calculated fields
+            self._create_zone_facts_table()
+            self._populate_calculated_project_fields()
+        except Exception as e:
+            logger.error("Failed to recalculate database due to {}".format(e))
+            if self.debug:
+                raise e
 
         return None
 
@@ -424,7 +427,6 @@ class LoadData(object):
         Adds values for calculated fields to the project table
         Assumes the columns have already been created due to meta.json
         '''
-
         conn = self.engine.connect()
 
 
@@ -635,20 +637,28 @@ class LoadData(object):
         performing client-side reconfiguration of data into display fields.
         This is all now done in the backend whenever new data is loaded.
         """
-        # drop zone_facts table if already in db
-        if 'zone_facts' in self.engine.table_names():
+        
+        try:
+            # drop zone_facts table if already in db
+            if 'zone_facts' in self.engine.table_names():
+                with self.engine.connect() as conn:
+                    conn.execute('DROP TABLE zone_facts;')
+
+            # create empty zone_facts table
+            sql_interface = HISql(meta=self.meta, manifest_row=None,
+                                  engine=self.engine)
             with self.engine.connect() as conn:
-                conn.execute('DROP TABLE zone_facts;')
+                sql_interface.create_table(db_conn=conn, table='zone_facts')
 
-        # create empty zone_facts table
-        sql_interface = HISql(meta=self.meta, manifest_row=None,
-                              engine=self.engine)
-        with self.engine.connect() as conn:
-            sql_interface.create_table(db_conn=conn, table='zone_facts')
+            # populate table with calculated fields values
+            res_units_by_zone_type = self._get_residential_units()
+            self._populate_zone_facts_table(res_units_by_zone_type)
+        
+        except Exception as e:
+            logger.error("Failed to create zone_facts table")
+            if self.debug:
+                raise e
 
-        # populate table with calculated fields values
-        res_units_by_zone_type = self._get_residential_units()
-        self._populate_zone_facts_table(res_units_by_zone_type)
 
     def _populate_zone_facts_table(self,res_units_by_zone_type):
         """
@@ -1242,7 +1252,8 @@ class LoadData(object):
             # TODO - consider using queue: once empty update db with psv data
             total_rows = len(csv_reader)
             for idx, data_row in enumerate(csv_reader):
-                print("  on row {} of {}".format(idx,total_rows), end='\r', flush=True)
+                if idx % 100 == 0:
+                    print("  on row ~{} of {}".format(idx,total_rows), end='\r', flush=True)
 
                 try:
                     data_row.update(meta_only_fields)  # insert other field dict
@@ -1341,13 +1352,12 @@ class LoadData(object):
             self._failed_table_count += 1
             pass
 
+
 def main(passed_arguments):
     """
     Initializes load procedure based on passed command line arguments and
     options.
-    """
-
-    
+    """    
 
     # use real data as default
     scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
@@ -1390,7 +1400,7 @@ def main(passed_arguments):
                       manifest_path=manifest_path,
                       keep_temp_files=keep_temp_files,
                       drop_tables=drop_tables,
-                      debug = False)
+                      debug = passed_arguments.debug)
 
     #Remove tables before starting ingestion process
     if passed_arguments.remove_tables:
@@ -1404,7 +1414,10 @@ def main(passed_arguments):
     else:
         loader.rebuild()
 
-
+    if passed_arguments.skip_calculations==False:
+        loader.recalculate_database()
+    else:
+        logger.info("Skipping recalculation of calculated database fields")
 
     #TODO add in failures report here e.g. _failed_table_count
 
@@ -1423,10 +1436,17 @@ parser.add_argument('--update-only', nargs='+',
                          'values')
 parser.add_argument('--remove-tables', nargs='+',
                     help='Drops tables before running the load data code. '
-                    ' Add the name of each table to drop in format "table1 table2"')
+                    ' Add the name of each table to drop in format "table1 table2"'
+                    ' If you want to drop all tables, use the keyword "all"')
 
 parser.add_argument ('--recalculate-only',action='store_true',
                     help="Don't update any data, just redo calculated fields")
+
+parser.add_argument ('--skip-calculations',action='store_true', default=False,
+                    help="Don't do any calculations")
+
+parser.add_argument ('--debug',action='store_true', default=False,
+                    help="Raise exceptions as they occur")
 
 
 if __name__ == '__main__':
