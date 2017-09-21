@@ -86,12 +86,12 @@ var projectView = {
           },
           {
               name: "transit_stats",
-              url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
+              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
               callback: dataBatchCallback
           },
           {
               name: "nearby_projects",
-              url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
+              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
               callback: dataBatchCallback
           },
           {
@@ -413,7 +413,7 @@ var projectView = {
         new SubsidyTimelineChart({
             dataRequest: {
                 name: currentNlihc + '_subsidy',
-                url: "http://hiapidemo.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
+                url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
             },
             container: '#subsidy-timeline-chart',
             width: 700,

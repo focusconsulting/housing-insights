@@ -42,6 +42,8 @@ frontmatter: isneeded
                     ['hoverBuilding', mapView.showPopup],
                     ['previewBuilding', mapView.showProjectPreview],
                     ['previewBuilding', mapView.highlightPreviewBuilding],
+                    ['filteredData', mapView.clearProjectPreview],
+                    ['filteredData',mapView.clearSelectedProjectIfDoesntMatch],
                     ['filteredData', mapView.filterMap],
                     ['filteredViewLoaded',mapView.addExportButton],
                     ['filteredViewLoaded',mapView.exportButton],
@@ -835,6 +837,8 @@ frontmatter: isneeded
                     mapView.listBuildings();
                     mapView.addExportButton();
                     mapView.exportButton();
+                    mapView.clearProjectPreview();
+                    mapView.clearSelectedProjectIfDoesntMatch(msg,data);
                     mapView.map.addSource('project', {
                         'type': 'geojson',
                         'data': mapView.convertedProjects
@@ -1052,8 +1056,9 @@ frontmatter: isneeded
         },  
 
         showProjectPreview: function(msg, data) {
-            var projectData = data[0];
-            if ( projectData ) {
+            
+            if ( data != null) {
+                var projectData = data[0];
 
                 mapView.scrollMatchingList(data);
                   
@@ -1150,8 +1155,42 @@ frontmatter: isneeded
                         .duration(fadeDuration)
                         .style('opacity',1)
                 },fadeDuration)
-            }
+          }
+          else {
+            var previewContents = d3.selectAll('.preview-contents');
+            var projectPreview = d3.select('#project-preview');
+            previewContents._groups[0][0].remove();
+            var emptyPreview = projectPreview.append('div');
+            emptyPreview._groups[0][0].className = 'preview-contents'
+            emptyPreview._groups[0][0].innerText = 'There is no project selected';
+          }
 
+        },
+
+        clearProjectPreview: function() {
+          d3.select('#clearSelectedButton')
+            .on('click', function(d) {
+              setState('previewBuilding',null);
+          });
+        },
+
+        clearSelectedProjectIfDoesntMatch: function() {
+          var currentState = getState();
+          if ( currentState.previewBuilding != null ){
+            var currentSelectedProject = getState().previewBuilding[0];
+            var filteredData = currentState.filteredData;
+            var stillInGroup = false;
+            if ( currentSelectedProject != null ){
+              filteredData[0].forEach(function (project){
+                if ( currentSelectedProject.properties.nlihc_id === project ){
+                  stillInGroup = true;
+                }
+              });
+              if ( !stillInGroup ){
+                setState('previewBuilding',null);
+              }
+            }
+          }
         },
 
         filterMap: function(msg, data) {

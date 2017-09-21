@@ -25,7 +25,7 @@ var router = {
             ['subNav.right', router.pushFilter],
             ['previewBuilding', router.pushFilter],
             ['clearState', router.clearOverlayURL]
-        ]);        
+        ]);
         router.isFilterInitialized = true;
         if ( router.hasInitialFilterState ) {
             router.decodeState();
@@ -57,7 +57,7 @@ var router = {
             // clear location has if state obj is empty  OR if it's only property is mapLayer equal to initial mapLayer (ward for now)
             window.history.replaceState(router.stateObj, 'newState', '#');
         } else {
-            window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramifyFilter());        
+            window.history.replaceState(router.stateObj, 'newState', '#/HI/' + router.paramifyFilter());
         }
     },
     pushViewChange: function(msg, data){
@@ -74,7 +74,7 @@ var router = {
                 var dataChoice = dataChoices.find(function(obj){
                     return key.split('.')[1] === obj.source;
                 });
-                
+
                 if ( dataChoice.component_type === 'continuous' ) {
                     var separator = router.stateObj[key] && router.stateObj[key][2] ? '-' : '_';
                     paramsArray.push(dataChoice.short_name + '=' + router.stateObj[key][0] + separator + router.stateObj[key][1]);
@@ -89,20 +89,20 @@ var router = {
                         var date = router.stateObj[key][i].getDate();
                         var month = router.stateObj[key][i].getMonth() + 1;
                         var year = router.stateObj[key][i].getFullYear();
-                        dateStrings[i] = 'd' + date.toString() + 'm' + month.toString() + 'y' + year.toString(); 
+                        dateStrings[i] = 'd' + date.toString() + 'm' + month.toString() + 'y' + year.toString();
                     }
                     paramsArray.push(dataChoice.short_name + '=' + dateStrings[0] + separator + dateStrings[1]);
                 }
             } else if ( key.split('.')[0] === 'mapLayer') {
                 if ( router.stateObj[key] !== mapView.initialLayers[0].source ) { // paramify only if mapLayer does not equal
-                                                                                  // initial layer. now `ward` but could be 
+                                                                                  // initial layer. now `ward` but could be
                                                                                   // something else
                     paramsArray.unshift('ml=' + router.stateObj[key]); // ensure mapLayer is always first
                                                                        // some other component seems to already ensure
                                                                        // this, but no harm done to do again.
                 }
             } else if ( key === 'overlaySet') {
-                
+
                 var dataChoice = dataChoices.find(function(obj){
                     return router.stateObj.overlaySet.overlay === obj.source;
                 });
@@ -165,9 +165,9 @@ var router = {
                     var min = +values[0]
                     var max = +values[1]
                     var nullsShown = separator === '_' ? false : true;
-                    
+
                     filterControlObj.set(min,max,nullsShown);
-                    
+
                 }
             if ( dataChoice.component_type === 'categorical' || dataChoice.component_type === 'location' || dataChoice.component_type === 'searchbar' ){
                     var values = eachArray[1].replace(/_/g,' ').split('+');
@@ -176,8 +176,8 @@ var router = {
                             dropdown_element.dropdown('set selected', values);
                     }); // decoding location won't without the setTimeout trick, which asyncs the function, to be fired
                         // in the next open slot in the queue. especially true if the mapLaye needs to be changed first, because then
-                        // probably a lot of async stuff is triggered but the setState call above. 
-                }   
+                        // probably a lot of async stuff is triggered but the setState call above.
+                }
                 if ( dataChoice.component_type === 'date' ){
                     // handle decoding for date type filter here
                     var separator = eachArray[1].indexOf('-') !== -1 ? '-' : '_';
@@ -198,8 +198,8 @@ var router = {
                         ]
                     );
                     document.querySelector('[name="showNulls-' + dataChoice.source + '"]').checked = nullsShown;
-                    
-                    //Commit the values using callback(), which will update slider to match. 
+
+                    //Commit the values using callback(), which will update slider to match.
                     filterView.filterInputs[dataChoice.short_name].callback();
                 }
             }
