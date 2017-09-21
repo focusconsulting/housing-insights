@@ -14,7 +14,6 @@ from subprocess import check_output
 import csv
 import json
 import os
-import logging
 import time
 #import docker
 
@@ -69,7 +68,7 @@ def get_database_engine(database_choice):
 
     except Exception as e:
         print(e)
-        logging.warning("Error - are you trying to use the wrong Docker connect string?")
+        print("Error - are you trying to use the wrong Docker connect string?")
         time.sleep(5)
         raise e
 

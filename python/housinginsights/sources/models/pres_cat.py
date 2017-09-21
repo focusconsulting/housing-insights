@@ -38,6 +38,12 @@ SUBSIDY_FIELDS = ['Nlihc_id', 'Subsidy_id',
                       'Subsidy_info_source_property',
                       'POA_end_actual']
 
+PROJ_ADDRE_FIELDS = ['Nlihc_id', 'Proj_name', 'Bldg_addre', 'Bldg_image_url',
+                     'Bldg_streetview_url', 'Bldg_address_id', 'Anc2012',
+                     'Psa2012', 'Geo2010', 'Cluster_tr2000',
+                     'Cluster_tr2000_name', 'Bldg_zip', 'Ward2012', 'Ssl',
+                     'Bldg_x', 'Bldg_y', 'Bldg_lon', 'Bldg_lat']
+
 CLUSTER_DESC_MAP = {
     'Cluster 1': 'Kalorama Heights, Adams Morgan, Lanier Heights',
     'Cluster 2': 'Columbia Heights, Mt. Pleasant, Pleasant Plains, Park View',
