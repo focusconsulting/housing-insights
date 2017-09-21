@@ -383,12 +383,15 @@ class CleanerBase(object, metaclass=ABCMeta):
         image_url = row['Proj_image_url']
         street_view_url = row['Proj_streetview_url']
         psa = row['Psa2012']
+        latitude = row['Proj_lat']
+        longitude = row['Proj_lon']
+
 
         # only do mar api lookup if we have a null geocode value
         if self.null_value in [ward, neighbor_cluster,
                                neighborhood_cluster_desc, zipcode, anc,
                                census_tract, status, full_address, image_url,
-                               street_view_url, psa]:
+                               street_view_url, psa, latitude,longitude]:
        
             try:
                 mar_api = MarApiConn()
@@ -468,6 +471,13 @@ class CleanerBase(object, metaclass=ABCMeta):
             if psa is not None:
                 row['Psa2012'] = 'PSA ' + psa.split(' ')[-1]
 
+        if longitude == self.null_value or latitude == self.null_value:
+            latitude = result['LATITUDE']
+            longitude = result['LONGITUDE']
+            if latitude is not None and longitude is not None:
+                row['Proj_lat'] = latitude
+                row['Proj_lon'] = longitude
+                
         return row
 
     def add_state_county_to_tract(self):

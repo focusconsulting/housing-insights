@@ -1,7 +1,6 @@
 
 
 from housinginsights.sources.mar import MarApiConn
-import logging
 
 from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="sources.log")
@@ -62,7 +61,7 @@ def check_mar_for_address(addr, conn):
         ###########################
         # Attempt #2 - MAR API
         ###########################
-        logging.info("  checking mar API")
+        logger.info("  checking mar API")
         mar_api = MarApiConn()
         result = mar_api.find_addr_string(address=addr)
         if (result['returnDataset'] == None or 
@@ -155,7 +154,7 @@ def get_unique_addresses_from_str(address_string=""):
 
             # validate stacks to handle contiguous range delimiter cases
             if len(delimiter_stack) > len(str_stack):
-                logging.warning('Invalid address: {}'.format(
+                logger.warning('Invalid address: {}'.format(
                     addr_str))
                 unique_addresses_result.append(addr_str)
                 continue
@@ -183,7 +182,7 @@ def get_unique_addresses_from_str(address_string=""):
                     # flag '<address_num>, <streetname> <quadrant>' as invalid case
                     try:
                         _ = int(_str)
-                        logging.warning('Invalid address: {}'.format(
+                        logger.warning('Invalid address: {}'.format(
                             addr_str))
                         unique_addresses_result.append(addr_str)
                         continue
@@ -193,7 +192,7 @@ def get_unique_addresses_from_str(address_string=""):
                         unique_addresses_result.append(base_str)
 
                 else:  # fail cleanly for all other invalid cases
-                    logging.warning('Invalid address: {}'.format(
+                    logger.warning('Invalid address: {}'.format(
                         addr_str))
                     unique_addresses_result.append(addr_str)
                     continue
@@ -215,7 +214,7 @@ def get_unique_addresses_from_str(address_string=""):
                         addr_num = num
                         num = str_stack.pop().strip()
                     except NameError as e:
-                        logging.warning(
+                        logger.warning(
                             'Missing "num" - using default addr_num: {}'.format(e))
                         num = str_stack.pop().strip()
 
@@ -254,7 +253,7 @@ def get_unique_addresses_from_str(address_string=""):
                     except ValueError:
                         # remove previous result that was added incorrectly
                         _ = unique_addresses_result.pop()
-                        logging.warning('Invalid address: {} & {}'.format(
+                        logger.warning('Invalid address: {} & {}'.format(
                             num, base_str))
                         unique_addresses_result.append('{} & {}'.format(
                             num, base_str))

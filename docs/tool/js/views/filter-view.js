@@ -225,7 +225,6 @@ var filterView = {
         }
 
         this.setInputCallback = function(callback){
-            console.log('in setInputCallback'); 
             this.callback = callback; // making callback function a property of the filterTextInput so we can access it later -JO
             var checkKeyPress = function(e){
                 if(e.charCode === 9 || e.charCode === 13){
@@ -272,7 +271,6 @@ var filterView = {
 
 
         //Create the element and put it 
-        console.log(keyValuePairsArrayMin);
         for (var i = 0; i < keyValuePairsArrayMin.length; i++){
             output['min'][keyValuePairsArrayMin[i][0]] = document.createElement('input');
             output['min'][keyValuePairsArrayMin[i][0]].setAttribute(

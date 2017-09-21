@@ -107,7 +107,7 @@ class BaseApiConn(object):
         else:
             url = urlpath
 
-        logger.debug("Requested URL %s with params %s", url, params)
+        logger.info("Requested URL %s with params %s", url, params)
         return self.session.get(url, params=params, proxies=self.proxies, **kwargs)
 
     def post(self, urlpath, data=None, **kwargs):
