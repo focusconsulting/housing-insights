@@ -61,7 +61,7 @@ var router = {
         }
     },
     pushViewChange: function(msg, data){
-        if (data.el === 'building-view'){
+        if (data.el === 'project-view'){
             var buildingID = getState().selectedBuilding[0].properties.nlihc_id;
             window.history.pushState(router.stateObj, 'newState', '#/HI/building=' + buildingID);
         }

@@ -1056,8 +1056,9 @@ frontmatter: isneeded
         },  
 
         showProjectPreview: function(msg, data) {
-            var projectData = data[0];
-            if ( projectData ) {
+            
+            if ( data != null) {
+                var projectData = data[0];
 
                 mapView.scrollMatchingList(data);
                   
