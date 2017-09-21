@@ -2,7 +2,6 @@
 Module contains helper functions used in loading data into database
 """
 
-import logging
 import json
 from sqlalchemy.exc import ProgrammingError
 import sys
@@ -12,6 +11,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir, os.pardir)))
 
 import housinginsights.ingestion.Cleaners as Cleaners
+
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 # Completed, tests not written.
@@ -50,7 +52,7 @@ def load_meta_data(filename='meta.json'):
     except:
         raise ValueError("Error found in JSON, check expected format.")
 
-    logging.info("{} imported. JSON format is valid: {}".format(filename, json_is_valid))
+    logger.info("{} imported. JSON format is valid: {}".format(filename, json_is_valid))
 
     return meta
 
@@ -106,7 +108,7 @@ def check_or_create_sql_manifest(engine, rebuild=False):
             create_command = "CREATE TABLE manifest({});".format(field_command)
             db_conn.execute(create_command)
             db_conn.close()
-            logging.info("Manifest table created in the SQL database")
+            logger.info("Manifest table created in the SQL database")
             return True
 
         except Exception as e:

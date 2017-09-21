@@ -10,7 +10,7 @@ if __name__ == '__main__':
 from housinginsights.sources.base_project import ProjectBaseApiConn
 from housinginsights.tools.logger import HILogger
 
-logger = HILogger(name=__file__, logfile="sources.log", level=10)
+logger = HILogger(name=__file__, logfile="sources.log")
 
 
 
@@ -26,12 +26,12 @@ class PrescatApiConn(ProjectBaseApiConn):
     storage location that admins can put prescat files
     '''
 
-    def __init__(self, baseurl=None,proxies=None,database_choice=None):
+    def __init__(self, baseurl=None,proxies=None,database_choice=None, debug=False):
         
         if baseurl==None:
             baseurl=os.path.abspath("../../../data/raw/preservation_catalog/20170724/Project.csv")
 
-        super().__init__(baseurl=baseurl, proxies=proxies, database_choice=database_choice)
+        super().__init__(baseurl=baseurl, proxies=proxies, database_choice=database_choice, debug=debug)
 
         self._available_unique_data_ids = ['prescat']
 

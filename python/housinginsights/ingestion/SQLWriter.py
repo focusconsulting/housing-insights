@@ -51,7 +51,6 @@ are we overriding or appending?
     something for DataReader class? JSON file?
 """
 
-import logging
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -64,6 +63,8 @@ from psycopg2 import DataError
 import copy
 import datetime
 
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 # TODO: is this incomplete - do we want to define a specific error output
 class TableWritingError(Exception):
@@ -126,15 +127,15 @@ class HISql(object):
 
                 dbapi_conn.commit()
             trans.commit()
-            logging.info("  data file loaded into database")
+            logger.info("  data file loaded into database")
         
         #TODO need to find out what types of expected errors might actually occur here  
         #For now, assume that SQLAlchemy will raise a programmingerror
         except (ProgrammingError, DataError, TypeError) as e:
             trans.rollback()
 
-            logging.warning("  FAIL: something went wrong loading {}".format(self.unique_data_id))
-            logging.warning("  exception: {}".format(e))
+            logger.warning("  FAIL: something went wrong loading {}".format(self.unique_data_id))
+            logger.warning("  exception: {}".format(e))
             raise TableWritingError
 
         conn.close()
@@ -156,7 +157,7 @@ class HISql(object):
                                                      close_conn=False)
 
         if sql_manifest_row is not None:
-            logging.info("  deleting existing manifest row for {}".format(
+            logger.info("  deleting existing manifest row for {}".format(
                 self.unique_data_id))
             delete_command = \
                 "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
@@ -187,7 +188,7 @@ class HISql(object):
             table = self.tablename
         db_conn = self.engine.connect()
         if self.does_table_exist(db_conn, table):
-            logging.info("  Did not create table because it already exists")
+            logger.info("  Did not create table because it already exists")
         else:
             self.create_table(db_conn, table)
         db_conn.close()
@@ -211,7 +212,7 @@ class HISql(object):
         field_command = ",".join(field_statements)
         create_command = "CREATE TABLE {}({});".format(table, field_command)
         db_conn.execute(create_command)
-        logging.info("  Table created: {}".format(table))
+        logger.info("  Table created: {}".format(table))
 
         # Create an id column and make it a primary key
         create_id = "ALTER TABLE {} ADD COLUMN {} text;".format(table, 'id')
@@ -233,7 +234,7 @@ class HISql(object):
         try:
             db_conn.execute("DROP TABLE {}".format(table))
         except ProgrammingError:
-            logging.warning("  {} table can't be dropped because it doesn't exist".format(self.tablename))
+            logger.warning("  {} table can't be dropped because it doesn't exist".format(self.tablename))
         db_conn.close()
 
     def get_sql_manifest_row(self, db_conn=None, close_conn=True):
@@ -273,7 +274,7 @@ class HISql(object):
             return results[0]
 
         if len(results) == 0:
-            logging.info("  Couldn't find sql_manifest_row for {}".format(self.unique_data_id))
+            logger.info("  Couldn't find sql_manifest_row for {}".format(self.unique_data_id))
             return None
 
     def get_sql_fields_and_type_from_meta(self, table_name=None):

@@ -11,11 +11,11 @@ Thanks for joining our project! First we'll do some quick setup to bring you int
 
 1) **Fork our [repository on Github](https://github.com/codefordc/housing-insights)**. Is this your first time forking? [Read detailed instructions here]({{site.baseurl}}/resources/onboarding/git-intro.html)
 
-2) **Join our slack channel**. Between in-person sessions, we communicate via Slack. Go to the [Code for DC homepage](http://codefordc.org/) and click the 'Join Slack' link. There are several Slack channels - a `housing-insights` channel as well as a channel for each team (data, D3, and prototype). 
+2) **Join our slack channel**. Between in-person sessions, we communicate via Slack. Go to the [Code for DC homepage](http://codefordc.org/) and click the link next to 'Slack Team'. There are several Slack channels - a `housing-insights` channel as well as a channel for each team (data, D3, and prototype). 
 
-3) **Fill out our [onboarding survey](https://goo.gl/forms/FsHzS4rzUNwnVnh02)**. It's mostly things like usernames so we can add you to the project.
+3) **Clone your fork of the repository** to your computer. Be sure to add both the 'origin' and 'codefordc' remote repositories so that you can use our triangular workflow - just cloning the repository is not enough. [Instructions are here]({{site.baseurl}}/resources/onboarding/triangular-git.html).
 
-4) **Clone your fork of the repository** to your computer, and add additional remotes so that you can pull from Code for DC and push to your fork. [Detailed instructions]({{site.baseurl}}/resources/onboarding/triangular-git.html). 
+4) **Fill out our [onboarding survey](https://goo.gl/forms/FsHzS4rzUNwnVnh02)**. It's mostly things like usernames so we can add you to the project.
 
 5) **System setup:** Choose your setup based on what you will be working on:
 
@@ -23,7 +23,7 @@ Thanks for joining our project! First we'll do some quick setup to bring you int
 
 * Adding data, documenting data, and Python coding: [Setup Docker]({{site.baseurl}}/resources/onboarding/docker.html)
 
-* Front end development: [Run a local server]({{site.baseurl}}/resources/onboarding/front-end.html)
+* Front end development: [Run Jekyll]({{site.baseurl}}/resources/onboarding/front-end.html)
 
 
 <hr/>
