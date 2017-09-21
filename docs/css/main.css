@@ -150,3 +150,15 @@ p {
   background-color: #ffffff;
   background-image: none;
 }
+
+.team-bio-block h3 {
+  margin-top:0px;
+}
+
+.team-bio-block .well {
+  min-height:200px;
+}
+
+.team-bio-block.no-image .well {
+  min-height:100px;
+}

@@ -49,7 +49,6 @@ frontmatter: isneeded
                     ['filteredViewLoaded',mapView.exportButton],
                     ['hoverBuildingList', mapView.highlightHoveredBuilding],
                     ['filterViewLoaded', mapView.initialSidebarState],
-                    ['filterViewLoaded',mapView.refreshModal],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['initialProjectsRendered',router.initGate],
                     ['filterViewLoaded', router.initGate]
@@ -258,7 +257,6 @@ frontmatter: isneeded
 
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
-                    mapView.refreshModal();
                 });
                 
                 // filter decoding was happening too quickly after initialLayers were added (ln 463),
@@ -328,11 +326,6 @@ frontmatter: isneeded
             setState('sidebar.right',true);
             setState('subNav.left', 'filters');
             setState('subNav.right', 'charts');
-        },
-        refreshModal: function(){
-            console.log("refreshing modal")
-            $('#welcomeModal').modal('refresh');
-            $('#welcomeModal').modal('refresh');
         },
         ChloroplethColorRange: function(source_data_name, chloroData, style){
             // CHLOROPLETH_STOP_COUNT cannot be 1! There's no reason you'd
@@ -1184,7 +1177,7 @@ frontmatter: isneeded
         clearSelectedProjectIfDoesntMatch: function() {
           var currentState = getState();
           if ( currentState.previewBuilding != null ){
-            var currentSelectedProject = getState().previewBuilding[0];
+            var currentSelectedProject = getState().previewBuilding[0][0];
             var filteredData = currentState.filteredData;
             var stillInGroup = false;
             if ( currentSelectedProject != null ){
@@ -1463,12 +1456,12 @@ frontmatter: isneeded
             
         },
         highlightPreviewBuilding(msg, data) {
-            var projectData = data[0];
             if ( getState().previewBuilding[1] ){ // if there's a previous previewBuilding state, clear the highlight
                 mapView.map.setFilter('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id, ['==', 'nlihc_id', '']);
                 mapView.map.removeLayer('project-highlight-preview-' + getState().previewBuilding[1][0].properties.nlihc_id);
             }
-            if (projectData) {
+            if (data != null) {
+                var projectData = data[0];
                 mapView.map.addLayer({
                     'id': 'project-highlight-preview-' + projectData.properties.nlihc_id,
                     'type': 'circle',
