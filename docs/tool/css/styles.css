@@ -851,8 +851,12 @@ input.search {
 }
 
 #welcomeModal .actions {
-    margin-top:30px;
-    text-align: inherit;
+    margin-top: 30px;
+    text-align: center;
+}
+
+#welcomeModal .btn {
+    margin: 5px;
 }
 
 .shepherd-skinny {
