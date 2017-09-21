@@ -74,8 +74,9 @@ def get_log_level_counts(logfile):
 
 
 
-def weekly_update(drop_tables_first = False):
-    db_choice = 'docker'
+def weekly_update(db_choice, drop_tables_first = False):
+    #TODO should update the secrets.json keys to make them simpler so that this mapping is irrelevant
+
     send_log = True
     debug = True
 
@@ -117,6 +118,7 @@ def weekly_update(drop_tables_first = False):
         get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only','dhcd_dfd_properties_project',
                                                                         'dhcd_dfd_properties_subsidy',
+                                                                        'dhcd_dfd_properties_addre',
                                                                         '--skip-calculations' ])
         load_data.main(arguments)
 
@@ -126,6 +128,7 @@ def weekly_update(drop_tables_first = False):
         get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only','dchousing_project',
                                                                         'dchousing_subsidy',
+                                                                        'dchousing_addre',
                                                                         '--skip-calculations'])
         load_data.main(arguments)
 
@@ -139,7 +142,13 @@ def weekly_update(drop_tables_first = False):
 
         get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only',
+                            'tract2010_ward2012',
+                            'tract2010_cluster2000',
                             'tax',
+                            #'hmda_all_dc',
+                            'topa_rcasd_2017',
+                            'topa_rcasd_2016',
+                            'topa_rcasd_2015',
                             'building_permits_2016',
                             'building_permits_2017',
                             'crime_2016','crime_2017',
@@ -164,9 +173,15 @@ def weekly_update(drop_tables_first = False):
 
 if __name__ == '__main__':
     services_parser = argparse.ArgumentParser("Services.py for running the weekly update job")  
+    services_parser.add_argument("database", help="""which database we should connect to 
+                    when using existing data as part of the download process""",
+                    choices=['docker', 'docker_local', 'local', 'codefordc'])
+
     services_parser.add_argument('--drop-all', help="drop all tables before starting the update", 
             action='store_true')
 
+
+
     services_arguments = services_parser.parse_args()
 
-    weekly_update(services_arguments.drop_all)
+    weekly_update(services_arguments.database, services_arguments.drop_all)

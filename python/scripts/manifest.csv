@@ -28,5 +28,5 @@ use,census_tract_to_ward,tract2010_ward2012,manual,2013-07-01,utf-8,../../../dat
 skip,crime,crime_2015,api,2017-09-20,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20170920/crime_2015.csv,
 use,crime,crime_2016,api,2017-09-20,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20170920/crime_2016.csv,
 use,crime,crime_2017,api,2017-09-20,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20170920/crime_2017.csv,
-use,wmata_dist,wmata_dist_20170215,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/wmata/20170215/dist_from_sql_with_lat.csv,
-use,wmata_info,wmata_info_20170215,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170524/wmata_stops.csv,
+use,wmata_dist,wmata_dist,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/wmata/20170215/dist_from_sql_with_lat.csv,
+use,wmata_info,wmata_stops,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170524/wmata_stops.csv,

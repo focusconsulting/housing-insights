@@ -392,7 +392,7 @@ class LoadData(object):
             self._create_zone_facts_table()
             self._populate_calculated_project_fields()
         except Exception as e:
-            logger.error("Failed to recalculate database")
+            logger.error("Failed to recalculate database due to {}".format(e))
             if self.debug:
                 raise e
 
