@@ -43,10 +43,11 @@ var router = {
     },
     pushFilter: function(msg, data){
         /*console.log(msg,data);*/
-        if (data.length === 0 || !data || ( msg === 'subNav.right' && data === 'charts') ) {
-            delete router.stateObj[msg];
-        } else if ( msg.split('.')[0] === 'previewBuilding' ) {
+        if ( msg.split('.')[0] === 'previewBuilding' ) {
+            //TODO Need to filter if data = null 
             router.stateObj['previewBuilding'] = data[0];
+        } else if (data.length === 0 || !data || ( msg === 'subNav.right' && data === 'charts') ) {
+            delete router.stateObj[msg];
         } else {
             router.stateObj[msg] = data;
         }
