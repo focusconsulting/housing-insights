@@ -151,3 +151,16 @@
 .ui.attached.header {
 	background-color: rgb(237, 241, 247);
 }
+
+#subsidized-unit-chart h2 {
+	font-size: 27px;
+	text-align: center;
+	margin: 0;
+	color: rgb(169,169,169);
+}
+
+#subsidized-unit-chart p {
+	font-size: 16px;
+	text-align: center;
+	color: #cccccc;
+}
