@@ -859,6 +859,11 @@ input.search {
     margin: 5px;
 }
 
+body .modal-dialog.large {
+    width: 80%; /* respsonsive width */
+    text-align:left;
+}
+
 .shepherd-skinny {
     max-width:300px !important;
     z-index:1000 !important;

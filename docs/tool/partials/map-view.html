@@ -134,23 +134,33 @@
 
     <!--Welcome Modal-->
     <div class="modal" id="welcomeModal">
-        <div class="modal-dialog">
+        <div class="modal-dialog large">
             <div class="modal-content">
-                <div class="modal-body">
-                    <p>The Housing Insights tool provides data about subsidized affordable housing projects and the
+                <div class="modal-body" >
+                    <h1>Welcome to Housing Insights!</h1>
+                     <p>The Housing Insights tool provides data about subsidized affordable housing projects and the
                         neighborhoods that they're in.</p>
 
-                    <h2>Who is this for?</h2>
+                    <div class="ui info message">
+                      <div class="header">
+                        This tool is in alpha!
+                      </div>
+                      <strong>Help us improve:</strong> if you have feedback, positive or negative, or questions you can email the leadership team at <a href="mailto:housinginsights@googlegroups.com">housinginsights@googlegroups.com</a> or open an issue on our
+                        <a href="https://github.com/codefordc/housing-insights/">Github Repository</a>. 
+                    </p></div>
+
+                   
+                    <h3>Who is this for?</h3>
                     <p>This data tool is designed for affordable housing advocates and government officials to better
                         understand the state of affordable housing in Washington, DC.</p>
 
-                    <h2>What can it do?</h2>
+                    <h3>What can it do?</h3>
                     <p>The tool provides a dyamic view of all affordable housing in the city. You can filter the
                         projects to view summary statistics of projects that meet certain criteria, and view
                         neighborhood data overlayed on top of the map. You can also view details of specific
                         projects.</p>
 
-                    <h2>Where is the data from?</h2>
+                    <h3>Where is the data from?</h3>
                     <p>Data has been gathered from multiple sources including the DC Governement, Urban Institue, HUD,
                         and the US Census Bureau. A full listing of data sources is located <a href="/data">on our data
                             documentation page</a></p>
@@ -176,6 +186,10 @@
                         <i class="ui spinner loading icon"></i>
                         View saved analysis
                     </div>
+                </div>
+
+                <div class="modal-body">
+                    <p><i>This tool was created by <a href="team">this group of volunteers</a> in collaboration with <a href="https://www.cnhed.org/">CNHED</a>, <a href="https://www.urban.org/">Urban Institute</a>, and <a href="https://dhcd.dc.gov/">DHCD</a>.</i></p>
                 </div>
             </div>
         </div>
