@@ -200,6 +200,7 @@ Notes for anyone adding their profile:
 - Make sure to put a space after the : in each of the elements
 - Description can be whatever you want, but keep it limited to ~<15 words
 
+Excel formula for creating the placeholder values from a spreadsheet: =" - name: " &B129&" "&LEFT(C129,1)&CHAR(10)&"   description: "&CHAR(10)&"   image: "&CHAR(10)&"   bio-url: "&CHAR(10)
 -->
 
 # Our Development Team
