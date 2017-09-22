@@ -42,11 +42,13 @@ var router = {
         }
     },
     pushFilter: function(msg, data){
-        /*console.log(msg,data);*/
-        if ( msg.split('.')[0] === 'previewBuilding' ) {
+        console.log(msg,data);
+       /* if ( msg.split('.')[0] === 'previewBuilding' ) {
             //TODO Need to filter if data = null 
             router.stateObj['previewBuilding'] = data[0];
-        } else if (data.length === 0 || !data || ( msg === 'subNav.right' && data === 'charts') ) {
+        } else */
+        if ( !data || data.length === 0 || ( msg === 'subNav.right' && data === 'charts') ) {
+            console.log('deleting stateObj property')
             delete router.stateObj[msg];
         } else {
             router.stateObj[msg] = data;
@@ -111,7 +113,7 @@ var router = {
             } else if ( key === 'subNav.right' && router.stateObj['subNav.right'] === 'buildings' ) {
                 paramsArray.push('sb=bdng');
             } else if ( key.split('.')[0] === 'previewBuilding' ){
-                paramsArray.push('pb=' + router.stateObj['previewBuilding'].properties.nlihc_id);
+                paramsArray.push('pb=' + router.stateObj['previewBuilding'][0].properties.nlihc_id);
             }
         }
      
