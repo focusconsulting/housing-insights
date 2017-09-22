@@ -6,7 +6,7 @@ leadership:
  - name: John Osterman
    description: Front end lead
    image: johnosterman.jpg
-   bio-url: https://github.com/ostermanj
+   bio-url: https://osterman.io
  - name: Thomas Hernandez
    description: User testing lead
    image: thomas.jpg
@@ -231,7 +231,7 @@ The technical leadership team is the group of volunteers in charge of continuing
                 <img width="100%" height="100%" src="{{site.baseurl}}/team/images/{% if member.image %}{{member.image}}{% else %}example.png{% endif %}">
             </div>
             <div class="col-sm-6">
-                <h3><a href="{{member.url}}">{{member.name}}</a></h3>
+                <h3><a href="{{member.bio-url}}">{{member.name}}</a></h3>
                 <p>{{member.description}}</p>
             </div>
         </div>
