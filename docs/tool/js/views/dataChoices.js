@@ -17,6 +17,17 @@
         //  For this approach to work, it will be cleanest if we never have duplicate column names in our sql tables unless the data has
         //  the same meaning in both places (e.g. "ward" and "ward" can appear in two tables but should have same name/format)
 
+        /*Awaiting update to API to make this field available
+        {   "source":"status",
+            "display_name": "Active or Inactive",
+            "display_text": "Status classification of the property",
+            "component_type": "categorical",
+            "data_type": "text",
+            "data_level": "project",
+            "short_name": "stat",
+            "sourcetable": "project"
+        },
+        */
         {   "source":"proj_name_addre",
             "display_name": "Search",
             "display_text": "This is the searchbar",
@@ -158,7 +169,26 @@
             "short_name": "txtot",
             "sourcetable": "project"
         },
-        
+        /*Awaiting update to API to make this field available
+        {   "source":"nearest_metro_station",
+            "display_name":"Distance to closest metro",
+            "display_text": "Walking distance in miles to the nearest metro station",
+            "component_type": "continuous",
+            "data_type": "decimal",
+            "data_level": "project",
+            "short_name": "nms",
+            "sourcetable": "project"
+        },
+        {   "source":"bus_routes_nearby",
+            "display_name":"Number of accessible bus routes",
+            "display_text": "Number of bus routes that have a bus stop within 0.5 miles walking distance",
+            "component_type": "continuous",
+            "data_type": "integer",
+            "data_level": "project",
+            "short_name": "brn",
+            "sourcetable": "project"
+        },
+        */
 
 
 //////////////////////////////////////////////////
@@ -207,9 +237,9 @@
             "sourcetable": "zone_facts"
         },
         {
-            "source": "construction_permits",
-            "display_name": "Building Permits: Construction 2016",
-            "display_text": "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+            "source": "construction_permits_rate",
+            "display_name": "Building Permits: Construction Rate",
+            "display_text": "Number of construction building permits per 1,000 residential properties issued in the zone over the past 1 year.",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
@@ -220,9 +250,9 @@
             "sourcetable": "zone_facts"
         },
         {
-            "source": "building_permits",
-            "display_name": "Building Permits: All 2016",
-            "display_text": "Number of construction building permits issued in the zone during 2016. (2017 data not yet available)",
+            "source": "building_permits_rate",
+            "display_name": "Building Permits: All Rate",
+            "display_text": "Number of all building permits per 1,000 residential properties issued in the zone over the past 1 year.",
             "data_level": "zone",
             "component_type": "continuous",
             "data_type":"decimal",
