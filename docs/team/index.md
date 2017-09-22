@@ -83,7 +83,7 @@ members:
    bio-url: 
  - name: Jamie Catania
    description: Front End Developer
-   image: jamiecatania.jpeg
+   image: jamiecatania.jpg
    bio-url: https://www.linkedin.com/in/jamiecatania/
  - name: Janalyn C
    description: 
