@@ -194,24 +194,40 @@ var controller = {
     // dataRequest is an object with the properties 'name', 'url' and 'callback'. The 'callback' is a function
     // that takes as an argument the data returned from getData.                             
     getData: function(dataRequest){
+        var retryCount = 0;
         if (model.dataCollection[dataRequest.name] === undefined) { // if data not in collection
-            d3.json(dataRequest.url, function(error, data){
-                if ( error ) { console.log(error); }
-                if ( data.objects !== null ) {
-                    model.dataCollection[dataRequest.name] = data;
-                    setState('dataLoaded.' + dataRequest.name, true );
-                    if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
-                        dataRequest.callback(data);
-                    }                              
-                } else {
-                    //This approach suggests that either the caller (via callback) or the subscriber (via dataLoaded state change)
-                    //should appropriately handle a null data return. If they don't handle it, they'll probably get errors anyways.
-                    setState('dataLoaded.' + dataRequest.name, false );
-                    if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
-                        dataRequest.callback(data);
+            function recursive(){
+                d3.json(dataRequest.url, function(error, data){
+                    if ( error ) { 
+                        console.log(error);
+                        if (retryCount < 2 ) {
+                            console.log('trying again ' + retryCount);
+                            recursive();
+                            retryCount++;
+                        } else {
+                            console.log('giving up');
+                            setState('getDataError.' + dataRequest.name + '.' + error.currentTarget.status, true);
+                        }
+                    } else {
+                    
+                        if ( data.objects !== null ) {
+                            model.dataCollection[dataRequest.name] = data;
+                            setState('dataLoaded.' + dataRequest.name, true );
+                            if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                                dataRequest.callback(data);
+                            }                              
+                        } else {
+                            //This approach suggests that either the caller (via callback) or the subscriber (via dataLoaded state change)
+                            //should appropriately handle a null data return. If they don't handle it, they'll probably get errors anyways.
+                            setState('dataLoaded.' + dataRequest.name, false );
+                            if ( dataRequest.callback !== undefined ) { // if callback has been passed in 
+                                dataRequest.callback(data);
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }
+            recursive();
                
         } else {
             // TODO publish that data is available every time it's requested or only on first load?
