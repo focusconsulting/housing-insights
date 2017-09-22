@@ -181,10 +181,10 @@ members:
    description: 
    image: 
    bio-url: 
- - name: Naty C
-   description: 
-   image: 
-   bio-url: 
+   name: Natalia C. Clementi
+   description: Open source and Python preacher, PhD student at GWU, helped with HI backend.   
+   image: naty.jpg
+   bio-url: https://github.com/ncclementi
  - name: Neal W
    description: 
    image: 
