@@ -25,10 +25,14 @@ members:
    description: Javascript developer
    image: 
    bio-url: 
- - name: Jamie
+ - name: Jamie G
    description: 
    image: jamieg.jpg
    bio-url: https://github.com/jgordo04
+ - name: Jamie Catania
+   description: 
+   image: jamiec.jpg
+   bio-url: https://github.com/jamiecatania
  - name: Jason Haas
    description:
    image: jasonhaas.jpg
@@ -61,10 +65,10 @@ members:
    description: 
    image: dano.jpg
    bio-url: https://www.linkedin.com/in/danielomaley/
- - name: Ed N
+ - name: Ed Nunes
    description: 
-   image: 
-   bio-url: 
+   image: edn.jpg
+   bio-url: https://github.com/Nunie123
  - name: Eric K
    description: 
    image: 
@@ -85,10 +89,10 @@ members:
    description: 
    image: 
    bio-url: 
- - name: Jay L
+ - name: Jay Louvis
    description: 
-   image: 
-   bio-url: 
+   image: jay.jpg
+   bio-url: https://github.com/louvis
  - name: Jeanne K
    description: 
    image: 
@@ -141,10 +145,10 @@ members:
    description: 
    image: 
    bio-url: 
- - name: Salomone B
+ - name: Salomone Baquis
    description: 
-   image: 
-   bio-url: 
+   image: salomone.jpg
+   bio-url: https://github.com/salomoneb
  - name: Terry S
    description: 
    image: 
