@@ -4,7 +4,7 @@ database - replacing null, parsing dates, parsing boolean, and handling weird
 values.
 """
 
-from abc import ABCMeta, abstractclassmethod, abstractmethod
+from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import dateutil.parser as dateparser
 import os
@@ -63,7 +63,6 @@ class CleanerBase(object, metaclass=ABCMeta):
         # TODO: add replace_null method as required for an implementation (#176)
         pass
 
-
     def add_proj_addre_lookup_from_mar(self):
         """
         Adds an in-memory lookup table of the contents of the current
@@ -84,7 +83,6 @@ class CleanerBase(object, metaclass=ABCMeta):
             proxy = conn.execute(q)
             result = proxy.fetchall()
             self.ssl_nlihc_lookup = {d[0]:d[1] for d in result}
-
 
     def get_nlihc_id_if_exists(self, mar_ids_string, ssl=None):
         "Checks for record in project table with matching MAR id."
@@ -109,7 +107,6 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         #If we don't find a match
         return self.null_value
-
 
     # TODO: figure out what is the point of this method...it looks incomplete
     def field_meta(self, field):
@@ -300,6 +297,10 @@ class CleanerBase(object, metaclass=ABCMeta):
 
 
         #TODO this is odd, find out why we have both ADDRESS_ID column and mar_id column
+        # The reason was because there were instances where proj_address_id
+        # were not valid mar_id values (JKwening) - if prescat has cleaned
+        # this up then this is no longer an issue; if not we should consider
+        # reverting back to original code
         if proj_address_id != self.null_value:
             row['mar_id'] = proj_address_id
             return row
@@ -325,6 +326,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         elif address != self.null_value:
             # check whether address is valid - it has street number
+            # TODO - use address processing code built for prescat_addre table
             try:
                 str_num = address.split(' ')[0]
                 int(str_num)
@@ -336,9 +338,9 @@ class CleanerBase(object, metaclass=ABCMeta):
             
             if result:
                 #Handle case of mar_api returning something but it not being an address
-                if (result['returnDataset'] == None or 
-                    result['returnDataset'] == {} or
-                    result['sourceOperation'] == 'DC Intersection'):
+                if (result['returnDataset'] is None or
+                   result['returnDataset'] == {} or
+                   result['sourceOperation'] == 'DC Intersection'):
                 
                     result = None
 
@@ -386,7 +388,6 @@ class CleanerBase(object, metaclass=ABCMeta):
         latitude = row['Proj_lat']
         longitude = row['Proj_lon']
 
-
         # only do mar api lookup if we have a null geocode value
         if self.null_value in [ward, neighbor_cluster,
                                neighborhood_cluster_desc, zipcode, anc,
@@ -400,7 +401,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             except KeyError:
                 return row
 
-        #if there were no null values in the geocodable fields
+        # if there were no null values in the geocodable fields
         else:
             return row
 
@@ -546,7 +547,6 @@ class CleanerBase(object, metaclass=ABCMeta):
             result = proxy.fetchall()
             self.mar_tract_lookup = {d[0]:d[1] for d in result}
 
-
     def add_census_tract_from_mar(self, row, column_name='mar_id',
                                   lat_lon_col_names=('LATITUDE', 'LONGITUDE'),
                                   x_y_coords_col_names=('X', 'Y'),
@@ -666,6 +666,7 @@ class GenericCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         return row
+
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -854,11 +855,13 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 
         return row
 
+
 class ProjectAddressCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row)
         return row
-        
+
+
 class ZillowCleaner(CleanerBase):
     """
     Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)
