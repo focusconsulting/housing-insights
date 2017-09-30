@@ -5,6 +5,7 @@ from housinginsights.sources.mar import MarApiConn
 from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="sources.log")
 
+
 def quick_address_cleanup(addr):
      #Used to perform common string replacements in addresses. 
         #The key is original, value is what we want it to become
@@ -36,10 +37,10 @@ def quick_address_cleanup(addr):
 
 
 def check_mar_for_address(addr, conn):
-        '''
+        """
         Looks for a matching address in the MAR
         Currently just uses a 
-        '''
+        """
 
         quick_address_cleanup(addr)
 
@@ -64,17 +65,18 @@ def check_mar_for_address(addr, conn):
         logger.info("  checking mar API")
         mar_api = MarApiConn()
         result = mar_api.find_addr_string(address=addr)
-        if (result['returnDataset'] == None or 
-            result['returnDataset'] == {} or
-            result['sourceOperation'] == 'DC Intersection'):
+        if (result['returnDataset'] is None or
+           result['returnDataset'] == {} or
+           result['sourceOperation'] == 'DC Intersection'):
 
-            #Means we didn't find a proper match
+            # means we didn't find a proper match
             result = None
 
+        # make sure to return address id as string and not default integer
         if result:
-            return result['returnDataset']['Table1'][0]['ADDRESS_ID']
+            return str(result['returnDataset']['Table1'][0]['ADDRESS_ID'])
 
-        #If no match found:
+        # if no match found:
         return None
 
 
