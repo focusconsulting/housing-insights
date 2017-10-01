@@ -254,7 +254,6 @@ class DataReader(HIReader):
     def keys(self):
         return self._keys
 
-
     def _download_data_file(self):
         """
         Internal function that tries to load the data file from the local file

@@ -95,7 +95,7 @@ class Manifest(HIReader):
         return unique_data_ids
 
     def update_manifest(self, date_stamped_folder):
-        '''
+        """
         Used for automatically swapping out old files for new ones in our manifest.csv
         whenever we gather new data. 
 
@@ -103,7 +103,7 @@ class Manifest(HIReader):
         (by sorting alphabetically). Make a list of .csv files in that folder
         and update the manifest.csv for every unique_data_id that corresponds
         to one of the .csv files. 
-        '''
+        """
         timestamp = os.path.basename(date_stamped_folder)
         data_date = datetime.strptime(timestamp, '%Y%m%d').strftime('%Y-%m-%d')
         file_path_base = date_stamped_folder[date_stamped_folder.find('raw'):]

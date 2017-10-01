@@ -13,12 +13,23 @@ This module is an implementation of a mediator object. It interacts
     missing/skipped data sets, any ingestion problems
 """
 
+# python imports
+import os
+import sys
+
+# relative package import for when running as a script
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                           os.pardir, os.pardir))
+sys.path.append(PYTHON_PATH)
+
+LOGGING_PATH = os.path.abspath(os.path.join(PYTHON_PATH, "logs"))
+
 from python.housinginsights.ingestion.LoadData import LoadData
 from python.housinginsights.ingestion.Manifest import Manifest
 
 
 class IngestionMediator(object):
-    def __init__(self):
+    def __init__(self, database_choice=None, meta_path=None):
         """
         Initialize mediator with private instance variables for colleague
         objects
@@ -44,7 +55,7 @@ class IngestionMediator(object):
 
 if __name__ == '__main__':
     # initialize instances to be used for this ingestion mediator instance
-    load_data = LoadData()
+    load_data = LoadData(database_choice='docker_database')
     manifest = Manifest()
 
     # initialize an instance of ingestion mediator and set colleague instances
