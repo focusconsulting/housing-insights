@@ -88,18 +88,19 @@ def check_or_create_sql_manifest(engine, rebuild=False):
             #Create the query with appropriate fields and datatypes
             db_conn = engine.connect()
             fields = [
-                ("status","text"),
+                ("status", "text"),
                 ("load_date", "timestamp"),
-                ("include_flag","text"),
-                ("destination_table","text"),
-                ("unique_data_id","text"),
+                ("include_flag", "text"),
+                ("destination_table", "text"),
+                ("unique_data_id", "text"),
                 ("update_method", "text"),
-                ("data_date","date"),
+                ("data_date", "date"),
                 ("encoding", "text"),
-                ("local_folder","text"),
-                ("s3_folder","text"),
-                ("filepath","text"),
-                ("notes","text")
+                ("local_folder", "text"),
+                ("s3_folder", "text"),
+                ("filepath", "text"),
+                ("dependency", "text"),
+                ("notes", "text")
                 ]
             field_statements = []
             for tup in fields:

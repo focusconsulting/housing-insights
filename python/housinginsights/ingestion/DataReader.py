@@ -20,8 +20,8 @@ import codecs
 from datetime import datetime
 import dateutil.parser as dateparser
 
-from housinginsights.tools.base_colleague import Colleague
-from housinginsights.tools.logger import HILogger
+from python.housinginsights.tools.base_colleague import Colleague
+from python.housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
@@ -170,14 +170,14 @@ class DataReader(HIReader):
 
         # Use default encoding if none found
         if 'encoding' not in manifest_row:
-            logger.warning("  Warning: encoding not found in manifest. " \
-                            "Falling back to latin-1.")
+            logger.warning("  Warning: encoding not found in manifest. "
+                           "Falling back to latin-1.")
         self.encoding = manifest_row.get('encoding', 'latin-1')
 
         self.load_from = load_from
         self.s3_path = os.path.join(manifest_row['s3_folder'],
                                     manifest_row['filepath'].strip("\/")
-                                    ).replace("\\","/")
+                                    ).replace("\\", "/")
         self._error_reporting_overhead = {}
         # # Test connection to s3 URL
         # if self.manifest_row['include_flag'] == 'use':

@@ -58,7 +58,7 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 class LoadData(Colleague):
 
     def __init__(self, database_choice=None, meta_path=None,
-                 manifest_path=None, keep_temp_files=True, 
+                 manifest_path=None, keep_temp_files=True,
                  drop_tables=False, debug=False):
         """
         Initializes the class with optional arguments. The default behaviour
@@ -89,17 +89,18 @@ class LoadData(Colleague):
                                                          'manifest.csv'))
         self._keep_temp_files = keep_temp_files
 
-        # TODO - move into IngestionMediator (both)
+        # TODO - move into IngestionMediator (both) - ready to be removed
         # load given meta.json and manifest.csv files into memory
         self.meta = ingestionfunctions.load_meta_data(meta_path)
         self.manifest = Manifest(manifest_path)
 
-        # TODO - move into IngestionMediator
+        # TODO - move into IngestionMediator - ready to be removed
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
 
+        # TODO - remove once meta_json_to_database is refactored
         # write the meta.json to the database
-        self._meta_json_to_database()
+        self.meta_json_to_database()
 
         self._failed_table_count = 0
 
@@ -164,7 +165,8 @@ class LoadData(Colleague):
                     if self.debug == True:
                         raise e
 
-    def _meta_json_to_database(self):
+    # TODO - make public and call from IngestionMediator passing meta object
+    def meta_json_to_database(self):
         """
         Makes sure we have a meta table in the database.
         If not, it creates it with appropriate fields.
@@ -282,7 +284,7 @@ class LoadData(Colleague):
         dirs.sort(reverse=True)
         return dirs[0]
 
-    # TODO - move into IngestionMediator
+    # TODO - move into IngestionMediator (remove altogether? Not used anywhere?)
     def make_manifest(self, all_folders_path):
         """
         Creates a new manifest.csv with updated data date and filepath for
@@ -310,7 +312,7 @@ class LoadData(Colleague):
 
         return self.manifest.update_manifest(most_recent_subfolder_path)
 
-    # TODO - move into IngestionMediator
+    # TODO - move into IngestionMediator (WIP)
     def update_database(self, unique_data_id_list):
         """
         Reloads only the flat file associated to the unique_data_id in
@@ -337,7 +339,7 @@ class LoadData(Colleague):
                 logger.info(
                     "  Loading {} data!".format(uid))
                 # TODO - call load_single_file directly: obsolete post refactor
-                self._process_data_file(manifest_row=manifest_row)
+                self.process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
 
         return processed_data_ids
@@ -362,7 +364,7 @@ class LoadData(Colleague):
             self._drop_tables()
 
         # reload meta.json into db
-        self._meta_json_to_database()
+        self.meta_json_to_database()
 
         processed_data_ids = []
 
@@ -379,7 +381,7 @@ class LoadData(Colleague):
                     logger.info("{}: preparing to load row {} from the manifest".
                                  format(manifest_row['unique_data_id'],
                                         len(self.manifest)))
-                    self._process_data_file(manifest_row=manifest_row)
+                    self.process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(manifest_row['unique_data_id'])
             except:
                 logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))        
@@ -1162,7 +1164,7 @@ class LoadData(Colleague):
                     'grouping': grouping, 'data_id': "res_units_by_zone"}
 
     # TODO - move into IngestionMediator and call _load_single_file directly
-    def _process_data_file(self, manifest_row):
+    def process_data_file(self, manifest_row):
         """
         Processes the data file for the given manifest row.
         """
@@ -1272,8 +1274,8 @@ class LoadData(Colleague):
                     if clean_data_row is not None:
                         csv_writer.write(clean_data_row)
                 except Exception as e:
-                    logger.error("Error when trying to clean row index {} from the manifest_row {}".format(idx,manifest_row))
-                    if self.debug == True:
+                    logger.error("Error when trying to clean row index {} from the manifest_row {}".format(idx, manifest_row))
+                    if self.debug is True:
                         raise e
 
 

@@ -18,7 +18,8 @@ class MyTestCase(unittest.TestCase):
         self.database_choice = 'docker_database'
         self.loader = load_data.LoadData(database_choice=self.database_choice,
                                          meta_path=self.meta_path,
-                                         manifest_path=self.manifest_path)
+                                         manifest_path=self.manifest_path,
+                                         debug=True)
 
     def query_db(self, engine, query):
         """
