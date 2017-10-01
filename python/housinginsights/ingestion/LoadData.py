@@ -54,15 +54,17 @@ from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 from housinginsights.ingestion.Manifest import Manifest
+from housinginsights.tools.base_colleague import Colleague
 
 from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
-class LoadData(object):
+
+class LoadData(Colleague):
 
     def __init__(self, database_choice=None, meta_path=None,
                  manifest_path=None, keep_temp_files=True, 
-                 drop_tables=False,debug=False):
+                 drop_tables=False, debug=False):
         """
         Initializes the class with optional arguments. The default behaviour
         is to load the local database with data tracked from meta.json
@@ -75,6 +77,7 @@ class LoadData(object):
         :param keep_temp_files: if True, temp clean pipe-delimited files will be
         archived in the 'python/logs' folder
         """
+        super().__init__()
 
         # load defaults if no arguments passed
         _scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
@@ -107,7 +110,6 @@ class LoadData(object):
 
         self.drop_tables = drop_tables
         self.debug=debug
-
 
     def _drop_tables(self):
         """
@@ -166,7 +168,6 @@ class LoadData(object):
                     logger.error("Couldn't remove table {}".format(table))
                     if self.debug == True:
                         raise e
-
 
     def _meta_json_to_database(self):
         """
@@ -658,7 +659,6 @@ class LoadData(object):
             logger.error("Failed to create zone_facts table")
             if self.debug:
                 raise e
-
 
     def _populate_zone_facts_table(self,res_units_by_zone_type):
         """

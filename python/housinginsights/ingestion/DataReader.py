@@ -20,7 +20,7 @@ import codecs
 from datetime import datetime
 import dateutil.parser as dateparser
 
-
+from housinginsights.tools.base_colleague import Colleague
 from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
@@ -30,7 +30,7 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 # TODO: convert relative path to full path when passed as argument
-class HIReader(object):
+class HIReader(Colleague):
     """
     Container object that reads in CSVs and provides them row-by-row through
     the __iter__ method. Each object is associated with one specific file
@@ -41,6 +41,7 @@ class HIReader(object):
     and lower bandwidth usage.
     """
     def __init__(self, path, path_type="file", encoding="latin-1", keys=None):
+        super().__init__()
         self.path = path
         self._length = None
         self._keys = keys

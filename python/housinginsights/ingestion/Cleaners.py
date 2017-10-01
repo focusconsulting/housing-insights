@@ -15,6 +15,7 @@ from housinginsights.sources.mar import MarApiConn
 from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
 from housinginsights.sources.google_maps import GoogleMapsApiConn
 from housinginsights.sources.models.mar import MAR_TO_TABLE_FIELDS
+from housinginsights.tools.base_colleague import Colleague
 
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -30,9 +31,11 @@ http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-str
 """
 
 
-class CleanerBase(object, metaclass=ABCMeta):
+class CleanerBase(Colleague, metaclass=ABCMeta):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='',
                  engine=None):
+        super().__init__()
+
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
         self.engine = engine
