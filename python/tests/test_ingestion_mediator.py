@@ -37,6 +37,9 @@ class MyTestCase(unittest.TestCase):
         result = self.mediator.rebuild_database(drop_all_tables=True)
         self.assertTrue(result)
 
+    def test_create_clean_psv(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

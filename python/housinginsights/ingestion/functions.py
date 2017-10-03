@@ -17,6 +17,7 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 # Completed, tests not written.
+# TODO - remove: moved into Meta.py
 def load_meta_data(filename='meta.json'):
     """
     Helper function validates the format of the JSON data in meta.json.
@@ -57,6 +58,7 @@ def load_meta_data(filename='meta.json'):
     return meta
 
 
+# TODO - remove: moved into Manifest.py
 def check_or_create_sql_manifest(engine, rebuild=False):
     '''
     Makes sure we have a manifest table in the database. 
@@ -116,6 +118,7 @@ def check_or_create_sql_manifest(engine, rebuild=False):
             raise e
 
 
+# TODO - remove: moved into Meta.py
 def get_cleaner_from_name(meta, manifest_row, name="GenericCleaner", engine=None):
     """
     Returns the instance of the cleaner class matching the given cleaner class

@@ -10,3 +10,9 @@ class Colleague(object):
 
     def set_ingestion_mediator(self, ingestion_mediator):
         self._ingestion_mediator = ingestion_mediator
+
+    def _get_engine(self):
+        return self._ingestion_mediator.get_engine()
+
+    def _get_manifest_row(self):
+        return self._ingestion_mediator.get_current_manifest_row()

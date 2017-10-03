@@ -56,6 +56,35 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 class LoadData(Colleague):
+    def __init__(self, drop_from_table=True):
+        super().__init__()
+        self._drop_from_table = drop_from_table
+
+    def load_raw_data(self, unique_data_id_list):
+        processed_ids = list()  # track what is processed
+        for unique_data_id in unique_data_id_list:
+            clean_data_path = self._ingestion_mediator.\
+                process_and_clean_raw_data(unique_data_id)
+            self._ingestion_mediator.write_file_to_db(clean_data_path)
+
+    def load_cleaned_data(self, unique_data_id_list,
+                          use_raw_if_missing=True):
+        pass
+
+    def reload_all_from_manifest(self, use_clean=True,
+                                 use_raw_if_missing=True):
+        pass
+
+    def rebuild_all_from_manifest(self, use_clean=True,
+                                  use_raw_if_missing=True):
+        pass
+
+    def set_drop_from_table_flag(self, drop):
+        """Setter for toggling drop from table flag on the fly"""
+        self._drop_from_table = drop
+
+
+class LoadDataOld(Colleague):
 
     def __init__(self, database_choice=None, meta_path=None,
                  manifest_path=None, keep_temp_files=True,
@@ -183,6 +212,7 @@ class LoadData(Colleague):
             conn.execute("DELETE FROM meta;")
             conn.execute(ins)
 
+    # TODO - remove: move into HISql
     def _remove_existing_data(self, manifest_row):
         """
         Removes all rows in the respective table for the given unique_data_id
@@ -201,7 +231,7 @@ class LoadData(Colleague):
             manifest_row=manifest_row)
 
         # get objects for interfacing with the database
-        sql_interface = self._configure_db_interface(
+        sql_interface = self.configure_db_interface(
             manifest_row=manifest_row, temp_filepath=temp_filepath)
         sql_manifest_row = sql_interface.get_sql_manifest_row()
 
@@ -222,8 +252,8 @@ class LoadData(Colleague):
             result = self.engine.execute(query)
             # change status = deleted in sql_manifest
             logger.info("    Resetting status in sql manifest row!")
-            sql_interface.update_manifest_row(conn=self.engine,
-                                              status='deleted')
+            sql_interface.update_sql_manifest_row(conn=self.engine,
+                                                  status='deleted')
         except ProgrammingError:
             logger.warning("Problem executing DELETE query for table {} and uid {}. Manifest row exists"
                         " but table does not. You should check validity of"
@@ -326,7 +356,7 @@ class LoadData(Colleague):
 
         for uid in unique_data_id_list:
             # TODO - move into IngestionMediator (pass manifest row to method)
-            manifest_row = self.manifest.get_manifest_row(uid)
+            manifest_row = self.manifest.get_current_manifest_row(uid)
 
             # TODO - move into IngestionMediator (only pass valid manifest row)
             # process manifest row for requested data_id if flagged for use
@@ -353,7 +383,7 @@ class LoadData(Colleague):
                         manifest_row['unique_data_id'])))
 
     # TODO - move into IngestionMediator: will call load_single file directly
-    # TODO - for each manifest row
+    # TODO - for each manifest row (WIP)
     def rebuild(self):
         """
         Using manifest.csv, meta.json, and respective cleaners, validate and
@@ -384,7 +414,7 @@ class LoadData(Colleague):
                     self.process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(manifest_row['unique_data_id'])
             except:
-                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))        
+                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))
 
         return processed_data_ids
 
@@ -658,7 +688,7 @@ class LoadData(Colleague):
                                   engine=self.engine)
 
             with self.engine.connect() as conn:
-                sql_interface.create_table(db_conn=conn, table='zone_facts')
+                sql_interface.create_table(db_conn=conn, table_name='zone_facts')
 
             # populate table with calculated fields values
             res_units_by_zone_type = self._get_residential_units()
@@ -1182,7 +1212,7 @@ class LoadData(Colleague):
                                csv_reader=csv_reader,
                                temp_filepath=temp_filepath)
 
-    # TODO - move into IngestionMediator: decouple cleaner workflow from this
+    # TODO - remove: decouple cleaner workflow from this - in Meta.py
     def _get_cleaner(self, table_name, manifest_row):
         """
         Returns the custom cleaner class that is to be used to clean the
@@ -1199,7 +1229,7 @@ class LoadData(Colleague):
             name=cleaner_class_name,
             engine=self.engine)
 
-    # TODO - move into IngestionMediator: related to cleaner work
+    # TODO - move into Meta: related to cleaner work
     def _get_meta_only_fields(self, table_name, data_fields):
         """
         Returns fields that exist in meta.json but not CSV so we can add
@@ -1217,7 +1247,7 @@ class LoadData(Colleague):
         return meta_only_fields
 
     # TODO - move into IngestionMediator? Is this reusable somewhere else also?
-    def _configure_db_interface(self, manifest_row, temp_filepath):
+    def configure_db_interface(self, manifest_row, temp_filepath):
         """
         Returns an interface object for the sql database
 
@@ -1243,7 +1273,7 @@ class LoadData(Colleague):
         """
         # TODO - move into IngestionMediator (sql_interface, pass row to method)
         # get database interface and it's equivalent manifest row
-        sql_interface = self._configure_db_interface(
+        sql_interface = self.configure_db_interface(
             manifest_row=manifest_row, temp_filepath=temp_filepath)
 
         sql_manifest_row = sql_interface.get_sql_manifest_row()
@@ -1354,7 +1384,7 @@ class LoadData(Colleague):
 
         # TODO Need to figure out how to revert the removal if loading doesn't work??
         self._remove_existing_data(manifest_row=manifest_row)
-        self._remove_table_if_empty(manifest_row = manifest_row)
+        self._remove_table_if_empty(manifest_row=manifest_row)
             
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()

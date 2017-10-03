@@ -128,6 +128,7 @@ class HIReader(Colleague):
         return None
 
 
+# TODO - refactor: do we really need meta and manifest_row passed
 class DataReader(HIReader):
     """
     Reads a specific data file. This file must be associated with a specific
@@ -354,7 +355,7 @@ class DataReader(HIReader):
                               "encoding error encountered.")
         return _keys
 
-    def should_file_be_loaded(self, sql_manifest_row):
+    def should_file_be_loaded(self):
         """
         Runs all the checks that the file is OK to use.
 
@@ -362,12 +363,12 @@ class DataReader(HIReader):
         :return: True if passes validation; False otherwise.
         """
 
-        if self._do_fields_match() and self._check_include_flag(sql_manifest_row):
+        if self._do_fields_match() and self._check_include_flag():
             return True
         else:
             return False
 
-    def _check_include_flag(self, sql_manifest_row):
+    def _check_include_flag(self):
         """
         Checks to make sure the include_flag matches requirements for loading the data
 
@@ -377,7 +378,7 @@ class DataReader(HIReader):
         """
 
         if self.manifest_row['include_flag'] == 'use':
-           return True
+            return True
 
         else:
             logger.warning("Skipping data source. {} include_flag is {}".format(

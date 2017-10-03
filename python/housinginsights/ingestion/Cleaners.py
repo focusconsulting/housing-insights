@@ -42,7 +42,7 @@ class CleanerBase(Colleague, metaclass=ABCMeta):
 
         self.manifest_row = manifest_row
         self.tablename = manifest_row['destination_table']
-        self.meta = meta
+        self.meta = meta  # TODO - remove: not used in this class
         self.fields = meta[self.tablename]['fields'] #a list of dicts
 
         self.null_value = 'Null' #what the SQLwriter expects in the temp csv
@@ -60,12 +60,10 @@ class CleanerBase(Colleague, metaclass=ABCMeta):
             if field['type'] == 'date':
                 self.date_fields.append(field['source_name'])
 
-
     @abstractmethod
     def clean(self, row, row_num):
         # TODO: add replace_null method as required for an implementation (#176)
         pass
-
 
     def add_proj_addre_lookup_from_mar(self):
         """
@@ -87,7 +85,6 @@ class CleanerBase(Colleague, metaclass=ABCMeta):
             proxy = conn.execute(q)
             result = proxy.fetchall()
             self.ssl_nlihc_lookup = {d[0]:d[1] for d in result}
-
 
     def get_nlihc_id_if_exists(self, mar_ids_string, ssl=None):
         "Checks for record in project table with matching MAR id."
@@ -112,7 +109,6 @@ class CleanerBase(Colleague, metaclass=ABCMeta):
 
         #If we don't find a match
         return self.null_value
-
 
     # TODO: figure out what is the point of this method...it looks incomplete
     def field_meta(self, field):
@@ -549,7 +545,6 @@ class CleanerBase(Colleague, metaclass=ABCMeta):
             result = proxy.fetchall()
             self.mar_tract_lookup = {d[0]:d[1] for d in result}
 
-
     def add_census_tract_from_mar(self, row, column_name='mar_id',
                                   lat_lon_col_names=('LATITUDE', 'LONGITUDE'),
                                   x_y_coords_col_names=('X', 'Y'),
@@ -669,6 +664,7 @@ class GenericCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         return row
+
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -857,11 +853,13 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 
         return row
 
+
 class ProjectAddressCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row)
         return row
-        
+
+
 class ZillowCleaner(CleanerBase):
     """
     Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)
