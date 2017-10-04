@@ -45,6 +45,7 @@ frontmatter: isneeded
                     ['filteredData', mapView.clearProjectPreview],
                     ['filteredData',mapView.clearSelectedProjectIfDoesntMatch],
                     ['filteredData', mapView.filterMap],
+                    ['filteredViewLoaded', mapView.setTimeout],
                     ['filteredViewLoaded',mapView.addExportButton],
                     ['filteredViewLoaded',mapView.exportButton],
                     ['hoverBuildingList', mapView.highlightHoveredBuilding],
@@ -52,7 +53,7 @@ frontmatter: isneeded
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['initialProjectsRendered',router.initGate],
                     ['filterViewLoaded', router.initGate]
-                                                              
+
                 ]);
 
 
@@ -90,7 +91,7 @@ frontmatter: isneeded
                     deny     : '.negative, .deny, .cancel',
                     onApprove: function(d) {
 
-                        //Figure out which button was pressed                      
+                        //Figure out which button was pressed
                         if (d.attr('id') == 'startTour') {
                             console.log("start the tour");
 
@@ -101,7 +102,7 @@ frontmatter: isneeded
                               }
                             });
 
-                          
+
                             mapView.tour.addStep('layer-choice', {
                                 text: "The zone type selected affects the 'Specific Zone' filter as well as all the zone-level datasets shown in blue",
                                 attachTo: '#layer-menu right',
@@ -219,7 +220,7 @@ frontmatter: isneeded
                         };
                     },
                     onHide: function(){
-                        
+
                         //If filterView hasn't loaded yet, show the page loading dimmer
                         if (!getState().filterViewLoaded[0]) {
 
@@ -239,7 +240,7 @@ frontmatter: isneeded
                     }
                   }).modal('show');
 
-                
+
 
                 this.originalZoom = 11;
                 this.originalCenter = [-77, 38.9072];
@@ -258,14 +259,14 @@ frontmatter: isneeded
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
                 });
-                
+
                 // filter decoding was happening too quickly after initialLayers were added (ln 463),
                 // before they were fully rendered. even mapBox's 'render' was sometime too early. ussing instead
                 // getLayer('projects') to make sure the layers are indeed present. 'render' is fired often; function below
-                // checks it against state of the project layer and 
+                // checks it against state of the project layer and
                 // !isFilterInitialized to setState initialProjectsRendered. router.initFilters
                 // subscribes to that stateChange and turns isFilterInitialized to true so that this stateChange
-                // fires only once. 
+                // fires only once.
 
                 var theMap = this.map;
                 this.map.on('render', function() {
@@ -835,6 +836,7 @@ frontmatter: isneeded
                         feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'
                      });
                     mapView.listBuildings();
+                    mapView.setTimeout();
                     mapView.addExportButton();
                     mapView.exportButton();
                     mapView.clearProjectPreview();
@@ -1042,26 +1044,26 @@ frontmatter: isneeded
         },
         scrollMatchingList: function(data){
                 var projectData = data[0];
-                $('#projects-list .projects-list-selected').removeClass('projects-list-selected'); 
+                $('#projects-list .projects-list-selected').removeClass('projects-list-selected');
                 var $listItem = $('#projects-list #' + projectData.properties.nlihc_id);
                 $listItem.addClass('projects-list-selected');
-                
+
                 if ( $listItem.length > 0 && data[1]) { // if the map has been filtered the listitem may no longer be in the DOM
                                                         // data[1] == false is the flag to not scroll
-                    var difference = $listItem.offset().top - $('#projects-list-group').offset().top; 
+                    var difference = $listItem.offset().top - $('#projects-list-group').offset().top;
                     $('#projects-list-group').animate({
                         scrollTop: $( '#projects-list-group' ).scrollTop() + difference - 7
                     }, 500)
                 }
-        },  
+        },
 
         showProjectPreview: function(msg, data) {
-            
+
             if ( data != null) {
                 var projectData = data[0];
 
                 mapView.scrollMatchingList(data);
-                  
+
                 if ( projectData.properties.longitude != null && projectData.properties.latitude ){
                     mapView.flyToProject([projectData.properties.longitude, projectData.properties.latitude]);
                 }
@@ -1261,7 +1263,7 @@ frontmatter: isneeded
                 .data(data, function(d) {
                     return d.properties.nlihc_id; // needs key to do update
                 });
-                
+
 
             listItems.attr('class', 'update');
 
@@ -1307,7 +1309,7 @@ frontmatter: isneeded
                     mapView.scrollMatchingList(getState().previewBuilding[0]);
                 },1000);
             }
-         
+
         },
         alertNoLocationInfo: function(){
             d3.select('#map-wrapper')
@@ -1321,6 +1323,27 @@ frontmatter: isneeded
               .style('opacity',0)
               .remove();
         },
+        setTimeout: function(){
+          setTimeout(function(){
+            // errorMsg = "Uh oh. Something seems to have gone wrong. Try reloading the page using the   refresh button in your browser, or by loading the page using a different browser (Chrome, Firefox). Please let us know about any errors you find! Email us at housinginsights@googlegroups.com or open an issue on (Github)[https://github.com/codefordc/housing-insights/issues]";
+            //
+            // var timeoutDiv = d3.select('.ui negative message');
+            // timeoutI = timeoutDiv.append("i");
+            // timeoutI.class = "close icon";
+            // timeoutInnerDiv = timeoutDiv.append("div");
+            // timeoutInnerDiv.class = "header";
+            // timeoutInnerDiv.innerText = "Timeout Error";
+            // timeoutP = timeoutDiv.appent("p");
+            // timeoutP.innerText = errorMsg;
+
+            var timeoutModal = d3.select('#timeoutModal');
+            timeoutModal.style.display = "block";
+            timeoutModal.class = "modal-open";
+            console.log("this should really show up now....");
+
+          }, 1000);
+        },
+
         addExportButton: function() {
           // Get the modal
           var modal = d3.select('#exportDataModal');
@@ -1453,7 +1476,7 @@ frontmatter: isneeded
                     'filter': ['==', 'nlihc_id', data]
                 });
             }
-            
+
         },
         highlightPreviewBuilding(msg, data) {
             if ( getState().previewBuilding[1] ){ // if there's a previous previewBuilding state, clear the highlight
@@ -1484,7 +1507,7 @@ frontmatter: isneeded
                     'filter': ['==', 'nlihc_id', projectData.properties.nlihc_id]
                 });
             }
-            
+
         },
         zoomToFilteredProjects: function(msg, data){
             if ( getState().previewBuilding === undefined || !getState().previewBuilding[0] ) {
