@@ -8,7 +8,7 @@ title: Data Sources
 
 The Housing Insights tool draws on several data sources.  Click on any of the sources listed below to learn more about it.
 
-* [Affordable Housing Inventory]({{site.baseurl}}/data/affordable-housing-inventory.html)
+* [Affordable Housing Inventory]({{site.baseurl}}/data/project.html)
 * [Building Permits]({{site.baseurl}}/data/building_permits.html)
 * [Census]({{site.baseurl}}/data/census.html)
 * [Crime]({{site.baseurl}}/data/crime.html)

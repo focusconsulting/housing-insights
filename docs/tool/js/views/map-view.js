@@ -202,7 +202,7 @@ frontmatter: isneeded
                                 text: "Data choices marked with a blue icon are zone-level data sets. \
                                        They refer to data about the area the project is in, not the project itself.<br><br>\
                                        Adjusting this filter would show projects in a Ward with a poverty rate between the selected values.<br><br>\
-                                       Remember you can change the zone type, but this will remove any existing selections you've made.",
+                                       Remember you can change the zone type in step 1, but this will remove any existing selections you've made.",
                                 attachTo: '#filter-content-poverty_rate right',
                                 classes: 'shepherd-skinny shepherd-theme-arrows',
                                 when: {
