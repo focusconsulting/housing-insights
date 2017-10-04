@@ -932,7 +932,7 @@ var filterView = {
             var description = content.append("div")
                             .classed("description",true)
 
-                    //Add data-specific icon
+                    //Add data-specific helper text
                 if(c.data_level == 'project') {
                     var helper = description.append("p")
                         .classed("project-flag",true)
@@ -954,6 +954,15 @@ var filterView = {
                     helper.append("span")
                     .html("Neighborhood level data set")                   
                     
+                }
+
+                if(c.sourcetable != ''){
+                    description.append("p")
+                        .classed("documentation-link",true)
+                        .append("a")
+                        .attr("href","/data/" + c.sourcetable + ".html")
+                        .attr("target","_blank")
+                        .html("(documentation)")
                 }
 
                 description.append("p").html(c.display_text)
