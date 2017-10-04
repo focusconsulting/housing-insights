@@ -51,7 +51,8 @@ frontmatter: isneeded
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['initialProjectsRendered',router.initGate],
-                    ['filterViewLoaded', router.initGate]
+                    ['filterViewLoaded', router.initGate],
+                    ['getDataError', mapView.displayDataLoadingError]
                                                               
                 ]);
 
@@ -302,6 +303,10 @@ frontmatter: isneeded
         },
         clearLoadingDimmer: function(msg, data){
             $('#loading-tool-dimmer').dimmer('hide');
+        },
+        displayDataLoadingError: function(msg,data){
+            d3.select("#getDataError-loading-error").classed('hidden',false);
+            $('#welcomeModal').modal('show');
         },
         navControl: {
             el: null,

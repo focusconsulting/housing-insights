@@ -141,6 +141,23 @@
                      <p>The Housing Insights tool provides data about subsidized affordable housing projects and the
                         neighborhoods that they're in.</p>
 
+                    <!--Error alert divs-->
+                    <div id = "generic-loading-error" class="ui message negative hidden">
+                        <div class="header">
+                            Error loading tool
+                        </div>
+                        <strong>Uh oh.</strong> Something seems to have gone wrong. Try reloading the page using the refresh button in your browser, or by loading the page using a different browser (Chrome, Firefox). Note that Housing Insights does not work in Internet Explorer. If the problem continues, please let us know! Email us at housinginsights@googlegroups.com or open an issue on <a href="https://github.com/codefordc/housing-insights/">Github</a>."
+
+                    </div>
+
+                    <div id = "getDataError-loading-error" class="ui message negative hidden">
+                        <div class="header">
+                            Data loading error
+                        </div>
+                        <strong>Uh oh.</strong> We couldn't access the data from our API. This is a known issue (<a href="https://github.com/codefordc/housing-insights/issues/557">read about it here</a>) that occurs every once in a while. Until we get it fixed, you can usually solve this by reloading the page. If the problem continues, please let us know! Email us at housinginsights@googlegroups.com or open an issue on <a href="https://github.com/codefordc/housing-insights/">Github</a>."
+                    </div>
+
+                    <!--Alpha tool notification-->
                     <div class="ui info message">
                       <div class="header">
                         This tool is in alpha!
@@ -149,7 +166,8 @@
                         <a href="https://github.com/codefordc/housing-insights/">Github Repository</a>. 
                     </p></div>
 
-                   
+
+                    <!--General modal content-->
                     <h3>Who is this for?</h3>
                     <p>This data tool is designed for affordable housing advocates and government officials to better
                         understand the state of affordable housing in Washington, DC.</p>
