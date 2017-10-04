@@ -638,7 +638,7 @@ var projectView = {
         projectView.addRoutes('#bus_routes_by_dist', brgSorted);
         projectView.addRoutes('#rail_routes_by_dist', rrgSorted);
       }
-    },
+    }/*, not available yet
     surroundingAreaDevelopment: {
       title: "Surrounding Area Development",
       wrapperPartial: "partials/project-view/surrounding-dev.html",
@@ -646,7 +646,7 @@ var projectView = {
         // Nothing to do yet
         return;
       }
-    }
+    }*/
   },
   addRoutes: function(id, data){
     var ul = d3.select(id);
