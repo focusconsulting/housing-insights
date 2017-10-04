@@ -69,10 +69,10 @@ members:
    description: 
    image: edn.jpg
    bio-url: https://github.com/Nunie123
- - name: Eric K
-   description: 
-   image: 
-   bio-url: 
+ - name: Eric Kaprowski
+   description: Data herder
+   image: emkap01.jpg
+   bio-url: https://github.com/emkap01
  - name: Eric H
    description: 
    image: 
