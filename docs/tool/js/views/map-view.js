@@ -111,9 +111,32 @@ frontmatter: isneeded
                               }
                             });
 
-                          
+                            mapView.tour.addStep('project-dots', {
+                                text: "Each dot on the map represents one subsidized affordable housing project - \
+                                a building or group of buildings.<br> Our project list comes from combining the \
+                                Preservation Catalog (which covers most federal sources), the database of DHCD \
+                                funded projects, and the Affordable Housing dataset maintained by DMPED from \
+                                opendata.dc.gov.",
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    show: function() {
+                                        console.log('we can trigger events here if needed');
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            })
                             mapView.tour.addStep('layer-choice', {
-                                text: "The zone type selected affects the 'Specific Zone' filter as well as all the zone-level datasets shown in blue",
+                                text: "The zone type selected changes the boundaries shown on the map. It also affects the 'Specific Zone' filter as well as all the zone-level datasets shown in blue",
                                 attachTo: '#layer-menu right',
                                 classes: 'shepherd-skinny shepherd-theme-arrows',
                                 when: {
@@ -154,7 +177,27 @@ frontmatter: isneeded
                                     }
                                 ]
                             });
-
+                            mapView.tour.addStep('null-data', {
+                                text: "For many data sources, we don't have information for all of the projects because it is not always provided to us in the source data. You can choose whether projects with a data value of 'unknown' should be included in your results.",
+                                attachTo: '#filter-content-proj_units_assist_max .nullsToggleContainer right',
+                                classes: 'shepherd-skinny shepherd-theme-arrows',
+                                when: {
+                                    'before-show': function() {
+                                        $('#filter-proj_units_assist_max').click();
+                                    }
+                                },
+                                buttons: [
+                                    {
+                                      text: 'Exit',
+                                      classes: 'shepherd-button-secondary',
+                                      action: mapView.tour.cancel
+                                    }, {
+                                      text: 'Next',
+                                      action: mapView.tour.next,
+                                      classes: 'shepherd-button-example-primary'
+                                    }
+                                ]
+                            });
                             mapView.tour.addStep('zone-data', {
                                 text: "Data choices marked with a blue icon are zone-level data sets. \
                                        They refer to data about the area the project is in, not the project itself.<br><br>\
@@ -164,6 +207,9 @@ frontmatter: isneeded
                                 classes: 'shepherd-skinny shepherd-theme-arrows',
                                 when: {
                                     'before-show': function() {
+                                        $('#filter-poverty_rate').click();
+                                    },
+                                    'after-show': function() {
                                         $('#filter-poverty_rate').click();
                                     }
                                 },
