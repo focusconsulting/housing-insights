@@ -1159,7 +1159,7 @@ var filterView = {
         //Add components to the navigation using the appropriate component type
         for (var i = 0; i < filterView.components.length; i++) {
 
-            console.log("building filter component: " + filterView.components[i].source);
+            //console.log("building filter component: " + filterView.components[i].source);
             
             //Set up sliders
             if (filterView.components[i].component_type === 'continuous'){

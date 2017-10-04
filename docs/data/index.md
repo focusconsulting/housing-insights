@@ -6,7 +6,17 @@ title: Data Sources
 
 # Data Sources
 
-This section will document the data sources that are used in this project. 
+The Housing Insights tool draws on several data sources.  Click on any of the sources listed below to learn more about it.
 
-* [Example data documentation page]({{site.baseurl}}/data/example.html)
-<!--TODO should pull from meta.json to create an automatic index of data tables. If a corresponding informational page has been created, it should hyperlink to it. -->
+* [Affordable Housing Inventory]({{site.baseurl}}/data/affordable-housing-inventory.html)
+* [Building Permits]({{site.baseurl}}/data/building_permits.html)
+* [Census]({{site.baseurl}}/data/census.html)
+* [Crime]({{site.baseurl}}/data/crime.html)
+* [DC Taxes]({{site.baseurl}}/data/dc_tax.html)
+* [Home Mortgage Disclosure Act Data - DC Only - 2007-2015]({{site.baseurl}}/data/hmda.html)
+* [Housing Subsidy Data]({{site.baseurl}}/data/subsidy.html)
+* [Housing and Urban Development Real Estate Assessment Center Scores]({{site.baseurl}}/data/reac_scores.html)
+* [Notices Issued Pursuant to Tenant Opportunity to Purchase Act (TOPA)]({{site.baseurl}}/data/topa.html)
+* [Office of Tax and Revenue's (OTR) Real Property Tax Database]({{site.baseurl}}/data/real_property.html)
+* [Zone Facts]({{site.baseurl}}/data/zone_facts.html)
+

@@ -23,6 +23,15 @@ frontmatter: isneeded
             function appendCallback() {
                 //this is used to indicate the completion of loading
                 setState('filterViewLoaded',false);
+                //Start the countdown for a generic loading error
+                setTimeout(function(){
+                    var loaded = getState()['filterViewLoaded'][0]
+                    if(!loaded){
+                        mapView.displayGenericLoadingError();
+                    } else{
+                        console.log('No error while loading tool')
+                    }
+                },30000)
 
                 setSubs([
                     ['mapLayer', mapView.showLayer],
@@ -51,7 +60,8 @@ frontmatter: isneeded
                     ['filterViewLoaded', mapView.initialSidebarState],
                     ['filteredProjectsAvailable',mapView.zoomToFilteredProjects],
                     ['initialProjectsRendered',router.initGate],
-                    ['filterViewLoaded', router.initGate]
+                    ['filterViewLoaded', router.initGate],
+                    ['getDataError', mapView.displayDataLoadingError]
                                                               
                 ]);
 
@@ -297,11 +307,19 @@ frontmatter: isneeded
 
                 });
 
-            }
+            }//appendCallback
 
         },
         clearLoadingDimmer: function(msg, data){
             $('#loading-tool-dimmer').dimmer('hide');
+        },
+        displayDataLoadingError: function(msg,data){
+            d3.select("#getDataError-loading-error").classed('hidden',false);
+            $('#welcomeModal').modal('show');
+        },
+        displayGenericLoadingError: function(msg,data){
+            d3.select("#generic-loading-error").classed('hidden',false);
+            $('#welcomeModal').modal('show');
         },
         navControl: {
             el: null,
