@@ -141,10 +141,10 @@ members:
    description: 
    image: 
    bio-url: 
- - name: Rich C
-   description: 
-   image: 
-   bio-url: 
+ - name: Rich Carder
+   description: Minor early Mapbox work
+   image: richc.jpg
+   bio-url: https://www.linkedin.com/in/richard-carder/
  - name: Richard S
    description: 
    image: 
