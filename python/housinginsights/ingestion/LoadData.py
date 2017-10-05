@@ -21,10 +21,7 @@ import sys
 import os
 import argparse
 import json
-import concurrent.futures
 from time import time, sleep
-from requests.packages.urllib3.exceptions import NewConnectionError
-from requests.packages.urllib3.exceptions import MaxRetryError
 
 from sqlalchemy import Table, Column, Integer, String, MetaData, Numeric
 from datetime import datetime
@@ -48,21 +45,50 @@ if __name__ == "__main__":
     sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools import dbtools
-
-
 from housinginsights.ingestion import CSVWriter, DataReader
 from housinginsights.ingestion import HISql, TableWritingError
 from housinginsights.ingestion import functions as ingestionfunctions
 from housinginsights.ingestion.Manifest import Manifest
+from housinginsights.tools.base_colleague import Colleague
 
 from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
-class LoadData(object):
+
+class LoadData(Colleague):
+    def __init__(self, drop_from_table=True):
+        super().__init__()
+        self._drop_from_table = drop_from_table
+
+    def load_raw_data(self, unique_data_id_list):
+        processed_ids = list()  # track what is processed
+        for unique_data_id in unique_data_id_list:
+            clean_data_path = self._ingestion_mediator.\
+                process_and_clean_raw_data(unique_data_id)
+            self._ingestion_mediator.write_file_to_db(clean_data_path)
+
+    def load_cleaned_data(self, unique_data_id_list,
+                          use_raw_if_missing=True):
+        pass
+
+    def reload_all_from_manifest(self, use_clean=True,
+                                 use_raw_if_missing=True):
+        pass
+
+    def rebuild_all_from_manifest(self, use_clean=True,
+                                  use_raw_if_missing=True):
+        pass
+
+    def set_drop_from_table_flag(self, drop):
+        """Setter for toggling drop from table flag on the fly"""
+        self._drop_from_table = drop
+
+
+class LoadDataOld(Colleague):
 
     def __init__(self, database_choice=None, meta_path=None,
-                 manifest_path=None, keep_temp_files=True, 
-                 drop_tables=False,debug=False):
+                 manifest_path=None, keep_temp_files=True,
+                 drop_tables=False, debug=False):
         """
         Initializes the class with optional arguments. The default behaviour
         is to load the local database with data tracked from meta.json
@@ -75,7 +101,9 @@ class LoadData(object):
         :param keep_temp_files: if True, temp clean pipe-delimited files will be
         archived in the 'python/logs' folder
         """
+        super().__init__()
 
+        # TODO - move into IngestionMediator (paths)
         # load defaults if no arguments passed
         _scripts_path = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
         if database_choice is None:
@@ -90,24 +118,23 @@ class LoadData(object):
                                                          'manifest.csv'))
         self._keep_temp_files = keep_temp_files
 
-        
-
+        # TODO - move into IngestionMediator (both) - ready to be removed
         # load given meta.json and manifest.csv files into memory
         self.meta = ingestionfunctions.load_meta_data(meta_path)
         self.manifest = Manifest(manifest_path)
 
-        
+        # TODO - move into IngestionMediator - ready to be removed
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
 
+        # TODO - remove once meta_json_to_database is refactored
         # write the meta.json to the database
-        self._meta_json_to_database()
+        self.meta_json_to_database()
 
         self._failed_table_count = 0
 
         self.drop_tables = drop_tables
-        self.debug=debug
-
+        self.debug = debug
 
     def _drop_tables(self):
         """
@@ -131,13 +158,13 @@ class LoadData(object):
         return query_result
 
     def remove_tables(self, tables):
-        '''
+        """
         Used when you want to update only part of the database. Drops the table
         and deletes all associated rows in the sql manifest. Run this before
         updating data in tables that have added or removed columns.
 
         tables: a list of table names to be deleted
-        '''
+        """
         if 'all' in tables:
             self._drop_tables()
             logger.info('Dropped all tables from database')
@@ -167,8 +194,8 @@ class LoadData(object):
                     if self.debug == True:
                         raise e
 
-
-    def _meta_json_to_database(self):
+    # TODO - make public and call from IngestionMediator passing meta object
+    def meta_json_to_database(self):
         """
         Makes sure we have a meta table in the database.
         If not, it creates it with appropriate fields.
@@ -185,6 +212,7 @@ class LoadData(object):
             conn.execute("DELETE FROM meta;")
             conn.execute(ins)
 
+    # TODO - remove: move into HISql
     def _remove_existing_data(self, manifest_row):
         """
         Removes all rows in the respective table for the given unique_data_id
@@ -203,7 +231,7 @@ class LoadData(object):
             manifest_row=manifest_row)
 
         # get objects for interfacing with the database
-        sql_interface = self._configure_db_interface(
+        sql_interface = self.configure_db_interface(
             manifest_row=manifest_row, temp_filepath=temp_filepath)
         sql_manifest_row = sql_interface.get_sql_manifest_row()
 
@@ -224,8 +252,8 @@ class LoadData(object):
             result = self.engine.execute(query)
             # change status = deleted in sql_manifest
             logger.info("    Resetting status in sql manifest row!")
-            sql_interface.update_manifest_row(conn=self.engine,
-                                              status='deleted')
+            sql_interface.update_sql_manifest_row(conn=self.engine,
+                                                  status='deleted')
         except ProgrammingError:
             logger.warning("Problem executing DELETE query for table {} and uid {}. Manifest row exists"
                         " but table does not. You should check validity of"
@@ -269,6 +297,7 @@ class LoadData(object):
                 if self.debug == True:
                     raise e
 
+    # TODO - move into IngestionMediator: related to manifest and raw data file
     def _get_most_recent_timestamp_subfolder(self, root_folder_path):
         """
         Returns the most recent timestamp subfolder in a given folder path.
@@ -285,6 +314,7 @@ class LoadData(object):
         dirs.sort(reverse=True)
         return dirs[0]
 
+    # TODO - move into IngestionMediator (remove altogether? Not used anywhere?)
     def make_manifest(self, all_folders_path):
         """
         Creates a new manifest.csv with updated data date and filepath for
@@ -312,6 +342,7 @@ class LoadData(object):
 
         return self.manifest.update_manifest(most_recent_subfolder_path)
 
+    # TODO - move into IngestionMediator (WIP)
     def update_database(self, unique_data_id_list):
         """
         Reloads only the flat file associated to the unique_data_id in
@@ -324,8 +355,10 @@ class LoadData(object):
         processed_data_ids = []
 
         for uid in unique_data_id_list:
-            manifest_row = self.manifest.get_manifest_row(uid)
+            # TODO - move into IngestionMediator (pass manifest row to method)
+            manifest_row = self.manifest.get_current_manifest_row(uid)
 
+            # TODO - move into IngestionMediator (only pass valid manifest row)
             # process manifest row for requested data_id if flagged for use
             if manifest_row is None:
                 logger.info("  Skipping: {} not found in manifest!".format(
@@ -335,7 +368,8 @@ class LoadData(object):
                 # follow normal workflow and load data_id
                 logger.info(
                     "  Loading {} data!".format(uid))
-                self._process_data_file(manifest_row=manifest_row)
+                # TODO - call load_single_file directly: obsolete post refactor
+                self.process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(uid)
 
         return processed_data_ids
@@ -348,6 +382,8 @@ class LoadData(object):
                     os.path.join(logging_path, 'temp_{}.psv'.format(
                         manifest_row['unique_data_id'])))
 
+    # TODO - move into IngestionMediator: will call load_single file directly
+    # TODO - for each manifest row (WIP)
     def rebuild(self):
         """
         Using manifest.csv, meta.json, and respective cleaners, validate and
@@ -358,7 +394,7 @@ class LoadData(object):
             self._drop_tables()
 
         # reload meta.json into db
-        self._meta_json_to_database()
+        self.meta_json_to_database()
 
         processed_data_ids = []
 
@@ -375,18 +411,20 @@ class LoadData(object):
                     logger.info("{}: preparing to load row {} from the manifest".
                                  format(manifest_row['unique_data_id'],
                                         len(self.manifest)))
-                    self._process_data_file(manifest_row=manifest_row)
+                    self.process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(manifest_row['unique_data_id'])
             except:
-                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))        
+                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))
 
         return processed_data_ids
 
+    # TODO - move into IngestionMediator: triggered by update_data & rebuild
+    # TODO - workflow and independently by user without any changes to db
     def recalculate_database(self):
-        '''
+        """
         An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but
         changes to the calculations are made, re-run the calculation routines.
-        '''
+        """
         try:
             #self._automap() #not yet used - created for potential use by calculated fields
             self._create_zone_facts_table()
@@ -399,11 +437,11 @@ class LoadData(object):
         return None
 
     def _automap(self):
-        '''
+        """
         Adding this in case it is useful for the update scripts for _populate_calculated_project_fields
         Did not end up using it for REAC score, but leaving it in case it is useful for future.
         Mimics automap method used in api
-        '''
+        """
         from sqlalchemy.ext.automap import automap_base
 
         Base = automap_base()
@@ -423,10 +461,10 @@ class LoadData(object):
         #self._WmataInfo = Base.classes.wmata_info
 
     def _populate_calculated_project_fields(self):
-        '''
+        """
         Adds values for calculated fields to the project table
         Assumes the columns have already been created due to meta.json
-        '''
+        """
         conn = self.engine.connect()
 
 
@@ -644,11 +682,13 @@ class LoadData(object):
                 with self.engine.connect() as conn:
                     conn.execute('DROP TABLE zone_facts;')
 
+            # TODO - pass meta and engine from IngestionMediator
             # create empty zone_facts table
             sql_interface = HISql(meta=self.meta, manifest_row=None,
                                   engine=self.engine)
+
             with self.engine.connect() as conn:
-                sql_interface.create_table(db_conn=conn, table='zone_facts')
+                sql_interface.create_table(db_conn=conn, table_name='zone_facts')
 
             # populate table with calculated fields values
             res_units_by_zone_type = self._get_residential_units()
@@ -658,7 +698,6 @@ class LoadData(object):
             logger.error("Failed to create zone_facts table")
             if self.debug:
                 raise e
-
 
     def _populate_zone_facts_table(self,res_units_by_zone_type):
         """
@@ -954,7 +993,7 @@ class LoadData(object):
         return {'items': items, 'grouping': grouping, 'data_id': field}
 
     def _summarize_observations(self, method, table_name, filter_name, months,
-                                grouping,res_units_by_zone_type):
+                                grouping, res_units_by_zone_type):
         """
         This endpoint takes a table that has each record as list of observations
         (like our crime and building_permits tables) and returns summary
@@ -1154,7 +1193,8 @@ class LoadData(object):
             return {'items': None, 'notes': "_get_residential_units failed: {}".format(e),
                     'grouping': grouping, 'data_id': "res_units_by_zone"}
 
-    def _process_data_file(self, manifest_row):
+    # TODO - move into IngestionMediator and call _load_single_file directly
+    def process_data_file(self, manifest_row):
         """
         Processes the data file for the given manifest row.
         """
@@ -1172,6 +1212,7 @@ class LoadData(object):
                                csv_reader=csv_reader,
                                temp_filepath=temp_filepath)
 
+    # TODO - remove: decouple cleaner workflow from this - in Meta.py
     def _get_cleaner(self, table_name, manifest_row):
         """
         Returns the custom cleaner class that is to be used to clean the
@@ -1188,6 +1229,7 @@ class LoadData(object):
             name=cleaner_class_name,
             engine=self.engine)
 
+    # TODO - move into Meta: related to cleaner work
     def _get_meta_only_fields(self, table_name, data_fields):
         """
         Returns fields that exist in meta.json but not CSV so we can add
@@ -1204,7 +1246,8 @@ class LoadData(object):
                 meta_only_fields[field['sql_name']] = None
         return meta_only_fields
 
-    def _configure_db_interface(self, manifest_row, temp_filepath):
+    # TODO - move into IngestionMediator? Is this reusable somewhere else also?
+    def configure_db_interface(self, manifest_row, temp_filepath):
         """
         Returns an interface object for the sql database
 
@@ -1228,28 +1271,28 @@ class LoadData(object):
         the clean data to PSV file, and then passes on that information so
         the database can be updated accordingly.
         """
+        # TODO - move into IngestionMediator (sql_interface, pass row to method)
         # get database interface and it's equivalent manifest row
-        sql_interface = self._configure_db_interface(
+        sql_interface = self.configure_db_interface(
             manifest_row=manifest_row, temp_filepath=temp_filepath)
 
         sql_manifest_row = sql_interface.get_sql_manifest_row()
 
+        # TODO - move into IngestionMediator: decouple cleaner workflow
         cleaner = self._get_cleaner(table_name=table_name,
                                     manifest_row=manifest_row)
         csv_writer = CSVWriter(meta=self.meta,
                                manifest_row=manifest_row,
                                filename=temp_filepath)
 
+        # TODO - move into IngestionMediator: decouple cleaner workflow
+        # TODO - LoadData will only processs already cleaned PSV file
         # clean the file and save the output to a local pipe-delimited file
         if csv_reader.should_file_be_loaded(sql_manifest_row=sql_manifest_row):
             print("  Cleaning...")
             start_time = time()
             meta_only_fields = self._get_meta_only_fields(
                 table_name=table_name, data_fields=csv_reader.keys)
-            # TODO - concurrency can be handled here: row at a time
-            # TODO - while cleaning one row, start cleaning the next
-            # TODO - once cleaning is done, write row to psv file
-            # TODO - consider using queue: once empty update db with psv data
             total_rows = len(csv_reader)
             for idx, data_row in enumerate(csv_reader):
                 if idx % 100 == 0:
@@ -1261,8 +1304,8 @@ class LoadData(object):
                     if clean_data_row is not None:
                         csv_writer.write(clean_data_row)
                 except Exception as e:
-                    logger.error("Error when trying to clean row index {} from the manifest_row {}".format(idx,manifest_row))
-                    if self.debug == True:
+                    logger.error("Error when trying to clean row index {} from the manifest_row {}".format(idx, manifest_row))
+                    if self.debug is True:
                         raise e
 
 
@@ -1297,6 +1340,7 @@ class LoadData(object):
             end_time = time()
             print("\nRun time= %s" % (end_time - start_time))
 
+    # TODO - remove since we it looks like no lo
     def _clean_data(self, idx, data_row, cleaner, table_name, data_fields):
         """
         Only used by threading - currently not used
@@ -1340,7 +1384,7 @@ class LoadData(object):
 
         # TODO Need to figure out how to revert the removal if loading doesn't work??
         self._remove_existing_data(manifest_row=manifest_row)
-        self._remove_table_if_empty(manifest_row = manifest_row)
+        self._remove_table_if_empty(manifest_row=manifest_row)
             
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()

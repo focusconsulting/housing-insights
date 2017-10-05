@@ -15,6 +15,7 @@ from housinginsights.sources.mar import MarApiConn
 from housinginsights.sources.models.pres_cat import CLUSTER_DESC_MAP
 from housinginsights.sources.google_maps import GoogleMapsApiConn
 from housinginsights.sources.models.mar import MAR_TO_TABLE_FIELDS
+from housinginsights.tools.base_colleague import Colleague
 
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -30,16 +31,18 @@ http://stackoverflow.com/questions/4821104/python-dynamic-instantiation-from-str
 """
 
 
-class CleanerBase(object, metaclass=ABCMeta):
+class CleanerBase(Colleague, metaclass=ABCMeta):
     def __init__(self, meta, manifest_row, cleaned_csv='', removed_csv='',
                  engine=None):
+        super().__init__()
+
         self.cleaned_csv = cleaned_csv
         self.removed_csv = removed_csv
         self.engine = engine
 
         self.manifest_row = manifest_row
         self.tablename = manifest_row['destination_table']
-        self.meta = meta
+        self.meta = meta  # TODO - remove: not used in this class
         self.fields = meta[self.tablename]['fields'] #a list of dicts
 
         self.null_value = 'Null' #what the SQLwriter expects in the temp csv
@@ -57,12 +60,10 @@ class CleanerBase(object, metaclass=ABCMeta):
             if field['type'] == 'date':
                 self.date_fields.append(field['source_name'])
 
-
     @abstractmethod
     def clean(self, row, row_num):
         # TODO: add replace_null method as required for an implementation (#176)
         pass
-
 
     def add_proj_addre_lookup_from_mar(self):
         """
@@ -84,7 +85,6 @@ class CleanerBase(object, metaclass=ABCMeta):
             proxy = conn.execute(q)
             result = proxy.fetchall()
             self.ssl_nlihc_lookup = {d[0]:d[1] for d in result}
-
 
     def get_nlihc_id_if_exists(self, mar_ids_string, ssl=None):
         "Checks for record in project table with matching MAR id."
@@ -109,7 +109,6 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         #If we don't find a match
         return self.null_value
-
 
     # TODO: figure out what is the point of this method...it looks incomplete
     def field_meta(self, field):
@@ -546,7 +545,6 @@ class CleanerBase(object, metaclass=ABCMeta):
             result = proxy.fetchall()
             self.mar_tract_lookup = {d[0]:d[1] for d in result}
 
-
     def add_census_tract_from_mar(self, row, column_name='mar_id',
                                   lat_lon_col_names=('LATITUDE', 'LONGITUDE'),
                                   x_y_coords_col_names=('X', 'Y'),
@@ -666,6 +664,7 @@ class GenericCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=['N', 'NA', '', None])
         return row
+
 
 class ProjectCleaner(CleanerBase):
     def clean(self, row, row_num=None):
@@ -854,11 +853,13 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 
         return row
 
+
 class ProjectAddressCleaner(CleanerBase):
     def clean(self,row,row_num=None):
         row = self.replace_nulls(row)
         return row
-        
+
+
 class ZillowCleaner(CleanerBase):
     """
     Incomplete Cleaner - adding data to the code so we have it when needed (was doing analysis on this)

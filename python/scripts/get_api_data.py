@@ -11,11 +11,12 @@ import os
 import importlib
 from datetime import datetime
 import argparse
+from python.housinginsights.tools.base_colleague import Colleague
 
 
-python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                               os.pardir))
-sys.path.append(python_filepath)
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                           os.pardir))
+sys.path.append(PYTHON_PATH)
 
 # Configure logging
 import logging
@@ -25,6 +26,11 @@ logger = HILogger(name=__file__, logfile="sources.log", level=logging.INFO)
 #TODO is this import necessary?
 from housinginsights.config.base import HousingInsightsConfig
 from housinginsights.ingestion.Manifest import Manifest
+
+
+
+class GetApiData(Colleague):
+
 
 
 def get_multiple_api_sources(a):
@@ -98,14 +104,14 @@ def get_multiple_api_sources(a):
 
     # update the manifest
     manifest = Manifest(os.path.abspath(os.path.join(
-        python_filepath, 'scripts', 'manifest.csv')))
+        PYTHON_PATH, 'scripts', 'manifest.csv')))
     d = datetime.now().strftime('%Y%m%d')
 
     # use correct root folder for raw folder path
     if db == 'remote_database':
         folder = 'https://s3.amazonaws.com/housinginsights'
     else:
-        folder = os.path.join(python_filepath, os.pardir, 'data')
+        folder = os.path.join(PYTHON_PATH, os.pardir, 'data')
     date_stamped_folder = os.path.join(folder, 'raw', '_downloads', d)
     try:
         manifest.update_manifest(date_stamped_folder=date_stamped_folder)

@@ -4,8 +4,11 @@ Manifest module
 import os
 from collections import Counter
 from csv import DictWriter, DictReader
+from sqlalchemy.exc import ProgrammingError
 
 from housinginsights.ingestion.DataReader import HIReader
+from housinginsights.tools.logger import HILogger
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 from datetime import datetime
 import dateutil.parser as dateparser
@@ -28,6 +31,23 @@ class Manifest(HIReader):
         if not self.has_unique_ids():
             raise ValueError('Manifest has duplicate unique_data_id!')
 
+        # metadata fields for manifest.csv
+        self._fields = [
+                    ("status", "text"),
+                    ("load_date", "timestamp"),
+                    ("include_flag", "text"),
+                    ("destination_table", "text"),
+                    ("unique_data_id", "text"),
+                    ("update_method", "text"),
+                    ("data_date", "date"),
+                    ("encoding", "text"),
+                    ("local_folder", "text"),
+                    ("s3_folder", "text"),
+                    ("filepath", "text"),
+                    ("dependency", "text"),
+                    ("notes", "text")
+                ]
+
     def __iter__(self):
         self._length = 0
         self._counter = Counter()
@@ -37,14 +57,15 @@ class Manifest(HIReader):
             for row in reader:
                 self._length += 1
 
-                #parse the date into proper format for sql
+                # parse the date into proper format for sql
                 try:
-                    _date = dateparser.parse(row['data_date'],dayfirst=False,yearfirst=False)
+                    _date = dateparser.parse(row['data_date'], dayfirst=False,
+                                             yearfirst=False)
                     row['data_date'] = datetime.strftime(_date, '%Y-%m-%d')
                 except ValueError:
                     row['data_date'] = 'Null'
 
-                #return the row
+                # return the row
                 yield row
 
     def has_unique_ids(self):
@@ -95,7 +116,7 @@ class Manifest(HIReader):
         return unique_data_ids
 
     def update_manifest(self, date_stamped_folder):
-        '''
+        """
         Used for automatically swapping out old files for new ones in our manifest.csv
         whenever we gather new data. 
 
@@ -103,7 +124,7 @@ class Manifest(HIReader):
         (by sorting alphabetically). Make a list of .csv files in that folder
         and update the manifest.csv for every unique_data_id that corresponds
         to one of the .csv files. 
-        '''
+        """
         timestamp = os.path.basename(date_stamped_folder)
         data_date = datetime.strptime(timestamp, '%Y%m%d').strftime('%Y-%m-%d')
         file_path_base = date_stamped_folder[date_stamped_folder.find('raw'):]
@@ -130,3 +151,49 @@ class Manifest(HIReader):
             writer.writerows(data)
 
         return self.path
+
+    def check_or_create_sql_manifest(self):
+        """
+        Makes sure we have a manifest table in the database.
+        If not, it creates it with appropriate fields.
+
+        This corresponds to the manifest.csv file, which contains a log
+        of all the individual data files we have used as well as which
+        table they each go into.
+
+        The csv version of the manifest includes all files we have ever
+        used, including ones not in the database.
+
+        The SQL version of the manifest only tracks those that have been
+        written to the database, and whether they are still there or
+        have been deleted.
+        """
+        engine = self._ingestion_mediator.get_engine()
+
+        if engine is None:
+            print('Error - SQLalchemy engine is unassigned!!')
+            raise ValueError
+
+        try:
+            with engine.connect() as db_conn:
+                sql_query = "SELECT * FROM manifest"
+                query_result = db_conn.execute(sql_query)
+                results = [dict(row.items()) for row in query_result]
+            return True
+        except ProgrammingError as _:
+            try:
+                # Create the query with appropriate fields and datatypes
+                db_conn = engine.connect()
+                field_statements = []
+                for tup in self._fields:
+                    field_statements.append(tup[0] + " " + tup[1])
+                field_command = ",".join(field_statements)
+                create_command = "CREATE TABLE manifest({});".format(
+                    field_command)
+                db_conn.execute(create_command)
+                db_conn.close()
+                logger.info("Manifest table created in the SQL database")
+                return True
+
+            except Exception as e:
+                raise e

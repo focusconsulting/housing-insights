@@ -20,8 +20,8 @@ import codecs
 from datetime import datetime
 import dateutil.parser as dateparser
 
-
-from housinginsights.tools.logger import HILogger
+from python.housinginsights.tools.base_colleague import Colleague
+from python.housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
@@ -30,7 +30,7 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 # TODO: convert relative path to full path when passed as argument
-class HIReader(object):
+class HIReader(Colleague):
     """
     Container object that reads in CSVs and provides them row-by-row through
     the __iter__ method. Each object is associated with one specific file
@@ -41,6 +41,7 @@ class HIReader(object):
     and lower bandwidth usage.
     """
     def __init__(self, path, path_type="file", encoding="latin-1", keys=None):
+        super().__init__()
         self.path = path
         self._length = None
         self._keys = keys
@@ -127,6 +128,7 @@ class HIReader(object):
         return None
 
 
+# TODO - refactor: do we really need meta and manifest_row passed
 class DataReader(HIReader):
     """
     Reads a specific data file. This file must be associated with a specific
@@ -169,14 +171,14 @@ class DataReader(HIReader):
 
         # Use default encoding if none found
         if 'encoding' not in manifest_row:
-            logger.warning("  Warning: encoding not found in manifest. " \
-                            "Falling back to latin-1.")
+            logger.warning("  Warning: encoding not found in manifest. "
+                           "Falling back to latin-1.")
         self.encoding = manifest_row.get('encoding', 'latin-1')
 
         self.load_from = load_from
         self.s3_path = os.path.join(manifest_row['s3_folder'],
                                     manifest_row['filepath'].strip("\/")
-                                    ).replace("\\","/")
+                                    ).replace("\\", "/")
         self._error_reporting_overhead = {}
         # # Test connection to s3 URL
         # if self.manifest_row['include_flag'] == 'use':
@@ -252,7 +254,6 @@ class DataReader(HIReader):
     @property
     def keys(self):
         return self._keys
-
 
     def _download_data_file(self):
         """
@@ -354,7 +355,7 @@ class DataReader(HIReader):
                               "encoding error encountered.")
         return _keys
 
-    def should_file_be_loaded(self, sql_manifest_row):
+    def should_file_be_loaded(self):
         """
         Runs all the checks that the file is OK to use.
 
@@ -362,12 +363,12 @@ class DataReader(HIReader):
         :return: True if passes validation; False otherwise.
         """
 
-        if self._do_fields_match() and self._check_include_flag(sql_manifest_row):
+        if self._do_fields_match() and self._check_include_flag():
             return True
         else:
             return False
 
-    def _check_include_flag(self, sql_manifest_row):
+    def _check_include_flag(self):
         """
         Checks to make sure the include_flag matches requirements for loading the data
 
@@ -377,7 +378,7 @@ class DataReader(HIReader):
         """
 
         if self.manifest_row['include_flag'] == 'use':
-           return True
+            return True
 
         else:
             logger.warning("Skipping data source. {} include_flag is {}".format(

@@ -52,7 +52,10 @@ class CSVWriter(object):
 
         # By default, creates a temp csv file wherever the calling module was
         #  located
-        self.filename = 'temp_{}.psv'.format(self.unique_data_id) if filename == None else filename
+        if filename is None:
+            self.filename = 'temp_{}.psv'.format(self.unique_data_id)
+        else:
+            filename
 
         # remove any existing copy of the file so we are starting clean
         self.remove_file()
@@ -65,7 +68,8 @@ class CSVWriter(object):
             #print("header written")
 
         self.file = open(self.filename, 'a', newline='', encoding='utf-8')
-        self.writer = DictWriter(self.file, fieldnames=self.dictwriter_fields, delimiter="|")
+        self.writer = DictWriter(self.file, fieldnames=self.dictwriter_fields,
+                                 delimiter="|")
 
     def write(self, row):
         """
