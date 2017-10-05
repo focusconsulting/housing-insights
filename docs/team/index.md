@@ -21,10 +21,10 @@ leadership:
    bio-url: https://www.nhumphrey.com
 
 members:
- - name: Paul G
-   description: Javascript developer
-   image: 
-   bio-url: 
+ - name: Paul Gottschling
+   description: Paul helped out with various front-end features.
+   image: paulg.jpg
+   bio-uRL: www.paulgottschling.com
  - name: Jamie G
    description: 
    image: jamieg.jpg
@@ -57,10 +57,10 @@ members:
    description: 
    image: 
    bio-url: 
- - name: Chris O
+ - name: Chris Oliver
    description: User Experience Designer
    image: chriso.jpg
-   bio-url: https://www.linkedin.com/in/chris-oliver/
+   bio-url: www.chrisoliver.co
  - name: Dan O'Maley
    description: 
    image: dano.jpg
