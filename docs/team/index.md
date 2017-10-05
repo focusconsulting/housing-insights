@@ -128,7 +128,7 @@ members:
  - name: Per Fjelstad
    description: Ran SQL queries for calculated fields.
    image: pfjel.jpg
-   bio-url: www.linkedin.com/in/perfjelstad
+   bio-url: https://www.linkedin.com/in/perfjelstad
  - name: Phil J
    description: 
    image: 
