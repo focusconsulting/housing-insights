@@ -75,7 +75,7 @@ class TableWritingError(Exception):
 # TODO - refactor: decouple meta and manifest_row - use IngestionMediator
 class HISql(Colleague):
     # def __init__(self, meta, manifest_row, engine, filename=None):
-    def __init__(self):
+    def __init__(self, debug=False):
         """
         Initialize object that will send the data stored in the newly-created
         clean.csv file to the database.
@@ -85,7 +85,7 @@ class HISql(Colleague):
         :param engine: the database the database that will be updated
         :param filename: the clean data file that will be loaded into database
         """
-        super().__init__()
+        super().__init__(debug)
         # self.meta = meta  # TODO - remove: no longer needed
         # self.manifest_row = manifest_row
         # self.engine = engine
@@ -143,7 +143,13 @@ class HISql(Colleague):
                     "  FAIL: something went wrong loading {}".format(
                         clean_psv_file))
                 logger.warning("  exception: {}".format(e))
-                raise TableWritingError
+                # raise TableWritingError
+                if self._debug:
+                    raise e
+                else:
+                    return False
+
+            return True
             
     def update_sql_manifest_row(self, manifest_row, conn,
                                 status="unknown"):

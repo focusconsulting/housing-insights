@@ -56,20 +56,86 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 class LoadData(Colleague):
-    def __init__(self, drop_from_table=True):
-        super().__init__()
+    def __init__(self, drop_from_table=True, debug=False):
+        super().__init__(debug)
         self._drop_from_table = drop_from_table
 
     def load_raw_data(self, unique_data_id_list):
+        """
+        Attempts to process and clean the raw data for the given
+        unique_data_ids in unique_data_id_list and then load it into the
+        database.
+
+        Returns list of successfully processed, cleaned, and loaded
+        unique_data_ids from the passed unique_data_id_list.
+
+        Note - if debug = True, errors are raised instead of skipped
+
+        :param unique_data_id_list: the list of unique data ids that should
+        be loaded into database from raw data file
+        :return: list of unique data ids that were successfully loaded into
+        the db
+        """
         processed_ids = list()  # track what is processed
         for unique_data_id in unique_data_id_list:
             clean_data_path = self._ingestion_mediator.\
                 process_and_clean_raw_data(unique_data_id)
-            self._ingestion_mediator.write_file_to_db(clean_data_path)
+            success = self._ingestion_mediator.write_file_to_db(clean_data_path)
+
+            if success:
+                processed_ids.append(unique_data_id)
+
+        return processed_ids
 
     def load_cleaned_data(self, unique_data_id_list,
                           use_raw_if_missing=True):
-        pass
+        """
+        Attempts to load clean psv file for the given
+        unique_data_ids in unique_data_id_list into the
+        database. If clean psv file doesn't already exist for a unique data
+        id and use_raw_if_missing flag is True, the raw data will be
+        processed, cleaned, and then loaded into the database.
+
+        Returns list of successfully loaded unique_data_ids from
+        the passed unique_data_id_list.
+
+        Note - if debug = True, errors are raised instead of skipped
+
+        :param unique_data_id_list: the list of unique data ids that should
+        be loaded into database from raw data file
+        :param use_raw_if_missing: flag determining whether to attempt to
+        load with raw data if clean psv file doesn't exist
+        :return: list of unique data ids that were successfully loaded into
+        the db
+        """
+        processed_ids = list()
+
+        # iterate through unique_data_id_list
+        for unique_data_id in unique_data_id_list:
+            # get clean psv file for given unique data id
+            clean_data_path = self._ingestion_mediator.get_clean_psv_path(
+                unique_data_id)
+
+            # if missing - determine action based on usw_raw_if_missing flag
+            if clean_data_path is None:
+                if use_raw_if_missing:
+                    result = self.load_raw_data([unique_data_id])
+                    if result:
+                        processed_ids.append(result.pop())
+                else:
+                    logger.info(
+                        "  Couldn't find clean psv file for {}".format(
+                            unique_data_id))
+                    if self._debug:
+                        raise FileNotFoundError
+            else:  # attempt to load clean psv into db
+                success = self._ingestion_mediator.write_file_to_db(
+                    clean_data_path)
+
+                if success:
+                    processed_ids.append(unique_data_id)
+
+        return processed_ids
 
     def reload_all_from_manifest(self, use_clean=True,
                                  use_raw_if_missing=True):

@@ -92,17 +92,39 @@ class IngestionMediator(object):
     def get_current_manifest_row(self):
         return self._manifest_row
 
+    def get_clean_psv_path(self, unique_data_id):
+        clean_data_path = os.path.abspath(
+            os.path.join(CLEAN_PSV_PATH,
+                         'clean_{}.psv'.format(unique_data_id)))
+
+        # check that it is valid file path and return accordingly
+        if os.path.exists(clean_data_path):
+            return clean_data_path
+        else:
+            return None
+
     # download new raw data
     def get_raw_data(self, manifest_row):
         pass
 
     # process and clean raw data
     def process_and_clean_raw_data(self, unique_data_id):
+        """
+        Processes and cleans the raw data file for the passed unique_data_id.
+
+        Once processed and clean, the resulting clean_unique_dat_id.psv file
+        path is returned as string.
+
+        :param unique_data_id: the unique data id for the raw data file to be
+        processed and cleaned
+        :return: string representation of the path for the
+        clean_unique_data_id.psv
+        """
         self._manifest_row = self._manifest.get_manifest_row(unique_data_id)
         self._table_name = self._manifest_row['destination_table']
         clean_data_path = os.path.abspath(
                     os.path.join(CLEAN_PSV_PATH,
-                                 'cleaned_{}.psv'.format(unique_data_id)))
+                                 'clean_{}.psv'.format(unique_data_id)))
         raw_data_reader = DataReader(meta=self._meta,
                                      manifest_row=self._manifest_row)
         clean_data_writer = CSVWriter(meta=self._meta,
@@ -145,8 +167,8 @@ class IngestionMediator(object):
 
     # write file to db
     def write_file_to_db(self, clean_data_path):
-        self._hi_sql.write_file_to_sql(self._table_name, clean_data_path,
-                                       self._engine)
+        return self._hi_sql.write_file_to_sql(self._table_name,
+                                              clean_data_path, self._engine)
 
 
 if __name__ == '__main__':
