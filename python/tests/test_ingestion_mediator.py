@@ -98,12 +98,16 @@ class MyTestCase(unittest.TestCase):
         self.assertFalse(result, 'should return empty list')
         self.assertEqual(len(result), 0, 'should be empty list')
 
-    def test_LoadData_lead_cleaned_data(self):
+    def test_LoadData_load_cleaned_data(self):
         # case - invalid unique_data_id passed
         self.assertRaises(ValueError, self.load_data.load_cleaned_data,
                           ['fake'])
 
         # case - missing psv with use_raw_if_missing = False
+        # delete file first if already exists
+        psv_path = self.mediator.get_clean_psv_path('dchousing_project')
+        if psv_path is not None:
+            os.remove(psv_path)
         self.assertRaises(FileNotFoundError, self.load_data.load_cleaned_data,
                           ['dchousing_project'], use_raw_if_missing=False)
 

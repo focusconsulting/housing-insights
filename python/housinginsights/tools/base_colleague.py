@@ -8,9 +8,11 @@ class Colleague(object):
     def __init__(self, debug=False):
         self._ingestion_mediator = None
         self._debug = debug
+        self._engine = None
 
     def set_ingestion_mediator(self, ingestion_mediator):
         self._ingestion_mediator = ingestion_mediator
+        self._engine = self._get_engine()
 
     def _get_engine(self):
         return self._ingestion_mediator.get_engine()
