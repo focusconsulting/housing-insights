@@ -9,10 +9,12 @@ class Colleague(object):
         self._ingestion_mediator = None
         self._debug = debug
         self._engine = None
+        self._database_choice = None
 
     def set_ingestion_mediator(self, ingestion_mediator):
         self._ingestion_mediator = ingestion_mediator
         self._engine = self._get_engine()
+        self._database_choice = self._ingestion_mediator.get_database_choice()
 
     def _get_engine(self):
         return self._ingestion_mediator.get_engine()

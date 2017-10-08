@@ -18,6 +18,7 @@ import os
 import sys
 from time import time, sleep
 from sqlalchemy.exc import ProgrammingError
+from datetime import datetime
 
 # relative package import for when running as a script
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -36,6 +37,7 @@ from python.housinginsights.tools import dbtools
 from python.housinginsights.ingestion.SQLWriter import HISql
 from python.housinginsights.tools.logger import HILogger
 from python.housinginsights.ingestion.CSVWriter import CSVWriter
+from python.scripts.get_api_data import GetApiData
 
 logger = HILogger(name=__file__, logfile="ingestion_mediator.log")  # TODO -
 # refactor
@@ -66,6 +68,7 @@ class IngestionMediator(object):
         self._manifest = None
         self._meta = None
         self._hi_sql = None
+        self._get_api_data = None
 
     ###############################
     # setter methods for linking this instance with respective colleague
@@ -84,6 +87,9 @@ class IngestionMediator(object):
     def set_hi_sql(self, hi_sql_instance):
         self._hi_sql = hi_sql_instance
 
+    def set_get_api_data(self, get_api_data_instance):
+        self._get_api_data = get_api_data_instance
+
     ###############################
     # setter and getter methods for accessing private instance variables
     ###############################
@@ -99,6 +105,9 @@ class IngestionMediator(object):
         mediator.
         """
         return self._engine
+
+    def get_database_choice(self):
+        return self._database_choice
 
     def get_current_manifest_row(self):
         return self._manifest_row
@@ -132,8 +141,28 @@ class IngestionMediator(object):
     # instance methods for coordinating tasks across other objects
     ###############################
     # download new raw data
-    def get_raw_data(self, manifest_row):
+    def download_api_raw_data(self, manifest_row):
         pass
+
+    # update manifest with new paths
+    def update_manifest_with_new_path(self):
+        time_stamp = datetime.now().strftime('%Y%m%d')
+
+        # use correct root folder for raw folder path
+        if self._database_choice == 'remote_database':
+            folder = 'https://s3.amazonaws.com/housinginsights'
+        else:
+            folder = os.path.join(PYTHON_PATH, os.pardir, 'data')
+        date_stamped_folder = os.path.join(folder, 'raw', '_downloads',
+                                           time_stamp)
+        try:
+            self._manifest.update_manifest(
+                date_stamped_folder=date_stamped_folder)
+            logger.info("Manifest updated at %s", date_stamped_folder)
+        except Exception as e:
+            logger.error("Failed to update manifest with error %s", e)
+            if self._debug:
+                raise e
 
     # process and clean raw data
     def process_and_clean_raw_data(self, unique_data_id):
@@ -330,6 +359,7 @@ if __name__ == '__main__':
                                                      'manifest.csv')))
     meta = Meta()
     hisql = HISql(debug=True)
+    get_api_api = GetApiData(debug=True)
 
     # initialize an instance of ingestion mediator and set colleague instances
     mediator = IngestionMediator(debug=True)
@@ -337,9 +367,11 @@ if __name__ == '__main__':
     mediator.set_manifest(manifest)
     mediator.set_meta(meta)
     mediator.set_hi_sql(hisql)
+    mediator.set_get_api_data(get_api_api)
 
     # connect colleague instances to this ingestion mediator instance
     load_data.set_ingestion_mediator(mediator)
     manifest.set_ingestion_mediator(mediator)
     meta.set_ingestion_mediator(mediator)
     hisql.set_ingestion_mediator(mediator)
+    get_api_api.set_ingestion_mediator(mediator)

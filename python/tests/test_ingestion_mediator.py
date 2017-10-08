@@ -7,6 +7,7 @@ from python.housinginsights.ingestion.LoadData import LoadData
 from python.housinginsights.ingestion.Manifest import Manifest
 from python.housinginsights.ingestion.Meta import Meta
 from python.housinginsights.ingestion.SQLWriter import HISql
+from python.scripts.get_api_data import GetApiData
 
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            os.pardir))
@@ -24,6 +25,7 @@ class MyTestCase(unittest.TestCase):
         self.manifest = Manifest(manifest_path)
         self.meta = Meta()
         self.hisql = HISql(debug=True)
+        self.get_api_data = GetApiData(debug=True)
 
         # build connection between mediator and its colleagues
         self.load_data.set_ingestion_mediator(self.mediator)
@@ -34,6 +36,8 @@ class MyTestCase(unittest.TestCase):
         self.mediator.set_meta(self.meta)
         self.hisql.set_ingestion_mediator(self.mediator)
         self.mediator.set_hi_sql(self.hisql)
+        self.get_api_data.set_ingestion_mediator(self.mediator)
+        self.mediator.set_get_api_data(self.get_api_data)
 
         # get db engine
         self.engine = self.mediator.get_engine()
@@ -164,7 +168,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_LoadData_recalculate_database(self):
         # make sure database is populated with all tables
-        # self.load_data.reload_all_from_manifest()
+        self.load_data.reload_all_from_manifest()
 
         # make sure zone_facts is not in db
         if 'zone_facts' in self.engine.table_names():
@@ -182,6 +186,52 @@ class MyTestCase(unittest.TestCase):
         # confirm zone_facts table was loaded into db
         result = 'zone_facts' in self.engine.table_names()
         self.assertTrue(result, 'zone_facts table is in db')
+
+    def test_GetApiData_get_files_by_modules(self):
+        # case - invalid module
+        result = self.get_api_data.get_files_by_modules(['fake'])
+        self.assertFalse(result, 'should return empty result: %s' % result)
+        self.assertEqual(len(result), 0, 'should return empty result')
+
+        # case - single module
+        result = self.get_api_data.get_files_by_modules(['DCHousing'])
+        self.assertTrue(result, 'should return non-empty result: %s' % result)
+        self.assertTrue('DCHousing' in result, 'should return DCHousing as '
+                                               'processed in result')
+        self.assertEqual(len(result), 1, 'should return a single result')
+
+        # case - multiple modules
+        modules_list = ['opendata', 'dhcd']
+        result = self.get_api_data.get_files_by_modules(modules_list)
+        self.assertTrue(result, 'should return non-empty result: %s' % result)
+        for mod in modules_list:
+            self.assertTrue(mod in result,
+                            'should return same values as original: '
+                            '{} is missing'.format(mod))
+        self.assertEqual(len(result), 2, 'should return two values in result')
+
+    def test_GetApiData_get_files_by_data_ids(self):
+        # case - invalid data id
+        result = self.get_api_data.get_files_by_data_ids(['fake'])
+        self.assertFalse(result, 'should return empty result: %s' % result)
+        self.assertEqual(len(result), 0, 'should return empty result')
+
+        # case - single data id
+        result = self.get_api_data.get_files_by_data_ids(['dchousing'])
+        self.assertTrue(result, 'should return non-empty result: %s' % result)
+        self.assertTrue('dchousing' in result, 'should return dchousing as '
+                                               'processed in result')
+        self.assertEqual(len(result), 1, 'should return a single result')
+
+        # case - multiple data ids
+        modules_list = ['crime_2015', 'building_permits_2016']
+        result = self.get_api_data.get_files_by_data_ids(modules_list)
+        self.assertTrue(result, 'should return non-empty result: %s' % result)
+        for mod in modules_list:
+            self.assertTrue(mod in result,
+                            'should return same values as original: '
+                            '{} is missing'.format(mod))
+        self.assertEqual(len(result), 2, 'should return two values in result')
 
 
 if __name__ == '__main__':
