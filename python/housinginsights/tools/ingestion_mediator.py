@@ -41,7 +41,7 @@ logger = HILogger(name=__file__, logfile="ingestion_mediator.log")  # TODO -
 
 
 class IngestionMediator(object):
-    def __init__(self, database_choice=None, debug=True):
+    def __init__(self, database_choice=None, debug=False):
         """
         Initialize mediator with private instance variables for colleague
         objects and other instance variables needed for ingestion workflow
@@ -65,7 +65,8 @@ class IngestionMediator(object):
         self._hi_sql = None
 
     ###############################
-    # set methods for linking this instance with respective colleague instances
+    # setter methods for linking this instance with respective colleague
+    # instances
     ###############################
     def set_load_data(self, load_data_instance):
         self._load_data = load_data_instance
@@ -74,14 +75,20 @@ class IngestionMediator(object):
         self._manifest = manifest_instance
 
     def set_meta(self, meta_instance):
-        self._meta = meta_instance.get_meta()
+        self._meta = meta_instance
 
     def set_hi_sql(self, hi_sql_instance):
         self._hi_sql = hi_sql_instance
 
     ###############################
-    # methods for coordinating tasks across other objects
+    # setter and getter methods for accessing private instance variables
     ###############################
+    def set_debug(self, debug):
+        self._debug = debug
+
+    def get_debug(self):
+        return self._debug
+
     def get_engine(self):
         """
         Return the database engine associated with the instance of ingestion
@@ -92,17 +99,31 @@ class IngestionMediator(object):
     def get_current_manifest_row(self):
         return self._manifest_row
 
+    def get_current_table_name(self):
+        return self._table_name
+
     def get_clean_psv_path(self, unique_data_id):
+        self._set_manifest_row_and_table_name(unique_data_id)
         clean_data_path = os.path.abspath(
             os.path.join(CLEAN_PSV_PATH,
                          'clean_{}.psv'.format(unique_data_id)))
 
         # check that it is valid file path and return accordingly
-        if os.path.exists(clean_data_path):
+        if os.path.isfile(clean_data_path):
             return clean_data_path
         else:
             return None
 
+    def _set_manifest_row_and_table_name(self, unique_data_id):
+        self._manifest_row = self._manifest.get_manifest_row(unique_data_id)
+        if self._manifest_row is not None:
+            self._table_name = self._manifest_row['destination_table']
+        else:
+            self._table_name = None
+
+    ###############################
+    # instance methods for coordinating tasks across other objects
+    ###############################
     # download new raw data
     def get_raw_data(self, manifest_row):
         pass
@@ -121,13 +142,23 @@ class IngestionMediator(object):
         clean_unique_data_id.psv
         """
         self._manifest_row = self._manifest.get_manifest_row(unique_data_id)
+
+        # validate resulting manifest_row
+        if self._manifest_row is None:
+            logger.error('"{}" is not in manifest.csv!'.format(unique_data_id))
+            if self._debug:
+                raise ValueError('"{}" is not a valid unique_data_id!'.format(
+                    unique_data_id))
+            else:
+                return None
+
         self._table_name = self._manifest_row['destination_table']
         clean_data_path = os.path.abspath(
                     os.path.join(CLEAN_PSV_PATH,
                                  'clean_{}.psv'.format(unique_data_id)))
-        raw_data_reader = DataReader(meta=self._meta,
+        raw_data_reader = DataReader(meta=self._meta.get_meta(),
                                      manifest_row=self._manifest_row)
-        clean_data_writer = CSVWriter(meta=self._meta,
+        clean_data_writer = CSVWriter(meta=self._meta.get_meta(),
                                       manifest_row=self._manifest_row,
                                       filename=clean_data_path)
         cleaner = self._meta.get_cleaner_from_name(
@@ -135,7 +166,7 @@ class IngestionMediator(object):
 
         # clean the file and save the output to a local pipe-delimited file
         if raw_data_reader.should_file_be_loaded():
-            print("  Cleaning...")
+            logger.info("  Cleaning...")
             start_time = time()
             meta_only_fields = self._meta.get_meta_only_fields(
                 table_name=self._table_name, data_fields=raw_data_reader.keys)
@@ -151,9 +182,9 @@ class IngestionMediator(object):
                     if clean_data_row is not None:
                         clean_data_writer.write(clean_data_row)
                 except Exception as e:
-                    logger.error(
-                        "Error when trying to clean row index {} from the manifest_row {}".format(
-                            idx, self._manifest_row))
+                    logger.error("Error when trying to clean row index {} from"
+                                 " the manifest_row {}".format(
+                                  idx, self._manifest_row))
                     if self._debug is True:
                         raise e
 
@@ -163,10 +194,30 @@ class IngestionMediator(object):
 
         return clean_data_path
 
-    # load psv file to database
-
     # write file to db
-    def write_file_to_db(self, clean_data_path):
+    def write_file_to_db(self, unique_data_id, clean_data_path):
+        # update instance with correct self._manifest_row and self._table_name
+        self._set_manifest_row_and_table_name(unique_data_id)
+
+        # remove existing data
+        result = self._hi_sql.remove_existing_data(self._manifest_row,
+                                                   self._engine)
+
+        # remove table if necessary
+        if result is not None:
+            _ = self._hi_sql.remove_table_if_empty(self._manifest_row,
+                                                   self._engine)
+
+        # create table if it doesn't exist
+        if self._hi_sql.does_table_exist(self._table_name, self._engine):
+            logger.info("Did not create table because it already exists")
+        else:
+            sql_fields, sql_field_types = \
+                self._meta.get_sql_fields_and_type_from_meta(self._table_name)
+            self._hi_sql.create_table(self._table_name, sql_fields,
+                                      sql_field_types, self._engine)
+
+        # load clean file to database
         return self._hi_sql.write_file_to_sql(self._table_name,
                                               clean_data_path, self._engine)
 

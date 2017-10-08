@@ -89,9 +89,7 @@ class Meta(Colleague):
         name.
 
         :param manifest_row: the given row in manifest.csv
-        :param cleaners: reference to the Cleaners class object
-        :param name: the referenced cleaner class in meta.json for the table as
-        str
+        :param engine: the engine object used for interacting with db
         :return: a class object of the given cleaner class
         """
 

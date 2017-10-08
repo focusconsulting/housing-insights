@@ -74,6 +74,291 @@ class TableWritingError(Exception):
 
 # TODO - refactor: decouple meta and manifest_row - use IngestionMediator
 class HISql(Colleague):
+
+    def __init__(self, debug=False):
+        """
+        Initialize object that will send the data stored in the newly-created
+        clean.csv file to the database.
+
+        :param debug: determines whether errors certain errors should be
+        raised or skipped
+        """
+        super().__init__(debug)
+
+    def write_file_to_sql(self, table_name, clean_psv_file, engine):
+        """
+        Attempts to write a clean psv file for the raw data of a given unique
+        data id into the specified table.
+
+        :param table_name: the table where the data should be added to
+        :param clean_psv_file: the path for the clean psv file
+        :param engine: the sql engine to be used for connecting to the db
+        :return: True if table was updated accordingly with the data from the
+        clean_psv_file - False otherwise
+        """
+        with engine.connect() as conn:
+            trans = conn.begin()
+
+            try:
+
+                logger.info("  opening {}".format(clean_psv_file))
+                with open(clean_psv_file, 'r', encoding='utf-8') as f:
+                    # copy_from is only available on the psycopg2 object, we
+                    # need to dig in to get it
+                    dbapi_conn = conn.connection
+                    dbapi_conn.set_client_encoding("UTF8")
+                    dbapi_cur = dbapi_conn.cursor()
+
+                    dbapi_cur.copy_from(f, table_name, sep='|',
+                                        null='Null', columns=None)
+
+                    self.update_sql_manifest_row(
+                        self._ingestion_mediator.get_current_manifest_row(),
+                        conn=conn, status="loaded")
+
+                    # used for debugging, keep commented in real usage
+                    # raise ProgrammingError(statement="test", params="test", orig="test")
+
+                    dbapi_conn.commit()
+                trans.commit()
+                logger.info("  data file loaded into database")
+
+            # TODO need to find out what types of expected errors might actually occur here
+            # For now, assume that SQLAlchemy will raise a programmingerror
+            except (ProgrammingError, DataError, TypeError) as e:
+                trans.rollback()
+
+                logger.warning(
+                    "  FAIL: something went wrong loading {}".format(
+                        clean_psv_file))
+                logger.warning("  exception: {}".format(e))
+                # raise TableWritingError
+                if self._debug:
+                    raise e
+                else:
+                    return False
+
+            return True
+
+    def update_sql_manifest_row(self, manifest_row, conn, status="unknown"):
+        """
+        Adds self.manifest_row associated with this table to the SQL manifest
+        conn = the connection to use (won't be closed so calling function can
+        rollback) status = the value to put in the "status" field
+        """
+        # Add the status
+        manifest_row = copy.copy(manifest_row)
+        manifest_row['status'] = status
+        manifest_row['load_date'] = datetime.datetime.now().isoformat()
+
+        # Remove the row if it exists
+        # TODO make sure data is synced or appended properly
+        sql_manifest_row = self.get_sql_manifest_row(manifest_row[
+                                                         'unique_data_id'],
+                                                     conn)
+
+        if sql_manifest_row is not None:
+            logger.info("  deleting existing manifest row for {}".format(
+                manifest_row['unique_data_id']))
+            delete_command = \
+                "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                    manifest_row['unique_data_id'])
+            conn.execute(delete_command)
+
+        columns = []
+        values = []
+        for key in manifest_row:
+            columns.append(key)
+            values.append(manifest_row[key])
+
+        columns_string = "(" + ",".join(columns) + ")"
+        values_string = "('" + "','".join(values) + "')"
+
+        insert_command = "INSERT INTO manifest {} VALUES {};".format(
+            columns_string, values_string)
+
+        conn.execute(insert_command)
+
+    # TODO - remove, seems unnecessary abstraction: moved into IngestionMediator
+    def create_table_if_necessary(self, table_name, engine):
+        """
+        Creates the table associated with this data file if it doesn't already
+        exist table = string representing the tablename
+        """
+        # TODO - a better long-term solution to this might be SQLAlchemy metadata: http://www.mapfish.org/doc/tutorials/sqlalchemy.html
+
+        if self.does_table_exist(table_name, engine):
+            logger.info("Did not create table because it already exists")
+        else:
+            self.create_table(table_name)
+
+    def does_table_exist(self, table_name, engine):
+
+        try:
+            with engine.connect() as db_conn:
+                db_conn.execute("SELECT * FROM {}".format(table_name))
+            return True
+        except ProgrammingError:
+            return False
+
+    def create_table(self, table_name, sql_fields, sql_field_types,
+                     engine):
+
+        with engine.connect() as db_conn:
+            field_statements = []
+            for idx, field in enumerate(sql_fields):
+                field_statements.append(field + " " + sql_field_types[idx])
+            field_command = ",".join(field_statements)
+            create_command = "CREATE TABLE {}({});".format(table_name,
+                                                           field_command)
+            db_conn.execute(create_command)
+            logger.info("  Table created: {}".format(table_name))
+
+            # Create an id column and make it a primary key
+            create_id = "ALTER TABLE {} ADD COLUMN {} text;".format(table_name,
+                                                                    'id')
+            db_conn.execute(create_id)
+            set_primary_key = "ALTER TABLE {} " \
+                              "ADD PRIMARY KEY ({});".format(table_name,
+                                                             'id')
+            db_conn.execute(set_primary_key)
+
+    def create_primary_key_table(self, table_name, engine):
+        pass
+
+    def drop_table(self, table_name, engine):
+        with engine.connect() as db_conn:
+            # TODO also need to delete manifest row(s)
+            # TODO need to use a transaction to ensure both operations sync
+            try:
+                db_conn.execute("DROP TABLE {}".format(table_name))
+            except ProgrammingError:
+                logger.warning("  {} table can't be dropped because it "
+                               "doesn't exist".format(table_name))
+
+    def get_sql_manifest_row(self, unique_data_id, conn):
+        """
+        Connect to the database, perform sql query for the given
+        'unique_data_id' and then return the equivalent sql manifest row.
+
+        :param unique_data_id: the unique data id of which we're interested in
+        :return: the resulting sql manifest row as a dict object
+        """
+        sql_query = "SELECT * FROM manifest " \
+                    "WHERE unique_data_id = '{}'".format(unique_data_id)
+
+        query_result = conn.execute(sql_query)
+
+        # convert the sqlAlchemy ResultProxy object into a list of dictionaries
+        results = [dict(row.items()) for row in query_result]
+
+        # We expect there to be exactly one row matching the query if
+        # the csv_row is already in the database
+        if len(results) > 1:
+            raise ValueError('  Found multiple rows in database for data'
+                             ' id {}'.format(unique_data_id))
+        elif len(results) == 0:
+            logger.info("  Couldn't find sql_manifest_row for {}".format(
+                unique_data_id))
+            return None
+        else:  # Return just the dictionary of results, not list of dictionaries
+            return results[0]
+
+    def remove_existing_data(self, manifest_row, engine):
+        """
+        Removes all rows in the respective table for the given unique_data_id
+        then sets status = deleted for the unique_data_id in the
+        database manifest.
+
+        :param manifest_row: the row for uid in the manifest
+        :param engine: object for connecting to the database
+        :return: result from executing delete query as
+        sqlalchemy result object if row exists in sql manifest - else
+        returns None
+        """
+        uid = manifest_row['unique_data_id']
+
+        with engine.connect() as conn:
+            trans = conn.begin()
+            # get objects for interfacing with the database
+            sql_manifest_row = self.get_sql_manifest_row(uid, conn)
+
+            try:
+                # delete only rows with data_id in respective table
+                table_name = sql_manifest_row['destination_table']
+            except TypeError:  # will occur if sql_manifest_row == None
+                logger.info("    No sql_manifest exists! Proceed with adding"
+                            " new data to the database!")
+                return None
+
+            try:
+                query = "DELETE FROM {} WHERE unique_data_id =" \
+                        " '{}'".format(table_name, uid)
+                logger.info("    Deleting {} data from {}!".format(
+                    uid, table_name))
+                result = conn.execute(query)
+                # change status = deleted in sql_manifest
+                logger.info("    Resetting status in sql manifest row!")
+                self.update_sql_manifest_row(manifest_row, conn=conn,
+                                             status='deleted')
+                trans.commit()
+            except ProgrammingError:
+                trans.rollback()
+                logger.warning(
+                    "Problem executing DELETE query for table {} and uid {}. "
+                    "Manifest row exists but table does not. You should check "
+                    "validity of table and data".format(table_name, uid))
+                return None
+
+        return result
+
+    def remove_table_if_empty(self, manifest_row, engine):
+        """
+        If a table is empty (all data has been removed, e.g. using _remove_existing_data),
+        delete the table itself. This allows the table to be rebuilt from scratch using
+        meta.json when new data is loaded - for example, if additional columns have been added.
+
+        :param manifest_row: the row for the uid in the manifest as a dictionary, which
+        supplies the name of the table to be checked/dropped
+
+        returns: result from executing delete qurey
+        """
+        table_name = manifest_row['destination_table']
+        with engine.connect() as conn:
+
+            try:
+                proxy = conn.execute("SELECT COUNT(*) FROM {}".format(
+                    table_name))
+                result = proxy.fetchall()
+            except ProgrammingError:
+                logger.info("    Couldn't find table {} in the database".format(
+                    table_name))
+                return None
+
+            # If the table is empty
+            # result format is [(count,)] i.e. list of tuples with each
+            # tuple = one row of result
+            if result[0][0] == 0:
+                trans = conn.begin()
+                try:
+                    logger.info("    Dropping table from database: {}".format(
+                        table_name))
+                    proxy = conn.execute("DROP TABLE {}".format(table_name))
+                    trans.commit()
+                    return proxy
+                except ProgrammingError as e:
+                    trans.rollback()
+                    logger.error(
+                        "Could not drop table {} from the database".format(
+                            table_name))
+                    if self._debug:
+                        raise e
+                    else:
+                        return None
+
+
+# TODO - refactor: decouple meta and manifest_row - use IngestionMediator
+class HISqlOld(Colleague):
     # def __init__(self, meta, manifest_row, engine, filename=None):
     def __init__(self, debug=False):
         """
@@ -239,14 +524,13 @@ class HISql(Colleague):
 
     def drop_table(self, table_name, engine):
         with engine.connect() as db_conn:
-            db_conn = self.engine.connect()
-
             #TODO also need to delete manifest row(s)
             #TODO need to use a transaction to ensure both operations sync
             try:
                 db_conn.execute("DROP TABLE {}".format(table_name))
             except ProgrammingError:
-                logger.warning("  {} table can't be dropped because it doesn't exist".format(table_name))
+                logger.warning("  {} table can't be dropped because it "
+                               "doesn't exist".format(table_name))
 
     def get_sql_manifest_row(self, unique_data_id, engine):
         """

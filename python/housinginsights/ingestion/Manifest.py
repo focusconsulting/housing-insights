@@ -178,7 +178,7 @@ class Manifest(HIReader):
             with engine.connect() as db_conn:
                 sql_query = "SELECT * FROM manifest"
                 query_result = db_conn.execute(sql_query)
-                results = [dict(row.items()) for row in query_result]
+                _ = [dict(row.items()) for row in query_result]
             return True
         except ProgrammingError as _:
             try:

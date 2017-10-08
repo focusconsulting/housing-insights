@@ -10,6 +10,13 @@ import uuid
 
 logging_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                             os.pardir, os.pardir, "logs"))
+# relative package import for when running as a script
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                           os.pardir, os.pardir))
+# sys.path.append(PYTHON_PATH)
+CLEAN_PSV_PATH = os.path.abspath(os.path.join(PYTHON_PATH, os.pardir,
+                                              'data', 'processed',
+                                              '_clean_psv'))
 
 
 class CSVWriter(object):
@@ -55,7 +62,7 @@ class CSVWriter(object):
         if filename is None:
             self.filename = 'temp_{}.psv'.format(self.unique_data_id)
         else:
-            filename
+            self.filename = filename
 
         # remove any existing copy of the file so we are starting clean
         self.remove_file()

@@ -370,11 +370,12 @@ class DataReader(HIReader):
 
     def _check_include_flag(self):
         """
-        Checks to make sure the include_flag matches requirements for loading the data
+        Checks to make sure the include_flag matches requirements for loading
+        the data
 
-        Previously this compared the manifest_row to the sql_manifest_row; however,
-        since the unique_data_id now stays constant across time this check is 
-        not needed. 
+        Previously this compared the manifest_row to the sql_manifest_row;
+        however, since the unique_data_id now stays constant across time this
+        check is not needed.
         """
 
         if self.manifest_row['include_flag'] == 'use':

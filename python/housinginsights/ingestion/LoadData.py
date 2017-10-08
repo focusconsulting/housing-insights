@@ -80,7 +80,12 @@ class LoadData(Colleague):
         for unique_data_id in unique_data_id_list:
             clean_data_path = self._ingestion_mediator.\
                 process_and_clean_raw_data(unique_data_id)
-            success = self._ingestion_mediator.write_file_to_db(clean_data_path)
+
+            if clean_data_path is None:  # continue onto next data_id
+                continue
+
+            success = self._ingestion_mediator.write_file_to_db(unique_data_id,
+                                                                clean_data_path)
 
             if success:
                 processed_ids.append(unique_data_id)
@@ -124,13 +129,16 @@ class LoadData(Colleague):
                         processed_ids.append(result.pop())
                 else:
                     logger.info(
-                        "  Couldn't find clean psv file for {}".format(
+                        "Couldn't find clean psv file for {}".format(
                             unique_data_id))
                     if self._debug:
-                        raise FileNotFoundError
+                        raise FileNotFoundError(
+                            "Couldn't find clean psv file for {} - "
+                            "'use_raw_if_missing' flag = False".format(
+                                unique_data_id))
             else:  # attempt to load clean psv into db
                 success = self._ingestion_mediator.write_file_to_db(
-                    clean_data_path)
+                    unique_data_id, clean_data_path)
 
                 if success:
                     processed_ids.append(unique_data_id)
@@ -328,6 +336,7 @@ class LoadDataOld(Colleague):
 
         return result
 
+    # TODO - remove: move into HISql
     def _remove_table_if_empty(self, manifest_row):
         """
         If a table is empty (all data has been removed, e.g. using _remove_existing_data),
