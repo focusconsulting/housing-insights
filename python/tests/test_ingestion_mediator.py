@@ -19,7 +19,7 @@ class MyTestCase(unittest.TestCase):
         manifest_path = os.path.abspath(os.path.join(SCRIPTS_PATH,
                                                      'manifest.csv'))
         # initialize mediator and colleague instances
-        self.load_data = LoadData(debug=True, drop_from_table=True)
+        self.load_data = LoadData(debug=True)
         self.mediator = IngestionMediator(debug=True)
         self.manifest = Manifest(manifest_path)
         self.meta = Meta()
@@ -34,6 +34,9 @@ class MyTestCase(unittest.TestCase):
         self.mediator.set_meta(self.meta)
         self.hisql.set_ingestion_mediator(self.mediator)
         self.mediator.set_hi_sql(self.hisql)
+
+        # get db engine
+        self.engine = self.mediator.get_engine()
 
     def test_get_clean_psv_path(self):
         # case - invalid unique_data_id passed
@@ -131,6 +134,50 @@ class MyTestCase(unittest.TestCase):
         result = self.load_data.load_cleaned_data(['fake'])
         self.assertFalse(result, 'should return empty list')
         self.assertEqual(len(result), 0, 'should be empty list')
+
+    def test_LoadData_reload_all_from_manifest(self):
+        self.load_data.reload_all_from_manifest(drop_tables=True)
+
+        # verify resulting sql_manifest post database rebuild
+        with self.engine.connect() as conn:
+            q = 'select unique_data_id, destination_table, status FROM manifest'
+            q_result = conn.execute(q)
+            result = {row[0]: {
+                'destination_table': row[1], 'status': row[2]}
+                for row in q_result.fetchall()}
+
+        for unique_data_id in result:
+            manifest_row = self.manifest.get_manifest_row(unique_data_id)
+            manifest_table_name = manifest_row['destination_table']
+            result_table_name = result[unique_data_id]['destination_table']
+            result_status = result[unique_data_id]['status']
+            self.assertEqual(manifest_table_name, result_table_name,
+                             'should have matching table name: {} : {}'.format(
+                                 manifest_table_name, result_table_name))
+            self.assertEqual('loaded', result_status,
+                             'should have status = loaded: actual {}'.format(
+                                 result_status))
+
+    def test_LoadData_recalculate_database(self):
+        # make sure database is populated with all tables
+        # self.load_data.reload_all_from_manifest()
+
+        # make sure zone_facts is not in db
+        if 'zone_facts' in self.engine.table_names():
+            with self.engine.connect() as conn:
+                conn.execute('DROP TABLE zone_facts;')
+
+        # currently no zone_facts table
+        result = 'zone_facts' in self.engine.table_names()
+        self.assertFalse(result, 'zone_facts table is not in db')
+
+        # rebuild zone_facts table
+        result = self.load_data.recalculate_database()
+        self.assertTrue(result, 'should have loaded zone_facts table')
+
+        # confirm zone_facts table was loaded into db
+        result = 'zone_facts' in self.engine.table_names()
+        self.assertTrue(result, 'zone_facts table is in db')
 
 
 if __name__ == '__main__':

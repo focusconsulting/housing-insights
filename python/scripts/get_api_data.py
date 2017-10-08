@@ -28,11 +28,6 @@ from housinginsights.config.base import HousingInsightsConfig
 from housinginsights.ingestion.Manifest import Manifest
 
 
-
-class GetApiData(Colleague):
-
-
-
 def get_multiple_api_sources(a):
     '''
     This method calls the 'get_data' method on each ApiConn class in the /sources folder

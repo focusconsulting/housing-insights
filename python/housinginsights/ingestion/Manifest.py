@@ -88,6 +88,16 @@ class Manifest(HIReader):
                     self.unique_ids[row['unique_data_id']] = 'found'
         return True
 
+    def get_use_unique_data_ids(self):
+        """
+        Returns list of all unique data ids that have 'include_flag' = 'use'.
+        """
+        use_ids = list()
+        for row in self:
+            if row['include_flag'] == 'use':
+                use_ids.append(row['unique_data_id'])
+        return use_ids
+
     def get_manifest_row(self, unique_data_id):
         """
         Returns the row for the given unique_data_id else 'None' if not in
@@ -152,7 +162,7 @@ class Manifest(HIReader):
 
         return self.path
 
-    def check_or_create_sql_manifest(self):
+    def check_or_create_sql_manifest(self, engine):
         """
         Makes sure we have a manifest table in the database.
         If not, it creates it with appropriate fields.
@@ -168,12 +178,6 @@ class Manifest(HIReader):
         written to the database, and whether they are still there or
         have been deleted.
         """
-        engine = self._ingestion_mediator.get_engine()
-
-        if engine is None:
-            print('Error - SQLalchemy engine is unassigned!!')
-            raise ValueError
-
         try:
             with engine.connect() as db_conn:
                 sql_query = "SELECT * FROM manifest"
@@ -182,6 +186,7 @@ class Manifest(HIReader):
             return True
         except ProgrammingError as _:
             try:
+                logger.info('SQL Manifest missing...attempting to add...')
                 # Create the query with appropriate fields and datatypes
                 db_conn = engine.connect()
                 field_statements = []

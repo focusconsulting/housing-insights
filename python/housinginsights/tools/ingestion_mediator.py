@@ -17,6 +17,7 @@ This module is an implementation of a mediator object. It interacts
 import os
 import sys
 from time import time, sleep
+from sqlalchemy.exc import ProgrammingError
 
 # relative package import for when running as a script
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -57,6 +58,8 @@ class IngestionMediator(object):
         self._engine = dbtools.get_database_engine(self._database_choice)
         self._manifest_row = None  # typically working on one at time - track?
         self._table_name = None
+        self._all_use_unique_data_ids = None
+        self._sql_manifest_in_db = False
 
         # initialize instance variables for colleague objects
         self._load_data = None
@@ -73,6 +76,7 @@ class IngestionMediator(object):
 
     def set_manifest(self, manifest_instance):
         self._manifest = manifest_instance
+        self._all_use_unique_data_ids = self._manifest.get_use_unique_data_ids()
 
     def set_meta(self, meta_instance):
         self._meta = meta_instance
@@ -101,6 +105,9 @@ class IngestionMediator(object):
 
     def get_current_table_name(self):
         return self._table_name
+
+    def get_list_use_unique_data_ids(self):
+        return self._all_use_unique_data_ids
 
     def get_clean_psv_path(self, unique_data_id):
         self._set_manifest_row_and_table_name(unique_data_id)
@@ -141,7 +148,8 @@ class IngestionMediator(object):
         :return: string representation of the path for the
         clean_unique_data_id.psv
         """
-        self._manifest_row = self._manifest.get_manifest_row(unique_data_id)
+        # set self._manifest_row and self._table_name instance variables
+        self._set_manifest_row_and_table_name(unique_data_id)
 
         # validate resulting manifest_row
         if self._manifest_row is None:
@@ -152,7 +160,7 @@ class IngestionMediator(object):
             else:
                 return None
 
-        self._table_name = self._manifest_row['destination_table']
+        # initialize objects needed for the cleaning process
         clean_data_path = os.path.abspath(
                     os.path.join(CLEAN_PSV_PATH,
                                  'clean_{}.psv'.format(unique_data_id)))
@@ -199,6 +207,11 @@ class IngestionMediator(object):
         # update instance with correct self._manifest_row and self._table_name
         self._set_manifest_row_and_table_name(unique_data_id)
 
+        # check and ensure sql_manifest exists before attempting to write to db
+        if not self._sql_manifest_in_db:
+            self._sql_manifest_in_db = \
+                self._manifest.check_or_create_sql_manifest(self._engine)
+
         # remove existing data
         result = self._hi_sql.remove_existing_data(self._manifest_row,
                                                    self._engine)
@@ -221,17 +234,105 @@ class IngestionMediator(object):
         return self._hi_sql.write_file_to_sql(self._table_name,
                                               clean_data_path, self._engine)
 
+    # create zone_facts table
+    def create_zone_facts_table(self):
+        """
+        Creates the zone_facts table which is used as a master table for API
+        endpoints. The purpose is to avoid recalculating fields adhoc and
+        performing client-side reconfiguration of data into display fields.
+        This is all now done in the backend whenever new data is loaded.
+        """
+
+        try:
+            # drop zone_facts table if already in db
+            if 'zone_facts' in self._engine.table_names():
+                with self._engine.connect() as conn:
+                    conn.execute('DROP TABLE zone_facts;')
+
+            # create empty zone_facts table
+            self._table_name = 'zone_facts'
+            self._manifest_row = None
+            sql_fields, sql_field_types = \
+                self._meta.get_sql_fields_and_type_from_meta(self._table_name)
+            self._hi_sql.create_table(self._table_name, sql_fields,
+                                      sql_field_types, self._engine)
+
+        except Exception as e:
+            logger.error("Failed to create zone_facts table")
+            if self._debug:
+                raise e
+
+    # remove tables for db
+    def remove_tables(self, tables_list):
+        """
+        Used when you want to update only part of the database. Drops the table
+        and deletes all associated rows in the sql manifest. Run this before
+        updating data in tables that have added or removed columns.
+
+        tables: a list of table names to be deleted
+        """
+        if 'all' in tables_list:
+            self._drop_tables()
+            logger.info('Dropped all tables from database')
+            self._sql_manifest_in_db = False
+        else:
+            for table in tables_list:
+                try:
+                    logger.info("Dropping the {} table and all associated "
+                                "manifest rows".format(table))
+                    # Delete all the relevant rows of the sql manifest table
+                    q = "SELECT DISTINCT unique_data_id FROM {}".format(table)
+                    with self._engine.connect() as conn:
+                        proxy = conn.execute(q)
+                        results = proxy.fetchall()
+                        for row in results:
+                            q = "DELETE FROM manifest " \
+                                "WHERE unique_data_id = '{}'".format(row[0])
+                            conn.execute(q)
+
+                        # And drop the table itself
+                        q = "DROP TABLE {}".format(table)
+                        conn.execute(q)
+
+                        logger.info("Dropping table {} was successful".format(table))
+
+                except ProgrammingError as e:
+                    logger.error("Couldn't remove table {}".format(table))
+                    if self._debug:
+                        raise e
+
+    def _drop_tables(self):
+        """
+        Returns the outcome of dropping all the tables from the
+        database_choice and then rebuilding.
+        """
+        logger.info("Dropping all tables from the database!")
+        with self._engine.connect() as conn:
+            query_result = list()
+            query_result.append(conn.execute(
+                "DROP SCHEMA public CASCADE;CREATE SCHEMA public;"))
+
+            if self._database_choice == 'remote_database' or \
+                            self._database_choice == 'remote_database_master':
+                query_result.append(conn.execute('''
+            GRANT ALL PRIVILEGES ON SCHEMA public TO housingcrud;
+            GRANT ALL PRIVILEGES ON ALL TABLES    IN SCHEMA public TO housingcrud;
+            GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO housingcrud;
+            GRANT ALL ON SCHEMA public TO public;
+            '''))
+        return query_result
+
 
 if __name__ == '__main__':
     # initialize instances to be used for this ingestion mediator instance
-    load_data = LoadData(drop_from_table=True)
+    load_data = LoadData(debug=True)
     manifest = Manifest(os.path.abspath(os.path.join(SCRIPTS_PATH,
                                                      'manifest.csv')))
     meta = Meta()
-    hisql = HISql()
+    hisql = HISql(debug=True)
 
     # initialize an instance of ingestion mediator and set colleague instances
-    mediator = IngestionMediator()
+    mediator = IngestionMediator(debug=True)
     mediator.set_load_data(load_data)
     mediator.set_manifest(manifest)
     mediator.set_meta(meta)
