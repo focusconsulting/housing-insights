@@ -15,6 +15,7 @@ class Colleague(object):
         self._ingestion_mediator = ingestion_mediator
         self._engine = self._get_engine()
         self._database_choice = self._ingestion_mediator.get_database_choice()
+        self._debug = self._ingestion_mediator.get_debug()
 
     def _get_engine(self):
         return self._ingestion_mediator.get_engine()

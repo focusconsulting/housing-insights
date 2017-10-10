@@ -94,7 +94,7 @@ class Manifest(HIReader):
         """
         use_ids = list()
         for row in self:
-            if row['include_flag'] == 'use':
+            if row['include_flag'] in Manifest._include_flags_positive:
                 use_ids.append(row['unique_data_id'])
         return use_ids
 
@@ -104,36 +104,20 @@ class Manifest(HIReader):
         manifest.
         """
         for row in self:
-            use = row['include_flag'] == 'use'
+            use = row['include_flag'] in Manifest._include_flags_positive
             if row['unique_data_id'] == unique_data_id and use:
                 return row
         return None
 
-    def create_list(self, folder_path):
-        """
-        Returns a list of potential unique_data_ids based on csv files in the
-        given folder path. The assumption is that all raw data a saved as csv
-        with filename that matches unique_data_id used in manifest.
-        """
-        unique_data_ids = list()
-        files_in_folder = os.listdir(folder_path)
-        for file in files_in_folder:
-            file_path = os.path.join(folder_path, file)
-            uid, file_ext = file.split(sep='.')
-            if os.path.isfile(file_path) and file_ext == 'csv':
-                unique_data_ids.append(uid)
-
-        return unique_data_ids
-
     def update_manifest(self, date_stamped_folder):
         """
-        Used for automatically swapping out old files for new ones in our manifest.csv
-        whenever we gather new data. 
+        Used for automatically swapping out old files for new ones in our
+        manifest.csv whenever we gather new data.
 
-        Using the folder passed (e.g. /data/raw/apis), find the most recent subfolder
-        (by sorting alphabetically). Make a list of .csv files in that folder
-        and update the manifest.csv for every unique_data_id that corresponds
-        to one of the .csv files. 
+        Using the folder passed (e.g. /data/raw/apis), find the most recent
+        subfolder (by sorting alphabetically). Make a list of .csv files in
+        that folder and update the manifest.csv for every unique_data_id that
+        corresponds to one of the .csv files.
         """
         timestamp = os.path.basename(date_stamped_folder)
         data_date = datetime.strptime(timestamp, '%Y%m%d').strftime('%Y-%m-%d')
@@ -142,7 +126,7 @@ class Manifest(HIReader):
         field_names = self.keys
 
         # get unique_data_ids for data files in recent subfolder
-        uid_list = self.create_list(date_stamped_folder)
+        uid_list = self._create_list(date_stamped_folder)
         data = list()
 
         # update the manifest.csv in place
@@ -161,6 +145,22 @@ class Manifest(HIReader):
             writer.writerows(data)
 
         return self.path
+
+    def _create_list(self, folder_path):
+        """
+        Returns a list of potential unique_data_ids based on csv files in the
+        given folder path. The assumption is that all raw data a saved as csv
+        with filename that matches unique_data_id used in manifest.
+        """
+        unique_data_ids = list()
+        files_in_folder = os.listdir(folder_path)
+        for file in files_in_folder:
+            file_path = os.path.join(folder_path, file)
+            uid, file_ext = file.split(sep='.')
+            if os.path.isfile(file_path) and file_ext == 'csv':
+                unique_data_ids.append(uid)
+
+        return unique_data_ids
 
     def check_or_create_sql_manifest(self, engine):
         """
@@ -202,3 +202,13 @@ class Manifest(HIReader):
 
             except Exception as e:
                 raise e
+
+    def get_dependent_data_ids(self, unique_data_id):
+        """
+        Returns list of dependent data ids for the passed unique_data_id
+        """
+        dependents = list()
+        for row in self:
+            if row['dependency'] == unique_data_id:
+                dependents.append(row['unique_data_id'])
+        return dependents

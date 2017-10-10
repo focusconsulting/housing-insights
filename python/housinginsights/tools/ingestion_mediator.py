@@ -62,6 +62,7 @@ class IngestionMediator(object):
         self._table_name = None
         self._all_use_unique_data_ids = None
         self._sql_manifest_in_db = False
+        self._id_map_used_set = set()
 
         # initialize instance variables for colleague objects
         self._load_data = None
@@ -106,6 +107,9 @@ class IngestionMediator(object):
         """
         return self._engine
 
+    def set_database_choice(self, database_choice):
+        self._database_choice = database_choice
+
     def get_database_choice(self):
         return self._database_choice
 
@@ -131,18 +135,115 @@ class IngestionMediator(object):
             return None
 
     def _set_manifest_row_and_table_name(self, unique_data_id):
+        """
+        Ensures that whenever the mediator is coordinating activities across
+        colleagues it is updated with the correct manifest row and table name
+        for the current state. This is primarily to avoid passing the current
+        manifest row across objects and communicate amongst colleagues
+        primarily with respect to unique_data_id of interest.
+
+        The aim here is clarity from a user's perspective and to ease
+        debugging. The manifest object is not intuitive to human reader but
+        the string representation of the unique_data_id is clear to a
+        person. Since there a single row for each unique data id,
+        this seems like the better data type to use for communicating
+        across colleague objects.
+
+        :param unique_data_id: the unique data id that is currently of focus
+        """
         self._manifest_row = self._manifest.get_manifest_row(unique_data_id)
         if self._manifest_row is not None:
             self._table_name = self._manifest_row['destination_table']
         else:
             self._table_name = None
 
+    def reset_id_map_set_use(self):
+        self._id_map_used_set = set()
+
     ###############################
     # instance methods for coordinating tasks across other objects
     ###############################
     # download new raw data
-    def download_api_raw_data(self, manifest_row):
-        pass
+    def download_api_raw_data(self, unique_data_id):
+        # remap if dchousing or dhcd
+        id_map = {
+            'dchousing_project': 'dchousing',
+            'dchousing_subsidy': 'dchousing',
+            'dchousing_addre': 'dchousing',
+            'dhcd_dfd_properties_project': 'dhcd_dfd_properties',
+            'dhcd_dfd_properties_subsidy': 'dhcd_dfd_properties',
+            'dhcd_dfd_properties_addre': 'dhcd_dfd_properties'
+        }
+
+        data_id = id_map.get(unique_data_id, unique_data_id)
+
+        # check whether api call has been made within same iteration of
+        # load_raw_data call, if so, don't download again
+        if data_id in self._id_map_used_set:
+            return True
+
+        # get download new raw data from api call
+        processed = self._get_api_data.get_files_by_data_ids([data_id])
+
+        # return outcome of attempt to download from api
+        if data_id in processed:
+            self._id_map_used_set.add(data_id)
+            return True
+        return False
+
+    # process all dependents recursively
+    def load_dependents_workflow(self, unique_data_id):
+        processed = list()
+        dependents_queue = list()
+        dependents_queue.extend(
+            self._manifest.get_dependent_data_ids(unique_data_id))
+
+        # iterate until no more dependent data ids
+        while dependents_queue:
+            data_id = dependents_queue.pop(0)
+            success = self.load_unique_data_id(data_id, download_api_data=True)
+
+            if success:
+                processed.append(data_id)
+
+                # add new dependents - assuming manifest doesn't have
+                # circular dependencies
+                dependents = self._manifest.get_dependent_data_ids(data_id)
+                for dependent in dependents:
+                    if dependent not in dependents_queue:
+                        dependents_queue.append(dependent)
+
+        return processed
+
+    # load to database
+    def load_unique_data_id(self, unique_data_id, download_api_data=False):
+        # don't proceed any further if invalid unique_data_id
+        if not self._check_unique_data_id(unique_data_id):
+            return False
+
+        updated_from_api = self._manifest_row['update_method'] == 'api'
+
+        # TODO - treat prescat as api once S3 bucket available?
+        # if requested get new raw data only if update_mode is api
+        if download_api_data and updated_from_api:
+            success = self.download_api_raw_data(unique_data_id)
+
+            # log failure and proceed accordingly
+            if not success:
+                logger.error('Download api request failed for %s data! '
+                             'Using existing raw data file!'
+                             % unique_data_id)
+                if self._debug:
+                    raise FileNotFoundError('Download api request failed '
+                                            'for %s data!' % unique_data_id)
+
+        clean_data_path = self.process_and_clean_raw_data(unique_data_id)
+
+        if clean_data_path is None:  # failed so do non't try to write to db
+            return False
+
+        # return result of attempting to write clean psv to db
+        return self.write_file_to_db(unique_data_id, clean_data_path)
 
     # update manifest with new paths
     def update_manifest_with_new_path(self):
@@ -177,16 +278,9 @@ class IngestionMediator(object):
         :return: string representation of the path for the
         clean_unique_data_id.psv
         """
-        # set self._manifest_row and self._table_name instance variables
-        self._set_manifest_row_and_table_name(unique_data_id)
 
-        # validate resulting manifest_row
-        if self._manifest_row is None:
-            logger.error('"{}" is not in manifest.csv!'.format(unique_data_id))
-            if self._debug:
-                raise ValueError('"{}" is not a valid unique_data_id!'.format(
-                    unique_data_id))
-            else:
+        # validate unique_data_id before processing
+        if not self._check_unique_data_id(unique_data_id):
                 return None
 
         # initialize objects needed for the cleaning process
@@ -203,7 +297,7 @@ class IngestionMediator(object):
 
         # clean the file and save the output to a local pipe-delimited file
         if raw_data_reader.should_file_be_loaded():
-            logger.info("  Cleaning...")
+            logger.info("  Cleaning %s..." % unique_data_id)
             start_time = time()
             meta_only_fields = self._meta.get_meta_only_fields(
                 table_name=self._table_name, data_fields=raw_data_reader.keys)
@@ -350,6 +444,21 @@ class IngestionMediator(object):
             GRANT ALL ON SCHEMA public TO public;
             '''))
         return query_result
+
+    def _check_unique_data_id(self, unique_data_id):
+        # set self._manifest_row and self._table_name instance variables
+        self._set_manifest_row_and_table_name(unique_data_id)
+
+        # validate resulting manifest_row
+        if self._manifest_row is None:
+            logger.error('"{}" is not in manifest.csv!'.format(unique_data_id))
+            if self._debug:
+                raise ValueError('"{}" is not a valid unique_data_id!'.format(
+                    unique_data_id))
+            else:
+                return False
+        else:
+            return True
 
 
 if __name__ == '__main__':

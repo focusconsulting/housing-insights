@@ -48,7 +48,8 @@ class LoadData(Colleague):
     def __init__(self, debug=False):
         super().__init__(debug)
 
-    def load_raw_data(self, unique_data_id_list):
+    def load_raw_data(self, unique_data_id_list, download_api_data=False,
+                      load_dependents=False):
         """
         Attempts to process and clean the raw data for the given
         unique_data_ids in unique_data_id_list and then load it into the
@@ -65,18 +66,26 @@ class LoadData(Colleague):
         the db
         """
         processed_ids = list()  # track what is processed
-        for unique_data_id in unique_data_id_list:
-            clean_data_path = self._ingestion_mediator.\
-                process_and_clean_raw_data(unique_data_id)
 
-            if clean_data_path is None:  # continue onto next data_id
+        # reset tracking of used get api data ids
+        self._ingestion_mediator.reset_id_map_set_use()
+
+        for unique_data_id in unique_data_id_list:
+            # skip those that have been processed via prior dependencies
+            if unique_data_id in processed_ids:
                 continue
 
-            success = self._ingestion_mediator.write_file_to_db(unique_data_id,
-                                                                clean_data_path)
+            success = self._ingestion_mediator.load_unique_data_id(
+                unique_data_id, download_api_data)
 
             if success:
                 processed_ids.append(unique_data_id)
+
+                # if requested process dependents next
+                if load_dependents:
+                    result = self._ingestion_mediator.load_dependents_workflow(
+                        unique_data_id)
+                    processed_ids.extend(result)  # add to processed_ids tracker
 
         return processed_ids
 
@@ -135,7 +144,8 @@ class LoadData(Colleague):
 
     def reload_all_from_manifest(self, use_clean=True,
                                  use_raw_if_missing=True,
-                                 drop_tables=False):
+                                 drop_tables=False, download_api_data=False,
+                                 load_dependents=False):
         """
         Reload all 'use' flagged unique data ids from manifest.csv.
 
@@ -155,7 +165,10 @@ class LoadData(Colleague):
             processed_ids = self.load_cleaned_data(unique_data_id_list=data_ids,
                                    use_raw_if_missing=use_raw_if_missing)
         else:
-            processed_ids = self.load_raw_data(unique_data_id_list=data_ids)
+            processed_ids = self.load_raw_data(
+                unique_data_id_list=data_ids,
+                download_api_data=download_api_data,
+                load_dependents=load_dependents)
 
         return processed_ids
 

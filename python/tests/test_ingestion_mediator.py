@@ -71,7 +71,7 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNone(result, 'should return None')
 
     def test_LoadData_load_raw_data(self):
-        # case - invalid unique_data_id passed
+        # # case - invalid unique_data_id passed
         self.assertRaises(ValueError, self.load_data.load_raw_data, ['fake'])
 
         # case - pass empty unique_data_id_list
@@ -83,7 +83,7 @@ class MyTestCase(unittest.TestCase):
         result = self.load_data.load_raw_data(['mar'])
         self.assertTrue(result, 'should return a non-empty list')
         self.assertEqual(len(result), 1, 'should return a list with len = 1')
-        self.assertTrue('mar' in result, '"mar" should be only value is list')
+        self.assertTrue('mar' in result, '"mar" should be only value in list')
 
         # case - multiple unique_data_ids passed
         unique_data_id_list = ['mar', 'prescat_project',
@@ -94,13 +94,30 @@ class MyTestCase(unittest.TestCase):
                          'should return a list with same length as original')
         for uid in unique_data_id_list:
             self.assertTrue(uid in result,
-                            '"{}" should be only value is list'.format(uid))
+                            '"{}" should be value in result: {}'.format(uid,
+                                                                        result))
 
         # case - invalid unique_data_id passed with debug=False
         self.mediator.set_debug(False)
         result = self.load_data.load_raw_data(['fake'])
         self.assertFalse(result, 'should return empty list')
         self.assertEqual(len(result), 0, 'should be empty list')
+
+        # case - load dependents feature
+        self.mediator.set_debug(True)
+        expected = ['prescat_addre', 'dchousing_project', 'prescat_parcel',
+                    'dchousing_subsidy', 'dchousing_addre', 'tax',
+                    'dhcd_dfd_properties_project',
+                    'dhcd_dfd_properties_subsidy', 'dhcd_dfd_properties_addre']
+        result = self.load_data.load_raw_data(['prescat_addre'],
+                                              download_api_data=True,
+                                              load_dependents=True)
+        self.assertTrue(result, 'should return a non-empty list')
+        self.assertEqual(len(result), 9, 'should return a list with len = 9')
+        for uid in expected:
+            self.assertTrue(uid in result,
+                            '"{}" should be value in result: {}'.format(
+                                uid, result))
 
     def test_LoadData_load_cleaned_data(self):
         # case - invalid unique_data_id passed
