@@ -16,7 +16,7 @@ This module is an implementation of a mediator object. It interacts
 # built-in import
 import os
 import sys
-from time import time, sleep
+from time import time
 from sqlalchemy.exc import ProgrammingError
 from datetime import datetime
 

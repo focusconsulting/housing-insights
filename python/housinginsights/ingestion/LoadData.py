@@ -62,6 +62,10 @@ class LoadData(Colleague):
 
         :param unique_data_id_list: the list of unique data ids that should
         be loaded into database from raw data file
+        :param download_api_data: if True, get_api_data will be called on
+        unique_data_ids that have update_method = api
+        :param load_dependents: if True, any data ids dependent on the
+        existence id db of the current data id will be processed next
         :return: list of unique data ids that were successfully loaded into
         the db
         """
@@ -153,6 +157,10 @@ class LoadData(Colleague):
         :param use_raw_if_missing: if True, use raw data file if clean psv
         file is missing
         :param drop_tables: if True, drop table first before loading data
+        :param download_api_data: if True, get_api_data will be called on
+        unique_data_ids that have update_method = api
+        :param load_dependents: if True, any data ids dependent on the
+        existence id db of the current data id will be processed next
         :return: list of unique data ids that were successfully loaded into
         the db
         """
