@@ -89,17 +89,22 @@ var projectView = {
               url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
               callback: dataBatchCallback
           },
-          {
-              name: "nearby_projects",
-              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
-              callback: dataBatchCallback
-          },
+
           {
               name: "raw_bus_stops",
               url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
               callback: dataBatchCallback
           }
-      ]
+      ];
+
+      if ( getState()['selectedBuilding'][0]['properties']['latitude'] !== null && getState()['selectedBuilding'][0]['properties']['longitude'] !== null ){ 
+          dataRequests.push({
+              name: "nearby_projects",
+              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
+              callback: dataBatchCallback
+          });
+      }
+
       for(var i = 0; i < dataRequests.length; i++){
           controller.getData(dataRequests[i]);
       }
@@ -275,7 +280,9 @@ var projectView = {
             var projLongitude = full_project_data['longitude'];
             var projLatitude = full_project_data['latitude'];
 
-            d3.select('#project-location-map').attr('src', 'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+325d88(' + projLongitude + ',' + projLatitude + ')/-77.0369,38.9072,8.3/124x124?access_token=' + mapboxgl.accessToken + '&attribution=false&logo=false');
+            if ( projLongitude !== null && projLatitude !== null ) {
+              d3.select('#project-location-map').attr('src', 'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+325d88(' + projLongitude + ',' + projLatitude + ')/-77.0369,38.9072,8.3/124x124?access_token=' + mapboxgl.accessToken + '&attribution=false&logo=false');
+            }
         }
     },
     ownership: {
@@ -522,10 +529,12 @@ var projectView = {
         ///////////////
         //Nearby Housing sidebar
         ///////////////
-        
-        d3.select("#tot_buildings").html(model.dataCollection['nearby_projects']['tot_buildings']);
-        d3.select("#tot_units").html(model.dataCollection['nearby_projects']['tot_units']);
-        d3.select("#nearby_housing_distance").html(model.dataCollection['nearby_projects']['distance'])
+        console.log(model.dataCollection['nearby_projects']);
+        if ( model.dataCollection['nearby_projects'] !== undefined ){
+          d3.select("#tot_buildings").html(model.dataCollection['nearby_projects']['tot_buildings']);
+          d3.select("#tot_units").html(model.dataCollection['nearby_projects']['tot_units']);
+          d3.select("#nearby_housing_distance").html(model.dataCollection['nearby_projects']['distance'])
+        }
 
       }
     },
