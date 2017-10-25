@@ -45,8 +45,8 @@ logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 class LoadData(Colleague):
-    def __init__(self, debug=False):
-        super().__init__(debug)
+    def __init__(self):
+        super().__init__()
 
     def load_raw_data(self, unique_data_id_list, download_api_data=False,
                       load_dependents=False):

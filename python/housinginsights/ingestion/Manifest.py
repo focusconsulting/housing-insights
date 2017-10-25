@@ -1,17 +1,19 @@
 """
 Manifest module
 """
+
+# built-in imports
 import os
 from collections import Counter
 from csv import DictWriter, DictReader
 from sqlalchemy.exc import ProgrammingError
+from datetime import datetime
+import dateutil.parser as dateparser
 
+# app imports
 from housinginsights.ingestion.DataReader import HIReader
 from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
-
-from datetime import datetime
-import dateutil.parser as dateparser
 
 
 class Manifest(HIReader):

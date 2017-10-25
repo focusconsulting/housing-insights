@@ -5,18 +5,16 @@ used in the the database.
 """
 # built-in imports
 import os
-import sys
 import json
 
 # app imports
-from python.housinginsights.tools.base_colleague import Colleague
-from python.housinginsights.tools.logger import HILogger
-from python.housinginsights.ingestion import Cleaners
+from housinginsights.tools.base_colleague import Colleague
+from housinginsights.tools.logger import HILogger
+from housinginsights.ingestion import Cleaners
 
-# relative package import for when running as a script
+# useful globals
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            os.pardir, os.pardir))
-# sys.path.append(PYTHON_PATH)
 SCRIPTS_PATH = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
 
 logger = HILogger(name=__file__, logfile="ingestion.log")

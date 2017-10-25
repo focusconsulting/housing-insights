@@ -2,17 +2,19 @@ import unittest
 import os
 import sys
 
-from python.housinginsights.tools.ingestion_mediator import IngestionMediator
-from python.housinginsights.ingestion.LoadData import LoadData
-from python.housinginsights.ingestion.Manifest import Manifest
-from python.housinginsights.ingestion.Meta import Meta
-from python.housinginsights.ingestion.SQLWriter import HISql
-from python.scripts.get_api_data import GetApiData
-
+# relative package import for when running as a script
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            os.pardir))
-# sys.path.append(PYTHON_PATH)
+sys.path.append(PYTHON_PATH)
 SCRIPTS_PATH = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
+
+# app imports
+from housinginsights.tools.ingestion_mediator import IngestionMediator
+from housinginsights.ingestion.LoadData import LoadData
+from housinginsights.ingestion.Manifest import Manifest
+from housinginsights.ingestion.Meta import Meta
+from housinginsights.ingestion.SQLWriter import HISql
+from housinginsights.ingestion.GetApiData import GetApiData
 
 
 class MyTestCase(unittest.TestCase):
@@ -20,12 +22,12 @@ class MyTestCase(unittest.TestCase):
         manifest_path = os.path.abspath(os.path.join(SCRIPTS_PATH,
                                                      'manifest.csv'))
         # initialize mediator and colleague instances
-        self.load_data = LoadData(debug=True)
+        self.load_data = LoadData()
         self.mediator = IngestionMediator(debug=True)
         self.manifest = Manifest(manifest_path)
         self.meta = Meta()
-        self.hisql = HISql(debug=True)
-        self.get_api_data = GetApiData(debug=True)
+        self.hisql = HISql()
+        self.get_api_data = GetApiData()
 
         # build connection between mediator and its colleagues
         self.load_data.set_ingestion_mediator(self.mediator)

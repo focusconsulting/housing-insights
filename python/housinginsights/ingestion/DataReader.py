@@ -20,8 +20,8 @@ import codecs
 from datetime import datetime
 import dateutil.parser as dateparser
 
-from python.housinginsights.tools.base_colleague import Colleague
-from python.housinginsights.tools.logger import HILogger
+from housinginsights.tools.base_colleague import Colleague
+from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
 

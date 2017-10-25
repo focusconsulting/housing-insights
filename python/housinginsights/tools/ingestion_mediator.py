@@ -1,46 +1,30 @@
 """
-This module is an implementation of a mediator object. It interacts
- with all objects and scripts involved in our ingestion and processing
- protocol and coordinate their activities.
-
- The following are some core tasks:
-
-    - check for new data regularly per specific schedule or on demand when
-    requested by admin
-    - download and ingest all new data
-    - handle all data ingestion problems via logging and skipping
-    - alert amdins via email of the data collection status; any
-    missing/skipped data sets, any ingestion problems
+ingestion_mediator.py is an implementation of a mediator object. It interacts
+with all objects and scripts involved in our ingestion and processing
+workflow, coordinating their activities.
 """
 
 # built-in import
 import os
-import sys
 from time import time
 from sqlalchemy.exc import ProgrammingError
 from datetime import datetime
 
-# relative package import for when running as a script
+# app imports
+from housinginsights.ingestion.DataReader import DataReader
+from housinginsights.tools import dbtools
+from housinginsights.tools.logger import HILogger
+from housinginsights.ingestion.CSVWriter import CSVWriter
+
+# useful paths as globals
 PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                            os.pardir, os.pardir))
-# sys.path.append(PYTHON_PATH)
 SCRIPTS_PATH = os.path.abspath(os.path.join(PYTHON_PATH, 'scripts'))
 CLEAN_PSV_PATH = os.path.abspath(os.path.join(PYTHON_PATH, os.pardir,
                                               'data', 'processed',
                                               '_clean_psv'))
 
-from python.housinginsights.ingestion.DataReader import DataReader
-from python.housinginsights.ingestion.LoadData import LoadData
-from python.housinginsights.ingestion.Manifest import Manifest
-from python.housinginsights.ingestion.Meta import Meta
-from python.housinginsights.tools import dbtools
-from python.housinginsights.ingestion.SQLWriter import HISql
-from python.housinginsights.tools.logger import HILogger
-from python.housinginsights.ingestion.CSVWriter import CSVWriter
-from python.scripts.get_api_data import GetApiData
-
-logger = HILogger(name=__file__, logfile="ingestion_mediator.log")  # TODO -
-# refactor
+logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
 class IngestionMediator(object):
@@ -344,6 +328,7 @@ class IngestionMediator(object):
             _ = self._hi_sql.remove_table_if_empty(self._manifest_row,
                                                    self._engine)
 
+        # TODO - a better long-term solution to this might be SQLAlchemy metadata: http://www.mapfish.org/doc/tutorials/sqlalchemy.html
         # create table if it doesn't exist
         if self._hi_sql.does_table_exist(self._table_name, self._engine):
             logger.info("Did not create table because it already exists")
@@ -459,28 +444,3 @@ class IngestionMediator(object):
                 return False
         else:
             return True
-
-
-if __name__ == '__main__':
-    # initialize instances to be used for this ingestion mediator instance
-    load_data = LoadData(debug=True)
-    manifest = Manifest(os.path.abspath(os.path.join(SCRIPTS_PATH,
-                                                     'manifest.csv')))
-    meta = Meta()
-    hisql = HISql(debug=True)
-    get_api_api = GetApiData(debug=True)
-
-    # initialize an instance of ingestion mediator and set colleague instances
-    mediator = IngestionMediator(debug=True)
-    mediator.set_load_data(load_data)
-    mediator.set_manifest(manifest)
-    mediator.set_meta(meta)
-    mediator.set_hi_sql(hisql)
-    mediator.set_get_api_data(get_api_api)
-
-    # connect colleague instances to this ingestion mediator instance
-    load_data.set_ingestion_mediator(mediator)
-    manifest.set_ingestion_mediator(mediator)
-    meta.set_ingestion_mediator(mediator)
-    hisql.set_ingestion_mediator(mediator)
-    get_api_api.set_ingestion_mediator(mediator)
