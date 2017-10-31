@@ -60,7 +60,7 @@ members:
  - name: Chris Oliver
    description: User Experience Designer
    image: chriso.jpg
-   bio-url: www.chrisoliver.co
+   bio-url: http://www.chrisoliver.co
  - name: Dan O'Maley
    description: 
    image: dano.jpg
@@ -125,10 +125,10 @@ members:
    description: 
    image: 
    bio-url:  
- - name: Per F
-   description: 
-   image: 
-   bio-url: 
+ - name: Per Fjelstad
+   description: Ran SQL queries for calculated fields.
+   image: pfjel.jpg
+   bio-url: https://www.linkedin.com/in/perfjelstad
  - name: Phil J
    description: 
    image: 
@@ -308,7 +308,7 @@ All the volunteer developers, designers and researchers that helped us build thi
             <div class="col-sm-6">
                 <!--enter your name between the <h3> tags, and a couple words of bio between the <p> tags.-->
                 <h3>You!</h3>
-                <p>Help us build this project.</p>
+                <p><a href="http://housinginsights.org/resources/">Help us build this project.</a></p>
             </div>
             </div>
         </div>

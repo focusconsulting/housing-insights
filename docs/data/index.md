@@ -12,7 +12,7 @@ The Housing Insights tool draws on several data sources.  Click on any of the so
 * [Building Permits]({{site.baseurl}}/data/building_permits.html)
 * [Census]({{site.baseurl}}/data/census.html)
 * [Crime]({{site.baseurl}}/data/crime.html)
-* [DC Taxes]({{site.baseurl}}/data/dc_tax.html)
+* [DC Taxes]({{site.baseurl}}/data/tax.html)
 * [Home Mortgage Disclosure Act Data - DC Only - 2007-2015]({{site.baseurl}}/data/hmda.html)
 * [Housing Subsidy Data]({{site.baseurl}}/data/subsidy.html)
 * [Housing and Urban Development Real Estate Assessment Center Scores]({{site.baseurl}}/data/reac_scores.html)
