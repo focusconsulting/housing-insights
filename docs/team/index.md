@@ -60,7 +60,7 @@ members:
  - name: Chris Oliver
    description: User Experience Designer
    image: chriso.jpg
-   bio-url: www.chrisoliver.co
+   bio-url: http://www.chrisoliver.co
  - name: Dan O'Maley
    description: 
    image: dano.jpg
