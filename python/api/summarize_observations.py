@@ -19,6 +19,7 @@ from flask_cors import cross_origin
 import dateutil.parser as dateparser
 
 from api.utils import objects_divide
+from sqlalchemy.sql import text
 
 
 def construct_summarize_observations(name, engine):
@@ -173,16 +174,27 @@ def construct_summarize_observations(name, engine):
         try:
             conn = engine.connect()
 
-            q = """
-                SELECT COALESCE({grouping},{fallback}) --'Unknown'
-                ,count(*) AS records
-                FROM {table_name}
-                where {date_field} between {date_range_sql}
-                {additional_wheres}
-                GROUP BY {grouping}
-                ORDER BY {grouping}
-                """.format(grouping=grouping,fallback=fallback,table_name=table_name,
-                    date_field=date_field,date_range_sql=date_range_sql,additional_wheres=additional_wheres)
+            table_name_options = ['building_permits', 'crime']
+            grouping_options = ['ward', 'neighborhood_cluster', 'census_tract']
+
+            if ((table_name in table_name_options) and (grouping in grouping_options)):
+
+                q = """
+                    SELECT COALESCE({grouping},{fallback}) --'Unknown'
+                    ,count(*) AS records
+                    FROM {table_name}
+                    where {date_field} between {date_range_sql}
+                    {additional_wheres}
+                    GROUP BY {grouping}
+                    ORDER BY {grouping}
+                    """.format(grouping=grouping,
+                               fallback=fallback,
+                               table_name=table_name,
+                               date_field=date_field,
+                               date_range_sql=date_range_sql,
+                               additional_wheres=additional_wheres)
+            else:
+                return Null 
 
             proxy = conn.execute(q)
             results = proxy.fetchall()
