@@ -4343,6 +4343,20 @@
         "source_name": "construction_permits_rate",
         "sql_name": "construction_permits_rate",
         "type": "decimal"
+      },
+      {
+        "display_name": "Units Actively Subsidized",
+        "display_text": "Total residential units in actively subsidized projects",
+        "source_name": "active_subsidized_units",
+        "sql_name": "active_subsidized_units",
+        "type": "integer"
+      },
+      {
+        "display_name": "Units Subsidized as Percentage",
+        "display_text": "Percentage of residential units actively subsidized",
+        "source_name": "percent_units_subsidized",
+        "sql_name": "percent_units_subsidized",
+        "type": "decimal"
       }
     ]
   },

@@ -676,6 +676,11 @@ class LoadData(object):
             'acs_median_rent', 'acs_upper_rent_quartile'
         ]
 
+        # dict with key/list pairs for summing filtered column values
+        filtered_sum_args = {  # [method, table_name, filter_name]
+            'active_subsidized_units': ['sum','project','proj_units_assist_max']
+        }
+
         # dict with key/list pairs for calling summarize_observations method
         summarize_obs_field_args = {  # [method, table_name, filter_name]
             'crime_count': ['count', 'crime', 'all'],
@@ -710,6 +715,52 @@ class LoadData(object):
                 except Exception as e:
                     logger.error("Couldn't get census data for {}".format(field))
                     logger.error(e)
+
+            # get field value[s] as column sum[s] from [mar and] project table[s]
+            for field in filtered_sum_args:
+                #
+                # conditional branch below (commented out) for later 
+                # differentiation, when we decide to run 
+                # _get_residential_units from here as well
+                # 
+                # if  field == 'active_subsidized_units':
+                # 
+
+                try:
+
+                    with self.engine.connect() as conn:
+
+                        q = '''
+                            SELECT COALESCE({grouping},'Unknown')
+                                , sum(proj_units_assist_max) 
+                                AS active_subsidized_units
+                            FROM project
+                            where status = 'Active' OR status IS NULL
+                            GROUP BY {grouping}
+                            ORDER BY {grouping}
+                            '''.format(grouping=zone_type)
+                        rproxy  =   conn.execute(q)
+                        rrows    =   rproxy.fetchall()
+                        subs_units = dict()
+                        subs_units['items'] = {r[0]:r[1] for r in rrows
+                            if r[0] != None and r[0] != ''
+                            }
+                        subs_units['grouping'] = zone_type
+                        subs_units['data_id'] = 'active_subsidized_units'
+                        field_values[field]  = subs_units['items']
+
+                        denominator = res_units_by_zone_type[zone_type]
+                        subs_rate = self._items_divide(subs_units, denominator)
+                        subs_perc = self._scale(subs_rate, 100)  # per 100
+                        field_values['percent_units_subsidized'] =  subs_perc['items']
+
+                # TODO do better error handling - 
+                # for interim development purposes only
+                except Exception as e:
+                    return {'items': None
+                        , 'notes': "Calculation failed for subsidy rates: {}".format(e)
+                        , 'grouping': zone_type
+                        , 'data_id': 'active_subsidized_units'}
 
             # get field value from building permits and crime table
             for field in sorted(summarize_obs_field_args,reverse=True): 
@@ -1011,7 +1062,6 @@ class LoadData(object):
             additional_wheres += " AND OFFENSE IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
         elif filter_name == 'nonviolent':
             additional_wheres += " AND OFFENSE NOT IN ('ROBBERY','HOMICIDE','ASSAULT W/DANGEROUS WEAPON','SEX ABUSE')"
-
 
         # Fallback for an invalid filter
         else:
