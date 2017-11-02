@@ -58,11 +58,12 @@ from housinginsights.ingestion.Manifest import Manifest
 from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
+
 class LoadData(object):
 
     def __init__(self, database_choice=None, meta_path=None,
                  manifest_path=None, keep_temp_files=True, 
-                 drop_tables=False,debug=False):
+                 drop_tables=False, debug=False):
         """
         Initializes the class with optional arguments. The default behaviour
         is to load the local database with data tracked from meta.json
@@ -82,6 +83,7 @@ class LoadData(object):
             self.database_choice = 'docker_database'
         else:
             self.database_choice = database_choice
+
         if meta_path is None:
             meta_path = os.path.abspath(os.path.join(_scripts_path,
                                                      'meta.json'))
@@ -90,13 +92,10 @@ class LoadData(object):
                                                          'manifest.csv'))
         self._keep_temp_files = keep_temp_files
 
-        
-
         # load given meta.json and manifest.csv files into memory
         self.meta = ingestionfunctions.load_meta_data(meta_path)
         self.manifest = Manifest(manifest_path)
 
-        
         # setup engine for database_choice
         self.engine = dbtools.get_database_engine(self.database_choice)
 
@@ -106,8 +105,7 @@ class LoadData(object):
         self._failed_table_count = 0
 
         self.drop_tables = drop_tables
-        self.debug=debug
-
+        self.debug = debug
 
     def _drop_tables(self):
         """
@@ -131,13 +129,13 @@ class LoadData(object):
         return query_result
 
     def remove_tables(self, tables):
-        '''
+        """
         Used when you want to update only part of the database. Drops the table
         and deletes all associated rows in the sql manifest. Run this before
         updating data in tables that have added or removed columns.
 
         tables: a list of table names to be deleted
-        '''
+        """
         if 'all' in tables:
             self._drop_tables()
             logger.info('Dropped all tables from database')
@@ -164,9 +162,8 @@ class LoadData(object):
 
                 except ProgrammingError as e:
                     logger.error("Couldn't remove table {}".format(table))
-                    if self.debug == True:
+                    if self.debug:
                         raise e
-
 
     def _meta_json_to_database(self):
         """
@@ -377,16 +374,18 @@ class LoadData(object):
                                         len(self.manifest)))
                     self._process_data_file(manifest_row=manifest_row)
                 processed_data_ids.append(manifest_row['unique_data_id'])
-            except:
-                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))        
+            except Exception as e:
+                logger.exception("Unable to process {}".format(manifest_row['unique_data_id']))
+                if self.debug:
+                    raise e
 
         return processed_data_ids
 
     def recalculate_database(self):
-        '''
+        """
         An alternative to 'rebuild' and 'update_database' methods - if no new data has been added but
         changes to the calculations are made, re-run the calculation routines.
-        '''
+        """
         try:
             #self._automap() #not yet used - created for potential use by calculated fields
             self._create_zone_facts_table()
@@ -399,11 +398,11 @@ class LoadData(object):
         return None
 
     def _automap(self):
-        '''
+        """
         Adding this in case it is useful for the update scripts for _populate_calculated_project_fields
         Did not end up using it for REAC score, but leaving it in case it is useful for future.
         Mimics automap method used in api
-        '''
+        """
         from sqlalchemy.ext.automap import automap_base
 
         Base = automap_base()
@@ -423,10 +422,10 @@ class LoadData(object):
         #self._WmataInfo = Base.classes.wmata_info
 
     def _populate_calculated_project_fields(self):
-        '''
+        """
         Adds values for calculated fields to the project table
         Assumes the columns have already been created due to meta.json
-        '''
+        """
         conn = self.engine.connect()
 
 
@@ -658,7 +657,6 @@ class LoadData(object):
             logger.error("Failed to create zone_facts table")
             if self.debug:
                 raise e
-
 
     def _populate_zone_facts_table(self,res_units_by_zone_type):
         """
@@ -1251,9 +1249,10 @@ class LoadData(object):
             # TODO - once cleaning is done, write row to psv file
             # TODO - consider using queue: once empty update db with psv data
             total_rows = len(csv_reader)
-            for idx, data_row in enumerate(csv_reader):
+            for idx, data_row in enumerate(csv_reader, 1):
                 if idx % 100 == 0:
-                    print("  on row ~{} of {}".format(idx,total_rows), end='\r', flush=True)
+                    print("  on row ~{} of {}".format(
+                        idx, total_rows), end='\r', flush=True)
 
                 try:
                     data_row.update(meta_only_fields)  # insert other field dict
@@ -1261,36 +1260,17 @@ class LoadData(object):
                     if clean_data_row is not None:
                         csv_writer.write(clean_data_row)
                 except Exception as e:
-                    logger.error("Error when trying to clean row index {} from the manifest_row {}".format(idx,manifest_row))
-                    if self.debug == True:
+                    logger.error("Error when trying to clean row index {} from"
+                                 " the manifest_row {}".format(idx,
+                                                               manifest_row))
+                    if self.debug:
                         raise e
-
-
-            # with concurrent.futures.ThreadPoolExecutor(
-            #         max_workers=100) as executor:
-            #     future_data = {executor.submit(
-            #         self._clean_data, idx, data_row, cleaner, table_name,
-            #         csv_reader.keys): (
-            #         idx, data_row) for idx, data_row in enumerate(csv_reader)}
-            #     for future in concurrent.futures.as_completed(future_data):
-            #         clean_data_row = future.result()
-            #         if clean_data_row is not None:
-            #             csv_writer.write(clean_data_row)
-            #
-            #     csv_writer.close()
-            #
-            #     # write the data to the database
-            #     self._update_database(sql_interface=sql_interface)
-            #
-            #     if not self._keep_temp_files:
-            #         csv_writer.remove_file()
-            #     end_time = time()
-            #     print("\nRun time= %s" % (end_time - start_time))
 
             csv_writer.close()
 
             # write the data to the database
-            self._update_database(sql_interface=sql_interface, manifest_row = manifest_row)
+            self._update_database(sql_interface=sql_interface,
+                                  manifest_row=manifest_row)
 
             if not self._keep_temp_files:
                 csv_writer.remove_file()
@@ -1340,7 +1320,7 @@ class LoadData(object):
 
         # TODO Need to figure out how to revert the removal if loading doesn't work??
         self._remove_existing_data(manifest_row=manifest_row)
-        self._remove_table_if_empty(manifest_row = manifest_row)
+        self._remove_table_if_empty(manifest_row=manifest_row)
             
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()
@@ -1400,7 +1380,7 @@ def main(passed_arguments):
                       manifest_path=manifest_path,
                       keep_temp_files=keep_temp_files,
                       drop_tables=drop_tables,
-                      debug = passed_arguments.debug)
+                      debug=passed_arguments.debug)
 
     #Remove tables before starting ingestion process
     if passed_arguments.remove_tables:
@@ -1414,7 +1394,7 @@ def main(passed_arguments):
     else:
         loader.rebuild()
 
-    if passed_arguments.skip_calculations==False:
+    if passed_arguments.skip_calculations is False:
         loader.recalculate_database()
     else:
         logger.info("Skipping recalculation of calculated database fields")
