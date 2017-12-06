@@ -8,7 +8,7 @@ var router = {
     isFilterInitialized: false,
     stateObj: {},
     initGate: function(){
-        if ( getState().initialProjectsRendered && getState().filterViewLoaded ) { // each stateChange triggers the gate function
+        if ( getState().initialProjectsRendered[0] && getState().filterViewLoaded[0] ) { // each stateChange triggers the gate function
                                                                                    // but both need to be true before calling
                                                                                    // initFilters. fixes bug whereby url decode
                                                                                    // was running before the filterControlsDict
