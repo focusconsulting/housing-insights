@@ -2,8 +2,8 @@
     open_data_dc.py
     ---------------
 
-    This file creates the 'building_permits', 'crime', and 'dc_tax' database
-    tables. Documentation for each dataset can be found on opendata.dc.gov
+    This file creates the 'building_permits', 'crime', 'dc_tax', and 'mar'
+    database tables. Documentation for each dataset can be found on opendata.dc.gov
     and the ETL README.
 
     To load the data, this file:
@@ -45,7 +45,12 @@ mapping = {
     # Tax Data. Seems to update every year. 
     'dc_tax': {
         2019: '496533836db640bcade61dd9078b0d63_53.csv',
-    }
+    },
+
+    # Master Address Repository: https://opendata.dc.gov/datasets/address-points
+    'mar': {
+        2019: 'aa514416aaf74fdc94748f1e56e7cc8a_0.csv'
+    },
 }
 
 def get_data_for_table(table_name):
@@ -66,12 +71,14 @@ def get_data_for_table(table_name):
     try:
         cursor.execute(f'DROP TABLE IF EXISTS {table_name}')
 
-        for year in mapping[table_name].keys():
+        for year in [2019]: # mapping[table_name].keys()):
             print(table_name, year)
             # Should there be a column designating the year?
-            pd.read_csv(mapping[table_name][year]).to_sql(table_name,
-                if_exists='append')
-        cursor.commit()
+            df = pd.read_csv(base+mapping[table_name][year])
+            print(df.head())
+            print(df.info(memory_usage='deep'))
+            #.to_sql(table_name, if_exists='append')
+        #cursor.commit()
 
     finally:
         cursor.close()
