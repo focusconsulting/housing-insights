@@ -2,7 +2,11 @@
     mar.py
     ------
 
-    Testing the mar data loading.
+    NOTE: This file (and API) may not be needed. A bulk download of the mar can
+    be found at:
+
+        - https://opendata.dc.gov/datasets/address-points/data
+        - https://opendata.dc.gov/pages/addressing-in-dc
 '''
 import requests
 
