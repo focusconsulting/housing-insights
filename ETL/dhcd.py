@@ -7,6 +7,12 @@
 
     TO-DO: Establish the outputs needed from this data, and clean some of the
     raw data in this file.
+
+    The data is used to create the projects and subsidies tables.
+
+    This data is combined with Projects.csv and Subsidies
+    from the Preservation Catalog (provided manually - on the s3).
+
 '''
 
 import requests

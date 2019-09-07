@@ -16,6 +16,8 @@
     this file will need to be updated each year with the convention set below.
     This will most likely change (some sort of ingestion file could be
     created).
+
+    TODO: DCHousing dataset.
 '''
 import requests
 import psycopg2
@@ -50,6 +52,12 @@ mapping = {
     # Master Address Repository: https://opendata.dc.gov/datasets/address-points
     'mar': {
         2019: 'aa514416aaf74fdc94748f1e56e7cc8a_0.csv'
+    },
+
+    # 'Affordable Housing Data': Seems to update regularly. 
+    # https://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62
+    'dc_housing': {
+        2019: '34ae3d3c9752434a8c03aca5deb550eb_62.csv'
     },
 }
 
