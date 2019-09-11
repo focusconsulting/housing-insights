@@ -15,7 +15,7 @@ census_tract | crime  | violent_crime  | non_violent_crime
 000300       |   108  |             4  |               104
 000400       |    25  |             0  |                25
 '''
-import utils
+from . import utils
 import pandas as pd
 
 def mark_violent(row):

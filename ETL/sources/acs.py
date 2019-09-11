@@ -26,7 +26,7 @@ fields = {
     'B25059_001E': 'upper_rent_quartile_in_dollars',
 }
 
-def get_acs_data(base):
+def get_acs_data():
     response = requests.get(base,
         params={
             'get': 'NAME,' + ','.join(fields.keys()),

@@ -31,7 +31,8 @@ crime = get_crime_data()
 #permits = get_permit_data()
 
 
-acs.merge(get_crime_for_year(crime_2019), left_on='tract', right_on='census_tract').head()
+print(acs.merge(crime, left_on='tract',
+    right_on='census_tract').head())
 
 
 # TODO - Building Permit Data: Depends on MAR
