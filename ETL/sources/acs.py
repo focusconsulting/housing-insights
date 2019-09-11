@@ -1,11 +1,10 @@
 '''
-    census.py
-    ---------
+    acs.py
+    ------
 
-    This file collects ACS data.
+    This file collects raw ACS data. It is used as the base file for
+    make_zone_facts.py
 
-    TO-DO: Establish the outputs needed from this data, and clean some of the
-    raw data in this file.
 '''
 from temp_credentials import key
 import requests
@@ -27,19 +26,19 @@ fields = {
     'B25059_001E': 'upper_rent_quartile_in_dollars',
 }
 
-response = requests.get(base,
+def get_acs_data(base):
+    response = requests.get(base,
         params={
             'get': 'NAME,' + ','.join(fields.keys()),
             'for': 'tract:*',
             'in': 'state:11',
             'key': key,
-            }
-)
+        }
+    )
 
-if response.status_code == 200:
-    data = response.json()
-    df = pd.DataFrame(data[1:], columns=data[0])
-    df = df.rename(columns=fields)
-    print(df.head())
-else:
-    print("Could not query")
+    try:
+        data = response.json()
+        df = pd.DataFrame(data[1:], columns=data[0])
+        return df.rename(columns=fields)
+    except:
+        raise ValueError("Could not query data!")

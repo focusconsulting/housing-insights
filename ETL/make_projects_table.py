@@ -10,6 +10,9 @@
         - DC Department of Housing and Community Development, using their API
 
     The data dictionary for this dataset is in {{ UPDATE ME }}.
+
+    X = Longitude
+    Y = Latitude
 '''
 import requests
 import pandas as pd
@@ -71,4 +74,23 @@ def load_dhcd():
     print('DHCD Response', r)
     return pd.DataFrame(xml_to_json.data(ElementTree.fromstring(r.text))['record'])
 
-df = load_prescat()
+prescat = load_prescat()
+prescat = pd.DataFrame(list(zip(prescat.columns.str.lower(),
+                                [1] * len(prescat.columns))),
+                                columns=['Features', 'prescat']
+)
+
+dchousing = load_dchousing()
+dchousing = pd.DataFrame(list(zip(dchousing.columns.str.lower(),
+                                [1] * len(dchousing.columns))),
+                                columns=['Features', 'dchousing']
+)
+
+
+dhcd = load_dhcd()
+dhcd = pd.DataFrame(list(zip(dhcd.columns.str.lower(),
+                                [1] * len(dhcd.columns))),
+                                columns=['Features', 'dhcd']
+)
+
+df = prescat.merge(dchousing, how='outer').merge(dhcd, how='outer').fillna(0)
