@@ -31,7 +31,8 @@ def get_crime_for_year(path):
     df.columns = df.columns.str.lower()
 
     # Todo, filter by start_date
-    df = df[['report_dat', 'census_tract', 'offense', 'method']]
+    df = df[['report_dat', 'census_tract', 'ward', 'neighborhood_cluster', 'offense', 'method']]
+    df['neighborhood_cluster'] = utils.just_digits(df['neighborhood_cluster'])
     df = filter_date(df)
 
     df.census_tract = df.census_tract.apply(utils.fix_tract)
@@ -50,4 +51,5 @@ def filter_date(df):
 def get_crime_data():
     paths = utils.get_paths_for_data('crime', years=utils.get_years())
     df = pd.concat([get_crime_for_year(path) for path in paths])
-    return df.groupby('census_tract')[['crime', 'violent_crime', 'non_violent_crime']].sum()
+    return [df.groupby(geo)[['crime', 'violent_crime', 'non_violent_crime']].sum() \
+            for geo in ['census_tract', 'neighborhood_cluster', 'ward']]

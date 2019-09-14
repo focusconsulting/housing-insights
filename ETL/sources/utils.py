@@ -4,7 +4,7 @@ utils.py
 
 This file has helper functions for loading and cleaning data.
 '''
-
+import re
 import datetime
 import numpy as np
 import pandas as pd
@@ -20,6 +20,10 @@ def fix_tract(tract_number):
     while len(tract_number) < 6:
         tract_number = '0' + tract_number
     return tract_number
+
+def just_digits(column):
+    column = column.astype(str)
+    return column.apply(lambda s: re.sub('[^0-9]', '', s).strip())
 
 def get_years():
     '''Returns this year and last year as integers.'''
