@@ -31,12 +31,4 @@ crime = get_crime_data()
 #permits = get_permit_data()
 
 
-print(acs.merge(crime, left_on='tract',
-    right_on='census_tract').head())
-
-
-# TODO - Building Permit Data: Depends on MAR
-#building_permits = pd.read_csv('https://opendata.arcgis.com/datasets/52e671890cb445eba9023313b1a85804_8.csv')
-#building_permits.columns = building_permits.columns.str.lower()
-#building_permits[['maraddressrepositoryid', 'permit_type_name']].head()
-#building_permits['permit_type_name'].apply(lambda x: 1 if x == 'CONSTRUCTION' else 0).head()
+df = acs.merge(crime, left_on='tract', right_on='census_tract')

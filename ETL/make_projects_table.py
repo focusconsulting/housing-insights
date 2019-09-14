@@ -17,7 +17,7 @@
 import requests
 import pandas as pd
 import geopandas as gp
-from sources.utils import S3
+import sources.utils
 from xml.etree import ElementTree
 from xmljson import parker as xml_to_json
 
@@ -40,26 +40,10 @@ def load_prescat():
     Loads the raw data from the preservation catalog.
     It is located in 'preservation_catalog' on the S3.
     '''
-    df = pd.read_csv(S3+'preservation_catalog/Project.csv')
+    df = pd.read_csv(utils.S3+'preservation_catalog/Project.csv')
     df.columns = df.columns.str.lower()
-    df = gp.GeoDataFrame(df,
-        geometry=gp.points_from_xy(df.proj_lon, df.proj_lat)
-    )
-
-    census_tracts_dc = gp.read_file(
-        ('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/'
-         'Demographic_WebMercator/MapServer/8/query?where=1%3D1&outFields='
-         'TRACT,Shape,GEOID,Shape_Length,Shape_Area&outSR=4326&f=json')
-    )
-    census_tracts_dc.columns = census_tracts_dc.columns.str.lower()
-
-    # Align spatial projects and join where the projects' point
-    # geometries are within the census tracts' polygon geometries.
-    df.crs = census_tracts_dc.crs
-    df = gp.sjoin(df, census_tracts_dc, op='within', how='left')
-
-    return df[preservation_catalog_columns+['tract']].rename(columns={'tract':
-        'census_tract'})
+    df = utils.get_census_tract_for_data(df, 'proj_lon', 'proj_lat')
+    return df[preservation_catalog_columns+['tract']]
 
 def load_dchousing():
     '''Loads the raw data from the opendata.dc.gov
@@ -108,4 +92,3 @@ def load_dhcd():
             params={'a': 'API_DoQuery', 'query': '{\'1\'.XEX.\'0\'}'})
     print('DHCD Response', r)
     return pd.DataFrame(xml_to_json.data(ElementTree.fromstring(r.text))['record'])
-

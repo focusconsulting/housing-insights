@@ -8,6 +8,7 @@ This file has helper functions for loading and cleaning data.
 import datetime
 import numpy as np
 import pandas as pd
+import geopandas as gp
 
 S3 = 'https://housing-insights.s3.amazonaws.com/'
 
@@ -40,3 +41,23 @@ def get_paths_for_data(data_category, years):
     df = pd.read_excel(S3+'data_sources.xlsx')
     return (df[(df.data_category == data_category) &
                (df.year.isin(years))]["url"].to_list())
+
+def get_census_tract_for_data(df, longitude_column, latitude_column):
+    '''Returns the data frame with a new column "tract".'''
+    df = gp.GeoDataFrame(df,
+        geometry=gp.points_from_xy(df[longitude_column], df[latitude_column])
+    )
+
+    # Grab census tract geometries from open data DC.
+    census_tracts_dc = gp.read_file(
+        ('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/'
+         'Demographic_WebMercator/MapServer/8/query?where=1%3D1&outFields='
+         'TRACT,Shape,GEOID,Shape_Length,Shape_Area&outSR=4326&f=json')
+    )
+    census_tracts_dc.columns = census_tracts_dc.columns.str.lower()
+
+    # Align spatial projects and join where the projects' point
+    # geometries are within the census tracts' polygon geometries.
+    df.crs = census_tracts_dc.crs
+    return gp.sjoin(df, census_tracts_dc, op='within', how='left')
+
