@@ -6,7 +6,7 @@
     the front-end via /api/projects/. It depends on the following data sources:
 
         - Projects.csv, From the Preservation Catalog Folder in the s3
-        - 'Affordable Housing Data': Updated regularly from open data DC
+        - 'Affordable Housing Data': Updated regularly from open data DC (MAR)
         - DC Department of Housing and Community Development, using their API
 
     The data dictionary for this dataset is in {{ UPDATE ME }}.
@@ -16,15 +16,50 @@
 '''
 import requests
 import pandas as pd
+import geopandas as gp
+from sources.utils import S3
 from xml.etree import ElementTree
 from xmljson import parker as xml_to_json
+
+preservation_catalog_columns = [
+    "nlihc_id",
+    "status", #active
+    "cluster_tr2000",
+    "ward2012",
+    "proj_units_tot",
+    "proj_lat",
+    "proj_lon",
+    "proj_name",
+    "proj_addre",
+    "proj_zip",
+]
+
 
 def load_prescat():
     '''
     Loads the raw data from the preservation catalog.
     It is located in 'preservation_catalog' on the S3.
     '''
-    return pd.read_csv('https://housing-insights.s3.amazonaws.com/preservation_catalog/Project.csv')
+    df = pd.read_csv(S3+'preservation_catalog/Project.csv')
+    df.columns = df.columns.str.lower()
+    df = gp.GeoDataFrame(df,
+        geometry=gp.points_from_xy(df.proj_lon, df.proj_lat)
+    )
+
+    census_tracts_dc = gp.read_file(
+        ('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/'
+         'Demographic_WebMercator/MapServer/8/query?where=1%3D1&outFields='
+         'TRACT,Shape,GEOID,Shape_Length,Shape_Area&outSR=4326&f=json')
+    )
+    census_tracts_dc.columns = census_tracts_dc.columns.str.lower()
+
+    # Align spatial projects and join where the projects' point
+    # geometries are within the census tracts' polygon geometries.
+    df.crs = census_tracts_dc.crs
+    df = gp.sjoin(df, census_tracts_dc, op='within', how='left')
+
+    return df[preservation_catalog_columns+['tract']].rename(columns={'tract':
+        'census_tract'})
 
 def load_dchousing():
     '''Loads the raw data from the opendata.dc.gov
@@ -74,23 +109,3 @@ def load_dhcd():
     print('DHCD Response', r)
     return pd.DataFrame(xml_to_json.data(ElementTree.fromstring(r.text))['record'])
 
-prescat = load_prescat()
-prescat = pd.DataFrame(list(zip(prescat.columns.str.lower(),
-                                [1] * len(prescat.columns))),
-                                columns=['Features', 'prescat']
-)
-
-dchousing = load_dchousing()
-dchousing = pd.DataFrame(list(zip(dchousing.columns.str.lower(),
-                                [1] * len(dchousing.columns))),
-                                columns=['Features', 'dchousing']
-)
-
-
-dhcd = load_dhcd()
-dhcd = pd.DataFrame(list(zip(dhcd.columns.str.lower(),
-                                [1] * len(dhcd.columns))),
-                                columns=['Features', 'dhcd']
-)
-
-df = prescat.merge(dchousing, how='outer').merge(dhcd, how='outer').fillna(0)
