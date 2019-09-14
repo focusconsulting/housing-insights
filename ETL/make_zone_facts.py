@@ -23,12 +23,16 @@ data, and the geograpic boundaries. The output columns for this file are:
 '''
 
 import pandas as pd
-from sources import get_acs_data, get_crime_data
+from sources import get_acs_data, get_crime_data, get_permit_data
 
+print("Grabbing ACS data")
 acs = get_acs_data()
+
+print("Grabbing permit data")
+permit = get_permit_data()
+
+print("Grabbing crime data")
 crime = get_crime_data()
 
-#permits = get_permit_data()
-
-
-df = acs.merge(crime, left_on='tract', right_on='census_tract')
+df = acs.merge(permit, left_on='tract', right_on='tract')
+df = df.merge(crime, left_on='tract', right_on='census_tract')
