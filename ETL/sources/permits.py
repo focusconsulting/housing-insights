@@ -25,8 +25,9 @@ def get_permit_data():
             lambda x: 1 if x == 'CONSTRUCTION' else 0)
     df['total_permits'] = 1
 
-    # Merge to tract
+    # Get census tract
     df = utils.get_census_tract_for_data(df, 'longitude', 'latitude')
-    df = df[['tract', 'construction_permits', 'total_permits']]
-    return df.groupby('tract').sum()
+    df = df[['tract', 'ward', 'neighborhoodcluster', 'construction_permits', 'total_permits']]
 
+    return [df.groupby(geo)[[geo, 'construction_permits', 'total_permits']].sum() \
+            for geo in ['tract', 'neighborhoodcluster', 'ward']]

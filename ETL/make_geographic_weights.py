@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # Make lookup tables
     tract_nh = get_areas(tract_geo, neighborhood_geo)
     tract_nh.columns = ['tract', 'neighborhood_cluster', 'weight']
-    tract_nh.to_csv('tract_neighborhood_weights.csv', index=False)
+    tract_nh.to_csv('tract_neighborhood_cluster_weights.csv', index=False)
 
     tract_ward = get_areas(tract_geo, ward_geo)
     tract_ward.columns = ['tract', 'ward', 'weight']

@@ -26,8 +26,7 @@ import pandas as pd
 from sources import get_acs_data, get_crime_data, get_permit_data
 
 print("Grabbing ACS data")
-acs = get_acs_data()
-#acs_tract, acs_cluster, acs_ward = get_acs_data()
+acs_tract, acs_cluster, acs_ward = get_acs_data()
 
 print("Grabbing permit data")
 permit_tract, permit_cluster, permit_ward = get_permit_data()
@@ -35,5 +34,8 @@ permit_tract, permit_cluster, permit_ward = get_permit_data()
 print("Grabbing crime data")
 crime_tract, crime_cluster, crime_ward = get_crime_data()
 
-#df = acs.merge(permit, left_on='tract', right_on='tract')
-#df = df.merge(crime, left_on='tract', right_on='census_tract')
+def combine_at_level(acs, permit, crime):
+    '''Combines ACS, permit, and crime data for a zone type.'''
+    df = acs.merge(permit)
+    df = df.merge(crime)
+    return df
