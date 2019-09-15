@@ -63,7 +63,7 @@ def make_base_table():
         combine_at_level(acs_tract, permit_tract, crime_tract, level='tract'),
         combine_at_level(acs_cluster, permit_cluster, crime_cluster, level='neighborhood_cluster'),
         combine_at_level(acs_ward, permit_ward, crime_ward, level='ward'),
-    ])
+    ], sort=True)
 
 def make_rates(df):
     '''Scales variables by the population.'''
