@@ -15,14 +15,16 @@
     Y = Latitude
 '''
 import requests
+import numpy as np
 import pandas as pd
 import geopandas as gp
-import sources.utils
+from sources import utils
 from xml.etree import ElementTree
 from xmljson import parker as xml_to_json
 
 preservation_catalog_columns = [
     "nlihc_id",
+    "proj_address_id",
     "status", #active
     "cluster_tr2000",
     "ward2012",
@@ -32,10 +34,21 @@ preservation_catalog_columns = [
     "proj_name",
     "proj_addre",
     "proj_zip",
+    "proj_units_assist_max", # Subsidized units (max)
+    "proj_owner_type",
+
+    # From subsidy file? 
+    #"subsidy_start_first",
+    #"subsidy_end_last",
+
+    # Most Recent TOPA Data
+    # Number of TOPA Notices
+    # Most Recent REAC Score
+    # Most Recent REAC Date
 ]
 
 
-def load_prescat():
+def load_preservation_catalog_projects():
     '''
     Loads the raw data from the preservation catalog.
     It is located in 'preservation_catalog' on the S3.
@@ -43,35 +56,46 @@ def load_prescat():
     df = pd.read_csv(utils.S3+'preservation_catalog/Project.csv')
     df.columns = df.columns.str.lower()
     df = utils.get_census_tract_for_data(df, 'proj_lon', 'proj_lat')
-    return df[preservation_catalog_columns+['tract']]
+    return clean_prescat(df[preservation_catalog_columns+['tract']])
+
+def clean_prescat(df):
+    '''Cleans up the prescat df.'''
+    #df['subsidy_start'] = pd.to_datetime(df.subsidy_start_first.replace('N', np.NaN))
+    #df['subsidy_end'] = pd.to_datetime(df.subsidy_end_last.replace('N', np.NaN))
+
+    df['neighborhood_cluster'] = utils.just_digits(df.cluster_tr2000)
+    df['ward'] = utils.just_digits(df.ward2012)
+    return df
+
+def add_taxes():
+    '''Adds the Project Taxable Value attribute to the data.'''
+    # Tax Data. Seems to update every year. 
+    return pd.read_csv('https://opendata.arcgis.com/datasets/496533836db640bcade61dd9078b0d63_53.csv')
+
 
 def load_dchousing():
     '''Loads the raw data from the opendata.dc.gov
     Current columns:
-        - 'X'
-        - 'Y'
-        - 'OBJECTID'
+        - 'ADDRESS_ID'
+        - 'FULLADDRESS'
         - 'MAR_WARD'
-        - 'ADDRESS'
         - 'PROJECT_NAME'
         - 'STATUS_PUBLIC'
-        - 'AGENCY_CALCULATED'
         - 'TOTAL_AFFORDABLE_UNITS'
         - 'LATITUDE'
         - 'LONGITUDE'
-        - 'AFFORDABLE_UNITS_AT_0_30_AMI'
-        - 'AFFORDABLE_UNITS_AT_31_50_AMI'
-        - 'AFFORDABLE_UNITS_AT_51_60_AMI'
-        - 'AFFORDABLE_UNITS_AT_61_80_AMI'
-        - 'AFFORDABLE_UNITS_AT_81_AMI'
-        - 'CASE_ID'
-        - 'ADDRESS_ID'
-        - 'XCOORD'
-        - 'YCOORD'
-        - 'FULLADDRESS'
-        - 'GIS_LAST_MOD_DTTM'
     '''
-    return pd.read_csv('https://opendata.arcgis.com/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.csv')
+    # TODO: Rename all of the columns to match prescat
+    df = pd.read_csv('https://opendata.arcgis.com/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.csv')
+    df = df[['ADDRESS_ID',
+         'FULLADDRESS',
+         'MAR_WARD',
+         'PROJECT_NAME',
+         'STATUS_PUBLIC',
+         'TOTAL_AFFORDABLE_UNITS',
+         'LATITUDE',
+         'LONGITUDE',]]
+    return df
 
 def load_dhcd():
     '''Loads the raw data from the DHCD
