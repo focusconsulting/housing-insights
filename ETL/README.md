@@ -26,7 +26,7 @@ That script:
 The `zone_facts` table has the following information.
 
 | Column                  | Description                                                              |
-|----------------------------------------------------------------------------------------------------|
+|-------------------------|--------------------------------------------------------------------------|
 | zone_type               | Census tract, neighborhood cluster, or ward.                             |
 | zone                    | Given the zone type, the number for that zone.                           |
 | poverty_rate            | The population in poverty divided by the total population.               |
@@ -50,7 +50,7 @@ This project uses the latest 5 year estimates from the ACS, which is currently 2
 specifically are:
 
 | Detail Table |	Table Subject |	Description |
-|---------------------------------------------|
+|--------------|----------------|-------------|
 | B01003_001E	 | Age and Sex	| Total Population
 | B25057_001E	 | Housing Characteristics	| LOWER CONTRACT RENT QUARTILE (DOLLARS)
 | B25058_001E	 | Housing Characteristics	| MEDIAN CONTRACT RENT (DOLLARS)
