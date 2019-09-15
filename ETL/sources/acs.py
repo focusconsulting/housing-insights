@@ -54,6 +54,7 @@ def get_zone_data(tract_df, zone_type):
     weights.tract = weights.tract.apply(utils.fix_tract)
 
     df = tract_df.merge(weights, left_on='tract', right_on='tract')
+    df[zone_type] = utils.just_digits(df[zone_type])
     for col in fields.values():
         df[col] = df[col].astype(float) * df.weight
 

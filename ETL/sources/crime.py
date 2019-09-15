@@ -35,7 +35,8 @@ def get_crime_for_year(path):
     df['neighborhood_cluster'] = utils.just_digits(df['neighborhood_cluster'])
     df = filter_date(df)
 
-    df.census_tract = df.census_tract.apply(utils.fix_tract)
+    df['tract'] = df.census_tract.apply(utils.fix_tract)
+    df = df.drop('census_tract', axis=1)
     df['violent_crime'] = df.apply(mark_violent, axis=1)
 
     df['non_violent_crime'] = df.violent_crime.apply(lambda x: 1 if x == 0 else 0)
@@ -52,4 +53,4 @@ def get_crime_data():
     paths = utils.get_paths_for_data('crime', years=utils.get_years())
     df = pd.concat([get_crime_for_year(path) for path in paths])
     return [df.groupby(geo)[['crime', 'violent_crime', 'non_violent_crime']].sum() \
-            for geo in ['census_tract', 'neighborhood_cluster', 'ward']]
+            for geo in ['tract', 'neighborhood_cluster', 'ward']]
