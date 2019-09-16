@@ -5,12 +5,28 @@ utils.py
 This file has helper functions for loading and cleaning data.
 '''
 import re
+import yaml
 import datetime
 import numpy as np
 import pandas as pd
 import geopandas as gp
 
 S3 = 'https://housing-insights.s3.amazonaws.com/'
+
+def get_credentials(keys):
+    '''
+    Returns the credientials for the keys given.
+
+    Input: keys a string of a single key, or a list of strings.
+    Returns A string or list of strings of credentials.
+    '''
+    with open('./secrets.yml', 'r') as secrets:
+        d = yaml.safe_load(secrets)
+    if isinstance(keys, str):
+        return d[keys]
+    if not isinstance(keys, list):
+        raise ValueError("Keys must be a string or list of strings.")
+    return [d[key] for key in keys]
 
 def fix_tract(tract_number):
     '''Makes a tract number a string of length six with leading zeroes.'''
