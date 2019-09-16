@@ -13,6 +13,27 @@ ETL process may be run on a local machine.
 ## Usage
 TBD
 
+## Projects Table
+The project table is created by combining data from the Preservation Catalog and 
+affordable housing data from Open Data DC.
+
+**Columns**:
+- `nlihc_id`: Preservation catalog only
+- `address_id`: Preservation catalog and open data DC
+- `status`: Preservation catalog and open data DC
+- `total_units`: Preservation catalog and open data DC
+- `latitude`: Preservation catalog and open data DC
+- `longitude`: Preservation catalog and open data DC
+- `name`: Preservation catalog and open data DC
+- `address`: Preservation catalog and open data DC
+- `zip`: Preservation catalog only
+- `units_assist_max`: Preservation catalog only
+- `owner_type`: Preservation catalog only
+- `tract`: Preservation catalog and open data DC
+- `neighborhood_cluster`: Preservation catalog and open data DC
+- `ward`: Preservation catalog and open data DC
+- `source`: Preservation catalog and open data DC
+
 ## The Zone Facts Table
 Half of the information available to the end user comes from the `zone_facts`
 database table. It is constructed through the script `make_zone_facts.py`.
