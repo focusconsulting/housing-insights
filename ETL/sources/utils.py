@@ -65,3 +65,25 @@ def get_census_tract_for_data(df, longitude_column, latitude_column):
     df.crs = census_tracts_dc.crs
     return gp.sjoin(df, census_tracts_dc, op='within', how='left')
 
+def get_cluster_for_data(df, longitude_column, latitude_column):
+    '''Returns the data frame with a new column "neighborhood_cluster".'''
+    df = gp.GeoDataFrame(df,
+        geometry=gp.points_from_xy(df[longitude_column], df[latitude_column])
+    )
+
+    # Grab census tract geometries from open data DC.
+    cluster_file = gp.read_file(
+        ('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/'
+         'Administrative_Other_Boundaries_WebMercator/MapServer/17/'
+         'query?where=1%3D1&outFields=NAME,Shape,Shape_Length,'
+         'Shape_Area&outSR=4326&f=json')
+    )
+
+    cluster_file.columns = cluster_file.columns.str.lower()
+    cluster_file = cluster_file.rename({'name': 'neighborhood_cluster'})
+
+    # Align spatial projects and join where the projects' point
+    # geometries are within the census tracts' polygon geometries.
+    df.crs = cluster_file.crs
+    return gp.sjoin(df, cluster_file, op='within', how='left')
+
