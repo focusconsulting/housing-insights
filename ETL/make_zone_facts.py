@@ -23,7 +23,7 @@ The output columns for this file are:
     - building_permits_rate
     - construction_permits_rate
 '''
-
+import psycopg2
 import pandas as pd
 from sources import get_acs_data, get_crime_data, get_permit_data
 
@@ -78,3 +78,17 @@ def make_rates(df):
 
 if __name__ == '__main__':
     df = make_rates(make_base_table())
+    # We will move this later
+    connection = psycopg2.connect(
+            dbname='housinginsights_docker',
+            user='codefordc',
+            password='codefordc',
+            host='postgres'
+    )
+    cursor = connection.cursor()
+
+    try:
+        df.to_sql('new_zone_facts', connection, if_exists='replace')
+    finally:
+        cursor.close()
+        connection.close()

@@ -48,12 +48,13 @@ application = Flask(__name__)
 # Flask Restless Setup
 #######################
 # Allow us to test locally if desired
-if 'docker' in sys.argv:
-    database_choice = 'docker_database'
-elif 'remote' in sys.argv:
-    database_choice = 'remote_database'
-else:
-    database_choice = 'codefordc_remote_admin'
+#if 'docker' in sys.argv:
+#    database_choice = 'docker_database'
+#elif 'remote' in sys.argv:
+#    database_choice = 'remote_database'
+#else:
+#    database_choice = 'codefordc_remote_admin'
+database_choice = 'docker_database'
 
 with open('housinginsights/secrets.json') as f:
     secrets = json.load(f)
@@ -219,6 +220,62 @@ def get_meta():
     result = conn.execute("SELECT meta FROM meta")
     row = result.fetchone()
     return row[0]
+
+#### MOVE THIS LATER
+def get_docker_db():
+    connection = psycopg2.connect(
+            dbname='housinginsights_docker',
+            user='codefordc',
+            password='codefordc',
+            host='postgres'
+    )
+    cursor = connection.cursor()
+    return connection, cursor
+
+@application.route('/api/make_nick', methods=['GET'])
+@cross_origin()
+def make_nick():
+    '''My test route to get stuff.'''
+
+    connection, cursor = get_docker_db()
+    try:
+        cursor.execute('''
+            DROP TABLE IF EXISTS nick;
+            CREATE TABLE nick AS
+            SELECT generate_series(1, 8) AS num;
+        ''')
+        return '<h1>Success</h1>'
+    finally:
+        cursor.close()
+        connection.close()
+
+@application.route('/api/get_nick', methods=['GET'])
+@cross_origin()
+def get_nick():
+    '''My test route to get stuff.'''
+
+    cursor = connection.cursor()
+    connection, cursor = get_docker_db()
+
+    try:
+        cursor.execute('SELECT * FROM nick;')
+        return jsonify(cursor.fetchall())
+    finally:
+        cursor.close()
+        connection.close()
+
+@application.route('/api/new_zone_facts', methods=['GET'])
+@cross_origin()
+def new_zone_facts():
+    '''My test route to get stuff.'''
+    cursor = connection.cursor()
+    connection, cursor = get_docker_db()
+    try:
+        cursor.execute('SELECT * FROM new_zone_facts;')
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
 
 
 ##########################################
