@@ -24,7 +24,7 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
       metaData: "deprecated.json", //"http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta",
 
       filterData: "filter.json", //"http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter",
-      project: "little_project.json", //"http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
+      project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
       layerData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/zone_facts/<source_data_name>/<grouping>"
     }
     
