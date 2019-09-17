@@ -1,18 +1,30 @@
+# Back End of Housing Insights
+This portion of the project holds the "back end" of the website implemented in python. It contains three main things:
 
+1. `application.py`: This is the main application file and ultimate server-side logic for the tool.
+2. `ETL`: Extract, Transform, Load. This set of code is responsible for loading in data sources into the tool.
+3. `API`: Application Programming Interface. This set of code is responsible for the routes accessible to the front end of the website.
 
-Configuring the Amazon Web Services Command Line Interface (awscli)
--------------------------------------------------------------------
+Both `ETL` and `API` have their own `README` documents with details of their implementation.
 
-Looking for instructions on downloading data from S3? These have moved to `our website <http://housinginsights.org/resources/aws-sync.html/>`_.
+### Elastic Beanstalk Deployment Information
+- Install the Elastic Beanstalk Command Line Interface: `$ pip install awsebcli`
+- Configure a profile that uses the AWS credentials for our Code for DC API account: `aws configure --profile codefordc`
+- Enter the public and secret keys provided to you by an admin; default location and output format can be None (just press enter)
 
+#### Normal use:
+1. Navigate to the housing-insights/python folder in your local repo
+2. run `eb deploy housinginsights-codefordc --profile codefordc` (here housinginsights-codefordc is the elastic beanstalk environment name, and codefordc is the name of the credentials saved in your config file above)
+3. Wait a few minutes while the server restarts w/ new code
+4. Test that the api urls work properly, including whichever changes you've made. Visit http://housinginsights.us-east-1.elasticbeanstalk.com/
 
-Getting data from APIs
-======================
-
-Using get_api_data.py
--------------
-
-get_api_data.py is a command line script to pull data from external data sources. 
-It uses modules in the housinginsights/sources directory to pull information from external data sources.
-See get_api_data.py for detailed instructions on how to run and parameters. 
-
+#### Deploy to staging enviroment to test
+1. Navigate to housing-insights/python folder in your local repo
+2. run `eb create --profile codefordc --instance_type t2.small --single`
+3. At the prompt, enter the name housinginsights-staging
+4. DNS CNAME can be default (i.e. housinginsights-staging)
+5. Select classic load balancer type. This will both create and deploy the current code. Wait while the server starts up, and then test the api url to make sure your changes behave as expected.
+6. If you need to make any edits and deploy to a running test server, use: `eb deploy housinginsights-staging --profile codefordc`
+7. **Important!** be sure to terminate the staging environment when you're done! You should only have this staging environment running while you're actively working on testing your live code. 
+8. Run `eb terminate housinginsights-staging`, or visit the Elastic Beanstalk instance in the [web console](https://codefordc.signin.aws.amazon.com/console).  Note, be sure to include the name of the instance to terminate, since the default if none is specified is the production server. 
+9. Use `eb list --profile codefordc` to verify that the instance has been terminated
