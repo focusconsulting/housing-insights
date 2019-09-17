@@ -1,0 +1,13 @@
+name: housing-insights
+channels:
+dependencies:
+    - pandas
+    - numpy
+    - flask
+    - sqlalchemy
+    - geopandas
+    - requests
+    - pip:
+        - Flask-Restless
+        - xlrd
+        - pyyaml
