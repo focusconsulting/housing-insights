@@ -36,7 +36,7 @@ services:
 
     sandbox:
         build:
-            context: python
+            context: back_end 
         volumes:
             - .:/repo
         command: tail -f /dev/null

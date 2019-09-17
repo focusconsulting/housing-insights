@@ -10,11 +10,11 @@ COPY environment.yml .
 COPY requirements.txt .
 
 # Install dependencies (needs updating)
-#RUN conda env create -f environment.yml
-#
-## Make sure that the environment updates appropriately
-#RUN conda env update -n housing-insights -f environment.yml
-RUN pip install -r requirements.txt
+RUN conda env create -f environment.yml
+
+# Make sure that the environment updates appropriately
+RUN conda env update -n housing-insights -f environment.yml
+#RUN pip install -r requirements.txt
 
 # Activate environment
 RUN echo "export PATH=/opt/conda/envs/housing-insights/bin:$PATH" >> /root/.bashrc

@@ -25,6 +25,7 @@ The output columns for this file are:
 '''
 import psycopg2
 import pandas as pd
+from sqlalchemy import create_engine
 from sources import get_acs_data, get_crime_data, get_permit_data
 
 scaled_columns = [
@@ -79,16 +80,10 @@ def make_rates(df):
 if __name__ == '__main__':
     df = make_rates(make_base_table())
     # We will move this later
-    connection = psycopg2.connect(
-            dbname='housinginsights_docker',
-            user='codefordc',
-            password='codefordc',
-            host='postgres'
-    )
-    cursor = connection.cursor()
 
+    engine = create_engine('postgresql://codefordc:codefordc@postgres:5432/housinginsights_docker')
+    connection = engine.connect()
     try:
         df.to_sql('new_zone_facts', connection, if_exists='replace')
     finally:
-        cursor.close()
         connection.close()
