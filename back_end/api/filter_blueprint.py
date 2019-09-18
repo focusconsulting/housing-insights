@@ -16,57 +16,40 @@ def construct_filter_blueprint(name, engine):
     def filter_data():
 
         ward_selects, cluster_selects, tract_selects = get_zone_facts_select_columns(engine)
-
+    # TODO: Put this somewhere else
         q = """
-                select
-                p.nlihc_id
-                , p.proj_addre
-                , p.proj_name
-                , CONCAT(p.proj_name, ': ', p.proj_addre) as proj_name_addre
-                , p.proj_units_tot
-                , p.proj_units_assist_max
-                , cast(p.proj_units_assist_max / p.proj_units_tot as decimal(3,2)) as percent_affordable_housing --TODO make this calculated field in projects table
-                , p.hud_own_type
-                , p.ward
-                , p.anc
-                , p.census_tract
-                , p.neighborhood_cluster
-                , p.neighborhood_cluster_desc
-                , p.zip
-                , p.most_recent_reac_score_num
-                , p.most_recent_reac_score_date
-                , p.sum_appraised_value_current_total
-                , p.topa_count
-                , p.most_recent_topa_date
-                , p.proj_units_tot_mar
-                , p.in_prescat
-                , p.in_dchousing
-                , p.in_dhcd
-                , p.proj_owner_type
-                , p.proj_ayb
-                
-                , s.portfolio
-                , s.agency
-                , to_char(s.poa_start, 'YYYY-MM-DD') as poa_start
-                , to_char(s.poa_end, 'YYYY-MM-DD') as poa_end
-                , to_char(s.poa_start_orig, 'YYYY-MM-DD') as poa_start_orig
-
-                , s.units_assist
-                , s.subsidy_id
-                
+            SELECT
+                project.nlihc_id,
+                project.census_tract,
+                project.neighborhood_cluster,
+                project.ward,
+                project.proj_name,
+                project.proj_addre,
+                project.proj_units_tot,
+                project.proj_units_assist_max,
+                project.proj_owner_type,
+                ssubsidy.portfolio,
+                to_char(subsidy.poa_start, 'YYYY-MM-DD') as poa_start,
+                to_char(subsidy.poa_end, 'YYYY-MM-DD') as poa_end,
+                project.most_recent_topa_date,
+                project.topa_count,
+                project.most_recent_reac_score_num,
+                project.most_recent_reac_score_date,
+                project.sum_appraised_value_current_total,
             """
         q += ward_selects
         q += cluster_selects
         q += tract_selects
 
         q += """
-                from project as p
-                
-                left join zone_facts as z1 on z1.zone = p.ward
-                left join zone_facts as z2 on z2.zone = p.neighborhood_cluster
-                left join zone_facts as z3 on z3.zone = p.census_tract
-
-                left join subsidy as s on s.nlihc_id = p.nlihc_id
+                FROM project
+                LEFT JOIN zone_facts AS z1
+                       ON z1.zone = project.ward
+                LEFT JOIN zone_facts AS z2
+                       ON z2.zone = project.neighborhood_cluster
+                LEFT JOIN zone_facts AS z3
+                       ON z3.zone = project.census_tract
+                LEFT JOIN subsidy AS s on s.nlihc_id = p.nlihc_id
             """
 
         conn = engine.connect()
