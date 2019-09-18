@@ -1,0 +1,31 @@
+{
+  "objects": [
+    {
+      "nlihc_id": "NL000135",
+      "latitude": 38.92387281, 
+      "longitude": -77.03938306,
+      "proj_name": "Glenn Arms Apts", 
+      "proj_addre": "2518 17th Street NW; 2524 17th Street NW", 
+      "ward": "Ward 1", 
+      "proj_units_assist_max": "THIS FIELD IS NEEDED",
+      "proj_units_tot": 45, 
+      "subsidy_end_first": "THIS FIELD IS NEEDED", 
+      "subsidy_end_last": "THIS FIELD IS NEEDED", 
+      "neighborhood_cluster_desc": "THIS FIELD IS OPTIONAL"
+    }, 
+    {
+      "nlihc_id": "NL000404", 
+      "latitude": 38.95164933, 
+      "longitude": -77.01206642, 
+      "proj_name": "5030 First St NW", 
+      "proj_addre": "5030 1st Street NW", 
+      "ward": "Ward 4",
+      "proj_name_addre": "5030 First St NW: 5030 1st Street NW", 
+      "proj_units_assist_max": 12, 
+      "proj_units_tot": null, 
+      "subsidy_end_first": null, 
+      "subsidy_end_last": null, 
+      "neighborhood_cluster_desc": "THIS FIELD IS OPTIONAL"
+    }
+  ]
+}
