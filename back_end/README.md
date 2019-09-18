@@ -28,3 +28,61 @@ Both `ETL` and `API` have their own `README` documents with details of their imp
 7. **Important!** be sure to terminate the staging environment when you're done! You should only have this staging environment running while you're actively working on testing your live code. 
 8. Run `eb terminate housinginsights-staging`, or visit the Elastic Beanstalk instance in the [web console](https://codefordc.signin.aws.amazon.com/console).  Note, be sure to include the name of the instance to terminate, since the default if none is specified is the production server. 
 9. Use `eb list --profile codefordc` to verify that the instance has been terminated
+
+
+### Temporary Notes
+
+#### Columns needed for filter api route
+These seem to be the ones needed, as you can see a few mistakes made it in to the end. These will need to be changed with the front end.
+```
+- nlihc_id
+- census_tract
+- neighborhood_cluster
+- ward
+- proj_name
+- proj_addre
+- proj_units_tot
+- proj_units_assist_max
+- proj_owner_type
+- portfolio
+- poa_end
+- poa_start
+- most_recent_topa_date
+- topa_count
+- most_recent_reac_score_num
+- most_recent_reac_score_date
+- sum_appraised_value_current_total
+- violent_crime_count_census_tract
+- violent_crime_count_neighborhood_cluster
+- violent_crime_count_ward
+- non_violent_crime_rate_census_tract
+- non_violent_crime_rate_neighborhood_cluster
+- non_violent_crime_rate_ward
+- crime_rate_census_tract
+- crime_rate_neighborhood_cluster
+- crime_rate_ward
+- construction_permits_rate_census_tract
+- construction_permits_rate_neighborhood_cluster
+- construction_permits_rate_ward
+- building_permits_rate_census_tract
+- building_permits_rate_neighborhood_cluster
+- building_permits_rate_ward
+- poverty_rate_census_tract
+- poverty_rate_neighborhood_cluster
+- poverty_rate_ward
+- income_per_capita_census_tract
+- income_per_capita_neighborhood_cluster
+- income_per_capita_ward
+- labor_participation_census_tract
+- labor_participation_neighborhood_cluster
+- labor_participation_ward
+- fraction_single_mothers_census_tract
+- fraction_single_mothers_neighborhood_cluster
+- fraction_single_mothers_ward
+- fraction_foreign_census_tract
+- fraction_foreign_neighborhood_cluster
+- fraction_foreign_ward
+- acs_median_rent_census_tract
+- acs_median_rent_neighborhood_cluster
+- acs_median_rent_ward
+```
