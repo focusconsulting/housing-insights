@@ -8,7 +8,7 @@
       "proj_addre": "2518 17th Street NW; 2524 17th Street NW", 
       "ward": "Ward 1", 
       "proj_units_assist_max": "THIS FIELD IS NEEDED",
-      "proj_units_tot": "THIS FIELD IS NEEDED",
+      "proj_units_tot": 45, 
       "subsidy_end_first": "THIS FIELD IS NEEDED", 
       "subsidy_end_last": "THIS FIELD IS NEEDED", 
       "neighborhood_cluster_desc": "THIS FIELD IS OPTIONAL"
