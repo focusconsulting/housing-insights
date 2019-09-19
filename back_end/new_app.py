@@ -10,10 +10,10 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
-from models import * #Project, Subsidy, Crime, Permit, Acs
-from schemas import TestSchema
+import models
+import schemas
 
-test_schema = TestSchema(many=True)
+test_schema = schemas.TestSchema(many=True)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -36,7 +36,7 @@ def project():
       - subsidy_end_last
       - neighborhood_cluster_desc
     '''
-    projects = Test.query.all()
+    projects = models.NewProject.query.all()
     result = test_schema.dump(projects)
     return jsonify(result)
 

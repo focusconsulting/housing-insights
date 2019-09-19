@@ -11,68 +11,69 @@ The tables are:
     - Acs (Updated with ACS 5 year estimates)
 '''
 
-from new_app import db, ma
+from new_app import db
 
-class Test(db.Model):
-    __tablename__ = 'project'
-    # Identificaton and Geography 
-    nlihc_id = db.Column(db.String, primary_key=True)
-
-#class Project(db.Model):
-#    '''
-#    Each observation in the project table is a single housing project and
-#    is identified with the nlihc_id. Projects that came from Open Data DC
-#    were given a string ID in this same column.
-#
-#    When called by "api/project", this table provides:
-#      - nlihc_id
-#      - latitude
-#      - longitude
-#      - proj_name
-#      - proj_addre
-#      - ward
-#      - proj_units_assist_max
-#      - proj_units_tot
-#      - neighborhood_cluster_desc
-#
-#    When called by "api/filter", this table provides all of the attributes
-#    below except longitude and latitude.
-#    '''
-#    __tablename__ = 'project'
-#
+#class Test(db.Model):
+#    __tablename__ = 'new_project'
 #    # Identificaton and Geography 
 #    nlihc_id = db.Column(db.String, primary_key=True)
-#    latitude = db.Column(db.Float)
-#    longitude = db.Column(db.Float)
-#    census_tract = db.Column(db.String, nullable=False)
-#    neighborhood_cluster = db.Column(db.String, nullable=False)
-#    ward = db.Column(db.String, nullable=False)
-#    neighborhood_cluster_desc = db.Column(db.String)
-#
-#    # Basic Project Information
-#    proj_name = db.Column(db.String, nullable=False)
-#    proj_addre = db.Column(db.String, nullable=False)
-#    proj_units_tot = db.Column(db.Integer)
-#    proj_units_assist_max = db.Column(db.Integer)
-#    proj_owner_type = db.Column(db.String)
-#
-#    # Extended Project Information
-#    most_recent_topa_date = db.Column(db.DateTime)
-#    topa_count = db.Column(db.Integer)
-#    most_recent_reac_score_num = db.Column(db.Integer)
-#    most_recent_reac_score_date = db.Column(db.DateTime)
-#    sum_appraised_value_current_total = db.Column(db.Float)
-#
-#    # One to many relationship with subsidy.
-#    subsidy = db.relationship('subsidy', backref='project', lazy=True)
-#
-#    def __repr__(self):
-#        '''A string representation for testing.'''
-#        return 'PROJECT {}: ({}, {})'.format(
-#                self.nlihc_id, self.latitude, self.longitude
-#                )
-#
-#
+
+class NewProject(db.Model):
+    '''
+    Each observation in the project table is a single housing project and
+    is identified with the nlihc_id. Projects that came from Open Data DC
+    were given a string ID in this same column.
+
+    When called by "api/project", this table provides:
+      - nlihc_id
+      - latitude
+      - longitude
+      - proj_name
+      - proj_addre
+      - ward
+      - proj_units_assist_max
+      - proj_units_tot
+      - neighborhood_cluster_desc
+
+    When called by "api/filter", this table provides all of the attributes
+    below except longitude and latitude.
+    '''
+    __tablename__ = 'new_project'
+    #__table_args__ = {'extend_existing': True}
+
+    # Identificaton and Geography 
+    nlihc_id = db.Column(db.String, primary_key=True)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    #census_tract = db.Column(db.String, nullable=False)
+    #neighborhood_cluster = db.Column(db.String, nullable=False)
+    #ward = db.Column(db.String, nullable=False)
+    #neighborhood_cluster_desc = db.Column(db.String)
+
+    ## Basic Project Information
+    #proj_name = db.Column(db.String, nullable=False)
+    #proj_addre = db.Column(db.String, nullable=False)
+    #proj_units_tot = db.Column(db.Integer)
+    #proj_units_assist_max = db.Column(db.Integer)
+    #proj_owner_type = db.Column(db.String)
+
+    # Extended Project Information
+    #most_recent_topa_date = db.Column(db.DateTime)
+    #topa_count = db.Column(db.Integer)
+    #most_recent_reac_score_num = db.Column(db.Integer)
+    #most_recent_reac_score_date = db.Column(db.DateTime)
+    #sum_appraised_value_current_total = db.Column(db.Float)
+
+    ## One to many relationship with subsidy.
+    #subsidy = db.relationship('subsidy', backref='project', lazy=True)
+
+    def __repr__(self):
+        '''A string representation for testing.'''
+        return 'PROJECT {}: ({}, {})'.format(
+                self.nlihc_id, self.latitude, self.longitude
+                )
+
+
 #class Subsidy(db.Model):
 #    '''
 #    Each observation in the subsidy table is a single subsidy, which may be one

@@ -6,14 +6,14 @@ MAINTAINER Jason Haas <jasonrhaas@gmail.com>
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY environment.yml .
+COPY test_env.yml .
 COPY requirements.txt .
 
 # Install dependencies (needs updating)
-RUN conda env create -f environment.yml
+RUN conda env create -f test_env.yml
 
 # Make sure that the environment updates appropriately
-RUN conda env update -n housing-insights -f environment.yml
+RUN conda env update -n housing-insights -f test_env.yml
 #RUN pip install -r requirements.txt
 
 # Activate environment

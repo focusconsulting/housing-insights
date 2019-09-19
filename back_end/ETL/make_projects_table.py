@@ -14,6 +14,7 @@
     Projects that are not from the preservation catalog have an nlihc_id
     beginning with "DC".
 '''
+from sqlalchemy import create_engine
 import requests
 import numpy as np
 import pandas as pd
@@ -125,4 +126,9 @@ if __name__ == '__main__':
         load_preservation_catalog_projects(),
         load_dchousing(),
     ], sort=True)
+
     # TODO - Remove duplicates from both datasets
+    df.to_sql('new_project',
+        create_engine(utils.get_credentials('docker_database_connect_str')),
+        if_exists='replace'
+            )
