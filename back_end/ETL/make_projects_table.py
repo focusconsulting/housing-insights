@@ -11,8 +11,8 @@
 
     The data dictionary for this dataset is in {{ UPDATE ME }}.
 
-    X = Longitude
-    Y = Latitude
+    Projects that are not from the preservation catalog have an nlihc_id
+    beginning with "DC".
 '''
 import requests
 import numpy as np
@@ -24,28 +24,24 @@ from xmljson import parker as xml_to_json
 
 preservation_catalog_columns = [
     "nlihc_id",
-    "proj_address_id",
-    "status", #active
-    "proj_units_tot",
-    "proj_lat",
-    "proj_lon",
-    "proj_name",
-    "proj_addre",
-    "proj_zip",
-    "proj_units_assist_max", # Subsidized units (max)
-    "proj_owner_type",
-    "tract",
+    "latitude",
+    "longitude",
+    "census_tract",
     "neighborhood_cluster",
     "ward",
-
-    # From subsidy file? 
-    #"subsidy_start_first",
-    #"subsidy_end_last",
-
-    # Most Recent TOPA Data
-    # Number of TOPA Notices
-    # Most Recent REAC Score
-    # Most Recent REAC Date
+    #"neighborhood_cluster_desc",
+    # Basic Project Information",
+    "proj_name",
+    "proj_addre",
+    "proj_units_tot",
+    "proj_units_assist_max",
+    "proj_owner_type",
+    # Extended Project Information",
+    #"most_recent_topa_date",
+    #"topa_count",
+    #"most_recent_reac_score_num",
+    #"most_recent_reac_score_date",
+    #"sum_appraised_value_current_total",
 ]
 
 
@@ -64,51 +60,38 @@ def clean_prescat(df):
     #df['subsidy_start'] = pd.to_datetime(df.subsidy_start_first.replace('N', np.NaN))
     #df['subsidy_end'] = pd.to_datetime(df.subsidy_end_last.replace('N', np.NaN))
     columns = {
-        "nlihc_id": "nlihc_id",
-        "proj_address_id": "address_id",
-        "status": "status",
-        "proj_units_tot": "total_units",
         "proj_lat": "latitude",
         "proj_lon": "longitude",
-        "proj_name": "name",
-        "proj_addre": "address",
-        "proj_zip":   "zip",
-        "proj_units_assist_max": "units_assist_max",
-        "proj_owner_type": "owner_type",
-        "tract": "tract",
-        "neighborhood_cluster": "neighborhood_cluster",
-        "ward": "ward",
-        'source': 'source',
+        "tract": "census_tract",
     }
 
     df['neighborhood_cluster'] = utils.just_digits(df.cluster_tr2000)
     df['ward'] = utils.just_digits(df.ward2012)
-    df['source'] = 'preservation_catalog'
 
-    return df[columns.keys()].rename(columns=columns)
+    return df.rename(columns=columns)[preservation_catalog_columns]
 
 def load_dchousing():
     '''Loads and transforms the raw data from the opendata.dc.gov'''
     columns = {
-        'ADDRESS_ID': 'address_id',
-        'FULLADDRESS': 'address',
+        'nlihc_id': 'nlihc_id',
+        'ADDRESS_ID': 'proj_address_id',
+        'FULLADDRESS': 'proj_addre',
         'MAR_WARD': 'ward',
-        'PROJECT_NAME': 'name',
-        'STATUS_PUBLIC': 'status',
-        'TOTAL_AFFORDABLE_UNITS': 'total_units',
+        'PROJECT_NAME': 'proj_name',
+        'TOTAL_AFFORDABLE_UNITS': 'proj_units_tot',
         'LATITUDE': 'latitude',
         'LONGITUDE': 'longitude',
-        'tract': 'tract',
+        'tract': 'census_tract',
         #'neighborhood_cluster': 'neighborhood_cluster',
-        'source': 'source',
     }
     df = pd.read_csv('https://opendata.arcgis.com/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.csv')
     df['MAR_WARD'] = utils.just_digits(df['MAR_WARD'])
     df = utils.get_census_tract_for_data(df, 'LONGITUDE', 'LATITUDE')
+
     # TODO Fix spatial join for clusters.
     #df = utils.get_cluster_for_data(df, 'LONGITUDE', 'LATITUDE')
-    df['source'] = 'open_data_dc'
-    return df[columns.keys()].rename(columns=columns)
+    df['nlihc_id'] = pd.Series(df.index).astype(str).apply(lambda s: 'DC' + s.zfill(6))
+    return df.rename(columns=columns)[columns.values()]
 
 def add_taxes():
     '''Adds the Project Taxable Value attribute to the data.'''

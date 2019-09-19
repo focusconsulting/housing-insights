@@ -6,10 +6,11 @@
     make_zone_facts.py
 
 '''
-from temp_credentials import key
 import requests
 import pandas as pd
 from . import utils
+
+key = utils.get_credentials('census-api-key')
 
 year = 2017 # Most recent year of 5 year estimates.
 base = f'https://api.census.gov/data/{year}/acs/acs5'
