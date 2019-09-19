@@ -58,8 +58,6 @@ def load_preservation_catalog_projects():
 
 def clean_prescat(df):
     '''Cleans up the prescat df.'''
-    #df['subsidy_start'] = pd.to_datetime(df.subsidy_start_first.replace('N', np.NaN))
-    #df['subsidy_end'] = pd.to_datetime(df.subsidy_end_last.replace('N', np.NaN))
     columns = {
         "proj_lat": "latitude",
         "proj_lon": "longitude",

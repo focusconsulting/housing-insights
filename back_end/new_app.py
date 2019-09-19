@@ -13,8 +13,6 @@ ma = Marshmallow(app)
 import models
 import schemas
 
-test_schema = schemas.TestSchema(many=True)
-
 @app.route('/', methods=['GET'])
 def index():
     '''Default page of the API.'''
@@ -23,21 +21,19 @@ def index():
 @app.route('/project')
 def project():
     '''
-    Returns the following in JSON:
-      - nlihc_id
-      - latitude
-      - longitude
-      - proj_name
-      - proj_addre
-      - ward
-      - proj_units_assist_max
-      - proj_units_tot
-      - subsidy_end_first
-      - subsidy_end_last
-      - neighborhood_cluster_desc
+    Returns a JSON of projects (see NewProjectSchema):
     '''
     projects = models.NewProject.query.all()
-    result = test_schema.dump(projects)
+    result = schemas.new_project_schema.dump(projects)
+    return jsonify(result)
+
+@app.route('/filter')
+def filter():
+    '''
+    Returns a JSON of projects (see NewFilterSchema):
+    '''
+    projects = models.NewProject.query.all()
+    result = schemas.new_filter_schema.dump(projects)
     return jsonify(result)
 
 if __name__ == "__main__":

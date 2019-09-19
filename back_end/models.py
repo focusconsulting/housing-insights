@@ -10,13 +10,7 @@ The tables are:
     - Permit (Updated Daily)
     - Acs (Updated with ACS 5 year estimates)
 '''
-
 from new_app import db
-
-#class Test(db.Model):
-#    __tablename__ = 'new_project'
-#    # Identificaton and Geography 
-#    nlihc_id = db.Column(db.String, primary_key=True)
 
 class NewProject(db.Model):
     '''
@@ -45,17 +39,17 @@ class NewProject(db.Model):
     nlihc_id = db.Column(db.String, primary_key=True)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
-    #census_tract = db.Column(db.String, nullable=False)
-    #neighborhood_cluster = db.Column(db.String, nullable=False)
-    #ward = db.Column(db.String, nullable=False)
+    census_tract = db.Column(db.String, nullable=False)
+    neighborhood_cluster = db.Column(db.String, nullable=False)
+    ward = db.Column(db.String, nullable=False)
     #neighborhood_cluster_desc = db.Column(db.String)
 
     ## Basic Project Information
-    #proj_name = db.Column(db.String, nullable=False)
-    #proj_addre = db.Column(db.String, nullable=False)
-    #proj_units_tot = db.Column(db.Integer)
-    #proj_units_assist_max = db.Column(db.Integer)
-    #proj_owner_type = db.Column(db.String)
+    proj_name = db.Column(db.String, nullable=False)
+    proj_addre = db.Column(db.String, nullable=False)
+    proj_units_tot = db.Column(db.Integer)
+    proj_units_assist_max = db.Column(db.Integer)
+    proj_owner_type = db.Column(db.String)
 
     # Extended Project Information
     #most_recent_topa_date = db.Column(db.DateTime)
@@ -65,7 +59,7 @@ class NewProject(db.Model):
     #sum_appraised_value_current_total = db.Column(db.Float)
 
     ## One to many relationship with subsidy.
-    #subsidy = db.relationship('subsidy', backref='project', lazy=True)
+    subsidy = db.relationship('NewSubsidy', backref='new_project', lazy=True)
 
     def __repr__(self):
         '''A string representation for testing.'''
@@ -74,28 +68,29 @@ class NewProject(db.Model):
                 )
 
 
-#class Subsidy(db.Model):
-#    '''
-#    Each observation in the subsidy table is a single subsidy, which may be one
-#    of many for a single housing project. It is also identified with the nlihc_id.
-#
-#    When called by "api/filter", this table provides all of the attributes
-#    below.
-#
-#    These could be added to the project table, but for now this table is
-#    separate incase more subsidy information is needed later.
-#    '''
-#    __tablename__ = 'subsidy'
-#
-#    nlihc_id = db.Column(db.String, db.ForeignKey('project.nhlic_id'))
-#    portfolio = db.Column(db.String)
-#    poa_start = db.Column(db.DateTime)
-#    poa_end = db.Column(db.DateTime)
-#
-#    def __repr__(self):
-#        return 'Subsidy for project: {}'.format(nlihc_id)
-#
-#
+class NewSubsidy(db.Model):
+    '''
+    Each observation in the subsidy table is a single subsidy, which may be one
+    of many for a single housing project. It is also identified with the nlihc_id.
+
+    When called by "api/filter", this table provides all of the attributes
+    below.
+
+    These could be added to the project table, but for now this table is
+    separate incase more subsidy information is needed later.
+    '''
+    __tablename__ = 'new_subsidy'
+
+    subsidy_id = db.Column(db.Integer, primary_key=True)
+    nlihc_id = db.Column(db.String, db.ForeignKey('new_project.nlihc_id'))
+    portfolio = db.Column(db.String)
+    poa_start = db.Column(db.DateTime)
+    poa_end = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return 'Subsidy {} for project: {}'.format(self.subsidy_id, self.nlihc_id)
+
+
 #class Crime:
 #    '''
 #    Each observation in the crime table is a geographic area (ward,
