@@ -12,7 +12,6 @@ from sqlalchemy.exc import ProgrammingError
 def construct_zone_facts_blueprint(name, engine):
 
     blueprint = Blueprint(name, __name__, url_prefix='/api')
-      
 
     @blueprint.route('/zone_facts/<column_name>/<grouping>', methods = ['GET'])
     @cross_origin()
@@ -39,6 +38,5 @@ def construct_zone_facts_blueprint(name, engine):
         output = {'status': status, 'grouping': grouping, 'column_name': column_name, 'objects': results}
         return jsonify(output)
 
-  
     #End of the constructor returns the assembled blueprint
     return blueprint

@@ -28,7 +28,6 @@ import json
 import simplejson
 from flask import jsonify
 from flask.json import JSONEncoder
-import calendar
 from datetime import datetime, date
 import dateutil.parser as dateparser
 from flask_sqlalchemy import SQLAlchemy
@@ -89,8 +88,7 @@ WmataDist = Base.classes.wmata_dist
 WmataInfo = Base.classes.wmata_info
 
 models = [BuildingPermits, Census, Crime, DcTax, Project, ReacScore,
-          RealProperty, Subsidy, Topa, WmataDist, WmataInfo
-          ]
+          RealProperty, Subsidy, Topa, WmataDist, WmataInfo]
 
 manager = APIManager(application, flask_sqlalchemy_db=db)
 

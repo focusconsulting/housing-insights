@@ -18,5 +18,6 @@ RUN conda env update -n housing-insights -f environment.yml
 
 # Activate environment
 RUN echo "export PATH=/opt/conda/envs/housing-insights/bin:$PATH" >> /root/.bashrc
+RUN cd /repo/back_end/; export FLASK_APP=new_app.py
 
 EXPOSE 5000

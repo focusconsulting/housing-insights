@@ -40,6 +40,7 @@ services:
         volumes:
             - .:/repo
         command: tail -f /dev/null
+        command: python /repo/back_end/new_app.py 
         ports:
             - "5000:5000"
         environment:

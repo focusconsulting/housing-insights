@@ -28,7 +28,7 @@ def construct_filter_blueprint(name, engine):
                 project.proj_units_tot,
                 project.proj_units_assist_max,
                 project.proj_owner_type,
-                ssubsidy.portfolio,
+                subsidy.portfolio,
                 to_char(subsidy.poa_start, 'YYYY-MM-DD') as poa_start,
                 to_char(subsidy.poa_end, 'YYYY-MM-DD') as poa_end,
                 project.most_recent_topa_date,
