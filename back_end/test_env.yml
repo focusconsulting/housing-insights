@@ -15,6 +15,7 @@ dependencies:
 #- xmljson
 
 - pip:
+  - flask
   - Flask
   - Flask-Cors
   - Flask-Restless

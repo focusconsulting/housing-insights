@@ -7,7 +7,6 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY test_env.yml .
-COPY requirements.txt .
 
 # Install dependencies (needs updating)
 RUN conda env create -f test_env.yml
