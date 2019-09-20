@@ -69,13 +69,8 @@ def make_base_table():
 def make_rates(df):
     '''Scales variables by the population.'''
     for scaled, original in scaled_columns:
-        print(original)
         df[scaled] = df[original].astype(float) / df['total_population'].astype(float)
     return df
-
-# Need the number of residential units?
-#df['building_permits_rate'] =
-#df['construction_permits_rate'] =
 
 if __name__ == '__main__':
     df = make_rates(make_base_table())

@@ -1,10 +1,9 @@
 '''
-    acs.py
-    ------
+acs.py
+------
 
-    This file collects raw ACS data. It is used as the base file for
-    make_zone_facts.py
-
+This file collects raw ACS data. It is used as the base file for
+make_zone_facts.py
 '''
 import requests
 import pandas as pd

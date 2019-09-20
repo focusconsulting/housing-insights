@@ -15,6 +15,27 @@ from shapely.geometry import Point
 
 S3 = 'https://housing-insights.s3.amazonaws.com/'
 
+def write_table(df, table_name, database='docker'):
+    '''
+    Writes a dataframe to the specified table and database.
+
+    Input: df - A DataFrame.
+           table_name - The intended database table as a string.
+           database - The intended database as a string. Options are
+                      docker and production.
+    Returns True or False (Success or Failure)
+    '''
+    try:
+        df.to_sql(
+            table_name,
+            create_engine(
+                get_credentials('{}_database_connect_str'.format(database))),
+            if_exists='replace',
+            index=False)
+        return True
+    except:
+        return False
+
 def get_credentials(keys):
     '''
     Returns the credientials for the keys given.
@@ -30,14 +51,14 @@ def get_credentials(keys):
         raise ValueError("Keys must be a string or list of strings.")
     return [d[key] for key in keys]
 
+
+
 def fix_tract(tract_number):
     '''Makes a tract number a string of length six with leading zeroes.'''
     if not tract_number or np.isnan(tract_number):
         return '99999'
     tract_number = str(int(tract_number))
-    while len(tract_number) < 6:
-        tract_number = '0' + tract_number
-    return tract_number
+    return tract_number.zfill(6)
 
 def just_digits(column):
     column = column.astype(str)
@@ -51,7 +72,6 @@ def get_years():
 def year_ago():
     '''Returns the datetime for a year ago.'''
     return datetime.datetime.now() - datetime.timedelta(days=365)
-
 
 def get_paths_for_data(data_category, years):
     '''
@@ -70,12 +90,6 @@ def get_census_tract_for_data(df, longitude_column, latitude_column):
         geometry=[Point(xy) for xy in zip(df[longitude_column], df[latitude_column])]
 #        geometry=gp.points_from_xy(df[longitude_column], df[latitude_column])
     )
-
-
-
-
-
-
 
     # Grab census tract geometries from open data DC.
     #path = ('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/'
@@ -111,4 +125,3 @@ def get_cluster_for_data(df, longitude_column, latitude_column):
     # geometries are within the census tracts' polygon geometries.
     df.crs = cluster_file.crs
     return gp.sjoin(df, cluster_file, op='within', how='left')
-

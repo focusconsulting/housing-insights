@@ -18,10 +18,8 @@ The resulting dataset from this file looks like:
 from . import utils
 from sqlalchemy import create_engine
 import pandas as pd
-# TODO: Have this grab the link from S3
 
-URL = 'https://opendata.arcgis.com/datasets/52e671890cb445eba9023313b1a85804_8.csv'
-def get_permit_data():
+def get_permit_data_for_year(path):
     df = pd.read_csv(URL)
     df.columns = df.columns.str.lower()
     df['construction_permits'] = df['permit_type_name'].apply(
@@ -35,6 +33,9 @@ def get_permit_data():
     df = df.rename(columns={'neighborhoodcluster': 'neighborhood_cluster'})
     df['neighborhood_cluster'] = utils.just_digits(df['neighborhood_cluster'])
 
+def get_permit_data():
+    paths = utils.get_paths_for_data('permits', years=utils.get_years())
+    df = pd.concat([get_permit_for_year(path) for path in paths])
     for geo in ['tract', 'neighborhood_cluster', 'ward']:
         temp = df.groupby(geo)[['construction_permits', 'total_permits']].sum()
         temp['zone_type'] = geo
