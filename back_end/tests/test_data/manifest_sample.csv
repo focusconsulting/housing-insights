@@ -1,3 +1,0 @@
-include_flag,destination_table,unique_data_id,data_date,encoding,local_folder,s3_folder,filepath,notes
-skip,building_temp,project_sample,4/1/2016,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,sample/project_sample.csv,Sample data
-use,acs_rent_median_temp,acs_sample,7/1/2012,latin-1,../../../data,https://s3.amazonaws.com/housinginsights/,sample/acs_median_rent_sample.csv,Sample data
