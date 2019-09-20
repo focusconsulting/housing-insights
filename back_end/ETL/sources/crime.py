@@ -7,15 +7,16 @@ for each census tract. It is called by make_zone_facts.py
 
 The resulting dataset from this file looks like:
 
-census_tract | crime  | violent_crime  | non_violent_crime
--------------|--------|----------------|------------------
-000100       |   392  |             5  |               387
-000201       |    21  |             0  |                21
-000202       |   390  |             6  |               384
-000300       |   108  |             4  |               104
-000400       |    25  |             0  |                25
+zone_type |   zone  | crime  | violent_crime  | non_violent_crime
+----------|---------|--------|----------------|------------------
+tract     | 000100  |   392  |             5  |               387
+tract     | 000201  |    21  |             0  |                21
+tract     | 000202  |   390  |             6  |               384
+tract     | 000300  |   108  |             4  |               104
+tract     | 000400  |    25  |             0  |                25
 '''
 from . import utils
+from sqlalchemy import create_engine
 import pandas as pd
 
 def mark_violent(row):
@@ -52,5 +53,24 @@ def filter_date(df):
 def get_crime_data():
     paths = utils.get_paths_for_data('crime', years=utils.get_years())
     df = pd.concat([get_crime_for_year(path) for path in paths])
-    return [df.groupby(geo)[['crime', 'violent_crime', 'non_violent_crime']].sum() \
-            for geo in ['tract', 'neighborhood_cluster', 'ward']]
+    data = []
+    for geo in ['tract', 'neighborhood_cluster', 'ward']:
+        temp = df.groupby(geo)[['crime', 'violent_crime', 'non_violent_crime']].sum()
+        temp['zone_type'] = geo
+        temp['zone'] = temp.index
+        data.append(temp)
+    return pd.concat(data).reset_index(drop=True)
+
+def load_crime_data():
+    '''Actually loads the data into the db.'''
+    try:
+        get_crime_data().to_sql(
+            'new_crime',
+            create_engine(utils.get_credentials('docker_database_connect_str')),
+            if_exists='replace',
+            index=False)
+        return True
+    except:
+        return False
+if __name__ == '__main__':
+    print(get_crime_data())

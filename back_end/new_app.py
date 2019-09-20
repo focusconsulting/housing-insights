@@ -14,13 +14,13 @@ app = Flask(__name__)
 #import schemas
 
 # TODO: Change init in ETL to load functions.
-import ETL
+from ETL.sources import load_crime_data, load_permit_data
 
 # ETL Functions To load DB Tables
 table_loaders = {
-    'crime': lambda: False,
+    'crime': load_crime_data,
     'acs': lambda: False,
-    'permit': lambda: False,
+    'permit': load_permit_data,
     'project': lambda: False,
     'subsidy': lambda: False,
 }

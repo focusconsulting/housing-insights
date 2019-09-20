@@ -7,16 +7,19 @@ for each census tract. It is called by make_zone_facts.py
 
 The resulting dataset from this file looks like:
 
-    tract  | construction_permits | total_permits
-    -------|----------------------|--------------
-    000100 |                 231  |          575
-    000201 |                   2  |            6
-    000202 |                 145  |          363
-    000300 |                 102  |          351
-    000400 |                  77  |          204
+ zone_type |   zone  | construction_permits | total_permits
+ ----------|---------|----------------------|--------------
+ tract     | 000100  |                 231  |          575
+ tract     | 000201  |                   2  |            6
+ tract     | 000202  |                 145  |          363
+ tract     | 000300  |                 102  |          351
+ tract     | 000400  |                  77  |          204
 '''
 from . import utils
+from sqlalchemy import create_engine
 import pandas as pd
+# TODO: Have this grab the link from S3
+
 URL = 'https://opendata.arcgis.com/datasets/52e671890cb445eba9023313b1a85804_8.csv'
 def get_permit_data():
     df = pd.read_csv(URL)
@@ -32,5 +35,21 @@ def get_permit_data():
     df = df.rename(columns={'neighborhoodcluster': 'neighborhood_cluster'})
     df['neighborhood_cluster'] = utils.just_digits(df['neighborhood_cluster'])
 
-    return [df.groupby(geo)[['construction_permits', 'total_permits']].sum() \
-            for geo in ['tract', 'neighborhood_cluster', 'ward']]
+    for geo in ['tract', 'neighborhood_cluster', 'ward']:
+        temp = df.groupby(geo)[['construction_permits', 'total_permits']].sum()
+        temp['zone_type'] = geo
+        temp['zone'] = temp.index
+        data.append(temp)
+    return pd.concat(data).reset_index(drop=True)
+
+def load_permit_data():
+    '''Actually loads the data into the db.'''
+    try:
+        get_permit_data().to_sql(
+            'new_permit',
+            create_engine(utils.get_credentials('docker_database_connect_str')),
+            if_exists='replace',
+            index=False)
+        return True
+    except:
+        return False
