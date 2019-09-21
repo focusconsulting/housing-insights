@@ -14,14 +14,10 @@
     Projects that are not from the preservation catalog have an nlihc_id
     beginning with "DC".
 '''
-from sqlalchemy import create_engine
-import requests
+import utils
 import numpy as np
 import pandas as pd
 import geopandas as gp
-from sources import utils
-from xml.etree import ElementTree
-from xmljson import parker as xml_to_json
 
 preservation_catalog_columns = [
     "nlihc_id",
@@ -97,36 +93,14 @@ def add_taxes():
     # Tax Data. Seems to update every year. 
     return pd.read_csv('https://opendata.arcgis.com/datasets/496533836db640bcade61dd9078b0d63_53.csv')
 
-# Probably won't use this data.
-def load_dhcd():
-    '''Loads the raw data from the DHCD
+def load_project_data(engine):
+    df = pd.concat([load_preservation_catalog_projects(), load_dchousing()],
+            sort=True)
+    return utils.write_table(df, 'new_project', engine)
 
-        - 'project__name'
-        - 'project__project_type_scope'
-        - 'project__loan_status'
-        - 'property__related_property_record_id____address__street_1'
-        - 'property__related_property_record_id____units__total_number_of_affordable_units_to_report'
-        - 'closing__projected_or_actual_closing_date'
-        - 'loans___total_loan_amount'
-        - 'lihtc_allocations__total_allocation_amount'
-        - 'construction_activity__status'
-        - 'payments'
-        - 'update_id'
-    '''
-    r = requests.get('https://octo.quickbase.com/db/bit4krbdh',
-            params={'a': 'API_DoQuery', 'query': '{\'1\'.XEX.\'0\'}'})
-    print('DHCD Response', r)
-    return pd.DataFrame(xml_to_json.data(ElementTree.fromstring(r.text))['record'])
 
 if __name__ == '__main__':
+    print(pd.concat([load_preservation_catalog_projects(), load_dchousing()],
+            sort=True).head())
 
-    df = pd.concat([
-        load_preservation_catalog_projects(),
-        load_dchousing(),
-    ], sort=True)
 
-    # TODO - Remove duplicates from both datasets
-    df.to_sql('new_project',
-        create_engine(utils.get_credentials('docker_database_connect_str')),
-        if_exists='replace'
-            )
