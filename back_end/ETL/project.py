@@ -14,7 +14,7 @@
     Projects that are not from the preservation catalog have an nlihc_id
     beginning with "DC".
 '''
-import utils
+from . import utils
 import numpy as np
 import pandas as pd
 import geopandas as gp
@@ -97,10 +97,3 @@ def load_project_data(engine):
     df = pd.concat([load_preservation_catalog_projects(), load_dchousing()],
             sort=True)
     return utils.write_table(df, 'new_project', engine)
-
-
-if __name__ == '__main__':
-    print(pd.concat([load_preservation_catalog_projects(), load_dchousing()],
-            sort=True).head())
-
-

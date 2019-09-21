@@ -7,7 +7,7 @@ make_zone_facts.py
 '''
 import requests
 import pandas as pd
-import utils
+from . import utils
 
 key = utils.get_credentials('census-api-key')
 
@@ -80,7 +80,3 @@ def load_acs_data(engine):
     '''Collects ACS data, transforms it, and loads it into the database.'''
     df = get_acs_data()
     return utils.write_table(df, 'acs', engine)
-
-if __name__ == '__main__':
-    df = get_acs_data()
-    print(df.head())

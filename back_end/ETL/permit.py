@@ -15,7 +15,7 @@ The resulting dataset from this file looks like:
  tract     | 000300  |                 102  |          351
  tract     | 000400  |                  77  |          204
 '''
-import utils
+from . import utils
 import pandas as pd
 
 def get_permit_for_year(path):
@@ -52,7 +52,3 @@ def load_permit_data(engine):
     '''Actually loads the data into the db.'''
     df = get_permit_data()
     return utils.write_table(df, 'new_permit', engine)
-
-if __name__ == '__main__':
-    df = get_permit_data()
-    print(df.head())

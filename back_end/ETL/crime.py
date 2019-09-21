@@ -15,7 +15,7 @@ tract     | 000202  |   390  |             6  |               384
 tract     | 000300  |   108  |             4  |               104
 tract     | 000400  |    25  |             0  |                25
 '''
-import utils
+from . import utils
 import pandas as pd
 
 def mark_violent(row):
@@ -59,6 +59,3 @@ def load_crime_data(engine):
     '''Actually loads the data into the db.'''
     df = get_crime_data()
     return utils.write_table(df, 'new_crime', engine)
-
-if __name__ == '__main__':
-    print(get_crime_data())

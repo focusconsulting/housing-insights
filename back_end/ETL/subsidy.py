@@ -18,9 +18,7 @@ subsidy_id  nlihc_id   poa_start     poa_end         portfolio
 
 import numpy as np
 import pandas as pd
-from sources import utils
-from sqlalchemy import create_engine
-
+from . import utils
 
 def load_preservation_catalog_subsidies():
     '''
@@ -35,11 +33,7 @@ def load_preservation_catalog_subsidies():
 
     return df[['subsidy_id', 'nlihc_id', 'portfolio', 'poa_start', 'poa_end']]
 
-def load_subsidy_table(database):
+def load_subsidy_data(database):
     '''Adds subsidy table to database (docker or production).'''
     df = load_preservation_catalog_subsidies()
     return utils.write_table(df, 'new_subsidy', database)
-
-# For testing and checking.
-if __name__ == "__main__":
-    load_preservation_catalog_subsidies()
