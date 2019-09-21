@@ -15,23 +15,17 @@ from shapely.geometry import Point
 
 S3 = 'https://housing-insights.s3.amazonaws.com/'
 
-def write_table(df, table_name, database='docker'):
+def write_table(df, table_name, engine):
     '''
     Writes a dataframe to the specified table and database.
 
     Input: df - A DataFrame.
            table_name - The intended database table as a string.
-           database - The intended database as a string. Options are
-                      docker and production.
+           engine - The sqlalchemy engine of the database.
     Returns True or False (Success or Failure)
     '''
     try:
-        df.to_sql(
-            table_name,
-            create_engine(
-                get_credentials('{}_database_connect_str'.format(database))),
-            if_exists='replace',
-            index=False)
+        df.to_sql(table_name, engine, if_exists='replace', index=False)
         return True
     except:
         return False
@@ -51,7 +45,10 @@ def get_credentials(keys):
         raise ValueError("Keys must be a string or list of strings.")
     return [d[key] for key in keys]
 
-
+def filter_date(df, column):
+    '''Returns observations within the past year.'''
+    df[column] = pd.to_datetime(df[column].str.slice(0,10))
+    return df[df[column] > year_ago()]
 
 def fix_tract(tract_number):
     '''Makes a tract number a string of length six with leading zeroes.'''

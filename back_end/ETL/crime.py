@@ -15,8 +15,7 @@ tract     | 000202  |   390  |             6  |               384
 tract     | 000300  |   108  |             4  |               104
 tract     | 000400  |    25  |             0  |                25
 '''
-from . import utils
-from sqlalchemy import create_engine
+import utils
 import pandas as pd
 
 def mark_violent(row):
@@ -31,10 +30,10 @@ def get_crime_for_year(path):
     df = pd.read_csv(path)
     df.columns = df.columns.str.lower()
 
-    # Todo, filter by start_date
     df = df[['report_dat', 'census_tract', 'ward', 'neighborhood_cluster', 'offense', 'method']]
     df['neighborhood_cluster'] = utils.just_digits(df['neighborhood_cluster'])
-    df = filter_date(df)
+    # Filter out permits from more than a year ago.
+    df = utils.filter_date(df, 'report_dat')
 
     df['tract'] = df.census_tract.apply(utils.fix_tract)
     df = df.drop('census_tract', axis=1)
@@ -44,11 +43,6 @@ def get_crime_for_year(path):
     df['crime'] = 1
 
     return df
-
-def filter_date(df):
-    '''Returns observations within the past year.'''
-    df.report_dat = pd.to_datetime(df.report_dat.str.slice(0,10))
-    return df[df.report_dat > utils.year_ago()]
 
 def get_crime_data():
     paths = utils.get_paths_for_data('crime', years=utils.get_years())
@@ -61,16 +55,10 @@ def get_crime_data():
         data.append(temp)
     return pd.concat(data).reset_index(drop=True)
 
-def load_crime_data():
+def load_crime_data(engine):
     '''Actually loads the data into the db.'''
-    try:
-        get_crime_data().to_sql(
-            'new_crime',
-            create_engine(utils.get_credentials('docker_database_connect_str')),
-            if_exists='replace',
-            index=False)
-        return True
-    except:
-        return False
+    df = get_crime_data()
+    return utils.write_table(df, 'new_crime', engine)
+
 if __name__ == '__main__':
     print(get_crime_data())

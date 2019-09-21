@@ -12,17 +12,15 @@ app = Flask(__name__)
 
 #import models
 #import schemas
-
-# TODO: Change init in ETL to load functions.
-from ETL.sources import load_crime_data, load_permit_data
+import ETL
 
 # ETL Functions To load DB Tables
 table_loaders = {
-    'crime': load_crime_data,
-    'acs': lambda: False,
-    'permit': load_permit_data,
-    'project': lambda: False,
-    'subsidy': lambda: False,
+        'acs': ETL.load_acs_data,
+      'crime': ETL.load_crime_data,
+     'permit': ETL.load_permit_data,
+    'project': ETL.load_project_data,
+    'subsidy': ETL.load_subsidy_data,
 }
 
 @app.route('/', methods=['GET'])
@@ -62,7 +60,7 @@ def make_table(table_name, password):
             </ul>
                '''
     # Returns True if successfully loaded.
-    if table_loaders[table_name]():
+    if table_loaders[table_name](engine=db.get_engine()):
         return '<h1>Success! Loaded {} table.</h1>'.format(table_name)
     return '''
             <h1>Unable to load {} table.</h1>

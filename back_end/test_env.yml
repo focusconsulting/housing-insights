@@ -2,28 +2,37 @@ name: housing-insights
 channels:
 - defaults
 #- gramener
+
 dependencies:
+- python=3.7
 - pip
-- psycopg2
-- python
 - sqlalchemy
 - numpy
 - pandas
 - geopandas
+- flask
+- pyyaml
+- requests
+- xlrd
+- flask-cors
+- flask-sqlalchemy
+- pip:
+    - flask-restless
+    - flask-marshmallow
+    - psycopg2-binary
 
 # Note: Package xmljson v0.1.6 requires channel gramener ( Ref: https://anaconda.org/gramener/xmljson )
 #- xmljson
 
-- pip:
-  - flask
-  - Flask
-  - Flask-Cors
-  - Flask-Restless
-  - Flask-SQLAlchemy
-  - flask-marshmallow
-  - Jinja2
-  - MarkupSafe
-  - PyYAML
-  - requests
-  - xlrd
-  - psycopg2-binary
+  #- pip:
+  #  - flask
+  #  - Flask-Cors
+  #  - Flask-Restless
+  #  - Flask-SQLAlchemy
+  #  - flask-marshmallow
+  #  - Jinja2
+  #  - MarkupSafe
+  #  - PyYAML
+  #  - requests
+  #  - xlrd
+  #  - psycopg2-binary

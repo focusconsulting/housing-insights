@@ -7,11 +7,13 @@ make_zone_facts.py
 '''
 import requests
 import pandas as pd
-from . import utils
+import utils
 
 key = utils.get_credentials('census-api-key')
 
-year = 2017 # Most recent year of 5 year estimates.
+# Most recent year of 5 year estimates.
+# Change this if better estimates come out.
+year = 2017
 base = f'https://api.census.gov/data/{year}/acs/acs5'
 
 fields = {
@@ -58,11 +60,27 @@ def get_zone_data(tract_df, zone_type):
     for col in fields.values():
         df[col] = df[col].astype(float) * df.weight
 
-    return df.groupby(zone_type).sum().drop('weight', axis=1).apply(round)
+    df = df.groupby(zone_type).sum().drop('weight', axis=1).apply(round)
+    df['zone_type'] = zone_type
+    df['zone'] = df.index
+    return df.reset_index(drop=True)
 
 def get_acs_data():
     '''Returns a dataset for tract, cluster, and ward.'''
     tract = get_tract_data()
     cluster = get_zone_data(tract, 'neighborhood_cluster')
     ward = get_zone_data(tract, 'ward')
-    return tract, cluster, ward
+
+    tract['zone_type'] = 'tract'
+    tract = tract.rename(columns={'tract': 'zone'})
+    return pd.concat([tract, cluster, ward],
+            sort=True).reset_index(drop=True).drop(columns=['county', 'state'])
+
+def load_acs_data(engine):
+    '''Collects ACS data, transforms it, and loads it into the database.'''
+    df = get_acs_data()
+    return utils.write_table(df, 'acs', engine)
+
+if __name__ == '__main__':
+    df = get_acs_data()
+    print(df.head())

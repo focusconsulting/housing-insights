@@ -16,15 +16,30 @@ subsidy_id  nlihc_id   poa_start     poa_end         portfolio
          5  NL000001  2005-03-01  2045-03-01                DC
 '''
 
-from . import utils
 import numpy as np
 import pandas as pd
+from sources import utils
+from sqlalchemy import create_engine
 
-def load_subsidy():
-    '''Brings in Preservation Catalog Subsidy Data.'''
+
+def load_preservation_catalog_subsidies():
+    '''
+    Loads the raw data from the preservation catalog.
+    It is located in 'preservation_catalog' on the S3.
+    '''
     df = pd.read_csv(utils.S3+'preservation_catalog/Subsidy.csv')
     df.columns = df.columns.str.lower()
-    df = df.replace('N', np.NaN)
-    df['poa_start'] = pd.to_datetime(df['poa_start'])
-    df['poa_end'] = pd.to_datetime(df['poa_end'])
-    return df[['nlihc_id', 'subsidy_id', 'poa_start', 'poa_end', 'program', 'agency']]
+
+    df['poa_start'] = pd.to_datetime(df.poa_start.replace('N', np.NaN))
+    df['poa_end'] = pd.to_datetime(df.poa_end.replace('N', np.NaN))
+
+    return df[['subsidy_id', 'nlihc_id', 'portfolio', 'poa_start', 'poa_end']]
+
+def load_subsidy_table(database):
+    '''Adds subsidy table to database (docker or production).'''
+    df = load_preservation_catalog_subsidies()
+    return utils.write_table(df, 'new_subsidy', database)
+
+# For testing and checking.
+if __name__ == "__main__":
+    load_preservation_catalog_subsidies()
