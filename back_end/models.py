@@ -54,9 +54,9 @@ class NewProject(db.Model):
     # Extended Project Information
     #most_recent_topa_date = db.Column(db.DateTime)
     #topa_count = db.Column(db.Integer)
-    #most_recent_reac_score_num = db.Column(db.Integer)
-    #most_recent_reac_score_date = db.Column(db.DateTime)
-    #sum_appraised_value_current_total = db.Column(db.Float)
+    most_recent_reac_score_num = db.Column(db.Integer)
+    most_recent_reac_score_date = db.Column(db.DateTime)
+    sum_appraised_value_current_total = db.Column(db.Float)
 
     ## One to many relationship with subsidy.
     subsidy = db.relationship('NewSubsidy', backref='new_project', lazy=True)
