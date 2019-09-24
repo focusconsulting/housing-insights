@@ -104,6 +104,11 @@ def load_mar():
     data = r.json()['features']
     return {r['attributes']['ADDRESS_ID']: r['attributes']['SSL'] for r in data}
 
+def load_topa():
+    df = pd.read_csv(utils.S3+'topa/Rcasd_current.csv')
+    df.columns = df.columns.str.lower()
+    return df
+
 def load_reac_data():
     '''Gets REAC information from the s3.'''
     df = pd.read_csv(utils.S3+'preservation_catalog/Reac_score.csv')
@@ -118,3 +123,5 @@ def load_project_data(engine):
     df['sum_appraised_value_current_total'] = (df['proj_address_id']
             .astype('Int64').map(load_mar()).map(load_tax()))
     return utils.write_table(df, 'new_project', engine)
+
+

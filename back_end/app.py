@@ -6,12 +6,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 app = Flask(__name__)
-#app.config.from_object(Config)
-#db = SQLAlchemy(app)
-#ma = Marshmallow(app)
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
 
-#import models
-#import schemas
+import models
+import schemas
 import ETL
 
 # ETL Functions To load DB Tables

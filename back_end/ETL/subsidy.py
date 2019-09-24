@@ -33,7 +33,7 @@ def load_preservation_catalog_subsidies():
 
     return df[['subsidy_id', 'nlihc_id', 'portfolio', 'poa_start', 'poa_end']]
 
-def load_subsidy_data(database):
+def load_subsidy_data(engine):
     '''Adds subsidy table to database (docker or production).'''
     df = load_preservation_catalog_subsidies()
-    return utils.write_table(df, 'new_subsidy', database)
+    return utils.write_table(df, 'new_subsidy', engine)

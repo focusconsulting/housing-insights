@@ -10,7 +10,7 @@ The tables are:
     - Permit (Updated Daily)
     - Acs (Updated with ACS 5 year estimates)
 '''
-from new_app import db
+from app import db
 
 class NewProject(db.Model):
     '''

@@ -39,9 +39,6 @@ services:
             context: back_end 
         volumes:
             - .:/repo
-        command: tail -f /dev/null
-        #command: conda activate housing-insights
-        #command: python /repo/back_end/app.py 
         ports:
             - "5000:5000"
         environment:
