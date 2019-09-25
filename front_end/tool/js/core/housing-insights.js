@@ -23,7 +23,7 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
       geoJSONPolygonsBase: "/tool/data/",
       metaData: "deprecated_meta.json", //DEPRECATED
       filterData: "little_filter.json", //"http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter",
-      project: "tiny_project.json", //"http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
+      project: "my_project.json", //"http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
       layerData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/zone_facts/<source_data_name>/<grouping>"
     }
     
