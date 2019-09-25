@@ -1,15 +1,20 @@
 '''new_app.py'''
-
+import datetime
 from config import Config
+from mailer import send_mail
 from flask import Flask, jsonify
 from flask_cors import cross_origin
 from flask_sqlalchemy import SQLAlchemy
+from flask_apscheduler import APScheduler
 from flask_marshmallow import Marshmallow
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
+
+scheduler = APScheduler()
+scheduler.init_app(app)
 
 import models
 import schemas
@@ -96,11 +101,26 @@ def make_table(table_name, password):
             <h2>Housing insights will load the backup data.</h2>
            '''.format(table_name)
 
-@app.route("/test")
-def test():
+@scheduler.task('interval', id='do_auto_load_tables', minutes=5)
+def auto_load_tables():
+    '''Grabs the most recent data every morning and puts it in the DB.'''
+    print("RELOADING DATA")
+    message = "Data update for {}".format(datetime.datetime.now())
+    if load_crime_data(engine=db.get_engine()):
+        message += "Crime table load successful.\n"
+    else:
+        message += "Crime table load not successful. Using backup.\n"
+    if load_permit_data(engine=db.get_engine()):
+        message += "Permit table load successful.\n"
+    else:
+        message += "Permit table load not successful. Using backup.\n"
     if ETL.make_zone_facts(db):
-        return "DID IT"
-    return "DID NOT DO IT"
+        message += "Zone facts table creation successful.\n"
+    else:
+        message += "Zone facts table creation not successful. Using backup.\n"
+    send_mail(message)
 
 if __name__ == "__main__":
+    print("RUNNING APP")
+    scheduler.start()
     app.run(host="0.0.0.0", debug=True)

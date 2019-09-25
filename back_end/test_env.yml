@@ -20,6 +20,7 @@ dependencies:
     - flask-restless
     - flask-marshmallow
     - psycopg2-binary
+    - flask-apscheduler
 
 # Note: Package xmljson v0.1.6 requires channel gramener ( Ref: https://anaconda.org/gramener/xmljson )
 #- xmljson
