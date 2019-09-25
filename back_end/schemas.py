@@ -6,7 +6,6 @@ This file allows us to select what columns we want from database models, and
 save them as json output.
 '''
 from app import ma
-#import models
 
 class NewProjectSchema(ma.Schema):
     class Meta:
@@ -38,4 +37,3 @@ class NewFilterSchema(ma.Schema):
                   #'subsidy.poa_end'
                   )
 new_filter_schema = NewFilterSchema(many=True)
-

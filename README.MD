@@ -1,30 +1,15 @@
 # Housing Insights
-> Bringing open data to affordable housing decision makers
+> Bringing open data to affordable housing decision makers.
 
 Welcome! If you're just arriving at this project, we recommend you check out our [onboarding page on our website](http://housinginsights.org/resources/onboarding) for new contributors to the project.
 
 
 # Project Folder Structure
-`\docs`
+`front_end/`
 A Jekyll-based static website that is used as a project informational page while developing the project.
 
-`\javascript`
-Code for our front-end tool.
-
-`\data` 
-This is not synced to Github, but it is where you can download the raw data if you are working on a ticket that needs that. Use the [AWS CLI sync instructions]({{site.baseurl}}/resources/aws-sync.html) for how to get this data.
-
-`\python`
-Folder for Python scripts used for processing data sources.
-
-`\python\scripts`
-The code that is actually executed to do things like download data, rebuild the database, etc. These scripts should contain very little code, instead leveraging our package.
-
-`\python\housinginsights`
-Our python package, which contains all the object-oriented code used by our data ingestion pipeline. 
-
-`\mockups`
-Store any brainstorming, images, pictures of napkin drawings, or other ideas for implementation here. "Live mockups" during the prototype phase, i.e. code-based mockups, can typically go directly into the insights-site folder instead.
+`back_end/`
+A python application that collects and transforms raw data, loads data into a database, and runs an API for the front end to access data.
 
 # Basic Workflow Concept
 This is very much a work in progress so any suggestions to clean up or change this approach are welcome!
@@ -57,26 +42,5 @@ We use a loose [git flow](https://datasift.github.io/gitflow/IntroducingGitFlow.
 
 If you know how to do that sort of thing, squashed and rebased pull requests bring great joy to our repo history! If you don't know what that means, it's not necessary and is best to learn only when you are confident in your Git skills.
 
-## Coding conventions
-Some miscellaneous coding conventions:
-* Write code that doesn't need code comments - variable names that clearly indicate content and type.
-* **But**, add more comments than you think is necessary. Lots of beginners will be working on the project, and 'self-documenting' code isn't always self documenting when you are still figuring out the basic language or package syntax.
-  * Always add a comment to describe purpose of a function and/or code section.
-  * Always use comments to document the meaning of positional parameters; use named parameters whenever possible
-    ```
-    # Bad
-    entries.select(3, 5)
-
-    # Better
-    entries.select(3, 5)  #.select(from,to) per mypackage docs.
-
-    # Ideal when language and package allows
-    entries.select(from=3, to=5)
-    ```
-* Use most common language conventions whenever possible
-   * Python: `snake_case` for vars and modules, `CapitalCamelCase` for class names, `ALL_UPPER` for constants.
-   * Javascript: `camelCase` for vars, `CapitalCamelCase` for constructors.
-* Single-line functions, CSS definitions, etc. are OK when they are short and/or follow a repeatable pattern.
-
 ## License
-We're publishing this project under the [MIT license](https://github.com/codefordc/housing-insights/blob/master/LICENSE.txt). By contributing code to this repo you are agreeing to make your work available to the public under the terms of this license.
+This project is published under an [MIT license](https://github.com/codefordc/housing-insights/blob/master/LICENSE.txt). By contributing code to this repo you are agreeing to make your work available to the public under the terms of this license.
