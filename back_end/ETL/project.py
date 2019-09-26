@@ -14,7 +14,8 @@
     Projects that are not from the preservation catalog have an nlihc_id
     beginning with "DC".
 '''
-from . import utils
+#from . import utils
+import utils
 import requests
 import numpy as np
 import pandas as pd
@@ -61,10 +62,9 @@ def load_preservation_catalog_projects():
                               "reac_score_num": "most_recent_reac_score_num",
                               })[preservation_catalog_columns]
 
-def load_open_data_dc_projects():
-    '''Loads and transforms the raw data from the opendata.dc.gov'''
+def load_affordable_housing_projects():
+    '''Loads and transforms the "Affordabe Housing" raw data from opendata.dc'''
     columns = {
-        'nlihc_id': 'nlihc_id',
         'ADDRESS_ID': 'proj_address_id',
         'FULLADDRESS': 'proj_addre',
         'MAR_WARD': 'ward',
@@ -73,18 +73,23 @@ def load_open_data_dc_projects():
         'LATITUDE': 'latitude',
         'LONGITUDE': 'longitude',
         'tract': 'census_tract',
-        #'neighborhood_cluster': 'neighborhood_cluster',
     }
-    # Get this from S3
-    url = 'https://opendata.arcgis.com/datasets/34ae3d3c9752434a8c03aca5deb550eb_62.csv'
+    url = utils.get_paths_for_data('affordable_housing', years=utils.get_years())[0]
     df = pd.read_csv(url)
     df['MAR_WARD'] = utils.just_digits(df['MAR_WARD'])
-    df = utils.get_census_tract_for_data(df, 'LONGITUDE', 'LATITUDE')
+    df = utils.get_census_tract_for_data(df, 'LONGITUDE','LATITUDE')
+    df = df.rename(columns=columns)[columns.values()]
+    df = utils.get_cluster_for_data(df, 'longitude', 'latitude')
+    df['nlihc_id'] = pd.Series(df.index).astype(str).apply(lambda s: 'AH' + s.zfill(6))
+    return df[['nlihc_id', 'neighborhood_cluster']+ list(columns.values())]
 
-    # TODO Fix spatial join for clusters.
-    #df = utils.get_cluster_for_data(df, 'LONGITUDE', 'LATITUDE')
-    df['nlihc_id'] = pd.Series(df.index).astype(str).apply(lambda s: 'DC' + s.zfill(6))
-    return df.rename(columns=columns)[columns.values()]
+def load_mar_projects():
+    '''Loads and trasforms the "Address Points" raw data from opendata.dc'''
+    url = utils.get_paths_for_data('mar', years=utils.get_years())[0]
+    df = pd.read_csv(url)
+    df = df[['ADDRESS_ID', 'ACTIVE_RES_UNIT_COUNT', 'SSL', 'CLUSTER_']]
+    df.columns = ['proj_address_id', 'active_res_unit_count', 'ssl', 'neighborhood_cluster']
+    return df
 
 def load_tax():
     '''Adds the Project Taxable Value attribute to the data.'''
@@ -94,15 +99,6 @@ def load_tax():
     )
     data = r.json()['features']
     return {r['attributes']['SSL']: r['attributes']['ASSESSMENT'] for r in data}
-
-def load_mar():
-    '''Makes a crosswalk file to link tax data to projects.'''
-    r = requests.get(
-        'https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Location_WebMercator/MapServer/0/query?where=1%3D1&outFields=ADDRESS_ID,SSL&returnGeometry=false&outSR=4326&f=json'
-    )
-
-    data = r.json()['features']
-    return {r['attributes']['ADDRESS_ID']: r['attributes']['SSL'] for r in data}
 
 def load_topa():
     df = pd.read_csv(utils.S3+'topa/Rcasd_current.csv')
@@ -118,10 +114,11 @@ def load_reac_data():
     return df[['date', 'reac_score_num']].reset_index()
 
 def load_project_data(engine):
+    '''With the addition of MAR - this takes a long time (a few minutes).'''
     df = pd.concat([load_preservation_catalog_projects(),
-                    load_open_data_dc_projects()], sort=True)
-    df['sum_appraised_value_current_total'] = (df['proj_address_id']
-            .astype('Int64').map(load_mar()).map(load_tax()))
-    return utils.write_table(df, 'new_project', engine)
-
-
+                    load_affordable_housing_projects()], sort=True)
+    df = df.sort_values('nlihc_id').drop_duplicates('proj_address_id')
+    df = df.merge(load_mar_projects(), on='proj_address_id', how='left')
+    df['sum_appraised_value_current_total'] = df['ssl'].map(load_tax())
+    return df
+#    return utils.write_table(df, 'new_project', engine)
