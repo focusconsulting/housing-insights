@@ -58,12 +58,5 @@ class TestUtils(unittest.TestCase):
     def test_get_credentials(self):
         self.assertEqual(utils.get_credentials('test'), 'passed')
 
-    def test_census_tract_load(self):
-        self.assertTrue(True)
-
-    def test_neighborhood_cluster_load(self):
-        self.assertTrue(True)
-
-
 if __name__ == '__main__':
     unittest.main()

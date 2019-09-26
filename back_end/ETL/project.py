@@ -12,8 +12,7 @@
     Projects that are not from the preservation catalog have an nlihc_id
     beginning with "AH" for affordable housing.
 '''
-#from . import utils
-import utils
+from . import utils
 import requests
 import numpy as np
 import pandas as pd
