@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <script src="js/external/offline-use/d3.min.js"></script>
+
+        <style> /* set the CSS */
+        .chart .values { fill:  rgba(234, 100, 2, 0.7); }
+
+        .chart .filler { fill: rgba(200,200,200,0.7); }
+
+        </style>
+    </head>
+    <body>
+        <h1>Demo of chart template</h1>
+        <div class="demoChart"></div>
+    <script src="js/charts/D3Table.js"></script>
+    <script>
+
+        //Example data from nlihc_id NL000004 "real property" field
+        var data = [
+                    {
+                      "id": "20f185f5-3885-4bae-8731-c2afa95a160d", 
+                      "nlihc_id": "NL000004", 
+                      "rp_date": "2001-05-31", 
+                      "rp_desc": "OTR: Sold to Parkfair Associates LLC; price: $693,769; sale type: Market.", 
+                      "rp_type": "OTR: Property sale", 
+                      "ssl": "2609    0822", 
+                      "unique_data_id": "prescat_real_property"
+                    }, 
+                    {
+                      "id": "b655524d-b720-415d-9304-746998d7db31", 
+                      "nlihc_id": "NL000004", 
+                      "rp_date": "2000-11-17", 
+                      "rp_desc": "NIDC: Property sold, distressed sale, Other.", 
+                      "rp_type": "NIDC: Foreclosure outcome", 
+                      "ssl": "2609    0822", 
+                      "unique_data_id": "prescat_real_property"
+                    }, 
+                    {
+                      "id": "e5c1dd06-18bf-4a70-b32e-4ce30e781a28", 
+                      "nlihc_id": "NL000004", 
+                      "rp_date": "2000-11-17", 
+                      "rp_desc": "OTR: Sold to 1611 Park Rd Tenants Assoc; price: $605,000; sale type: Foreclosure.", 
+                      "rp_type": "OTR: Property sale", 
+                      "ssl": "2609    0822", 
+                      "unique_data_id": "prescat_real_property"
+                    }, 
+                    {
+                      "id": "85a35497-dd58-4d16-a266-ecbd6933dfd3", 
+                      "nlihc_id": "NL000004", 
+                      "rp_date": "2000-09-21", 
+                      "rp_desc": "ROD: Notice of foreclosure (2000086047); issued by Askin A Bradley.", 
+                      "rp_type": "ROD: Foreclosure notice", 
+                      "ssl": "2609    0822", 
+                      "unique_data_id": "prescat_real_property"
+                    }, 
+                    {
+                      "id": "bd6ffaa3-a9ba-440c-9527-ccc4364c9bf5", 
+                      "nlihc_id": "NL000004", 
+                      "rp_date": "2000-08-07", 
+                      "rp_desc": "ROD: Notice of foreclosure (2000070627); issued by Askin A Bradley.", 
+                      "rp_type": "ROD: Foreclosure notice", 
+                      "ssl": "2609    0822", 
+                      "unique_data_id": "prescat_real_property"
+                    }, 
+                    {
+                      "id": "fb10cfd8-0774-49fc-a604-6803780ffe57", 
+                      "nlihc_id": "NL000004", 
+                      "rp_date": "1997-11-18", 
+                      "rp_desc": "ROD: Notice of foreclosure (9700073539); issued by Askin A Bradley.", 
+                      "rp_type": "ROD: Foreclosure notice", 
+                      "ssl": "2609    0822", 
+                      "unique_data_id": "prescat_real_property"
+                    }
+                  ]
+
+        var demoChart = new D3Table('.demoChart')
+                            .data(data)
+                            .columns(['rp_type',{field:'rp_date', label:'Date of RP', class:'yoyo', html: function(d){return 'date: ' + d}}])
+                            .create()
+
+        setTimeout(function(){
+            demoChart.columns(['rp_type','ssl',{field:'rp_date', label:'Date of RP', class:'yoyo', html: function(d){return 'date: ' + d}}])
+                .update()
+        },2000)
+
+        setTimeout(function(){
+            demoChart.columns(['rp_type','ssl'])
+                .update()
+        },4000)
+
+
+        setTimeout(function(){
+            var copiedData = JSON.parse(JSON.stringify(data))
+            copiedData.splice(1,1)
+            demoChart.data(copiedData)
+                .update()
+        },6000)
+    </script>
+    </body>
+
+</html>

@@ -1,0 +1,21 @@
+<!--sitewide includes-->
+<footer>
+<div class="container">
+
+    <div class="row">
+        <div class="col-xs-12">
+            <h3>Project Partners</h3>
+        </div>
+        {% for partner in site.partners %}
+        <div class="col-sm-3 col-xs-6">
+            <a href="{{ partner.url }}">
+                <img width="160" class="img-responsive" src="{{ partner.logo }}" alt="{{ partner.name }} logo" />
+            </a>
+            <p class="text-center">
+                {{ partner.name }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</footer>

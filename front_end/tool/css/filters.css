@@ -1,0 +1,113 @@
+#temp-filter-menu {
+    width: 100%;
+    height: 100%;
+    top: 100px;
+    
+    
+}
+
+
+
+/*Stuff for all filter components*/
+
+#filter-components {
+  padding-bottom: 150px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.filter-group {
+    border-bottom: 1px solid black;
+}
+
+.filter-label {
+    font-weight: bold;
+}
+
+#temp-filter-menu h3 {
+    margin-bottom:20px;
+}
+/*------------------------------*/
+/*Override the nouiSlider styles*/
+
+/*add enough space for tool tips*/
+.noUi-target {
+    margin: 45px 26px 20px 20px;
+}
+
+.categorical {
+    margin-left: 12px;
+    margin-bottom: 15px;
+}
+
+/*colors*/
+.noUi-connect {
+  background:rgba(234, 100, 2, 0.7);
+}
+
+/*Make handles smaller*/
+.noUi-horizontal {
+  height: 18px;
+}
+.noUi-horizontal .noUi-handle {
+  width: 20px;
+  height: 28px;
+  left: -10px;
+  top: -6px;
+}
+.noUi-handle:before,
+.noUi-handle:after {
+  content: "";
+  display: block;
+  position: absolute;
+  height: 14px;
+  width: 1px;
+  background: #E8E7E6;
+  left: 6px;
+  top: 6px;
+}
+.noUi-handle:after {
+  left: 10px;
+}
+
+/*Descriptive text*/
+
+.description .neighborhood-flag {
+    font-size: 0.8em;
+    color: rgba(24, 100, 178,1);
+    margin-bottom: 0px;
+}
+
+.description .project-flag {
+    font-size: 0.8em;
+    color: rgba(234, 100, 2, 1);
+    margin-bottom: 0px;
+  }
+
+/*Styles for null data toggle tooltip*/
+.filter {
+    position: relative;
+}
+
+.filter .tooltip {
+    position: absolute;
+    margin-left: -15px;
+    text-transform: initial;
+    line-height: 1.8em;
+}
+
+.filter .tooltip.top {
+    padding: 0;
+}
+
+.filter .tooltip.top .tooltip-arrow {
+    left: 19px;
+    bottom: -5px;
+}
+
+.filter .tooltip .tooltip-inner {
+    text-align: start;
+    max-width: 245px;
+    min-height: 75px;
+}

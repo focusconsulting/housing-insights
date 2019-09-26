@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+	{% include header-includes.html %}
+	{{page.css}}
+
+	<title>{{ page.title }}</title>
+
+</head>
+
+
+<!--Optional on-page styles-->
+<style>
+
+</style>
+
+
+
+<!--Main body of the content here-->
+<body>
+	<div class="bg-white">
+	{% include navbar.html %}
+		<!--main body-->
+		<div class="container">
+			<div class="row">
+			<div class="col-xs-12"><!--id="container-sub-wrapper"-->
+
+	  			{{content}}
+
+			</div>
+			</div>
+		</div>
+	</div>
+
+<!--.sitewide includes-->
+{% include footer-includes.html %}
+{{page.javascript}}
+<!--page specific includes-->
+	<!--none-->
+<!--.page specific includes-->
+
+</body>
+
+</html>

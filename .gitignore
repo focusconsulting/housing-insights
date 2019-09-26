@@ -23,7 +23,7 @@ python/ingestion/Notes : 237-BROWSE-Ingestion-Infra
 docs/_site/
 docs/.sass-cache/
 docs/.jekyll-metadata
-.DS_Store
+*.DS_Store
 docs/.DS_Store
 docs/css/.DS_Store
 _site/
@@ -31,8 +31,8 @@ _site/
 ###################
 # Configuration
 ###################
-secrets.json
-
+*/secrets.json
+*/secrets.yml
 
 ####################
 # Pycharm Idea Folder

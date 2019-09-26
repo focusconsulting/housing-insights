@@ -4,13 +4,12 @@ services:
 
 
     jekyll:
-        #image: codefordc2/housing-insights-jekyll
         build:
-            context: docs
+            context: front_end 
         command:
             - jekyll serve --watch --incremental --force_polling
         volumes:
-            - ./docs:/srv/jekyll
+            - ./front_end:/srv/jekyll
         ports:
             - "4000:4000"
 
@@ -36,10 +35,9 @@ services:
 
     sandbox:
         build:
-            context: python
+            context: back_end 
         volumes:
             - .:/repo
-        command: tail -f /dev/null
         ports:
             - "5000:5000"
         environment:

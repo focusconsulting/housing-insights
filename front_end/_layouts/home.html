@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+	{% include header-includes.html %}
+	{{page.css}}
+
+	<title>{{ page.title }}</title>
+
+</head>
+
+
+<!--Optional on-page styles-->
+<style>
+
+</style>
+
+
+
+<!--Main body of the content here-->
+<body>
+	<div class="bg-white">
+	{% include navbar.html %}
+	<!--
+			<div class="alert alert-info" style="margin-top:-20px;">
+					alert goes here
+			</div>
+	-->
+	<div class="hero-image">
+		<div class="jumbotron hero-image">
+		<div class="container">
+			<div class="title-text">
+				<h1>Housing Insights</h1>
+				<h2>{{ site.tagline }}</h2>
+				<p>
+					<a href="tool" class="btn btn-primary btn-lg help-build">Explore the tool!</a>
+				</p>
+			</div>
+		</div>
+		</div>
+	</div>
+
+	</div>
+
+	<div class="bg-white">
+	<div class="container bg-white">
+	  <div class="row">
+	    <div class="col-xs-12">
+				{{content}}
+			</div>
+		</div>
+	</div>
+	</div>
+
+<!--.sitewide includes-->
+{% include footer-includes.html %}
+{{page.javascript}}
+<!--page specific includes-->
+	<!--none-->
+<!--.page specific includes-->
+
+</body>
+
+</html>

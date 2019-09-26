@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <script src="js/external/offline-use/d3.min.js"></script>
+
+        <style> /* set the CSS */
+        .chart .values { fill:  rgba(234, 100, 2, 0.7); }
+
+        .chart .filler { fill: rgba(200,200,200,0.7); }
+
+        </style>
+    </head>
+    <body>
+        <h1>Demo of chart template</h1>
+        <div class="demoChart"></div>
+    <script src="js/charts/chart-prototype.js"></script>
+    <script src="js/charts/template-inherited-chart.js"></script>
+    <script src="js/charts/donut-chart.js"></script>
+    <script>
+
+        var data = [{"letter":"A","percent":0.8}];
+
+        var demoChart = new DonutChart('.demoChart')
+                    .width(400)
+                    .height(400)
+                    .margin({top: 20, right: 20, bottom: 30, left: 20})
+                    .data(data)
+                    .field('percent')
+                    .label('letter')
+
+                    .duration(1000)
+                    .create()
+
+
+        setTimeout(function(){
+            demoChart.width(200).height(200).resize()
+        },2000)
+        setTimeout(function(){
+            var copiedData = JSON.parse(JSON.stringify(data))
+            copiedData[0]['percent'] = 0.2
+            demoChart.update(copiedData)
+        }, 3000)
+    </script>
+    </body>
+
+</html>
