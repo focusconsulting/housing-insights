@@ -6,16 +6,13 @@
     the front-end via /api/projects/. It depends on the following data sources:
 
         - Projects.csv, From the Preservation Catalog Folder in the s3
-        - 'Affordable Housing Data': Updated regularly from open data DC (MAR)
-        - DC Department of Housing and Community Development, using their API
-
-    The data dictionary for this dataset is in {{ UPDATE ME }}.
+        - 'Affordable Housing Data': Updated regularly from open data DC
+        - Master Adress Repository
 
     Projects that are not from the preservation catalog have an nlihc_id
-    beginning with "DC".
+    beginning with "AH" for affordable housing.
 '''
-#from . import utils
-import utils
+from . import utils
 import requests
 import numpy as np
 import pandas as pd
@@ -28,7 +25,7 @@ preservation_catalog_columns = [
     "census_tract",
     "neighborhood_cluster",
     "ward",
-    #"neighborhood_cluster_desc",
+    "neighborhood_cluster_desc",
     # Basic Project Information",
     "proj_name",
     "proj_addre",
@@ -36,12 +33,8 @@ preservation_catalog_columns = [
     "proj_address_id",
     "proj_units_assist_max",
     "proj_owner_type",
-    # Extended Project Information",
-    #"most_recent_topa_date",
-    #"topa_count",
     "most_recent_reac_score_num",
     "most_recent_reac_score_date",
-    #"sum_appraised_value_current_total",
 ]
 
 def load_preservation_catalog_projects():
@@ -60,6 +53,7 @@ def load_preservation_catalog_projects():
                               "tract": "census_tract",
                               "date": "most_recent_reac_score_date",
                               "reac_score_num": "most_recent_reac_score_num",
+                              "cluster_tr2000_name": "neighborhood_cluster_desc",
                               })[preservation_catalog_columns]
 
 def load_affordable_housing_projects():
@@ -101,9 +95,25 @@ def load_tax():
     return {r['attributes']['SSL']: r['attributes']['ASSESSMENT'] for r in data}
 
 def load_topa():
+    '''
+    This function loads the raw TOPA data, grabs the most recent date for
+    each address id, and counts the number of TOPA notices for each address id.
+
+    It returns a dataframe where the obserations are an address id, the most
+    recent topa notice as a data, and the number of topa notices.
+    '''
     df = pd.read_csv(utils.S3+'topa/Rcasd_current.csv')
     df.columns = df.columns.str.lower()
-    return df
+    df['most_recent_topa_date'] = pd.to_datetime(df['notice_date'])
+    return pd.concat([
+            # The most recent topa data.
+            (df.sort_values('most_recent_topa_date', ascending=False)
+               .groupby('address_id').first()['most_recent_topa_date']),
+            # Number of observations per address id.
+            df.address_id.value_counts()
+            ], axis=1).reset_index().rename(columns={
+            # Fixing column names
+            'address_id': 'topa_count', 'index': 'proj_address_id'})
 
 def load_reac_data():
     '''Gets REAC information from the s3.'''
@@ -120,5 +130,13 @@ def load_project_data(engine):
     df = df.sort_values('nlihc_id').drop_duplicates('proj_address_id')
     df = df.merge(load_mar_projects(), on='proj_address_id', how='left')
     df['sum_appraised_value_current_total'] = df['ssl'].map(load_tax())
-    return df
-#    return utils.write_table(df, 'new_project', engine)
+
+
+    # Fix neighborhood Cluster Info
+    df['neighborhood_cluster_x'] = utils.just_digits(df.neighborhood_cluster_x)
+    df['neighborhood_cluster_y'] = utils.just_digits(df.neighborhood_cluster_y)
+    df['neighborhood_cluster'] = df.apply(lambda row: max(
+        row.neighborhood_cluster_x, row.neighborhood_cluster_y), axis=1)
+    df = df.drop(columns=['neighborhood_cluster_x', 'neighborhood_cluster_y'])
+    df = df.merge(load_topa(), on='proj_address_id', how='left')
+    return utils.write_table(df, 'new_project', engine)

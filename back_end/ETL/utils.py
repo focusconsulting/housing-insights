@@ -105,10 +105,7 @@ def get_cluster_for_data(df, longitude_column, latitude_column):
     )
     # Grab census tract geometries from open data DC.
     cluster_file = gp.read_file(
-        ('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/'
-         'Administrative_Other_Boundaries_WebMercator/MapServer/17/'
-         'query?where=1%3D1&outFields=NAME,Shape,Shape_Length,'
-         'Shape_Area&outSR=4326&f=json')
+        'https://opendata.arcgis.com/datasets/f6c703ebe2534fc3800609a07bad8f5b_17.geojson'
     )
     cluster_file.columns = cluster_file.columns.str.lower()
     cluster_file = cluster_file.rename(columns={'name': 'neighborhood_cluster'})

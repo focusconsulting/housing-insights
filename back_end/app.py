@@ -1,4 +1,6 @@
-'''new_app.py'''
+'''
+app.py
+'''
 import datetime
 from config import Config
 from mailer import send_mail
@@ -7,6 +9,7 @@ from flask_cors import cross_origin
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
 from flask_marshmallow import Marshmallow
+import filter_view_query
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -26,7 +29,7 @@ table_loaders = {
       'crime': ETL.load_crime_data,
      'permit': ETL.load_permit_data,
     'project': ETL.load_project_data,
-    'subsidy': ETL.load_subsidy_data,
+#    'subsidy': ETL.load_subsidy_data,
 }
 
 @app.route('/', methods=['GET'])
@@ -46,8 +49,8 @@ def project():
 @app.route('/filter')
 def filter():
     '''Returns a JSON of projects (see NewFilterSchema)'''
-    projects = models.NewProject.query.all()
-    result = schemas.new_filter_schema.dump(projects)
+    proxy = db.session.execute(filter_view_query.query)
+    result = [dict(x) for x in proxy]
     return jsonify({'objects': result})
 
 @cross_origin()
@@ -79,6 +82,7 @@ def make_table(table_name, password):
     See the documentation for clear instructions on creating tables.
     '''
     if password != "SECRET":
+        send_mail('Invalid data loading attempted.')
         return '<h1>Invalid Password: Please Try Again</h1>'
     if table_name not in table_loaders.keys():
         return '''
@@ -89,11 +93,11 @@ def make_table(table_name, password):
                 <li>acs</li>
                 <li>permit</li>
                 <li>project</li>
-                <li>subsidy</li>
             </ul>
                '''
     # Returns True if successfully loaded.
     if table_loaders[table_name](engine=db.get_engine()):
+        send_mail('Loaded {} table.'.format(table_name))
         return '<h1>Success! Loaded {} table.</h1>'.format(table_name)
     return '''
             <h1>Unable to load {} table.</h1>
@@ -101,16 +105,16 @@ def make_table(table_name, password):
             <h2>Housing insights will load the backup data.</h2>
            '''.format(table_name)
 
-@scheduler.task('interval', id='do_auto_load_tables', minutes=5)
+@scheduler.task('cron', id='do_auto_load_tables', day="*", hour=0)
 def auto_load_tables():
     '''Grabs the most recent data every morning and puts it in the DB.'''
     print("RELOADING DATA")
-    message = "Data update for {}".format(datetime.datetime.now())
-    if load_crime_data(engine=db.get_engine()):
+    message = "Data update for {}\n".format(datetime.datetime.now())
+    if ETL.load_crime_data(engine=db.get_engine()):
         message += "Crime table load successful.\n"
     else:
         message += "Crime table load not successful. Using backup.\n"
-    if load_permit_data(engine=db.get_engine()):
+    if ETL.load_permit_data(engine=db.get_engine()):
         message += "Permit table load successful.\n"
     else:
         message += "Permit table load not successful. Using backup.\n"

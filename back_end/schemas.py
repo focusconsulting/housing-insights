@@ -26,14 +26,3 @@ class NewProjectSchema(ma.Schema):
         )
 
 new_project_schema = NewProjectSchema(many=True)
-
-class NewFilterSchema(ma.Schema):
-    class Meta:
-        # Fields to expose
-        fields = ('nlihc_id',
-                  #'subsidy'
-                  #'subsidy.portfolio',
-                  #'subsidy.poa_start',
-                  #'subsidy.poa_end'
-                  )
-new_filter_schema = NewFilterSchema(many=True)
