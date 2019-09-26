@@ -20,17 +20,17 @@ The filter endpoint is created by the filter_view_query.py file
 The zone facts endpoint is created in this file.
 '''
 import datetime
-from config import Config
 from mailer import send_mail
 from flask import Flask, jsonify
 from flask_cors import cross_origin
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
 from flask_marshmallow import Marshmallow
+from config import TestingConfig, ProductionConfig
 import filter_view_query
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.config.from_object(TestingConfig)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
