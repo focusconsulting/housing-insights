@@ -1,5 +1,23 @@
 '''
 app.py
+
+This file contains the logic for the back end of the housing-insights tool.
+
+It does three things:
+
+    1. Auto loads data from Open Data DC (crime and permit) and creates the
+    zone facts table every morning. It emails reports of this to CNHED staff.
+    2. Allows CNHED staff to load other tables with the newest data.
+    3. Sends data from the database as JSON for the front end tool.
+
+The endpoints for the front end are:
+    - project
+    - filter
+    - zone_facts
+
+The project endpoint is created from the models.py and schemas.py files.
+The filter endpoint is created by the filter_view_query.py file
+The zone facts endpoint is created in this file.
 '''
 import datetime
 from config import Config
@@ -39,7 +57,7 @@ def index():
     return 'At the housing-insights back-end.'
 
 @cross_origin()
-@app.route('/project')
+@app.route('/new_project')
 def project():
     '''Returns a JSON of projects (see NewProjectSchema)'''
     projects = models.NewProject.query.all()
@@ -47,19 +65,18 @@ def project():
     return jsonify({'objects': result})
 
 @cross_origin()
-@app.route('/filter')
+@app.route('/new_filter')
 def filter():
-    '''Returns a JSON of projects (see NewFilterSchema)'''
+    '''Returns a JSON of projects combined with subsidy and zone_facts data.'''
     proxy = db.session.execute(filter_view_query.query)
     result = [dict(x) for x in proxy]
     return jsonify({'objects': result})
 
 @cross_origin()
-@app.route('/zone_facts/<column_name>/<grouping>', methods = ['GET'])
+@app.route('/new_zone_facts/<column_name>/<grouping>', methods = ['GET'])
 def zone_facts(column_name = 'poverty_rate', grouping='ward'):
     '''
-    API endpoint to return just the column and grouping matching the passed
-    values, in the format needed by the chloropleth map
+    API endpoint to return a single column from zone_facts for a given zone.
     '''
     try:
         proxy = db.session.execute('''
@@ -128,4 +145,4 @@ def auto_load_tables():
 if __name__ == "__main__":
     print("RUNNING APP")
     scheduler.start()
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=False)

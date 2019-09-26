@@ -6,7 +6,7 @@ global:
   application_name: housinginsights_codefordc #formerly hiapidemo
   branch: null
   default_ec2_keyname: housinginsights-eb #formerly null
-  default_platform: Python 3.4
+  default_platform: Python 3.7
   default_region: us-east-1
   instance_profile: null
   platform_name: null
