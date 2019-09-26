@@ -22,6 +22,7 @@ scheduler.init_app(app)
 import models
 import schemas
 import ETL
+from ETL.utils import get_credentials
 
 # ETL Functions To load DB Tables
 table_loaders = {
@@ -29,7 +30,7 @@ table_loaders = {
       'crime': ETL.load_crime_data,
      'permit': ETL.load_permit_data,
     'project': ETL.load_project_data,
-#    'subsidy': ETL.load_subsidy_data,
+    'subsidy': ETL.load_subsidy_data,
 }
 
 @app.route('/', methods=['GET'])
@@ -81,7 +82,7 @@ def make_table(table_name, password):
     This function allows CNHED staff to load a database table "manually".
     See the documentation for clear instructions on creating tables.
     '''
-    if password != "SECRET":
+    if password != get_credentials('load-data-password'):
         send_mail('Invalid data loading attempted.')
         return '<h1>Invalid Password: Please Try Again</h1>'
     if table_name not in table_loaders.keys():

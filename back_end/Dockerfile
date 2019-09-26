@@ -4,10 +4,10 @@ FROM continuumio/miniconda3
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY test_env.yml .
+COPY environment.yml .
 
 # Install dependencies
-RUN conda env create -f test_env.yml 
+RUN conda env create -f environment.yml 
 
 ## Have environment activate on start
 RUN echo "source activate housing-insights; cd /repo/back_end" > ~/.bashrc

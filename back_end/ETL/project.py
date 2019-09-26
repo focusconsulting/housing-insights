@@ -12,7 +12,8 @@
     Projects that are not from the preservation catalog have an nlihc_id
     beginning with "AH" for affordable housing.
 '''
-from . import utils
+#from . import utils
+import utils
 import requests
 import numpy as np
 import pandas as pd
@@ -47,7 +48,7 @@ def load_preservation_catalog_projects():
     df = utils.get_census_tract_for_data(df, 'proj_lon', 'proj_lat')
     df['neighborhood_cluster'] = utils.just_digits(df.cluster_tr2000)
     df['ward'] = utils.just_digits(df.ward2012)
-    df = df.merge(load_reac_data())
+    df = df.merge(load_reac_data(), how='left')
     return df.rename(columns={"proj_lat": "latitude",
                               "proj_lon": "longitude",
                               "tract": "census_tract",
@@ -125,18 +126,27 @@ def load_reac_data():
 
 def load_project_data(engine):
     '''With the addition of MAR - this takes a long time (a few minutes).'''
+    print("Starting load")
     df = pd.concat([load_preservation_catalog_projects(),
                     load_affordable_housing_projects()], sort=True)
     df = df.sort_values('nlihc_id').drop_duplicates('proj_address_id')
+
+    df = add_mar_and_tax(df)
+    df = add_neighborhoods(df)
+    df = df.merge(load_topa(), on='proj_address_id', how='left')
+    return utils.write_table(df, 'new_project', engine)
+
+def add_mar_and_tax(df):
+    print("Adding mar and tax")
     df = df.merge(load_mar_projects(), on='proj_address_id', how='left')
     df['sum_appraised_value_current_total'] = df['ssl'].map(load_tax())
+    return df
 
-
+def add_neighborhoods(df):
+    print("Adding neighborhoods")
     # Fix neighborhood Cluster Info
     df['neighborhood_cluster_x'] = utils.just_digits(df.neighborhood_cluster_x)
     df['neighborhood_cluster_y'] = utils.just_digits(df.neighborhood_cluster_y)
     df['neighborhood_cluster'] = df.apply(lambda row: max(
         row.neighborhood_cluster_x, row.neighborhood_cluster_y), axis=1)
-    df = df.drop(columns=['neighborhood_cluster_x', 'neighborhood_cluster_y'])
-    df = df.merge(load_topa(), on='proj_address_id', how='left')
-    return utils.write_table(df, 'new_project', engine)
+    return df.drop(columns=['neighborhood_cluster_x', 'neighborhood_cluster_y'])

@@ -42,7 +42,7 @@ class NewProject(db.Model):
     census_tract = db.Column(db.String, nullable=False)
     neighborhood_cluster = db.Column(db.String, nullable=False)
     ward = db.Column(db.String, nullable=False)
-    #neighborhood_cluster_desc = db.Column(db.String)
+    neighborhood_cluster_desc = db.Column(db.String)
 
     ## Basic Project Information
     proj_name = db.Column(db.String, nullable=False)

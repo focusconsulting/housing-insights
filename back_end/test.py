@@ -11,6 +11,7 @@ from ETL import subsidy
 from ETL import utils
 
 import pandas as pd
+import requests
 
 class TestDataCollection(unittest.TestCase):
     '''Tests the collection of raw data.'''
@@ -33,11 +34,23 @@ class TestDataCollection(unittest.TestCase):
         for c in ['zone', 'zone_type', 'construction_permits', 'total_permits']:
             self.assertIn(c, df.columns)
 
-    def test_get_project_data(self):
-        self.assertTrue(True)
+    def test_get_prescat_project(self):
+        df = project.load_preservation_catalog_projects()
+        self.assertIsInstance(df, pd.DataFrame)
+
+    def test_topa(self):
+        df = project.load_topa()
+        self.assertIsInstance(df, pd.DataFrame)
+
+    def test_reac(self):
+        df = project.load_reac_data()
+        self.assertIsInstance(df, pd.DataFrame)
 
     def test_get_subsidy_data(self):
-        self.assertTrue(True)
+        df = subsidy.load_preservation_catalog_subsidies()
+        self.assertIsInstance(df, pd.DataFrame)
+        for c in ['subsidy_id', 'nlihc_id', 'portfolio', 'poa_start', 'poa_end']:
+            self.assertIn(c, df.columns)
 
 class TestUtils(unittest.TestCase):
     '''Tests the utils within ETL.'''
@@ -45,14 +58,12 @@ class TestUtils(unittest.TestCase):
     def test_get_credentials(self):
         self.assertEqual(utils.get_credentials('test'), 'passed')
 
-class TestAPI(unittest.TestCase):
-    '''Tests application API.'''
-
-    def test_project_route(self):
+    def test_census_tract_load(self):
         self.assertTrue(True)
 
-    def test_filter_route(self):
+    def test_neighborhood_cluster_load(self):
         self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()

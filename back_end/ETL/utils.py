@@ -89,7 +89,8 @@ def get_census_tract_for_data(df, longitude_column, latitude_column):
 
     # Grab census tract geometries from open data DC.
     census_tracts_dc = gp.read_file(
-        'https://opendata.arcgis.com/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8.geojson')
+        'https://opendata.arcgis.com/datasets/6969dd63c5cb4d6aa32f15effb8311f3_8.geojson'
+        )[['TRACT', 'geometry']]
     census_tracts_dc.columns = census_tracts_dc.columns.str.lower()
 
     # Align spatial projects and join where the projects' point
@@ -101,14 +102,13 @@ def get_cluster_for_data(df, longitude_column, latitude_column):
     '''Returns the data frame with a new column "neighborhood_cluster".'''
     df = gp.GeoDataFrame(df,
         geometry=[Point(xy) for xy in zip(df[longitude_column], df[latitude_column])]
-        #geometry=gp.points_from_xy(df[longitude_column], df[latitude_column])
     )
     # Grab census tract geometries from open data DC.
     cluster_file = gp.read_file(
         'https://opendata.arcgis.com/datasets/f6c703ebe2534fc3800609a07bad8f5b_17.geojson'
     )
-    cluster_file.columns = cluster_file.columns.str.lower()
-    cluster_file = cluster_file.rename(columns={'name': 'neighborhood_cluster'})
+    cluster_file = cluster_file[['NAME', 'NBH_NAMES', 'geometry']]
+    cluster_file.columns = ['neighborhood_cluster', 'neighborhood_cluster_desc', 'geometry']
 
     # Align spatial projects and join where the projects' point
     # geometries are within the census tracts' polygon geometries.
