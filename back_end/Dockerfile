@@ -14,5 +14,5 @@ RUN echo "source activate housing-insights; cd /repo/back_end" > ~/.bashrc
 ENV PATH /opt/conda/envs/housing-insights/bin:$PATH
 
 WORKDIR /repo/back_end
-CMD ["python", "app.py"] 
 EXPOSE 5000
+CMD ["python", "app.py"] 

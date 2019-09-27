@@ -30,7 +30,7 @@ from config import TestingConfig, ProductionConfig
 import filter_view_query
 
 app = Flask(__name__)
-app.config.from_object(TestingConfig)
+app.config.from_object(ProductionConfig)
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
@@ -145,4 +145,4 @@ def auto_load_tables():
 if __name__ == "__main__":
     print("RUNNING APP")
     scheduler.start()
-    app.run(host="0.0.0.0", debug=False)
+    app.run(host="0.0.0.0")
