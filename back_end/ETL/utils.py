@@ -10,10 +10,21 @@ import datetime
 import numpy as np
 import pandas as pd
 import geopandas as gp
-
+import psycopg2
 from shapely.geometry import Point
 
 S3 = 'https://housing-insights.s3.amazonaws.com/'
+
+def get_db_connection():
+    return psycopg2.connect(
+        database=get_credentials('database'),
+        user=get_credentials('user'),
+        password=get_credentials('password'),
+        host=get_credentials('host'),
+        port=get_credentials('port')
+    )
+
+
 
 def write_table(df, table_name, engine):
     '''

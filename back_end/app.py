@@ -19,28 +19,27 @@ The project endpoint is created from the models.py and schemas.py files.
 The filter endpoint is created by the filter_view_query.py file
 The zone facts endpoint is created in this file.
 '''
+# Application Configuration
 import datetime
 from mailer import send_mail
 from flask import Flask, jsonify
 from flask_cors import cross_origin
-from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
-from flask_marshmallow import Marshmallow
 from config import TestingConfig, ProductionConfig
+
+# Loading
+import ETL
 import filter_view_query
 
-app = Flask(__name__)
-app.config.from_object(ProductionConfig)
-db = SQLAlchemy(app)
-ma = Marshmallow(app)
+# Database
+from sqlalchemy import create_engine
+from ETL.utils import get_credentials, get_db_connection
+from psycopg2.extras import RealDictCursor
 
+app = Flask(__name__)
 scheduler = APScheduler()
 scheduler.init_app(app)
-
-import models
-import schemas
-import ETL
-from ETL.utils import get_credentials
+engine = create_engine(get_credentials('engine-string'))
 
 # ETL Functions To load DB Tables
 table_loaders = {
@@ -49,6 +48,7 @@ table_loaders = {
      'permit': ETL.load_permit_data,
     'project': ETL.load_project_data,
     'subsidy': ETL.load_subsidy_data,
+    'zone_facts': ETL.make_zone_facts,
 }
 
 @app.route('/', methods=['GET'])
@@ -60,16 +60,20 @@ def index():
 @app.route('/new_project')
 def project():
     '''Returns a JSON of projects (see NewProjectSchema)'''
-    projects = models.NewProject.query.all()
-    result = schemas.new_project_schema.dump(projects)
+    with get_db_connection() as connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute('SELECT * FROM new_project;')
+            result = cur.fetchall()
     return jsonify({'objects': result})
 
 @cross_origin()
 @app.route('/new_filter')
 def filter():
     '''Returns a JSON of projects combined with subsidy and zone_facts data.'''
-    proxy = db.session.execute(filter_view_query.query)
-    result = [dict(x) for x in proxy]
+    with get_db_connection() as connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(filter_view_query.query)
+            result = cur.fetchall()
     return jsonify({'objects': result})
 
 @cross_origin()
@@ -79,13 +83,17 @@ def zone_facts(column_name = 'poverty_rate', grouping='ward'):
     API endpoint to return a single column from zone_facts for a given zone.
     '''
     try:
-        proxy = db.session.execute('''
-           SELECT zone, {}
-             FROM new_zone_facts
-            WHERE zone_type = '{}'
-         ORDER BY zone;'''.format(column_name, grouping))
-        result = [dict(x) for x in proxy]
-        status = 'success'
+        if grouping not in ['ward', 'census_tract', 'neighborhood_cluster']:
+            raise ValueError('Not valid grouping')
+        with get_db_connection() as connection:
+            with connection.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute('''
+                       SELECT zone, {}
+                         FROM new_zone_facts
+                        WHERE zone_type = '{}'
+                     ORDER BY zone;'''.format(column_name, grouping))
+                result = cur.fetchall()
+                status = 'success'
     except:
         result = []
         status = 'Not found'
@@ -114,7 +122,7 @@ def make_table(table_name, password):
             </ul>
                '''
     # Returns True if successfully loaded.
-    if table_loaders[table_name](engine=db.get_engine()):
+    if table_loaders[table_name](engine):
         send_mail('Loaded {} table.'.format(table_name))
         return '<h1>Success! Loaded {} table.</h1>'.format(table_name)
     return '''
@@ -128,15 +136,15 @@ def auto_load_tables():
     '''Grabs the most recent data every morning and puts it in the DB.'''
     print("RELOADING DATA")
     message = "Data update for {}\n".format(datetime.datetime.now())
-    if ETL.load_crime_data(engine=db.get_engine()):
+    if ETL.load_crime_data(engine):
         message += "Crime table load successful.\n"
     else:
         message += "Crime table load not successful. Using backup.\n"
-    if ETL.load_permit_data(engine=db.get_engine()):
+    if ETL.load_permit_data(engine):
         message += "Permit table load successful.\n"
     else:
         message += "Permit table load not successful. Using backup.\n"
-    if ETL.make_zone_facts(db):
+    if ETL.make_zone_facts(engine):
         message += "Zone facts table creation successful.\n"
     else:
         message += "Zone facts table creation not successful. Using backup.\n"
