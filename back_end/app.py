@@ -78,13 +78,16 @@ def filter():
 
 @cross_origin()
 @app.route('/new_zone_facts/<column_name>/<grouping>', methods = ['GET'])
-def zone_facts(column_name = 'poverty_rate', grouping='ward'):
+def zone_facts(column_name='poverty_rate', grouping='ward'):
     '''
     API endpoint to return a single column from zone_facts for a given zone.
     '''
     try:
-        if grouping not in ['ward', 'census_tract', 'neighborhood_cluster']:
-            raise ValueError('Not valid grouping')
+        if grouping not in ['ward', 'tract', 'neighborhood_cluster']:
+            if grouping == 'census_tract':
+                grouping = 'tract'
+            else:
+                raise ValueError('Not valid grouping')
         with get_db_connection() as connection:
             with connection.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute('''
