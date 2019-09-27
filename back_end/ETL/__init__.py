@@ -5,3 +5,5 @@ from .project import load_project_data
 from .subsidy import load_subsidy_data
 
 from .make_zone_facts import make_zone_facts
+
+from .filter_view_query import query as filter_query

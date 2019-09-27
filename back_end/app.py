@@ -25,11 +25,9 @@ from mailer import send_mail
 from flask import Flask, jsonify
 from flask_cors import cross_origin
 from flask_apscheduler import APScheduler
-from config import TestingConfig, ProductionConfig
 
 # Loading
 import ETL
-import filter_view_query
 
 # Database
 from sqlalchemy import create_engine
@@ -37,6 +35,7 @@ from ETL.utils import get_credentials, get_db_connection
 from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__)
+app.config['SCHEDULER_API_ENABLED'] = True
 scheduler = APScheduler()
 scheduler.init_app(app)
 engine = create_engine(get_credentials('engine-string'))
@@ -72,7 +71,7 @@ def filter():
     '''Returns a JSON of projects combined with subsidy and zone_facts data.'''
     with get_db_connection() as connection:
         with connection.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(filter_view_query.query)
+            cur.execute(ETL.filter_query)
             result = cur.fetchall()
     return jsonify({'objects': result})
 
