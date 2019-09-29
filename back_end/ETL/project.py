@@ -13,28 +13,29 @@
     beginning with "AH" for affordable housing.
 '''
 from . import utils
+from . import wmata
 import requests
 import numpy as np
 import pandas as pd
 import geopandas as gp
 
 preservation_catalog_columns = [
-    "nlihc_id",
-    "latitude",
-    "longitude",
-    "census_tract",
-    "neighborhood_cluster",
-    "ward",
-    "neighborhood_cluster_desc",
-    # Basic Project Information",
-    "proj_name",
-    "proj_addre",
-    "proj_units_tot",
-    "proj_address_id",
-    "proj_units_assist_max",
-    "proj_owner_type",
-    "most_recent_reac_score_num",
-    "most_recent_reac_score_date",
+    'nlihc_id',
+    'latitude',
+    'longitude',
+    'census_tract',
+    'neighborhood_cluster',
+    'ward',
+    'neighborhood_cluster_desc',
+    # Basic Project Information',
+    'proj_name',
+    'proj_addre',
+    'proj_units_tot',
+    'proj_address_id',
+    'proj_units_assist_max',
+    'proj_owner_type',
+    'most_recent_reac_score_num',
+    'most_recent_reac_score_date',
 ]
 
 def load_preservation_catalog_projects():
@@ -48,12 +49,12 @@ def load_preservation_catalog_projects():
     df['neighborhood_cluster'] = utils.just_digits(df.cluster_tr2000)
     df['ward'] = utils.just_digits(df.ward2012)
     df = df.merge(load_reac_data(), how='left')
-    return df.rename(columns={"proj_lat": "latitude",
-                              "proj_lon": "longitude",
-                              "tract": "census_tract",
-                              "date": "most_recent_reac_score_date",
-                              "reac_score_num": "most_recent_reac_score_num",
-                              "cluster_tr2000_name": "neighborhood_cluster_desc",
+    return df.rename(columns={'proj_lat': 'latitude',
+                              'proj_lon': 'longitude',
+                              'tract': 'census_tract',
+                              'date': 'most_recent_reac_score_date',
+                              'reac_score_num': 'most_recent_reac_score_num',
+                              'cluster_tr2000_name': 'neighborhood_cluster_desc',
                               })[preservation_catalog_columns]
 
 def load_affordable_housing_projects():
@@ -133,6 +134,11 @@ def load_project_data(engine):
     df = add_mar_and_tax(df)
     df = add_neighborhoods(df)
     df = df.merge(load_topa(), on='proj_address_id', how='left')
+    bus = wmata.add_bus_stops(df[['nlihc_id', 'longitude', 'latitude']],
+            'longitude', 'latitude')
+    df = df.merge(bus, how='left')
+
+    return df
     return utils.write_table(df, 'new_project', engine)
 
 def add_mar_and_tax(df):

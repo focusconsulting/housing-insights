@@ -92,11 +92,15 @@ def get_paths_for_data(data_category, years):
     return (df[(df.data_category == data_category) &
                (df.year.isin(years))]["url"].to_list())
 
-def get_census_tract_for_data(df, longitude_column, latitude_column):
-    '''Returns the data frame with a new column "tract".'''
-    df = gp.GeoDataFrame(df,
+def make_df_geo_df(df, longitude_column, latitude_column):
+    '''Makes a dataframe a geodataframe.'''
+    return gp.GeoDataFrame(df,
         geometry=[Point(xy) for xy in zip(df[longitude_column], df[latitude_column])]
     )
+
+def get_census_tract_for_data(df, longitude_column, latitude_column):
+    '''Returns the data frame with a new column "tract".'''
+    df = make_df_geo_df(df, longitude_column, latitude_column)
 
     # Grab census tract geometries from open data DC.
     census_tracts_dc = gp.read_file(
@@ -111,9 +115,8 @@ def get_census_tract_for_data(df, longitude_column, latitude_column):
 
 def get_cluster_for_data(df, longitude_column, latitude_column):
     '''Returns the data frame with a new column "neighborhood_cluster".'''
-    df = gp.GeoDataFrame(df,
-        geometry=[Point(xy) for xy in zip(df[longitude_column], df[latitude_column])]
-    )
+    df = make_df_geo_df(df, longitude_column, latitude_column)
+
     # Grab census tract geometries from open data DC.
     cluster_file = gp.read_file(
         'https://opendata.arcgis.com/datasets/f6c703ebe2534fc3800609a07bad8f5b_17.geojson'
