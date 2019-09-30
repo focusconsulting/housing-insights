@@ -1,11 +1,69 @@
 # Back End of Housing Insights
-This portion of the project holds the "back end" of the website implemented in python. It contains three main things:
+This portion of the project holds the "back end" of the website implemented in python. It contains the following: 
 
-1. `application.py`: This is the main application file and ultimate server-side logic for the tool.
-2. `ETL`: Extract, Transform, Load. This set of code is responsible for loading in data sources into the tool.
-3. `API`: Application Programming Interface. This set of code is responsible for the routes accessible to the front end of the website.
+* `app.py`: The main application file and ultimate server-side logic for the tool. 
+* `mailer.py`: Contains code to send e-mails related to the tool automatically.
+* `test.py`: Contains tests for the back end portion of the project. Run `python test.py` to run all tests.
+* `Dockerfile`: Sets up the development environment.
+* `environment.yml`: A conda environment template run by the Dockerfile
+* `secrets.yml`: Holds API keys and other secret information.
+* `secrets.sample.yml`: A template for `secrets.yml`.
+* `ETL`: Extract, Transform, Load. Code is responsible for loading in data sources into the tool.
+    * `__init__.py`: Allows specific imports for `app.py`.
+    * `acs.py`: Handles American Community Suvey data. 
+    * `crime.py`: Handles crime data from Open Data DC.
+    * `permit.py`: Handles building permit data.
+    * `project.py`: Collects projects, REAC, and TOPA information for the database.
+    * `subsidy.py`: Adds subsidy data to the subsidy table in the database.
+    * `utils.py`: Miscellanious functions that are needed for the ETL process.
+    * `wmata.py`: Handles bus stop and rail station data.
+    * `make_geographic_weights.py`: Creates weights for demographics calculations. This should only be run if the census boundaries have changed.
+    * `make_zone_facts.py`: Creates the zone facts table from ACS, crime, and permit data.
+    * `filter_view_query.py`: The SQL query for the filter API route.
 
-Both `ETL` and `API` have their own `README` documents with details of their implementation.
+## Data Sources
+
+#### Downloaded From the S3
+* Preservation Catalog Projects
+* Preservation Catalog Subsidies
+* Preservation Catalog REAC Information
+* TOPA Information
+
+#### Collected From External Source
+* [American Community Survey Data]()
+* [Open Data DC Crime]()
+* [Open Data DC Building Permits]()
+* [Open Data DC DC Affordable Housing Projects]()
+* [Open Data DC Tax Information]()
+* [The DC Master Address Repository]()
+* [Open Data DC Census Tract Shapefiles]()
+* [Open Data DC Neighborhood Cluster Shapefiles]()
+* [WMATA API]()
+
+
+#### ACS Detail Tables Used
+| Detail Table  | Description                       |
+|---------------|-----------------------------------|
+| `B01003 001E` | Total population                  |
+| `B02001 003E` | African American population       |
+| `B17020 002E` | Population in poverty             |
+| `B23025 002E` | Labor force population            |
+| `B16008 019E` | Foreign born population           |
+| `B09002 015E` | Single mom households             |
+| `B19025 001E` | Aggregate household income        |
+| `B25057 001E` | Lower rent quartile in dollars    |
+| `B25058 001E` | Median rent quartile in dollars   |
+| `B25059 001E` | Upper rent quartile in dollars    |
+
+## Database Connection
+
+
+## Environments / Dependencies
+
+
+### Running the code
+All code is ultimately called and used from `app.py`, therefore, running code should be done at this top level (`back_end`) inside the Docker container. 
+To do adhock testing of code in ETL, you may need to adjust the imports, such as `import utils` rather than `from . import utils`.
 
 ### Elastic Beanstalk Deployment Information
 - Install the Elastic Beanstalk Command Line Interface: `$ pip install awsebcli`
