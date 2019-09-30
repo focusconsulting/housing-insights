@@ -6,7 +6,9 @@ This repository contains code for both [housinginsights.org](http://housinginsig
 1. `front_end/`: A Jekyll-based static website that holds legacy information and front end code for the project.
 2. `back_end/`: A python Flask application that collects and transforms raw data, loads data into a database, and runs an API for the front end to access data.
 
-See the README file in either for specific information about that portion of the project. 
+Overall, the `back_end` directory hass a Flask application that sends data to and from a Postgres database as seen below. See the README file in either for specific information about that portion of the project. 
+
+![](front_end/assets/tech-stack.png)
 
 # Setting up your local environment
 This project uses `Docker` and `docker-compose` to create a consistent environment for development and deployment.
