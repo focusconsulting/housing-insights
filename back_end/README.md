@@ -1,7 +1,7 @@
 # Back End of Housing Insights
-This portion of the project holds the "back end" of the website implemented in python. It contains the following: 
+This portion of the project holds the "back end" of the website implemented in python. It contains the following:
 
-* `app.py`: The main application file and ultimate server-side logic for the tool. 
+* `app.py`: The main application file and ultimate server-side logic for the tool.
 * `mailer.py`: Contains code to send e-mails related to the tool automatically.
 * `test.py`: Contains tests for the back end portion of the project. Run `python test.py` to run all tests.
 * `Dockerfile`: Sets up the development environment.
@@ -10,7 +10,7 @@ This portion of the project holds the "back end" of the website implemented in p
 * `secrets.sample.yml`: A template for `secrets.yml`.
 * `ETL`: Extract, Transform, Load. Code is responsible for loading in data sources into the tool.
     * `__init__.py`: Allows specific imports for `app.py`.
-    * `acs.py`: Handles American Community Suvey data. 
+    * `acs.py`: Handles American Community Suvey data.
     * `crime.py`: Handles crime data from Open Data DC.
     * `permit.py`: Handles building permit data.
     * `project.py`: Collects projects, REAC, and TOPA information for the database.
@@ -30,15 +30,15 @@ This portion of the project holds the "back end" of the website implemented in p
 * TOPA Information
 
 #### Collected From External Source
-* [American Community Survey Data]()
-* [Open Data DC Crime]()
-* [Open Data DC Building Permits]()
-* [Open Data DC DC Affordable Housing Projects]()
-* [Open Data DC Tax Information]()
-* [The DC Master Address Repository]()
-* [Open Data DC Census Tract Shapefiles]()
-* [Open Data DC Neighborhood Cluster Shapefiles]()
-* [WMATA API]()
+* [American Community Survey Data](https://www.census.gov/programs-surveys/acs/data.html)
+* [Open Data DC Crime](https://opendata.dc.gov/datasets/crime-incidents-in-2019)
+* [Open Data DC Building Permits](https://opendata.dc.gov/datasets/building-permits-in-2019)
+* [Open Data DC Affordable Housing Projects](https://opendata.dc.gov/datasets/34ae3d3c9752434a8c03aca5deb550eb_62)
+* [Open Data DC Integrated Tax System Public Extract](https://opendata.dc.gov/datasets/integrated-tax-system-public-extract)
+* [The DC Master Address Repository](https://opendata.dc.gov/datasets/address-points)
+* [Open Data DC Census Tract Shapefiles](https://opendata.dc.gov/datasets/census-tracts-by-population-2000)
+* [Open Data DC Neighborhood Cluster Shapefiles](https://opendata.dc.gov/datasets/neighborhood-clusters)
+* [WMATA API](https://developer.wmata.com/)
 
 
 #### ACS Detail Tables Used
@@ -56,21 +56,49 @@ This portion of the project holds the "back end" of the website implemented in p
 | `B25059 001E` | Upper rent quartile in dollars    |
 
 ## Database Connection
+This project uses a PostgreSQL database, with the development version using a Docker image and the production database hosted on AWS.
+Connecting to the database happens two ways:
 
+1. A SQLAlchemy engine sent through pandas functions. The pandas function `to_sql` allows clean and simple data loading for entire tables as
+they are crafted in `ETL`. The function only takes a SQLAlchemy engine object or SQLite connection, so this was necessary.
+2. The API creates a new `psycopg2` connection with each call and closes it appropriately. This ensures there are no hung connections to the production database.
+
+**Why not SQLAlchemy throughout?**
+
+An earlier of this project used SQLAlchemy to reflect the database, but did not consistently use the ORM for querying. It actually had the data loading process entirely separate from the Flask application, so
+having the ORM and infrastructure to make migrations did not exists. After consideration, it was revealed the front end required a flat and wide return of data that made using the ORM over raw SQL
+a little cumbersome. If this changes in the future, refactoring using an ORM may ne more appropriate.
 
 ## Environments / Dependencies
+The Dockerfile creates and maintains a conda enviroment with the necessary python dependencies. While this set up was used in a previous iteration of the project, it is required moving forward.
+As this project uses the `geopandas` package, conda allows the collection and use of non-python dependencies that would be more difficult to set up without it.
 
+The following packages are used in this project:
+- `sqlalchemy`
+- `numpy`
+- `pandas`
+- `geopandas`
+- `flask`
+- `pyyaml`
+- `requests`
+- `xlrd`
+- `flask-cors`
+- `flask-sqlalchemy`
+- `flask-restless`
+- `flask-marshmallow`
+- `psycopg2-binary`
+- `flask-apscheduler`
 
 ### Running the code
-All code is ultimately called and used from `app.py`, therefore, running code should be done at this top level (`back_end`) inside the Docker container. 
+All code is ultimately called and used from `app.py`, therefore, running code should be done at this top level (`back_end`) inside the Docker container.
 To do adhock testing of code in ETL, you may need to adjust the imports, such as `import utils` rather than `from . import utils`.
 
-### Elastic Beanstalk Deployment Information
+### Elastic Beanstalk Deployment Setup
 - Install the Elastic Beanstalk Command Line Interface: `$ pip install awsebcli`
 - Configure a profile that uses the AWS credentials for our Code for DC API account: `aws configure --profile codefordc`
 - Enter the public and secret keys provided to you by an admin; default location and output format can be None (just press enter)
+#### UPDATE ME WITH DOCKER INSTRUCTIONS
 
-#### Normal use:
 1. Navigate to the housing-insights/python folder in your local repo
 2. run `eb deploy housinginsights-codefordc --profile codefordc` (here housinginsights-codefordc is the elastic beanstalk environment name, and codefordc is the name of the credentials saved in your config file above)
 3. Wait a few minutes while the server restarts w/ new code
@@ -83,8 +111,8 @@ To do adhock testing of code in ETL, you may need to adjust the imports, such as
 4. DNS CNAME can be default (i.e. housinginsights-staging)
 5. Select classic load balancer type. This will both create and deploy the current code. Wait while the server starts up, and then test the api url to make sure your changes behave as expected.
 6. If you need to make any edits and deploy to a running test server, use: `eb deploy housinginsights-staging --profile codefordc`
-7. **Important!** be sure to terminate the staging environment when you're done! You should only have this staging environment running while you're actively working on testing your live code. 
-8. Run `eb terminate housinginsights-staging`, or visit the Elastic Beanstalk instance in the [web console](https://codefordc.signin.aws.amazon.com/console).  Note, be sure to include the name of the instance to terminate, since the default if none is specified is the production server. 
+7. **Important!** be sure to terminate the staging environment when you're done! You should only have this staging environment running while you're actively working on testing your live code.
+8. Run `eb terminate housinginsights-staging`, or visit the Elastic Beanstalk instance in the [web console](https://codefordc.signin.aws.amazon.com/console).  Note, be sure to include the name of the instance to terminate, since the default if none is specified is the production server.
 9. Use `eb list --profile codefordc` to verify that the instance has been terminated
 
 
