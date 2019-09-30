@@ -8,7 +8,7 @@ This repository contains code for both [housinginsights.org](http://housinginsig
 
 Overall, the `back_end` directory hass a Flask application that sends data to and from a Postgres database as seen below. See the README file in either for specific information about that portion of the project. 
 
-![](front_end/assets/tech-stack.png)
+<img src="./front_end/assets/tech-stack.png" alt="Tech Stack" width="70%">
 
 # Setting up your local environment
 This project uses `Docker` and `docker-compose` to create a consistent environment for development and deployment.
