@@ -24,7 +24,13 @@ def get_db_connection():
         port=get_credentials('port')
     )
 
-
+def basic_query(query):
+    '''Performs a basic query on the database, returns a list of tuples.'''
+    with get_db_connection() as connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query)
+            result = cur.fetchall()
+    return result
 
 def write_table(df, table_name, engine):
     '''

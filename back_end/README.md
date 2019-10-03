@@ -55,6 +55,17 @@ This portion of the project holds the "back end" of the website implemented in p
 | `B25058 001E` | Median rent quartile in dollars   |
 | `B25059 001E` | Upper rent quartile in dollars    |
 
+## API Routes
+Specific documentation of these routes can be found in `API`
+* `project`
+* `project/nlihc_id`
+* `filter`
+* `wmata/<nlihc_id>`
+* `building_permits/<dist>`
+* `projects/<dist>`
+* `project/<nlihc_id>/subsidies/`
+* `zone_facts/<column_name>/<grouping>`
+
 ## Database Connection
 This project uses a PostgreSQL database, with the development version using a Docker image and the production database hosted on AWS.
 Connecting to the database happens two ways:

@@ -31,7 +31,7 @@ import ETL
 
 # Database
 from sqlalchemy import create_engine
-from ETL.utils import get_credentials, get_db_connection
+from ETL.utils import get_credentials, basic_query
 from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__)
@@ -55,24 +55,31 @@ def index():
     '''Default page of the API.'''
     return 'At the housing-insights back-end.'
 
+### API SECTION
+
 @cross_origin()
-@app.route('/new_project')
+@app.route('/new_project', methods=['GET'])
+@app.route('/new_project/<nlihc_id>', methods=['GET'])
 def project():
-    '''Returns a JSON of projects (see NewProjectSchema)'''
-    with get_db_connection() as connection:
-        with connection.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute('SELECT * FROM new_project;')
-            result = cur.fetchall()
+    '''Returns a JSON of projects (includes TOPA and REAC).'''
+    where = f"WHERE nlihc_id = '{nlihc_id}'" if nlihc_id else ''
+    result = basic_query('SELECT * FROM new_project'+where+';')
+    return jsonify({'objects': result})
+
+## POSSIBLE TODO: Projects Distance Query
+
+@cross_origin()
+@app.route('/new_project/<nlihc_id>/subsidies/', methods=['GET'])
+def project_subsidies(nlihc_id):
+    '''Returns every subsidy associated with a single project.'''
+    result = basic_query("SELECT * FROM new_subsidy WHERE nlihc_id = '{}';")
     return jsonify({'objects': result})
 
 @cross_origin()
 @app.route('/new_filter')
 def filter():
     '''Returns a JSON of projects combined with subsidy and zone_facts data.'''
-    with get_db_connection() as connection:
-        with connection.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(ETL.filter_query)
-            result = cur.fetchall()
+    result = basic_query(ETL.filter_query)
     return jsonify({'objects': result})
 
 @cross_origin()
@@ -87,14 +94,11 @@ def zone_facts(column_name='poverty_rate', grouping='ward'):
                 grouping = 'tract'
             else:
                 raise ValueError('Not valid grouping')
-        with get_db_connection() as connection:
-            with connection.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute('''
+                result = basic_query('''
                        SELECT zone, {}
                          FROM new_zone_facts
                         WHERE zone_type = '{}'
                      ORDER BY zone;'''.format(column_name, grouping))
-                result = cur.fetchall()
                 status = 'success'
     except:
         result = []
@@ -102,6 +106,8 @@ def zone_facts(column_name='poverty_rate', grouping='ward'):
 
     output = {'status': status, 'grouping': grouping, 'column_name': column_name, 'objects': result}
     return jsonify(output)
+
+### TABLE LOADING SECTION
 
 @app.route('/make_table/<table_name>/<password>')
 def make_table(table_name, password):

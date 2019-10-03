@@ -13,7 +13,7 @@
     beginning with "AH" for affordable housing.
 '''
 from . import utils
-from . import wmata
+#from . import wmata
 import requests
 import numpy as np
 import pandas as pd
@@ -131,12 +131,12 @@ def load_project_data(engine):
                     load_affordable_housing_projects()], sort=True)
     df = df.sort_values('nlihc_id').drop_duplicates('proj_address_id')
 
-    df = add_mar_and_tax(df)
-    df = add_neighborhoods(df)
-    df = df.merge(load_topa(), on='proj_address_id', how='left')
-    bus = wmata.add_bus_stops(df[['nlihc_id', 'longitude', 'latitude']],
-            'longitude', 'latitude')
-    df = df.merge(bus, how='left')
+    #df = add_mar_and_tax(df)
+    #df = add_neighborhoods(df)
+    #df = df.merge(load_topa(), on='proj_address_id', how='left')
+    #bus = wmata.add_bus_stops(df[['nlihc_id', 'longitude', 'latitude']],
+    #        'longitude', 'latitude')
+    #df = df.merge(bus, how='left')
 
     return df
     return utils.write_table(df, 'new_project', engine)
