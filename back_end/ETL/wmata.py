@@ -24,6 +24,8 @@ def make_wmata_tables(engine):
             engine)
     df = utils.make_df_geo_df(df, 'longitude', 'latitude')
     transit = get_transit_locations()
+    print(transit.head())
+    print(transit.columns)
     make_wmata_info(transit, engine)
     make_wmata_dist(df, transit, engine)
 
@@ -33,6 +35,7 @@ def make_wmata_dist(df, transit, engine):
     within half a mile of eachother.
     '''
     merged = gp.sjoin(df, transit, how='left', op='within')
+    print(merged.head())
     merged = merged[
         ['nlihc_id', 'latitude', 'longitude', 'Name',
             'type', 'stop_id_or_station_code', 'Lines', 'Lat', 'Lon']]

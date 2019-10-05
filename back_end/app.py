@@ -1,5 +1,6 @@
 '''
 app.py
+------
 
 This file contains the logic for the back end of the housing-insights tool.
 
@@ -72,7 +73,7 @@ def project(nlihc_id=None):
 @app.route('/new_project/<nlihc_id>/subsidies/', methods=['GET'])
 def project_subsidies(nlihc_id):
     '''Returns every subsidy associated with a single project.'''
-    result = basic_query("SELECT * FROM new_subsidy WHERE nlihc_id = '{}';")
+    result = basic_query(f"SELECT * FROM new_subsidy WHERE nlihc_id = '{nlihc_id}';")
     return jsonify({'objects': result})
 
 @cross_origin()
