@@ -19,9 +19,10 @@ from . import utils
 from operator import itemgetter
 from math import radians, cos, sin, asin, sqrt
 
-def make_wmata_tables(project_df, longitude_column='longitude',
-                      latitude_column='latitude', engine=None):
-    df = utils.make_df_geo_df(project_df, longitude_column, latitude_column)
+def make_wmata_tables(engine):
+    df = pd.read_sql('SELECT nlihc_id, latitude, longitude FROM new_project;',
+            engine)
+    df = utils.make_df_geo_df(df, 'longitude', 'latitude')
     transit = get_transit_locations()
     make_wmata_info(transit, engine)
     make_wmata_dist(df, transit, engine)
@@ -75,7 +76,7 @@ def get_transit_locations():
 
     rail = get_rail_stations()
     rail['type'] = 'rail'
-    rail['Routes'] = rail['Code']
+    rail['Lines'] = rail['Code']
     rail = rail.rename(columns={'Code': 'stop_id_or_station_code'})
     df = pd.concat([
         bus[['stop_id_or_station_code', 'Name', 'type', 'Lines', 'Lat', 'Lon']],

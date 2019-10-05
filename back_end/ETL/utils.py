@@ -12,6 +12,7 @@ import pandas as pd
 import geopandas as gp
 import psycopg2
 from shapely.geometry import Point
+from psycopg2.extras import RealDictCursor
 
 S3 = 'https://housing-insights.s3.amazonaws.com/'
 

@@ -32,7 +32,6 @@ import ETL
 # Database
 from sqlalchemy import create_engine
 from ETL.utils import get_credentials, basic_query
-from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__)
 app.config['SCHEDULER_API_ENABLED'] = True
@@ -48,6 +47,7 @@ table_loaders = {
     'project': ETL.load_project_data,
     'subsidy': ETL.load_subsidy_data,
     'zone_facts': ETL.make_zone_facts,
+    'wmata': ETL.make_wmata_tables,
 }
 
 @app.route('/', methods=['GET'])
@@ -58,11 +58,11 @@ def index():
 ### API SECTION
 
 @cross_origin()
+@app.route('/new_project/<string:nlihc_id>')
 @app.route('/new_project', methods=['GET'])
-@app.route('/new_project/<nlihc_id>', methods=['GET'])
-def project():
+def project(nlihc_id=None):
     '''Returns a JSON of projects (includes TOPA and REAC).'''
-    where = f"WHERE nlihc_id = '{nlihc_id}'" if nlihc_id else ''
+    where = f" WHERE nlihc_id = '{nlihc_id}'" if nlihc_id else ''
     result = basic_query('SELECT * FROM new_project'+where+';')
     return jsonify({'objects': result})
 
@@ -127,6 +127,7 @@ def make_table(table_name, password):
                 <li>acs</li>
                 <li>permit</li>
                 <li>project</li>
+                <li>wmata</li>
             </ul>
                '''
     # Returns True if successfully loaded.
@@ -161,4 +162,4 @@ def auto_load_tables():
 if __name__ == "__main__":
     print("RUNNING APP")
     scheduler.start()
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)
