@@ -24,10 +24,13 @@ def make_wmata_tables(engine):
             engine)
     df = utils.make_df_geo_df(df, 'longitude', 'latitude')
     transit = get_transit_locations()
-    print(transit.head())
-    print(transit.columns)
-    make_wmata_info(transit, engine)
-    make_wmata_dist(df, transit, engine)
+    try:
+        make_wmata_info(transit.copy(), engine)
+        make_wmata_dist(df, transit, engine)
+        return True
+    except Exception as e:
+        print(e)
+    return False        
 
 def make_wmata_dist(df, transit, engine):
     '''
@@ -35,7 +38,6 @@ def make_wmata_dist(df, transit, engine):
     within half a mile of eachother.
     '''
     merged = gp.sjoin(df, transit, how='left', op='within')
-    print(merged.head())
     merged = merged[
         ['nlihc_id', 'latitude', 'longitude', 'Name',
             'type', 'stop_id_or_station_code', 'Lines', 'Lat', 'Lon']]
@@ -74,7 +76,7 @@ def get_transit_locations():
         params={'api_key': utils.get_credentials('wmata-api-key')})
     bus = pd.DataFrame(data.json()['Stops'])
     bus['type'] = 'bus'
-    bus['Lines'] = bus['Routes'].str.replace('[','')
+    bus['Lines'] = bus['Routes'].apply(lambda s: ', '.join(s))
     bus = bus.rename(columns={'StopID': 'stop_id_or_station_code'})
 
     rail = get_rail_stations()
