@@ -61,6 +61,12 @@ def index():
     '''Default page of the API.'''
     return 'At the housing-insights back-end.'
 
+@app.route('/site-map', methods=['GET'])
+def site_map():
+    '''Returns the possible routes of the app.'''
+    return jsonify([str(rule) for rule in app.url_map.iter_rules() 
+        if 'GET' in rule.methods])
+
 ### API SECTION
 
 @cross_origin()
