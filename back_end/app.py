@@ -28,7 +28,7 @@ The zone facts endpoint is created in this file.
 # Application Configuration
 import datetime
 from mailer import send_mail
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import cross_origin
 from flask_apscheduler import APScheduler
 
@@ -126,6 +126,18 @@ def nearby_transit(nlihc_id):
     result = basic_query(f"SELECT * FROM new_wmata_dist WHERE nlihc_id = '{nlihc_id}';")
     result = ETL.wmata_helper(result)
     return jsonify(result)
+
+### Project Distance
+@cross_origin()
+@app.route('/projects/<dist>', methods=['GET'])
+def nearby_projects(dist):
+    latitude = request.args.get('latitude', None)
+    longitude = request.args.get('longitude', None)
+    if not (latitude and longitude):
+        return "Please supply latitude and longitude"
+    return jsonify(ETL.nearby_projects(
+        float(dist), float(latitude), float(longitude)))
+
 
 ### TABLE LOADING SECTION
 
