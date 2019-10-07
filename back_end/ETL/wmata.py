@@ -10,6 +10,10 @@ This file contains code to create the following tables:
     wmata_json | Copy of open data dc geojson as text.
 
 They are used in the project view.
+
+
+This file also contains code to add the number of nearby bus stops to the
+project table.
 '''
 import requests
 import pandas as pd
@@ -42,7 +46,9 @@ def make_wmata_dist(df, transit, engine):
         ['nlihc_id', 'latitude', 'longitude', 'Name',
             'type', 'stop_id_or_station_code', 'Lines', 'Lat', 'Lon']]
     merged['dist_in_miles'] = merged.apply(haversine, axis=1)
-    merged = merged[['nlihc_id', 'type', 'stop_id_or_station_code', 'dist_in_miles']]
+    merged.columns = merged.columns.str.lower()
+    merged = merged[['nlihc_id', 'type', 'stop_id_or_station_code', 
+        'lines', 'dist_in_miles']]
     return utils.write_table(merged, 'new_wmata_dist', engine)
 
 def make_wmata_info(df, engine):

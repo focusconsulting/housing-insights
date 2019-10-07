@@ -113,13 +113,13 @@ def zone_facts(column_name='poverty_rate', grouping='ward'):
     output = {'status': status, 'grouping': grouping, 'column_name': column_name, 'objects': result}
     return jsonify(output)
 
-
 ### WMATA Distance
 @cross_origin()
 @app.route('/new_wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
     result = basic_query(f"SELECT * FROM new_wmata_dist WHERE nlihc_id = '{nlihc_id}';")
-    return jsonify({"objects": result})
+    result = ETL.wmata_helper(result)
+    return jsonify(result)
 
 ### TABLE LOADING SECTION
 
