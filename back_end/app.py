@@ -18,12 +18,12 @@ The endpoints for the front end are:
         - A single project's subsidies.
     - filter
         - Basically all information.
+    - wmata
+        - Transit information
     - zone_facts
         - The zone facts table for a specific zone.
 
-The project endpoint is created from the models.py and schemas.py files.
-The filter endpoint is created by the filter_view_query.py file
-The zone facts endpoint is created in this file.
+The filter endpoint is created by the ETL/filter_view_query.py file
 '''
 # Application Configuration
 import datetime
@@ -122,6 +122,7 @@ def zone_facts(column_name='poverty_rate', grouping='ward'):
 @cross_origin()
 @app.route('/new_wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
+    '''Returns transit information for all transit within half a mile of a project.'''
     result = basic_query(f"SELECT * FROM new_wmata_dist WHERE nlihc_id = '{nlihc_id}';")
     result = ETL.wmata_helper(result)
     return jsonify(result)
@@ -130,6 +131,7 @@ def nearby_transit(nlihc_id):
 @cross_origin()
 @app.route('/projects/<dist>', methods=['GET'])
 def nearby_projects(dist):
+    '''Returns projects within half a mile of a set of coordinates.'''
     latitude = request.args.get('latitude', None)
     longitude = request.args.get('longitude', None)
     if not (latitude and longitude):

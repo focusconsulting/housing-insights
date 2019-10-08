@@ -4,7 +4,8 @@ This portion of the project holds the "back end" of the website implemented in p
 * `app.py`: The main application file and ultimate server-side logic for the tool.
 * `mailer.py`: Contains code to send e-mails related to the tool automatically.
 * `test.py`: Contains tests for the back end portion of the project. Run `python test.py` to run all tests.
-* `Dockerfile`: Sets up the development environment.
+* `Dockerfile`: Sets up the deployment environment.
+* `Dockerfile-development`: Sets up the development environment.
 * `environment.yml`: A conda environment template run by the Dockerfile
 * `secrets.yml`: Holds API keys and other secret information.
 * `secrets.sample.yml`: A template for `secrets.yml`.
@@ -17,9 +18,18 @@ This portion of the project holds the "back end" of the website implemented in p
     * `subsidy.py`: Adds subsidy data to the subsidy table in the database.
     * `utils.py`: Miscellanious functions that are needed for the ETL process.
     * `wmata.py`: Handles bus stop and rail station data.
+    * `wmata_helper.py`: Handles bus stop and rail station data grouping for the API output format.
     * `make_geographic_weights.py`: Creates weights for demographics calculations. This should only be run if the census boundaries have changed.
     * `make_zone_facts.py`: Creates the zone facts table from ACS, crime, and permit data.
     * `filter_view_query.py`: The SQL query for the filter API route.
+
+## Reference and Common Changes
+* E-mail functionality can be changed `mailer.py`
+* API routes can be added to `app.py`
+* User table loading routes can be added to `app.py`
+* Raw data ingestion occurs in a file within `ETL`
+* Specific columns are sent to the database via `ETL` as well
+* `ETL` functions can be exposed to the app in `ELT/__init__.py`
 
 ## Data Sources
 
@@ -39,6 +49,8 @@ This portion of the project holds the "back end" of the website implemented in p
 * [Open Data DC Census Tract Shapefiles](https://opendata.dc.gov/datasets/census-tracts-by-population-2000)
 * [Open Data DC Neighborhood Cluster Shapefiles](https://opendata.dc.gov/datasets/neighborhood-clusters)
 * [WMATA API](https://developer.wmata.com/)
+* [Bus Stops](https://opendata.dc.gov/datasets/e85b5321a5a84ff9af56fd614dab81b3_53)
+* [Rail Stations](https://opendata.dc.gov/datasets/metro-stations-in-dc)
 
 
 #### ACS Detail Tables Used
@@ -56,15 +68,13 @@ This portion of the project holds the "back end" of the website implemented in p
 | `B25059 001E` | Upper rent quartile in dollars    |
 
 ## API Routes
-Specific documentation of these routes can be found in `API`
-* `project`
-* `project/nlihc_id`
-* `filter`
-* `wmata/<nlihc_id>`
-* `building_permits/<dist>`
-* `projects/<dist>`
-* `project/<nlihc_id>/subsidies/`
-* `zone_facts/<column_name>/<grouping>`
+* `new_project`: Returns all projects.
+* `new_project/nlihc_id`: Returns project information for a single project.
+* `new_project/<nlihc_id>/subsidies/`: Returns subsidies for a single project.
+* `projects/<dist>`: Returns projects within half a mile of a set of coordinates.
+* `new_filter`: For the filter view, returns just about everything.
+* `new_wmata/<nlihc_id>`: Returns transit information for all transit within half a mile of a project.
+* `new_zone_facts/<column_name>/<grouping>`: Returns the zone fact for a specific zone type.
 
 ## Database Connection
 This project uses a PostgreSQL database, with the development version using a Docker image and the production database hosted on AWS.
@@ -78,7 +88,7 @@ they are crafted in `ETL`. The function only takes a SQLAlchemy engine object or
 
 An earlier of this project used SQLAlchemy to reflect the database, but did not consistently use the ORM for querying. It actually had the data loading process entirely separate from the Flask application, so
 having the ORM and infrastructure to make migrations did not exists. After consideration, it was revealed the front end required a flat and wide return of data that made using the ORM over raw SQL
-a little cumbersome. If this changes in the future, refactoring using an ORM may ne more appropriate.
+a little cumbersome. If this changes in the future, refactoring using an ORM may be more appropriate.
 
 ## Environments / Dependencies
 The Dockerfile creates and maintains a conda enviroment with the necessary python dependencies. While this set up was used in a previous iteration of the project, it is required moving forward.
@@ -102,21 +112,30 @@ The following packages are used in this project:
 
 ### Running the code
 All code is ultimately called and used from `app.py`, therefore, running code should be done at this top level (`back_end`) inside the Docker container.
-To do adhock testing of code in ETL, you may need to adjust the imports, such as `import utils` rather than `from . import utils`.
+To do adhock testing of code within ETL, you may need to adjust the imports, such as `import utils` rather than `from . import utils`.
+
+For development do the following.
+1. Use the appropriate `docker-compose` command to start the containers.
+2. Run `docker-compose exec sandbox bash` to enter the python container.
+3. Navigate to the application by running `cd /repo/back_end/`.
+4. Run `python app.py` to start the application.
 
 ### Elastic Beanstalk Deployment Setup
 - Install the Elastic Beanstalk Command Line Interface: `$ pip install awsebcli`
 - Configure a profile that uses the AWS credentials for our Code for DC API account: `aws configure --profile codefordc`
 - Enter the public and secret keys provided to you by an admin; default location and output format can be None (just press enter)
-#### UPDATE ME WITH DOCKER INSTRUCTIONS
 
-1. Navigate to the housing-insights/python folder in your local repo
-2. run `eb deploy housinginsights-codefordc --profile codefordc` (here housinginsights-codefordc is the elastic beanstalk environment name, and codefordc is the name of the credentials saved in your config file above)
-3. Wait a few minutes while the server restarts w/ new code
-4. Test that the api urls work properly, including whichever changes you've made. Visit http://housinginsights.us-east-1.elasticbeanstalk.com/
+### Elastic Beanstalk Deployment Overview 
+1. Reference the [documentation](https://docs.aws.amazon.com/en_pv/elasticbeanstalk/latest/dg/single-container-docker.html#single-container-docker.deploy-local) 
+2. Navigate to the `back_end` folder in your local repo
+3. Create the environment with `eb init -p docker housinginsights-codefordc` 
+4. Test it locally with `eb local run --port 5000`
+3. Actually deploy with `eb deploy housinginsights-codefordc --profile codefordc` 
+4. Wait a few minutes while the server restarts with the new version of the project.
+5. Double check your work at [http://housinginsights.us-east-1.elasticbeanstalk.com/](http://housinginsights.us-east-1.elasticbeanstalk.com/)
 
 #### Deploy to staging enviroment to test
-1. Navigate to housing-insights/python folder in your local repo
+1. Do steps 1 - 3 above.
 2. run `eb create --profile codefordc --instance_type t2.small --single`
 3. At the prompt, enter the name housinginsights-staging
 4. DNS CNAME can be default (i.e. housinginsights-staging)
@@ -125,61 +144,3 @@ To do adhock testing of code in ETL, you may need to adjust the imports, such as
 7. **Important!** be sure to terminate the staging environment when you're done! You should only have this staging environment running while you're actively working on testing your live code.
 8. Run `eb terminate housinginsights-staging`, or visit the Elastic Beanstalk instance in the [web console](https://codefordc.signin.aws.amazon.com/console).  Note, be sure to include the name of the instance to terminate, since the default if none is specified is the production server.
 9. Use `eb list --profile codefordc` to verify that the instance has been terminated
-
-
-### Temporary Notes
-
-#### Columns needed for filter api route
-These seem to be the ones needed, as you can see a few mistakes made it in to the end. These will need to be changed with the front end.
-```
-- nlihc_id
-- census_tract
-- neighborhood_cluster
-- ward
-- proj_name
-- proj_addre
-- proj_units_tot
-- proj_units_assist_max
-- proj_owner_type
-- portfolio
-- poa_end
-- poa_start
-- most_recent_topa_date
-- topa_count
-- most_recent_reac_score_num
-- most_recent_reac_score_date
-- sum_appraised_value_current_total
-- violent_crime_count_census_tract
-- violent_crime_count_neighborhood_cluster
-- violent_crime_count_ward
-- non_violent_crime_rate_census_tract
-- non_violent_crime_rate_neighborhood_cluster
-- non_violent_crime_rate_ward
-- crime_rate_census_tract
-- crime_rate_neighborhood_cluster
-- crime_rate_ward
-- construction_permits_rate_census_tract
-- construction_permits_rate_neighborhood_cluster
-- construction_permits_rate_ward
-- building_permits_rate_census_tract
-- building_permits_rate_neighborhood_cluster
-- building_permits_rate_ward
-- poverty_rate_census_tract
-- poverty_rate_neighborhood_cluster
-- poverty_rate_ward
-- income_per_capita_census_tract
-- income_per_capita_neighborhood_cluster
-- income_per_capita_ward
-- labor_participation_census_tract
-- labor_participation_neighborhood_cluster
-- labor_participation_ward
-- fraction_single_mothers_census_tract
-- fraction_single_mothers_neighborhood_cluster
-- fraction_single_mothers_ward
-- fraction_foreign_census_tract
-- fraction_foreign_neighborhood_cluster
-- fraction_foreign_ward
-- acs_median_rent_census_tract
-- acs_median_rent_neighborhood_cluster
-- acs_median_rent_ward
-```
