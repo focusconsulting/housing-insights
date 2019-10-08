@@ -68,13 +68,13 @@ This portion of the project holds the "back end" of the website implemented in p
 | `B25059 001E` | Upper rent quartile in dollars    |
 
 ## API Routes
-* `new_project`: Returns all projects.
-* `new_project/nlihc_id`: Returns project information for a single project.
-* `new_project/<nlihc_id>/subsidies/`: Returns subsidies for a single project.
-* `projects/<dist>`: Returns projects within half a mile of a set of coordinates.
-* `new_filter`: For the filter view, returns just about everything.
-* `new_wmata/<nlihc_id>`: Returns transit information for all transit within half a mile of a project.
-* `new_zone_facts/<column_name>/<grouping>`: Returns the zone fact for a specific zone type.
+* `/api/project`: Returns all projects.
+* `/api/project/nlihc_id`: Returns project information for a single project.
+* `/api/project/<nlihc_id>/subsidies/`: Returns subsidies for a single project.
+* `/api/projects/<dist>`: Returns projects within half a mile of a set of coordinates.
+* `/api/filter`: For the filter view, returns just about everything.
+* `/api/wmata/<nlihc_id>`: Returns transit information for all transit within half a mile of a project.
+* `/api/zone_facts/<column_name>/<grouping>`: Returns the zone fact for a specific zone type.
 
 ## Database Connection
 This project uses a PostgreSQL database, with the development version using a Docker image and the production database hosted on AWS.
