@@ -24,13 +24,16 @@ from operator import itemgetter
 from math import radians, cos, sin, asin, sqrt
 
 def make_wmata_tables(engine):
+    print("Reading projects")
     df = pd.read_sql('SELECT nlihc_id, latitude, longitude FROM new_project;',
             engine)
     df = utils.make_df_geo_df(df, 'longitude', 'latitude')
+    print("Getting Raw Transit")
     transit = get_transit_locations()
     try:
         make_wmata_info(transit.copy(), engine)
         make_wmata_dist(df, transit, engine)
+        print("Finished wmata loading.")
         return True
     except Exception as e:
         print(e)
@@ -41,6 +44,7 @@ def make_wmata_dist(df, transit, engine):
     Makes the table wmata_dist. Each row is a project and station that are
     within half a mile of eachother.
     '''
+    print("Making new_wmata_dist")
     merged = gp.sjoin(df, transit, how='left', op='within')
     merged = merged[
         ['nlihc_id', 'latitude', 'longitude', 'Name',
@@ -53,6 +57,7 @@ def make_wmata_dist(df, transit, engine):
     
 def make_wmata_info(df, engine):
     '''Loads the wmata_info table into the database.'''
+    print("Making new_wmata_info")
     df.columns = df.columns.str.lower()
     df = df.rename(columns={
         'lat': 'latitude', 'lon': 'longitude'})

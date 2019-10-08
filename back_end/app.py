@@ -54,7 +54,6 @@ table_loaders = {
     'subsidy': ETL.load_subsidy_data,
     'zone_facts': ETL.make_zone_facts,
     'wmata': ETL.make_wmata_tables,
-    'raw_wmata': ETL.load_raw_wmata,
 }
 
 @app.route('/', methods=['GET'])
@@ -161,7 +160,6 @@ def make_table(table_name, password):
                 <li>permit</li>
                 <li>project</li>
                 <li>wmata</li>
-                <li>raw_wmata</li>
             </ul>
                '''
     # Returns True if successfully loaded.
