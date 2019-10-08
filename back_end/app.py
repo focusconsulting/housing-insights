@@ -70,8 +70,8 @@ def site_map():
 ### API SECTION
 
 @cross_origin()
-@app.route('/new_project/<string:nlihc_id>')
-@app.route('/new_project', methods=['GET'])
+@app.route('/api/project/<string:nlihc_id>')
+@app.route('/api/project', methods=['GET'])
 def project(nlihc_id=None):
     '''Returns a JSON of projects (includes TOPA and REAC).'''
     where = f" WHERE nlihc_id = '{nlihc_id}'" if nlihc_id else ''
@@ -79,21 +79,21 @@ def project(nlihc_id=None):
     return jsonify({'objects': result})
 
 @cross_origin()
-@app.route('/new_project/<nlihc_id>/subsidies/', methods=['GET'])
+@app.route('/api/project/<nlihc_id>/subsidies/', methods=['GET'])
 def project_subsidies(nlihc_id):
     '''Returns every subsidy associated with a single project.'''
     result = basic_query(f"SELECT * FROM new_subsidy WHERE nlihc_id = '{nlihc_id}';")
     return jsonify({'objects': result})
 
 @cross_origin()
-@app.route('/new_filter')
+@app.route('/api/filter')
 def filter():
     '''Returns a JSON of projects combined with subsidy and zone_facts data.'''
     result = basic_query(ETL.filter_query)
     return jsonify({'objects': result})
 
 @cross_origin()
-@app.route('/new_zone_facts/<column_name>/<grouping>', methods = ['GET'])
+@app.route('/api/zone_facts/<column_name>/<grouping>', methods = ['GET'])
 def zone_facts(column_name='poverty_rate', grouping='ward'):
     '''
     API endpoint to return a single column from zone_facts for a given zone.
@@ -119,7 +119,7 @@ def zone_facts(column_name='poverty_rate', grouping='ward'):
 
 ### WMATA Distance
 @cross_origin()
-@app.route('/new_wmata/<nlihc_id>',  methods=['GET'])
+@app.route('/api/wmata/<nlihc_id>',  methods=['GET'])
 def nearby_transit(nlihc_id):
     '''Returns transit information for all transit within half a mile of a project.'''
     result = basic_query(f"SELECT * FROM new_wmata_dist WHERE nlihc_id = '{nlihc_id}';")
@@ -128,7 +128,7 @@ def nearby_transit(nlihc_id):
 
 ### Project Distance
 @cross_origin()
-@app.route('/projects/<dist>', methods=['GET'])
+@app.route('/api//projects/<dist>', methods=['GET'])
 def nearby_projects(dist):
     '''Returns projects within half a mile of a set of coordinates.'''
     latitude = request.args.get('latitude', None)
@@ -194,4 +194,4 @@ def auto_load_tables():
 if __name__ == "__main__":
     print("RUNNING APP")
     scheduler.start()
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0")
