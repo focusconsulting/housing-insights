@@ -50,7 +50,7 @@ def make_wmata_dist(df, transit, engine):
     merged = merged[['nlihc_id', 'type', 'stop_id_or_station_code', 
         'lines', 'dist_in_miles']]
     return utils.write_table(merged, 'new_wmata_dist', engine)
-
+    
 def make_wmata_info(df, engine):
     '''Loads the wmata_info table into the database.'''
     df.columns = df.columns.str.lower()

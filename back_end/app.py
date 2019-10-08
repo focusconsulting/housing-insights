@@ -54,6 +54,7 @@ table_loaders = {
     'subsidy': ETL.load_subsidy_data,
     'zone_facts': ETL.make_zone_facts,
     'wmata': ETL.make_wmata_tables,
+    'raw_wmata': ETL.load_raw_wmata,
 }
 
 @app.route('/', methods=['GET'])
@@ -77,8 +78,6 @@ def project(nlihc_id=None):
     where = f" WHERE nlihc_id = '{nlihc_id}'" if nlihc_id else ''
     result = basic_query('SELECT * FROM new_project'+where+';')
     return jsonify({'objects': result})
-
-## POSSIBLE TODO: Projects Distance Query
 
 @cross_origin()
 @app.route('/new_project/<nlihc_id>/subsidies/', methods=['GET'])
@@ -160,6 +159,7 @@ def make_table(table_name, password):
                 <li>permit</li>
                 <li>project</li>
                 <li>wmata</li>
+                <li>raw_wmata</li>
             </ul>
                '''
     # Returns True if successfully loaded.
