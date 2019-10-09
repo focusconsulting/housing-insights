@@ -25,17 +25,21 @@ The output columns for this file are:
     - building_permits_rate
     - construction_permits_rate
 '''
+from .utils import get_db_connection
 
-def make_zone_facts(db):
+def make_zone_facts(engine):
     '''
     This function automatically makes the zone facts table with the newest
     crime and permit data. It requires that the crime, permit, and acs tables
     aleady exist.
 
-    Must be passed in a SQLAlchemy database object from the application.
+    The engine argument is so that it fits well with the application API, it
+    goes unused.
     '''
     try:
-        db.session.execute('''
+        con = get_db_connection()
+        with con.cursor() as cur:
+            cur.execute('''
         DROP TABLE IF EXISTS new_zone_facts;
         CREATE TABLE new_zone_facts AS
         SELECT
@@ -64,6 +68,8 @@ def make_zone_facts(db):
           ON acs.zone = new_permit.zone AND acs.zone_type = new_permit.zone_type;
       COMMIT;
         ''')
+        con.close()
+        con = None
         return True
     except:
         return False

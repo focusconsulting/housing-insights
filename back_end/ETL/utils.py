@@ -10,10 +10,28 @@ import datetime
 import numpy as np
 import pandas as pd
 import geopandas as gp
-
+import psycopg2
 from shapely.geometry import Point
+from psycopg2.extras import RealDictCursor
 
 S3 = 'https://housing-insights.s3.amazonaws.com/'
+
+def get_db_connection():
+    return psycopg2.connect(
+        database=get_credentials('database'),
+        user=get_credentials('user'),
+        password=get_credentials('password'),
+        host=get_credentials('host'),
+        port=get_credentials('port')
+    )
+
+def basic_query(query):
+    '''Performs a basic query on the database, returns a list of tuples.'''
+    with get_db_connection() as connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(query)
+            result = cur.fetchall()
+    return result
 
 def write_table(df, table_name, engine):
     '''
@@ -81,11 +99,15 @@ def get_paths_for_data(data_category, years):
     return (df[(df.data_category == data_category) &
                (df.year.isin(years))]["url"].to_list())
 
-def get_census_tract_for_data(df, longitude_column, latitude_column):
-    '''Returns the data frame with a new column "tract".'''
-    df = gp.GeoDataFrame(df,
+def make_df_geo_df(df, longitude_column, latitude_column):
+    '''Makes a dataframe a geodataframe.'''
+    return gp.GeoDataFrame(df,
         geometry=[Point(xy) for xy in zip(df[longitude_column], df[latitude_column])]
     )
+
+def get_census_tract_for_data(df, longitude_column, latitude_column):
+    '''Returns the data frame with a new column "tract".'''
+    df = make_df_geo_df(df, longitude_column, latitude_column)
 
     # Grab census tract geometries from open data DC.
     census_tracts_dc = gp.read_file(
@@ -100,9 +122,8 @@ def get_census_tract_for_data(df, longitude_column, latitude_column):
 
 def get_cluster_for_data(df, longitude_column, latitude_column):
     '''Returns the data frame with a new column "neighborhood_cluster".'''
-    df = gp.GeoDataFrame(df,
-        geometry=[Point(xy) for xy in zip(df[longitude_column], df[latitude_column])]
-    )
+    df = make_df_geo_df(df, longitude_column, latitude_column)
+
     # Grab census tract geometries from open data DC.
     cluster_file = gp.read_file(
         'https://opendata.arcgis.com/datasets/f6c703ebe2534fc3800609a07bad8f5b_17.geojson'

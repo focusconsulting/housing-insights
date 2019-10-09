@@ -1,18 +1,17 @@
 FROM continuumio/miniconda3
 
 # Set up code directory
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-
-COPY environment.yml .
+# Leave for deployment
+COPY . /app
+WORKDIR /app
 
 # Install dependencies
 RUN conda env create -f environment.yml 
 
 ## Have environment activate on start
-RUN echo "source activate housing-insights; cd /repo/back_end" > ~/.bashrc
+RUN echo "source activate housing-insights;" > ~/.bashrc
 ENV PATH /opt/conda/envs/housing-insights/bin:$PATH
 
-WORKDIR /repo/back_end
+# Run the app and send it to localhost
 EXPOSE 5000
 CMD ["python", "app.py"] 

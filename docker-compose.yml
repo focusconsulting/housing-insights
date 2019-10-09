@@ -36,10 +36,13 @@ services:
     sandbox:
         build:
             context: back_end 
+            dockerfile: Dockerfile-development
         volumes:
             - .:/repo
         ports:
             - "5000:5000"
+        # Keeps the container running
+        command: tail -f /dev/null
         environment:
             - SET_CONTAINER_TIMEZONE=true
             - CONTAINER_TIMEZONE=America/New_York
