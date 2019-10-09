@@ -3,7 +3,7 @@
 
 This repository contains code for both [housinginsights.org](http://housinginsights.org) and the AWS hosted API that feeds it. It is divided into two sections.
 
-1. `front_end/`: A Jekyll-based static website that holds legacy information and front end code for the project.
+1. `docs/`: A Jekyll-based static website that holds legacy information and front end code for the project. This folder must be named `docs` for the deployment configuration on [GitHub Pages](https://help.github.com/en/articles/configuring-a-publishing-source-for-your-github-pages-site).
 2. `back_end/`: A python Flask application that collects and transforms raw data, loads data into a database, and runs an API for the front end to access data.
 
 Overall, the `back_end` directory hass a Flask application that sends data to and from a Postgres database as seen below. See the README file in either for specific information about that portion of the project. 
