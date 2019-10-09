@@ -21,7 +21,7 @@ var model = {  // TODO (?) change to a module similar to State and Subscribe so 
     //NOTE raw data sources have their urls included in the metaData
     URLS: {
       geoJSONPolygonsBase: "/tool/data/",
-      metaData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta",
+      metaData: "deprecated_meta.json", //DEPRECATED
       filterData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/filter",
       project: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project",
       layerData: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/zone_facts/<source_data_name>/<grouping>"
