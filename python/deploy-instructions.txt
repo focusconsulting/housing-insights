@@ -9,7 +9,7 @@
 1) Navigate to the housing-insights/python folder in your local repo
 2) run `eb deploy housinginsights-codefordc --profile codefordc` (here housinginsights-codefordc is the elastic beanstalk environment name, and codefordc is the name of the credentials saved in your config file above)
 3) Wait a few minutes while the server restarts w/ new code
-4) Test that the api urls work properly, including whichever changes you've made. Visit http://housinginsights.us-east-1.elasticbeanstalk.com/
+4) Test that the api urls work properly, including whichever changes you've made. Visit http://housinginsights-prod.us-east-1.elasticbeanstalk.com/
 
 # Deploy to staging enviroment to test
 1) Navigate to housing-insights/python folder in your local repo

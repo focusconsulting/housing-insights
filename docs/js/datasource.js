@@ -3,7 +3,7 @@ $(function () {
     var containerDivId = "datasource-table";
     $.ajax({
         dataType: "json",
-        url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/meta",
+        url: "http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/meta",
         success: function (data) {
             // This is the ID (accessed from a hidden div in the template)
             var id = document.getElementById(containerDivId).childNodes[0].id;

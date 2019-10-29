@@ -76,7 +76,7 @@ var projectView = {
       var dataRequestCount = 0;
       var dataRequests = [
           {   name: "full_project_data_" + nlihc_id,
-              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project/" + nlihc_id,
+              url: "http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/project/" + nlihc_id,
               callback: dataBatchCallback
           },
           {
@@ -86,12 +86,12 @@ var projectView = {
           },
           {
               name: "transit_stats",
-              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
+              url: "http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/wmata/" + nlihc_id,
               callback: dataBatchCallback
           },
           {
               name: "nearby_projects",
-              url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
+              url: "http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=" + getState()['selectedBuilding'][0]['properties']['latitude'] + "&longitude=" + getState()['selectedBuilding'][0]['properties']['longitude'],
               callback: dataBatchCallback
           },
           {
@@ -445,7 +445,7 @@ var projectView = {
         new SubsidyTimelineChart({
             dataRequest: {
                 name: currentNlihc + '_subsidy',
-                url: "http://housinginsights.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
+                url: "http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/project/" + currentNlihc + "/subsidies"
             },
             container: '#subsidy-timeline-chart',
             width: 700,

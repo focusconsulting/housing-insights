@@ -34,7 +34,7 @@ _site/
 # Configuration
 ###################
 secrets.json
-
+secrets.yml
 
 ####################
 # Pycharm Idea Folder
