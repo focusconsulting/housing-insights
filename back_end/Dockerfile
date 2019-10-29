@@ -2,11 +2,13 @@ FROM continuumio/miniconda3
 
 # Set up code directory
 # Leave for deployment
-COPY . /app
+COPY ./environment.yml /app/environment.yml
 WORKDIR /app
 
 # Install dependencies
 RUN conda env create -f environment.yml 
+
+COPY . /app
 
 ## Have environment activate on start
 RUN echo "source activate housing-insights;" > ~/.bashrc

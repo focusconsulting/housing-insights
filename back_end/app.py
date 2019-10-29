@@ -61,6 +61,17 @@ def index():
     '''Default page of the API.'''
     return 'At the housing-insights back-end.'
 
+@app.route('/api/meta', methods=['GET'])
+@cross_origin()
+def get_meta():
+    '''
+    Outputs the meta.json to the front end
+    '''
+
+    result = basic_query("SELECT meta FROM meta")
+    print(result)
+    return result[0]['meta']
+
 @app.route('/site-map', methods=['GET'])
 def site_map():
     '''Returns the possible routes of the app.'''
@@ -68,32 +79,42 @@ def site_map():
         if 'GET' in rule.methods])
 
 ### API SECTION
-
-@cross_origin()
-@app.route('/api/project/<string:nlihc_id>')
 @app.route('/api/project', methods=['GET'])
+@cross_origin()
+def all_projects(nlihc_id=None):
+    '''Returns a JSON of projects (includes TOPA and REAC).'''
+    where = f" WHERE nlihc_id = '{nlihc_id}'" if nlihc_id else ''
+    result = basic_query('SELECT * FROM new_project'+where+';')
+    return jsonify({'objects': result})
+
+
+@app.route('/api/project/<string:nlihc_id>',  methods=['GET'])
+@cross_origin()
 def project(nlihc_id=None):
     '''Returns a JSON of projects (includes TOPA and REAC).'''
     where = f" WHERE nlihc_id = '{nlihc_id}'" if nlihc_id else ''
     result = basic_query('SELECT * FROM new_project'+where+';')
     return jsonify({'objects': result})
 
-@cross_origin()
+
 @app.route('/api/project/<nlihc_id>/subsidies/', methods=['GET'])
+@cross_origin()
 def project_subsidies(nlihc_id):
     '''Returns every subsidy associated with a single project.'''
     result = basic_query(f"SELECT * FROM new_subsidy WHERE nlihc_id = '{nlihc_id}';")
     return jsonify({'objects': result})
 
-@cross_origin()
+
 @app.route('/api/filter')
+@cross_origin()
 def filter():
     '''Returns a JSON of projects combined with subsidy and zone_facts data.'''
     result = basic_query(ETL.filter_query)
     return jsonify({'objects': result})
 
-@cross_origin()
+
 @app.route('/api/zone_facts/<column_name>/<grouping>', methods = ['GET'])
+@cross_origin()
 def zone_facts(column_name='poverty_rate', grouping='ward'):
     '''
     API endpoint to return a single column from zone_facts for a given zone.
@@ -118,8 +139,8 @@ def zone_facts(column_name='poverty_rate', grouping='ward'):
     return jsonify(output)
 
 ### WMATA Distance
-@cross_origin()
 @app.route('/api/wmata/<nlihc_id>',  methods=['GET'])
+@cross_origin()
 def nearby_transit(nlihc_id):
     '''Returns transit information for all transit within half a mile of a project.'''
     result = basic_query(f"SELECT * FROM new_wmata_dist WHERE nlihc_id = '{nlihc_id}';")
@@ -127,8 +148,8 @@ def nearby_transit(nlihc_id):
     return jsonify(result)
 
 ### Project Distance
+@app.route('/api/projects/<dist>', methods=['GET'])
 @cross_origin()
-@app.route('/api//projects/<dist>', methods=['GET'])
 def nearby_projects(dist):
     '''Returns projects within half a mile of a set of coordinates.'''
     latitude = request.args.get('latitude', None)
