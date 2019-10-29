@@ -1,0 +1,18 @@
+branch-defaults:
+  default:
+    environment: housinginsights-prod
+    group_suffix: null
+global:
+  application_name: housinginsights-prod
+  branch: null
+  default_ec2_keyname: housinginsights-prod
+  default_platform: Docker 18.06.1-ce
+  default_region: us-east-1
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: codefordc
+  repository: null
+  sc: null
+  workspace_type: Application
