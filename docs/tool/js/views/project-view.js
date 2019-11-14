@@ -97,7 +97,7 @@ var projectView = {
           },
           {
               name: "raw_bus_stops",
-              url: "../../../assets/static_data/metro_bus_stops.geojson"
+              url: "../../../assets/static_data/metro_bus_stops.geojson",
               //url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
               callback: dataBatchCallback
           }
