@@ -81,7 +81,8 @@ var projectView = {
           },
           {
               name: "raw_metro_stations",
-              url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
+              url: "../../../assets/static_data/metro_stations_in_dc.geojson",
+              //url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
               callback: dataBatchCallback
           },
           {
@@ -96,7 +97,8 @@ var projectView = {
           },
           {
               name: "raw_bus_stops",
-              url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
+              url: "../../../assets/static_data/metro_bus_stops.geojson"
+              //url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
               callback: dataBatchCallback
           }
       ]

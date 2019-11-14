@@ -1,17 +1,18 @@
 branch-defaults:
   default:
-    environment: housinginsights-codefordc #Name of the instance in EB. Formerly hiapidemo-dev
+    environment: housinginsights-prod
     group_suffix: null
 global:
-  application_name: housinginsights_codefordc #formerly hiapidemo
+  application_name: housinginsights-prod
   branch: null
-  default_ec2_keyname: housinginsights-eb #formerly null
-  default_platform: Python 3.4
+  default_ec2_keyname: housinginsights-prod
+  default_platform: Docker 18.06.1-ce
   default_region: us-east-1
+  include_git_submodules: true
   instance_profile: null
   platform_name: null
   platform_version: null
-  profile: codefordc  #Tells which credentials to use; needs to be set up in your awscli config
+  profile: codefordc
   repository: null
   sc: null
   workspace_type: Application

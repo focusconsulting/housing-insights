@@ -1,21 +1,15 @@
-FROM continuumio/miniconda3
-
-MAINTAINER Jason Haas <jasonrhaas@gmail.com>
+FROM python:3.5-slim-buster
 
 # Set up code directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY environment.yml .
 COPY requirements.txt .
 
-# Install dependencies
-RUN conda env create -f environment.yml
+RUN pip install -r requirements.txt
 
-# Make sure that the environment updates appropriately
-RUN conda env update -n housing-insights -f environment.yml
-
-# Activate environment
-RUN echo "export PATH=/opt/conda/envs/housing-insights/bin:$PATH" >> /root/.bashrc
+COPY . .
 
 EXPOSE 5000
+
+CMD ["python", "application.py"]
