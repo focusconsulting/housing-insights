@@ -1,11 +1,11 @@
 include_flag,destination_table,unique_data_id,update_method,data_date,encoding,local_folder,s3_folder,filepath,notes
 use,mar,mar,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/mar.csv,BUILD FIRST - other tables depend on it
-use,project,prescat_project,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170830/Project.csv,
-use,subsidy,prescat_subsidy,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170830/Subsidy.csv,
-use,proj_addre,prescat_addre,api,2017-08-27,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170830/Building_geocode.csv,
-use,reac_score,prescat_reac,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170830/Reac_score.csv,
-use,real_property,prescat_real_property,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170830/Real_property.csv,
-use,parcel,prescat_parcel,manual,2017-03-15,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20170830/Parcel.csv,
+use,project,prescat_project,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20191203/Project.csv,
+use,subsidy,prescat_subsidy,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20191202/Subsidy.csv,
+use,proj_addre,prescat_addre,api,2017-08-27,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20191202/Building_geocode.csv,
+use,reac_score,prescat_reac,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20191202/Reac_score.csv,
+use,real_property,prescat_real_property,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20191202/Real_property.csv,
+use,parcel,prescat_parcel,manual,2017-03-15,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20191202/Parcel.csv,
 use,project,dchousing_project,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/dchousing_project.csv,
 use,subsidy,dchousing_subsidy,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/dchousing_subsidy.csv,
 use,proj_addre,dchousing_addre,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/dchousing_addre.csv,

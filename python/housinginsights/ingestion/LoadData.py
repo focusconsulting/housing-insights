@@ -474,7 +474,6 @@ class LoadData(object):
         meta = MetaData()
         meta.reflect(bind=self.engine)
         p,t = meta.tables['project'],meta.tables['dc_tax']
-
         q = select([p.c.nlihc_id
                 , t.c.appraised_value_current_total
                 , t.c.appraised_value_current_land
@@ -1265,28 +1264,6 @@ class LoadData(object):
                     if self.debug == True:
                         raise e
 
-
-            # with concurrent.futures.ThreadPoolExecutor(
-            #         max_workers=100) as executor:
-            #     future_data = {executor.submit(
-            #         self._clean_data, idx, data_row, cleaner, table_name,
-            #         csv_reader.keys): (
-            #         idx, data_row) for idx, data_row in enumerate(csv_reader)}
-            #     for future in concurrent.futures.as_completed(future_data):
-            #         clean_data_row = future.result()
-            #         if clean_data_row is not None:
-            #             csv_writer.write(clean_data_row)
-            #
-            #     csv_writer.close()
-            #
-            #     # write the data to the database
-            #     self._update_database(sql_interface=sql_interface)
-            #
-            #     if not self._keep_temp_files:
-            #         csv_writer.remove_file()
-            #     end_time = time()
-            #     print("\nRun time= %s" % (end_time - start_time))
-
             csv_writer.close()
 
             # write the data to the database
@@ -1338,9 +1315,10 @@ class LoadData(object):
         """
         print("  Loading...")
 
-        # TODO Need to figure out how to revert the removal if loading doesn't work??
-        self._remove_existing_data(manifest_row=manifest_row)
-        self._remove_table_if_empty(manifest_row = manifest_row)
+        # TODO This needs to me more safe.  Rather than removing the data and then the table
+        # This should create a temp table and then switch the names
+        #self._remove_existing_data(manifest_row=manifest_row)
+        #self._remove_table_if_empty(manifest_row = manifest_row)
             
         # create table if it doesn't exist
         sql_interface.create_table_if_necessary()
@@ -1351,6 +1329,8 @@ class LoadData(object):
             # currently write_file_to_sql() just writes in log that file failed
             self._failed_table_count += 1
             pass
+        # TODO: rename the current table to {tablename}_{timestamp}
+        # TODO: rename the {tablename}_temp to {tablename}
 
 
 def main(passed_arguments):
