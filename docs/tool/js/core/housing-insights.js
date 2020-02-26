@@ -1,5 +1,5 @@
 /*Comment here helps keep Jekyll from getting confused*/
-"use strict";
+'use strict';
 
 /*
  * MODEL **********************************
