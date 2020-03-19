@@ -19,12 +19,12 @@ python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
 sys.path.append(python_filepath)
 
 
-#configuration
-#See /logs/example-logging.py for usage examples
+# configuration
+# See /logs/example-logging.py for usage examples
 logging_path = os.path.abspath(os.path.join(python_filepath, "logs"))
 logging_filename = os.path.abspath(os.path.join(logging_path, "ingestion.log"))
 logging.basicConfig(filename=logging_filename, level=logging.DEBUG)
-#Pushes everything from the logger to the command line output as well
+# Pushes everything from the logger to the command line output as well
 logging.getLogger().addHandler(logging.StreamHandler())
 
 
@@ -38,7 +38,7 @@ def _sql_name_clean(name):
     :return: cleaned up column name as lower case
     """
     # TODO: add code to make sure doesn't end or begin with underscore
-    for item in ["-"," ","."]:
+    for item in ["-", " ", "."]:
         if item in name:
             name = name.replace(item, "_")
     return name.lower()
@@ -119,13 +119,13 @@ def make_draft_json(filename, tablename, encoding):
         sql_type = _pandas_to_sql_data_type(pandas_type)
 
         field_attributes = {
-                "type": sql_type,
-                "source_name": field,
-                "sql_name": _sql_name_clean(field),
-                "display_name": _sql_name_clean(field),
-                "display_text":"",
-                "required_in_source": True
-            }
+            "type": sql_type,
+            "source_name": field,
+            "sql_name": _sql_name_clean(field),
+            "display_name": _sql_name_clean(field),
+            "display_text": "",
+            "required_in_source": True
+        }
         output[tablename]["fields"].append(field_attributes)
 
     # Write completed draft JSON as csv into the logging folder
@@ -176,7 +176,7 @@ def appendJSON(new_json, master_json):
 
     :return: void
     """
-    #TODO: version control of meta.json, create backup making changes to master JSON
+    # TODO: version control of meta.json, create backup making changes to master JSON
     if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
         raise ValueError("Path to one of the JSON files is invalid")
 
@@ -219,7 +219,8 @@ def duplicateTable(new_table, new_json, master_json):
     time_out = 0
 
     while time_out < 10:
-        usr_decide = input("\nPress: [O] to overwrite current value in meta.json; [C] to cancel: ")
+        usr_decide = input(
+            "\nPress: [O] to overwrite current value in meta.json; [C] to cancel: ")
 
         if ('O' in usr_decide or 'o' in usr_decide):
             # Overwrite current table in master json
@@ -228,7 +229,7 @@ def duplicateTable(new_table, new_json, master_json):
                 master_data = json_file.read()
             masterJ_data = json.loads(master_data)
 
-            masterJ_data.pop(new_table, 0)	# 0 as fail-safe parameter
+            masterJ_data.pop(new_table, 0)  # 0 as fail-safe parameter
             json.dump(masterJ_data, open(master_json, 'w'), indent=2)
 
             appendJSON(new_json, master_json)
@@ -251,14 +252,16 @@ def duplicateTable(new_table, new_json, master_json):
 if __name__ == '__main__':
     #
     # Edit these values before running!
-    csv_filename = os.path.abspath("../../../data/raw/preservation_catalog/20170830/Building_geocode.csv")#"../../../data/sample
+    csv_filename = os.path.abspath(
+        "../../../data/raw/charter_school/20200319/Charter_Schools.csv")  # "../../../data/sample
     # /project_sample.csv"
-    table_name = "proj_addre_full"
-    encoding = "latin1" #Try utf-8 or latin1. Put the successful value into
+    table_name = "charter_schools"
+    encoding = "utf-8"  # Try utf-8 or latin1. Put the successful value into
     # manifest.csv
-    #print('main(): {}, {}, {}'.format())
+    # print('main(): {}, {}, {}'.format())
     # import ipdb; ipdb.set_trace()
-    #Make the table
+    # Make the table
+    print(sys.argv)
     if 'create' in sys.argv:
         make_draft_json(csv_filename, table_name, encoding)
 

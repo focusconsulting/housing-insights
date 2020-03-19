@@ -6,13 +6,11 @@ import json
 from sqlalchemy.exc import ProgrammingError
 import sys
 import os
+import housinginsights.ingestion.Cleaners as Cleaners
+from housinginsights.tools.logger import HILogger
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              os.pardir, os.pardir)))
-
-import housinginsights.ingestion.Cleaners as Cleaners
-
-from housinginsights.tools.logger import HILogger
 logger = HILogger(name=__file__, logfile="ingestion.log")
 
 
@@ -47,12 +45,15 @@ def load_meta_data(filename='meta.json'):
                 for key in field:
                     if key not in ('display_name', 'display_text', 'source_name', 'sql_name', 'type', 'required_in_source', '_comment'):
                         json_is_valid = False
-                        first_json_error = "Location: table: {}, section: {}, attribute: {}".format(table, field, key)
-                        raise ValueError("Error found in JSON, check expected format. {}".format(first_json_error))
+                        first_json_error = "Location: table: {}, section: {}, attribute: {}".format(
+                            table, field, key)
+                        raise ValueError(
+                            "Error found in JSON, check expected format. {}".format(first_json_error))
     except:
         raise ValueError("Error found in JSON, check expected format.")
 
-    logger.info("{} imported. JSON format is valid: {}".format(filename, json_is_valid))
+    logger.info("{} imported. JSON format is valid: {}".format(
+        filename, json_is_valid))
 
     return meta
 
@@ -85,22 +86,22 @@ def check_or_create_sql_manifest(engine, rebuild=False):
         return True
     except ProgrammingError as e:
         try:
-            #Create the query with appropriate fields and datatypes
+            # Create the query with appropriate fields and datatypes
             db_conn = engine.connect()
             fields = [
-                ("status","text"),
+                ("status", "text"),
                 ("load_date", "timestamp"),
-                ("include_flag","text"),
-                ("destination_table","text"),
-                ("unique_data_id","text"),
+                ("include_flag", "text"),
+                ("destination_table", "text"),
+                ("unique_data_id", "text"),
                 ("update_method", "text"),
-                ("data_date","date"),
+                ("data_date", "date"),
                 ("encoding", "text"),
-                ("local_folder","text"),
-                ("s3_folder","text"),
-                ("filepath","text"),
-                ("notes","text")
-                ]
+                ("local_folder", "text"),
+                ("s3_folder", "text"),
+                ("filepath", "text"),
+                ("notes", "text")
+            ]
             field_statements = []
             for tup in fields:
                 field_statements.append(tup[0] + " " + tup[1])
@@ -115,7 +116,10 @@ def check_or_create_sql_manifest(engine, rebuild=False):
             raise e
 
 
-def get_cleaner_from_name(meta, manifest_row, name="GenericCleaner", engine=None):
+def get_cleaner_from_name(meta,
+                          manifest_row,
+                          name="GenericCleaner",
+                          engine=None):
     """
     Returns the instance of the cleaner class matching the given cleaner class
     name.
@@ -126,8 +130,8 @@ def get_cleaner_from_name(meta, manifest_row, name="GenericCleaner", engine=None
     :return: a class object of the given cleaner class
     """
 
-    #Import
-    #module = import_module("module.submodule")
+    # Import
+    # module = import_module("module.submodule")
     Class_ = getattr(Cleaners, name)
     instance = Class_(meta, manifest_row, engine=engine)
     return instance
@@ -141,12 +145,11 @@ def join_paths(pieces=[]):
     return '/'.join(s.strip('/') for s in pieces)
 
 
-#Used for testing purposes
+# Used for testing purposes
 if __name__ == '__main__':
 
     from housinginsights.tools import dbtools
     meta_path = os.path.abspath('../../scripts/meta.json')
-
 
     meta = load_meta_data(meta_path)
     engine = dbtools.get_database_engine('docker_database')
