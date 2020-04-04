@@ -1,360 +1,358 @@
 * {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 li {
-    list-style-position:inside;
+  list-style-position: inside;
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
 #main-nav {
-    background-color: rgb(189, 54, 33);
-    color: #fff;
-    width: 100%;
-    height: 40px;
-    z-index: 9999;
-    position: fixed;
+  background-color: rgb(189, 54, 33);
+  color: #fff;
+  width: 100%;
+  height: 40px;
+  z-index: 9999;
+  position: fixed;
 }
 
 #sub-nav {
-    width: 100%;
-    position: absolute;
-    top: 40px;
-    color: inherit;
-    background-color: #d69c93;
-    height: 40px;
-    display: flex;
-    justify-content: space-between;
+  width: 100%;
+  position: absolute;
+  top: 40px;
+  color: inherit;
+  background-color: #d69c93;
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .sub-nav-button {
-    flex-grow: 1;
-    background-color: inherit;
-    border: none;
-    border-bottom: 2px solid rgb(189, 54, 33);
-    transition: background-color 0.2s linear;
-    cursor: pointer;
+  flex-grow: 1;
+  background-color: inherit;
+  border: none;
+  border-bottom: 2px solid rgb(189, 54, 33);
+  transition: background-color 0.2s linear;
+  cursor: pointer;
 }
 
 .sub-nav-container {
-    position: relative;
-    display: none;
-    
+  position: relative;
+  display: none;
 }
 
 .sub-nav-container.active {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .sub-nav-heading {
-    height:40px;
-    /*Allow space for controls on the right side*/
-    width: -webkit-calc(100% - 40px);
-    width:    -moz-calc(100% - 40px);
-    width:         calc(100% - 40px); 
+  height: 40px;
+  /*Allow space for controls on the right side*/
+  width: -webkit-calc(100% - 40px);
+  width: -moz-calc(100% - 40px);
+  width: calc(100% - 40px);
 
-    padding: 10px 0px 10px 10px;
+  padding: 10px 0px 10px 10px;
 }
 .sub-nav-heading h1,
 .sub-nav-group h1 {
-    font-size: 16px;
-    font-weight: bold;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 /* Ensure there's no extra scroll bar within
 the container for categorical filters */
 div.filter.categorical.content.active {
-    overflow: visible;
+  overflow: visible;
 }
 
 /* Text input boxes within sidebars */
-div.filter.content input.filter-text{
-    display: inline-block;
-    position: relative;
-    height: 2em;
-    border: 1px solid rgb(230, 230, 230);
-    box-sizing: border-box;
+div.filter.content input.filter-text {
+  display: inline-block;
+  position: relative;
+  height: 2em;
+  border: 1px solid rgb(230, 230, 230);
+  box-sizing: border-box;
 }
 
 input.filter-text.invalid {
-    background-color: #D69C93;
-    border: 2px solid #BD3621 !important;
+  background-color: #d69c93;
+  border: 2px solid #bd3621 !important;
 }
 
 .filter-title.invalid:before {
-    content: '!';
-    position: absolute;
-    right: 11px;
-    color: #fff;
-    z-index: 1;
-    top: 5px;
+  content: '!';
+  position: absolute;
+  right: 11px;
+  color: #fff;
+  z-index: 1;
+  top: 5px;
 }
 
 .filter-title.invalid:after {
-    content: '\025B2';
-    position: absolute;
-    right: 0;
-    font-size: 187%;
-    top: 3px;
-    color: #BD3621;
-    
+  content: '\025B2';
+  position: absolute;
+  right: 0;
+  font-size: 187%;
+  top: 3px;
+  color: #bd3621;
 }
 
 div.filter.content input.year-text {
-    width: 40px;
+  width: 40px;
 }
-div.filter.content input.month-text, 
+div.filter.content input.month-text,
 div.filter.content input.day-text {
-    width: 20px;
+  width: 20px;
 }
 
-div.filter.content .continuous-input-text{
-    width: 85px;
+div.filter.content .continuous-input-text {
+  width: 85px;
 }
 
-.text-input.date span{
-    margin-left: .3em;
-    margin-right: .3em;
+.text-input.date span {
+  margin-left: 0.3em;
+  margin-right: 0.3em;
 }
-.text-input.continuous span{
-    margin-left: 1em;
-    margin-right: 1em;
+.text-input.continuous span {
+  margin-left: 1em;
+  margin-right: 1em;
 }
 
-.text-input{
-    margin-left: 20px;
-    position: relative;
+.text-input {
+  margin-left: 20px;
+  position: relative;
 }
 
 .text-input.date:before {
-    content: 'mm/dd/yyy';
-    position: absolute;
-    color: #767676;
-    font-size: 11px;
-    top: -23px;
+  content: 'mm/dd/yyy';
+  position: absolute;
+  color: #767676;
+  font-size: 11px;
+  top: -23px;
 }
 
-button.nullValuesToggleSubmit{
-    height: 1.5em;
-    width: 1.5em;
-    background: rgb(100, 100, 100);
-    display: inline-block;
-    position: relative;
-    border: none;
-    border-radius: 5px;
-    vertical-align: middle;
-    margin-left:2px;
+button.nullValuesToggleSubmit {
+  height: 1.5em;
+  width: 1.5em;
+  background: rgb(100, 100, 100);
+  display: inline-block;
+  position: relative;
+  border: none;
+  border-radius: 5px;
+  vertical-align: middle;
+  margin-left: 2px;
 }
 
 /* drawn from https://codepen.io/jonneal/pen/kptBs */
 button.nullValuesToggleSubmit::before {
-    border-style: solid;
-    border-width: .25em .25em 0 0;
-    content: '';
-    display: inline-block;
-    position: relative;
-    vertical-align: top;
-    top: .3em;
-    left: -.1em;
-    transform: rotate(45deg);
-    width: .75em;
-    height: .75em;
-    border-color: white;
+  border-style: solid;
+  border-width: 0.25em 0.25em 0 0;
+  content: '';
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+  top: 0.3em;
+  left: -0.1em;
+  transform: rotate(45deg);
+  width: 0.75em;
+  height: 0.75em;
+  border-color: white;
 }
 
 /*Color code the text for projects that match the specified filters*/
 .matching {
-    color:rgba(253,126,35,0.7) !important;
+  color: rgba(253, 126, 35, 0.7) !important;
 }
 .total {
-    color:rgba(25,25,25,.6) !important;
+  color: rgba(25, 25, 25, 0.6) !important;
 }
-
-
 
 .sub-nav-group {
-    padding: 0px 10px 0px 10px;
-    overflow-y: auto;
-    
+  padding: 0px 10px 0px 10px;
+  overflow-y: auto;
 }
-#project-preview-group{
-    flex: 0 1 auto;
-    height: 350px;
-    padding-left: 16px;
-    padding-top: 10px;
+#project-preview-group {
+  flex: 0 1 auto;
+  height: 350px;
+  padding-left: 16px;
+  padding-top: 10px;
 }
-#projects-list-group{
-    flex: 1 1 auto; /*makes the list expand to fill rest of available space, while both preview and list shrink if needed*/
-    height: 350px; /*need some basis for flexbox to not oversquish the other container*/
-    padding: 0;
+#projects-list-group {
+  flex: 1 1 auto; /*makes the list expand to fill rest of available space, while both preview and list shrink if needed*/
+  height: 350px; /*need some basis for flexbox to not oversquish the other container*/
+  padding: 0;
 }
 
 .scroll-y {
-    overflow-y: auto;
+  overflow-y: auto;
 }
 
-#projects-list, #building-view-segments {
-    margin-top: 0px;
+#projects-list,
+#building-view-segments {
+  margin-top: 0px;
 }
 
 #left-options .sub-nav-button,
 #left-options-building .sub-nav-button {
-    border-right: 2px solid rgb(189, 54, 33);
+  border-right: 2px solid rgb(189, 54, 33);
 }
 
 #right-options .sub-nav-button,
 #right-options-building .sub-nav-button {
-    border-left: 2px solid rgb(189, 54, 33);
+  border-left: 2px solid rgb(189, 54, 33);
 }
 
 .sub-nav-button.active {
-    background-color: #fff;
-    border-bottom-width: 0;
+  background-color: #fff;
+  border-bottom-width: 0;
 }
 
-#left-options, #left-options-building {
-    width: 300px;
-    display: flex;
+#left-options,
+#left-options-building {
+  width: 300px;
+  display: flex;
 }
 
-#right-options, #right-options-building {
-    width: 350px;
-    display: flex;
+#right-options,
+#right-options-building {
+  width: 350px;
+  display: flex;
 }
 
-#options-spacer, #options-spacer-building {
-    flex-grow: 1;
-    border-bottom: 2px solid rgb(189, 54, 33);
-    position: relative; /*so pillboxes can be appended*/
+#options-spacer,
+#options-spacer-building {
+  flex-grow: 1;
+  border-bottom: 2px solid rgb(189, 54, 33);
+  position: relative; /*so pillboxes can be appended*/
 }
 
 #clear-pillbox-holder {
-    position: absolute;
-    display: block;
-    left: 100%;
-    height: 40px;
-    width: 250px;
-
+  position: absolute;
+  display: block;
+  left: 100%;
+  height: 40px;
+  width: 250px;
 }
 
-#clear-pillbox-holder:hover, #clear-pillbox-holder.force-hover {
-    height: initial;
+#clear-pillbox-holder:hover,
+#clear-pillbox-holder.force-hover {
+  height: initial;
 }
 
 #clear-pillbox-holder .ui.label {
-    min-height: 30px;   
+  min-height: 30px;
 }
 
 .ui.label.clear-single {
-    transition: padding-top 0.2s linear, padding-bottom 0.2s linear, max-height 0.2s linear, background .1s ease;
-    overflow: hidden;
+  transition: padding-top 0.2s linear, padding-bottom 0.2s linear,
+    max-height 0.2s linear, background 0.1s ease;
+  overflow: hidden;
 }
 .ui.label.clear-single.visible {
-    padding-top: 0;
-    padding-bottom: 0;
-    max-height: 0;
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    margin-top: 0;
-
- 
+  padding-top: 0;
+  padding-bottom: 0;
+  max-height: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  margin-top: 0;
 }
 
 .ui.label.clear-single.visible:last-child {
-    margin-bottom: 100px;
+  margin-bottom: 100px;
 }
 
-#clear-pillbox-holder:hover .clear-single.visible, #clear-pillbox-holder.force-hover .clear-single.visible {
-    padding: 0.833em;
-    max-height: 72px;
-    position: relative;
-    top: initial;
-    opacity: 1;
+#clear-pillbox-holder:hover .clear-single.visible,
+#clear-pillbox-holder.force-hover .clear-single.visible {
+  padding: 0.833em;
+  max-height: 72px;
+  position: relative;
+  top: initial;
+  opacity: 1;
 }
 
 .main-view {
-    width: 100%;
-    transition: opacity 0.5s linear, transform 0.5s ease-in;
-    opacity: 1;
-    overflow: hidden;
+  width: 100%;
+  transition: opacity 0.5s linear, transform 0.5s ease-in;
+  opacity: 1;
+  overflow: hidden;
 }
 
 .main-view:not(#map-view) {
-    position: relative;
-    top: 0px;
+  position: relative;
+  top: 0px;
 }
 
 .navbar.navbar-default {
-    margin-bottom:0px !important;
+  margin-bottom: 0px !important;
 }
 
 .main-view.fade {
-    opacity: 0;
+  opacity: 0;
 }
 
 .main-view.inactive {
-    visibility: hidden;
+  visibility: hidden;
 }
 
 .main-view.transition-right {
-    transform: translate(100%, 0);
+  transform: translate(100%, 0);
 }
 
 .main-view.transition-left {
-    transform: translate(-100%, 0);
+  transform: translate(-100%, 0);
 }
 
 .legend {
-    background-color: rgba(255, 255, 255, .85);
-    padding: 10px;
-    position: absolute;
-    display: block;
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 10px;
+  position: absolute;
+  display: block;
 }
-#category-legend{
-    bottom: 0;
-    left: 310px;   
+#category-legend {
+  bottom: 0;
+  left: 310px;
 }
 
 #chloroplethLegend-wrapper {
-    bottom: 0;
-    right: 360px; 
-    
+  bottom: 0;
+  right: 360px;
 }
 #chloroplethLegend {
-    height:120px;
+  height: 120px;
 }
 
-
 #legend-items div span {
-    border-radius: 50%;
-    display: inline-block;
-    height: 10px;
-    margin-right: 5px;
-    width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  height: 10px;
+  margin-right: 5px;
+  width: 10px;
 }
 
 #legend-items div span.square {
-    border-radius: 0;
+  border-radius: 0;
 }
 
 .sidebar-inner-wrapper {
-    position: absolute;
-    top: 0px;
-    bottom: 0px;
-    background-color: #fff;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 /*
@@ -370,71 +368,70 @@ button.nullValuesToggleSubmit::before {
 }
 */
 
-.sidebar-inner-wrapper>div {
-    flex-grow: 1;
+.sidebar-inner-wrapper > div {
+  flex-grow: 1;
 }
 
 #sidebar-control-right {
-    position: absolute;
-    top: 5px;
-    right: 15px;
-    z-index:100;
-    cursor: pointer;
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  z-index: 100;
+  cursor: pointer;
 }
 
-.nullsToggleContainer{
-    margin-top: 5px;
-    margin-left: 25px;
+.nullsToggleContainer {
+  margin-top: 5px;
+  margin-left: 25px;
 }
 
-.nullsToggleContainer input[type=checkbox]{
-    display: inline-block;
-    margin-right: 3px;
-    vertical-align: top;
+.nullsToggleContainer input[type='checkbox'] {
+  display: inline-block;
+  margin-right: 3px;
+  vertical-align: top;
 }
 
 #pie-charts {
-    display: flex;
-    justify-content: space-around;
-    position: static;
-    width: 100%;
-    box-shadow: 0 8px 17px #fff;
-    background-color: #fff;
-    top: 40px;
-    padding-top: 10px;
+  display: flex;
+  justify-content: space-around;
+  position: static;
+  width: 100%;
+  box-shadow: 0 8px 17px #fff;
+  background-color: #fff;
+  top: 40px;
+  padding-top: 10px;
 }
-
 
 #zone-selector {
-    width: 120px;
+  width: 120px;
 }
 .sidebar {
-    position: absolute;
-    width: 100%;
-    max-width: 300px;
-    top: 80px;
-    bottom: 0;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.95);
-    transform: translate(-100%, 0);
-    transition: transform 0.2s linear;
-    border-right: 1px solid rgb(189, 54, 33);
+  position: absolute;
+  width: 100%;
+  max-width: 300px;
+  top: 80px;
+  bottom: 0;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.95);
+  transform: translate(-100%, 0);
+  transition: transform 0.2s linear;
+  border-right: 1px solid rgb(189, 54, 33);
 }
 .sidebar.active {
-    transform: translate(0, 0) !important;
+  transform: translate(0, 0) !important;
 }
 
-.sidebar.left{
-    max-width:300px;
+.sidebar.left {
+  max-width: 300px;
 }
 
 .sidebar.right {
-    right: 0;
-    max-width: 350px;
-    transform: translate(100%, 0);
-    border-right-width: 0;
-    border-left: 1px solid rgb(189, 54, 33);
-    border-top: 1px solid rgb(189, 54, 33);
+  right: 0;
+  max-width: 350px;
+  transform: translate(100%, 0);
+  border-right-width: 0;
+  border-left: 1px solid rgb(189, 54, 33);
+  border-top: 1px solid rgb(189, 54, 33);
 }
 
 /*
@@ -443,329 +440,341 @@ Note, transition from expanded to totally closed is snapping instantly because o
 Others are working correctly. 
 */
 .sidebar.right.expanded {
-    max-width: -webkit-calc(100% - 300px);
-    max-width:    -moz-calc(100% - 300px);
-    max-width:         calc(100% - 300px);
-    transition: max-width 0.2s linear;
+  max-width: -webkit-calc(100% - 300px);
+  max-width: -moz-calc(100% - 300px);
+  max-width: calc(100% - 300px);
+  transition: max-width 0.2s linear;
 }
 
 #project-preview {
-    height:350px;
+  height: 350px;
 }
 
-#project-preview .preview-field.proj_name{
-    font-weight:bold;
-    font-size:1.1em;
+#project-preview .preview-field.proj_name {
+  font-weight: bold;
+  font-size: 1.1em;
 }
-#project-preview a.proj_name{
-    font-weight:bold;
-    font-size:1.2em;
-    cursor: pointer;
-    color: #bd3621;
+#project-preview a.proj_name {
+  font-weight: bold;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #bd3621;
 }
-#projects-list>div, #building-view-segments div {
-    overflow: hidden;
-    transition: max-height 0.5s linear, margin-bottom 0.5s linear, opacity 0.5s linear;
-    max-height: 0;
-    margin-bottom: 0;
-    opacity: 0;
-    cursor: pointer;
-    position: relative;
-
+#projects-list > div,
+#building-view-segments div {
+  overflow: hidden;
+  transition: max-height 0.5s linear, margin-bottom 0.5s linear,
+    opacity 0.5s linear;
+  max-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  cursor: pointer;
+  position: relative;
 }
-#projects-list>div .project-title {
-    font-weight: bold;
-    font-size: 1em;
-}
-
-#projects-list>div:hover, #building-view-segments div:hover {
-    background-color: #ddebff;
+#projects-list > div .project-title {
+  font-weight: bold;
+  font-size: 1em;
 }
 
-
-#projects-list>div.projects-list-selected:before {
-    content: '\025B2';
-    color: #bd3621;
-    position: absolute;
-    left: 1px;
-    top: 4px;
+#projects-list > div:hover,
+#building-view-segments div:hover {
+  background-color: #ddebff;
 }
 
-#projects-list>div.enter, #projects-list>div.update,
+#projects-list > div.projects-list-selected:before {
+  content: '\025B2';
+  color: #bd3621;
+  position: absolute;
+  left: 1px;
+  top: 4px;
+}
+
+#projects-list > div.enter,
+#projects-list > div.update,
 #building-view-segments div.enter {
-    padding: 5px 4px 5px 16px;
-    max-height: 100px;
-    opacity: 1;
+  padding: 5px 4px 5px 16px;
+  max-height: 100px;
+  opacity: 1;
 }
 
 #building-view-segments {
-    position: fixed;
+  position: fixed;
 }
 
-
 .mapboxgl-popup-content .tooltip-field {
-    font-weight: normal;
-    font-size:0.8em;
+  font-weight: normal;
+  font-size: 0.8em;
 }
 
 .mapboxgl-popup-content {
-    cursor: pointer;
+  cursor: pointer;
 }
 .mapboxgl-popup-content .tooltip-field.proj_name {
-    font-weight: bold;
-    font-size:1em;
+  font-weight: bold;
+  font-size: 1em;
 }
 
 .mapboxgl-popup-close-button {
-    font-size:2em !important;
-
+  font-size: 2em !important;
 }
 .sidebar-tab {
-    width: 20px;
-    height: 37px;
-    position: absolute;
-    border: none;
-    position: absolute;
-    background-color: rgb(189, 54, 33);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: transform 0.2s linear;
-    z-index: 9999;
+  width: 20px;
+  height: 37px;
+  position: absolute;
+  border: none;
+  position: absolute;
+  background-color: rgb(189, 54, 33);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s linear;
+  z-index: 9999;
 }
 #sidebar-left .sidebar-tab {
-    right: 0;
-    transform: translate(20px, 0);
+  right: 0;
+  transform: translate(20px, 0);
 }
 #sidebar-right .sidebar-tab {
-    left: 0;
-    transform: translate(-20px, 0);
+  left: 0;
+  transform: translate(-20px, 0);
 }
 .sidebar.active .sidebar-tab {
-    transform: translate(0, 0) !important;
+  transform: translate(0, 0) !important;
 }
 .sidebar.active .triangle {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 .triangle {
-    width: 0;
-    height: 0;
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    transition: transform 0.2s linear;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  transition: transform 0.2s linear;
 }
 .triangle.right {
-    border-left: 12px solid #fff;
+  border-left: 12px solid #fff;
 }
 .triangle.left {
-    border-right: 12px solid #fff;
+  border-right: 12px solid #fff;
 }
 
 #loading-state-screen {
-    background-color: rgba(0,0,0,0.8);
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 9999999;
-    color:#fff;
-    display: none;
+  background-color: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9999999;
+  color: #fff;
+  display: none;
 }
-
 
 /*
  * MAPBOX
  */
 #map {
-    position: absolute;
-    width: 100%;
-    top: 80px;
-    bottom: 0;
+  position: absolute;
+  width: 100%;
+  top: 80px;
+  bottom: 0;
 }
 
-
 #layer-menu-buttons button {
-    border: 5px solid #fff;
-    padding: 9px 3px;
-    font-size: 11px;
+  border: 5px solid #fff;
+  padding: 9px 3px;
+  font-size: 11px;
 }
 
 #projects-list p,
 #filter-components p {
-    font-size:14px;
-
+  font-size: 14px;
 }
 
 .no-location-alert {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translateX(-50%);
-    font-size: 36px;
-    border: 1px solid rgb(189, 54, 33);
-    border-radius: 35px;
-    padding: 10px;
-    color: rgb(189, 54, 33);
-    background-color: rgba(255,255,255,0.5);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%);
+  font-size: 36px;
+  border: 1px solid rgb(189, 54, 33);
+  border-radius: 35px;
+  padding: 10px;
+  color: rgb(189, 54, 33);
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 #reset-zoom {
-    display: none;
-    position: absolute;
-    right: 350px;
-    top: 80px;
-    border: none;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 3px;
+  display: none;
+  position: absolute;
+  right: 350px;
+  top: 80px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 3px;
 }
 
-.mapboxgl-ctrl-top-right{
-    top: 120px;
-    position: absolute;
-    z-index: 1000 !important;
-    transition: transform .5s;
-    transform: translateX(0px);
-    
-}
-.mapboxgl-ctrl-top-right.movedIn{
-    transform: translateX(-350px);
+#terrain {
+  position: absolute;
+  right: 450px;
+  top: 80px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 3px;
 }
 
+#streets {
+  position: absolute;
+  right: 500px;
+  top: 80px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 3px;
+}
 
+.mapboxgl-ctrl-top-right {
+  top: 120px;
+  position: absolute;
+  z-index: 1000 !important;
+  transition: transform 0.5s;
+  transform: translateX(0px);
+}
+.mapboxgl-ctrl-top-right.movedIn {
+  transform: translateX(-350px);
+}
 
 /*Partially override semantic-ui styling, so some is inherited from there*/
 
 /*Mimics accordion title styling*/
 .sub-nav-container .header {
-    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
-    font-size: 1.3em;
-    background: #d69c93;
-    margin: 0em;
-    padding: 0.3em 0.5em;
-    color: rgba(0, 0, 30, 0.95);
-    font-weight: bold;
-    border-top: 1px solid rgba(34, 36, 38, 0.15);
+  font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 1.3em;
+  background: #d69c93;
+  margin: 0em;
+  padding: 0.3em 0.5em;
+  color: rgba(0, 0, 30, 0.95);
+  font-weight: bold;
+  border-top: 1px solid rgba(34, 36, 38, 0.15);
 }
 
 #filters {
-    overflow-y: hidden;
+  overflow-y: hidden;
 }
 
 /*Mimics accordion content styling*/
 #filters .static-content {
-    margin: 0;
-    padding: .5em 1em 1.5em;
-    display: block;
+  margin: 0;
+  padding: 0.5em 1em 1.5em;
+  display: block;
 }
 
 /*Used for the actively selected boundary type*/
-.ui.button.toggle.active, 
-.ui.buttons .button.toggle.active, 
+.ui.button.toggle.active,
+.ui.buttons .button.toggle.active,
 .ui.toggle.buttons .active.button {
-    background-color: #0D5C7D!important;
-    color: #FFF!important;
+  background-color: #0d5c7d !important;
+  color: #fff !important;
 }
 
 /*Layer accordions (blue)*/
 
 /* Normal */
 .ui.styled.accordion .title.overlay-title {
-    background: rgba(30, 92, 223, 0.3);
-    margin: 0em;
-    padding: 0.3em 0.5em;
-    color: rgba(0, 0, 30, 0.95);
-    font-weight: bold;
-    border-top: 1px solid rgba(34, 36, 38, 0.15);
+  background: rgba(30, 92, 223, 0.3);
+  margin: 0em;
+  padding: 0.3em 0.5em;
+  color: rgba(0, 0, 30, 0.95);
+  font-weight: bold;
+  border-top: 1px solid rgba(34, 36, 38, 0.15);
 }
 
 /* Hover */
 .ui.styled.accordion .title.overlay-title:hover {
-    background: rgba(30, 92, 223, 0.5);
-    color: rgba(50, 50, 80, 0.95);
+  background: rgba(30, 92, 223, 0.5);
+  color: rgba(50, 50, 80, 0.95);
 }
 
 /* Active */
 .ui.styled.accordion .active.title.overlay-title {
-    background: rgba(24, 100, 178, 0.7);
-    color: rgba(0, 0, 30, 0.95);
+  background: rgba(24, 100, 178, 0.7);
+  color: rgba(0, 0, 30, 0.95);
 }
 
 /*Filter accordions (orange)*/
 
 /* Normal */
 .ui.styled.accordion .title.filter-title {
-    background: rgba(253, 126, 35, 0.3);
-    margin: 0em;
-    padding: 0.3em 0.5em;
-    color: rgba(0, 0, 30, 0.95);
-    font-weight: bold;
-    border-top: 1px solid rgba(34, 36, 38, 0.15);
-    position: relative;
+  background: rgba(253, 126, 35, 0.3);
+  margin: 0em;
+  padding: 0.3em 0.5em;
+  color: rgba(0, 0, 30, 0.95);
+  font-weight: bold;
+  border-top: 1px solid rgba(34, 36, 38, 0.15);
+  position: relative;
 }
 
 /* Hover */
 .ui.styled.accordion .title.filter-title:hover {
-    background: rgba(253, 126, 35, 0.5);
-    color: rgba(50, 50, 80, 0.95);
+  background: rgba(253, 126, 35, 0.5);
+  color: rgba(50, 50, 80, 0.95);
 }
 
 /* Active */
 .ui.styled.accordion .active.title.filter-title {
-    background: rgba(253, 126, 35, 0.3);
-    color: rgba(0, 0, 30, 0.95);
+  background: rgba(253, 126, 35, 0.3);
+  color: rgba(0, 0, 30, 0.95);
 }
 
 /*colors the currently selected data field if data_level is zone*/
 .ui.styled.accordion .active.title.filter-title.zone {
-    background: rgba(24, 100, 178, 0.7);
-    color: rgba(0, 0, 30, 0.95);
+  background: rgba(24, 100, 178, 0.7);
+  color: rgba(0, 0, 30, 0.95);
 }
 
-
-.ui.styled.accordion .title.filter-title.filter-activated, .ui.styled.accordion .active.title.filter-title.filter-activated {
-    background: rgba(234, 100, 2, 0.7);
+.ui.styled.accordion .title.filter-title.filter-activated,
+.ui.styled.accordion .active.title.filter-title.filter-activated {
+  background: rgba(234, 100, 2, 0.7);
 }
 
 /*Clear filter pillboxes*/
 .ui.label.clear-single {
-    background-color: rgba(253,126,35,0.7);
-    display: inline-block !important;
-    position: relative;
-    font-size: .95em;
-    margin-top:5px;
-    cursor: pointer;
+  background-color: rgba(253, 126, 35, 0.7);
+  display: inline-block !important;
+  position: relative;
+  font-size: 0.95em;
+  margin-top: 5px;
+  cursor: pointer;
 }
 
 .ui.label.clear-single-flier {
-    background-color: rgba(253,126,35,0.7);
-    display: block;
-    position: absolute !important;
-    font-size: .95em;
-    z-index: 99999;
-    transition: left 1.5s, top 1.5s;
+  background-color: rgba(253, 126, 35, 0.7);
+  display: block;
+  position: absolute !important;
+  font-size: 0.95em;
+  z-index: 99999;
+  transition: left 1.5s, top 1.5s;
 }
 
 .ui.label.clear-all {
-    background-color: rgba(150,150,150,0.7);
-    display: block !important;
-    position: relative;
-    font-size: .95em;
-    margin:5px 2px;
-    cursor: pointer;
+  background-color: rgba(150, 150, 150, 0.7);
+  display: block !important;
+  position: relative;
+  font-size: 0.95em;
+  margin: 5px 2px;
+  cursor: pointer;
 }
 
 .ui.label.label-all {
-    background-color: rgba(253,126,35,0.7) !important;
-        display: inline !important;
-         font-size: .95em;
-    margin:5px 2px;
+  background-color: rgba(253, 126, 35, 0.7) !important;
+  display: inline !important;
+  font-size: 0.95em;
+  margin: 5px 2px;
 }
 
 .ui.label.clear-all:hover {
-    color: rgb(50, 50, 50) !important;
+  color: rgb(50, 50, 50) !important;
 }
 
 /* chloroplath legend */
@@ -779,92 +788,87 @@ Others are working correctly.
   width: 20px;
   display: inline-block;
   vertical-align: middle;
-  border: solid rgba(0,0,0,0.3) 1px;
+  border: solid rgba(0, 0, 0, 0.3) 1px;
   margin-right: 5px;
 }
 
-#chloroplethLegend{
-    display: block;
-    position: relative;
-    width: 100%;
-} 
-
+#chloroplethLegend {
+  display: block;
+  position: relative;
+  width: 100%;
+}
 
 /* building view */
 
 #sub-nav-building {
-    width: 100%;
-    color: inherit;
-    background-color: #d69c93;
-    height: 40px;
-    display: flex;
-    justify-content: space-between;
-    z-index: 10000;
+  width: 100%;
+  color: inherit;
+  background-color: #d69c93;
+  height: 40px;
+  display: flex;
+  justify-content: space-between;
+  z-index: 10000;
 }
 
 #building-view-container {
-    margin-top: 40px;
+  margin-top: 40px;
 }
-
-
 
 dl.inline dd {
   display: inline;
   margin: 0;
 }
-dl.inline dd:after{
+dl.inline dd:after {
   display: block;
   content: '';
 }
-dl.inline dt{
+dl.inline dt {
   display: inline-block;
   min-width: 75px;
 }
 
-
 /*search bar*/
 #searchbar .dropdown {
-    border-radius:15px;
-    max-width:400px;
-    float:right;
-    margin-right:10px;
-    margin-left:50px;
+  border-radius: 15px;
+  max-width: 400px;
+  float: right;
+  margin-right: 10px;
+  margin-left: 50px;
 }
 
 #searchbar {
-    height:30px;
+  height: 30px;
 }
 
 /*patches semantic ui bug that search helper text is cut off after clearing a pillbox*/
 input.search {
-    width:200px !important;
+  width: 200px !important;
 }
 
-
 /*fixes spinning box background when a icon-button has a loading icon*/
-.ui.labeled.icon.button> .icon{
-    background-color: rgba(0,0,0,0);
+.ui.labeled.icon.button > .icon {
+  background-color: rgba(0, 0, 0, 0);
 }
 
 #welcomeModal {
-    overflow-y: auto;
+  overflow-y: auto;
 }
 
 #welcomeModal .actions {
-    margin-top: 30px;
-    text-align: center;
+  margin-top: 30px;
+  text-align: center;
 }
 
 #welcomeModal .btn {
-    margin: 5px;
+  margin: 5px;
 }
 
 body .modal-dialog.large {
-    width: 80%; /* respsonsive width */
-    text-align:left;
+  width: 80%; /* respsonsive width */
+  text-align: left;
 }
 
 .shepherd-skinny {
-    max-width:300px !important;
-    z-index:1000 !important;
+  max-width: 300px !important;
+  z-index: 1000 !important;
 }
