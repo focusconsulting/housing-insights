@@ -5,9 +5,16 @@ frontmatter: isneeded
 
     "use strict";
 
+    
     var mapView = {
         el: 'map-view',
-
+        forEachLayer: function (text, cb) {
+          mapView.map.getStyle().layers.forEach((layer) => {
+            if (!layer.id.includes(text)) return;
+        
+            cb(layer);
+          });
+        },
         init: function() { // as single page app, view init() functions should include only what should happen the first time
             // the view is loaded. things that need to happen every time the view is made active should be in
             // the onReturn methods. nothing needs to be there so far for mapView, but projectView for instance
@@ -296,14 +303,15 @@ frontmatter: isneeded
                   }).modal('show');
 
                 
-
+                this.terrainMapStyle = 'mapbox://styles/codefordc/ck8lodqke0h8t1ild43wwfr60';
+                this.streetsMapStyle = 'mapbox://styles/codefordc/ck8lo645c0fu11io5sw0z6826';
                 this.originalZoom = 11;
                 this.originalCenter = [-77, 38.9072];
                 //Add the map
-                mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+                mapboxgl.accessToken = 'pk.eyJ1IjoiY29kZWZvcmRjIiwiYSI6ImNpc3JrdTI3NTAzenIybm0xZGt4MnF0aWEifQ.zE2ErZ8UsBXrrucF8l7jRQ';
                 this.map = new mapboxgl.Map({
                     container: 'map', // container id
-                    style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
+                    style: this.streetsMapStyle,
                     zoom: mapView.originalZoom,
                     center: mapView.originalCenter,
                     minZoom: 3,
@@ -328,6 +336,68 @@ frontmatter: isneeded
                   if ( theMap.loaded() && theMap.getLayer('project-enter') !== undefined && !router.isFilterInitialized ) {
                       setState('initialProjectsRendered', true);
                   }
+                });
+
+                d3.select('#terrain').on('click', function() {
+                  
+                  const savedLayers = [];
+                  const savedSources = {};
+                  const layerGroups = [
+                    'project-unmatched',
+                    'project-enter',
+                    'project'
+                  ];
+
+                  layerGroups.forEach((layerGroup) => {
+                    mapView.forEachLayer(layerGroup, (layer) => {
+                      savedSources[layer.source] = mapView.map.getSource(layer.source).serialize();
+                      savedLayers.push(layer);
+                    });
+                  });
+
+                  mapView.map.setStyle(mapView.terrainMapStyle);
+
+
+                  setTimeout(() => {
+                    Object.entries(savedSources).forEach(([id, source]) => {
+                      mapView.map.addSource(id, source);
+                    });
+
+                    savedLayers.forEach((layer) => {
+                      mapView.map.addLayer(layer);
+                    });
+                  }, 1000);
+                  
+                });
+
+                d3.select('#streets').on('click', function() {
+                  const savedLayers = [];
+                  const savedSources = {};
+                  const layerGroups = [
+                    'project-unmatched',
+                    'project-enter',
+                    'project'
+                  ];
+
+                  layerGroups.forEach((layerGroup) => {
+                    mapView.forEachLayer(layerGroup, (layer) => {
+                      savedSources[layer.source] = mapView.map.getSource(layer.source).serialize();
+                      savedLayers.push(layer);
+                    });
+                  });
+
+                  mapView.map.setStyle(mapView.streetsMapStyle);
+
+
+                  setTimeout(() => {
+                    Object.entries(savedSources).forEach(([id, source]) => {
+                      mapView.map.addSource(id, source);
+                    });
+
+                    savedLayers.forEach((layer) => {
+                      mapView.map.addLayer(layer);
+                    });
+                  }, 1000);
                 });
 
                 this.map.on('zoomend', function() {
@@ -474,81 +544,6 @@ frontmatter: isneeded
             //TODO we want to move this config data into it's own file or to the api
             mapView.initialOverlays = test//TODO load this from dataChoices
         },
-
-
-
-        //No longer used - we are moving this into the combined filter/layer setup.
-        //Keep this code here until we confirm the removal of separate layers menu with user tests around 7/25
-        //TODO remove once confirmed
-        /*
-        overlayMenu: function(msg, data) {
-
-            if (data === true) {
-                mapView.buildOverlayOptions();
-                mapView.initialOverlays.forEach(function(overlay) {
-                    new mapView.overlayMenuOption(overlay);
-                });
-            } else {
-                console.log("ERROR data loaded === false")
-            }
-        },
-        overlayMenuOption: function(overlay) {
-
-
-            var parent = d3.select('#overlay-menu')
-                .classed("ui styled fluid accordion", true) //semantic UI styling
-
-            var title = parent.append("div")
-                .classed("title overlay-title", true);
-            title.append("i")
-                .classed("dropdown icon", true);
-            title.append("span")
-                .classed("title-text", true)
-                .text(overlay.display_name)
-            title.attr("id", "overlay-" + overlay.source); //TODO need to change this to different variable after changing meta logic structure
-
-
-            var content = parent.append("div")
-                .classed("content", true)
-              .attr("id", "overlay-about-"+overlay.source)
-                .text(overlay.display_text)
-
-            var legendLocation = content.append("div")
-                .attr("id", "overlay-" + overlay.source + "-legend") // TODO need to change this to different variable after changing meta logic structure
-                .style("height", "150px");
-
-            $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
-
-            //Set it up to trigger the layer when title is clicked
-            document.getElementById("overlay-" + overlay.source).addEventListener("click", clickCallback);
-
-            function clickCallback() {
-                var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-                console.log("changing from " + existingOverlayType + " to " + overlay.source);
-
-                if (existingOverlayType !== overlay.source) {
-                    setState('overlayRequest', {
-                        overlay: overlay.source,
-                        activeLayer: getState().mapLayer[0]
-                    });
-                } else {
-                    mapView.clearOverlay();
-                };
-
-                //probably not currently working - disabling of layers
-                mapView.layerMenuOptions.forEach(function(opt) {
-                    if (thisOption.availableLayerNames.indexOf(opt.source) === -1) {
-                        opt.makeUnavailable();
-                    } else {
-                        opt.makeAvailable();
-                    }
-                });
-
-            }; //end clickCallback
-        },
-
-        */
-
 
         onReturn: function() {
             console.log('nothing to do');
@@ -1058,6 +1053,167 @@ frontmatter: isneeded
             }
 
         },
+        reinitializeProjects: function(msg, data) {
+          mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
+          mapView.convertedProjects.features.forEach(function(feature) {
+              feature.properties.matches_filters = true;
+              feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'
+           });
+          mapView.listBuildings();
+          mapView.addExportButton();
+          mapView.exportButton();
+          mapView.clearProjectPreview();
+          mapView.clearSelectedProjectIfDoesntMatch(msg,data);
+          mapView.map.addSource('project', {
+              'type': 'geojson',
+              'data': mapView.convertedProjects
+          });
+          mapView.circleStrokeWidth = 1;
+          mapView.circleStrokeOpacity = 1;
+          mapView.map.addLayer({
+              'id': 'project-unmatched',
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'none'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+
+                  'circle-stroke-opacity': 0.5,
+                  'circle-opacity': 0.5,
+                  'circle-stroke-width': 0,
+                  'circle-color': '#aaaaaa',
+                  'circle-stroke-color': '#aaaaaa'
+
+              }
+          });
+          mapView.map.addLayer({
+              'id': 'project-exit', // add layer for exiting projects. empty at first. very repetitive of project layer, which could be improved
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'exit'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+                  'circle-opacity': 0.5,
+                  'circle-color': '#aaaaaa',
+
+                  'circle-stroke-opacity': 0.5,
+                  'circle-stroke-width': 0,
+                  'circle-stroke-color': '#626262'
+              }
+          });
+          mapView.map.addLayer({
+              'id': 'project',
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'stay'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+                  'circle-opacity': 0.5,
+                  'circle-color': '#fd8d3c',
+
+                  'circle-stroke-width': 0,
+                  'circle-stroke-opacity': 0.5,
+                  'circle-stroke-color': '#fd8d3c'    //same as circle for existing
+              }
+          });
+          mapView.map.addLayer({
+              'id': 'project-enter', // add layer for entering projects. empty at first. very repetitive of project layer, which could be improved
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'enter'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+
+                  'circle-opacity': 0.5,
+                  'circle-color': '#fd8d3c',
+
+                  'circle-stroke-width': 0, //Warning, this is not actually set here - the animateEnterExit overrides it
+                  'circle-stroke-opacity': 0.5,
+                  'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
+              }
+          });
+
+          setState('initialLayersAdded', true);
+
+         //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
+          mapView.map.on('mousemove', function(e) {
+              //get the province feature underneath the mouse
+              var features = mapView.map.queryRenderedFeatures(e.point, {
+                  layers: ['project','project-enter','project-exit', 'project-unmatched']
+              });
+              //if there's a point under our mouse, then do the following.
+              if (features.length > 0) {
+                  //use the following code to change the
+                  //cursor to a pointer ('pointer') instead of the default ('')
+                  mapView.map.getCanvas().style.cursor = (features[0].properties.proj_addre != null) ? 'pointer' : '';
+              }
+              //if there are no points under our mouse,
+              //then change the cursor back to the default
+              else {
+                  mapView.map.getCanvas().style.cursor = '';
+              }
+          });
+
+
+
+          mapView.map.on('click', function(e) {
+              var building = (mapView.map.queryRenderedFeatures(e.point, {
+                  layers: ['project','project-enter','project-exit', 'project-unmatched']
+              }))[0];
+
+              //If you click but not on a building, remove any tooltips
+              if (building === undefined) {
+                  mapView.removeAllPopups();
+              } else {
+              //If you click on a building, show that building in the side panel
+                  setState('subNav.right', 'buildings');
+                  setState('previewBuilding', [building, true]); // true ie flag to scroll matchign list
+              }
+          });
+
+          //Callbacks for hovering over any of the four project layers
+          mapView.map.on('mouseenter', 'project', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+          mapView.map.on('mouseenter', 'project-enter', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+          mapView.map.on('mouseenter', 'project-exit', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+          mapView.map.on('mouseenter', 'project-unmatched', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+
+      },
 
         removeAllPopups: function(){
             for (var i = 0; i < mapView.popups.length; i++) {
