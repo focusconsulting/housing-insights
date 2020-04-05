@@ -32,4 +32,5 @@ use,crime,crime_2016,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com
 use,crime,crime_2017,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/crime_2017.csv,
 use,wmata_dist,wmata_dist,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/wmata/20170215/dist_from_sql_with_lat.csv,
 use,wmata_info,wmata_stops,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170524/wmata_stops.csv,
-use,charter_schools,charter_schools,api,2020-03-19,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/charter_school/20200319/Charter_Schools.csv,Information on charter shcools from data.dc.gov
+use,charter_schools,charter_schools,manual,2020-04-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20200404/charter_schools.csv,Information on charter shcools from data.dc.gov
+use,asset_dist,asset_dist,api,2020-04-05,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20200405/asset_dist.csv,

@@ -802,6 +802,11 @@ class WmataDistCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         return row
 
+class AssetDistCleaner(CleanerBase):
+    def clean(self, row, row_num=None):
+        return row
+
+
 
 class WmataInfoCleaner(CleanerBase):
     def clean(self, row, row_num=None):

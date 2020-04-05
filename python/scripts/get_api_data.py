@@ -68,27 +68,29 @@ def get_multiple_api_sources(a):
             'dhcd':           'DhcdApiConn',
             'census':         'CensusApiConn',
             'wmata_distcalc': 'WmataApiConn',
-            'prescat':        'PrescatApiConn'
+            'prescat':        'PrescatApiConn',
+            'asset_dist': 'AssetApiConn'
     }
 
     # If no module list is provided, use them all
     if module_list is None:
         module_list = list(modules.keys())
-
+    
     for m in module_list:
         try:
-            logger.info("Processing %s module with class %s", m, modules[m])
+            logger.error("Processing %s module with class %s", m, modules[m])
             module_name = API_FOLDER + '.' + m
+            
             module = importlib.import_module(module_name)
 
             class_name = modules[m]
             api_class = getattr(module, class_name)
-
+            
             api_instance = api_class(database_choice=db, debug=debug)
             api_method = getattr(api_instance, 'get_data') # Every class should have a get_data method!
 
             # Get the data
-            api_method(unique_data_ids, sample, output_type, db=db) #TODO refactor all the methods that need db to instead use self.engine() created in __init__(see base_project for example)
+            api_method(unique_data_ids, sample, output_type, db=db) # TODO refactor all the methods that need db to instead use self.engine() created in __init__(see base_project for example)
 
         except Exception as e:
             logger.error("The request for '%s' failed with error: %s", m, e)
@@ -143,7 +145,7 @@ parser.add_argument('--ids', nargs='+',
                               'acs5_2013','acs5_2014','acs5_2015',
                               'acs5_2009_moe','acs5_2010_moe','acs5_2011_moe','acs5_2012_moe',
                               'acs5_2013_moe','acs5_2014_moe','acs5_2015_moe',
-                              'wmata_stops','wmata_dist'
+                              'wmata_stops','wmata_dist', 'asset_dist'
                              ])
 
 parser.add_argument('--modules', nargs='+',
@@ -154,7 +156,8 @@ parser.add_argument('--modules', nargs='+',
                                 'dhcd',
                                 'census',
                                 'wmata_distcalc',
-                                'prescat'
+                                'prescat',
+                                'asset_dist'
                                 ])
 
 parser.add_argument ('--debug',action='store_true',

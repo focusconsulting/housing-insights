@@ -1,4 +1,5 @@
 import os, logging
+import sys
 
 python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                os.pardir, os.pardir))
@@ -27,8 +28,9 @@ class HILogger():
         logger.setLevel(level)
         formatter = logging.Formatter(  fmt=fmt,
                                         datefmt=datefmt)
-        stream_handler = logging.StreamHandler()
+        stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setFormatter(formatter)
+        stream_handler.setLevel(logging.INFO)
         logger.addHandler(stream_handler)
         if logfile:
             file_handler = logging.FileHandler(self.logfile)

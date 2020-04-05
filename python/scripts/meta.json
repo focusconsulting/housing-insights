@@ -1,4 +1,98 @@
 {
+  "asset_dist": {
+    "fields": [
+      {
+        "source_name": "nlihc_id",
+        "display_text": "Preservation Catalog ID",
+        "required_in_source": true,
+        "display_name": "Nlihc ID",
+        "type": "text",
+        "sql_name": "nlihc_id"
+      },
+      {
+        "source_name": "type",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "Type",
+        "type": "text",
+        "sql_name": "type"
+      },
+      {
+        "source_name": "id",
+        "display_text": "Asset ID",
+        "required_in_source": true,
+        "display_name": "Asset ID",
+        "type": "text",
+        "sql_name": "asset_id"
+      },
+      {
+        "source_name": "asset_name",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "asset_name"
+      },
+      {
+        "source_name": "dist_in_miles",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "Distance in Miles",
+        "type": "decimal",
+        "sql_name": "dist_in_miles"
+      },
+      {
+        "source_name": "crow_distance",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "crow_distance",
+        "type": "decimal",
+        "sql_name": "crow_distance"
+      },
+      {
+        "source_name": "building_lat",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "building_lat",
+        "type": "decimal",
+        "sql_name": "building_lat"
+      },
+      {
+        "source_name": "building_lon",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "building_lon",
+        "type": "decimal",
+        "sql_name": "building_lon"
+      },
+      {
+        "source_name": "asset_lat",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "asset_lat",
+        "type": "decimal",
+        "sql_name": "asset_lat"
+      },
+      {
+        "source_name": "asset_lon",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "asset_lon",
+        "type": "decimal",
+        "sql_name": "asset_lon"
+      },
+      {
+        "source_name": "unique_data_id",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "display_name": "Unique Data ID",
+        "type": "text",
+        "sql_name": "unique_data_id"
+      }
+    ],
+    "replace_table": true,
+    "cleaner": "AssetDistCleaner"
+  },
   "charter_schools": {
     "fields": [
       {

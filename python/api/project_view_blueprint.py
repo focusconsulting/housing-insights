@@ -1,15 +1,53 @@
 from flask import Blueprint
 from flask import jsonify, request
-
 import math
-
-import logging
 from flask_cors import cross_origin
 
 
 def construct_project_view_blueprint(name, engine):
 
     blueprint = Blueprint(name, __name__, url_prefix='/api')
+
+    @blueprint.route('/assets/<nlihc_id>', methods=['GET'])
+    @cross_origin()
+    def nearby_assets(nlihc_id):
+        '''
+        Returns nearby asssets
+        '''
+        conn = engine.connect()
+        try:
+            q = """
+                SELECT dist_in_miles, type, asset_name, asset_lat, asset_lon
+                FROM asset_dist
+                WHERE nlihc_id = '{}'
+                """.format(nlihc_id)
+            assets = conn.execute(q).fetchall()
+            results = {}
+            for asset in assets:
+                category_name = asset[1]
+                asset_name = asset[2]
+                asset_latitude = asset[3]
+                asset_longitude = asset[4]
+                asset_dist = asset[0]
+                asset_processed = {
+                    'asset_name': asset_name,
+                    'longitude': asset_longitude,
+                    'latitude': asset_latitude,
+                    'distance_in_miles': asset_dist
+                }
+                if category_name in results:
+                    results[category_name].append(asset_processed)
+                else:
+                    results[category_name] = []
+                    results[category_name].append(asset_processed)
+        except Exception as e:
+            conn.close()
+            print("failed to fetch assets", e)
+        finally:
+            conn.close()
+        return jsonify({'objects': results})
+        
+
 
     @blueprint.route('/wmata/<nlihc_id>',  methods=['GET'])
     @cross_origin()

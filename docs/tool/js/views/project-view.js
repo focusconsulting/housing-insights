@@ -92,6 +92,11 @@ var projectView = {
           callback: dataBatchCallback
         },
         {
+          name: 'asset',
+          url: 'http://localhost:5000/api/assets/' + nlihc_id,
+          callback: dataBatchCallback
+        },
+        {
           name: 'transit_stats',
           url: 'http://localhost:5000/api/wmata/' + nlihc_id,
           callback: dataBatchCallback
@@ -702,6 +707,71 @@ var projectView = {
         );
         d3.select('#nearby_housing_distance').html(
           model.dataCollection['nearby_projects']['distance']
+        );
+      }
+    },
+    assets: {
+      title: 'Nearby Assets',
+      wrapperPartial: 'partials/project-view/assets.html',
+      render: function(full_project_data) {
+        const assetMap = new mapboxgl.Map({
+          container: 'asset-map',
+          style: 'mapbox://styles/mapbox/light-v9',
+          center: [
+            full_project_data['longitude'],
+            full_project_data['latitude']
+          ],
+          zoom: 14
+        });
+
+        assetMap.on('load', function() {
+          console.error(
+            full_project_data['longitude'],
+            full_project_data['latitude']
+          );
+          console.error(
+            controller.convertToGeoJSON({
+              objects: model.dataCollection['asset']['objects']['education']
+            })
+          );
+          assetMap.addSource('asset1', {
+            type: 'geojson',
+            data: controller.convertToGeoJSON({
+              objects: model.dataCollection['asset']['objects']['education']
+            })
+          });
+          assetMap.addLayer({
+            id: 'assetLocations',
+            source: 'asset1',
+            type: 'circle',
+            minzoom: 9,
+            paint: {
+              'circle-color': 'rgb(120,150,255)',
+              'circle-stroke-width': 3,
+              'circle-stroke-color': 'rgb(150,150,150)',
+              'circle-radius': {
+                base: 1.75,
+                stops: [
+                  [10, 2],
+                  [18, 20]
+                ] //2px at zoom 10, 20px at zoom 18
+              }
+            }
+          });
+          assetMap.addLayer({
+            id: 'assetTitles',
+            source: 'asset1',
+            type: 'symbol',
+            minzoom: 11,
+            layout: {
+              'text-field': '{asset_name}',
+              'text-anchor': 'bottom-left'
+            }
+          });
+          projectView.addCurrentBuildingToMap(assetMap, 'targetBuilding2');
+        });
+        d3.select('#num_of_schools').html(
+          model.dataCollection['asset']['objects']['education'].length
         );
       }
     },
