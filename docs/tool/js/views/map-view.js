@@ -5,9 +5,258 @@ frontmatter: isneeded
 
     "use strict";
 
+    const assets = [
+        {
+            id: 'primary care centers',
+            filename: 'primary_care_centers',
+            icon: 'school',
+            toggleSelector: '#assets-primary-care-centers',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['PrimaryCarePtNAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['PrimaryCarePtADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'grocery store locations',
+            filename: 'grocery_store_locations',
+            toggleSelector: '#assets-grocery-store',
+            icon: 'grocery',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['STORENAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'atm banking',
+            toggleSelector: '#assets-atm-banking',
+            filename: 'atm_banking',
+            icon: 'bank',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'charter schools',
+            filename: 'charter_schools',
+            icon: 'school',
+            toggleSelector: '#assets-charter-school',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'public schools',
+            filename: 'public_schools',
+            icon: 'school',
+            toggleSelector: '#assets-public-school',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'independent schools',
+            filename: 'independent_schools',
+            icon: 'school',
+            toggleSelector: '#assets-indepedent-school',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'day care centers',
+            filename: 'day_care_centers',
+            icon: 'playground',
+            toggleSelector: '#assets-day-care-centers',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'religious institutions',
+            filename: 'places_of_worship',
+            icon: 'place-of-worship',
+            toggleSelector: '#assets-religious-institution',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'community centers',
+            filename: 'recreation_facilities',
+            icon: 'park',
+            toggleSelector: '#assets-community-centers',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'museums',
+            filename: 'museums_in_dc',
+            icon: 'museum',
+            toggleSelector: '#assets-museums',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['MAR_MATCHADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'libraries',
+            filename: 'libraries',
+            icon: 'library',
+            toggleSelector: '#assets-libraries',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'nonprofits',
+            filename: 'tax_exempt_properties',
+            toggleSelector: '#assets-nonprofits',
+            icon: 'school',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'hospitals',
+            filename: 'hospitals',
+            toggleSelector: '#assets-health-centers',
+            icon: 'hospital',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'aging centers',
+            filename: 'aging_services',
+            toggleSelector: '#assets-aging-centers',
+            icon: 'hospital',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'parks',
+            filename: 'parks_and_recreation_areas',
+            icon: 'park',
+            toggleSelector: '#assets-parks',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'community gardens',
+            filename: 'community_gardens_points',
+            icon: 'garden',
+            toggleSelector: '#assets-community-gardens',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'rec-fields',
+            filename: 'recreation_fields',
+            icon: 'basketball',
+            toggleSelector: '#assets-rec-fields',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'police',
+            filename: 'police_stations',
+            icon: 'police',
+            toggleSelector: '#assets-police',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'fire stations',
+            filename: 'fire_stations',
+            icon: 'fire-station',
+            toggleSelector: '#assets-fire-stations',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'banks',
+            filename: 'bank_locations',
+            icon: 'bank',
+            toggleSelector: '#assets-banks',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'non-depository banks',
+            filename: 'nondepository_banks',
+            icon: 'bank',
+            toggleSelector: '#assets-non-depository-banks',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'payday lenders',
+            filename: 'check_cashing_locations',
+            icon: 'suitcase',
+            toggleSelector: '#assets-payday-lenders',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'bus stops',
+            filename: 'metro_bus_stops',
+            icon: '',
+            toggleSelector: '#assets-bus-stops',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        },
+        {
+            id: 'metro stops',
+            filename: 'metro_stations_in_dc',
+            icon: 'rail',
+            toggleSelector: '#assets-metro-stops',
+            generatePopupHtml: (properties) => {
+                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+            }
+        }
+    ];
+
     var mapView = {
         el: 'map-view',
-
+        forEachLayer: function (text, cb) {
+          mapView.map.getStyle().layers.forEach((layer) => {
+            if (!layer.id.includes(text)) return;
+        
+            cb(layer);
+          });
+        },
         init: function() { // as single page app, view init() functions should include only what should happen the first time
             // the view is loaded. things that need to happen every time the view is made active should be in
             // the onReturn methods. nothing needs to be there so far for mapView, but projectView for instance
@@ -41,6 +290,7 @@ frontmatter: isneeded
                     ['sidebar.right', mapView.navControl.move],
                     ['dataLoaded.metaData', mapView.addInitialLayers], //adds zone borders to geojson
                     ['dataLoaded.metaData', resultsView.init],
+                    ['mapLoaded', mapView.addAssetsToMap],
                     ['dataLoaded.metaData', mapView.placeProjects],
                     ['dataLoaded.metaData', mapView.buildOverlayOptions],
                     ['dataLoaded.raw_project', filterView.init],
@@ -296,14 +546,15 @@ frontmatter: isneeded
                   }).modal('show');
 
                 
-
+                this.terrainMapStyle = 'mapbox://styles/codefordc/ck8lodqke0h8t1ild43wwfr60';
+                this.streetsMapStyle = 'mapbox://styles/codefordc/ck8lo645c0fu11io5sw0z6826';
                 this.originalZoom = 11;
                 this.originalCenter = [-77, 38.9072];
                 //Add the map
-                mapboxgl.accessToken = 'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+                mapboxgl.accessToken = 'pk.eyJ1IjoiY29kZWZvcmRjIiwiYSI6ImNpc3JrdTI3NTAzenIybm0xZGt4MnF0aWEifQ.zE2ErZ8UsBXrrucF8l7jRQ';
                 this.map = new mapboxgl.Map({
                     container: 'map', // container id
-                    style: 'mapbox://styles/rmcarder/cizru0urw00252ro740x73cea',
+                    style: this.streetsMapStyle,
                     zoom: mapView.originalZoom,
                     center: mapView.originalCenter,
                     minZoom: 3,
@@ -328,6 +579,70 @@ frontmatter: isneeded
                   if ( theMap.loaded() && theMap.getLayer('project-enter') !== undefined && !router.isFilterInitialized ) {
                       setState('initialProjectsRendered', true);
                   }
+                });
+
+                d3.select('#terrain').on('click', function() {
+                  
+                  const savedLayers = [];
+                  const savedSources = {};
+                  const layerGroups = [
+                    'project-unmatched',
+                    'project-enter',
+                    'project',
+                    ...assets.map(a => a.id)
+                  ];
+
+                  layerGroups.forEach((layerGroup) => {
+                    mapView.forEachLayer(layerGroup, (layer) => {
+                      savedSources[layer.source] = mapView.map.getSource(layer.source).serialize();
+                      savedLayers.push(layer);
+                    });
+                  });
+
+                  mapView.map.setStyle(mapView.terrainMapStyle);
+
+
+                  setTimeout(() => {
+                    Object.entries(savedSources).forEach(([id, source]) => {
+                      mapView.map.addSource(id, source);
+                    });
+
+                    savedLayers.forEach((layer) => {
+                      mapView.map.addLayer(layer);
+                    });
+                  }, 1000);
+                  
+                });
+
+                d3.select('#streets').on('click', function() {
+                  const savedLayers = [];
+                  const savedSources = {};
+                  const layerGroups = [
+                    'project-unmatched',
+                    'project-enter',
+                    'project',
+                    ...assets.map(a => a.id)
+                  ];
+
+                  layerGroups.forEach((layerGroup) => {
+                    mapView.forEachLayer(layerGroup, (layer) => {
+                      savedSources[layer.source] = mapView.map.getSource(layer.source).serialize();
+                      savedLayers.push(layer);
+                    });
+                  });
+
+                  mapView.map.setStyle(mapView.streetsMapStyle);
+
+
+                  setTimeout(() => {
+                    Object.entries(savedSources).forEach(([id, source]) => {
+                      mapView.map.addSource(id, source);
+                    });
+
+                    savedLayers.forEach((layer) => {
+                      mapView.map.addLayer(layer);
+                    });
+                  }, 1000);
                 });
 
                 this.map.on('zoomend', function() {
@@ -474,81 +789,6 @@ frontmatter: isneeded
             //TODO we want to move this config data into it's own file or to the api
             mapView.initialOverlays = test//TODO load this from dataChoices
         },
-
-
-
-        //No longer used - we are moving this into the combined filter/layer setup.
-        //Keep this code here until we confirm the removal of separate layers menu with user tests around 7/25
-        //TODO remove once confirmed
-        /*
-        overlayMenu: function(msg, data) {
-
-            if (data === true) {
-                mapView.buildOverlayOptions();
-                mapView.initialOverlays.forEach(function(overlay) {
-                    new mapView.overlayMenuOption(overlay);
-                });
-            } else {
-                console.log("ERROR data loaded === false")
-            }
-        },
-        overlayMenuOption: function(overlay) {
-
-
-            var parent = d3.select('#overlay-menu')
-                .classed("ui styled fluid accordion", true) //semantic UI styling
-
-            var title = parent.append("div")
-                .classed("title overlay-title", true);
-            title.append("i")
-                .classed("dropdown icon", true);
-            title.append("span")
-                .classed("title-text", true)
-                .text(overlay.display_name)
-            title.attr("id", "overlay-" + overlay.source); //TODO need to change this to different variable after changing meta logic structure
-
-
-            var content = parent.append("div")
-                .classed("content", true)
-              .attr("id", "overlay-about-"+overlay.source)
-                .text(overlay.display_text)
-
-            var legendLocation = content.append("div")
-                .attr("id", "overlay-" + overlay.source + "-legend") // TODO need to change this to different variable after changing meta logic structure
-                .style("height", "150px");
-
-            $('.ui.accordion').accordion({'exclusive':true}); //only one open at a time
-
-            //Set it up to trigger the layer when title is clicked
-            document.getElementById("overlay-" + overlay.source).addEventListener("click", clickCallback);
-
-            function clickCallback() {
-                var existingOverlayType = getState().overlaySet !== undefined ? getState().overlaySet[0].overlay : null;
-                console.log("changing from " + existingOverlayType + " to " + overlay.source);
-
-                if (existingOverlayType !== overlay.source) {
-                    setState('overlayRequest', {
-                        overlay: overlay.source,
-                        activeLayer: getState().mapLayer[0]
-                    });
-                } else {
-                    mapView.clearOverlay();
-                };
-
-                //probably not currently working - disabling of layers
-                mapView.layerMenuOptions.forEach(function(opt) {
-                    if (thisOption.availableLayerNames.indexOf(opt.source) === -1) {
-                        opt.makeUnavailable();
-                    } else {
-                        opt.makeAvailable();
-                    }
-                });
-
-            }; //end clickCallback
-        },
-
-        */
-
 
         onReturn: function() {
             console.log('nothing to do');
@@ -734,7 +974,7 @@ frontmatter: isneeded
                 display_text: 'A small division used in collection of the US Census.',
                 color: '#0D5C7D',
                 visibility: 'none'
-            }
+            },
 
             //TODO add ANC? Need weighting factors in database first
 
@@ -759,6 +999,242 @@ frontmatter: isneeded
             } else {
                 console.log("ERROR data loaded === false")
             };
+        },
+        addCharterSchoolLayerToMap: function(msg, data) {
+            
+            var dataRequest = {
+                name: 'charter schools',
+                url: model.URLS.geoJSONPolygonsBase + 'charter_schools.geojson',
+                callback: addCharterSchoolLayer
+            }
+            controller.getData(dataRequest);
+
+            function addCharterSchoolLayer(data) {
+                
+                mapView.map.addSource('charter schools', {
+                    type: 'geojson',
+                    data: data
+                });
+                
+                console.error('CHARTER')
+                mapView.map.addLayer({
+                    id: 'charter schools',
+                    type: 'circle',
+                    source: 'charter schools',
+                    'paint': {
+                        'circle-radius': {
+                            'base': 1.75,
+                            'stops': [
+                                [11, 4],
+                                [12, 5],
+                                [15, 16]
+                            ]
+                        },
+
+                        'circle-stroke-opacity': 0.5,
+                        'circle-opacity': 0.5,
+                        'circle-stroke-width': 0,
+                        'circle-color': 'green',
+                        'circle-stroke-color': 'green'
+
+                    },
+                    layout: {
+                        visibility: 'none'
+                    }
+                });
+
+
+                d3.select('#assets-charter-school')
+                    .on('change', function() {
+                        const layer = 'charter schools';
+                        const visibility = mapView.map.getLayoutProperty(layer, 'visibility');
+                        if(visibility === 'visible') {
+                            mapView.map.setLayoutProperty(layer, 'visibility', 'none');
+                        } else {
+                            mapView.map.setLayoutProperty(layer, 'visibility', 'visible');
+                        }
+                    })
+            }
+        },
+        addAtmBankingLayerToMap: function(msg, data) {
+            
+            var dataRequest = {
+                name: 'atm banking',
+                url: model.URLS.geoJSONPolygonsBase + 'atm_banking.geojson',
+                callback: addCharterSchoolLayer
+            }
+            controller.getData(dataRequest);
+
+            function addCharterSchoolLayer(data) {
+                
+                mapView.map.addSource('atm banking', {
+                    type: 'geojson',
+                    data: data
+                });
+                
+                console.error('CHARTER')
+                mapView.map.addLayer({
+                    id: 'atm banking',
+                    type: 'circle',
+                    source: 'atm banking',
+                    'paint': {
+                        'circle-radius': {
+                            'base': 1.75,
+                            'stops': [
+                                [11, 4],
+                                [12, 5],
+                                [15, 16]
+                            ]
+                        },
+
+                        'circle-stroke-opacity': 0.5,
+                        'circle-opacity': 0.5,
+                        'circle-stroke-width': 0,
+                        'circle-color': 'yellow',
+                        'circle-stroke-color': 'yellow'
+
+                    },
+                    layout: {
+                        visibility: 'none'
+                    }
+                });
+
+
+                d3.select('#assets-atm-banking')
+                    .on('change', function() {
+                        const layer = 'atm banking';
+                        const visibility = mapView.map.getLayoutProperty(layer, 'visibility');
+                        if(visibility === 'visible') {
+                            mapView.map.setLayoutProperty(layer, 'visibility', 'none');
+                        } else {
+                            mapView.map.setLayoutProperty(layer, 'visibility', 'visible');
+                        }
+                    })
+            }
+        },
+        addGroceryStoreLayerToMap: function(msg, data) {
+            
+            var dataRequest = {
+                name: 'atm banking',
+                url: model.URLS.geoJSONPolygonsBase + 'grocery_store_locations.geojson',
+                callback: addCharterSchoolLayer
+            }
+            controller.getData(dataRequest);
+
+            function addCharterSchoolLayer(data) {
+                
+                mapView.map.addSource('grocery store locations', {
+                    type: 'geojson',
+                    data: data
+                });
+                
+                mapView.map.addLayer({
+                    id: 'grocery store locations',
+                    type: 'circle',
+                    source: 'grocery store locations',
+                    'paint': {
+                        'circle-radius': {
+                            'base': 1.75,
+                            'stops': [
+                                [11, 4],
+                                [12, 5],
+                                [15, 16]
+                            ]
+                        },
+
+                        'circle-stroke-opacity': 0.5,
+                        'circle-opacity': 0.5,
+                        'circle-stroke-width': 0,
+                        'circle-color': 'red',
+                        'circle-stroke-color': 'red'
+
+                    },
+                    layout: {
+                        visibility: 'none'
+                    }
+                });
+
+
+                d3.select('#assets-grocery-store')
+                    .on('change', function() {
+                        const layer = 'grocery store locations';
+                        const visibility = mapView.map.getLayoutProperty(layer, 'visibility');
+                        if(visibility === 'visible') {
+                            mapView.map.setLayoutProperty(layer, 'visibility', 'none');
+                        } else {
+                            mapView.map.setLayoutProperty(layer, 'visibility', 'visible');
+                        }
+                    })
+            }
+        },
+        addAssetsToMap: function() {
+            function addAssetToMap(asset) {
+                var dataRequest = {
+                    name: 'primary care centers',
+                    url: model.URLS.geoJSONPolygonsBase + asset.filename + '.geojson',
+                    callback: (data) => {
+                        mapView.map.addSource(asset.id, {
+                            type: 'geojson',
+                            data: data
+                        });
+                        mapView.map.addLayer({
+                            id: asset.id,
+                            type: 'symbol',
+                            source: asset.id,
+                            layout: {
+                                'icon-image': `${asset.icon}-11`,
+                                'icon-allow-overlap': true,
+                                visibility: 'none'
+                            }
+                        });
+                        d3.select(asset.toggleSelector)
+                            .on('change', function() {
+                                const visibility = mapView.map.getLayoutProperty(asset.id, 'visibility');
+                                if(visibility === 'visible') {
+                                    mapView.map.setLayoutProperty(asset.id, 'visibility', 'none');
+                                } else {
+                                    mapView.map.setLayoutProperty(asset.id, 'visibility', 'visible');
+                                }
+                            });
+                        mapView.map.on('mouseenter', asset.id, function(e) {
+                            // Create a popup, but don't add it to the map yet.
+                            var popup = new mapboxgl.Popup({
+                                closeButton: false,
+                                closeOnClick: false
+                            });
+        
+                            mapView.map.getCanvas().style.cursor = 'pointer';
+                            var coordinates = e.features[0].geometry.coordinates.slice();
+
+                            console.log(e.features[0].properties);
+                            const assetPopupHtml = asset.generatePopupHtml(e.features[0].properties);
+        
+                            // Ensure that if the map is zoomed out such that multiple
+                            // copies of the feature are visible, the popup appears
+                            // over the copy being pointed to.
+                            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                            }
+        
+                            // Populate the popup and set its coordinates
+                            // based on the feature found.
+                            popup
+                            .setLngLat(coordinates)
+                            .setHTML(assetPopupHtml)
+                            .addTo(mapView.map);
+        
+                            mapView.popups.push(popup);
+                        });
+        
+                        mapView.map.on('mouseleave', asset.id, function() {
+                            mapView.removeAllPopups();
+                        })
+                    }
+                }
+                controller.getData(dataRequest)
+            }
+            
+            assets.forEach(addAssetToMap);
         },
         addZoneLayerToMap: function(layer) {
             //Adds an individual zone (ward, zip, etc.) to the geoJSON
@@ -1058,8 +1534,170 @@ frontmatter: isneeded
             }
 
         },
+        reinitializeProjects: function(msg, data) {
+          mapView.convertedProjects = controller.convertToGeoJSON(model.dataCollection.raw_project);
+          mapView.convertedProjects.features.forEach(function(feature) {
+              feature.properties.matches_filters = true;
+              feature.properties.klass = 'stay';  // 'stay'|'enter'|'exit'|'none'
+           });
+          mapView.listBuildings();
+          mapView.addExportButton();
+          mapView.exportButton();
+          mapView.clearProjectPreview();
+          mapView.clearSelectedProjectIfDoesntMatch(msg,data);
+          mapView.map.addSource('project', {
+              'type': 'geojson',
+              'data': mapView.convertedProjects
+          });
+          mapView.circleStrokeWidth = 1;
+          mapView.circleStrokeOpacity = 1;
+          mapView.map.addLayer({
+              'id': 'project-unmatched',
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'none'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+
+                  'circle-stroke-opacity': 0.5,
+                  'circle-opacity': 0.5,
+                  'circle-stroke-width': 0,
+                  'circle-color': '#aaaaaa',
+                  'circle-stroke-color': '#aaaaaa'
+
+              }
+          });
+          mapView.map.addLayer({
+              'id': 'project-exit', // add layer for exiting projects. empty at first. very repetitive of project layer, which could be improved
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'exit'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+                  'circle-opacity': 0.5,
+                  'circle-color': '#aaaaaa',
+
+                  'circle-stroke-opacity': 0.5,
+                  'circle-stroke-width': 0,
+                  'circle-stroke-color': '#626262'
+              }
+          });
+          mapView.map.addLayer({
+              'id': 'project',
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'stay'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+                  'circle-opacity': 0.5,
+                  'circle-color': '#fd8d3c',
+
+                  'circle-stroke-width': 0,
+                  'circle-stroke-opacity': 0.5,
+                  'circle-stroke-color': '#fd8d3c'    //same as circle for existing
+              }
+          });
+          mapView.map.addLayer({
+              'id': 'project-enter', // add layer for entering projects. empty at first. very repetitive of project layer, which could be improved
+              'type': 'circle',
+              'source': 'project',
+              'filter': ['==', 'klass', 'enter'],
+              'paint': {
+                  'circle-radius': {
+                      'base': 1.75,
+                      'stops': [
+                          [11, 4],
+                          [12, 5],
+                          [15, 16]
+                      ]
+                  },
+
+                  'circle-opacity': 0.5,
+                  'circle-color': '#fd8d3c',
+
+                  'circle-stroke-width': 0, //Warning, this is not actually set here - the animateEnterExit overrides it
+                  'circle-stroke-opacity': 0.5,
+                  'circle-stroke-color': '#fc4203'//'#ea6402'    //darker for entering
+              }
+          });
+
+          setState('initialLayersAdded', true);
+
+         //TODO - with the upgraded mapboxGL, this could be done with a 'mouseenter' and 'mouseexit' event
+          mapView.map.on('mousemove', function(e) {
+              //get the province feature underneath the mouse
+              var features = mapView.map.queryRenderedFeatures(e.point, {
+                  layers: ['project','project-enter','project-exit', 'project-unmatched']
+              });
+              //if there's a point under our mouse, then do the following.
+              if (features.length > 0) {
+                  //use the following code to change the
+                  //cursor to a pointer ('pointer') instead of the default ('')
+                  mapView.map.getCanvas().style.cursor = (features[0].properties.proj_addre != null) ? 'pointer' : '';
+              }
+              //if there are no points under our mouse,
+              //then change the cursor back to the default
+              else {
+                  mapView.map.getCanvas().style.cursor = '';
+              }
+          });
+
+
+
+          mapView.map.on('click', function(e) {
+              var building = (mapView.map.queryRenderedFeatures(e.point, {
+                  layers: ['project','project-enter','project-exit', 'project-unmatched']
+              }))[0];
+
+              //If you click but not on a building, remove any tooltips
+              if (building === undefined) {
+                  mapView.removeAllPopups();
+              } else {
+              //If you click on a building, show that building in the side panel
+                  setState('subNav.right', 'buildings');
+                  setState('previewBuilding', [building, true]); // true ie flag to scroll matchign list
+              }
+          });
+
+          //Callbacks for hovering over any of the four project layers
+          mapView.map.on('mouseenter', 'project', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+          mapView.map.on('mouseenter', 'project-enter', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+          mapView.map.on('mouseenter', 'project-exit', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+          mapView.map.on('mouseenter', 'project-unmatched', function(e) {
+              setState('hoverBuilding', e.features[0])
+          });
+
+      },
 
         removeAllPopups: function(){
+            console.log('removing popup')
             for (var i = 0; i < mapView.popups.length; i++) {
                 if (mapView.popups[i].isOpen()) {
                     mapView.popups[i].remove()
