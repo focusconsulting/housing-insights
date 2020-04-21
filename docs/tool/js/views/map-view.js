@@ -13,7 +13,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-primary-care-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['PrimaryCarePtNAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['PrimaryCarePtADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['PrimaryCarePtADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Primary Care Center</div>' +
+                '<div class="tooltip-field">Education</div>' 
             }
         },
         {
@@ -23,7 +25,9 @@ frontmatter: isneeded
             icon: 'grocery',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['STORENAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Grocery Stores</div>' +
+                '<div class="tooltip-field">Health</div>' 
             }
         },
         {
@@ -33,7 +37,9 @@ frontmatter: isneeded
             icon: 'bank',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">ATM Banking</div>' +
+                '<div class="tooltip-field">Financial</div>' 
             }
         },
         {
@@ -43,7 +49,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-charter-school',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Charter Schools</div>' +
+                '<div class="tooltip-field">Education</div>' 
             }
         },
         {
@@ -53,7 +61,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-public-school',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Public Schools</div>' +
+                '<div class="tooltip-field">Education</div>' 
             }
         },
         {
@@ -63,7 +73,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-indepedent-school',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Independent Schools</div>' +
+                '<div class="tooltip-field">Education</div>' 
             }
         },
         {
@@ -73,7 +85,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-day-care-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Day care centers</div>' +
+                '<div class="tooltip-field">Education</div>' 
             }
         },
         {
@@ -83,7 +97,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-religious-institution',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Places of worship</div>' +
+                '<div class="tooltip-field">Cultural</div>' 
             }
         },
         {
@@ -93,7 +109,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-community-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Community Centers</div>' +
+                '<div class="tooltip-field">Cultural</div>' 
             }
         },
         {
@@ -103,7 +121,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-museums',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['MAR_MATCHADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['MAR_MATCHADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Museums</div>' +
+                '<div class="tooltip-field">Cultural</div>' 
             }
         },
         {
@@ -113,7 +133,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-libraries',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Libraries</div>' +
+                '<div class="tooltip-field">Cultural</div>' 
             }
         },
         {
@@ -123,7 +145,9 @@ frontmatter: isneeded
             icon: 'school',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Non Profits</div>' +
+                '<div class="tooltip-field">Cultural</div>' 
             }
         },
         {
@@ -133,7 +157,9 @@ frontmatter: isneeded
             icon: 'hospital',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Hospitals</div>' +
+                '<div class="tooltip-field">Health</div>' 
             }
         },
         {
@@ -143,7 +169,9 @@ frontmatter: isneeded
             icon: 'hospital',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Aging Centers</div>' +
+                '<div class="tooltip-field">Health</div>' 
             }
         },
         {
@@ -153,7 +181,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-parks',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Parks</div>' +
+                '<div class="tooltip-field">Health</div>' 
             }
         },
         {
@@ -163,7 +193,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-community-gardens',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Community Gardens</div>' +
+                '<div class="tooltip-field">Health</div>' 
             }
         },
         {
@@ -173,7 +205,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-rec-fields',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Recreational Fields</div>' +
+                '<div class="tooltip-field">Health</div>' 
             }
         },
         {
@@ -183,7 +217,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-police',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Police Stations</div>' +
+                '<div class="tooltip-field">Public Safety</div>' 
             }
         },
         {
@@ -193,7 +229,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-fire-stations',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Fire Stations</div>' +
+                '<div class="tooltip-field">Public Safety</div>' 
             }
         },
         {
@@ -203,7 +241,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-banks',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Banks</div>' +
+                '<div class="tooltip-field">Financial</div>' 
             }
         },
         {
@@ -213,7 +253,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-non-depository-banks',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Non-depository Banks</div>' +
+                '<div class="tooltip-field">Financial</div>' 
             }
         },
         {
@@ -223,17 +265,21 @@ frontmatter: isneeded
             toggleSelector: '#assets-payday-lenders',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Payday Lenders</div>' +
+                '<div class="tooltip-field">Financial</div>' 
             }
         },
         {
             id: 'bus stops',
             filename: 'metro_bus_stops',
-            icon: '',
+            icon: 'bus',
             toggleSelector: '#assets-bus-stops',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Metro Stops</div>' +
+                '<div class="tooltip-field">Transportation</div>'
             }
         },
         {
@@ -243,7 +289,9 @@ frontmatter: isneeded
             toggleSelector: '#assets-metro-stops',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>'
+                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                '<div class="tooltip-field">Metro Stations</div>' +
+                '<div class="tooltip-field">Transportation</div>'
             }
         }
     ];
