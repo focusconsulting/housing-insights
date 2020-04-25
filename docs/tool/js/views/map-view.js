@@ -276,9 +276,8 @@ frontmatter: isneeded
             icon: 'bus',
             toggleSelector: '#assets-bus-stops',
             generatePopupHtml: (properties) => {
-                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
-                '<div class="tooltip-field">Metro Stops</div>' +
+                return '<div class="tooltip-field proj_name">' + properties['BSTP_MSG_TEXT'] + '</div>' +
+                '<div class="tooltip-field">Bus Stops</div>' +
                 '<div class="tooltip-field">Transportation</div>'
             }
         },
