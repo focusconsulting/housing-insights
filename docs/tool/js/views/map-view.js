@@ -204,8 +204,7 @@ frontmatter: isneeded
             icon: 'basketball',
             toggleSelector: '#assets-rec-fields',
             generatePopupHtml: (properties) => {
-                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                return '<div class="tooltip-field proj_name">' + properties['DESCRIPTION'] + '</div>' +
                 '<div class="tooltip-field">Recreational Fields</div>' +
                 '<div class="tooltip-field">Health</div>' 
             }
@@ -276,9 +275,8 @@ frontmatter: isneeded
             icon: 'bus',
             toggleSelector: '#assets-bus-stops',
             generatePopupHtml: (properties) => {
-                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
-                '<div class="tooltip-field">Metro Stops</div>' +
+                return '<div class="tooltip-field proj_name">' + properties['BSTP_MSG_TEXT'] + '</div>' +
+                '<div class="tooltip-field">Bus Stops</div>' +
                 '<div class="tooltip-field">Transportation</div>'
             }
         },
@@ -1048,177 +1046,10 @@ frontmatter: isneeded
                 console.log("ERROR data loaded === false")
             };
         },
-        addCharterSchoolLayerToMap: function(msg, data) {
-            
-            var dataRequest = {
-                name: 'charter schools',
-                url: model.URLS.geoJSONPolygonsBase + 'charter_schools.geojson',
-                callback: addCharterSchoolLayer
-            }
-            controller.getData(dataRequest);
-
-            function addCharterSchoolLayer(data) {
-                
-                mapView.map.addSource('charter schools', {
-                    type: 'geojson',
-                    data: data
-                });
-                
-                console.error('CHARTER')
-                mapView.map.addLayer({
-                    id: 'charter schools',
-                    type: 'circle',
-                    source: 'charter schools',
-                    'paint': {
-                        'circle-radius': {
-                            'base': 1.75,
-                            'stops': [
-                                [11, 4],
-                                [12, 5],
-                                [15, 16]
-                            ]
-                        },
-
-                        'circle-stroke-opacity': 0.5,
-                        'circle-opacity': 0.5,
-                        'circle-stroke-width': 0,
-                        'circle-color': 'green',
-                        'circle-stroke-color': 'green'
-
-                    },
-                    layout: {
-                        visibility: 'none'
-                    }
-                });
-
-
-                d3.select('#assets-charter-school')
-                    .on('change', function() {
-                        const layer = 'charter schools';
-                        const visibility = mapView.map.getLayoutProperty(layer, 'visibility');
-                        if(visibility === 'visible') {
-                            mapView.map.setLayoutProperty(layer, 'visibility', 'none');
-                        } else {
-                            mapView.map.setLayoutProperty(layer, 'visibility', 'visible');
-                        }
-                    })
-            }
-        },
-        addAtmBankingLayerToMap: function(msg, data) {
-            
-            var dataRequest = {
-                name: 'atm banking',
-                url: model.URLS.geoJSONPolygonsBase + 'atm_banking.geojson',
-                callback: addCharterSchoolLayer
-            }
-            controller.getData(dataRequest);
-
-            function addCharterSchoolLayer(data) {
-                
-                mapView.map.addSource('atm banking', {
-                    type: 'geojson',
-                    data: data
-                });
-                
-                console.error('CHARTER')
-                mapView.map.addLayer({
-                    id: 'atm banking',
-                    type: 'circle',
-                    source: 'atm banking',
-                    'paint': {
-                        'circle-radius': {
-                            'base': 1.75,
-                            'stops': [
-                                [11, 4],
-                                [12, 5],
-                                [15, 16]
-                            ]
-                        },
-
-                        'circle-stroke-opacity': 0.5,
-                        'circle-opacity': 0.5,
-                        'circle-stroke-width': 0,
-                        'circle-color': 'yellow',
-                        'circle-stroke-color': 'yellow'
-
-                    },
-                    layout: {
-                        visibility: 'none'
-                    }
-                });
-
-
-                d3.select('#assets-atm-banking')
-                    .on('change', function() {
-                        const layer = 'atm banking';
-                        const visibility = mapView.map.getLayoutProperty(layer, 'visibility');
-                        if(visibility === 'visible') {
-                            mapView.map.setLayoutProperty(layer, 'visibility', 'none');
-                        } else {
-                            mapView.map.setLayoutProperty(layer, 'visibility', 'visible');
-                        }
-                    })
-            }
-        },
-        addGroceryStoreLayerToMap: function(msg, data) {
-            
-            var dataRequest = {
-                name: 'atm banking',
-                url: model.URLS.geoJSONPolygonsBase + 'grocery_store_locations.geojson',
-                callback: addCharterSchoolLayer
-            }
-            controller.getData(dataRequest);
-
-            function addCharterSchoolLayer(data) {
-                
-                mapView.map.addSource('grocery store locations', {
-                    type: 'geojson',
-                    data: data
-                });
-                
-                mapView.map.addLayer({
-                    id: 'grocery store locations',
-                    type: 'circle',
-                    source: 'grocery store locations',
-                    'paint': {
-                        'circle-radius': {
-                            'base': 1.75,
-                            'stops': [
-                                [11, 4],
-                                [12, 5],
-                                [15, 16]
-                            ]
-                        },
-
-                        'circle-stroke-opacity': 0.5,
-                        'circle-opacity': 0.5,
-                        'circle-stroke-width': 0,
-                        'circle-color': 'red',
-                        'circle-stroke-color': 'red'
-
-                    },
-                    layout: {
-                        visibility: 'none'
-                    }
-                });
-
-
-                d3.select('#assets-grocery-store')
-                    .on('change', function() {
-                        const layer = 'grocery store locations';
-                        const visibility = mapView.map.getLayoutProperty(layer, 'visibility');
-                        if(visibility === 'visible') {
-                            mapView.map.setLayoutProperty(layer, 'visibility', 'none');
-                        } else {
-                            mapView.map.setLayoutProperty(layer, 'visibility', 'visible');
-                        }
-                    })
-            }
-        },
         addAssetsToMap: function() {
             function addAssetToMap(asset) {
                 var dataRequest = {
-                    name: 'primary care centers',
+                    name: `asset-${asset.id}`,
                     url: model.URLS.geoJSONPolygonsBase + asset.filename + '.geojson',
                     callback: (data) => {
                         mapView.map.addSource(asset.id, {
@@ -1251,25 +1082,32 @@ frontmatter: isneeded
                                 closeOnClick: false
                             });
         
-                            mapView.map.getCanvas().style.cursor = 'pointer';
-                            var coordinates = e.features[0].geometry.coordinates.slice();
+                            const coordinates = e.features[0].geometry.type === 'point' ? e.features[0].geometry.coordinates.slice() : null;
 
-                            console.log(e.features[0].properties);
                             const assetPopupHtml = asset.generatePopupHtml(e.features[0].properties);
         
-                            // Ensure that if the map is zoomed out such that multiple
-                            // copies of the feature are visible, the popup appears
-                            // over the copy being pointed to.
-                            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                            }
-        
+                           
                             // Populate the popup and set its coordinates
                             // based on the feature found.
-                            popup
-                            .setLngLat(coordinates)
-                            .setHTML(assetPopupHtml)
-                            .addTo(mapView.map);
+                            if(coordinates) {
+                                 // Ensure that if the map is zoomed out such that multiple
+                                // copies of the feature are visible, the popup appears
+                                // over the copy being pointed to.
+                                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                                }
+        
+                                popup
+                                .setLngLat(coordinates)
+                                .setHTML(assetPopupHtml)
+                                .addTo(mapView.map);
+                            } else {
+                                popup
+                                .trackPointer()
+                                .setHTML(assetPopupHtml)
+                                .addTo(mapView.map);
+                            }
+                            
         
                             mapView.popups.push(popup);
                         });
