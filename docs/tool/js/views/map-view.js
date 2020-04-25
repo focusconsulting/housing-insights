@@ -204,8 +204,7 @@ frontmatter: isneeded
             icon: 'basketball',
             toggleSelector: '#assets-rec-fields',
             generatePopupHtml: (properties) => {
-                return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
-                '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
+                return '<div class="tooltip-field proj_name">' + properties['DESCRIPTION'] + '</div>' +
                 '<div class="tooltip-field">Recreational Fields</div>' +
                 '<div class="tooltip-field">Health</div>' 
             }
