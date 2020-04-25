@@ -9,7 +9,7 @@ frontmatter: isneeded
         {
             id: 'primary care centers',
             filename: 'primary_care_centers',
-            icon: 'school',
+            icon: 'hospital-15',
             toggleSelector: '#assets-primary-care-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['PrimaryCarePtNAME'] + '</div>' +
@@ -22,7 +22,7 @@ frontmatter: isneeded
             id: 'grocery store locations',
             filename: 'grocery_store_locations',
             toggleSelector: '#assets-grocery-store',
-            icon: 'grocery',
+            icon: 'grocery-15',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['STORENAME'] + '</div>' +
                 '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
@@ -34,7 +34,7 @@ frontmatter: isneeded
             id: 'atm banking',
             toggleSelector: '#assets-atm-banking',
             filename: 'atm_banking',
-            icon: 'bank',
+            icon: 'bank-15',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
                 '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
@@ -45,7 +45,7 @@ frontmatter: isneeded
         {
             id: 'charter schools',
             filename: 'charter_schools',
-            icon: 'school',
+            icon: 'school-15',
             toggleSelector: '#assets-charter-school',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -57,7 +57,7 @@ frontmatter: isneeded
         {
             id: 'public schools',
             filename: 'public_schools',
-            icon: 'school',
+            icon: 'school-15',
             toggleSelector: '#assets-public-school',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -69,7 +69,7 @@ frontmatter: isneeded
         {
             id: 'independent schools',
             filename: 'independent_schools',
-            icon: 'school',
+            icon: 'school-15',
             toggleSelector: '#assets-indepedent-school',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -81,7 +81,7 @@ frontmatter: isneeded
         {
             id: 'day care centers',
             filename: 'day_care_centers',
-            icon: 'playground',
+            icon: 'playground-15',
             toggleSelector: '#assets-day-care-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -93,7 +93,7 @@ frontmatter: isneeded
         {
             id: 'religious institutions',
             filename: 'places_of_worship',
-            icon: 'place-of-worship',
+            icon: 'place-of-worship-15',
             toggleSelector: '#assets-religious-institution',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -105,7 +105,7 @@ frontmatter: isneeded
         {
             id: 'community centers',
             filename: 'recreation_facilities',
-            icon: 'park',
+            icon: 'park-15',
             toggleSelector: '#assets-community-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -117,7 +117,7 @@ frontmatter: isneeded
         {
             id: 'museums',
             filename: 'museums_in_dc',
-            icon: 'museum',
+            icon: 'museum-15',
             toggleSelector: '#assets-museums',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -129,7 +129,7 @@ frontmatter: isneeded
         {
             id: 'libraries',
             filename: 'libraries',
-            icon: 'library',
+            icon: 'library-15',
             toggleSelector: '#assets-libraries',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -142,7 +142,7 @@ frontmatter: isneeded
             id: 'nonprofits',
             filename: 'tax_exempt_properties',
             toggleSelector: '#assets-nonprofits',
-            icon: 'school',
+            icon: 'school-15',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
                 '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
@@ -154,7 +154,7 @@ frontmatter: isneeded
             id: 'hospitals',
             filename: 'hospitals',
             toggleSelector: '#assets-health-centers',
-            icon: 'hospital',
+            icon: 'hospital-15',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
                 '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
@@ -166,7 +166,7 @@ frontmatter: isneeded
             id: 'aging centers',
             filename: 'aging_services',
             toggleSelector: '#assets-aging-centers',
-            icon: 'hospital',
+            icon: 'hospital-15',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
                 '<div class="tooltip-field">' + properties['ADDRESS'] + '</div>' +
@@ -177,7 +177,7 @@ frontmatter: isneeded
         {
             id: 'parks',
             filename: 'parks_and_recreation_areas',
-            icon: 'park',
+            icon: 'park-15',
             toggleSelector: '#assets-parks',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -189,7 +189,7 @@ frontmatter: isneeded
         {
             id: 'community gardens',
             filename: 'community_gardens_points',
-            icon: 'garden',
+            icon: 'garden-15',
             toggleSelector: '#assets-community-gardens',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -201,7 +201,7 @@ frontmatter: isneeded
         {
             id: 'rec-fields',
             filename: 'recreation_fields',
-            icon: 'basketball',
+            icon: 'basketball-15',
             toggleSelector: '#assets-rec-fields',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['DESCRIPTION'] + '</div>' +
@@ -212,7 +212,7 @@ frontmatter: isneeded
         {
             id: 'police',
             filename: 'police_stations',
-            icon: 'police',
+            icon: 'police-15',
             toggleSelector: '#assets-police',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -224,7 +224,7 @@ frontmatter: isneeded
         {
             id: 'fire stations',
             filename: 'fire_stations',
-            icon: 'fire-station',
+            icon: 'fire-station-15',
             toggleSelector: '#assets-fire-stations',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -236,7 +236,7 @@ frontmatter: isneeded
         {
             id: 'banks',
             filename: 'bank_locations',
-            icon: 'bank',
+            icon: 'bank-15',
             toggleSelector: '#assets-banks',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -248,7 +248,7 @@ frontmatter: isneeded
         {
             id: 'non-depository banks',
             filename: 'nondepository_banks',
-            icon: 'bank',
+            icon: 'bank-15',
             toggleSelector: '#assets-non-depository-banks',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -260,7 +260,7 @@ frontmatter: isneeded
         {
             id: 'payday lenders',
             filename: 'check_cashing_locations',
-            icon: 'suitcase',
+            icon: 'suitcase-15',
             toggleSelector: '#assets-payday-lenders',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -272,7 +272,7 @@ frontmatter: isneeded
         {
             id: 'bus stops',
             filename: 'metro_bus_stops',
-            icon: 'bus',
+            icon: 'washington-metro',
             toggleSelector: '#assets-bus-stops',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['BSTP_MSG_TEXT'] + '</div>' +
@@ -283,7 +283,7 @@ frontmatter: isneeded
         {
             id: 'metro stops',
             filename: 'metro_stations_in_dc',
-            icon: 'rail',
+            icon: 'washington-metro',
             toggleSelector: '#assets-metro-stops',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -1061,7 +1061,7 @@ frontmatter: isneeded
                             type: 'symbol',
                             source: asset.id,
                             layout: {
-                                'icon-image': `${asset.icon}-11`,
+                                'icon-image': asset.icon,
                                 'icon-allow-overlap': true,
                                 visibility: 'none'
                             }
