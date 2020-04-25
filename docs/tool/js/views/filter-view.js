@@ -161,7 +161,7 @@ var filterView = {
     this.element.checked = true;
 
     var txt = document.createTextNode(
-      'Include projects with missing ' + component.display_name + ' data?'
+      'Include projects with missing ' + component.display_name + ' data'
     );
 
     this.toDOM = function (parentElement) {
