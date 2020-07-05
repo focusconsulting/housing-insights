@@ -621,17 +621,25 @@ Others are working correctly.
   right: 450px;
   top: 80px;
   border: none;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(189, 54, 33, 0.3);
   padding: 3px;
+}
+
+#terrain:disabled {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 #streets {
   position: absolute;
-  right: 500px;
+  right: 525px;
   top: 80px;
   border: none;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(189, 54, 33, 0.3);
   padding: 3px;
+}
+
+#streets:disabled {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .mapboxgl-ctrl-top-right {

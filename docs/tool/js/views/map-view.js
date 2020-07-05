@@ -610,6 +610,10 @@ frontmatter: isneeded
 
                 this.map.on('load', function() {
                     setState('mapLoaded', true);
+                    $('#streets').addClass('active');
+                    $('#streets').prop('disabled', true);
+                    $('#terrain').removeClass('active');
+                    $('#terrain').prop('disabled', false)
                 });
                 
                 // filter decoding was happening too quickly after initialLayers were added (ln 463),
@@ -629,6 +633,10 @@ frontmatter: isneeded
 
                 d3.select('#terrain').on('click', function() {
                   
+                  $('#terrain').addClass('active');
+                  $('#terrain').prop('disabled', true);
+                  $('#streets').removeClass('active');
+                  $('#streets').prop('disabled', false)
                   const savedLayers = [];
                   const savedSources = {};
                   const layerGroups = [
@@ -661,6 +669,10 @@ frontmatter: isneeded
                 });
 
                 d3.select('#streets').on('click', function() {
+                  $('#streets').addClass('active');
+                  $('#streets').prop('disabled', true);
+                  $('#terrain').removeClass('active');
+                  $('#terrain').prop('disabled', false);
                   const savedLayers = [];
                   const savedSources = {};
                   const layerGroups = [
