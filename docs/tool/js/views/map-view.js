@@ -272,7 +272,7 @@ frontmatter: isneeded
         {
             id: 'bus stops',
             filename: 'metro_bus_stops',
-            icon: 'washington-metro',
+            icon: 'bus-15',
             toggleSelector: '#assets-bus-stops',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['BSTP_MSG_TEXT'] + '</div>' +

@@ -872,3 +872,13 @@ body .modal-dialog.large {
   max-width: 300px !important;
   z-index: 1000 !important;
 }
+
+/* Asset */
+div.asset-toggle {
+  display: flex;
+  align-items: center;
+}
+
+div.asset-toggle > img {
+  margin-right: 10px;
+}
