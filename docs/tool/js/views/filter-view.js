@@ -1258,6 +1258,34 @@ var filterView = {
     //Allow mid-string searches
     $('#' + c.source + '-searchbar').dropdown({
       fullTextSearch: 'exact',
+      message: {
+        noResults: 'No results found. Searching for address...',
+      },
+      onNoResults: _.debounce(function (value) {
+        $.ajax({
+          dataType: 'json',
+          url: `https://cors-anywhere.herokuapp.com/http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx/findLocation2?f=json&str=${value.toString(
+            'base64'
+          )}`,
+          method: 'GET',
+          success: function (data) {
+            if (
+              data.returnDataset &&
+              data.returnDataset.Table1 &&
+              data.returnDataset.Table1.length == 1
+            ) {
+              const address = data.returnDataset.Table1[0];
+              const center = [address['LONGITUDE'], address['LATITUDE']];
+              mapView.map.flyTo({
+                center,
+                zoom: 13,
+              });
+            }
+          },
+        });
+
+        return true;
+      }, 2000),
     });
 
     //Change the icon
