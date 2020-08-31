@@ -1261,7 +1261,11 @@ var filterView = {
       message: {
         noResults: 'No results found. Searching for address...',
       },
+
       onNoResults: _.debounce(function (value) {
+        if (c.addressMarker) {
+          c.addressMarker.remove();
+        }
         $.ajax({
           dataType: 'json',
           url: `https://cors-anywhere.herokuapp.com/http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx/findLocation2?f=json&str=${value.toString(
@@ -1276,9 +1280,12 @@ var filterView = {
             ) {
               const address = data.returnDataset.Table1[0];
               const center = [address['LONGITUDE'], address['LATITUDE']];
+              c.addressMarker = new mapboxgl.Marker()
+                .setLngLat([address['LONGITUDE'], address['LATITUDE']])
+                .addTo(mapView.map);
               mapView.map.flyTo({
                 center,
-                zoom: 13,
+                zoom: 17,
               });
             }
           },
@@ -1302,6 +1309,9 @@ var filterView = {
         ).dropdown('get value');
         var specific_state_code = 'filterValues.' + component.source;
         setState(specific_state_code, selectedValues);
+        if (component.addressMarker) {
+          component.addressMarker.remove();
+        }
       };
     }
     var currentSelectCallback = makeSelectCallback(c);
