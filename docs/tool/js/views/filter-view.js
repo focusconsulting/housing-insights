@@ -1285,7 +1285,7 @@ var filterView = {
                 .addTo(mapView.map);
               mapView.map.flyTo({
                 center,
-                zoom: 17,
+                zoom: 15,
               });
             }
           },
