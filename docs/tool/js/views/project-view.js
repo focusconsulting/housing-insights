@@ -201,7 +201,7 @@ var projectView = {
     header: {
       title: 'Basic information',
       hideTitle: true,
-      wrapperPartial: 'partials/project-view/header.html',
+      wrapperPartial: 'tool/partials/project-view/header.html',
       render: function (full_project_data) {
         var d = full_project_data;
         d3.select('#project-name').text(d.proj_name);
@@ -229,7 +229,7 @@ var projectView = {
     units: {
       //Several sections after this have title hidden, so this uses generic title above all of them
       title: 'Property Information',
-      wrapperPartial: 'partials/project-view/units.html',
+      wrapperPartial: 'tool/partials/project-view/units.html',
       hideTitle: false,
       render: function (full_project_data) {
         var data = [];
@@ -296,7 +296,7 @@ var projectView = {
     },
     location: {
       title: 'Location Information',
-      wrapperPartial: 'partials/project-view/location.html',
+      wrapperPartial: 'tool/partials/project-view/location.html',
       hideTitle: true,
       render: function (full_project_data) {
         var data = [];
@@ -347,7 +347,7 @@ var projectView = {
     },
     ownership: {
       title: 'Ownership',
-      wrapperPartial: 'partials/project-view/ownership.html',
+      wrapperPartial: 'tool/partials/project-view/ownership.html',
       hideTitle: true,
       render: function (full_project_data) {
         var data = [];
@@ -398,7 +398,7 @@ var projectView = {
     },
     saleActivity: {
       title: 'Sale Activity',
-      wrapperPartial: 'partials/project-view/saleActivity.html',
+      wrapperPartial: 'tool/partials/project-view/saleActivity.html',
       hideTitle: true,
       render: function (full_project_data) {
         var data = full_project_data.real_property;
@@ -461,7 +461,7 @@ var projectView = {
     },
     topaNotices: {
       title: 'TOPA Notices',
-      wrapperPartial: 'partials/project-view/topa-notices.html',
+      wrapperPartial: 'tool/partials/project-view/topa-notices.html',
       hideTitle: false,
       render: function (full_project_data) {
         var topaTable = d3.select('#topa-notice-table');
@@ -560,7 +560,7 @@ var projectView = {
     },
     subsidyTimelineChart: {
       title: 'Building Subsidy Status',
-      wrapperPartial: 'partials/project-view/subsidy.html',
+      wrapperPartial: 'tool/partials/project-view/subsidy.html',
       render: function (full_project_data) {
         var currentNlihc = full_project_data['nlihc_id'];
 
@@ -637,7 +637,7 @@ var projectView = {
     },
     affordableHousingMap: {
       title: 'Affordable Housing Nearby',
-      wrapperPartial: 'partials/project-view/affordable-housing.html',
+      wrapperPartial: 'tool/partials/project-view/affordable-housing.html',
       render: function (full_project_data) {
         var affordableHousingMap = new mapboxgl.Map({
           container: 'affordable-housing-map',
@@ -772,7 +772,7 @@ var projectView = {
     // },
     metroStationsAndBusStops: {
       title: 'Public Transit Accessibility',
-      wrapperPartial: 'partials/project-view/transit.html',
+      wrapperPartial: 'tool/partials/project-view/transit.html',
       render: function (full_project_data) {
         var metroStationsMap = new mapboxgl.Map({
           container: 'metro-stations-map',

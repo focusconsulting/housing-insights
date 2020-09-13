@@ -238,7 +238,7 @@ var controller = {
     },                                         // bool
     appendPartial: function(partialRequest,context){
         partialRequest.container = partialRequest.container || 'body-wrapper'; 
-        d3.html('partials/' + partialRequest.partial + '.html', function(fragment){
+        d3.html('tool/partials/' + partialRequest.partial + '.html', function(fragment){
             if ( partialRequest.transition ) {
                 fragment.querySelector('.main-view').classList.add('transition-right');
                 setTimeout(function(){
