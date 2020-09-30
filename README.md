@@ -1,4 +1,5 @@
 # Housing Insights
+# Cool
 > Bringing open data to affordable housing stakeholders. 
 
 This repository contains code for both [housinginsights.org](http://housinginsights.org) and the AWS hosted API that feeds it. It is divided into two sections.
