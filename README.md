@@ -15,6 +15,6 @@ This project uses `Docker` and `docker-compose` to create a consistent environme
 The [onboarding page of housinginsights](http://housinginsights.org/resources/onboarding) has detailed information on setting up the appropriate environment.
 There is currently no Docker image for the front end of the website - ask a front end team member or project lead for help setting up your local environment. 
 
-## License
+# License
 This project is published under an [MIT license](https://github.com/codefordc/housing-insights/blob/master/LICENSE.txt).
 By contributing code to this repo you are agreeing to make your work available to the public under the terms of this license.
