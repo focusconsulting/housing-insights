@@ -105,7 +105,7 @@ frontmatter: isneeded
         {
             id: 'community centers',
             filename: 'recreation_facilities',
-            icon: 'park-15',
+            icon: 'door-open-fa',
             toggleSelector: '#assets-community-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
@@ -603,7 +603,7 @@ frontmatter: isneeded
                     style: this.streetsMapStyle,
                     zoom: mapView.originalZoom,
                     center: mapView.originalCenter,
-                    minZoom: 3,
+                    minZoom: 10,
                     preserveDrawingBuffer: true
                 });
                 this.map.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -1831,7 +1831,7 @@ frontmatter: isneeded
         flyToProject: function(lngLatArray) {
             mapView.map.flyTo({
                 center: lngLatArray,
-                zoom: 15
+                zoom: 18
             });
         },
         /*
@@ -2106,7 +2106,8 @@ frontmatter: isneeded
                 mapView.map.fitBounds([[minLon,minLat], [maxLon,maxLat]],
                                 {linear: true,
                                 padding: {top: 20, bottom: 20, left: 320, right: 370}, //to accomodate sidebars + 20 px
-                                maxZoom: 14  //far enough to see whole neighborhood cluster
+                                maxZoom: 18,  //far enough to see whole neighborhood cluster
+                                minZoom: 11
                                 });
                 if (getState().filteredProjectsAvailable.length === 1 ) { // if initial onload zoom, reset the originalCenter and originalZoom
                     mapView.map.originalCenter = [mapView.map.getCenter().lng, mapView.map.getCenter().lat];

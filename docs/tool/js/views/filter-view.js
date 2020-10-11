@@ -1285,7 +1285,7 @@ var filterView = {
                 .addTo(mapView.map);
               mapView.map.flyTo({
                 center,
-                zoom: 15,
+                zoom: 18,
               });
             }
           },
@@ -1308,8 +1308,9 @@ var filterView = {
           '.ui.dropdown.' + 'dropdown-' + component.source
         ).dropdown('get value');
         var specific_state_code = 'filterValues.' + component.source;
+
         setState(specific_state_code, selectedValues);
-        if (component.addressMarker) {
+        if (component.addressMarker && selectedValues.length !== 0) {
           component.addressMarker.remove();
         }
       };
