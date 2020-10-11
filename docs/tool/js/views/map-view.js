@@ -105,7 +105,7 @@ frontmatter: isneeded
         {
             id: 'community centers',
             filename: 'recreation_facilities',
-            icon: 'park-15',
+            icon: 'door-open-fa',
             toggleSelector: '#assets-community-centers',
             generatePopupHtml: (properties) => {
                 return '<div class="tooltip-field proj_name">' + properties['NAME'] + '</div>' +
