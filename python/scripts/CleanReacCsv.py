@@ -13,8 +13,8 @@ def createProperHeader(header):
 
 
 results_dir = os.path.join(os.path.dirname(
-    __file__), "../../data/raw/preservation_catalog/20201111")
-df = pd.read_csv('../../data/raw/preservation_catalog/20201111/Reac_score.csv')
+    __file__), "../../data/raw/preservation_catalog/20201207")
+df = pd.read_csv('../../data/raw/preservation_catalog/20201207/Reac_score.csv')
 updated_col_names = {}
 # Drop colums
 if 'REAC_ID' in df.columns:
