@@ -362,7 +362,7 @@ var projectView = {
         });
         data.push({
           title: 'Manager',
-          value: full_project_data['hud_mg_name'],
+          value: full_project_data['hud_mgr_name'],
         });
 
         var table = new D3Table('#ownership-table')
