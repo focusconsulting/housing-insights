@@ -13,8 +13,8 @@ def createProperHeader(header):
 
 
 results_dir = os.path.join(os.path.dirname(
-    __file__), "../../data/raw/preservation_catalog/20201207")
-df = pd.read_csv('../../data/raw/preservation_catalog/20201207/Project.csv')
+    __file__), "../../data/raw/preservation_catalog/20210112")
+df = pd.read_csv('../../data/raw/preservation_catalog/20210112/Project.csv')
 updated_col_names = {}
 # Make sure the column names are correct
 for col in df.columns:
@@ -23,7 +23,7 @@ for col in df.columns:
 for index, value in df['Geo2010'].items():
     df.at[index, 'Geo2010'] = value.replace('DC ', '')
 # Drop colums
-# df.drop(columns=['Added_to_catalog'], inplace=True)
+df.drop(columns=['Added_to_catalog'], inplace=True)
 # print(df['Proj_address_id'])
 df.rename(columns={'Cat_at_risk': 'Cat_At_Risk', 'Cat_more_info': 'Cat_More_Info',
                    'Cat_lost': 'Cat_Lost', 'Cat_replaced': 'Cat_Replaced'}, inplace=True)
