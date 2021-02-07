@@ -72,55 +72,43 @@ permalink: /about/
 
 <hr />
 
-<h1>Get Involved</h1>
+<h1>Found an issue or have a question?</h1>
 <div class="row">
-  <div class="col-sm-6">
-    <div class="well get-involved">
-      <h2>Affordable Housing Professionals</h2>
-      <p class="lead text-info">
-        Are you someone who works in DC Government, at a non-profit, or with
-        affordable housing developments?
-      </p>
-      <p>
-        We want to continue to improve this tool and need your input!
-        <a href="{{site.baseurl}}/resources/contact">Contact</a> the project
-        staff if you're interested in providing feedback on what would make this
-        tool most useful to you.
-      </p>
-
-      <p>Sign up for regular updates about the tool:</p>
-      <button
-        type="button"
-        data-toggle="modal"
-        data-target="#modal_email"
-        class="btn btn-primary get-updates"
-      >
-        Get updates
-      </button>
-    </div>
+  <div class="col-sm-8">
+    <form onsubmit="" id="email-form">
+      <!--email subject-->
+      <div class="form-group">
+        <label for="email-subject" class="control-label">Subject</label>
+        <input
+          type="text"
+          name="email-subject"
+          class="form-control"
+          id="email-subject"
+        />
+      </div>
+  
+      <!--email body-->
+      <div class="form-group">
+        <label for="email-body" class="control-label">Message</label>
+        <textarea
+          style="height:250px"
+          name="email-body"
+          class="form-control"
+          id="email-body"
+        ></textarea>
+      </div>
+  
+      <div class="form-group">
+        <button id="submit-email" class="btn btn-info" name="submit">
+          Send Email
+        </button>
+      </div>
   </div>
-
-  <div class="col-sm-6">
-    <div class="well get-involved">
-      <h2>Coders and Developers</h2>
-      <p class="lead text-info">
-        Are you a coder, developer, or data enthusiast?
-      </p>
-      <p>
-        Beginner or professional, do you want to give back to the community and
-        help us continue to refine this tool?
-        <a href="http://codefordc.org/">Code for DC</a> volunteers are doing the
-        work to make this tool awesome. The tool uses a dynamic Javascript
-        front-end, crunches our data with Python, and we can use your help no
-        matter what your background or experience.
-      </p>
-
-      <a href="{{site.baseurl}}/resources" class="btn btn-primary help-build"
-        >Help us build it</a
-      >
-    </div>
-  </div>
+  
+  </form>
 </div>
+
+<hr />
 
 <h1>Our Volunteers</h1>
 <p>
@@ -128,3 +116,13 @@ permalink: /about/
   <a href="{{site.baseurl}}/team">this awesome group of volunteers</a>. {%
   include modal_email.html %}
 </p>
+
+<script>
+  $('#email-form').on('submit', function(e) {
+    e.preventDefault();
+    const subject = $('#email-subject').val();
+    const body = $('#email-body').val();
+    const url = `mailto:sbruton@cnhed.org?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    $(`<a href=${url} target="_blank" rel="noopener noreferrer nofollow"></a>`)[0].click();
+  })
+</script>
