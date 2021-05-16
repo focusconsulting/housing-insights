@@ -296,9 +296,8 @@ var filterView = {
 
     //Create the element and put it
     for (var i = 0; i < keyValuePairsArrayMin.length; i++) {
-      output['min'][keyValuePairsArrayMin[i][0]] = document.createElement(
-        'input'
-      );
+      output['min'][keyValuePairsArrayMin[i][0]] =
+        document.createElement('input');
       output['min'][keyValuePairsArrayMin[i][0]].setAttribute(
         'id',
         sourceObj.source + '-' + keyValuePairsArrayMin[i][0] + '-text'
@@ -315,9 +314,8 @@ var filterView = {
         keyValuePairsArrayMin[i][1];
     }
     for (var i = 0; i < keyValuePairsArrayMax.length; i++) {
-      output['max'][keyValuePairsArrayMax[i][0]] = document.createElement(
-        'input'
-      );
+      output['max'][keyValuePairsArrayMax[i][0]] =
+        document.createElement('input');
       output['max'][keyValuePairsArrayMax[i][0]].setAttribute(
         'id',
         sourceObj.source + '-' + keyValuePairsArrayMax[i][0] + '-text'
@@ -356,11 +354,10 @@ var filterView = {
         c.data_level == 'zone' ? '_' + getState()['mapLayer'][0] : '';
       var data_field = c.source + modifier;
 
-      var allDataValuesForThisSource = model.dataCollection.filterData.objects.map(
-        function (item) {
+      var allDataValuesForThisSource =
+        model.dataCollection.filterData.objects.map(function (item) {
           return item[data_field];
-        }
-      );
+        });
       ths.minDatum = d3.min(allDataValuesForThisSource) || 0;
       ths.maxDatum = d3.max(allDataValuesForThisSource) || 1;
       ths.datumRange = ths.maxDatum - ths.minDatum;
@@ -783,21 +780,20 @@ var filterView = {
     });
     // as with textInputs, adds each instance of dateInput to the filterView.dateInputs object, so it can be accessed
     // later
-    filterView.filterInputs[
-      this.component.short_name
-    ] = new filterView.filterTextInput(
-      component,
-      [
-        ['month', minDatum.getMonth() + 1],
-        ['day', minDatum.getDate()],
-        ['year', minDatum.getFullYear()],
-      ],
-      [
-        ['month', maxDatum.getMonth() + 1],
-        ['day', maxDatum.getDate()],
-        ['year', maxDatum.getFullYear()],
-      ]
-    );
+    filterView.filterInputs[this.component.short_name] =
+      new filterView.filterTextInput(
+        component,
+        [
+          ['month', minDatum.getMonth() + 1],
+          ['day', minDatum.getDate()],
+          ['year', minDatum.getFullYear()],
+        ],
+        [
+          ['month', maxDatum.getMonth() + 1],
+          ['day', maxDatum.getDate()],
+          ['year', maxDatum.getFullYear()],
+        ]
+      );
     var dateInputs = filterView.filterInputs[this.component.short_name];
     function makeSliderCallback(component, doesItSetState) {
       return function sliderCallback(
@@ -1267,21 +1263,15 @@ var filterView = {
           c.addressMarker.remove();
         }
         $.ajax({
-          dataType: 'json',
-          url: `https://cors-anywhere.herokuapp.com/http://citizenatlas.dc.gov/newwebservices/locationverifier.asmx/findLocation2?f=json&str=${value.toString(
-            'base64'
-          )}`,
-          method: 'GET',
+          url: `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+            value
+          )}.json?types=address&bbox=-77.083056,38.908611,-76.997778,38.959167&access_token=pk.eyJ1IjoiY29kZWZvcmRjIiwiYSI6ImNpc3JrdTI3NTAzenIybm0xZGt4MnF0aWEifQ.zE2ErZ8UsBXrrucF8l7jRQ`,
           success: function (data) {
-            if (
-              data.returnDataset &&
-              data.returnDataset.Table1 &&
-              data.returnDataset.Table1.length == 1
-            ) {
-              const address = data.returnDataset.Table1[0];
-              const center = [address['LONGITUDE'], address['LATITUDE']];
+            const { features } = data;
+            if (features.length === 1) {
+              const { center } = features[0];
               c.addressMarker = new mapboxgl.Marker()
-                .setLngLat([address['LONGITUDE'], address['LATITUDE']])
+                .setLngLat(center)
                 .addTo(mapView.map);
               mapView.map.flyTo({
                 center,
@@ -1290,7 +1280,6 @@ var filterView = {
             }
           },
         });
-
         return true;
       }, 2000),
     });
