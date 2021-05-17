@@ -1265,10 +1265,10 @@ var filterView = {
         $.ajax({
           url: `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
             value
-          )}.json?types=address&bbox=-77.083056,38.908611,-76.997778,38.959167&access_token=pk.eyJ1IjoiY29kZWZvcmRjIiwiYSI6ImNpc3JrdTI3NTAzenIybm0xZGt4MnF0aWEifQ.zE2ErZ8UsBXrrucF8l7jRQ`,
+          )}.json?types=address&bbox=-77.083056,37.908611,-76.997778,39.959167&access_token=pk.eyJ1IjoiY29kZWZvcmRjIiwiYSI6ImNpc3JrdTI3NTAzenIybm0xZGt4MnF0aWEifQ.zE2ErZ8UsBXrrucF8l7jRQ`,
           success: function (data) {
             const { features } = data;
-            if (features.length === 1) {
+            if (features.length >= 1) {
               const { center } = features[0];
               c.addressMarker = new mapboxgl.Marker()
                 .setLngLat(center)
