@@ -9,9 +9,9 @@ import numpy as np
 
 
 results_dir = os.path.join(os.path.dirname(
-    __file__), "../../data/raw/TOPA_notices/20200226")
+    __file__), "../../data/raw/TOPA_notices/20211012")
 df = pd.read_csv(
-    '../../data/raw/TOPA_notices/20200226/Rcasd_2019.csv', encoding="latin-1")
+    '../../data/raw/TOPA_notices/20211012/Rcasd_2019.csv', encoding="latin-1")
 updated_col_names = {}
 
 # Make sure the census tract is okay
