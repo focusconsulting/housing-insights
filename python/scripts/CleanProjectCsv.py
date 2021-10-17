@@ -13,8 +13,8 @@ def createProperHeader(header):
 
 
 results_dir = os.path.join(os.path.dirname(
-    __file__), "../../data/raw/preservation_catalog/20210603")
-df = pd.read_csv('../../data/raw/preservation_catalog/20210603/Project.csv')
+    __file__), "../../data/raw/preservation_catalog/20211012")
+df = pd.read_csv('../../data/raw/preservation_catalog/20211012/Project.csv')
 updated_col_names = {}
 # Make sure the column names are correct
 for col in df.columns:
