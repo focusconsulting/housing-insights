@@ -48,7 +48,7 @@ var DonutChartOldExtension = {
   },
   updateSubscriber: function (msg, data) {
     resultsView.charts.forEach(function (chart) {
-      DonutChartOld.prototype.update.call(chart, data);
+      DonutChartOld.prototype.update.call(chart, data.filter(d => Boolean(d)));
     });
   },
   update: function (filterData) {
