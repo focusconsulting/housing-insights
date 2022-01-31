@@ -28,7 +28,7 @@ var PieProtoExtension = {
     })
     this.arc = d3.arc()
       .outerRadius(chart.radius)
-      .innerRadius(chart.radius - chart.width / 4)
+      .innerRadius(chart.radius - chart.width / 8)
       .startAngle(0); 
     this.background = this.svgCentered  
         .append('path')

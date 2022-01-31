@@ -22,7 +22,7 @@ var resultsView = {
 
                 count: instance,
                 container: '#pie-' + i,
-                width: 75,
+                width: 95,
                 height: 95,
                 index: i,
                 margin: {
