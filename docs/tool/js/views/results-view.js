@@ -124,6 +124,7 @@ var resultsView = {
                 .data(resultsView.filteredStats['ward'])
                 .field('percent_projects')
                 .label('group')
+                .countField('projects')
                 .percentMode(true)
                 .create()
         } else {
@@ -139,6 +140,7 @@ var resultsView = {
                 .data(resultsView.filteredStats['ward'])
                 .field('percent_proj_units_assist_max')
                 .label('group')
+                .countField('proj_units_assist_max')
                 .percentMode(true)
                 .create()
         } else {
