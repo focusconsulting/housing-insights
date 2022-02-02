@@ -1,0 +1,128 @@
+---
+layout: toolLayoutNew
+title: Housing Insights Search
+permalink: /search/
+---
+
+<div class="row margin-bottom">
+  <div class="col-xs-10 vcenter">
+    <h1>Search for projects</h1>
+    <div id="filters" style="display: none">
+      <h2>Filters</h2>
+      <div id="subsidized" class="ui checkbox">
+        <input type="checkbox" name="subsized" />
+        <label>Subsidized</label>
+      </div>
+      <hr />
+    </div>
+    <h2>Search Input</h2>
+    <div id="project-search">Loading search data.</div>
+    <hr />
+    <h1>View projects in table</h1>
+    <div id="project-table">
+      <table class="display" style="width: 100%"></table>
+    </div>
+  </div>
+
+  <script>
+    const SITE_URL = '{{site.url}}';
+    const NLIHC_ID_REGEX = /NL[0-9]*/gm;
+    let all_projects = [];
+    let filters = [];
+    (() => {
+      window.onload = () => {
+        fetch(
+          'http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/project'
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const { objects: projects } = data;
+            all_projects = projects;
+            const dropdownElement = $('#project-search');
+            dropdownElement.text('');
+            dropdownElement.addClass('ui fluid search selection dropdown');
+            dropdownElement.append($('<input type="hidden" name="project">'));
+            dropdownElement.append($('<i class="dropdown icon"></i>'));
+            dropdownElement.append(
+              $('<div class="default text">Search by address.. </div>')
+            );
+            const selectElement = $('<div class="menu"></div>');
+            dropdownElement.append(selectElement);
+            all_projects.map((project) => {
+              const option = $(
+                `<div class="item" data-value="${project.proj_name} ${project.proj_name_addre} ${project.nlihc_id} ${project.hud_mgr_name}" >${project.proj_name} ${project.proj_name_addre}</div> `
+              );
+              selectElement.append(option);
+            });
+            dropdownElement.dropdown({
+              fullTextSearch: true,
+              minCharacters: 3,
+              ignoreCase: true,
+              action: (text, value) => {
+                const [nlihc_id] = value.match(NLIHC_ID_REGEX);
+                const selected = $('[name="project"]');
+                if (nlihc_id && selected.val() !== '') {
+                  window.location.assign(
+                    `${SITE_URL}/#/HI/building=${nlihc_id}`
+                  );
+                }
+              },
+            });
+            $('#subsidized').checkbox({
+              onChecked: () => {
+                filters.push({
+                  name: 'subsidized',
+                  filter: (project) => {
+                    return project.subsidized === 'Yes';
+                  },
+                });
+              },
+              onUnchecked: () => {
+                filters = filters.filter(
+                  (filter) => filter.name !== 'subsidized'
+                );
+              },
+              onChange: () => {
+                const newFilterValues = all_projects
+                  .filter((project) => {
+                    if (filters.length === 0) {
+                      return true;
+                    }
+                    return filters.some((filter) => filter.filter(project));
+                  })
+                  .map((project) => ({
+                    name: `${project.proj_name} ${project.proj_name_addre}`,
+                    text: `${project.proj_name} ${project.proj_name_addre}`,
+                    value: `${project.proj_name} ${project.proj_name_addre} ${project.nlihc_id} ${project.hud_mgr_name}`,
+                  }));
+                $('#project-search').dropdown(
+                  'change values (values)',
+                  newFilterValues
+                );
+              },
+            });
+            $('#filters').show();
+            const table = $('#project-table > table').DataTable({
+              data: all_projects,
+              display: 'stripe',
+              columns: [
+                { data: 'proj_name', title: 'Name' },
+                { data: 'proj_name_addre', title: 'Address' },
+                { data: 'proj_owner_type', title: 'Owner Type' },
+                { data: 'ward', title: 'Ward' },
+              ],
+            });
+            $('#project-table tbody').on('click', 'tr', function (event) {
+              const data = table.row(event.target).data();
+              window.location.assign(
+                `${SITE_URL}/#/HI/building=${data.nlihc_id}`
+              );
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      };
+    })();
+  </script>
+</div>
