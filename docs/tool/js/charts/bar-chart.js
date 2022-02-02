@@ -63,7 +63,9 @@ var BarExtension = {
         
         //Assigning scales within the update function assumes data is in the order we want to display - updating elements will move
         chart.yScale = d3.scaleBand()
-            .domain(chart.data().map(function(d) { return d[chart.label()]; }))
+            .domain(chart.data().map(function(d) { 
+                return d[chart.label()]; 
+            }))
             .range([chart.innerHeight(),0])
             .padding(chart.barPadding())
 
@@ -127,6 +129,8 @@ var BarExtension = {
             .data(chart.data(), function(d) { return d[chart.label()];})
             .classed("update",true) //only existing bars
 
+
+
         var newBars = bars.enter().append('rect')
                 .classed("values", true)                    
                 .attr("x", 0)
@@ -135,7 +139,7 @@ var BarExtension = {
                 .attr("width", 0)
                 
         
-        var allBars = newBars.merge(bars)
+         newBars.merge(bars)
                 .transition()
                     .delay(this.delay())          //Allows chart to load slightly before starting animation
                     .duration(this.duration())
@@ -143,13 +147,29 @@ var BarExtension = {
                     .attr("height", yScale.bandwidth())
                     .attr("y", function(d,i) {return yScale(d.group)})
                     .attr("width", function(d) { 
-                        return xScale(d[chart.field()]);})
+                        return xScale(d[chart.field()]);
+                    })
                     
 
-        var leavingBars = bars.exit().remove()
+        bars.exit().remove()
 
+        this.innerChart.selectAll('.label').remove()
+        console.log(chart.data())
+        if(chart.percentMode() && chart.countField() && !chart.data().every(datum => datum[chart.field()] === 1)) {
+            this.innerChart.selectAll(".text")  		
+                .data(chart.data())
+                .enter()
+                .append("text")
+                .attr("class","label")
+                .attr("x", (d) => xScale(d[chart.field()]) + 2)
+                .attr("y", function(d,i) {return yScale(d.group) + 6})
+                .attr("dy", ".75em")
+                .text((d) => {
+                    return d[chart.countField()].toLocaleString();
+                });  
+        }
         
-
+        
     },
 
     /* 

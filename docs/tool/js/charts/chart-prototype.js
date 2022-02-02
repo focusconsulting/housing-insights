@@ -38,6 +38,7 @@ ChartProto.prototype = {
       chart._data = []
       chart._field = null;
       chart._label = null //"field" will be returned as placeholder by getter if _label is null
+      chart._countField = null;
       chart._width = 400;
       chart._height = 300;
       chart._margin = {top:10,right:10,bottom:10,left:10};
@@ -210,6 +211,11 @@ ChartProto.prototype = {
         };
         this._label = _;
         return this;
+    },
+    countField: function(_){
+      if (!arguments.length) return this._countField;
+      this._countField = _;
+      return this;
     },
     margin: function(_){
         if (!arguments.length) return this._margin;
