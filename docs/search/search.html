@@ -58,13 +58,16 @@ permalink: /search/
               fullTextSearch: true,
               minCharacters: 3,
               ignoreCase: true,
-              action: (text, value) => {
-                const [nlihc_id] = value.match(NLIHC_ID_REGEX);
+              forceSelection: false,
+              onChange: () => {
                 const selected = $('[name="project"]');
-                if (nlihc_id && selected.val() !== '') {
-                  window.location.assign(
-                    `${SITE_URL}/#/HI/building=${nlihc_id}`
-                  );
+                if (selected.val() !== '') {
+                  const [nlihc_id] = selected.val().match(NLIHC_ID_REGEX);
+                  if (nlihc_id) {
+                    window.location.assign(
+                      `${SITE_URL}/#/HI/building=${nlihc_id}`
+                    );
+                  }
                 }
               },
             });
