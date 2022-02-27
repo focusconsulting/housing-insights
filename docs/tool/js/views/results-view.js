@@ -115,33 +115,29 @@ var resultsView = {
     },
     makeBarChart:function(){
 
-        //Percent of project
+        //Count of projects
         if (!resultsView.projectBarChart){
-            resultsView.projectBarChart = new BarChart('#projectPercentChart')
+            resultsView.projectBarChart = new BarChart('#projectCountChart')
                 .width(300)
-                .height(200)
-                .margin({top: 0, right: 20, bottom: 20, left: 50})
+                .height(250)
+                .margin({top: 0, right: 20, bottom: 30, left: 50})
                 .data(resultsView.filteredStats['ward'])
-                .field('percent_projects')
+                .field('projects')
                 .label('group')
-                .countField('projects')
-                .percentMode(true)
                 .create()
         } else {
             resultsView.projectBarChart.update(resultsView.filteredStats['ward']);
         }
 
-        //Percent of units
+        //Count of units
         if (!resultsView.unitBarChart){
-            resultsView.unitBarChart = new BarChart('#unitPercentChart')
+            resultsView.unitBarChart = new BarChart('#unitCountChart')
                 .width(300)
-                .height(200)
-                .margin({top: 0, right: 20, bottom: 20, left: 50})
+                .height(250)
+                .margin({top: 0, right: 20, bottom: 40, left: 50})
                 .data(resultsView.filteredStats['ward'])
-                .field('percent_proj_units_assist_max')
+                .field('proj_units_assist_max')
                 .label('group')
-                .countField('proj_units_assist_max')
-                .percentMode(true)
                 .create()
         } else {
             resultsView.unitBarChart.update(resultsView.filteredStats['ward']);
