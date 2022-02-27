@@ -86,14 +86,20 @@ var BarExtension = {
         }
         else {
             xScale.domain([0,max])
-            xAxis.tickFormat(d3.format(",")) //TODO look up proper format
+            xAxis = xAxis.tickValues(xScale.ticks(4).concat(xScale.domain()))
         }
 
         chart.svg.select('.x-axis')
             .transition()
             .delay(chart.delay())
             .duration(chart.duration())
-            .call(xAxis);
+            .call(xAxis)
+            .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(90)")
+            .style("text-anchor", "start");
 
         // add the y Axis
         chart.svg.select('.y-axis')
