@@ -13,9 +13,9 @@ def createProperHeader(header):
 
 
 results_dir = os.path.join(os.path.dirname(
-    __file__), "../../data/raw/preservation_catalog/20211220")
+    __file__), "../../data/raw/preservation_catalog/20220620")
 df = pd.read_csv(
-    '../../data/raw/preservation_catalog/20211220/Real_property.csv', encoding='windows-1252')
+    '../../data/raw/preservation_catalog/20220620/Real_property.csv', encoding='windows-1252')
 updated_col_names = {}
 df.replace(to_replace="U", value="01/01/1970", inplace=True)
 df.replace(to_replace="N", value="01/01/1970", inplace=True)
