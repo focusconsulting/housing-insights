@@ -2931,7 +2931,7 @@
         "sql_name": "census_tract"
       },
       {
-        "source_name": "Cluster_tr2000",
+        "source_name": "cluster2017",
         "display_text": "Neighborhood cluster",
         "required_in_source": true,
         "display_name": "Neighborhood Cluster",
@@ -2963,7 +2963,7 @@
         "sql_name": "tract_population"
       },
       {
-        "source_name": "Pieces_cltr00",
+        "source_name": "Pieces_cl17",
         "display_text": "Neighborhood Cluster pieces split by Tract",
         "required_in_source": true,
         "display_name": "Cluster Pieces",
@@ -2971,7 +2971,7 @@
         "sql_name": "num_cluster_pieces_in_tract"
       },
       {
-        "source_name": "Pop_cltr00",
+        "source_name": "Pop_cl17",
         "display_text": "Cluster population",
         "required_in_source": true,
         "display_name": "Cluster Population",
