@@ -1602,12 +1602,28 @@
         "sql_name": "unique_data_id"
       },
       {
+        "source_name": "XCOORD",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "longitude",
+        "type": "decimal",
+        "sql_name": "xcoord"
+      },
+      {
         "source_name": "X",
         "display_text": "",
         "required_in_source": true,
         "display_name": "X-coordinate",
         "type": "decimal",
-        "sql_name": "xcoord"
+        "sql_name": "longx"
+      },
+      {
+        "source_name": "YCOORD",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "latitude",
+        "type": "decimal",
+        "sql_name": "laty"
       },
       {
         "source_name": "Y",
@@ -1648,6 +1664,46 @@
         "display_name": "Status",
         "type": "text",
         "sql_name": "status"
+      },
+      {
+        "source_name": "STATUS_ID",
+        "display_text": "The current status ID of the address",
+        "required_in_source": false,
+        "display_name": "Status ID",
+        "type": "text",
+        "sql_name": "status_id"
+      },
+      {
+        "source_name": "METADATA_ID",
+        "display_text": "The metadata ID of the address",
+        "required_in_source": false,
+        "display_name": "Metadata ID",
+        "type": "text",
+        "sql_name": "metadata_id"
+      },
+      {
+        "source_name": "OBJECTID",
+        "display_text": "The metadata ID of the address",
+        "required_in_source": false,
+        "display_name": "Object ID",
+        "type": "text",
+        "sql_name": "object_id"
+      },
+      {
+        "source_name": "OBJECTID_1",
+        "display_text": "The metadata ID of the address",
+        "required_in_source": false,
+        "display_name": "Object ID 1",
+        "type": "text",
+        "sql_name": "object_id1"
+      },
+      {
+        "source_name": "ROADWAYSEGID",
+        "display_text": "The metadata ID of the address",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "roadway_seg_id"
       },
       {
         "source_name": "SSL",
@@ -1874,6 +1930,14 @@
         "sql_name": "zipcode"
       },
       {
+        "source_name": "ZIPCODE4",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "zipcode4",
+        "type": "decimal",
+        "sql_name": "zipcode4"
+      },
+      {
         "source_name": "ANC",
         "display_text": "",
         "required_in_source": true,
@@ -2002,6 +2066,14 @@
         "sql_name": "anc_2012"
       },
       {
+        "source_name": "ANC_2023",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "anc_2023",
+        "type": "text",
+        "sql_name": "anc_2023"
+      },
+      {
         "source_name": "SMD_2002",
         "display_text": "",
         "required_in_source": true,
@@ -2016,6 +2088,14 @@
         "display_name": "smd_2012",
         "type": "text",
         "sql_name": "smd_2012"
+      },
+      {
+        "source_name": "SMD_2023",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "smd_2023",
+        "type": "text",
+        "sql_name": "smd_2023"
       }
     ],
     "replace_table": true,

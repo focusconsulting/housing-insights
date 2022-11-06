@@ -75,7 +75,7 @@ class OpenDataApiConn(BaseApiConn):
                     err = "An error occurred during request: status {0}"
                     logger.exception(err.format(result.status_code))
                     continue
-
+                result.encoding = "utf-8"
                 content = result.text
 
                 if output_type == 'stdout':
