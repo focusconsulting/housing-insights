@@ -143,7 +143,7 @@ def weekly_update(db_choice, drop_tables_first = False):
         get_api_data.get_multiple_api_sources(arguments)
         arguments = load_data.parser.parse_args([db_choice,'--update-only',
                             'tract2012_ward2022',
-                            'tract2010_cluster2000',
+                            'tract2010_cluster2017',
                             'tax',
                             #'hmda_all_dc',
                             'topa_rcasd_2017',
