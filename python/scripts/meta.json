@@ -3595,7 +3595,7 @@
         "sql_name": "census_tract"
       },
       {
-        "source_name": "Ward2012",
+        "source_name": "Ward2022",
         "display_text": "Ward description",
         "required_in_source": true,
         "display_name": "Ward Description",
