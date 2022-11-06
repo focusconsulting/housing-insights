@@ -213,14 +213,16 @@ class CleanerBase(object, metaclass=ABCMeta):
         """
         Make all census tract names follow a consistent format.
         column_name corresponds to the key of the row, which depends on
-        the source file column name which may be different from the final
+        the source file column name which may be different from the final
         consistent name of census_tract
         """
         # deal with null values
         if row[column_name] == self.null_value:
             return row
-        else:
+        elif row[column_name] in self.census_mapping:
             row[column_name] = self.census_mapping[row[column_name]]
+            return row
+        else:
             return row
 
     def replace_tracts(self, row, row_num, column_name='census_tract'):
@@ -372,12 +374,12 @@ class CleanerBase(object, metaclass=ABCMeta):
         if row['mar_id'] == self.null_value:
             return row
 
-        ward = row['Ward2012']
-        neighbor_cluster = row['Cluster_tr2000']
-        neighborhood_cluster_desc = row['Cluster_tr2000_name']
+        ward = row['Ward2022']
+        neighbor_cluster = row['cluster2017']
+        neighborhood_cluster_desc = row['cluster2017_name']
         zipcode = row['Proj_zip']
         anc = row['Anc2012']
-        census_tract = row['Geo2010']
+        census_tract = row['Geo2020']
         status = row['Status']
         full_address = row['Proj_addre']
         image_url = row['Proj_image_url']
@@ -405,7 +407,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
         # update missing geocode values accordingly
         if ward == self.null_value:
-            row['Ward2012'] = result['WARD'].lower().capitalize()
+            row['Ward2022'] = result['WARD'].lower().capitalize()
 
         if neighbor_cluster == self.null_value:
             cluster = result['CLUSTER_']
@@ -425,7 +427,7 @@ class CleanerBase(object, metaclass=ABCMeta):
             row['Anc2012'] = result['ANC_2012']
 
         if census_tract == self.null_value:
-            row['Geo2010'] = result['CENSUS_TRACT']
+            row['Geo2020'] = result['CENSUS_TRACT']
 
         if status == self.null_value:
             row['Status'] = result['STATUS']
@@ -679,9 +681,9 @@ class ProjectCleaner(CleanerBase):
         except Exception as e:
             logger.error("Error geocoding {}, error was {}".format(row, e))
 
-        row = self.rename_ward(row, ward_key='Ward2012')
+        row = self.rename_ward(row, ward_key='Ward2022')
         row = self.rename_status(row)
-        row = self.rename_census_tract(row, column_name='Geo2010')
+        row = self.rename_census_tract(row, column_name='Geo2020')
         return row
 
 

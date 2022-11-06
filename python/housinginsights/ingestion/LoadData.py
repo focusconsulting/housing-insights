@@ -1242,6 +1242,7 @@ class LoadData(object):
                 except Exception as e:
                     logger.error("Error when trying to clean row index {} from the manifest_row {}".format(
                         idx, manifest_row))
+                    logger.error(e)
                     if self.debug == True:
                         raise e
 

@@ -1138,6 +1138,14 @@
         "sql_name": "nlihc_id"
       },
       {
+        "source_name": "reac_id",
+        "display_text": "REMS Property ID",
+        "required_in_source": true,
+        "display_name": "REAC Id",
+        "type": "text",
+        "sql_name": "reac_id"
+      },
+      {
         "source_name": "REAC_date",
         "display_text": "REAC inspection date",
         "required_in_source": true,
@@ -1264,12 +1272,44 @@
         "sql_name": "geo2010"
       },
       {
+        "source_name": "Geo2020",
+        "display_text": "Full census tract ID as of 2020",
+        "required_in_source": false,
+        "display_name": "geo2020",
+        "type": "text",
+        "sql_name": "geo2020"
+      },
+      {
+        "source_name": "GeoBg2020",
+        "display_text": "Full census block group ID (2020): sscccttttttb",
+        "required_in_source": false,
+        "display_name": "geoBg2010",
+        "type": "text",
+        "sql_name": "geobg2010"
+      },
+      {
+        "source_name": "GeoBlk2020",
+        "display_text": "Full census block ID (2020): sscccttttttbbbb",
+        "required_in_source": false,
+        "display_name": "geoBlk2020",
+        "type": "text",
+        "sql_name": "geoblk2020"
+      },
+      {
         "source_name": "Cluster_tr2000",
         "display_text": "Tract-based neighborhood cluster as of 2000",
         "required_in_source": false,
         "display_name": "cluster_tr2000",
         "type": "text",
         "sql_name": "cluster_tr2000"
+      },
+      {
+        "source_name": "cluster2017",
+        "display_text": "Tract-based neighborhood cluster as of 2000",
+        "required_in_source": false,
+        "display_name": "cluster2017",
+        "type": "text",
+        "sql_name": "cluster2017"
       },
       {
         "source_name": "Cluster_tr2000_name",
@@ -1296,7 +1336,15 @@
         "sql_name": "ward2012"
       },
       {
-        "source_name": "Ssl",
+        "source_name": "Ward2022",
+        "display_text": "Ward as of 2022",
+        "required_in_source": false,
+        "display_name": "ward2022",
+        "type": "text",
+        "sql_name": "ward2022"
+      },
+      {
+        "source_name": "ssl",
         "display_text": "Square Suffix Lot ID",
         "required_in_source": false,
         "display_name": "ssl",
@@ -1334,6 +1382,14 @@
         "display_name": "bldg_lat",
         "type": "decimal",
         "sql_name": "bldg_lat"
+      },
+      {
+        "source_name": "Bldg_units_mar",
+        "display_text": "Housing units at the primary address (from MAR)",
+        "required_in_source": false,
+        "display_name": "Building Units Mar",
+        "type": "text",
+        "sql_name": "bldg_units_mar"
       },
       {
         "source_name": "unique_data_id",
@@ -2484,6 +2540,14 @@
         "sql_name": "proj_units_tot"
       },
       {
+        "source_name": "Proj_units_mar",
+        "display_text": "Total housing units at primary addresses (from MAR)",
+        "required_in_source": true,
+        "display_name": "Project Units Total Mar",
+        "type": "decimal",
+        "sql_name": "proj_units_mar"
+      },
+      {
         "source_name": "Proj_Units_Assist_Min",
         "display_text": "Minimum total assisted housing units in the property",
         "required_in_source": true,
@@ -2573,6 +2637,14 @@
       },
       {
         "source_name": "Ward2012",
+        "display_text": "Ward12",
+        "required_in_source": true,
+        "display_name": "Ward",
+        "type": "text",
+        "sql_name": "ward12"
+      },
+      {
+        "source_name": "Ward2022",
         "display_text": "Ward",
         "required_in_source": true,
         "display_name": "Ward",
@@ -2609,10 +2681,34 @@
         "required_in_source": true,
         "display_name": "Census Tract",
         "type": "text",
+        "sql_name": "census_tract_2010"
+      },
+      {
+        "source_name": "Geo2020",
+        "display_text": "Census Tract",
+        "required_in_source": true,
+        "display_name": "Census Tract",
+        "type": "text",
         "sql_name": "census_tract"
       },
       {
         "source_name": "Cluster_tr2000",
+        "display_text": "Tract-based neighborhood cluster 2000",
+        "required_in_source": true,
+        "display_name": "Neighborhood Cluster",
+        "type": "text",
+        "sql_name": "neighborhood_cluster_2000"
+      },
+      {
+        "source_name": "Cluster_tr2000_name",
+        "display_text": "Tract-based neighborhood cluster description",
+        "required_in_source": true,
+        "display_name": "Neighborhood Cluster Description 2000",
+        "type": "text",
+        "sql_name": "neighborhood_cluster_desc_2000"
+      },
+      {
+        "source_name": "cluster2017",
         "display_text": "Tract-based neighborhood cluster",
         "required_in_source": true,
         "display_name": "Neighborhood Cluster",
@@ -2620,7 +2716,7 @@
         "sql_name": "neighborhood_cluster"
       },
       {
-        "source_name": "Cluster_tr2000_name",
+        "source_name": "cluster2017_name",
         "display_text": "Tract-based neighborhood cluster description",
         "required_in_source": true,
         "display_name": "Neighborhood Cluster Description",

@@ -338,7 +338,7 @@ class ProjectBaseApiConn(BaseApiConn):
 
         '''
         geocode_fields = [data['Proj_lat'], data['Proj_lon'], data['Zip'],
-                          data['Cluster_tr2000'], data['Ward2012']]
+                          data['cluster2017'], data['Ward2022']]
         if None in geocode_fields:
             for mar_id in mar_ids_found:
                 try:
