@@ -4,12 +4,12 @@ Model for tables from preservation catalog.
 
 PROJ_FIELDS = ['Nlihc_id', 'Status', 'Subsidized', 'Cat_Expiring',
           'Cat_Failing_Insp', 'Proj_Name', 'Proj_City', 'Proj_ST', 'Proj_zip',
-          'Proj_Units_Tot', 'Proj_Units_Assist_Min', 'Proj_Units_Assist_Max',
+          'Proj_Units_Tot', 'Proj_units_mar', 'Proj_Units_Assist_Min', 'Proj_Units_Assist_Max',
           'Hud_Own_Effect_dt', 'Hud_Own_Name', 'Hud_Own_Type', 'Hud_Mgr_Name',
           'Hud_Mgr_Type', 'Subsidy_Start_First', 'Subsidy_Start_Last',
-          'Subsidy_End_First', 'Subsidy_End_Last', 'Ward2012', 'PBCA',
-          'Anc2012', 'Psa2012', 'Geo2010', 'Cluster_tr2000',
-          'Cluster_tr2000_name', 'Zip', 'Proj_image_url', 'Proj_streetview_url',
+          'Subsidy_End_First', 'Subsidy_End_Last', 'Ward2012', 'Ward2022', 'PBCA',
+          'Anc2012', 'Psa2012', 'Geo2010', 'Geo2020', 'Cluster_tr2000',
+          'Cluster_tr2000_name', 'cluster2017', 'cluster2017_name,'  'Zip', 'Proj_image_url', 'Proj_streetview_url',
           'Proj_address_id', 'Proj_x', 'Proj_y', 'Proj_lat', 'Proj_lon',
           'Update_Dtm', 'Subsidy_info_source_property', 'contract_number',
           'Proj_addre', 'Bldg_count','Proj_ayb', 'Proj_eyb', 'Proj_owner_type', 'Category_Code',
@@ -20,9 +20,9 @@ ADDRESS_FIELDS = {'lat_lon': ('Proj_lat', 'Proj_lon'),
                   'address': ('Proj_addre', 'Proj_zip')}
 
 MAR_MAP = {'Proj_Name', 'Proj_City', 'Proj_ST', 'Proj_zip',
-          'Ward2012', 'PBCA',
+          'Ward2012', 'Ward2022',  'PBCA',
           'Anc2012', 'Psa2012', 'Cluster_tr2000',
-          'Cluster_tr2000_name', 'Zip', 'Proj_image_url', 'Proj_streetview_url',
+          'Cluster_tr2000_name', 'cluster2017', 'cluster2017_name', 'Zip', 'Proj_image_url', 'Proj_streetview_url',
           'Proj_address_id', 'Proj_x', 'Proj_y', 'Proj_lat', 'Proj_lon',
           'Update_Dtm', 'Subsidy_info_source_property', 'contract_number',
           'Proj_addre', 'Bldg_count', 'Nlihc_id', 'Category_Code',
@@ -40,8 +40,8 @@ SUBSIDY_FIELDS = ['Nlihc_id', 'Subsidy_id',
 
 PROJ_ADDRE_FIELDS = ['Nlihc_id', 'Proj_name', 'Bldg_addre', 'Bldg_image_url',
                      'Bldg_streetview_url', 'Bldg_address_id', 'Anc2012',
-                     'Psa2012', 'Geo2010', 'Cluster_tr2000',
-                     'Cluster_tr2000_name', 'Bldg_zip', 'Ward2012', 'Ssl',
+                     'Psa2012', 'Geo2010', 'Geo2020', 'Cluster_tr2000',
+                     'Cluster_tr2000_name', 'cluster2017', 'cluster2017_name', 'Bldg_zip', 'Ward2012', 'Ward2022' 'ssl',
                      'Bldg_x', 'Bldg_y', 'Bldg_lon', 'Bldg_lat']
 
 CLUSTER_DESC_MAP = {

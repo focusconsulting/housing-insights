@@ -24,8 +24,8 @@ class CleanerTestCase(unittest.TestCase):
 
         # mar_id test cases - except for ward other fields are typically Null
         mar_ids = [148655, 289735, 311058, 308201]
-        fields = ['Ward2012', 'Cluster_tr2000', 'Cluster_tr2000_name',
-                  'Proj_Zip', 'Anc2012', 'Geo2010',
+        fields = ['Ward2022', 'cluster2017', 'cluster2017_name',
+                  'Proj_Zip', 'Anc2012', 'Geo2020',
                   'Status', 'Proj_addre', 'Proj_image_url',
                   'Proj_streetview_url', 'Psa2012', 'Proj_City', 'Proj_ST']
         rows = list()

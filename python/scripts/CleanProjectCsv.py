@@ -20,8 +20,8 @@ updated_col_names = {}
 for col in df.columns:
     updated_col_names[col] = createProperHeader(col)
 # Make sure the census tract is okay
-for index, value in df['Geo2010'].items():
-    df.at[index, 'Geo2010'] = value.replace('DC ', '')
+for index, value in df['Geo2020'].items():
+    df.at[index, 'Geo2020'] = value.replace('DC ', '')
 # Drop colums
 df.drop(columns=['Added_to_catalog'], inplace=True)
 # print(df['Proj_address_id'])
