@@ -83,7 +83,7 @@ var projectView = {
         {
           name: 'full_project_data_' + nlihc_id,
           url:
-            'http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/project/' +
+            'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/' +
             nlihc_id,
           callback: dataBatchCallback,
         },
@@ -96,14 +96,14 @@ var projectView = {
         {
           name: 'transit_stats',
           url:
-            'http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/wmata/' +
+            'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/wmata/' +
             nlihc_id,
           callback: dataBatchCallback,
         },
         {
           name: 'nearby_projects',
           url:
-            'http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/projects/0.5?latitude=' +
+            'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/projects/0.5?latitude=' +
             getState()['selectedBuilding'][0]['properties']['latitude'] +
             '&longitude=' +
             getState()['selectedBuilding'][0]['properties']['longitude'],
@@ -568,7 +568,7 @@ var projectView = {
           dataRequest: {
             name: currentNlihc + '_subsidy',
             url:
-              'http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/project/' +
+              'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/' +
               currentNlihc +
               '/subsidies',
           },
