@@ -25,22 +25,22 @@ permalink: /search/
   </div>
 
   <script>
-    const SITE_URL = '{{site.url}}';
+    const SITE_URL = "{{site.url}}";
     const NLIHC_ID_REGEX = /NL[0-9]*/gm;
     let all_projects = [];
     let filters = [];
     (() => {
       window.onload = () => {
         fetch(
-          'http://housinginsights-prod.us-east-1.elasticbeanstalk.com/api/project'
+          "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project"
         )
           .then((response) => response.json())
           .then((data) => {
             const { objects: projects } = data;
             all_projects = projects;
-            const dropdownElement = $('#project-search');
-            dropdownElement.text('');
-            dropdownElement.addClass('ui fluid search selection dropdown');
+            const dropdownElement = $("#project-search");
+            dropdownElement.text("");
+            dropdownElement.addClass("ui fluid search selection dropdown");
             dropdownElement.append($('<input type="hidden" name="project">'));
             dropdownElement.append($('<i class="dropdown icon"></i>'));
             dropdownElement.append(
@@ -61,7 +61,7 @@ permalink: /search/
               forceSelection: false,
               onChange: () => {
                 const selected = $('[name="project"]');
-                if (selected.val() !== '') {
+                if (selected.val() !== "") {
                   const [nlihc_id] = selected.val().match(NLIHC_ID_REGEX);
                   if (nlihc_id) {
                     window.location.assign(
@@ -71,18 +71,18 @@ permalink: /search/
                 }
               },
             });
-            $('#subsidized').checkbox({
+            $("#subsidized").checkbox({
               onChecked: () => {
                 filters.push({
-                  name: 'subsidized',
+                  name: "subsidized",
                   filter: (project) => {
-                    return project.subsidized === 'Yes';
+                    return project.subsidized === "Yes";
                   },
                 });
               },
               onUnchecked: () => {
                 filters = filters.filter(
-                  (filter) => filter.name !== 'subsidized'
+                  (filter) => filter.name !== "subsidized"
                 );
               },
               onChange: () => {
@@ -98,24 +98,24 @@ permalink: /search/
                     text: `${project.proj_name} ${project.proj_name_addre}`,
                     value: `${project.proj_name} ${project.proj_name_addre} ${project.nlihc_id} ${project.hud_mgr_name}`,
                   }));
-                $('#project-search').dropdown(
-                  'change values (values)',
+                $("#project-search").dropdown(
+                  "change values (values)",
                   newFilterValues
                 );
               },
             });
-            $('#filters').show();
-            const table = $('#project-table > table').DataTable({
+            $("#filters").show();
+            const table = $("#project-table > table").DataTable({
               data: all_projects,
-              display: 'stripe',
+              display: "stripe",
               columns: [
-                { data: 'proj_name', title: 'Name' },
-                { data: 'proj_name_addre', title: 'Address' },
-                { data: 'proj_owner_type', title: 'Owner Type' },
-                { data: 'ward', title: 'Ward' },
+                { data: "proj_name", title: "Name" },
+                { data: "proj_name_addre", title: "Address" },
+                { data: "proj_owner_type", title: "Owner Type" },
+                { data: "ward", title: "Ward" },
               ],
             });
-            $('#project-table tbody').on('click', 'tr', function (event) {
+            $("#project-table tbody").on("click", "tr", function (event) {
               const data = table.row(event.target).data();
               window.location.assign(
                 `${SITE_URL}/#/HI/building=${data.nlihc_id}`
