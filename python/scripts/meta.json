@@ -1224,6 +1224,14 @@
         "sql_name": "proj_name"
       },
       {
+        "source_name": "ID",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "building_geocode_id"
+      },
+      {
         "source_name": "Bldg_addre",
         "display_text": "Full address of the property",
         "required_in_source": true,
@@ -2246,6 +2254,14 @@
         "sql_name": "y"
       },
       {
+        "source_name": "OCTO_RECORD_ID",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "octo_record_id"
+      },
+      {
         "source_name": "CCN",
         "display_text": "Customer complaint number",
         "required_in_source": true,
@@ -2372,22 +2388,6 @@
         "display_name": "Voting Precint",
         "type": "text",
         "sql_name": "voting_precinct"
-      },
-      {
-        "source_name": "XCOORD",
-        "display_text": "X coordinate",
-        "required_in_source": true,
-        "display_name": "Xcoord",
-        "type": "decimal",
-        "sql_name": "xcoord"
-      },
-      {
-        "source_name": "YCOORD",
-        "display_text": "Y coordinate",
-        "required_in_source": true,
-        "display_name": "Ycoord",
-        "type": "decimal",
-        "sql_name": "ycoord"
       },
       {
         "source_name": "LATITUDE",
@@ -3457,6 +3457,46 @@
         "sql_name": "businessimprovementdistrict"
       },
       {
+        "source_name": "GLOBALID",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "GLOBALID"
+      },
+      {
+        "source_name": "CREATED_USER",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CREATED_USER"
+      },
+      {
+        "source_name": "CREATED_DATE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "date",
+        "sql_name": "CREATED_DATE"
+      },
+      {
+        "source_name": "LAST_EDITED_USER",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "LAST_EDITED_USER"
+      },
+      {
+        "source_name": "LAST_EDITED_DATE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "date",
+        "sql_name": "LAST_EDITED_DATE"
+      },
+      {
         "source_name": "unique_data_id",
         "display_text": "Identifies which source file this record came from",
         "required_in_source": false,
@@ -3501,6 +3541,14 @@
         "display_name": "SSL Orig",
         "type": "text",
         "sql_name": "ssl_orig"
+      },
+      {
+        "source_name": "ID",
+        "display_text": "",
+        "required_in_source": true,
+        "display_name": "id",
+        "type": "text",
+        "sql_name": "parcel_ID"
       },
       {
         "source_name": "Parcel_owner_date",
@@ -4541,7 +4589,7 @@
         "sql_name": "ssl"
       },
       {
-        "source_name": "ASSESSOR_NAME",
+        "source_name": "ASRNAME",
         "display_text": "Assessor Name",
         "required_in_source": true,
         "display_name": "Assessor Name",
@@ -4549,7 +4597,7 @@
         "sql_name": "assessor_name"
       },
       {
-        "source_name": "LAND_USE_CODE",
+        "source_name": "USECODE",
         "display_text": "Three digit code that identifies the property type",
         "required_in_source": true,
         "display_name": "Land Use Code",
@@ -4557,7 +4605,7 @@
         "sql_name": "land_use_code"
       },
       {
-        "source_name": "LAND_USE_DESCRIPTION",
+        "source_name": "PROPTYPE",
         "display_text": "Describes the property type associated with the Land Use Code",
         "required_in_source": true,
         "display_name": "Land Use Description",
@@ -4573,7 +4621,7 @@
         "sql_name": "landarea"
       },
       {
-        "source_name": "PROPERTY_ADDRESS",
+        "source_name": "PREMISEADD",
         "display_text": "Property Address",
         "required_in_source": true,
         "display_name": "Property Address",
@@ -4581,7 +4629,7 @@
         "sql_name": "property_address"
       },
       {
-        "source_name": "OTR_NEIGHBORHOOD_CODE",
+        "source_name": "NBHD",
         "display_text": "OTR Neighborhood Code",
         "required_in_source": true,
         "display_name": "OTR Neighborhood Code",
@@ -4589,7 +4637,7 @@
         "sql_name": "otr_neighborhood_code"
       },
       {
-        "source_name": "OTR_NEIGHBORHOOD_NAME",
+        "source_name": "NBHDNAME",
         "display_text": "OTR Neighborhood Name",
         "required_in_source": true,
         "display_name": "OTR Neighborhood Name",
@@ -4597,7 +4645,7 @@
         "sql_name": "otr_neighborhood_name"
       },
       {
-        "source_name": "OWNER_NAME_PRIMARY",
+        "source_name": "OWNERNAME",
         "display_text": "Name of the legal property owner",
         "required_in_source": true,
         "display_name": "Owner Name Primary",
@@ -4605,7 +4653,7 @@
         "sql_name": "owner_name_primary"
       },
       {
-        "source_name": "CAREOF_NAME",
+        "source_name": "CAREOFNAME",
         "display_text": "Name of property caretaker if provided",
         "required_in_source": true,
         "display_name": "Careof Name",
@@ -4613,7 +4661,7 @@
         "sql_name": "careof_name"
       },
       {
-        "source_name": "OWNER_ADDRESS_LINE1",
+        "source_name": "ADDRESS1",
         "display_text": "Owner Address Line 1",
         "required_in_source": true,
         "display_name": "Owner Address Line 1",
@@ -4621,7 +4669,7 @@
         "sql_name": "owner_address_line1"
       },
       {
-        "source_name": "OWNER_ADDRESS_LINE2",
+        "source_name": "ADDRESS2",
         "display_text": "Owner Address Line 2",
         "required_in_source": true,
         "display_name": "Owner Address Line 2",
@@ -4629,7 +4677,7 @@
         "sql_name": "owner_address_line2"
       },
       {
-        "source_name": "OWNER_ADDRESS_CITYSTZIP",
+        "source_name": "CITYSTZIP",
         "display_text": "Owner Address City State Zip",
         "required_in_source": true,
         "display_name": "Owner Address City State Zip",
@@ -4637,23 +4685,7 @@
         "sql_name": "owner_address_citystzip"
       },
       {
-        "source_name": "APPRAISED_VALUE_BASEYEAR_LAND",
-        "display_text": "",
-        "required_in_source": true,
-        "display_name": "Appraised Value Baseyear Land",
-        "type": "integer",
-        "sql_name": "appraised_value_baseyear_land"
-      },
-      {
-        "source_name": "APPRAISED_VALUE_BASEYEAR_BLDG",
-        "display_text": "",
-        "required_in_source": true,
-        "display_name": "Appraised Value Baseyear Building",
-        "type": "integer",
-        "sql_name": "appraised_value_baseyear_bldg"
-      },
-      {
-        "source_name": "APPRAISED_VALUE_PRIOR_LAND",
+        "source_name": "OLDLAND",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Appraised Value Prior Land",
@@ -4661,7 +4693,7 @@
         "sql_name": "appraised_value_prior_land"
       },
       {
-        "source_name": "APPRAISED_VALUE_PRIOR_IMPR",
+        "source_name": "OLDIMPR",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Appraised Value Prior Improvements",
@@ -4669,7 +4701,7 @@
         "sql_name": "appraised_value_prior_impr"
       },
       {
-        "source_name": "APPRAISED_VALUE_PRIOR_TOTAL",
+        "source_name": "OLDTOTAL",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Appraised Value Prior Total",
@@ -4677,7 +4709,7 @@
         "sql_name": "appraised_value_prior_total"
       },
       {
-        "source_name": "APPRAISED_VALUE_CURRENT_LAND",
+        "source_name": "PHASELAND",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Appraised Value Current Land",
@@ -4685,7 +4717,7 @@
         "sql_name": "appraised_value_current_land"
       },
       {
-        "source_name": "APPRAISED_VALUE_CURRENT_IMPR",
+        "source_name": "PHASEBUILD",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Appraised Value Current Improvement",
@@ -4693,7 +4725,7 @@
         "sql_name": "appraised_value_current_impr"
       },
       {
-        "source_name": "APPRAISED_VALUE_CURRENT_TOTAL",
+        "source_name": "ASSESSMENT",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Appraised Value Current Total",
@@ -4701,23 +4733,7 @@
         "sql_name": "appraised_value_current_total"
       },
       {
-        "source_name": "PHASEIN_VALUE_CURRENT_LAND",
-        "display_text": "",
-        "required_in_source": true,
-        "display_name": "Phasein Value Current Land",
-        "type": "integer",
-        "sql_name": "phasein_value_current_land"
-      },
-      {
-        "source_name": "PHASEIN_VALUE_CURRENT_BLDG",
-        "display_text": "",
-        "required_in_source": true,
-        "display_name": "Phasein Value Current Building",
-        "type": "integer",
-        "sql_name": "phasein_value_current_bldg"
-      },
-      {
-        "source_name": "VACANT_USE",
+        "source_name": "VACLNDUSE",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Vacant Use",
@@ -4725,7 +4741,7 @@
         "sql_name": "vacant_use"
       },
       {
-        "source_name": "HOMESTEAD_DESCRIPTION",
+        "source_name": "HSTDCODE",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Homestead Description",
@@ -4733,7 +4749,7 @@
         "sql_name": "homestead_description"
       },
       {
-        "source_name": "TAX_TYPE_DESCRIPTION",
+        "source_name": "MIX1TXTYPE",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Tax Type Description",
@@ -4749,7 +4765,7 @@
         "sql_name": "taxrate"
       },
       {
-        "source_name": "MIXED_USE",
+        "source_name": "MIX2TXTYPE",
         "display_text": "Mixed Use",
         "required_in_source": true,
         "display_name": "Mixed Use",
@@ -4757,7 +4773,7 @@
         "sql_name": "mixed_use"
       },
       {
-        "source_name": "OWNER_OCCUPIED_COOP_UNITS",
+        "source_name": "OWNOCCT",
         "display_text": "Number of owner occupied coop units",
         "required_in_source": true,
         "display_name": "Owner Occupied Coop Units",
@@ -4765,7 +4781,7 @@
         "sql_name": "owner_occupied_coop_units"
       },
       {
-        "source_name": "LAST_SALE_PRICE",
+        "source_name": "SALEPRICE",
         "display_text": "Last Sale Price",
         "required_in_source": true,
         "display_name": "Last Sale Price",
@@ -4773,7 +4789,7 @@
         "sql_name": "last_sale_price"
       },
       {
-        "source_name": "LAST_SALE_DATE",
+        "source_name": "SALEDATE",
         "display_text": "Last Sale Date",
         "required_in_source": true,
         "display_name": "Last Sale Date",
@@ -4781,7 +4797,7 @@
         "sql_name": "last_sale_date"
       },
       {
-        "source_name": "DEED_DATE",
+        "source_name": "DEEDDATE",
         "display_text": "Deed Date",
         "required_in_source": true,
         "display_name": "Deed Date",
@@ -4789,7 +4805,7 @@
         "sql_name": "deed_date"
       },
       {
-        "source_name": "CURRENT_ASSESSMENT_CAP",
+        "source_name": "CAPCURR",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Current Assessment Cap",
@@ -4797,7 +4813,7 @@
         "sql_name": "current_assessment_cap"
       },
       {
-        "source_name": "PROPOSED_ASSESSMENT_CAP",
+        "source_name": "CAPPROP",
         "display_text": "",
         "required_in_source": true,
         "display_name": "Proposed Assessment Cap",
@@ -4805,7 +4821,7 @@
         "sql_name": "proposed_assessment_cap"
       },
       {
-        "source_name": "OWNER_NAME_SECONDARY",
+        "source_name": "OWNNAME2",
         "display_text": "Owner Name Secondary",
         "required_in_source": true,
         "display_name": "Owner Name Secondary",
@@ -4813,20 +4829,1493 @@
         "sql_name": "owner_name_secondary"
       },
       {
-        "source_name": "ADDRESS_ID",
-        "display_text": "Address ID",
-        "required_in_source": true,
-        "display_name": "Address ID",
-        "type": "text",
-        "sql_name": "address_id"
-      },
-      {
-        "source_name": "LASTMODIFIEDDATE",
+        "source_name": "EXTRACTDAT",
         "display_text": "Date the record was last modified according to Open Data DC",
         "required_in_source": true,
         "display_name": "Last Modified Date",
         "type": "date",
         "sql_name": "lastmodifieddate"
+      },
+
+      {
+        "source_name": "PY10FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10FEE"
+      },
+      {
+        "source_name": "INTERNALID",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "INTERNALID"
+      },
+      {
+        "source_name": "PY1FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1FEE"
+      },
+      {
+        "source_name": "PY5TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5TAX"
+      },
+      {
+        "source_name": "PY6BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6BAL"
+      },
+      {
+        "source_name": "COOPUNITS",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "COOPUNITS"
+      },
+      {
+        "source_name": "CY2TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2TOTDUE"
+      },
+      {
+        "source_name": "TOTDUEAMT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "TOTDUEAMT"
+      },
+      {
+        "source_name": "MIX2LNDPCT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX2LNDPCT"
+      },
+      {
+        "source_name": "PY4COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4COLL"
+      },
+      {
+        "source_name": "REASONCD",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "REASONCD"
+      },
+      {
+        "source_name": "PY3YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3YEAR"
+      },
+      {
+        "source_name": "SWWSADTOTALDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SWWSADTOTALDUE"
+      },
+      {
+        "source_name": "PY8TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8TOTDUE"
+      },
+      {
+        "source_name": "PY6YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6YEAR"
+      },
+      {
+        "source_name": "SALETYPE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SALETYPE"
+      },
+      {
+        "source_name": "MIX2RATE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX2RATE"
+      },
+      {
+        "source_name": "MIX1LNDPCT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX1LNDPCT"
+      },
+      {
+        "source_name": "SQUARE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SQUARE"
+      },
+      {
+        "source_name": "PY10TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10TOTDUE"
+      },
+      {
+        "source_name": "PY7BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7BAL"
+      },
+      {
+        "source_name": "CY1INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1INT"
+      },
+      {
+        "source_name": "PY1PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1PEN"
+      },
+      {
+        "source_name": "PY5CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5CR"
+      },
+      {
+        "source_name": "PY3COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3COLL"
+      },
+      {
+        "source_name": "NEWIMPR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "NEWIMPR"
+      },
+      {
+        "source_name": "PY6COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6COLL"
+      },
+      {
+        "source_name": "SWWSADBALANCE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SWWSADBALANCE"
+      },
+      {
+        "source_name": "PY10INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10INT"
+      },
+      {
+        "source_name": "CLASSTYPE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CLASSTYPE"
+      },
+      {
+        "source_name": "DUEDATE2",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "DUEDATE2"
+      },
+      {
+        "source_name": "PY10TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10TAX"
+      },
+      {
+        "source_name": "ACCEPTCODE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "ACCEPTCODE"
+      },
+      {
+        "source_name": "PY6CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6CR"
+      },
+      {
+        "source_name": "CY2CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2CR"
+      },
+      {
+        "source_name": "UNITNUMBER",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "UNITNUMBER"
+      },
+      {
+        "source_name": "PY9PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9PEN"
+      },
+      {
+        "source_name": "MIX2CLASS",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX2CLASS"
+      },
+      {
+        "source_name": "PY2CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2CR"
+      },
+      {
+        "source_name": "PACEBALANCE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PACEBALANCE"
+      },
+      {
+        "source_name": "NEWTOTAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "NEWTOTAL"
+      },
+      {
+        "source_name": "PY4TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4TAX"
+      },
+      {
+        "source_name": "CY1COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1COLL"
+      },
+      {
+        "source_name": "PY9FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9FEE"
+      },
+      {
+        "source_name": "TRIGROUP",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "TRIGROUP"
+      },
+      {
+        "source_name": "PY10COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10COLL"
+      },
+      {
+        "source_name": "PY7CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7CR"
+      },
+      {
+        "source_name": "CY2TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2TXSALE"
+      },
+      {
+        "source_name": "PY3BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3BAL"
+      },
+      {
+        "source_name": "CY2INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2INT"
+      },
+      {
+        "source_name": "PY7COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7COLL"
+      },
+      {
+        "source_name": "LOWNUMBER",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "LOWNUMBER"
+      },
+      {
+        "source_name": "MORTGAGECO",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MORTGAGECO"
+      },
+      {
+        "source_name": "PY5PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5PEN"
+      },
+      {
+        "source_name": "CY2COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2COLL"
+      },
+      {
+        "source_name": "PACETOTALDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PACETOTALDUE"
+      },
+      {
+        "source_name": "PY1YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1YEAR"
+      },
+      {
+        "source_name": "PY6INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6INT"
+      },
+      {
+        "source_name": "CY1TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1TOTDUE"
+      },
+      {
+        "source_name": "PY8FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8FEE"
+      },
+      {
+        "source_name": "PIPARENTLOT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PIPARENTLOT"
+      },
+      {
+        "source_name": "BIDBALANCE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "BIDBALANCE"
+      },
+      {
+        "source_name": "PY9YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9YEAR"
+      },
+      {
+        "source_name": "PY8PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8PEN"
+      },
+      {
+        "source_name": "MIX2BLDVAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX2BLDVAL"
+      },
+      {
+        "source_name": "PY2FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2FEE"
+      },
+      {
+        "source_name": "CY1CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1CR"
+      },
+      {
+        "source_name": "PY2TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2TXSALE"
+      },
+      {
+        "source_name": "PY7YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7YEAR"
+      },
+      {
+        "source_name": "DUEDATE3",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "DUEDATE3"
+      },
+      {
+        "source_name": "PY8YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8YEAR"
+      },
+      {
+        "source_name": "MIX1CLASS",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX1CLASS"
+      },
+      {
+        "source_name": "PY10TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10TXSALE"
+      },
+      {
+        "source_name": "PY7FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7FEE"
+      },
+      {
+        "source_name": "PY8TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8TXSALE"
+      },
+      {
+        "source_name": "LASTPAYDT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "LASTPAYDT"
+      },
+      {
+        "source_name": "PY5TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5TOTDUE"
+      },
+      {
+        "source_name": "PY7PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7PEN"
+      },
+      {
+        "source_name": "PY4YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4YEAR"
+      },
+      {
+        "source_name": "PRMS_WARD",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PRMS_WARD"
+      },
+      {
+        "source_name": "PY10BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10BAL"
+      },
+      {
+        "source_name": "LOT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "LOT"
+      },
+      {
+        "source_name": "PY9INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9INT"
+      },
+      {
+        "source_name": "CY1FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1FEE"
+      },
+      {
+        "source_name": "PY6PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6PEN"
+      },
+      {
+        "source_name": "CY1YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1YEAR"
+      },
+      {
+        "source_name": "PY7TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7TAX"
+      },
+      {
+        "source_name": "PY5BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5BAL"
+      },
+      {
+        "source_name": "PY8INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8INT"
+      },
+      {
+        "source_name": "PY2INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2INT"
+      },
+      {
+        "source_name": "PACECOLLECTED",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PACECOLLECTED"
+      },
+      {
+        "source_name": "PY6TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6TAX"
+      },
+      {
+        "source_name": "AMTDUE1",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "AMTDUE1"
+      },
+      {
+        "source_name": "PY2TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2TAX"
+      },
+      {
+        "source_name": "STREETNAME",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "STREETNAME"
+      },
+      {
+        "source_name": "PY2YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2YEAR"
+      },
+      {
+        "source_name": "MIX2LNDVAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX2LNDVAL"
+      },
+      {
+        "source_name": "PY1CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1CR"
+      },
+      {
+        "source_name": "PY3FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3FEE"
+      },
+      {
+        "source_name": "PY1TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1TXSALE"
+      },
+      {
+        "source_name": "MIX1RATE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX1RATE"
+      },
+      {
+        "source_name": "MIX1BLDVAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX1BLDVAL"
+      },
+      {
+        "source_name": "SEWSBALANCE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SEWSBALANCE"
+      },
+      {
+        "source_name": "PY10PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10PEN"
+      },
+      {
+        "source_name": "CY2YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2YEAR"
+      },
+      {
+        "source_name": "TOTBALAMT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "TOTBALAMT"
+      },
+      {
+        "source_name": "PY3TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3TXSALE"
+      },
+      {
+        "source_name": "TOTCOLAMT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "TOTCOLAMT"
+      },
+      {
+        "source_name": "PY4INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4INT"
+      },
+      {
+        "source_name": "SEWSTOTALDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SEWSTOTALDUE"
+      },
+      {
+        "source_name": "PARTPART",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PARTPART"
+      },
+      {
+        "source_name": "PY3CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3CR"
+      },
+      {
+        "source_name": "PY9BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9BAL"
+      },
+      {
+        "source_name": "SUFFIX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SUFFIX"
+      },
+      {
+        "source_name": "PY3TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3TAX"
+      },
+      {
+        "source_name": "PY5TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5TXSALE"
+      },
+      {
+        "source_name": "PY2COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2COLL"
+      },
+      {
+        "source_name": "CY2TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2TAX"
+      },
+      {
+        "source_name": "DELCODE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "DELCODE"
+      },
+      {
+        "source_name": "PY1TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1TAX"
+      },
+      {
+        "source_name": "PY9TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9TOTDUE"
+      },
+      {
+        "source_name": "PY10YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10YEAR"
+      },
+      {
+        "source_name": "AMTDUE3",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "AMTDUE3"
+      },
+      {
+        "source_name": "PY4BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4BAL"
+      },
+      {
+        "source_name": "PY3TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3TOTDUE"
+      },
+      {
+        "source_name": "PY7TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7TOTDUE"
+      },
+      {
+        "source_name": "SEWSCOLLECTED",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SEWSCOLLECTED"
+      },
+      {
+        "source_name": "PY2TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2TOTDUE"
+      },
+      {
+        "source_name": "SUBNBHD",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SUBNBHD"
+      },
+      {
+        "source_name": "PY4TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4TOTDUE"
+      },
+      {
+        "source_name": "INST_NO",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "INST_NO"
+      },
+      {
+        "source_name": "PY9CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9CR"
+      },
+      {
+        "source_name": "PY10CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY10CR"
+      },
+      {
+        "source_name": "BIDTOTALDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "BIDTOTALDUE"
+      },
+      {
+        "source_name": "PY9TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9TAX"
+      },
+      {
+        "source_name": "PY5FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5FEE"
+      },
+      {
+        "source_name": "PY6TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6TXSALE"
+      },
+      {
+        "source_name": "PY3PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3PEN"
+      },
+      {
+        "source_name": "PY4PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4PEN"
+      },
+      {
+        "source_name": "PY9TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9TXSALE"
+      },
+      {
+        "source_name": "PY4FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4FEE"
+      },
+      {
+        "source_name": "PRESSL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PRESSL"
+      },
+      {
+        "source_name": "PY8CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8CR"
+      },
+      {
+        "source_name": "CY2PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2PEN"
+      },
+      {
+        "source_name": "PCHILDCODE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PCHILDCODE"
+      },
+      {
+        "source_name": "ANNUALTAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "ANNUALTAX"
+      },
+      {
+        "source_name": "PY1TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1TOTDUE"
+      },
+      {
+        "source_name": "BIDNAME",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "BIDNAME"
+      },
+      {
+        "source_name": "PY2BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2BAL"
+      },
+      {
+        "source_name": "BIDCOLLECTED",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "BIDCOLLECTED"
+      },
+      {
+        "source_name": "PY6FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6FEE"
+      },
+      {
+        "source_name": "PY7TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7TXSALE"
+      },
+      {
+        "source_name": "PY9COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY9COLL"
+      },
+      {
+        "source_name": "DUEDATE1",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "DUEDATE1"
+      },
+      {
+        "source_name": "CY1PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1PEN"
+      },
+      {
+        "source_name": "SWWSADCOLLECTED",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "SWWSADCOLLECTED"
+      },
+      {
+        "source_name": "CY2BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2BAL"
+      },
+      {
+        "source_name": "ARN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "ARN"
+      },
+      {
+        "source_name": "PY3INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY3INT"
+      },
+      {
+        "source_name": "ABTLOTCODE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "ABTLOTCODE"
+      },
+      {
+        "source_name": "MIX2BLDPCT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX2BLDPCT"
+      },
+      {
+        "source_name": "PY1COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1COLL"
+      },
+      {
+        "source_name": "PY4TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4TXSALE"
+      },
+      {
+        "source_name": "PY1INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1INT"
+      },
+      {
+        "source_name": "QDRNTNAME",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "QDRNTNAME"
+      },
+      {
+        "source_name": "PY5COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5COLL"
+      },
+      {
+        "source_name": "PY8COLL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8COLL"
+      },
+      {
+        "source_name": "PY8BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8BAL"
+      },
+      {
+        "source_name": "MIX1LNDVAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX1LNDVAL"
+      },
+      {
+        "source_name": "PY2PEN",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY2PEN"
+      },
+      {
+        "source_name": "CY1BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1BAL"
+      },
+      {
+        "source_name": "MIXEDUSE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIXEDUSE"
+      },
+      {
+        "source_name": "PY5YEAR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5YEAR"
+      },
+      {
+        "source_name": "CY2FEE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY2FEE"
+      },
+      {
+        "source_name": "CY1TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1TAX"
+      },
+      {
+        "source_name": "CY1TXSALE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "CY1TXSALE"
+      },
+      {
+        "source_name": "PY7INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY7INT"
+      },
+      {
+        "source_name": "MIX1BLDPCT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "MIX1BLDPCT"
+      },
+      {
+        "source_name": "PY8TAX",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY8TAX"
+      },
+      {
+        "source_name": "AMTDUE2",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "AMTDUE2"
+      },
+      {
+        "source_name": "NEWLAND",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "NEWLAND"
+      },
+      {
+        "source_name": "PY6TOTDUE",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY6TOTDUE"
+      },
+      {
+        "source_name": "PY1BAL",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY1BAL"
+      },
+      {
+        "source_name": "PY4CR",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY4CR"
+      },
+      {
+        "source_name": "PY5INT",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "",
+        "type": "text",
+        "sql_name": "PY5INT"
       },
       {
         "source_name": "nlihc_id",

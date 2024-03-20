@@ -1,11 +1,11 @@
 include_flag,destination_table,unique_data_id,update_method,data_date,encoding,local_folder,s3_folder,filepath,notes
 use,mar,mar,api,2022-08-20,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20220820/mar.csv,BUILD FIRST - other tables depend on it
-use,project,prescat_project,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20230104/Project.csv,
-use,subsidy,prescat_subsidy,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20230104/Subsidy.csv,
-use,proj_addre,prescat_addre,manual,2017-08-27,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20230104/Building_geocode.csv,
-use,reac_score,prescat_reac,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20230104/Reac_score.csv,
-use,real_property,prescat_real_property,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20230104/Real_property.csv,
-use,parcel,prescat_parcel,manual,2017-03-15,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20230104/Parcel.csv,
+use,project,prescat_project,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20240301/Project.csv,
+use,subsidy,prescat_subsidy,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20240301/Subsidy.csv,
+use,proj_addre,prescat_addre,manual,2017-08-27,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20240301/Building_geocode.csv,
+use,reac_score,prescat_reac,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20240301/Reac_score.csv,
+use,real_property,prescat_real_property,manual,2017-07-24,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20240301/Real_property.csv,
+use,parcel,prescat_parcel,manual,2017-03-15,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/preservation_catalog/20240301/Parcel.csv,
 use,project,dchousing_project,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/dchousing_project.csv,
 use,subsidy,dchousing_subsidy,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/dchousing_subsidy.csv,
 use,proj_addre,dchousing_addre,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/dchousing_addre.csv,
@@ -15,9 +15,15 @@ use,proj_addre,dhcd_dfd_properties_addre,api,2017-10-04,utf-8,../../../data,http
 skip,building_permits,building_permits_2013,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2013.csv,
 skip,building_permits,building_permits_2014,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2014.csv,
 skip,building_permits,building_permits_2015,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2015.csv,
-use,building_permits,building_permits_2016,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2016.csv,
-use,building_permits,building_permits_2017,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2017.csv,
-use,dc_tax,tax,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/tax.csv,
+skip,building_permits,building_permits_2016,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2016.csv,
+skip,building_permits,building_permits_2017,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2017.csv,
+use,building_permits,building_permits_2018,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/building_permits_2017.csv,
+use,building_permits,building_permits_2019,api,2024-03-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/building_permits_2019.csv,
+use,building_permits,building_permits_2020,api,2024-03-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/building_permits_2020.csv,
+use,building_permits,building_permits_2021,api,2024-03-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/building_permits_2021.csv,
+use,building_permits,building_permits_2022,api,2024-03-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/building_permits_2022.csv,
+use,building_permits,building_permits_2023,api,2024-03-14,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/building_permits_2023.csv,
+use,dc_tax,tax,api,2024-03-08,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240308/tax.csv,
 skip,hmda,hmda_all_dc,manual,2017-04-06,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/hmda/DC_2007_to_2015/hmda_lar.csv,"Downloaded from www.consumerfinance.org, reflects all DC HMDA records from 2007-2015"
 use,topa,topa_rcasd_2017,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20170725/Rcasd_2017.csv,Parsed from DCHD data by Urban Institute staff.
 use,topa,topa_rcasd_2016,manual,2017-05-20,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20170725/Rcasd_2016.csv,Parsed from DCHD data by Urban Institute staff.
@@ -25,12 +31,18 @@ use,topa,topa_rcasd_2015,manual,2017-05-20,latin-1,../../../data,https://s3.amaz
 use,topa,topa_rcasd_2018,manual,2020-02-26,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20200226/Rcasd_2018.csv,Parsed from DCHD data by Urban Institute staff.
 use,topa,topa_rcasd_2019,manual,2020-02-26,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20200226/Rcasd_2019.csv,Parsed from DCHD data by Urban Institute staff.
 use,topa,topa_ahpc,manual,2021-08-07,latin-1,../../../data,https://s3.amazonaws.com/housing-insights/,raw/TOPA_notices/20210807/ahpc_topa.csv,Parsed from DCHD data by Urban Institute staff.
-use,census,acs5_2020,api,2022-11-06,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20221106/acs5_2020.csv,
+use,census,acs5_2022,api,2024-03-20,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240320/acs5_2022.csv,
 use,census_tract_to_neighborhood_cluster,tract2010_cluster2017,manual,2022-11-06,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/geographic_data/Tract_weights/Wt_tr10_cl17.csv,
 use,census_tract_to_ward,tract2010_ward2022,manual,2013-07-01,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/geographic_data/Tract_weights/Wt_tr10_ward22.csv,
 skip,crime,crime_2015,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/crime_2015.csv,
-use,crime,crime_2016,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/crime_2016.csv,
-use,crime,crime_2017,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/crime_2017.csv,
+skip,crime,crime_2016,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/crime_2016.csv,
+skip,crime,crime_2017,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20171004/crime_2017.csv,
+use,crime,crime_2018,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2018.csv,
+use,crime,crime_2019,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2019.csv,
+use,crime,crime_2020,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2020.csv,
+use,crime,crime_2021,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2021.csv,
+use,crime,crime_2022,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2022.csv,
+use,crime,crime_2023,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2023.csv,
 use,wmata_dist,wmata_dist,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/wmata/20170215/dist_from_sql_with_lat.csv,
 use,wmata_info,wmata_stops,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170524/wmata_stops.csv,
 use,charter_schools,charter_schools,api,2020-03-19,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/charter_school/20200319/Charter_Schools.csv,Information on charter shcools from data.dc.gov

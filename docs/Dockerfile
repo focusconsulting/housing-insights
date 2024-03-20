@@ -1,4 +1,4 @@
-FROM ruby
+FROM ruby:2.6.5
 
 COPY Gemfile* /srv/jekyll/
 WORKDIR /srv/jekyll
