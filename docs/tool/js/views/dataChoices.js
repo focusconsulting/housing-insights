@@ -93,7 +93,7 @@
             "data_type":"text",
             "data_level": "project",
             "short_name": "hud",
-            "sourcetable": "project"
+            "sourcetable": "project",
         },
 
         {   "source": "portfolio",
@@ -112,7 +112,8 @@
             "data_type": "timestamp",
             "data_level": "project",
             "short_name": "ps",
-            "sourcetable": "subsidy"
+            "sourcetable": "subsidy",
+            "last_updated_date": "03/19/2024"
         },
         {   "source":"poa_end",
             "display_name":"Subsidy End Date",
@@ -149,7 +150,8 @@
             "data_type": "integer",
             "data_level": "project",
             "short_name": "reacn",
-            "sourcetable": "project"
+            "sourcetable": "project",
+            "last_updated_date": "03/19/2024"
         },
         {   "source":"most_recent_reac_score_date",
             "display_name":"Most Recent REAC Date",
@@ -158,7 +160,8 @@
             "data_type": "timestamp",
             "data_level": "project",
             "short_name": "reacd",
-            "sourcetable": "project"
+            "sourcetable": "project",
+            "last_updated_date": "03/19/2024"
         },
         {   "source":"sum_appraised_value_current_total",
             "display_name":"Project Taxable Value",
@@ -167,7 +170,8 @@
             "data_type": "integer",
             "data_level": "project",
             "short_name": "txtot",
-            "sourcetable": "project"
+            "sourcetable": "project",
+            "last_updated_date": "03/19/2024"
         },
         /*Awaiting update to API to make this field available
         {   "source":"nearest_metro_station",
@@ -208,7 +212,8 @@
             "default_layer": "ward",
             "style": "number",
             "short_name": "cv",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "non_violent_crime_rate",
@@ -221,7 +226,8 @@
             "default_layer": "ward",
             "style": "number",
             "short_name": "cn",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "crime_rate",
@@ -234,7 +240,8 @@
             "default_layer": "ward",
             "style": "number",
             "short_name": "ca",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "construction_permits_rate",
@@ -247,7 +254,8 @@
             "default_layer": "ward",
             "style": "number",
             "short_name": "bpc",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "building_permits_rate",
@@ -260,7 +268,8 @@
             "default_layer": "ward",
             "style": "number",
             "short_name": "bpa",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "poverty_rate",
@@ -273,7 +282,8 @@
             "default_layer": "census_tract",
             "style": "percent",
             "short_name": "pov",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "income_per_capita",
@@ -286,7 +296,8 @@
             "default_layer": "census_tract",
             "style": "money",
             "short_name": "inc",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "labor_participation",
@@ -299,7 +310,8 @@
             "default_layer": "census_tract",
             "style": "percent",
             "short_name": "lp",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "fraction_single_mothers",
@@ -312,7 +324,8 @@
             "default_layer": "census_tract",
             "style": "percent",
             "short_name": "sm",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         /*
         {
@@ -339,7 +352,8 @@
             "default_layer": "census_tract",
             "style": "percent",
             "short_name": "ff",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         },
         {
             "source": "acs_median_rent",
@@ -352,7 +366,8 @@
             "default_layer": "census_tract",
             "style": "number",
             "short_name": "rnt",
-            "sourcetable": "zone_facts"
+            "sourcetable": "zone_facts",
+            "last_updated_date": "03/19/2024"
         }
     ];
 
