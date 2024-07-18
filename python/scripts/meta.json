@@ -6700,5 +6700,163 @@
     ],
     "replace_table": false,
     "cleaner": "TopaCleaner"
+  },
+  "topa_outcomes": {
+    "fields": [
+      {
+        "source_name": "nlihc_id",
+        "display_text": "Preservation Catalog project ID",
+        "required_in_source": true,
+        "display_name": "nlihc_id",
+        "type": "text",
+        "sql_name": "nlihc_id"
+      },
+      {
+        "source_name": "has_topa_outcome",
+        "display_text": "Has TOPA outcome reported",
+        "required_in_source": true,
+        "display_name": "TOPA Outcome",
+        "type": "boolean",
+        "sql_name": "has_topa_outcome"
+      },
+      {
+        "source_name": "d_cbo_dhcd_received_ta_reg",
+        "display_text": "Tenant association registered",
+        "required_in_source": true,
+        "display_name": "Tenant association registered",
+        "type": "boolean",
+        "sql_name": "d_cbo_dhcd_received_ta_reg"
+      },
+      {
+        "source_name": "TA_assign_rights",
+        "display_text": "Tenant association assigned rights",
+        "required_in_source": true,
+        "display_name": "Tenant association assigned rights",
+        "type": "boolean",
+        "sql_name": "ta_assign_rights"
+      },
+      {
+        "source_name": "d_le_coop",
+        "display_text": "Limited equity coop",
+        "required_in_source": true,
+        "display_name": "Limited equity coop",
+        "type": "boolean",
+        "sql_name": "d_le_coop"
+      },
+      {
+        "source_name": "d_purch_condo_coop",
+        "display_text": "Tenant homeownership: LE Coop or Condo",
+        "required_in_source": true,
+        "display_name": "Tenant homeownership: LE Coop or Condo",
+        "type": "boolean",
+        "sql_name": "d_purch_condo_coop"
+      },
+      {
+        "source_name": "d_other_condo",
+        "display_text": "Other condos (not tenant homeownership)",
+        "required_in_source": true,
+        "display_name": "Other condos (not tenant homeownership)",
+        "type": "boolean",
+        "sql_name": "d_other_condo"
+      },
+      {
+        "source_name": "d_lihtc",
+        "display_text": "LIHTC added or preserved",
+        "required_in_source": true,
+        "display_name": "LIHTC added or preserved",
+        "type": "boolean",
+        "sql_name": "d_lihtc"
+      },
+      {
+        "source_name": "d_dc_hptf",
+        "display_text": "DC housing production trust fund added or preserved",
+        "required_in_source": true,
+        "display_name": "DC housing production trust fund added or preserved",
+        "type": "boolean",
+        "sql_name": "d_dc_hptf"
+      },
+      {
+        "source_name": "d_dc_other",
+        "display_text": "Other DC subsidy added or preserved",
+        "required_in_source": true,
+        "display_name": "Other DC subsidy added or preserved",
+        "type": "boolean",
+        "sql_name": "d_dc_other"
+      },
+      {
+        "source_name": "d_fed_aff",
+        "display_text": "Section 8 or other federal project-based added or preserved",
+        "required_in_source": true,
+        "display_name": "Section 8 or other federal project-based added or preserved",
+        "type": "boolean",
+        "sql_name": "d_fed_aff"
+      },
+      {
+        "source_name": "d_rent_control",
+        "display_text": "Rent control preserved",
+        "required_in_source": true,
+        "display_name": "Rent control preserved",
+        "type": "boolean",
+        "sql_name": "d_rent_control"
+      },
+      {
+        "source_name": "d_affordable",
+        "display_text": "Affordability added or preserved",
+        "required_in_source": true,
+        "display_name": "Affordability added or preserved",
+        "type": "boolean",
+        "sql_name": "d_affordable"
+      },
+      {
+        "source_name": "d_100pct_afford",
+        "display_text": "100% affordable",
+        "required_in_source": true,
+        "display_name": "100% affordable",
+        "type": "boolean",
+        "sql_name": "d_100pct_afford"
+      },
+      {
+        "source_name": "d_rehab",
+        "display_text": "Renovations or repairs for residents in development agreement",
+        "required_in_source": true,
+        "display_name": "Renovations or repairs for residents in development agreement",
+        "type": "boolean",
+        "sql_name": "d_rehab"
+      },
+      {
+        "source_name": "d_cbo_involved",
+        "display_text": "Properties with CBO involvement",
+        "required_in_source": true,
+        "display_name": "Properties with CBO involvement",
+        "type": "boolean",
+        "sql_name": "d_cbo_involved"
+      },
+      {
+        "source_name": "d_buyout_100",
+        "display_text": "100% buyout",
+        "required_in_source": true,
+        "display_name": "100% buyout",
+        "type": "boolean",
+        "sql_name": "d_buyout_100"
+      },
+      {
+        "source_name": "d_buyout_partial",
+        "display_text": "Partial buyout",
+        "required_in_source": true,
+        "display_name": "Partial buyout",
+        "type": "boolean",
+        "sql_name": "d_buyout_partial"
+      },
+      {
+        "source_name": "unique_data_id",
+        "display_text": "Identifies which source file this record came from",
+        "required_in_source": false,
+        "display_name": "Unique Data ID",
+        "type": "text",
+        "sql_name": "unique_data_id"
+      }
+    ],
+    "replace_table": true,
+    "cleaner": "TopaOutcomeCleaner"
   }
 }

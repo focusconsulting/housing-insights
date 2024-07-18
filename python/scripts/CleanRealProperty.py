@@ -12,7 +12,7 @@ def createProperHeader(header):
 
 
 results_dir = os.path.join(
-    os.path.dirname(__file__), "../../data/raw/preservation_catalog/20240301"
+    os.path.dirname(__file__), "../../data/raw/preservation_catalog/20240709"
 )
 df = pd.read_csv(
     "../../data/raw/preservation_catalog/20240301/Real_property.csv",
