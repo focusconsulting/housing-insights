@@ -57,7 +57,6 @@ var filterUtil = {
 
     	var workingData = model.dataCollection['filterData'].objects;
         var filterValues = filterUtil.getFilterValues();
-
 		for (key in filterValues) { // iterate through registered filters
 
             //need to get the matching component out of a list of objects
@@ -121,6 +120,9 @@ var filterUtil = {
                     //If all objects are removed from filter list, assume they want all objects
                     if (filterValues[key][0].length == 0 ) {
                         return true;
+                    }
+                    if(component['data_type'] == 'boolean') {
+                        return filterValues[key][0].includes(d[key].toString())
                     }
                     //otherwise use the list of chosen categories
 					return filterValues[key][0].includes(d[key]);

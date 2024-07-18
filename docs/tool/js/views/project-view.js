@@ -1,17 +1,17 @@
 //A comment here helps keep Jekyll from getting confused about rendering
 
-'use strict';
+"use strict";
 
 var projectView = {
   // 'el', 'init' and 'onReturn' conform projectView to the structure expected in the code for
   // changing partials.
-  el: 'project-view',
+  el: "project-view",
   init: function (nlihcID) {
     // nlihcID is passed in only when the initial view is building
 
     // TODO: Change this and use the one from secrets.json.
     mapboxgl.accessToken =
-      'pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g';
+      "pk.eyJ1Ijoicm1jYXJkZXIiLCJhIjoiY2lqM2lwdHdzMDA2MHRwa25sdm44NmU5MyJ9.nQY5yF8l0eYk2jhQ1koy9g";
 
     var transition = nlihcID !== undefined ? true : false;
     var partialRequest = {
@@ -25,16 +25,16 @@ var projectView = {
 
     function appendCallback() {
       if (getState().activeView.length > 1) {
-        document.getElementById('button-back').innerHTML =
-          '&lt; Back to Map View';
+        document.getElementById("button-back").innerHTML =
+          "&lt; Back to Map View";
       }
       projectView.getRelevantData(nlihcID); // nlihcID is passed in only when the initial view is building
     }
   },
   renderSegments: function () {
-    var nlihc_id = getState()['selectedBuilding'][0]['properties']['nlihc_id'];
+    var nlihc_id = getState()["selectedBuilding"][0]["properties"]["nlihc_id"];
     var full_project_data =
-      model.dataCollection['full_project_data_' + nlihc_id]['objects'][0];
+      model.dataCollection["full_project_data_" + nlihc_id]["objects"][0];
 
     //save for later use
     projectView.full_project_data = full_project_data;
@@ -53,7 +53,7 @@ var projectView = {
     if (nlihcID !== undefined) {
       var dataURL = model.URLS.project;
       var dataRequest = {
-        name: 'raw_project',
+        name: "raw_project",
         url: dataURL,
         callback: dataCallback,
       };
@@ -66,7 +66,7 @@ var projectView = {
           .features.find(function (each) {
             return each.properties.nlihc_id === nlihcID;
           });
-        setState('selectedBuilding', selectedBuildingGeoJSON);
+        setState("selectedBuilding", selectedBuildingGeoJSON);
         continueDataRequest();
       }
     } else {
@@ -74,44 +74,43 @@ var projectView = {
     }
 
     function continueDataRequest() {
-      var nlihc_id = getState()['selectedBuilding'][0]['properties'][
-        'nlihc_id'
-      ];
+      var nlihc_id =
+        getState()["selectedBuilding"][0]["properties"]["nlihc_id"];
 
       var dataRequestCount = 0;
       var dataRequests = [
         {
-          name: 'full_project_data_' + nlihc_id,
+          name: "full_project_data_" + nlihc_id,
           url:
-            'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/' +
+            "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/" +
             nlihc_id,
           callback: dataBatchCallback,
         },
         {
-          name: 'raw_metro_stations',
-          url: '../../../assets/static_data/metro_stations_in_dc.geojson',
+          name: "raw_metro_stations",
+          url: "../../../assets/static_data/metro_stations_in_dc.geojson",
           //url: "http://opendata.dc.gov/datasets/54018b7f06b943f2af278bbe415df1de_52.geojson",
           callback: dataBatchCallback,
         },
         {
-          name: 'transit_stats',
+          name: "transit_stats",
           url:
-            'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/wmata/' +
+            "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/wmata/" +
             nlihc_id,
           callback: dataBatchCallback,
         },
         {
-          name: 'nearby_projects',
+          name: "nearby_projects",
           url:
-            'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/projects/0.5?latitude=' +
-            getState()['selectedBuilding'][0]['properties']['latitude'] +
-            '&longitude=' +
-            getState()['selectedBuilding'][0]['properties']['longitude'],
+            "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/projects/0.5?latitude=" +
+            getState()["selectedBuilding"][0]["properties"]["latitude"] +
+            "&longitude=" +
+            getState()["selectedBuilding"][0]["properties"]["longitude"],
           callback: dataBatchCallback,
         },
         {
-          name: 'raw_bus_stops',
-          url: '../../../assets/static_data/metro_bus_stops.geojson',
+          name: "raw_bus_stops",
+          url: "../../../assets/static_data/metro_bus_stops.geojson",
           //url: "https://opendata.arcgis.com/datasets/e85b5321a5a84ff9af56fd614dab81b3_53.geojson",
           callback: dataBatchCallback,
         },
@@ -130,18 +129,18 @@ var projectView = {
     }
   },
   wrapAndAppendSegment: function (layoutSegment, full_project_data) {
-    var container = document.getElementById('building-view-container');
+    var container = document.getElementById("building-view-container");
 
     //Add the title
     if (!layoutSegment.hideTitle) {
-      d3.select('#building-view-container')
-        .append('div')
-        .classed('ui attached header', true)
+      d3.select("#building-view-container")
+        .append("div")
+        .classed("ui attached header", true)
         .text(layoutSegment.title);
     }
 
-    var htmlSection = document.createElement('section');
-    htmlSection.classList = 'ui attached segment';
+    var htmlSection = document.createElement("section");
+    htmlSection.classList = "ui attached segment";
     container.appendChild(htmlSection);
 
     //Save for submenu navigation later
@@ -154,9 +153,9 @@ var projectView = {
   },
 
   navSidebar: {
-    id: 'building-view-segments',
+    id: "building-view-segments",
     render: function () {
-      var container = document.getElementById('building-view-segments');
+      var container = document.getElementById("building-view-segments");
       for (var segmentName in projectView.layout) {
         new projectView.NavSidebarButton(
           projectView.layout[segmentName]
@@ -169,11 +168,11 @@ var projectView = {
 
     this.render = function () {
       var ths = this;
-      var button = document.createElement('div');
-      button.classList.add('enter');
+      var button = document.createElement("div");
+      button.classList.add("enter");
       button.textContent = this.layoutObj.title;
       document.getElementById(projectView.navSidebar.id).appendChild(button);
-      button.addEventListener('click', function () {
+      button.addEventListener("click", function () {
         var topNavBarHeight = 120;
         var destination =
           window.scrollY +
@@ -199,18 +198,18 @@ var projectView = {
   // appear in the segment itself, or just within the navigation sidebar.
   layout: {
     header: {
-      title: 'Basic information',
+      title: "Basic information",
       hideTitle: true,
-      wrapperPartial: 'tool/partials/project-view/header.html',
+      wrapperPartial: "tool/partials/project-view/header.html",
       render: function (full_project_data) {
         var d = full_project_data;
-        d3.select('#project-name').text(d.proj_name);
-        d3.select('#project-address').text(d.proj_addre);
-        d3.select('#street-view').attr(
-          'src',
-          'https://maps.googleapis.com/maps/api/streetview?size=200x150&location=' +
+        d3.select("#project-name").text(d.proj_name);
+        d3.select("#project-address").text(d.proj_addre);
+        d3.select("#street-view").attr(
+          "src",
+          "https://maps.googleapis.com/maps/api/streetview?size=200x150&location=" +
             encodeURIComponent(d.proj_addre) +
-            '%20Washington%20DC&key=AIzaSyC6TjZXrowAWxfCYETdDBE3XQVCbtD-RWc'
+            "%20Washington%20DC&key=AIzaSyC6TjZXrowAWxfCYETdDBE3XQVCbtD-RWc"
         );
 
         //TODO add all matching addresses once proj_addre table is ready
@@ -228,65 +227,65 @@ var projectView = {
     */
     units: {
       //Several sections after this have title hidden, so this uses generic title above all of them
-      title: 'Property Information',
-      wrapperPartial: 'tool/partials/project-view/units.html',
+      title: "Property Information",
+      wrapperPartial: "tool/partials/project-view/units.html",
       hideTitle: false,
       render: function (full_project_data) {
         var data = [];
         data.push({
-          title: 'Subsidized Units',
-          value: full_project_data['proj_units_assist_max'],
+          title: "Subsidized Units",
+          value: full_project_data["proj_units_assist_max"],
         });
         data.push({
-          title: 'Total Units',
-          value: full_project_data['proj_units_tot'],
+          title: "Total Units",
+          value: full_project_data["proj_units_tot"],
         });
 
         // Do both the total unit and subsidized unit count exist for this project?
         if (data[0].value && data[1].value) {
-          data[0]['percent-subsidized'] = data[0].value / data[1].value;
+          data[0]["percent-subsidized"] = data[0].value / data[1].value;
 
-          var subsidizedProjectChart = new DonutChart('#subsidized-unit-chart')
+          var subsidizedProjectChart = new DonutChart("#subsidized-unit-chart")
             .width(124)
             .height(124)
             .margin({ bottom: 18 })
             .data(data)
-            .field('percent-subsidized')
-            .label('title')
+            .field("percent-subsidized")
+            .label("title")
             .create();
         } else if (data[0].value) {
           //Does the Subsidized Unit count exist for this project?
-          d3.select('#subsidized-unit-chart').append('h2').text(data[0].value);
+          d3.select("#subsidized-unit-chart").append("h2").text(data[0].value);
 
-          d3.select('#subsidized-unit-chart')
-            .append('p')
-            .text('Subsidized Units');
+          d3.select("#subsidized-unit-chart")
+            .append("p")
+            .text("Subsidized Units");
         } else if (data[1].value) {
           //Does the Total Unit count exist for this project?
-          d3.select('#subsidized-unit-chart').append('h2').text(data[1].value);
+          d3.select("#subsidized-unit-chart").append("h2").text(data[1].value);
 
-          d3.select('#subsidized-unit-chart').append('p').text('Total Units');
+          d3.select("#subsidized-unit-chart").append("p").text("Total Units");
         }
 
         //TODO: Add an indicator/icon for when neither Subsidized nor Total unit count exist. The space is currently blank when this happens.
 
-        var table = new D3Table('#units-table')
+        var table = new D3Table("#units-table")
           .data(data)
           .columns([
             {
-              field: 'title',
-              label: 'Title',
-              class: 'title',
+              field: "title",
+              label: "Title",
+              class: "title",
               html: function (d) {
                 return d;
               },
             },
             {
-              field: 'value',
-              label: 'Value',
-              class: 'value',
+              field: "value",
+              label: "Value",
+              class: "value",
               html: function (d) {
-                return d == null ? 'Unknown' : d;
+                return d == null ? "Unknown" : d;
               },
             },
           ])
@@ -295,93 +294,93 @@ var projectView = {
       },
     },
     location: {
-      title: 'Location Information',
-      wrapperPartial: 'tool/partials/project-view/location.html',
+      title: "Location Information",
+      wrapperPartial: "tool/partials/project-view/location.html",
       hideTitle: true,
       render: function (full_project_data) {
         var data = [];
-        data.push({ title: 'Ward', value: full_project_data['ward'] });
+        data.push({ title: "Ward", value: full_project_data["ward"] });
         data.push({
-          title: 'Neighborhood Cluster',
+          title: "Neighborhood Cluster",
           value:
-            full_project_data['neighborhood_cluster'] +
-            ': ' +
-            full_project_data['neighborhood_cluster_desc'],
+            full_project_data["neighborhood_cluster"] +
+            ": " +
+            full_project_data["neighborhood_cluster_desc"],
         });
-        data.push({ title: 'ANC', value: full_project_data['anc'] });
+        data.push({ title: "ANC", value: full_project_data["anc"] });
         data.push({
-          title: 'Census Tract',
-          value: full_project_data['census_tract'],
+          title: "Census Tract",
+          value: full_project_data["census_tract"],
         });
 
-        var table = new D3Table('#location-table')
+        var table = new D3Table("#location-table")
           .data(data)
           .columns([
             {
-              field: 'title',
-              label: 'Title',
-              class: 'title',
+              field: "title",
+              label: "Title",
+              class: "title",
               html: function (d) {
                 return d;
               },
             },
-            'value',
+            "value",
           ])
           .hideTitle(true)
           .create();
 
-        var projLongitude = full_project_data['longitude'];
-        var projLatitude = full_project_data['latitude'];
+        var projLongitude = full_project_data["longitude"];
+        var projLatitude = full_project_data["latitude"];
 
-        d3.select('#project-location-map').attr(
-          'src',
-          'https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+325d88(' +
+        d3.select("#project-location-map").attr(
+          "src",
+          "https://api.mapbox.com/styles/v1/mapbox/light-v9/static/pin-s-star+325d88(" +
             projLongitude +
-            ',' +
+            "," +
             projLatitude +
-            ')/-77.0369,38.9072,8.3/124x124?access_token=' +
+            ")/-77.0369,38.9072,8.3/124x124?access_token=" +
             mapboxgl.accessToken +
-            '&attribution=false&logo=false'
+            "&attribution=false&logo=false"
         );
       },
     },
     ownership: {
-      title: 'Ownership',
-      wrapperPartial: 'tool/partials/project-view/ownership.html',
+      title: "Ownership",
+      wrapperPartial: "tool/partials/project-view/ownership.html",
       hideTitle: true,
       render: function (full_project_data) {
         var data = [];
         data.push({
-          title: 'Owner Type',
-          value: full_project_data['proj_owner_type'],
+          title: "Owner Type",
+          value: full_project_data["proj_owner_type"],
         });
-        data.push({ title: 'Owner', value: full_project_data['hud_own_name'] });
+        data.push({ title: "Owner", value: full_project_data["hud_own_name"] });
         data.push({
-          title: 'Manager Type',
-          value: full_project_data['hud_mgr_type'],
+          title: "Manager Type",
+          value: full_project_data["hud_mgr_type"],
         });
         data.push({
-          title: 'Manager',
-          value: full_project_data['hud_mgr_name'],
+          title: "Manager",
+          value: full_project_data["hud_mgr_name"],
         });
 
-        var table = new D3Table('#ownership-table')
+        var table = new D3Table("#ownership-table")
           .data(data)
           .columns([
             {
-              field: 'title',
-              label: 'Title',
-              class: 'title',
+              field: "title",
+              label: "Title",
+              class: "title",
               html: function (d) {
                 return d;
               },
             },
             {
-              field: 'value',
-              label: 'Value',
-              class: 'value',
+              field: "value",
+              label: "Value",
+              class: "value",
               html: function (d) {
-                return d == null ? 'Unknown' : d;
+                return d == null ? "Unknown" : d;
               },
             },
           ])
@@ -389,67 +388,67 @@ var projectView = {
           .create();
 
         var ownershipIcon = d3
-          .select('#ownership-icon')
-          .append('img')
-          .style('padding-left', '26.5px')
-          .style('margin-top', '10px')
-          .attr('src', '/assets/icons/ownership.svg');
+          .select("#ownership-icon")
+          .append("img")
+          .style("padding-left", "26.5px")
+          .style("margin-top", "10px")
+          .attr("src", "/assets/icons/ownership.svg");
       },
     },
     saleActivity: {
-      title: 'Sale Activity',
-      wrapperPartial: 'tool/partials/project-view/saleActivity.html',
+      title: "Sale Activity",
+      wrapperPartial: "tool/partials/project-view/saleActivity.html",
       hideTitle: true,
       render: function (full_project_data) {
         var data = full_project_data.real_property;
 
-        d3.xml('/assets/icons/real-property.svg', function (xml) {
+        d3.xml("/assets/icons/real-property.svg", function (xml) {
           document
-            .getElementById('real-property-icon')
+            .getElementById("real-property-icon")
             .appendChild(xml.documentElement);
 
-          d3.select('#real-property-svg').style('margin-left', '26.5px');
+          d3.select("#real-property-svg").style("margin-left", "26.5px");
 
-          d3.select('#real-property-svg circle')
-            .style('stroke', '#cccccc')
-            .style('stroke-width', '8px')
-            .style('fill', 'white');
+          d3.select("#real-property-svg circle")
+            .style("stroke", "#cccccc")
+            .style("stroke-width", "8px")
+            .style("fill", "white");
 
           if (data.length > 0) {
-            d3.select('#real-property-svg path').style('fill', '#325d88');
+            d3.select("#real-property-svg path").style("fill", "#325d88");
           } else {
-            d3.select('#real-property-svg path').style('fill', '#cccccc');
+            d3.select("#real-property-svg path").style("fill", "#cccccc");
           }
         });
 
         if (data.length === 0) {
-          d3.select('#realPropertyTable')
-            .append('p')
-            .html('No sale activity available');
+          d3.select("#realPropertyTable")
+            .append("p")
+            .html("No sale activity available");
         } else {
-          var table = new D3Table('#realPropertyTable')
+          var table = new D3Table("#realPropertyTable")
             .data(data)
             .columns([
               {
-                field: 'rp_date',
-                label: 'Date',
-                class: 'value',
+                field: "rp_date",
+                label: "Date",
+                class: "value",
                 html: function (d) {
                   return d;
                 },
               },
               {
-                field: 'rp_type',
-                label: 'Activity Type',
-                class: 'value',
+                field: "rp_type",
+                label: "Activity Type",
+                class: "value",
                 html: function (d) {
                   return d;
                 },
               },
               {
-                field: 'rp_desc',
-                label: 'Description',
-                class: 'value',
+                field: "rp_desc",
+                label: "Description",
+                class: "value",
                 html: function (d) {
                   return d;
                 },
@@ -460,173 +459,280 @@ var projectView = {
       },
     },
     topaNotices: {
-      title: 'TOPA Notices',
-      wrapperPartial: 'tool/partials/project-view/topa-notices.html',
+      title: "TOPA Notices",
+      wrapperPartial: "tool/partials/project-view/topa-notices.html",
       hideTitle: false,
       render: function (full_project_data) {
-        var topaTable = d3.select('#topa-notice-table');
+        var topaTable = d3.select("#topa-notice-table");
         if (full_project_data.topa.length === 0) {
-          topaTable.append('p').text('No known TOPA notices!');
+          topaTable.append("p").text("No known TOPA notices!");
 
           // Add TOPA icon with notice count
-          d3.select('#topa-icon')
-            .append('img')
-            .style('padding-left', '26.5px')
-            .attr('src', '/assets/icons/topa-no-warnings.svg');
+          d3.select("#topa-icon")
+            .append("img")
+            .style("padding-left", "26.5px")
+            .attr("src", "/assets/icons/topa-no-warnings.svg");
         } else {
           //TODO! Refactor this into a 'buildTable' function that is callable from wherever.
           //helpful examples:
           //https://www.vis4.net/blog/posts/making-html-tables-in-d3-doesnt-need-to-be-a-pain/
           //https://gist.github.com/jfreels/6733593
 
-          var headerTr = topaTable.append('tr').classed('heading', true);
-          headerTr.append('th').text(''); //index number, no need to annotate
-          headerTr.append('th').text('Notice Date');
-          headerTr.append('th').text('Notice Type');
-          headerTr.append('th').text('Sale Price');
+          var headerTr = topaTable.append("tr").classed("heading", true);
+          headerTr.append("th").text(""); //index number, no need to annotate
+          headerTr.append("th").text("Notice Date");
+          headerTr.append("th").text("Notice Type");
+          headerTr.append("th").text("Sale Price");
 
           //Add rows for each topa notice
           var topaRows = topaTable
-            .selectAll('tr.data')
+            .selectAll("tr.data")
             .data(full_project_data.topa, function (d) {
               return d.id;
             });
 
           var trs = topaRows
             .enter()
-            .append('tr')
-            .attr('id', function (d) {
+            .append("tr")
+            .attr("id", function (d) {
               return d.id;
             })
-            .classed('data', true); //to differentiate from headings
+            .classed("data", true); //to differentiate from headings
           trs
-            .append('td')
-            .classed('title', true)
+            .append("td")
+            .classed("title", true)
             .text(function (d, i) {
-              return i + 1 + ')';
+              return i + 1 + ")";
             });
           trs
-            .append('td')
-            .classed('value', true)
+            .append("td")
+            .classed("value", true)
             .text(function (d) {
               return d.notice_date;
             });
           trs
-            .append('td')
-            .classed('value', true)
+            .append("td")
+            .classed("value", true)
             .text(function (d) {
               return d.notice_type;
             });
           trs
-            .append('td')
-            .classed('value', true)
+            .append("td")
+            .classed("value", true)
             .text(function (d) {
               if (d.sale_price == null) {
-                return '-';
+                return "-";
               } else {
-                return d3.format('$,.0r')(d.sale_price);
+                return d3.format("$,.0r")(d.sale_price);
               }
             });
 
           // Add TOPA icon with notice count
           var svg = d3
-            .select('#topa-icon')
-            .append('img')
-            .style('padding-left', '26.5px')
-            .attr('src', '/assets/icons/topa-warning.svg');
+            .select("#topa-icon")
+            .append("img")
+            .style("padding-left", "26.5px")
+            .attr("src", "/assets/icons/topa-warning.svg");
 
           var topaCount = d3
-            .select('#topa-icon')
-            .append('h2')
-            .style('margin-top', '-35px')
-            .style('text-align', 'center')
-            .style('color', '#000000')
+            .select("#topa-icon")
+            .append("h2")
+            .style("margin-top", "-35px")
+            .style("text-align", "center")
+            .style("color", "#000000")
             .text(full_project_data.topa.length);
 
           var topaCountLabel = d3
-            .select('#topa-icon')
-            .append('p')
-            .style('text-align', 'center')
-            .style('font-size', '12px')
-            .style('margin-top', '-5px');
+            .select("#topa-icon")
+            .append("p")
+            .style("text-align", "center")
+            .style("font-size", "12px")
+            .style("margin-top", "-5px");
 
           if (full_project_data.topa.length === 1) {
-            topaCountLabel.text('TOPA Notice');
+            topaCountLabel.text("TOPA Notice");
           } else {
-            topaCountLabel.text('TOPA Notices');
+            topaCountLabel.text("TOPA Notices");
           }
         }
       },
     },
-    subsidyTimelineChart: {
-      title: 'Building Subsidy Status',
-      wrapperPartial: 'tool/partials/project-view/subsidy.html',
+    topaOutcomes: {
+      title: "TOPA Outcomes",
+      wrapperPartial: "tool/partials/project-view/topa-outcomes.html",
+      hideTitle: false,
       render: function (full_project_data) {
-        var currentNlihc = full_project_data['nlihc_id'];
+        const topaTable = d3.select("#topa-outcome-table");
+        d3.select("#topa-outcome-icon")
+          .append("img")
+          .style("padding-left", "26.5px")
+          .attr("src", "/assets/icons/topa-outcomes.svg");
+        if (!full_project_data.has_topa_outcome) {
+          topaTable.append("No TOPA outcome recorded for this project");
+        } else {
+          const outcome = full_project_data.topa_outcomes[0];
+          const mapBooleanToString = (value) => {
+            if (value) {
+              return "Yes";
+            }
+            return "No";
+          };
+
+          var data = [];
+          data.push({
+            title: "Tenant association registered",
+            value: mapBooleanToString(outcome.d_cbo_dhcd_received_ta_reg),
+          });
+          data.push({
+            title: "Tenant association assigned rights",
+            value: mapBooleanToString(outcome.ta_assign_rights),
+          });
+          data.push({
+            title: "Limited equity coop",
+            value: mapBooleanToString(outcome.d_le_coop),
+          });
+          data.push({
+            title: "Tenant homeownership: LE Coop or Condo",
+            value: mapBooleanToString(outcome.d_purch_condo_coop),
+          });
+          data.push({
+            title: "Other condos (not tenant homeownership)",
+            value: mapBooleanToString(outcome.d_other_condo),
+          });
+          data.push({
+            title: "LIHTC added or preserved",
+            value: mapBooleanToString(outcome.d_lihtc),
+          });
+          data.push({
+            title: "DC housing production trust fund added or preserved",
+            value: mapBooleanToString(outcome.d_dc_hptf),
+          });
+          data.push({
+            title: "Other DC subsidy added or preserved",
+            value: mapBooleanToString(outcome.d_dc_other),
+          });
+          data.push({
+            title:
+              "Section 8 or other federal project-based added or preserved",
+            value: mapBooleanToString(outcome.d_fed_aff),
+          });
+          data.push({
+            title: "Rent control preserved",
+            value: mapBooleanToString(outcome.d_rent_control),
+          });
+          data.push({
+            title: "Affordability added or preserved",
+            value: mapBooleanToString(outcome.d_affordable),
+          });
+          data.push({
+            title: "100% affordable",
+            value: mapBooleanToString(outcome.d_100pct_afford),
+          });
+          data.push({
+            title:
+              "Renovations or repairs for residents in development agreement",
+            value: mapBooleanToString(outcome.d_rehab),
+          });
+          data.push({
+            title: "Properties with CBO involvement",
+            value: mapBooleanToString(outcome.d_cbo_involved),
+          });
+          data.push({
+            title: "100% buyout",
+            value: mapBooleanToString(outcome.d_buyout_100),
+          });
+          data.push({
+            title: "Partial buyout",
+            value: mapBooleanToString(outcome.d_buyout_partial),
+          });
+
+          var table = new D3Table("#topa-outcome-table")
+            .data(data)
+            .columns([
+              {
+                field: "title",
+                label: "Title",
+                class: "title",
+                html: function (d) {
+                  return d;
+                },
+              },
+              "value",
+            ])
+            .hideTitle(true)
+            .create();
+        }
+      },
+    },
+    subsidyTimelineChart: {
+      title: "Building Subsidy Status",
+      wrapperPartial: "tool/partials/project-view/subsidy.html",
+      render: function (full_project_data) {
+        var currentNlihc = full_project_data["nlihc_id"];
 
         new SubsidyTimelineChart({
           dataRequest: {
-            name: currentNlihc + '_subsidy',
+            name: currentNlihc + "_subsidy",
             url:
-              'http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/' +
+              "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/" +
               currentNlihc +
-              '/subsidies',
+              "/subsidies",
           },
-          container: '#subsidy-timeline-chart',
+          container: "#subsidy-timeline-chart",
           width: 700,
           height: 300,
         });
 
-        var data = full_project_data['subsidy'];
-        console.log('subsidy data', data);
+        var data = full_project_data["subsidy"];
+        console.log("subsidy data", data);
 
-        new D3Table('#subsidy-table')
+        new D3Table("#subsidy-table")
           .data(data)
           .columns([
             {
-              field: 'poa_end',
-              label: 'Scheduled End Date',
-              class: 'value',
+              field: "poa_end",
+              label: "Scheduled End Date",
+              class: "value",
               html: function (d) {
                 return d;
               },
             },
             {
-              field: 'poa_end_actual',
-              label: 'Actual End Date',
-              class: 'value',
+              field: "poa_end_actual",
+              label: "Actual End Date",
+              class: "value",
               html: function (d) {
-                return d == null ? '-' : d;
+                return d == null ? "-" : d;
               },
             },
             {
-              field: 'poa_start',
-              label: 'Start Date',
-              class: 'value',
-              html: function (d) {
-                return d;
-              },
-            },
-            {
-              field: 'units_assist',
-              label: 'Assisted Units',
-              class: 'value',
+              field: "poa_start",
+              label: "Start Date",
+              class: "value",
               html: function (d) {
                 return d;
               },
             },
             {
-              field: 'program',
-              label: 'Program',
-              class: 'value',
+              field: "units_assist",
+              label: "Assisted Units",
+              class: "value",
               html: function (d) {
                 return d;
               },
             },
             {
-              field: 'agency',
-              label: 'Agency',
-              class: 'value',
+              field: "program",
+              label: "Program",
+              class: "value",
+              html: function (d) {
+                return d;
+              },
+            },
+            {
+              field: "agency",
+              label: "Agency",
+              class: "value",
               html: function (d) {
                 return d;
               },
@@ -636,38 +742,38 @@ var projectView = {
       },
     },
     affordableHousingMap: {
-      title: 'Affordable Housing Nearby',
-      wrapperPartial: 'tool/partials/project-view/affordable-housing.html',
+      title: "Affordable Housing Nearby",
+      wrapperPartial: "tool/partials/project-view/affordable-housing.html",
       render: function (full_project_data) {
         var affordableHousingMap = new mapboxgl.Map({
-          container: 'affordable-housing-map',
-          style: 'mapbox://styles/mapbox/light-v9',
+          container: "affordable-housing-map",
+          style: "mapbox://styles/mapbox/light-v9",
           center: [
-            full_project_data['longitude'],
-            full_project_data['latitude'],
+            full_project_data["longitude"],
+            full_project_data["latitude"],
           ],
           zoom: 15,
           trackResize: true,
         });
 
-        affordableHousingMap.on('load', function () {
-          affordableHousingMap.addSource('project1', {
-            type: 'geojson',
+        affordableHousingMap.on("load", function () {
+          affordableHousingMap.addSource("project1", {
+            type: "geojson",
             data: controller.convertToGeoJSON(
-              model.dataCollection['raw_project']
+              model.dataCollection["raw_project"]
             ),
           });
 
           affordableHousingMap.addLayer({
-            id: 'buildingLocations',
-            source: 'project1',
-            type: 'circle',
+            id: "buildingLocations",
+            source: "project1",
+            type: "circle",
             minzoom: 9,
             paint: {
-              'circle-color': 'rgb(120,150,255)',
-              'circle-stroke-width': 3,
-              'circle-stroke-color': 'rgb(150,150,150)',
-              'circle-radius': {
+              "circle-color": "rgb(120,150,255)",
+              "circle-stroke-width": 3,
+              "circle-stroke-color": "rgb(150,150,150)",
+              "circle-radius": {
                 base: 1.75,
                 stops: [
                   [10, 2],
@@ -678,13 +784,13 @@ var projectView = {
           });
 
           affordableHousingMap.addLayer({
-            id: 'buildingTitles',
-            source: 'project1',
-            type: 'symbol',
+            id: "buildingTitles",
+            source: "project1",
+            type: "symbol",
             minzoom: 11,
             layout: {
               //'text-field': "{Proj_Name}",  //TODO need to hide the one under the current building
-              'text-anchor': 'bottom-left',
+              "text-anchor": "bottom-left",
             },
           });
 
@@ -694,14 +800,14 @@ var projectView = {
         //Nearby Housing sidebar
         ///////////////
 
-        d3.select('#tot_buildings').html(
-          model.dataCollection['nearby_projects']['tot_buildings']
+        d3.select("#tot_buildings").html(
+          model.dataCollection["nearby_projects"]["tot_buildings"]
         );
-        d3.select('#tot_units').html(
-          model.dataCollection['nearby_projects']['tot_units']
+        d3.select("#tot_units").html(
+          model.dataCollection["nearby_projects"]["tot_units"]
         );
-        d3.select('#nearby_housing_distance').html(
-          model.dataCollection['nearby_projects']['distance']
+        d3.select("#nearby_housing_distance").html(
+          model.dataCollection["nearby_projects"]["distance"]
         );
       },
     },
@@ -771,48 +877,48 @@ var projectView = {
     //   }
     // },
     metroStationsAndBusStops: {
-      title: 'Public Transit Accessibility',
-      wrapperPartial: 'tool/partials/project-view/transit.html',
+      title: "Public Transit Accessibility",
+      wrapperPartial: "tool/partials/project-view/transit.html",
       render: function (full_project_data) {
         var metroStationsMap = new mapboxgl.Map({
-          container: 'metro-stations-map',
-          style: 'mapbox://styles/mapbox/light-v9',
+          container: "metro-stations-map",
+          style: "mapbox://styles/mapbox/light-v9",
           center: [
-            full_project_data['longitude'],
-            full_project_data['latitude'],
+            full_project_data["longitude"],
+            full_project_data["latitude"],
           ],
           zoom: 15,
         });
 
-        metroStationsMap.on('load', function () {
-          metroStationsMap.addSource('metros', {
-            type: 'geojson',
-            data: model.dataCollection['raw_metro_stations'],
+        metroStationsMap.on("load", function () {
+          metroStationsMap.addSource("metros", {
+            type: "geojson",
+            data: model.dataCollection["raw_metro_stations"],
           });
 
           metroStationsMap.addLayer({
-            id: 'metroStationDots',
-            source: 'metros',
-            type: 'circle',
+            id: "metroStationDots",
+            source: "metros",
+            type: "circle",
             minzoom: 11,
             paint: {
-              'circle-color': 'white',
-              'circle-stroke-width': 3,
-              'circle-stroke-color': 'green',
-              'circle-radius': 7,
+              "circle-color": "white",
+              "circle-stroke-width": 3,
+              "circle-stroke-color": "green",
+              "circle-radius": 7,
             },
           });
 
           metroStationsMap.addLayer({
-            id: 'metroStationLabels',
-            source: 'metros',
-            type: 'symbol',
+            id: "metroStationLabels",
+            source: "metros",
+            type: "symbol",
             minzoom: 11,
             layout: {
-              'text-field': '{NAME}',
-              'text-anchor': 'left',
-              'text-offset': [1, 0],
-              'text-size': {
+              "text-field": "{NAME}",
+              "text-anchor": "left",
+              "text-offset": [1, 0],
+              "text-size": {
                 base: 1.75,
                 stops: [
                   [10, 10],
@@ -821,60 +927,60 @@ var projectView = {
               },
             },
             paint: {
-              'text-color': '#006400',
+              "text-color": "#006400",
             },
           });
 
-          metroStationsMap.addSource('busStops', {
-            type: 'geojson',
-            data: model.dataCollection['raw_bus_stops'],
+          metroStationsMap.addSource("busStops", {
+            type: "geojson",
+            data: model.dataCollection["raw_bus_stops"],
           });
           metroStationsMap.addLayer({
-            id: 'busStopDots',
-            source: 'busStops',
-            type: 'symbol',
+            id: "busStopDots",
+            source: "busStops",
+            type: "symbol",
             minzoom: 11,
             layout: {
-              'icon-image': 'bus-15',
+              "icon-image": "bus-15",
               //'text-field': "{BSTP_MSG_TEXT}", //too busy
-              'text-anchor': 'left',
-              'text-offset': [1, 0],
-              'text-size': 12,
-              'text-optional': true,
+              "text-anchor": "left",
+              "text-offset": [1, 0],
+              "text-size": 12,
+              "text-optional": true,
             },
           });
           //No titles for now, as the geojson from OpenData does not include routes (what we want)
 
           projectView.addCurrentBuildingToMap(
             metroStationsMap,
-            'targetBuilding2'
+            "targetBuilding2"
           );
         });
         ///////////////////
         //Transit sidebar
         ///////////////////
         var numBusRoutes = Object.keys(
-          model.dataCollection['transit_stats']['bus_routes']
+          model.dataCollection["transit_stats"]["bus_routes"]
         ).length;
         var numRailRoutes = Object.keys(
-          model.dataCollection['transit_stats']['rail_routes']
+          model.dataCollection["transit_stats"]["rail_routes"]
         ).length;
-        d3.select('#num_bus_routes').html(numBusRoutes);
-        d3.select('#num_rail_routes').html(numRailRoutes);
+        d3.select("#num_bus_routes").html(numBusRoutes);
+        d3.select("#num_rail_routes").html(numRailRoutes);
 
         //TODO this is a pretty hacky way to do this but it lets us use the same specs as above
         //TODO should make this approach to a legend a reusable method if desired, and then
         //link the values here to the relevant attributes in the addLayer method.
         var rail_icon = d3
-          .select('#rail_icon')
-          .append('svg')
-          .style('width', 24)
-          .style('height', 18)
-          .append('circle')
-          .attr('cx', '9')
-          .attr('cy', '9')
-          .attr('r', '7')
-          .attr('style', 'fill: white; stroke: green; stroke-width: 3');
+          .select("#rail_icon")
+          .append("svg")
+          .style("width", 24)
+          .style("height", 18)
+          .append("circle")
+          .attr("cx", "9")
+          .attr("cy", "9")
+          .attr("r", "7")
+          .attr("style", "fill: white; stroke: green; stroke-width: 3");
 
         var brgSorted = d3
           .nest()
@@ -882,7 +988,7 @@ var projectView = {
             return d.shortest_dist;
           })
           .sortKeys(d3.ascending)
-          .entries(model.dataCollection['transit_stats']['bus_routes_grouped']);
+          .entries(model.dataCollection["transit_stats"]["bus_routes_grouped"]);
         var rrgSorted = d3
           .nest()
           .key(function (d) {
@@ -890,10 +996,10 @@ var projectView = {
           })
           .sortKeys(d3.ascending)
           .entries(
-            model.dataCollection['transit_stats']['rail_routes_grouped']
+            model.dataCollection["transit_stats"]["rail_routes_grouped"]
           );
-        projectView.addRoutes('#bus_routes_by_dist', brgSorted);
-        projectView.addRoutes('#rail_routes_by_dist', rrgSorted);
+        projectView.addRoutes("#bus_routes_by_dist", brgSorted);
+        projectView.addRoutes("#rail_routes_by_dist", rrgSorted);
       },
     } /*, not available yet
     surroundingAreaDevelopment: {
@@ -907,38 +1013,38 @@ var projectView = {
   },
   addRoutes: function (id, data) {
     var ul = d3.select(id);
-    var lis = ul.selectAll('li').data(data);
+    var lis = ul.selectAll("li").data(data);
 
     lis
       .enter()
-      .append('li')
-      .attr('class', 'route_list')
+      .append("li")
+      .attr("class", "route_list")
       .merge(lis)
       .html(function (d) {
         var output =
-          '<strong>' + d.values[0]['shortest_dist'] + ' miles</strong>: ';
-        output = output + d.values[0]['routes'].join(', ');
+          "<strong>" + d.values[0]["shortest_dist"] + " miles</strong>: ";
+        output = output + d.values[0]["routes"].join(", ");
         return output;
       });
   },
 
   addCurrentBuildingToMap: function (map) {
-    map.addSource('currentBuilding', {
-      type: 'geojson',
-      data: getState()['selectedBuilding'][0],
+    map.addSource("currentBuilding", {
+      type: "geojson",
+      data: getState()["selectedBuilding"][0],
     });
 
     //For future reference, this is how to do custom icons, requires effort:https://github.com/mapbox/mapbox-gl-js/issues/822
     map.addLayer({
-      id: 'thisBuildingLocation',
-      source: 'currentBuilding',
-      type: 'circle',
+      id: "thisBuildingLocation",
+      source: "currentBuilding",
+      type: "circle",
       minzoom: 6,
       paint: {
-        'circle-color': 'red',
-        'circle-stroke-width': 3,
-        'circle-stroke-color': 'red',
-        'circle-radius': {
+        "circle-color": "red",
+        "circle-stroke-width": 3,
+        "circle-stroke-color": "red",
+        "circle-radius": {
           base: 1.75,
           stops: [
             [10, 2],
@@ -949,19 +1055,19 @@ var projectView = {
     });
 
     map.addLayer({
-      id: 'thisBuildingTitle',
-      source: 'currentBuilding',
-      type: 'symbol',
+      id: "thisBuildingTitle",
+      source: "currentBuilding",
+      type: "symbol",
       minzoom: 11,
       paint: {
-        'text-color': 'red',
+        "text-color": "red",
       },
       layout: {
-        'text-field': '{Proj_Name}',
-        'text-justify': 'left',
-        'text-offset': [1, 0],
-        'text-anchor': 'left',
-        'text-size': 14,
+        "text-field": "{Proj_Name}",
+        "text-justify": "left",
+        "text-offset": [1, 0],
+        "text-anchor": "left",
+        "text-size": 14,
       },
     });
   },
