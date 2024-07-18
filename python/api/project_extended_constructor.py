@@ -46,7 +46,7 @@ def construct_project_extended_blueprint(name, engine, tables, models):
 
         # Add one-to-many table results
         if nlihc_id != None and len(results) > 0:
-            for tablename in ['topa', 'subsidy', 'real_property', 'reac_score']:
+            for tablename in ['topa', 'subsidy', 'real_property', 'reac_score', 'topa_outcomes']:
                 if tablename in tables:
                     try:
                         q = """

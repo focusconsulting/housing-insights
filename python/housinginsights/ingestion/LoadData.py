@@ -585,6 +585,22 @@ class LoadData(object):
         conn.execute(stmt)
 
         #########################
+        # Set TOPA Outcomes
+        #########################
+        logger.info("  Calculating TOPA outcomes")
+        stmt = """
+                UPDATE project
+                SET has_topa_outcome = (
+                    SELECT COALESCE(topa_outcomes.has_topa_outcome, false)
+                    FROM project as inner_project
+                    left join topa_outcomes
+                    on inner_project.nlihc_id = topa_outcomes.nlihc_id
+                    where project.nlihc_id = inner_project.nlihc_id
+                );
+                """
+        conn.execute(stmt)
+
+        #########################
         # Other calculated fields
         #########################
 

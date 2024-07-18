@@ -2981,6 +2981,14 @@
         "sql_name": "most_recent_topa_date"
       },
       {
+        "source_name": "has_topa_outcome",
+        "display_text": "Whether or not there is TOPA outcome",
+        "required_in_source": false,
+        "display_name": "Has TOPA outcome",
+        "type": "boolean",
+        "sql_name": "has_topa_outcome"
+      },
+      {
         "source_name": "nearest_metro_station",
         "display_text": "Distance to Nearest Metro Station within Half a Mile",
         "required_in_source": false,
