@@ -133,7 +133,16 @@
             "short_name": "topac",
             "sourcetable": "project"
         },
-        
+        {
+            "source": "has_topa_outcome",
+            "display_name": "Has TOPA outcome",
+            "display_text": "Filter down to projects that have a recorded TOPA outcome",
+            "component_type": "categorical",
+            "data_type": "boolean",
+            "data_level": "project",
+            "short_name": "hto",
+            "sourcetable": "project"
+        },
         {   "source":"most_recent_topa_date",
             "display_name":"Most Recent TOPA Date",
             "display_text": "Date of the most recent TOPA notice associated with the property, if there is one.",
