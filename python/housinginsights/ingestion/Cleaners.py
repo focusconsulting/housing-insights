@@ -890,6 +890,28 @@ class SubsidyCleaner(CleanerBase):
         row = self.parse_dates(row)
         return row
 
+class TopaOutcomeCleaner(CleanerBase):
+    def clean(self, row, row_nume=None):
+        row["has_topa_outcome"] = self.convert_boolean(row["has_topa_outcome"])
+        row["d_cbo_dhcd_received_ta_reg"] = self.convert_boolean(row["d_cbo_dhcd_received_ta_reg"])
+        row["TA_assign_rights"] = self.convert_boolean(row["TA_assign_rights"])
+        row["d_le_coop"] = self.convert_boolean(row["d_le_coop"])
+        row["d_purch_condo_coop"] = self.convert_boolean(row["d_purch_condo_coop"])
+        row["d_other_condo"] = self.convert_boolean(row["d_other_condo"])
+        row["d_lihtc"] = self.convert_boolean(row["d_lihtc"])
+        row["d_dc_hptf"] = self.convert_boolean(row["d_dc_hptf"])
+        row["d_dc_other"] = self.convert_boolean(row["d_dc_other"])
+        row["d_fed_aff"] = self.convert_boolean(row["d_fed_aff"])
+        row["d_rent_control"] = self.convert_boolean(row["d_rent_control"])
+        row["d_affordable"] = self.convert_boolean(row["d_affordable"])
+        row["d_100pct_afford"] = self.convert_boolean(row["d_100pct_afford"])
+        row["d_rehab"] = self.convert_boolean(row["d_rehab"])
+        row["d_cbo_involved"] = self.convert_boolean(row["d_cbo_involved"])
+        row["d_buyout_100"] = self.convert_boolean(row["d_buyout_100"])
+        row["d_buyout_partial"] = self.convert_boolean(row["d_buyout_partial"])
+        
+        return row
+
 
 class BuildingPermitsCleaner(CleanerBase):
     def __init__(self, meta, manifest_row, cleaned_csv="", removed_csv="", engine=None):
