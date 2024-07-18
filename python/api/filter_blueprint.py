@@ -1,4 +1,3 @@
-
 from flask import Blueprint
 from flask import jsonify
 from api.utils import get_zone_facts_select_columns
@@ -7,15 +6,18 @@ import logging
 
 from flask_cors import cross_origin
 
+
 def construct_filter_blueprint(name, engine):
 
-    blueprint = Blueprint(name, __name__, url_prefix='/api')
+    blueprint = Blueprint(name, __name__, url_prefix="/api")
 
-    @blueprint.route('/filter/', methods=['GET'])
+    @blueprint.route("/filter/", methods=["GET"])
     @cross_origin()
     def filter_data():
 
-        ward_selects, cluster_selects, tract_selects = get_zone_facts_select_columns(engine)
+        ward_selects, cluster_selects, tract_selects = get_zone_facts_select_columns(
+            engine
+        )
 
         q = """
                 select
@@ -36,6 +38,7 @@ def construct_filter_blueprint(name, engine):
                 , p.most_recent_reac_score_num
                 , p.most_recent_reac_score_date
                 , p.sum_appraised_value_current_total
+                , p.has_topa_outcome
                 , p.topa_count
                 , p.most_recent_topa_date
                 , p.proj_units_tot_mar
@@ -73,8 +76,8 @@ def construct_filter_blueprint(name, engine):
         proxy = conn.execute(q)
         results = [dict(x) for x in proxy.fetchall()]
         conn.close()
-        output = {'objects': results}
+        output = {"objects": results}
         return jsonify(output)
 
-    #End of the constructor returns the assembled blueprint
+    # End of the constructor returns the assembled blueprint
     return blueprint
