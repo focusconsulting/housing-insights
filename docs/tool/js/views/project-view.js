@@ -571,6 +571,9 @@ var projectView = {
           topaTable.append("No TOPA outcome recorded for this project");
         } else {
           const outcome = full_project_data.topa_outcomes[0];
+          const topaNoticeDate = outcome.u_notice_date;
+          console.log(outcome);
+          d3.select("#topa-outcome-date").text(topaNoticeDate);
           const mapBooleanToString = (value) => {
             if (value) {
               return "Yes";
