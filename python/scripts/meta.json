@@ -6720,6 +6720,22 @@
         "sql_name": "nlihc_id"
       },
       {
+        "source_name": "u_notice_date",
+        "display_text": "Date of TOPA notice of sale",
+        "required_in_source": true,
+        "display_name": "TOPA Notice Sale Date",
+        "type": "date",
+        "sql_name": "u_notice_date"
+      },
+      {
+        "source_name": "u_sale_date",
+        "display_text": "Date of property sale (if sold)",
+        "required_in_source": true,
+        "display_name": "Property sale date",
+        "type": "date",
+        "sql_name": "u_sale_date"
+      },
+      {
         "source_name": "has_topa_outcome",
         "display_text": "Has TOPA outcome reported",
         "required_in_source": true,

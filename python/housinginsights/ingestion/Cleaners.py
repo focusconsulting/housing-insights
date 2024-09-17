@@ -890,10 +890,13 @@ class SubsidyCleaner(CleanerBase):
         row = self.parse_dates(row)
         return row
 
+
 class TopaOutcomeCleaner(CleanerBase):
     def clean(self, row, row_nume=None):
         row["has_topa_outcome"] = self.convert_boolean(row["has_topa_outcome"])
-        row["d_cbo_dhcd_received_ta_reg"] = self.convert_boolean(row["d_cbo_dhcd_received_ta_reg"])
+        row["d_cbo_dhcd_received_ta_reg"] = self.convert_boolean(
+            row["d_cbo_dhcd_received_ta_reg"]
+        )
         row["TA_assign_rights"] = self.convert_boolean(row["TA_assign_rights"])
         row["d_le_coop"] = self.convert_boolean(row["d_le_coop"])
         row["d_purch_condo_coop"] = self.convert_boolean(row["d_purch_condo_coop"])
@@ -909,7 +912,10 @@ class TopaOutcomeCleaner(CleanerBase):
         row["d_cbo_involved"] = self.convert_boolean(row["d_cbo_involved"])
         row["d_buyout_100"] = self.convert_boolean(row["d_buyout_100"])
         row["d_buyout_partial"] = self.convert_boolean(row["d_buyout_partial"])
-        
+
+        if row["u_sale_date"] == "":
+            row["u_sale_date"] = self.null_value
+
         return row
 
 
