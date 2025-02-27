@@ -21,8 +21,8 @@ var model = {
   URLS: {
     geoJSONPolygonsBase: "/tool/data/",
     metaData: "https://api.housinginsights.org/api/meta",
-    filterData: "https://api.housinginsights.org/api/filter",
-    project: "https://api.housinginsights.org/api/project",
+    filterData: "https://api.housinginsights.org/api/filter/",
+    project: "https://api.housinginsights.org/api/project/",
     layerData:
       "https://api.housinginsights.org/api/zone_facts/<source_data_name>/<grouping>",
   },
