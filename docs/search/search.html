@@ -31,9 +31,7 @@ permalink: /search/
     let filters = [];
     (() => {
       window.onload = () => {
-        fetch(
-          "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project"
-        )
+        fetch("https://api.housinginsights.org/api/project")
           .then((response) => response.json())
           .then((data) => {
             const { objects: projects } = data;
