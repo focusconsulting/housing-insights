@@ -81,9 +81,7 @@ var projectView = {
       var dataRequests = [
         {
           name: "full_project_data_" + nlihc_id,
-          url:
-            "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/" +
-            nlihc_id,
+          url: "https://api.housinginsights.org/api/project/" + nlihc_id,
           callback: dataBatchCallback,
         },
         {
@@ -94,15 +92,13 @@ var projectView = {
         },
         {
           name: "transit_stats",
-          url:
-            "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/wmata/" +
-            nlihc_id,
+          url: "https://api.housinginsights.org/api/wmata/" + nlihc_id,
           callback: dataBatchCallback,
         },
         {
           name: "nearby_projects",
           url:
-            "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/projects/0.5?latitude=" +
+            "https://api.housinginsights.org/api/projects/0.5?latitude=" +
             getState()["selectedBuilding"][0]["properties"]["latitude"] +
             "&longitude=" +
             getState()["selectedBuilding"][0]["properties"]["longitude"],
@@ -677,7 +673,7 @@ var projectView = {
           dataRequest: {
             name: currentNlihc + "_subsidy",
             url:
-              "http://housing-insights-api-104582314.us-east-1.elb.amazonaws.com/api/project/" +
+              "https://api.housinginsights.org/api/project/" +
               currentNlihc +
               "/subsidies",
           },
