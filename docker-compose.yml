@@ -25,7 +25,8 @@ services:
         restart: "on-failure:10"
 
     postgres:
-        image: codefordc2/housing-insights-postgres
+        image: postgres:16.8
+        platform: linux/amd64 # Fix running on Apple silicon
         environment:
             - POSTGRES_PASSWORD=codefordc
             - POSTGRES_USER=codefordc
@@ -39,7 +40,6 @@ services:
             context: python
         volumes:
             - .:/repo
-        #command: tail -f /dev/null
         ports:
             - "5000:5000"
         environment:
