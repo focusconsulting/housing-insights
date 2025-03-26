@@ -3,6 +3,7 @@ from housinginsights.tools.logger import HILogger
 
 logger = HILogger(name=__file__, logfile="sources.log")
 
+
 class GoogleMapsApiConn(BaseApiConn):
     """
     API Interface to google maps.
@@ -12,9 +13,9 @@ class GoogleMapsApiConn(BaseApiConn):
     # Note - this is not the only base url for google maps
     # if we expand further should consider adding additional params to the
     # init call to dictate which base url to use or make base url = 'http://'
-    BASEURL = 'http://maps.google.com'
+    BASEURL = "http://maps.google.com"
 
-    def __init__(self,baseurl=None,proxies=None,database_choice=None, debug=False):
+    def __init__(self, baseurl=None, proxies=None, database_choice=None, debug=False):
         super().__init__(baseurl=GoogleMapsApiConn.BASEURL)
 
     def check_street_view(self, latitude, longitude, radius=50):
@@ -32,9 +33,10 @@ class GoogleMapsApiConn(BaseApiConn):
         'Location', 'Projection'. Location is the data we're interested in.
         """
 
-        url = '/cbk?output=json&hl=en&ll={},' \
-              '{}&radius={}&cb_client=maps_sv&v=4'.format(latitude, longitude,
-                                                          radius)
+        url = (
+            "/cbk?output=json&hl=en&ll={},"
+            "{}&radius={}&cb_client=maps_sv&v=4".format(latitude, longitude, radius)
+        )
 
         result = self.get(url)
 
@@ -60,12 +62,11 @@ class GoogleMapsApiConn(BaseApiConn):
         results.
         :return: string representing the street view url end point
         """
-        endpoint_url = 'https://www.google.com/maps/@?api=1&map_action=pano'
+        endpoint_url = "https://www.google.com/maps/@?api=1&map_action=pano"
 
         if pano_id is not None:
-            endpoint_url += '&pano={}'.format(pano_id)
+            endpoint_url += "&pano={}".format(pano_id)
 
-        endpoint_url += '&viewpoint={},{}'.format(latitude, longitude)
+        endpoint_url += "&viewpoint={},{}".format(latitude, longitude)
 
         return endpoint_url
-

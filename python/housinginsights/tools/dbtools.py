@@ -1,9 +1,9 @@
 ##########################################################################
 # Summary
 ##########################################################################
-'''
+"""
 tools for connecting to the database, which can be used in all of the project folders
-'''
+"""
 
 ##########################################################################
 # Imports & Configuration
@@ -15,9 +15,10 @@ import csv
 import json
 import os
 import time
-#import docker
 
-secrets_filepath = os.path.join(os.path.dirname(__file__), '../secrets.json')
+# import docker
+
+secrets_filepath = os.path.join(os.path.dirname(__file__), "../secrets.json")
 
 
 ##########################################################################
@@ -29,15 +30,15 @@ def get_connect_str(database_choice):
     """
     with open(secrets_filepath) as fh:
         secrets = json.load(fh)
-    return secrets[database_choice]['connect_str']
+    return secrets[database_choice]["connect_str"]
 
 
 def get_database_connection(database_choice):
-    '''
-    Deprecated - it is better to use get_database_engine 
+    """
+    Deprecated - it is better to use get_database_engine
     and then use engine.connect() within your code so that
-    closing the connection is more safely handled. 
-    '''
+    closing the connection is more safely handled.
+    """
 
     # Connect to the database
     connection_string = get_connect_str(database_choice)
@@ -45,9 +46,10 @@ def get_database_connection(database_choice):
     database_connection = engine.connect()
     return database_connection
 
+
 def get_database_engine(database_choice):
-    '''
-    engines are the way to connect to the database. 
+    """
+    engines are the way to connect to the database.
 
     To use, follow this pattern:
 
@@ -55,14 +57,14 @@ def get_database_engine(database_choice):
     conn = engine.connect()
     conn.execute('SELECT * from manifest')
     conn.close()
-    '''
-    
+    """
+
     # Connect to the database
     connection_string = get_connect_str(database_choice)
     try:
         engine = create_engine(connection_string)
 
-        #test out the engine to make sure it is valid
+        # test out the engine to make sure it is valid
         conn = engine.connect()
         conn.close()
 
@@ -73,7 +75,8 @@ def get_database_engine(database_choice):
         raise e
 
     return engine
-    
+
+
 def get_database_session(database_choice):
     # Connect to the database
     connection_string = get_connect_str(database_choice)
@@ -81,6 +84,7 @@ def get_database_session(database_choice):
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
+
 
 def get_psycopg2_cursor(database_choice):
     connection_string = get_connect_str(database_choice)

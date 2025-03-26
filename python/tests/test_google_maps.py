@@ -3,11 +3,10 @@ import os
 import sys
 from pprint import pprint
 
-PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                           os.pardir))
-TEST_DATA_PATH = os.path.abspath(os.path.join(PYTHON_PATH, 'tests',
-                                              'test_data',
-                                              'project_missing_streetview.csv'))
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+TEST_DATA_PATH = os.path.abspath(
+    os.path.join(PYTHON_PATH, "tests", "test_data", "project_missing_streetview.csv")
+)
 
 # add to python system path
 sys.path.append(PYTHON_PATH)
@@ -35,5 +34,5 @@ class MyTestCase(unittest.TestCase):
         self.assertTrue(result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

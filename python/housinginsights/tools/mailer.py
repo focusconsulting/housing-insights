@@ -6,12 +6,13 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-secrets_filepath = os.path.join(os.path.dirname(__file__), '../secrets.json')
+secrets_filepath = os.path.join(os.path.dirname(__file__), "../secrets.json")
 import json
+
 with open(secrets_filepath) as fh:
     secrets = json.load(fh)
 
-COMMASPACE = ', '
+COMMASPACE = ", "
 
 
 class HIMailer:
@@ -20,42 +21,44 @@ class HIMailer:
         self.debug_mode = debug_mode
         self.recipients = recipients
         self.cc_recipients = cc_recipients
-        self.debug_recipient = secrets['email']['debug_recipient']
-        self.send_from = secrets['email']['username']
-        self.username = secrets['email']['username']
-        self.password = secrets['email']['password']
-        self.host = secrets['email']['host']
-        self.admin_email = secrets['email'].get('admin', '')
+        self.debug_recipient = secrets["email"]["debug_recipient"]
+        self.send_from = secrets["email"]["username"]
+        self.username = secrets["email"]["username"]
+        self.password = secrets["email"]["password"]
+        self.host = secrets["email"]["host"]
+        self.admin_email = secrets["email"].get("admin", "")
         self.attachments = None
 
     def send_email(self):
         # Create the enclosing (outer) message
-        outer = MIMEMultipart('alternative')
-        outer['Subject'] = self.subject
-        outer['From'] = self.send_from
+        outer = MIMEMultipart("alternative")
+        outer["Subject"] = self.subject
+        outer["From"] = self.send_from
         if self.debug_mode:
-            outer['To'] = self.debug_recipient
+            outer["To"] = self.debug_recipient
         else:
             self.recipients.append(self.admin_email)
-            outer['To'] = COMMASPACE.join(self.recipients)
-            outer['CC'] = COMMASPACE.join(self.cc_recipients)
+            outer["To"] = COMMASPACE.join(self.recipients)
+            outer["CC"] = COMMASPACE.join(self.cc_recipients)
 
-        msg = MIMEBase('application', "octet-stream")
+        msg = MIMEBase("application", "octet-stream")
 
         # Add the text of the email
-        email_body = MIMEText(self.message, 'plain')
+        email_body = MIMEText(self.message, "plain")
         outer.attach(email_body)
 
         # Add the attachments
         if self.attachments:
             for file in self.attachments:
                 try:
-                    with open(file, 'rb') as fp:
+                    with open(file, "rb") as fp:
                         msg.set_payload(fp.read())
                     encoders.encode_base64(msg)
-                    msg.add_header('Content-Disposition',
-                                   'attachment',
-                                   filename=os.path.basename(file))
+                    msg.add_header(
+                        "Content-Disposition",
+                        "attachment",
+                        filename=os.path.basename(file),
+                    )
                     outer.attach(msg)
                 except:
                     print("Unable to add the attachment to the email")
@@ -73,13 +76,11 @@ class HIMailer:
             raise ValueError("No recipients provided, unable to send email.")
 
         try:
-            with smtplib.SMTP(host=self.host, port='587') as s:
+            with smtplib.SMTP(host=self.host, port="587") as s:
                 s.ehlo()
                 s.starttls()
                 s.login(self.username, self.password)
-                s.sendmail(self.username,
-                           all_recipients,
-                           composed)
+                s.sendmail(self.username, all_recipients, composed)
                 s.close()
                 print("Email successfully sent.")
         except smtplib.SMTPConnectError as err:
@@ -89,5 +90,6 @@ class HIMailer:
             print("Unable to send email: {}".format(sys.exc_info()[0]))
             raise
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     pass

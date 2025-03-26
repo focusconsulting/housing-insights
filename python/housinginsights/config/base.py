@@ -10,6 +10,7 @@ class SectionConfig(object):
     Config object that has an Attribute
     for each key in the given section.
     """
+
     def __init__(self, config):
         """
         :param config: Configuration object.
@@ -24,6 +25,7 @@ class HousingInsightsConfig(object):
     Thin wrapper around config parser that returns
     a simple SectionConfig.
     """
+
     def __init__(self, config_file):
         self.parser = ConfigParser()
         self.parser.read(config_file)

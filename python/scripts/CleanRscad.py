@@ -1,4 +1,3 @@
-
 # Camel case all the headers
 # Make the fields line up
 #
@@ -8,10 +7,12 @@ import os
 import numpy as np
 
 
-results_dir = os.path.join(os.path.dirname(
-    __file__), "../../data/raw/TOPA_notices/20220620")
+results_dir = os.path.join(
+    os.path.dirname(__file__), "../../data/raw/TOPA_notices/20220620"
+)
 df = pd.read_csv(
-    '../../data/raw/TOPA_notices/20220620/Rcasd_2019.csv', encoding="latin-1")
+    "../../data/raw/TOPA_notices/20220620/Rcasd_2019.csv", encoding="latin-1"
+)
 updated_col_names = {}
 
 # Make sure the census tract is okay
@@ -29,12 +30,12 @@ updated_col_names = {}
 # df['Addr_num'].fillna(0, inplace=True)
 # df['Addr_num'] = df['Addr_num'].astype(np.int64)
 
-df['ADDRESS_ID'].fillna(0, inplace=True)
-df['ADDRESS_ID'] = df['ADDRESS_ID'].astype(np.int64)
-df['M_OBS'].fillna(0, inplace=True)
-df['M_OBS'] = df['M_OBS'].astype(np.int64)
+df["ADDRESS_ID"].fillna(0, inplace=True)
+df["ADDRESS_ID"] = df["ADDRESS_ID"].astype(np.int64)
+df["M_OBS"].fillna(0, inplace=True)
+df["M_OBS"] = df["M_OBS"].astype(np.int64)
 
 
-df.to_csv(results_dir + '/Rcasd_2019.csv', encoding="latin-1", index=False)
+df.to_csv(results_dir + "/Rcasd_2019.csv", encoding="latin-1", index=False)
 
 print("Done")
