@@ -53,8 +53,10 @@ are we overriding or appending?
 
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             os.pardir, os.pardir)))
+
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+)
 # TODO: clean up unused imports
 from housinginsights.tools import dbtools
 from sqlalchemy.orm import sessionmaker
@@ -64,7 +66,9 @@ import copy
 import datetime
 
 from housinginsights.tools.logger import HILogger
+
 logger = HILogger(name=__file__, logfile="ingestion.log")
+
 
 # TODO: is this incomplete - do we want to define a specific error output
 class TableWritingError(Exception):
@@ -93,18 +97,22 @@ class HISql(object):
             self.tablename = self.manifest_row["destination_table"]
 
             # assign defaults
-            self.filename = 'temp_{}.psv'.format(self.unique_data_id) \
-                if filename is None else filename
+            self.filename = (
+                "temp_{}.psv".format(self.unique_data_id)
+                if filename is None
+                else filename
+            )
         except TypeError:
             # assume creating table directly from meta.json
             self.unique_data_id = None
             self.tablename = None
-            self.filename = 'temp_{}.psv'.format('default') \
-                if filename is None else filename
+            self.filename = (
+                "temp_{}.psv".format("default") if filename is None else filename
+            )
 
     def write_file_to_sql(self):
-        #TODO let this use existing session/connection/engine instead?
-        #engine = dbtools.get_database_engine("local_database")
+        # TODO let this use existing session/connection/engine instead?
+        # engine = dbtools.get_database_engine("local_database")
 
         conn = self.engine.connect()
         trans = conn.begin()
@@ -112,34 +120,38 @@ class HISql(object):
         try:
 
             print("  opening {}".format(self.filename))
-            with open(self.filename, 'r', encoding='utf-8') as f:
-                #copy_from is only available on the psycopg2 object, we need to dig in to get it
+            with open(self.filename, "r", encoding="utf-8") as f:
+                # copy_from is only available on the psycopg2 object, we need to dig in to get it
                 dbapi_conn = conn.connection
                 dbapi_conn.set_client_encoding("UTF8")
                 dbapi_cur = dbapi_conn.cursor()
 
-                dbapi_cur.copy_from(f, self.tablename, sep='|', null='Null', columns=None)
+                dbapi_cur.copy_from(
+                    f, self.tablename, sep="|", null="Null", columns=None
+                )
 
                 self.update_manifest_row(conn=conn, status="loaded")
 
-                #used for debugging, keep commented in real usage
-                #raise ProgrammingError(statement="test", params="test", orig="test")
+                # used for debugging, keep commented in real usage
+                # raise ProgrammingError(statement="test", params="test", orig="test")
 
                 dbapi_conn.commit()
             trans.commit()
             logger.info("  data file loaded into database")
-        
-        #TODO need to find out what types of expected errors might actually occur here  
-        #For now, assume that SQLAlchemy will raise a programmingerror
+
+        # TODO need to find out what types of expected errors might actually occur here
+        # For now, assume that SQLAlchemy will raise a programmingerror
         except (ProgrammingError, DataError, TypeError) as e:
             trans.rollback()
 
-            logger.warning("  FAIL: something went wrong loading {}".format(self.unique_data_id))
+            logger.warning(
+                "  FAIL: something went wrong loading {}".format(self.unique_data_id)
+            )
             logger.warning("  exception: {}".format(e))
             raise TableWritingError
 
         conn.close()
-            
+
     def update_manifest_row(self, conn, status="unknown"):
         """
         Adds self.manifest_row associated with this table to the SQL manifest
@@ -148,20 +160,20 @@ class HISql(object):
         """
         # Add the status
         manifest_row = copy.copy(self.manifest_row)
-        manifest_row['status'] = status
-        manifest_row['load_date'] = datetime.datetime.now().isoformat()
+        manifest_row["status"] = status
+        manifest_row["load_date"] = datetime.datetime.now().isoformat()
 
         # Remove the row if it exists
         # TODO make sure data is synced or appended properly
-        sql_manifest_row = self.get_sql_manifest_row(db_conn=conn,
-                                                     close_conn=False)
+        sql_manifest_row = self.get_sql_manifest_row(db_conn=conn, close_conn=False)
 
         if sql_manifest_row is not None:
-            logger.info("  deleting existing manifest row for {}".format(
-                self.unique_data_id))
-            delete_command = \
-                "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
-                    self.unique_data_id)
+            logger.info(
+                "  deleting existing manifest row for {}".format(self.unique_data_id)
+            )
+            delete_command = "DELETE FROM manifest WHERE unique_data_id = '{}'".format(
+                self.unique_data_id
+            )
             conn.execute(delete_command)
 
         columns = []
@@ -174,8 +186,9 @@ class HISql(object):
         values_string = "('" + "','".join(values) + "')"
 
         insert_command = "INSERT INTO manifest {} VALUES {};".format(
-            columns_string, values_string)
-        
+            columns_string, values_string
+        )
+
         conn.execute(insert_command)
 
     def create_table_if_necessary(self, table=None):
@@ -183,7 +196,7 @@ class HISql(object):
         Creates the table associated with this data file if it doesn't already
         exist table = string representing the tablename
         """
-        #TODO - a better long-term solution to this might be SQLAlchemy metadata: http://www.mapfish.org/doc/tutorials/sqlalchemy.html
+        # TODO - a better long-term solution to this might be SQLAlchemy metadata: http://www.mapfish.org/doc/tutorials/sqlalchemy.html
         if table is None:
             table = self.tablename
         db_conn = self.engine.connect()
@@ -204,7 +217,8 @@ class HISql(object):
     def create_table(self, db_conn, table):
 
         sql_fields, sql_field_types = self.get_sql_fields_and_type_from_meta(
-            table_name=table)
+            table_name=table
+        )
 
         field_statements = []
         for idx, field in enumerate(sql_fields):
@@ -215,10 +229,9 @@ class HISql(object):
         logger.info("  Table created: {}".format(table))
 
         # Create an id column and make it a primary key
-        create_id = "ALTER TABLE {} ADD COLUMN {} text;".format(table, 'id')
+        create_id = "ALTER TABLE {} ADD COLUMN {} text;".format(table, "id")
         db_conn.execute(create_id)
-        set_primary_key = "ALTER TABLE {} ADD PRIMARY KEY ({});".format(table,
-                                                                        'id')
+        set_primary_key = "ALTER TABLE {} ADD PRIMARY KEY ({});".format(table, "id")
         db_conn.execute(set_primary_key)
 
     def create_primary_key_table(self, db_conn, table):
@@ -229,12 +242,16 @@ class HISql(object):
         db_conn = self.engine.connect()
         table = self.tablename if table is None else table
 
-        #TODO also need to delete manifest row(s)
-        #TODO need to use a transaction to ensure both operations sync
+        # TODO also need to delete manifest row(s)
+        # TODO need to use a transaction to ensure both operations sync
         try:
             db_conn.execute("DROP TABLE {}".format(table))
         except ProgrammingError:
-            logger.warning("  {} table can't be dropped because it doesn't exist".format(self.tablename))
+            logger.warning(
+                "  {} table can't be dropped because it doesn't exist".format(
+                    self.tablename
+                )
+            )
         db_conn.close()
 
     def get_sql_manifest_row(self, db_conn=None, close_conn=True):
@@ -249,7 +266,8 @@ class HISql(object):
         :return: the resulting sql manifest row as a dict object
         """
         sql_query = "SELECT * FROM manifest WHERE unique_data_id = '{}'".format(
-            self.unique_data_id)
+            self.unique_data_id
+        )
 
         if db_conn is None:
             db_conn = self.engine.connect()
@@ -266,15 +284,19 @@ class HISql(object):
         # the csv_row is already in the database
         # TODO: change this to if, elif, else statement is mutually exclusive
         if len(results) > 1:
-            raise ValueError('Found multiple rows in database for data'
-                             ' id {}'.format(self.unique_data_id))
+            raise ValueError(
+                "Found multiple rows in database for data"
+                " id {}".format(self.unique_data_id)
+            )
 
         # Return just the dictionary of results, not the list of dictionaries
         if len(results) == 1:
             return results[0]
 
         if len(results) == 0:
-            logger.info("  Couldn't find sql_manifest_row for {}".format(self.unique_data_id))
+            logger.info(
+                "  Couldn't find sql_manifest_row for {}".format(self.unique_data_id)
+            )
             return None
 
     def get_sql_fields_and_type_from_meta(self, table_name=None):
@@ -288,13 +310,13 @@ class HISql(object):
         if table_name is None:
             table_name = self.tablename
 
-        meta_fields = self.meta[table_name]['fields']
+        meta_fields = self.meta[table_name]["fields"]
 
         sql_fields = list()
         sql_field_types = list()
 
         for field in meta_fields:
-            sql_fields.append(field['sql_name'])
-            sql_field_types.append(field['type'])
+            sql_fields.append(field["sql_name"])
+            sql_field_types.append(field["type"])
 
         return sql_fields, sql_field_types

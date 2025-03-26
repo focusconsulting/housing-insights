@@ -1,6 +1,7 @@
 """
 Manifest module
 """
+
 import os
 from collections import Counter
 from csv import DictWriter, DictReader
@@ -17,34 +18,36 @@ class Manifest(HIReader):
     should be used to read the manifest and return it row-by-row.
     """
 
-    _include_flags_positive = ['use']
-    _include_flags_negative = ['pending', 'exclude', 'superseded']
+    _include_flags_positive = ["use"]
+    _include_flags_negative = ["pending", "exclude", "superseded"]
 
-    def __init__(self, path='manifest.csv'):
+    def __init__(self, path="manifest.csv"):
         super().__init__(path)
         self.unique_ids = {}  # from the unique_id column in the manifest
 
         # validate the manifest
         if not self.has_unique_ids():
-            raise ValueError('Manifest has duplicate unique_data_id!')
+            raise ValueError("Manifest has duplicate unique_data_id!")
 
     def __iter__(self):
         self._length = 0
         self._counter = Counter()
-        with open(self.path, 'r', newline='') as data:
+        with open(self.path, "r", newline="") as data:
             reader = DictReader(data)
             self._keys = reader.fieldnames
             for row in reader:
                 self._length += 1
 
-                #parse the date into proper format for sql
+                # parse the date into proper format for sql
                 try:
-                    _date = dateparser.parse(row['data_date'],dayfirst=False,yearfirst=False)
-                    row['data_date'] = datetime.strftime(_date, '%Y-%m-%d')
+                    _date = dateparser.parse(
+                        row["data_date"], dayfirst=False, yearfirst=False
+                    )
+                    row["data_date"] = datetime.strftime(_date, "%Y-%m-%d")
                 except ValueError:
-                    row['data_date'] = 'Null'
+                    row["data_date"] = "Null"
 
-                #return the row
+                # return the row
                 yield row
 
     def has_unique_ids(self):
@@ -59,12 +62,12 @@ class Manifest(HIReader):
         self.unique_ids = {}
 
         for row in self:
-            if row['unique_data_id'] in self.unique_ids:
+            if row["unique_data_id"] in self.unique_ids:
                 return False
             else:
-                #don't add flags that won't make it into the SQL database
-                if row['include_flag'] in Manifest._include_flags_positive:
-                    self.unique_ids[row['unique_data_id']] = 'found'
+                # don't add flags that won't make it into the SQL database
+                if row["include_flag"] in Manifest._include_flags_positive:
+                    self.unique_ids[row["unique_data_id"]] = "found"
         return True
 
     def get_manifest_row(self, unique_data_id):
@@ -73,8 +76,8 @@ class Manifest(HIReader):
         manifest.
         """
         for row in self:
-            use = row['include_flag'] == 'use'
-            if row['unique_data_id'] == unique_data_id and use:
+            use = row["include_flag"] == "use"
+            if row["unique_data_id"] == unique_data_id and use:
                 return row
         return None
 
@@ -88,25 +91,25 @@ class Manifest(HIReader):
         files_in_folder = os.listdir(folder_path)
         for file in files_in_folder:
             file_path = os.path.join(folder_path, file)
-            uid, file_ext = file.split(sep='.')
-            if os.path.isfile(file_path) and file_ext == 'csv':
+            uid, file_ext = file.split(sep=".")
+            if os.path.isfile(file_path) and file_ext == "csv":
                 unique_data_ids.append(uid)
 
         return unique_data_ids
 
     def update_manifest(self, date_stamped_folder):
-        '''
+        """
         Used for automatically swapping out old files for new ones in our manifest.csv
-        whenever we gather new data. 
+        whenever we gather new data.
 
         Using the folder passed (e.g. /data/raw/apis), find the most recent subfolder
         (by sorting alphabetically). Make a list of .csv files in that folder
         and update the manifest.csv for every unique_data_id that corresponds
-        to one of the .csv files. 
-        '''
+        to one of the .csv files.
+        """
         timestamp = os.path.basename(date_stamped_folder)
-        data_date = datetime.strptime(timestamp, '%Y%m%d').strftime('%Y-%m-%d')
-        file_path_base = date_stamped_folder[date_stamped_folder.find('raw'):]
+        data_date = datetime.strptime(timestamp, "%Y%m%d").strftime("%Y-%m-%d")
+        file_path_base = date_stamped_folder[date_stamped_folder.find("raw") :]
 
         field_names = self.keys
 
@@ -116,15 +119,14 @@ class Manifest(HIReader):
 
         # update the manifest.csv in place
         for row in self:
-            row_uid = row['unique_data_id']
+            row_uid = row["unique_data_id"]
             if row_uid in uid_list:
-                row['data_date'] = data_date
-                filepath = os.path.join(file_path_base,
-                                        "{}.csv".format(row_uid))
-                row['filepath'] = filepath
+                row["data_date"] = data_date
+                filepath = os.path.join(file_path_base, "{}.csv".format(row_uid))
+                row["filepath"] = filepath
             data.append(row)
 
-        with open(self.path, mode='w', encoding='utf-8', newline='') as f:
+        with open(self.path, mode="w", encoding="utf-8", newline="") as f:
             writer = DictWriter(f, fieldnames=field_names)
             writer.writeheader()
             writer.writerows(data)

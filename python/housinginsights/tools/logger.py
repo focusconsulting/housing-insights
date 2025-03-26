@@ -1,20 +1,28 @@
 import os, logging
 
-python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                               os.pardir, os.pardir))
+python_filepath = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+)
 logging_path = os.path.abspath(os.path.join(python_filepath, "logs"))
 
-class HILogger():
+
+class HILogger:
     """
     Log to console and to file.
     logger = HILogger(name=__name__, logfile=mylog.log)
     """
 
-    DEFAULT_FORMAT = '%(levelname)s -- %(asctime)s -- %(name)s -- %(message)s'
-    DEFAULT_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+    DEFAULT_FORMAT = "%(levelname)s -- %(asctime)s -- %(name)s -- %(message)s"
+    DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-    def __init__(self, name, logfile=None, fmt=DEFAULT_FORMAT, datefmt=DEFAULT_DATE_FORMAT,
-                level=logging.INFO):
+    def __init__(
+        self,
+        name,
+        logfile=None,
+        fmt=DEFAULT_FORMAT,
+        datefmt=DEFAULT_DATE_FORMAT,
+        level=logging.INFO,
+    ):
         # Get config values
 
         if logfile:
@@ -25,8 +33,7 @@ class HILogger():
         logger.handlers = []
 
         logger.setLevel(level)
-        formatter = logging.Formatter(  fmt=fmt,
-                                        datefmt=datefmt)
+        formatter = logging.Formatter(fmt=fmt, datefmt=datefmt)
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
@@ -36,7 +43,6 @@ class HILogger():
             logger.addHandler(file_handler)
 
         self.logger = logger
-
 
     def debug(self, msg, *args, **kwargs):
         self.logger.debug(msg, *args, **kwargs)

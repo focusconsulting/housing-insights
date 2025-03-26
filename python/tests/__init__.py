@@ -1,5 +1,5 @@
 ############################################################
-#Folder and file setup/configuration tests
+# Folder and file setup/configuration tests
 ############################################################
 
 
@@ -8,9 +8,9 @@ from unittest import skip
 
 import sys, os
 
-python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                               os.pardir))
+python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(python_filepath)
+
 
 class InitializationTests(unittest.TestCase):
 

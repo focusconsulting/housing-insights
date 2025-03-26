@@ -14,8 +14,9 @@ from optparse import OptionParser
 
 import pandas as pandas
 
-python_filepath = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                               os.pardir, os.pardir))
+python_filepath = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+)
 sys.path.append(python_filepath)
 
 
@@ -55,16 +56,16 @@ def _pandas_to_sql_data_type(pandas_type_string):
     :return: sql equivalent data type
     """
     mapping = {
-        'object': 'text',
-        'int64': 'integer',
-        'float64': 'decimal',
-        'datetime64': 'timestamp'
+        "object": "text",
+        "int64": "integer",
+        "float64": "decimal",
+        "datetime64": "timestamp",
     }
     # TODO: refactor to return key with default look up?
     try:
         sql_type = mapping[pandas_type_string]
     except KeyError:
-        sql_type = 'text'
+        sql_type = "text"
     return sql_type
 
 
@@ -95,7 +96,7 @@ def make_draft_json(filename, tablename, encoding):
             # TODO: change cleaner naming scheme to CamelCase
             "cleaner": tablename + "{}".format("_cleaner"),
             "replace_table": True,
-            "fields": []
+            "fields": [],
         }
     }
 
@@ -105,7 +106,7 @@ def make_draft_json(filename, tablename, encoding):
         "source_name": "unique_data_id",
         "sql_name": "unique_data_id",
         "type": "text",
-        "required_in_source": False
+        "required_in_source": False,
     }
     output[tablename]["fields"].append(unique_data_id_field)
 
@@ -124,12 +125,12 @@ def make_draft_json(filename, tablename, encoding):
             "sql_name": _sql_name_clean(field),
             "display_name": _sql_name_clean(field),
             "display_text": "",
-            "required_in_source": True
+            "required_in_source": True,
         }
         output[tablename]["fields"].append(field_attributes)
 
     # Write completed draft JSON as csv into the logging folder
-    output_path = os.path.join(logging_path, (tablename+".json"))
+    output_path = os.path.join(logging_path, (tablename + ".json"))
     with open(output_path, "w") as results:
         json.dump(output, results, sort_keys=True, indent=2)
 
@@ -151,7 +152,7 @@ def checkTable(table_name, meta):
     : True - table_name found in meta.json
     : False - table_name NOT found
     """
-    if not(os.path.isfile(meta)):
+    if not (os.path.isfile(meta)):
         raise ValueError("Unable to access JSON file")
 
     # read the data from current json file
@@ -177,7 +178,7 @@ def appendJSON(new_json, master_json):
     :return: void
     """
     # TODO: version control of meta.json, create backup making changes to master JSON
-    if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
+    if not (os.path.isfile(new_json) and os.path.isfile(master_json)):
         raise ValueError("Path to one of the JSON files is invalid")
 
     # Update the master JSON file
@@ -193,7 +194,7 @@ def appendJSON(new_json, master_json):
     # add the new table to the master JSON
     masterJ_data.update(new_data)
     # write the new JSON list to the master JSON file
-    json.dump(masterJ_data, open(master_json, 'w'), indent=2)
+    json.dump(masterJ_data, open(master_json, "w"), indent=2)
     print("%s appended to meta.json file" % new_json)
 
 
@@ -213,16 +214,17 @@ def duplicateTable(new_table, new_json, master_json):
 
     :return: void
     """
-    if not(os.path.isfile(new_json) and os.path.isfile(master_json)):
+    if not (os.path.isfile(new_json) and os.path.isfile(master_json)):
         raise ValueError("Path to one of the JSON files is invalid")
 
     time_out = 0
 
     while time_out < 10:
         usr_decide = input(
-            "\nPress: [O] to overwrite current value in meta.json; [C] to cancel: ")
+            "\nPress: [O] to overwrite current value in meta.json; [C] to cancel: "
+        )
 
-        if ('O' in usr_decide or 'o' in usr_decide):
+        if "O" in usr_decide or "o" in usr_decide:
             # Overwrite current table in master json
             # remove the entry meta.json
             with open(master_json, "r") as json_file:
@@ -230,12 +232,12 @@ def duplicateTable(new_table, new_json, master_json):
             masterJ_data = json.loads(master_data)
 
             masterJ_data.pop(new_table, 0)  # 0 as fail-safe parameter
-            json.dump(masterJ_data, open(master_json, 'w'), indent=2)
+            json.dump(masterJ_data, open(master_json, "w"), indent=2)
 
             appendJSON(new_json, master_json)
             return
 
-        elif ('C' in usr_decide or 'c' in usr_decide):
+        elif "C" in usr_decide or "c" in usr_decide:
             # cancel copying
             print("Copying new JSON cancelled")
             return
@@ -249,11 +251,12 @@ def duplicateTable(new_table, new_json, master_json):
     print("Copying JSON aborted")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     #
     # Edit these values before running!
     csv_filename = os.path.abspath(
-        "../../../data/raw/charter_school/20200319/Charter_Schools.csv")  # "../../../data/sample
+        "../../../data/raw/charter_school/20200319/Charter_Schools.csv"
+    )  # "../../../data/sample
     # /project_sample.csv"
     table_name = "charter_schools"
     encoding = "utf-8"  # Try utf-8 or latin1. Put the successful value into
@@ -262,11 +265,11 @@ if __name__ == '__main__':
     # import ipdb; ipdb.set_trace()
     # Make the table
     print(sys.argv)
-    if 'create' in sys.argv:
+    if "create" in sys.argv:
         make_draft_json(csv_filename, table_name, encoding)
 
-    if 'add' in sys.argv:
-        new_json_path = os.path.join(logging_path, (table_name+".json"))
+    if "add" in sys.argv:
+        new_json_path = os.path.join(logging_path, (table_name + ".json"))
         json_filepath = os.path.join(python_filepath, "scripts/meta.json")
 
         print(json_filepath)

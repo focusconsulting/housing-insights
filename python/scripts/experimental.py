@@ -3,8 +3,7 @@ import sys
 import os
 import argparse
 
-PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                           os.pardir))
+PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(PYTHON_PATH)
 
 from housinginsights.tools.logger import HILogger

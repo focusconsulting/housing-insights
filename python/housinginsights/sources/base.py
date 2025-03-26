@@ -7,8 +7,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from housinginsights.config.base import HousingInsightsConfig
-from housinginsights.sources.models.pres_cat import PROJ_FIELDS, \
-    SUBSIDY_FIELDS
+from housinginsights.sources.models.pres_cat import PROJ_FIELDS, SUBSIDY_FIELDS
 from housinginsights.tools import dbtools
 
 import requests
@@ -18,8 +17,8 @@ from housinginsights.tools.logger import HILogger
 
 logger = HILogger(name=__file__, logfile="sources.log")
 
-class BaseApiConn(object):
 
+class BaseApiConn(object):
     """
     Base API Connection to inherit from. Proxy support built in.
 
@@ -37,6 +36,7 @@ class BaseApiConn(object):
 
 
     """
+
     def __init__(self, baseurl=None, proxies=None, database_choice=None, debug=False):
         """
         :param baseurl: URL endpoint of the API.
@@ -49,34 +49,35 @@ class BaseApiConn(object):
 
         :param database_choice: String containing the name of the database to connect
             when existing data needs to be used. String should match the one found in
-            secrets.json. Optional - not used by BaseApiConn, but sometimes used by others. 
+            secrets.json. Optional - not used by BaseApiConn, but sometimes used by others.
         """
         self.session = requests.Session()
         self.baseurl = baseurl
         self.proxies = proxies
         self.debug = debug
-        
-        #A list of strings; this should be defined in the child class
-        self._available_unique_data_ids = None
-        
 
+        # A list of strings; this should be defined in the child class
+        self._available_unique_data_ids = None
 
     @property
     def output_paths(self):
         if self._available_unique_data_ids is None:
-            raise NotImplementedError("You need to add self._available_unique_data_ids to your class before using it")
+            raise NotImplementedError(
+                "You need to add self._available_unique_data_ids to your class before using it"
+            )
 
         paths = {}
         for u in self._available_unique_data_ids:
-            base = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                               os.pardir,os.pardir,os.pardir))
-            api_location = 'data/raw/_downloads'
+            base = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)
+            )
+            api_location = "data/raw/_downloads"
             filename = u + ".csv"
-            d = datetime.now().strftime('%Y%m%d')
-            path = os.path.join(base,api_location,d,filename)
+            d = datetime.now().strftime("%Y%m%d")
+            path = os.path.join(base, api_location, d, filename)
             paths[u] = path
 
-            #So output methods don't need to deal with missing dirs
+            # So output methods don't need to deal with missing dirs
             self.create_directory_if_missing(path)
         return paths
 
@@ -99,10 +100,10 @@ class BaseApiConn(object):
         :type  params: dict of String.
         """
         if self.baseurl != None:
-            if self.baseurl[-1] == '/':
+            if self.baseurl[-1] == "/":
                 self.baseurl = self.baseurl[:-1]
-            if urlpath[0] != '/':
-                urlpath = '/' + urlpath
+            if urlpath[0] != "/":
+                urlpath = "/" + urlpath
             url = self.baseurl + urlpath
         else:
             url = urlpath
@@ -136,7 +137,7 @@ class BaseApiConn(object):
 
         :return: None
         """
-        directory=os.path.dirname(filepath)
+        directory = os.path.dirname(filepath)
         os.makedirs(directory, exist_ok=True)
 
     def result_to_csv(self, fields, results, filepath):
@@ -155,8 +156,8 @@ class BaseApiConn(object):
         :return: None
         """
         self.create_directory_if_missing(filepath)
-        with open(filepath, 'w', encoding='utf-8') as f:
-            writer = csv.writer(f, delimiter=',')
+        with open(filepath, "w", encoding="utf-8") as f:
+            writer = csv.writer(f, delimiter=",")
             writer.writerow(fields)
             for result in results:
                 writer.writerow(result)
@@ -174,7 +175,7 @@ class BaseApiConn(object):
         :return: None
         """
         self.create_directory_if_missing(filepath)
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(data)
 
 
