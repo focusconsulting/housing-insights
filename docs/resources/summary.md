@@ -18,7 +18,7 @@ It's important to also note that one building can participate in multiple progra
 For additional background on the specific programs you may see referenced, [see this list of descriptions of the federal incentive programs](http://www.preservationdatabase.org/programdesc.php).
 
 ## What is Our Approach?
-We're building a web tool that enables decision makers to better understand affordable housing properties in DC. The core data source is a list of all subsidized affordable properties, the [Preservation Catalog](http://www.neighborhoodinfodc.org/dcpreservationcatalog). This database also contains information about the buildings themselves and the contracts that provide them subsidies.
+We're building a web tool that enables decision makers to better understand affordable housing properties in DC. The core data source is a list of all subsidized affordable properties, the [Preservation Catalog](https://www.urban.org/urban-wire/cataloging-where-dc-should-preserve-affordable-housing-citys-population-continues-grow). This database also contains information about the buildings themselves and the contracts that provide them subsidies.
 
 We'll connect this to new data sources, primarily public data sets provided by DC government, that give us more information about the buildings themselves as well as the neighborhoods that they are part of. We will perform analysis on these merged data sets both at the building level and the city level to improve decision makers understanding of the factors influencing housing preservation.
 
