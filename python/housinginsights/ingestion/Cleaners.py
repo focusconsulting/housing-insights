@@ -858,6 +858,7 @@ class CleanerBase(object, metaclass=ABCMeta):
 
 class GenericCleaner(CleanerBase):
     def clean(self, row, row_num=None):
+        print("HERE")
         row = self.replace_nulls(row, null_values=["N", "NA", "", None])
         return row
 
@@ -1051,6 +1052,8 @@ class reac_score_cleaner(CleanerBase):
 class real_property_cleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row, null_values=["", None])
+        if row['RP_date'] == 'U' or row['RP_date'] == 'N':
+            row['RP_date'] = 'Null'
         return row
 
 

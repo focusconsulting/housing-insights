@@ -1224,14 +1224,6 @@
         "sql_name": "proj_name"
       },
       {
-        "source_name": "ID",
-        "display_text": "",
-        "required_in_source": false,
-        "display_name": "",
-        "type": "text",
-        "sql_name": "building_geocode_id"
-      },
-      {
         "source_name": "Bldg_addre",
         "display_text": "Full address of the property",
         "required_in_source": true,
@@ -1272,12 +1264,36 @@
         "sql_name": "anc2012"
       },
       {
+        "source_name": "ANC2023",
+        "display_text": "Advisory Neighborhood Commission as of 2012",
+        "required_in_source": false,
+        "display_name": "anc2023",
+        "type": "text",
+        "sql_name": "anc2023"
+      },
+      {
         "source_name": "Psa2012",
         "display_text": "Police Service Area as of 2012",
         "required_in_source": false,
         "display_name": "psa2012",
         "type": "text",
         "sql_name": "psa2012"
+      },
+      {
+        "source_name": "psa2019",
+        "display_text": "Police Service Area as of 2019",
+        "required_in_source": false,
+        "display_name": "psa2019",
+        "type": "text",
+        "sql_name": "psa2019"
+      },
+      {
+        "source_name": "VoterPre2012",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "voter_pre_2012",
+        "type": "text",
+        "sql_name": "voter_pre_2012"
       },
       {
         "source_name": "Geo2010",
@@ -1406,6 +1422,14 @@
         "display_name": "Building Units Mar",
         "type": "text",
         "sql_name": "bldg_units_mar"
+      },
+      {
+        "source_name": "Place_name_list",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "Place Name List",
+        "type": "text",
+        "sql_name": "place_name_list"
       },
       {
         "source_name": "unique_data_id",
@@ -2679,6 +2703,14 @@
         "source_name": "Anc2012",
         "display_text": "Advisory Neighborhood Commission",
         "required_in_source": true,
+        "display_name": "ANC2012",
+        "type": "text",
+        "sql_name": "anc2012"
+      },
+      {
+        "source_name": "ANC2023",
+        "display_text": "Advisory Neighborhood Commission",
+        "required_in_source": true,
         "display_name": "ANC",
         "type": "text",
         "sql_name": "anc"
@@ -3043,6 +3075,14 @@
         "display_name": "In DHCD Quickbase",
         "type": "text",
         "sql_name": "in_dhcd"
+      },
+      {
+        "source_name": "Place_name_list",
+        "display_text": "",
+        "required_in_source": false,
+        "display_name": "Place_name_list",
+        "type": "text",
+        "sql_name": "Place_name_list"
       },
       {
         "source_name": "unique_data_id",
