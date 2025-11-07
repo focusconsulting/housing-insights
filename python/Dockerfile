@@ -1,4 +1,4 @@
-FROM python:3.5-slim-buster
+FROM python:3.12-slim
 
 RUN apt-get update && apt-get -y install  postgresql libpq-dev build-essential
 
