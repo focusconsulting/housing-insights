@@ -49,6 +49,8 @@ class OpenDataApiConn(BaseApiConn):
             "crime_2021",
             "crime_2022",
             "crime_2023",
+            "crime_2024",
+            "crime_2025",
             "mar",
         ]
 
@@ -77,6 +79,8 @@ class OpenDataApiConn(BaseApiConn):
             "crime_2021": "619c5bd17ca2411db0689bb0a211783c_3.csv",
             "crime_2022": "f9cc541fc8c04106a05a1a4f1e7e813c_4.csv",
             "crime_2023": "89561a4f02ba46cca3c42333425d1b87_5.csv",
+            "crime_2024": "c5a9f33ffca546babbd91de1969e742d_6.csv",
+            "crime_2025": "74d924ddc3374e3b977e6f002478cb9b_7.csv",
             "mar": "aa514416aaf74fdc94748f1e56e7cc8a_0.csv",
         }
 

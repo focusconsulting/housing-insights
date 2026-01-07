@@ -43,7 +43,9 @@ use,crime,crime_2019,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com
 use,crime,crime_2020,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2020.csv,
 use,crime,crime_2021,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2021.csv,
 use,crime,crime_2022,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2022.csv,
-use,crime,crime_2023,api,2017-10-04,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20240314/crime_2023.csv,
+use,crime,crime_2023,api,2026-01-07,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20260107/crime_2023.csv,
+use,crime,crime_2024,api,2026-01-07,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20260107/crime_2024.csv,
+use,crime,crime_2025,api,2026-01-07,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/_downloads/20260107/crime_2025.csv,
 use,wmata_dist,wmata_dist,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/wmata/20170215/dist_from_sql_with_lat.csv,
 use,wmata_info,wmata_stops,api,2017-05-24,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/apis/20170524/wmata_stops.csv,
 use,charter_schools,charter_schools,api,2020-03-19,utf-8,../../../data,https://s3.amazonaws.com/housing-insights/,raw/charter_school/20200319/Charter_Schools.csv,Information on charter shcools from data.dc.gov

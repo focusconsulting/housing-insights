@@ -165,6 +165,8 @@ parser.add_argument(
         "crime_2021",
         "crime_2022",
         "crime_2023",
+        "crime_2024",
+        "crime_2025",
         "mar",
         "dchousing",
         "dhcd_dfd_projects",
