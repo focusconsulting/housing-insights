@@ -420,6 +420,19 @@ class CleanerBase(object, metaclass=ABCMeta):
             logger.warning("  no matching Tract found for row {}".format(row_num, row))
         return row
 
+    def rename_neighborhood_cluster(self, row, neighbor_hood_cluster_key="NEIGHBORHOOD_CLUSTER"):
+        if row[neighbor_hood_cluster_key] == self.null_value:
+            return row
+        else:
+            cluster = row[neighbor_hood_cluster_key]
+            if cluster.isnumeric():
+                row[neighbor_hood_cluster_key] = f"Cluster {str(cluster)}"
+                return row
+            pieces = cluster.split(" ")
+            if len(pieces) == 2 and pieces[1].isnumeric():
+                row[neighbor_hood_cluster_key] = f"Cluster {int(pieces[1])}"
+                return row
+    
     def rename_ward(self, row, ward_key="WARD"):
         """
         Standardize ward field to be 'Ward #' - where # represents the numeric
@@ -876,6 +889,7 @@ class ProjectCleaner(CleanerBase):
             logger.error("Error geocoding {}, error was {}".format(row, e))
 
         row = self.rename_ward(row, ward_key="Ward2022")
+        row = self.rename_neighborhood_cluster(row, neighbor_hood_cluster_key="cluster2017")
         row = self.rename_status(row)
         row = self.rename_census_tract(row, column_name="Geo2020")
         return row
@@ -1099,6 +1113,7 @@ class Zone_HousingUnit_Bedrm_Count_cleaner(CleanerBase):
 class ProjectAddressCleaner(CleanerBase):
     def clean(self, row, row_num=None):
         row = self.replace_nulls(row)
+        row = self.rename_neighborhood_cluster(row, neighbor_hood_cluster_key="cluster2017")
         return row
 
 
