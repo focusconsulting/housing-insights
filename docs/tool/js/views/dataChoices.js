@@ -222,7 +222,7 @@
             "style": "number",
             "short_name": "cv",
             "sourcetable": "zone_facts",
-            "last_updated_date": "03/19/2024"
+            "last_updated_date": "01/07/2026"
         },
         {
             "source": "non_violent_crime_rate",
@@ -236,7 +236,7 @@
             "style": "number",
             "short_name": "cn",
             "sourcetable": "zone_facts",
-            "last_updated_date": "03/19/2024"
+            "last_updated_date": "01/07/2026"
         },
         {
             "source": "crime_rate",
@@ -250,7 +250,7 @@
             "style": "number",
             "short_name": "ca",
             "sourcetable": "zone_facts",
-            "last_updated_date": "03/19/2024"
+            "last_updated_date": "01/07/2026"
         },
         {
             "source": "construction_permits_rate",
