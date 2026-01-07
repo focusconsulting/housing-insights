@@ -675,7 +675,7 @@ var projectView = {
             url:
               "https://api.housinginsights.org/api/project/" +
               currentNlihc +
-              "/subsidies",
+              "/subsidies/",
           },
           container: "#subsidy-timeline-chart",
           width: 700,
