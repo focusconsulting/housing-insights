@@ -205,7 +205,7 @@ var projectView = {
           "src",
           "https://maps.googleapis.com/maps/api/streetview?size=200x150&location=" +
             encodeURIComponent(d.proj_addre) +
-            "%20Washington%20DC&key=AIzaSyC6TjZXrowAWxfCYETdDBE3XQVCbtD-RWc"
+            "%20Washington%20DC&key=AIzaSyDect3m0VlZBLPNmdm9qG3W6-L3V1nRtZ0"
         );
 
         //TODO add all matching addresses once proj_addre table is ready
